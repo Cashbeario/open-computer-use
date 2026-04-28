@@ -14,6 +14,7 @@ import { getUserProfile } from "@/lib/user/api"
 import { ThemeProvider } from "next-themes"
 import Script from "next/script"
 import { LayoutClient } from "./layout-client"
+import { AnimatedFavicon } from "@/components/animated-favicon"
 import { PostHogProvider } from "@/lib/posthog/provider"
 import { PostHogPageView } from "@/lib/posthog/page-view"
 import { LocalizedSEOSchemas } from "./seo-schemas"
@@ -359,6 +360,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <AnimatedFavicon />
         <IntlClientProvider locale={locale} messages={messages as Record<string, unknown>}>
           <PostHogProvider>
             <PostHogPageView />

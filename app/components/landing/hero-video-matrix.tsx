@@ -59,65 +59,68 @@ function StatCell({
 }) {
   const { prefix, num, suffix } = useMemo(() => parseStat(rawValue), [rawValue])
   const [inView, setInView] = useState(false)
-  const animated = useCountUp(num, 1500, inView)
+  const animated = useCountUp(num, 1800, inView)
   const display = num === 0
     ? `${prefix}0${suffix}`
     : `${prefix}${animated.toLocaleString()}${suffix}`
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       onViewportEnter={() => setInView(true)}
       viewport={{ once: true, amount: 0.45 }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "group relative flex flex-col items-center text-center",
-        isMobile ? "px-2 py-1" : "px-4 py-1",
+        isMobile ? "px-2 py-1" : "px-4 py-1.5",
       )}
     >
-      {/* Number — gradient text, animated count-up. White tones for
-          legibility against the photographic card backdrop. */}
+      {/* Number — flat white over the dark frosted plate. Tabular
+          numerals stop count-up jitter; a quiet drop-shadow gives the
+          digit a hairline of depth against the photographic blur. */}
       <div
         className={cn(
-          "font-semibold tabular-nums tracking-[-0.04em] leading-none",
-          "bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent",
+          "font-semibold tabular-nums tracking-[-0.045em] leading-none",
+          "text-white/95",
           "drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]",
-          isMobile ? "text-[1.6rem]" : "text-[1.85rem] lg:text-[2.05rem]",
+          isMobile ? "text-[1.7rem]" : "text-[2rem] lg:text-[2.25rem]",
         )}
       >
         {display}
       </div>
 
-      {/* Hairline underline — draws in beneath the number once it's in
-          view; the single signature element of the row. */}
+      {/* Hairline — single signature flourish per cell. Static (no
+          hover gymnastics) so the row reads as architecture. */}
       <motion.div
         aria-hidden="true"
         initial={{ scaleX: 0, opacity: 0 }}
         animate={inView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
-        transition={{ duration: 0.9, delay: delay + 0.15, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1, delay: delay + 0.15, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          "mt-2 h-px w-9 origin-center",
+          "mt-3 h-px w-8 origin-center",
           "bg-gradient-to-r from-transparent via-white/55 to-transparent",
-          "transition-[width,opacity] duration-300 group-hover:w-12 group-hover:via-white/85",
         )}
       />
 
-      {/* Label */}
+      {/* Label — mono caps eyebrow. Wide tracking + low opacity is the
+          codebase's editorial signature for metadata strips. */}
       <div
         className={cn(
-          "font-medium leading-tight tracking-tight transition-colors duration-200",
-          "text-white/75 group-hover:text-white/95",
+          "font-mono uppercase leading-tight text-white/70",
           "drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)]",
-          isMobile ? "mt-1.5 text-[10.5px]" : "mt-2 text-[11.5px]",
+          isMobile
+            ? "mt-2 text-[9px] tracking-[0.18em]"
+            : "mt-2.5 text-[9.5px] tracking-[0.22em]",
         )}
       >
         {label}
       </div>
 
-      {/* Sublabel */}
+      {/* Sublabel — half-step quieter than the label so the hierarchy
+          reads instantly. Same family for typographic continuity. */}
       {!isMobile && (
-        <div className="mt-0.5 text-[10px] leading-tight text-white/55 drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+        <div className="mt-1 font-mono text-[8.5px] uppercase tracking-[0.16em] leading-tight text-white/45 drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
           {sublabel}
         </div>
       )}
@@ -165,11 +168,13 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   const [headlineIndex, setHeadlineIndex] = useState(0)
   const HEADLINES = HEADLINE_KEYS.map((key) => t(`useCases.${key}.headline`))
 
-  // Auto-rotate headlines
+  // Auto-rotate headlines. Slower cadence (4.5s) than a typical marquee
+  // so each line gets a confident dwell — premium pacing reads as
+  // intentional, not jittery.
   useEffect(() => {
     const interval = setInterval(() => {
       setHeadlineIndex((prev) => (prev + 1) % HEADLINES.length)
-    }, 3500)
+    }, 4500)
     return () => clearInterval(interval)
   }, [HEADLINES.length])
 
@@ -500,8 +505,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
         <div
           ref={overlayRef}
           className={cn(
-            "absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none",
-            isMobile ? "pt-20 pb-16" : "pt-24 pb-20"
+            "absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none pt-20 pb-16"
           )}
           style={{
             transform: "translateZ(0)",
@@ -512,34 +516,42 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
           <div
             className={cn(
               "pointer-events-auto text-center w-full",
-              isMobile ? "px-5 max-w-[440px]" : "px-10 max-w-[900px]"
+              // Tighter editorial measure on desktop — keeps the headline
+              // from sprawling and pulls the stats card into the same
+              // optical column as the type.
+              isMobile ? "px-5 max-w-[440px]" : "px-10 max-w-[820px]"
             )}
           >
-            {/* Headline */}
+            {/* Headline — tightened tracking + leading + text-balance for
+                a more confident editorial wrap. Sized 0.25rem smaller per
+                breakpoint than before so it reads as composed, not loud. */}
             <h1
               className={cn(
-                "font-semibold tracking-[-0.04em] text-foreground",
+                "font-semibold tracking-[-0.045em] text-foreground text-balance",
                 isMobile
-                  ? "text-[1.65rem] leading-[1.12]"
-                  : "text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] leading-[1.08]"
+                  ? "text-[1.65rem] leading-[1.08]"
+                  : "text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.04]"
               )}
             >
               {t("headline")}
             </h1>
 
-            {/* Rotating subheadline */}
+            {/* Rotating subheadline — signature ease curve for a
+                "confident settle" arrival; 0.6s duration breathes longer
+                than the previous 0.5s. Tracking matched to the headline
+                for typographic continuity. */}
             <div
               className={cn(
                 "relative overflow-hidden",
-                isMobile ? "mt-0.5 pb-1" : "mt-2 pb-2"
+                isMobile ? "mt-1 pb-1" : "mt-2.5 pb-2"
               )}
             >
               <span
                 className={cn(
-                  "invisible block font-medium tracking-[-0.03em]",
+                  "invisible block font-medium tracking-[-0.035em]",
                   isMobile
-                    ? "text-[1.25rem] leading-[1.3]"
-                    : "text-[1.75rem] md:text-[2rem] lg:text-[2.25rem] leading-[1.3]"
+                    ? "text-[1.2rem] leading-[1.28]"
+                    : "text-[1.6rem] md:text-[1.85rem] lg:text-[2.05rem] leading-[1.28]"
                 )}
                 aria-hidden="true"
               >
@@ -551,15 +563,15 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               <AnimatePresence mode="wait">
                 <motion.span
                   key={headlineIndex}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   className={cn(
-                    "absolute inset-x-0 top-0 font-medium tracking-[-0.03em] text-foreground/50 dark:text-white/55",
+                    "absolute inset-x-0 top-0 font-medium tracking-[-0.035em] text-foreground/45 dark:text-white/50",
                     isMobile
-                      ? "text-[1.25rem] leading-[1.3]"
-                      : "text-[1.75rem] md:text-[2rem] lg:text-[2.25rem] leading-[1.3]"
+                      ? "text-[1.2rem] leading-[1.28]"
+                      : "text-[1.6rem] md:text-[1.85rem] lg:text-[2.05rem] leading-[1.28]"
                   )}
                 >
                   {HEADLINES[headlineIndex]}
@@ -567,88 +579,113 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               </AnimatePresence>
             </div>
 
-            {/* Description */}
+            {/* Description — tighter leading (1.55 vs relaxed 1.625), narrower
+                measure on desktop for a true editorial line length. */}
             <p
               className={cn(
-                "mx-auto text-foreground/55 dark:text-white/60 leading-relaxed",
+                "mx-auto text-foreground/55 dark:text-white/60",
                 isMobile
-                  ? "mt-2.5 text-[12.5px] max-w-[320px]"
-                  : "mt-3.5 text-[15px] sm:text-[16px] max-w-[480px]"
+                  ? "mt-3 text-[12.5px] leading-[1.5] max-w-[320px]"
+                  : "mt-4 text-[15px] sm:text-[16px] leading-[1.55] max-w-[440px]"
               )}
             >
               {t("useCases.computerAgent.outcome")}
             </p>
 
             {/* ─── Resources saved — money / time / output / effort.
-                Four hard numbers, count-up animated on viewport entry,
-                presented inside one unified hairline-bordered card.
-                No internal dividers — whitespace + a single signature
-                top-edge gradient hairline keep the row reading as one
-                cohesive surface, not four split columns. */}
+                Four hard numbers presented in a single editorial plate.
+                The Lucas Calloch backdrop is back — but heavily frosted
+                so the photograph reads as ambient warmth + texture, not
+                literal imagery. This is the Apple / Linear / Vercel
+                premium move: image as light source, not subject. The
+                blur is set on the image element directly (not on the
+                viewer's backdrop) and a darkness gradient sits above it
+                to anchor the white type below. One signature top
+                hairline remains the only decorative flourish. */}
             <motion.div
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative mx-auto",
-                isMobile ? "mt-5 max-w-[340px]" : "mt-6 max-w-[760px]",
+                isMobile ? "mt-6 max-w-[340px]" : "mt-7 max-w-[680px]",
               )}
               aria-label="Resources saved per workflow"
             >
-              {/* Outer card — hairline border, photographic backdrop. */}
+              {/* Outer plate — single hairline ring + soft long shadow.
+                  `isolate` creates a stacking context so the blurred
+                  image and its overlay tints can sit at -z-10 without
+                  escaping the rounded clip. */}
               <div
                 className={cn(
-                  "relative rounded-[18px] overflow-hidden isolate",
+                  "relative rounded-2xl overflow-hidden isolate",
                   "border border-white/[0.10]",
-                  "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_18px_44px_-22px_rgba(0,0,0,0.55)]",
+                  "shadow-[0_1px_2px_rgba(0,0,0,0.04),0_22px_56px_-28px_rgba(0,0,0,0.45)]",
+                  "dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_24px_60px_-28px_rgba(0,0,0,0.65)]",
                 )}
               >
-                {/* Photographic backdrop. Sits below all content; the
-                    overlays above tune contrast for legibility. */}
+                {/* Lightly frosted photographic backdrop. Subtle blur
+                    (4px mobile, 8px desktop) softens the image enough
+                    to read as atmospheric texture rather than a hard
+                    photograph, while still letting the subject + warm
+                    tones show through. `scale-[1.04]` hides the small
+                    blur halo at the edges of the rounded clip. */}
                 <NextImage
                   src="/lucas-calloch-P-yzuyWFEIk-unsplash.jpg"
                   alt=""
                   fill
-                  sizes="(max-width: 768px) 360px, 760px"
+                  sizes="(max-width: 768px) 360px, 680px"
                   priority
                   draggable={false}
-                  className="-z-10 object-cover select-none"
+                  className="-z-10 object-cover select-none scale-[1.02] blur-[1px] sm:blur-[2px]"
                 />
 
-                {/* Legibility tint — vertical gradient that anchors text
-                    contrast without flattening the photograph. */}
+                {/* Legibility tint — graduated dark wash. Eased back
+                    from the heavy frost values so the photograph reads
+                    through without losing text contrast. */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/35 via-black/45 to-black/55"
                 />
 
-                {/* Soft radial vignette — keeps the figures crisp at
-                    center, lets the photograph breathe at the edges. */}
+                {/* Soft radial vignette — keeps the centre slightly
+                    brighter than the corners so the eye lands on the
+                    numbers, not the edges. */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_90%_at_50%_50%,transparent_30%,rgba(0,0,0,0.35)_100%)]"
                 />
 
-                {/* Signature top hairline — the one decorative flourish. */}
+                {/* Inner top sheen — a 1/2-height gradient that fades
+                    downward, gives the glass a "lit from above" quality. */}
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.06] to-transparent"
+                />
+
+                {/* Signature top hairline — the one decorative flourish.
+                    White-tinted because the plate is now dark across
+                    both modes; pulled inset-x-12 so the line tapers off
+                    before the corners. */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"
                 />
 
                 <div
                   className={cn(
                     "relative grid",
                     isMobile
-                      ? "grid-cols-2 gap-y-4 px-4 py-4"
-                      : "grid-cols-4 gap-x-1 px-6 py-5",
+                      ? "grid-cols-2 gap-y-5 px-5 py-5"
+                      : "grid-cols-4 gap-x-2 px-8 py-7",
                   )}
                 >
                   {RESOURCE_STAT_KEYS.map((key, i) => (
                     <StatCell
                       key={key}
                       isMobile={isMobile}
-                      delay={0.45 + i * 0.08}
+                      delay={0.4 + i * 0.07}
                       rawValue={t(`resourceStats.${key}.value`)}
                       label={t(`resourceStats.${key}.label`)}
                       sublabel={t(`resourceStats.${key}.sublabel`)}
@@ -656,22 +693,17 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                   ))}
                 </div>
               </div>
-
-              {/* Faint outer halo — single signature flourish behind the
-                  card. Desktop only; mobile keeps the card edge crisp. */}
-              {!isMobile && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -inset-x-10 -inset-y-6 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.06),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.10),transparent_60%)] blur-2xl"
-                />
-              )}
             </motion.div>
 
-            {/* CTAs */}
+            {/* CTAs — primary keeps the solid foreground fill but adds a
+                soft inset highlight + quiet shadow for depth, and dials
+                the hover scale back to 1.015 (premium restraint over
+                the previous 1.02). Secondary drops the x-translate
+                gimmick — colour shift alone reads more confident. */}
             <div
               className={cn(
                 "flex items-center justify-center",
-                isMobile ? "mt-5 gap-3 flex-col" : "mt-6 gap-5"
+                isMobile ? "mt-6 gap-3 flex-col" : "mt-7 gap-6"
               )}
             >
               <Link href="/auth">
@@ -679,12 +711,15 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
                     "bg-foreground text-background",
+                    "shadow-[0_1px_0_0_rgba(255,255,255,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.30)]",
+                    "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.50)]",
+                    "transition-[box-shadow,transform] duration-300",
                     isMobile
                       ? "px-6 py-3 text-sm"
-                      : "px-7 py-3 text-[15px]"
+                      : "px-7 py-3 text-[14.5px]"
                   )}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
                 >
                   {tc("tryCoastyFree")}
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -698,11 +733,12 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 <motion.button
                   className={cn(
                     "inline-flex items-center gap-1.5 font-medium cursor-pointer",
-                    "text-foreground/50 hover:text-foreground/75 dark:text-white/60 dark:hover:text-white/90 transition-colors duration-300",
-                    isMobile ? "text-sm" : "text-[15px]"
+                    // Sits at the same /55 middle tier as the description
+                    // so the eye groups them as one editorial pair.
+                    "text-foreground/55 hover:text-foreground/85 dark:text-white/60 dark:hover:text-white/90 transition-colors duration-300",
+                    isMobile ? "text-sm" : "text-[14.5px]"
                   )}
-                  whileHover={{ x: 2 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileTap={{ scale: 0.985 }}
                 >
                   <Video className="h-3.5 w-3.5" />
                   {tc("bookDemo")}
@@ -712,26 +748,37 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
           </div>
         </div>
 
-        {/* ─── Scroll indicator (independent, does not scale) ─── */}
+        {/* ─── Scroll indicator (independent, does not scale) ───
+            Quieter than the previous treatment — mono caps with the same
+            0.22em tracking the rest of the editorial system uses, a
+            tighter 4px bounce, and a smaller chevron so the eye reads
+            the cue without being pulled away from the headline. */}
         <div
           ref={scrollIndRef}
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 text-foreground/30 dark:text-white/30",
+            "absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-foreground/30 dark:text-white/30",
             isMobile ? "bottom-6" : "bottom-10"
           )}
         >
-          <span className="text-[10px] font-medium tracking-[0.2em] uppercase">
+          <span
+            className={cn(
+              "font-mono text-[9px] uppercase",
+              // Mirror the StatCell label scale so every editorial mono
+              // strip on the hero shares the same tracking rhythm.
+              isMobile ? "tracking-[0.18em]" : "tracking-[0.22em]"
+            )}
+          >
             Scroll
           </span>
           <motion.div
-            animate={{ y: [0, 6, 0] }}
+            animate={{ y: [0, 4, 0] }}
             transition={{
-              duration: 2,
+              duration: 2.2,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.6} />
           </motion.div>
         </div>
       </div>

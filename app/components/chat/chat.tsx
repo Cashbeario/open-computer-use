@@ -32,7 +32,6 @@ import { themeConfig } from "@/lib/theme-config"
 import { QuickStartGuide } from "./quick-start-guide"
 import { Search, Bug, Globe, FileText, BarChart3, Mail, Zap, Sparkles, PenTool, MonitorSmartphone, Clipboard, Users, TrendingUp, Eye, FileCode, LayoutGrid, Send, ShoppingCart, MessageCircle, Bot } from "lucide-react"
 import { SwarmPanel } from "./swarm-panel"
-import { FloatingThumbnails } from "./floating-thumbnails"
 import { CinematicIntro, TaglineIntro, shouldShowIntro, isIntroDismissed } from "./cinematic-intro"
 import { ActiveSwarmBanner, type ActiveSwarm } from "./active-swarm-banner"
 import { RemoteApproval } from "./remote-approval"
@@ -1017,8 +1016,6 @@ export function Chat() {
     setIntroResolved(true)
   }, [])
   const introVisible = (introPhase === "active" || introPhase === "fading") && showOnboarding && !!user
-  const introFading = introPhase === "fading"
-  const showThumbnails = showOnboarding && !!user && introPhase === "done"
 
   // Pick a random motivational tagline once per mount — client-only to avoid SSR
   // hydration mismatch (Math.random differs between server and client renders).
@@ -1055,7 +1052,6 @@ export function Chat() {
           swarmFullscreen ? "justify-start" : "justify-end md:justify-center"
         )}
       >
-        <FloatingThumbnails visible={showThumbnails} skipEntrance={introFading} />
         {introVisible && createPortal(
           <CinematicIntro
             onSettled={() => setIntroPhase("fading")}

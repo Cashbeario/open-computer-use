@@ -294,6 +294,29 @@ resource "aws_ecs_service" "app" {
     rollback = true
   }
 
+  # Force a new deployment on every `terraform apply`.
+  #
+  # Rationale: var.frontend_image / var.backend_image use the `:latest` mutable
+  # tag, so pushing a new image to ECR does NOT change the task-definition string
+  # Terraform diffs against — without this flag, `apply` is a no-op and ECS
+  # never pulls the new digest.  With force_new_deployment=true, ECS schedules
+  # a fresh rollout on every apply.  Fargate always pulls the image on task
+  # start, so the new digest is picked up.
+  #
+  # Disruption is bounded by the rolling-deploy settings above:
+  #   • min healthy 100%  → never drops below current capacity
+  #   • max 200%          → new tasks come up BEFORE old ones drain
+  #   • 120s deregistration delay on the target group
+  #     (alb.tf:61, alb.tf:101) → in-flight requests finish on old tasks
+  #   • circuit breaker + rollback → auto-revert on health failures
+  #
+  # Trade-off: every apply triggers a deploy, even when only non-image fields
+  # changed.  That's intentional — the alternative (immutable image tags) would
+  # require plumbing a tag var through every push.  If you want a no-op apply,
+  # comment this line and run `aws ecs update-service --force-new-deployment`
+  # out-of-band (see the `redeploy_command` output in outputs.tf).
+  force_new_deployment = true
+
   # Let auto-scaling manage desired_count after initial deploy
   lifecycle {
     ignore_changes = [desired_count]

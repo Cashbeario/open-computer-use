@@ -59,12 +59,16 @@ extraResources:
   - from: build/icon.png
     to: icon.png
 publish:
+  # Order matters: electron-updater reads app-update.yml (generated from this
+  # block at build time) and uses the FIRST entry as the runtime update feed.
+  # We want clients to check updates.coasty.ai (CDN we control) — keeping
+  # github here is for build-time artifact upload only (mirror / changelog).
+  - provider: generic
+    url: https://updates.coasty.ai
   - provider: github
     owner: LLmHub-dev
     repo: open-computer-use
     releaseType: release
-  - provider: generic
-    url: https://updates.coasty.ai
 win:
   target:
     - nsis

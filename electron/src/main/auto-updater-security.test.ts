@@ -95,8 +95,10 @@ describe('feed URL — HTTPS, hard-coded', () => {
 
   it('confirms electron-builder.yml publish.url is https:// (not http)', () => {
     const yml = fs.readFileSync(builderYmlPath, 'utf-8')
-    // Find the publish block
-    expect(yml).toMatch(/publish:\s*\n\s*provider:\s*generic\s*\n\s*url:\s*https:\/\//)
+    // Find the generic provider's url. The publish block is a YAML list
+    // (github + generic), so match the list-item form: `- provider: generic`
+    // followed (after indented `url:`) by `https://`.
+    expect(yml).toMatch(/-\s*provider:\s*generic\s*\n\s+url:\s*https:\/\//)
     // Explicitly: no http:// in publish url
     const publishMatch = yml.match(/publish:[\s\S]*?(?=\n\S|\n$)/)
     expect(publishMatch).toBeTruthy()

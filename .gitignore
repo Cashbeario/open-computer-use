@@ -152,3 +152,6 @@ scripts/build-golden-ami.mjs
 scripts/build-windows-golden-ami.mjs
 supabase/migrations/
 campaigns/*
+
+# infra docker secrets
+infra/docker/.env

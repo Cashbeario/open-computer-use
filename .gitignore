@@ -157,3 +157,7 @@ campaigns/*
 # infra docker secrets
 infra/docker/.env
 
+# Local deploy audit log — contains usernames, timestamps, and git messages
+# we don't want public.  Written by build-and-push and rollback.
+infra/docker/deployments.log
+

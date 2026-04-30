@@ -71,47 +71,28 @@ function StatCell({
       onViewportEnter={() => setInView(true)}
       viewport={{ once: true, amount: 0.45 }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "group relative flex flex-col items-center text-center",
-        isMobile ? "px-2 py-1" : "px-4 py-1.5",
-      )}
+      className="group relative flex flex-col items-center text-center"
     >
-      {/* Number — flat white over the dark frosted plate. Tabular
-          numerals stop count-up jitter; a quiet drop-shadow gives the
-          digit a hairline of depth against the photographic blur. */}
+      {/* Number — confident weight at the same tonal register as the
+          headline. Tabular numerals stop count-up jitter. */}
       <div
         className={cn(
-          "font-semibold tabular-nums tracking-[-0.045em] leading-none",
-          "text-white/95",
-          "drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]",
-          isMobile ? "text-[1.7rem]" : "text-[2rem] lg:text-[2.25rem]",
+          "font-semibold tabular-nums tracking-[-0.05em] leading-none",
+          "text-foreground/95 dark:text-white/95",
+          isMobile ? "text-[1.45rem]" : "text-[1.7rem] lg:text-[1.85rem]",
         )}
       >
         {display}
       </div>
 
-      {/* Hairline — single signature flourish per cell. Static (no
-          hover gymnastics) so the row reads as architecture. */}
-      <motion.div
-        aria-hidden="true"
-        initial={{ scaleX: 0, opacity: 0 }}
-        animate={inView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
-        transition={{ duration: 1, delay: delay + 0.15, ease: [0.22, 1, 0.36, 1] }}
-        className={cn(
-          "mt-3 h-px w-8 origin-center",
-          "bg-gradient-to-r from-transparent via-white/55 to-transparent",
-        )}
-      />
-
       {/* Label — mono caps eyebrow. Wide tracking + low opacity is the
           codebase's editorial signature for metadata strips. */}
       <div
         className={cn(
-          "font-mono uppercase leading-tight text-white/70",
-          "drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)]",
+          "font-mono uppercase leading-tight text-foreground/55 dark:text-white/55",
           isMobile
-            ? "mt-2 text-[9px] tracking-[0.18em]"
-            : "mt-2.5 text-[9.5px] tracking-[0.22em]",
+            ? "mt-2 text-[8.5px] tracking-[0.18em]"
+            : "mt-2.5 text-[9px] tracking-[0.22em]",
         )}
       >
         {label}
@@ -120,7 +101,7 @@ function StatCell({
       {/* Sublabel — half-step quieter than the label so the hierarchy
           reads instantly. Same family for typographic continuity. */}
       {!isMobile && (
-        <div className="mt-1 font-mono text-[8.5px] uppercase tracking-[0.16em] leading-tight text-white/45 drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
+        <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.16em] leading-tight text-foreground/35 dark:text-white/35">
           {sublabel}
         </div>
       )}
@@ -364,6 +345,32 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
       }
     }
 
+    // Mobile-safety net — the gradual rAF-driven fade can be interrupted
+    // by Safari's momentum-scroll rAF throttling: if the user flicks past
+    // the entire 250vh hero in one inertial gesture, the IntersectionObserver
+    // fires "non-intersecting" before any rAF frame has a chance to set
+    // crossfade opacity to 1, leaving the rest of the page stuck invisible.
+    // This helper forces the final post-hero visible state on the persistent
+    // outside-the-hero elements that the rAF loop drives. We deliberately
+    // DON'T touch hero-internal layers (overlay/grid/vignette/bottomFade/
+    // bgLayer) — the main content's z-1 + marginTop:-100vh covers the hero
+    // when scrolled past, and the rAF's discrete-state cache (overlayHidden,
+    // gridHidden) would go stale if we wrote to those directly here.
+    const forcePostHeroState = () => {
+      if (crossfade) {
+        if (crossfade.style.opacity !== "1") crossfade.style.opacity = "1"
+        if (crossfade.style.pointerEvents !== "") crossfade.style.pointerEvents = ""
+      }
+      if (header) {
+        header.style.opacity = "1"
+        header.style.pointerEvents = ""
+      }
+      if (guides) guides.style.opacity = "1"
+      if (beamsEl) beamsEl.style.opacity = "1"
+    }
+
+    const isPastHero = () => scrollable > 0 && window.scrollY > containerTop + scrollable
+
     const io = new IntersectionObserver(
       (entries) => {
         const nowActive = entries[0]?.isIntersecting ?? true
@@ -373,6 +380,9 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
           if (!rafId) rafId = requestAnimationFrame(update)
         } else if (!nowActive && isActive) {
           isActive = false
+          // Lock the post-hero state explicitly — the rAF loop won't run
+          // again until the user scrolls back into the hero.
+          if (isPastHero()) forcePostHeroState()
         }
       },
       { rootMargin: "200px 0px" }
@@ -387,6 +397,21 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     const onResize = () => measure()
     window.addEventListener("resize", onResize, { passive: true })
 
+    // Backup scroll listener — fires after Safari momentum scroll ends, even
+    // when rAF was throttled during the gesture. Only does work when state
+    // is wrong, so it costs nothing in the steady state.
+    const onScroll = () => {
+      if (isPastHero() && crossfade && crossfade.style.opacity !== "1") {
+        forcePostHeroState()
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+
+    // Initial state: if the page loaded with a saved scroll position past
+    // the hero (back-button restore, refresh mid-page, deep link), force
+    // the visible state immediately so the user sees content right away.
+    if (isPastHero()) forcePostHeroState()
+
     rafId = requestAnimationFrame(update)
 
     return () => {
@@ -395,6 +420,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
       io.disconnect()
       ro.disconnect()
       window.removeEventListener("resize", onResize)
+      window.removeEventListener("scroll", onScroll)
       // Use cached refs — no getElementById in cleanup
       if (header) { header.style.opacity = "1"; header.style.pointerEvents = "" }
       if (guides) guides.style.opacity = "1"
@@ -593,15 +619,14 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
             </p>
 
             {/* ─── Resources saved — money / time / output / effort.
-                Four hard numbers presented in a single editorial plate.
-                The Lucas Calloch backdrop is back — but heavily frosted
-                so the photograph reads as ambient warmth + texture, not
-                literal imagery. This is the Apple / Linear / Vercel
-                premium move: image as light source, not subject. The
-                blur is set on the image element directly (not on the
-                viewer's backdrop) and a darkness gradient sits above it
-                to anchor the white type below. One signature top
-                hairline remains the only decorative flourish. */}
+                A glass spec-strip mirroring the landing-header chrome
+                vocabulary: low-opacity tinted panel, hairline border,
+                backdrop blur, single signature top hairline. Tapered
+                vertical hairlines between columns give the row the
+                feel of an editorial spec sheet. A photographic light
+                cone projects from the panel's bottom edge down through
+                the rest of the hero — restrained ambient warmth, the
+                glass plate's "shadow" cast as light. */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -609,88 +634,124 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               transition={{ duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative mx-auto",
-                isMobile ? "mt-6 max-w-[340px]" : "mt-7 max-w-[680px]",
+                isMobile ? "mt-7 max-w-[320px]" : "mt-8 max-w-[560px]",
               )}
               aria-label="Resources saved per workflow"
             >
-              {/* Outer plate — single hairline ring + soft long shadow.
-                  `isolate` creates a stacking context so the blurred
-                  image and its overlay tints can sit at -z-10 without
-                  escaping the rounded clip. */}
+              {/* ─── Light cone ───
+                  A true cone of light projected downward from the
+                  panel's TOP edge. Two masks compose to shape it:
+                    • Outer mask (vertical linear-gradient) — opaque
+                      at top (panel edge), dissolving to transparent
+                      before the section's bottom.
+                    • Inner mask (conic-gradient at top-center) — a
+                      ~96° opaque angular sector (132°–228°) with
+                      feathered 36° soft edges on each side. The
+                      cone's apex is the origin point (a single
+                      pixel) and its sides expand naturally with
+                      distance — at full container height the cone
+                      reaches past the page edges, so the visible
+                      base lands exactly on the guide rails.
+                  z-[-1] escapes to the overlay's stacking context
+                  (overlay has z-10 + position:absolute = stacking
+                  context) where it paints in the negative-z step —
+                  before all static / auto-z descendants. So the
+                  cone sits behind the CTAs and the panel while
+                  still scaling and fading with the overlay's
+                  scroll-driven transform. */}
               <div
-                className={cn(
-                  "relative rounded-2xl overflow-hidden isolate",
-                  "border border-white/[0.10]",
-                  "shadow-[0_1px_2px_rgba(0,0,0,0.04),0_22px_56px_-28px_rgba(0,0,0,0.45)]",
-                  "dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_24px_60px_-28px_rgba(0,0,0,0.65)]",
-                )}
+                aria-hidden="true"
+                className="pointer-events-none absolute top-0 left-1/2 z-[-1]"
+                style={{
+                  width: "100vw",
+                  height: isMobile ? "min(78vh, 700px)" : "min(92vh, 1000px)",
+                  transform: "translate3d(-50%, 0, 0)",
+                  willChange: "opacity",
+                  // Vertical fade — full opacity for longer so the
+                  // cone holds visibility deep into the section
+                  // before dissolving into the page background.
+                  maskImage:
+                    "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.25) 80%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.25) 80%, transparent 100%)",
+                }}
               >
-                {/* Lightly frosted photographic backdrop. Subtle blur
-                    (4px mobile, 8px desktop) softens the image enough
-                    to read as atmospheric texture rather than a hard
-                    photograph, while still letting the subject + warm
-                    tones show through. `scale-[1.04]` hides the small
-                    blur halo at the edges of the rounded clip. */}
-                <NextImage
-                  src="/lucas-calloch-P-yzuyWFEIk-unsplash.jpg"
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 360px, 680px"
-                  priority
-                  draggable={false}
-                  className="-z-10 object-cover select-none scale-[1.02] blur-[1px] sm:blur-[2px]"
-                />
-
-                {/* Legibility tint — graduated dark wash. Eased back
-                    from the heavy frost values so the photograph reads
-                    through without losing text contrast. */}
                 <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/35 via-black/45 to-black/55"
-                />
+                  className="absolute inset-0"
+                  style={{
+                    // Conic mask — defines the cone shape.
+                    // 0deg = up; clockwise. Opaque core at 145°-215°
+                    // (a 70° flood of light around straight-down),
+                    // feathered out to 110° and 250° (35° each soft
+                    // edge). 140° total cone width — generous spread
+                    // that reaches the page edges quickly.
+                    maskImage:
+                      "conic-gradient(from 0deg at 50% 0%, transparent 0deg, transparent 110deg, rgba(0,0,0,1) 145deg, rgba(0,0,0,1) 215deg, transparent 250deg, transparent 360deg)",
+                    WebkitMaskImage:
+                      "conic-gradient(from 0deg at 50% 0%, transparent 0deg, transparent 110deg, rgba(0,0,0,1) 145deg, rgba(0,0,0,1) 215deg, transparent 250deg, transparent 360deg)",
+                  }}
+                >
+                  <NextImage
+                    src="/lucas-calloch-P-yzuyWFEIk-unsplash.jpg"
+                    alt=""
+                    fill
+                    sizes="100vw"
+                    priority
+                    draggable={false}
+                    className="object-cover object-top select-none opacity-[0.45] dark:opacity-[0.58] saturate-[1.25]"
+                  />
+                  {/* Background-tone wash — eased back so the cone
+                      keeps warmth through its body. Only the tail
+                      and the top edge dissolve to background. */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-b from-background/5 via-background/20 to-background"
+                  />
+                </div>
+              </div>
 
-                {/* Soft radial vignette — keeps the centre slightly
-                    brighter than the corners so the eye lands on the
-                    numbers, not the edges. */}
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_90%_at_50%_50%,transparent_30%,rgba(0,0,0,0.35)_100%)]"
-                />
-
-                {/* Inner top sheen — a 1/2-height gradient that fades
-                    downward, gives the glass a "lit from above" quality. */}
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.06] to-transparent"
-                />
-
-                {/* Signature top hairline — the one decorative flourish.
-                    White-tinted because the plate is now dark across
-                    both modes; pulled inset-x-12 so the line tapers off
-                    before the corners. */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"
-                />
-
+              {/* No panel chrome, no top rule — the cone of light
+                  behind defines the moment, and the tapered cell
+                  dividers carry all the structure the row needs.
+                  Apple / Linear "no chrome" at its most literal. */}
+              <div className="relative">
                 <div
                   className={cn(
                     "relative grid",
-                    isMobile
-                      ? "grid-cols-2 gap-y-5 px-5 py-5"
-                      : "grid-cols-4 gap-x-2 px-8 py-7",
+                    isMobile ? "grid-cols-2" : "grid-cols-4",
                   )}
                 >
-                  {RESOURCE_STAT_KEYS.map((key, i) => (
-                    <StatCell
-                      key={key}
-                      isMobile={isMobile}
-                      delay={0.4 + i * 0.07}
-                      rawValue={t(`resourceStats.${key}.value`)}
-                      label={t(`resourceStats.${key}.label`)}
-                      sublabel={t(`resourceStats.${key}.sublabel`)}
-                    />
-                  ))}
+                  {RESOURCE_STAT_KEYS.map((key, i) => {
+                    // Vertical divider on every cell except the first
+                    // column. Rendered as a tapered gradient pseudo-
+                    // element so it dissolves into the cone of light
+                    // rather than meeting hard edges.
+                    const hasLeftDivider = isMobile ? i % 2 === 1 : i > 0
+                    // On mobile (2x2), bottom row also gets a tapered
+                    // horizontal divider above it.
+                    const hasTopDivider = isMobile && i >= 2
+                    return (
+                      <div
+                        key={key}
+                        className={cn(
+                          "relative",
+                          isMobile ? "px-2 py-4" : "px-3 py-6",
+                          hasLeftDivider &&
+                            "before:content-[''] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.14] dark:before:via-white/[0.16] before:to-transparent",
+                          hasTopDivider &&
+                            "after:content-[''] after:absolute after:top-0 after:left-4 after:right-4 after:h-px after:bg-gradient-to-r after:from-transparent after:via-foreground/[0.14] dark:after:via-white/[0.16] after:to-transparent",
+                        )}
+                      >
+                        <StatCell
+                          isMobile={isMobile}
+                          delay={0.4 + i * 0.07}
+                          rawValue={t(`resourceStats.${key}.value`)}
+                          label={t(`resourceStats.${key}.label`)}
+                          sublabel={t(`resourceStats.${key}.sublabel`)}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </motion.div>

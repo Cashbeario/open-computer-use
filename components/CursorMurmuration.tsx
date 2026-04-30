@@ -4,8 +4,7 @@
  * Cursor murmuration — entry component.
  *
  * Branches by device tier:
- *   • reduced-motion or low-end → static SVG composition (no JS animation)
- *   • mobile (no hover, narrow viewport) → static SVG (also avoids loading three.js)
+ *   • reduced-motion / mobile / no-hover / low-end → render nothing
  *   • desktop / tablet → WebGL flock, count tuned to GPU/CPU class
  *
  * The WebGL impl lives in a separate module that is dynamic-imported only
@@ -16,13 +15,10 @@
 import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
 import { useLiteMode } from "@/lib/hooks/use-lite-mode"
-import CursorMurmurationStatic from "./CursorMurmurationStatic"
 
 // No loading fallback: the WebGL flock spawns off-canvas and streams in,
 // so a centered static composition shown during the dynamic import would
 // flash a different layout right before the entry animation begins.
-// CursorMurmurationStatic is still used as the permanent fallback for
-// mobile / reduced-motion / low-end devices below.
 const CursorMurmurationFlock = dynamic(
   () => import("./CursorMurmurationFlock"),
   { ssr: false }
@@ -77,11 +73,14 @@ export default function CursorMurmuration() {
   }, [lite.lite, lite.reducedMotion, lite.mobile])
 
   if (tier === null) return null
-  if (tier === "static") return <CursorMurmurationStatic />
+  // Mobile / reduced-motion / low-end devices render nothing — no static
+  // SVG fallback, no WebGL. The page's natural background carries those
+  // surfaces; the cursor flock is a desktop-only flourish.
+  if (tier === "static") return null
 
-  // Trimmed cursor counts — with the strong cohesion/alignment tuning the
-  // flock reads as a flock with far fewer instances, and a sparser scene
+  // Sparse cursor counts — with the strong cohesion/alignment tuning the
+  // flock reads as a flock with far fewer instances, and a quieter scene
   // keeps the hero text uncluttered on big displays.
-  const count = tier === "desktop" ? 120 : 80
+  const count = tier === "desktop" ? 70 : 45
   return <CursorMurmurationFlock count={count} />
 }

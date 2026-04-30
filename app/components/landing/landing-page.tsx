@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { captureUtmParams } from "@/lib/posthog/analytics"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
@@ -17,25 +17,15 @@ import { FeaturesSection } from "./sections/features"
 import { PricingSection } from "./sections/pricing"
 import { FAQSection } from "./sections/faq"
 import { GuideLines, SectionDivider as SharedSectionDivider } from "./guide-lines"
-import { LandingProgressRail } from "./section-shell"
 import dynamic from "next/dynamic"
 
 // Cursor murmuration — boids flock of OS-pointer arrows. Self-gates by
-// device tier internally: WebGL on desktop/tablet, static SVG on mobile and
+// device tier internally: WebGL on desktop/tablet, nothing on mobile and
 // reduced-motion. Loads three.js only when the WebGL path is actually used.
 const CursorMurmuration = dynamic(() => import("@/components/CursorMurmuration"), {
   ssr: false,
   loading: () => null,
 })
-
-const LANDING_NAV_SECTIONS = [
-  { id: "benchmark", label: "Benchmark" },
-  { id: "features", label: "Features" },
-  { id: "why-coasty", label: "Why Coasty" },
-  { id: "demo", label: "Demo" },
-  { id: "cost", label: "Cost" },
-  { id: "pricing", label: "Pricing" },
-] as const
 
 export function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
@@ -65,111 +55,6 @@ export function LandingPage() {
     const onResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  // ── Section progress tracking ──
-  // Continuous scroll progress through the guided sections. Range is [0, N]
-  // for N sections: 0 = before the first section, k = at the top of section k,
-  // N = at the bottom of the last section. The progress bar fill maps to
-  // `progress / N`; the active dot is `floor(progress)` clamped to [0, N-1].
-  const [scrollProgress, setScrollProgress] = useState(0)
-
-  useEffect(() => {
-    if (!mounted) return
-    const sectionEls = LANDING_NAV_SECTIONS
-      .map(s => document.getElementById(s.id))
-      .filter(Boolean) as HTMLElement[]
-    if (!sectionEls.length) return
-
-    // sectionRanges[i] = { top, bottom } for section i in document coords.
-    // Re-measured on resize and on any section size change (ResizeObserver).
-    let sectionRanges: { top: number; bottom: number }[] = []
-
-    const measure = () => {
-      sectionRanges = sectionEls.map(el => {
-        const r = el.getBoundingClientRect()
-        return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY }
-      })
-    }
-
-    let rafId = 0
-    const update = () => {
-      rafId = 0
-      if (!sectionRanges.length) return
-
-      // Trigger point at 40% down the viewport — the eye fixates here while
-      // scrolling, so the active dot transitions where it visually feels right.
-      const trigger = window.scrollY + window.innerHeight * 0.4
-      const N = sectionRanges.length
-      let progress: number
-
-      if (trigger < sectionRanges[0].top) {
-        // Before the first section.
-        progress = 0
-      } else if (trigger >= sectionRanges[N - 1].top) {
-        // Inside or past the last section. Linearly continue from N-1 to N
-        // using the section's own height, so the bar keeps filling through
-        // the final section and saturates at 100% on exit.
-        const last = sectionRanges[N - 1]
-        const span = Math.max(1, last.bottom - last.top)
-        const frac = Math.min(1, Math.max(0, (trigger - last.top) / span))
-        progress = (N - 1) + frac
-      } else {
-        // Find which adjacent section pair the trigger sits between.
-        let i = 0
-        for (; i < N - 1; i++) {
-          if (trigger < sectionRanges[i + 1].top) break
-        }
-        const span = Math.max(1, sectionRanges[i + 1].top - sectionRanges[i].top)
-        const frac = (trigger - sectionRanges[i].top) / span
-        progress = i + Math.min(1, Math.max(0, frac))
-      }
-
-      setScrollProgress(progress)
-    }
-
-    const onScroll = () => {
-      // Coalesce scroll bursts into one rAF — prevents redundant React state
-      // updates during smooth-scroll-into-view animations and momentum scroll.
-      if (rafId) return
-      rafId = requestAnimationFrame(update)
-    }
-
-    const onResize = () => {
-      measure()
-      update()
-    }
-
-    // Section heights change for many reasons (image/font loading, framer
-    // entry animations, expanded states). ResizeObserver keeps the cache in
-    // sync without us having to predict every cause.
-    const ro = new ResizeObserver(() => {
-      measure()
-      update()
-    })
-    for (const el of sectionEls) ro.observe(el)
-    // Document height also changes when content above the sections grows.
-    if (document.documentElement) ro.observe(document.documentElement)
-
-    measure()
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onResize)
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onResize)
-      ro.disconnect()
-      if (rafId) cancelAnimationFrame(rafId)
-    }
-  }, [mounted])
-
-  const scrollToLandingSection = useCallback((index: number) => {
-    const el = document.getElementById(LANDING_NAV_SECTIONS[index]?.id)
-    if (!el) return
-    // Header is ~64px + a small margin so the section eyebrow lands clear of
-    // the floating progress rail.
-    const top = el.getBoundingClientRect().top + window.scrollY - 96
-    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
   }, [])
 
   const SectionDivider = SharedSectionDivider
@@ -242,14 +127,7 @@ export function LandingPage() {
             Each section sits at its natural height with consistent
             rhythm (py-20 sm:py-24 lg:py-32) inside a max-w-6xl container.
             Section transitions are handled by SectionDivider between them.
-            A slim top progress rail (LandingProgressRail) replaces the
-            old left sticky nav.
            ══════════════════════════════════════════════════════════════ */}
-        <LandingProgressRail
-          sections={LANDING_NAV_SECTIONS}
-          scrollProgress={scrollProgress}
-          onJump={scrollToLandingSection}
-        />
         <div className="max-w-7xl mx-auto">
 
         <BenchmarkSection isMobile={isMobile} />

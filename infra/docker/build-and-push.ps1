@@ -1,34 +1,29 @@
 <#
 .SYNOPSIS
-    Build & push backend + frontend Docker images to AWS ECR in parallel.
+    Build & push backend + frontend Docker images to AWS ECR, then deploy.
 
 .DESCRIPTION
-    Required env:
-      AWS_ACCESS_KEY_ID
-      AWS_SECRET_ACCESS_KEY
-      AWS_REGION
-      AWS_ACCOUNT_ID
-      BACKEND_REPO              (ECR repo name for the backend image)
-      FRONTEND_REPO             (ECR repo name for the frontend image)
+    Pipeline:
+      1. npm run test:all       (skip with SKIP_TESTS=1)
+      2. aws ecr login
+      3. docker compose build   (reads repo-root .env for build args)
+      4. docker tag for ECR
+      5. docker push (sequential)
+      6. terraform apply        (interactive -- you type "yes"; skip with SKIP_TERRAFORM=1)
+
+    Required env (in infra/docker/.env or shell):
+      AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+      AWS_ACCOUNT_ID, BACKEND_REPO, FRONTEND_REPO
 
     Optional env:
-      AWS_SESSION_TOKEN         (only if using temporary creds)
-      IMAGE_TAG                 (default: latest)
-      ECR_HOST                  (default: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com)
-
-    Optional frontend build args (passed through if set):
-      ENCRYPTION_KEY, CSRF_SECRET,
-      NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE,
-      STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET,
-      STRIPE_PRICE_STARTER, STRIPE_PRICE_PROFESSIONAL, STRIPE_PRICE_ENTERPRISE
-
-    Loads variables from infra/docker/.env (if present) before validating.
+      AWS_SESSION_TOKEN, IMAGE_TAG (default: latest), ECR_HOST,
+      SKIP_TESTS=1, SKIP_TERRAFORM=1, COMPOSE_FILE (default: docker-compose.yml),
+      TF_DIR (default: infra/aws)
 #>
 
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
-function Coalesce { param($a, $b) if ([string]::IsNullOrEmpty($a)) { $b } else { $a } }
 function Log  { param($tag, $msg) Write-Host "[$tag] $msg" -ForegroundColor Cyan }
 function Fail { param($tag, $msg) Write-Host "[$tag] $msg" -ForegroundColor Red }
 
@@ -86,30 +81,32 @@ Import-DotEnv (Join-Path $ScriptDir '.env')
 Require-Env @('AWS_ACCESS_KEY_ID','AWS_SECRET_ACCESS_KEY','AWS_REGION',
               'AWS_ACCOUNT_ID','BACKEND_REPO','FRONTEND_REPO')
 
-$AwsAccountId = $env:AWS_ACCOUNT_ID
 $AwsRegion    = $env:AWS_REGION
 $BackendRepo  = $env:BACKEND_REPO
 $FrontendRepo = $env:FRONTEND_REPO
-$ImageTag     = Coalesce $env:IMAGE_TAG 'latest'
-$EcrHost      = Coalesce $env:ECR_HOST "$AwsAccountId.dkr.ecr.$AwsRegion.amazonaws.com"
+$ImageTag     = if ([string]::IsNullOrEmpty($env:IMAGE_TAG))    { 'latest' } else { $env:IMAGE_TAG }
+$EcrHost      = if ([string]::IsNullOrEmpty($env:ECR_HOST))     { "$($env:AWS_ACCOUNT_ID).dkr.ecr.$AwsRegion.amazonaws.com" } else { $env:ECR_HOST }
+$ComposeFile  = if ([string]::IsNullOrEmpty($env:COMPOSE_FILE)) { 'docker-compose.yml' } else { $env:COMPOSE_FILE }
+
+$BackendTarget  = "$EcrHost/${BackendRepo}:${ImageTag}"
+$FrontendTarget = "$EcrHost/${FrontendRepo}:${ImageTag}"
 
 Set-Location $RepoRoot
 
+# ---------- 1. tests ----------
 if ($env:SKIP_TESTS -eq '1') {
-    Log 'test' 'SKIP_TESTS=1 — skipping npm run test:all'
+    Log 'test' 'SKIP_TESTS=1 -- skipping npm run test:all'
 } else {
     Log 'test' 'running npm run test:all (must pass before build/push)'
     & npm run test:all
     if ($LASTEXITCODE -ne 0) {
-        Fail 'test' "npm run test:all failed (rc=$LASTEXITCODE) — aborting before build/push"
+        Fail 'test' "npm run test:all failed (rc=$LASTEXITCODE) -- aborting"
         exit 1
     }
     Log 'test' 'all tests passed'
 }
 
-$LogDir = Join-Path ([System.IO.Path]::GetTempPath()) ("ecr-push-" + [guid]::NewGuid().ToString('N').Substring(0,8))
-New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
-
+# ---------- 2. ECR login ----------
 Log 'ecr' "logging in to $EcrHost"
 $pw = (& aws ecr get-login-password --region $AwsRegion)
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($pw)) {
@@ -123,94 +120,65 @@ if ($LASTEXITCODE -ne 0) {
 }
 Log 'ecr' 'logged in'
 
-$FeArgNames = @(
-    'ENCRYPTION_KEY','CSRF_SECRET',
-    'NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE',
-    'STRIPE_API_KEY','STRIPE_WEBHOOK_SECRET',
-    'STRIPE_PRICE_STARTER','STRIPE_PRICE_PROFESSIONAL','STRIPE_PRICE_ENTERPRISE'
-)
-$FeBuildArgs = @()
-foreach ($n in $FeArgNames) {
-    $val = (Get-Item "env:$n" -ErrorAction SilentlyContinue).Value
-    if (-not [string]::IsNullOrEmpty($val)) {
-        $FeBuildArgs += '--build-arg'
-        $FeBuildArgs += "$n=$val"
+# ---------- 3. compose build ----------
+# Compose auto-reads ./.env for build args (Stripe/Supabase/Encryption keys).
+# Outputs local images: llmhub-backend:latest, llmhub-frontend:latest
+Log 'build' "docker compose -f $ComposeFile build"
+& docker compose -f $ComposeFile build
+if ($LASTEXITCODE -ne 0) {
+    Fail 'build' "docker compose build failed (rc=$LASTEXITCODE)"
+    exit 1
+}
+
+# ---------- 4. tag for ECR ----------
+Log 'tag' "tagging images for $EcrHost"
+& docker tag 'llmhub-backend:latest' $BackendTarget
+if ($LASTEXITCODE -ne 0) { Fail 'tag' "backend tag failed (rc=$LASTEXITCODE)"; exit 1 }
+& docker tag 'llmhub-frontend:latest' $FrontendTarget
+if ($LASTEXITCODE -ne 0) { Fail 'tag' "frontend tag failed (rc=$LASTEXITCODE)"; exit 1 }
+
+# ---------- 5. push (sequential) ----------
+Log 'push' "pushing $BackendTarget"
+& docker push $BackendTarget
+if ($LASTEXITCODE -ne 0) {
+    Fail 'backend' "push failed (rc=$LASTEXITCODE)"
+    exit 1
+}
+
+Log 'push' "pushing $FrontendTarget"
+& docker push $FrontendTarget
+if ($LASTEXITCODE -ne 0) {
+    Fail 'frontend' "push failed (rc=$LASTEXITCODE)"
+    exit 1
+}
+
+Log 'push' $BackendTarget
+Log 'push' $FrontendTarget
+
+# ---------- 6. terraform apply ----------
+$TfDir = if ([string]::IsNullOrEmpty($env:TF_DIR)) { 'infra/aws' } else { $env:TF_DIR }
+if ($env:SKIP_TERRAFORM -eq '1') {
+    Log 'tf' 'SKIP_TERRAFORM=1 -- skipping terraform apply'
+} else {
+    Require-Cmd 'terraform'
+    $TfPath = Join-Path $RepoRoot $TfDir
+    if (-not (Test-Path $TfPath)) {
+        Fail 'tf' "$TfDir not found in repo root"
+        exit 1
     }
+    Log 'tf' "running 'terraform apply' in $TfDir (you will be prompted to type 'yes')"
+    Push-Location $TfPath
+    try {
+        & terraform apply
+        $TfRc = $LASTEXITCODE
+    } finally {
+        Pop-Location
+    }
+    if ($TfRc -ne 0) {
+        Fail 'tf' "terraform apply failed (rc=$TfRc) -- images already pushed to ECR"
+        exit 1
+    }
+    Log 'tf' 'terraform apply completed'
 }
 
-$BackendLog  = Join-Path $LogDir 'backend.log'
-$FrontendLog = Join-Path $LogDir 'frontend.log'
-
-Log 'build' "backend  -> ${BackendRepo}:${ImageTag}  (log: $BackendLog)"
-Log 'build' "frontend -> ${FrontendRepo}:${ImageTag} (log: $FrontendLog)"
-
-$beArgs = @(
-    'build',
-    '-t', "${BackendRepo}:${ImageTag}",
-    '-t', "$EcrHost/${BackendRepo}:${ImageTag}",
-    '-f', 'backend/Dockerfile', 'backend'
-)
-$feArgs = @('build') + $FeBuildArgs + @(
-    '-t', "${FrontendRepo}:${ImageTag}",
-    '-t', "$EcrHost/${FrontendRepo}:${ImageTag}",
-    '-f', 'Dockerfile', '.'
-)
-
-$beProc = Start-Process -FilePath 'docker' -ArgumentList $beArgs `
-    -RedirectStandardOutput $BackendLog -RedirectStandardError "$BackendLog.err" `
-    -WorkingDirectory $RepoRoot -NoNewWindow -PassThru
-$feProc = Start-Process -FilePath 'docker' -ArgumentList $feArgs `
-    -RedirectStandardOutput $FrontendLog -RedirectStandardError "$FrontendLog.err" `
-    -WorkingDirectory $RepoRoot -NoNewWindow -PassThru
-
-# Live progress: tail last line of each log every 5s
-while (-not $beProc.HasExited -or -not $feProc.HasExited) {
-    $beState = if ($beProc.HasExited) { 'done' } else { 'running' }
-    $feState = if ($feProc.HasExited) { 'done' } else { 'running' }
-    $beTail = ''
-    $feTail = ''
-    if (Test-Path $BackendLog)  { $beTail = (Get-Content $BackendLog  -Tail 1 -ErrorAction SilentlyContinue) }
-    if (Test-Path $FrontendLog) { $feTail = (Get-Content $FrontendLog -Tail 1 -ErrorAction SilentlyContinue) }
-    if ($beTail.Length -gt 90) { $beTail = $beTail.Substring(0, 90) }
-    if ($feTail.Length -gt 90) { $feTail = $feTail.Substring(0, 90) }
-    Write-Host ("[backend  {0,-7}] {1}" -f $beState, $beTail)
-    Write-Host ("[frontend {0,-7}] {1}" -f $feState, $feTail)
-    Start-Sleep -Seconds 5
-}
-
-$beRc = $beProc.ExitCode
-$feRc = $feProc.ExitCode
-
-function Dump-Tail($path, $errPath, $tag) {
-    if (Test-Path $path)    { Get-Content $path    -Tail 60 | ForEach-Object { Write-Host "[$tag] $_" } }
-    if (Test-Path $errPath) { Get-Content $errPath -Tail 60 | ForEach-Object { Write-Host "[$tag][err] $_" } }
-}
-
-if ($beRc -ne 0) { Fail 'backend'  "build failed (rc=$beRc) — log:";  Dump-Tail $BackendLog  "$BackendLog.err"  'backend' }
-if ($feRc -ne 0) { Fail 'frontend' "build failed (rc=$feRc) — log:"; Dump-Tail $FrontendLog "$FrontendLog.err" 'frontend' }
-if ($beRc -ne 0 -or $feRc -ne 0) { exit 1 }
-
-Log 'build' 'both images built'
-
-Log 'push' 'pushing in parallel'
-$BackendPushLog  = Join-Path $LogDir 'push-backend.log'
-$FrontendPushLog = Join-Path $LogDir 'push-frontend.log'
-
-$bePush = Start-Process -FilePath 'docker' -ArgumentList @('push', "$EcrHost/${BackendRepo}:${ImageTag}") `
-    -RedirectStandardOutput $BackendPushLog -RedirectStandardError "$BackendPushLog.err" `
-    -NoNewWindow -PassThru
-$fePush = Start-Process -FilePath 'docker' -ArgumentList @('push', "$EcrHost/${FrontendRepo}:${ImageTag}") `
-    -RedirectStandardOutput $FrontendPushLog -RedirectStandardError "$FrontendPushLog.err" `
-    -NoNewWindow -PassThru
-
-$bePush.WaitForExit() | Out-Null
-$fePush.WaitForExit() | Out-Null
-$bePushRc = $bePush.ExitCode
-$fePushRc = $fePush.ExitCode
-
-if ($bePushRc -ne 0) { Fail 'backend'  "push failed (rc=$bePushRc) — log:";  Dump-Tail $BackendPushLog  "$BackendPushLog.err"  'backend' }
-if ($fePushRc -ne 0) { Fail 'frontend' "push failed (rc=$fePushRc) — log:"; Dump-Tail $FrontendPushLog "$FrontendPushLog.err" 'frontend' }
-if ($bePushRc -ne 0 -or $fePushRc -ne 0) { exit 1 }
-
-Log 'done' "$EcrHost/${BackendRepo}:${ImageTag}"
-Log 'done' "$EcrHost/${FrontendRepo}:${ImageTag}"
+Log 'done' 'build, push, and terraform apply complete'

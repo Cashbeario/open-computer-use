@@ -40,7 +40,7 @@ export default function BlogPostPage() {
     new Date(date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen bg-background isolate overflow-x-clip">
       <GuideLines />
       <LandingHeader />
 
@@ -203,16 +203,15 @@ export default function BlogPostPage() {
                       View Case Studies <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
-                  <Link href="/auth">
-                    <motion.button
+                  <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
+                    <Link
+                      href="/auth"
                       className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-7 py-3 text-sm cursor-pointer"
-                      whileHover={{ scale: 1.02, y: -1 }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       Try Coasty Free
                       <ArrowRight className="h-4 w-4" />
-                    </motion.button>
-                  </Link>
+                    </Link>
+                  </motion.div>
                 </div>
               </div>
             </div>

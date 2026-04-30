@@ -767,8 +767,13 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 isMobile ? "mt-6 gap-3 flex-col" : "mt-7 gap-6"
               )}
             >
-              <Link href="/auth">
-                <motion.button
+              <motion.div
+                whileHover={{ scale: 1.015 }}
+                whileTap={{ scale: 0.985 }}
+                className="inline-block"
+              >
+                <Link
+                  href="/auth"
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
                     "bg-foreground text-background",
@@ -779,19 +784,16 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                       ? "px-6 py-3 text-sm"
                       : "px-7 py-3 text-[14.5px]"
                   )}
-                  whileHover={{ scale: 1.015 }}
-                  whileTap={{ scale: 0.985 }}
                 >
                   {tc("tryCoastyFree")}
                   <ArrowRight className="h-3.5 w-3.5" />
-                </motion.button>
-              </Link>
-              <a
-                href="https://cal.com/coasty/15min"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <motion.button
+                </Link>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.985 }} className="inline-block">
+                <a
+                  href="https://cal.com/coasty/15min"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     "inline-flex items-center gap-1.5 font-medium cursor-pointer",
                     // Sits at the same /55 middle tier as the description
@@ -799,12 +801,11 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                     "text-foreground/55 hover:text-foreground/85 dark:text-white/60 dark:hover:text-white/90 transition-colors duration-300",
                     isMobile ? "text-sm" : "text-[14.5px]"
                   )}
-                  whileTap={{ scale: 0.985 }}
                 >
                   <Video className="h-3.5 w-3.5" />
                   {tc("bookDemo")}
-                </motion.button>
-              </a>
+                </a>
+              </motion.div>
             </div>
           </div>
         </div>

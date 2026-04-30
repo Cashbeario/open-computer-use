@@ -767,45 +767,39 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 isMobile ? "mt-6 gap-3 flex-col" : "mt-7 gap-6"
               )}
             >
-              <motion.div
-                whileHover={{ scale: 1.015 }}
-                whileTap={{ scale: 0.985 }}
-                className="inline-block"
+              <Link
+                href="/auth"
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
+                  "bg-foreground text-background",
+                  "shadow-[0_1px_0_0_rgba(255,255,255,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.30)]",
+                  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.50)]",
+                  "transition-[box-shadow,transform] duration-300",
+                  "hover:scale-[1.015] active:scale-[0.985]",
+                  isMobile
+                    ? "px-6 py-3 text-sm"
+                    : "px-7 py-3 text-[14.5px]"
+                )}
               >
-                <Link
-                  href="/auth"
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
-                    "bg-foreground text-background",
-                    "shadow-[0_1px_0_0_rgba(255,255,255,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.30)]",
-                    "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.50)]",
-                    "transition-[box-shadow,transform] duration-300",
-                    isMobile
-                      ? "px-6 py-3 text-sm"
-                      : "px-7 py-3 text-[14.5px]"
-                  )}
-                >
-                  {tc("tryCoastyFree")}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.985 }} className="inline-block">
-                <a
-                  href="https://cal.com/coasty/15min"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "inline-flex items-center gap-1.5 font-medium cursor-pointer",
-                    // Sits at the same /55 middle tier as the description
-                    // so the eye groups them as one editorial pair.
-                    "text-foreground/55 hover:text-foreground/85 dark:text-white/60 dark:hover:text-white/90 transition-colors duration-300",
-                    isMobile ? "text-sm" : "text-[14.5px]"
-                  )}
-                >
-                  <Video className="h-3.5 w-3.5" />
-                  {tc("bookDemo")}
-                </a>
-              </motion.div>
+                {tc("tryCoastyFree")}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <a
+                href="https://cal.com/coasty/15min"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "inline-flex items-center gap-1.5 font-medium cursor-pointer",
+                  // Sits at the same /55 middle tier as the description
+                  // so the eye groups them as one editorial pair.
+                  "text-foreground/55 hover:text-foreground/85 dark:text-white/60 dark:hover:text-white/90 transition-all duration-300",
+                  "active:scale-[0.985]",
+                  isMobile ? "text-sm" : "text-[14.5px]"
+                )}
+              >
+                <Video className="h-3.5 w-3.5" />
+                {tc("bookDemo")}
+              </a>
             </div>
           </div>
         </div>

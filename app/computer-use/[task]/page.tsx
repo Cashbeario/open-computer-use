@@ -169,15 +169,13 @@ export default function ComputerUseTaskPage() {
                 <p className="text-sm text-muted-foreground/60 mb-6 max-w-md mx-auto">
                   Start using Coasty to handle {page.title.toLowerCase()} tasks autonomously.
                 </p>
-                <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                  <Link
-                    href="/auth"
-                    className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-7 py-3 text-sm cursor-pointer"
-                  >
-                    Try Coasty Free
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </motion.div>
+                <Link
+                  href="/auth"
+                  className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-7 py-3 text-sm cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+                >
+                  Try Coasty Free
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </>

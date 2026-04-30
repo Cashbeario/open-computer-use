@@ -203,15 +203,13 @@ export default function BlogPostPage() {
                       View Case Studies <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
-                  <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
-                    <Link
-                      href="/auth"
-                      className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-7 py-3 text-sm cursor-pointer"
-                    >
-                      Try Coasty Free
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </motion.div>
+                  <Link
+                    href="/auth"
+                    className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-7 py-3 text-sm cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+                  >
+                    Try Coasty Free
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             </div>

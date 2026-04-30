@@ -123,15 +123,13 @@ export default function UseCasesPage() {
             <p className="text-muted-foreground/60 text-sm mb-6">
               Ready to 10x your output?
             </p>
-            <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} className="inline-block">
-              <Link
-                href="/auth"
-                className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer"
-              >
-                Try Coasty Free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
+            <Link
+              href="/auth"
+              className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+            >
+              Try Coasty Free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <p className="text-[11px] text-muted-foreground/30 mt-4">
               No credit card required
             </p>

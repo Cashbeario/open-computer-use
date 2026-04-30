@@ -535,11 +535,10 @@ export function LandingHeader({
               <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
                 <motion.div
                   layoutId={animateBrandFromIntro ? "landing-brand-logo" : undefined}
-                  whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ duration: 0.15 }}
                   className={cn(
-                    "relative transition-all duration-500 flex-shrink-0",
+                    "relative transition-all duration-500 flex-shrink-0 group-hover:scale-[1.04]",
                     scrolled ? "h-7 w-7 sm:h-8 sm:w-8" : "h-8 w-8 sm:h-9 sm:w-9",
                   )}
                 >

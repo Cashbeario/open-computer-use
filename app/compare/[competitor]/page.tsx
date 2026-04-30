@@ -472,23 +472,19 @@ export default function CompetitorPage() {
               {t("ctaDescription")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                <Link
-                  href="/auth"
-                  className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer"
-                >
-                  {t("ctaButton")}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} className="inline-block">
-                <Link
-                  href="/results"
-                  className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-colors duration-200"
-                >
-                  {t("watchCaseStudies")}
-                </Link>
-              </motion.div>
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+              >
+                {t("ctaButton")}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/results"
+                className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+              >
+                {t("watchCaseStudies")}
+              </Link>
             </div>
             <p className="text-[11px] text-muted-foreground/30 mt-4">
               {t("noCreditCard")}

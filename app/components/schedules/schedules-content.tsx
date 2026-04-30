@@ -395,13 +395,13 @@ function ScheduleCard({
 
   return (
     <motion.div
-      whileHover={{ y: -2 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn(
         "group relative flex flex-col rounded-xl overflow-hidden h-full",
         "border border-border/30 bg-card/50",
         "hover:border-border/50 hover:shadow-lg hover:shadow-black/[0.04] dark:hover:shadow-black/[0.15]",
-        "transition-[border-color,box-shadow] duration-300",
+        "hover:-translate-y-0.5",
+        "transition-all duration-300 ease-out",
         !isActive && !isFailed && "opacity-80 hover:opacity-100",
       )}
     >
@@ -455,10 +455,10 @@ function ScheduleCard({
         </div>
 
         <div className={cn("px-4 py-2.5 flex items-center gap-1.5 border-t border-border/20", "translate-y-0 opacity-100", "sm:translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100", "transition-all duration-300 ease-out")}>
-          <motion.button onClick={handleRunNow} disabled={!!actionLoading} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className={cn("h-7 px-3 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-colors", "bg-muted/50 hover:bg-muted text-foreground/60 hover:text-foreground", "disabled:opacity-40")}>
+          <motion.button onClick={handleRunNow} disabled={!!actionLoading} whileTap={{ scale: 0.96 }} className={cn("h-7 px-3 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-150", "bg-muted/50 hover:bg-muted text-foreground/60 hover:text-foreground hover:scale-[1.04]", "disabled:opacity-40")}>
             <CoastyIcon className="h-3 w-3" />{actionLoading === "run" ? "\u2026" : "Run"}
           </motion.button>
-          <motion.button onClick={handleTogglePause} disabled={!!actionLoading} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="h-7 px-2.5 rounded-lg text-[11px] flex items-center gap-1.5 text-muted-foreground/60 hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-40">
+          <motion.button onClick={handleTogglePause} disabled={!!actionLoading} whileTap={{ scale: 0.96 }} className="h-7 px-2.5 rounded-lg text-[11px] flex items-center gap-1.5 text-muted-foreground/60 hover:text-foreground hover:bg-muted/50 hover:scale-[1.04] transition-all duration-150 disabled:opacity-40">
             {schedule.enabled ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
             {actionLoading === "pause" ? "\u2026" : schedule.enabled ? "Pause" : "Resume"}
           </motion.button>
@@ -468,7 +468,7 @@ function ScheduleCard({
             ...(onEdit ? [{ icon: Pencil, action: () => onEdit(schedule.chat_id), title: "Edit" }] : []),
             { icon: Trash2, action: handleDelete, title: "Delete" },
           ].map(({ icon: Icon, action, title }) => (
-            <motion.button key={title} onClick={action} disabled={!!actionLoading} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/50 transition-colors disabled:opacity-40" title={title}>
+            <motion.button key={title} onClick={action} disabled={!!actionLoading} whileTap={{ scale: 0.9 }} className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/50 hover:scale-110 transition-all duration-150 disabled:opacity-40" title={title}>
               <Icon className="h-3.5 w-3.5" />
             </motion.button>
           ))}
@@ -621,8 +621,8 @@ function ScheduleCalendar({ schedules, selectedDate, onSelectDate, onRun, onPaus
               {days.map((day) => {
                 const sel = isSel(day), tod = isTod(day), taskCount = taskMap.get(day.getDate()) || 0
                 return (
-                  <motion.button key={day.getDate()} data-selected={sel ? "true" : undefined} data-today={tod ? "true" : undefined} onClick={() => onSelectDate(day)} whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
-                    className={cn("relative flex flex-col items-center gap-1 px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-xl shrink-0 transition-all duration-200 min-w-[44px] sm:min-w-[52px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", sel ? "bg-muted ring-1 ring-border shadow-sm" : "hover:bg-muted/40")}
+                  <motion.button key={day.getDate()} data-selected={sel ? "true" : undefined} data-today={tod ? "true" : undefined} onClick={() => onSelectDate(day)} whileTap={{ scale: 0.94 }}
+                    className={cn("relative flex flex-col items-center gap-1 px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-xl shrink-0 transition-all duration-200 min-w-[44px] sm:min-w-[52px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring hover:scale-[1.06]", sel ? "bg-muted ring-1 ring-border shadow-sm" : "hover:bg-muted/40")}
                     style={{ scrollSnapAlign: "center" }}
                   >
                     <span className={cn("text-[10px] font-medium uppercase tracking-wider leading-none", sel ? "text-foreground/60" : "text-muted-foreground/40")}>
@@ -1202,10 +1202,9 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: React.ComponentTyp
   return (
     <motion.button
       onClick={(e) => { e.stopPropagation(); onClick() }}
-      whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.92 }}
       className={cn(
-        "flex items-center gap-1 rounded-md transition-colors",
+        "flex items-center gap-1 rounded-md transition-all duration-150 hover:scale-[1.08]",
         label ? "h-7 px-2 text-[11px] font-medium text-muted-foreground/50 hover:text-foreground hover:bg-muted/50" : "h-7 w-7 justify-center text-muted-foreground/30 hover:text-muted-foreground hover:bg-muted/40",
       )}
     >

@@ -155,12 +155,12 @@ function ActionBtn({ icon: Icon, label, onClick, loading, disabled, variant = "d
       type="button"
       onClick={onClick}
       disabled={isDead}
-      whileHover={!isDead ? { y: -1 } : undefined}
       whileTap={!isDead ? { scale: 0.97 } : undefined}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
-        "h-9 inline-flex items-center gap-2 px-3.5 rounded-xl text-sm font-medium transition-colors shrink-0",
+        "h-9 inline-flex items-center gap-2 px-3.5 rounded-xl text-sm font-medium transition-all duration-150 shrink-0",
         "disabled:opacity-40 disabled:cursor-not-allowed",
+        !isDead && "hover:-translate-y-px",
         variant === "primary" && "bg-foreground text-background hover:bg-foreground/90 shadow-sm",
         variant === "default" && "bg-foreground/[0.04] hover:bg-foreground/[0.08] border border-border/40 text-foreground",
         variant === "destructive" && "bg-foreground/[0.02] hover:bg-destructive/10 border border-destructive/20 text-destructive",

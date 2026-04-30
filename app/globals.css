@@ -185,6 +185,18 @@
   -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
 }
 
+/* Kill iOS Safari's 300ms double-tap-to-zoom delay on every interactive
+   element. Without this, every tap on a link/button waits ~300ms to see
+   if a second tap is coming, which feels exactly like "I have to double-
+   click". `manipulation` permits panning + pinch-zoom on the page itself
+   (so the page stays scrollable / zoomable), but disables the per-element
+   double-tap zoom that introduces the delay. Also disables the iOS tap
+   highlight flash so the press feels instant rather than wash-then-fire. */
+a, button, [role="button"], [role="link"], input[type="button"], input[type="submit"], label[for] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Global scrollbar hiding */
 *::-webkit-scrollbar {
   display: none;

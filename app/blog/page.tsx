@@ -236,24 +236,20 @@ export default function BlogPage() {
               Want to see Coasty in action?
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="/auth"
-                  className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer"
-                >
-                  Try Coasty Free
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="/results"
-                  className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-colors duration-200"
-                >
-                  View Case Studies
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </motion.div>
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+              >
+                Try Coasty Free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/results"
+                className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+              >
+                View Case Studies
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
             <p className="text-[11px] text-muted-foreground/30 mt-4">
               No credit card required

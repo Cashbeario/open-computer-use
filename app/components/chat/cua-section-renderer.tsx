@@ -314,8 +314,7 @@ function ScreenshotDot({ src }: { src: string }) {
   return (
     <>
       <motion.div
-        className="absolute -left-[10px] top-[3px] z-[2] cursor-pointer"
-        whileHover={{ scale: 1.08 }}
+        className="absolute -left-[10px] top-[3px] z-[2] cursor-pointer transition-transform duration-150 hover:scale-[1.08]"
         whileTap={{ scale: 0.96 }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
         onClick={() => setLightboxOpen(true)}

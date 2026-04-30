@@ -2014,8 +2014,7 @@ function ScreenshotDotSmall({ src }: { src: string }) {
   return (
     <>
       <motion.div
-        className="cursor-pointer z-[2]"
-        whileHover={{ scale: 1.2 }}
+        className="cursor-pointer z-[2] transition-transform duration-150 hover:scale-[1.2]"
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 500, damping: 15 }}
         onClick={() => setLightboxOpen(true)}
@@ -2069,8 +2068,7 @@ function ScreenshotInline({ src }: { src: string }) {
   return (
     <>
       <motion.div
-        className="mt-1.5 cursor-pointer inline-block"
-        whileHover={{ scale: 1.02 }}
+        className="mt-1.5 cursor-pointer inline-block transition-transform duration-150 hover:scale-[1.02]"
         whileTap={{ scale: 0.98 }}
         onClick={() => setLightboxOpen(true)}
       >

@@ -1644,8 +1644,7 @@ function ScreenshotThumb({ src, alt }: { src: string; alt: string }) {
     <>
       <motion.button
         type="button"
-        className="shrink-0 cursor-pointer focus:outline-none"
-        whileHover={{ scale: 1.03 }}
+        className="shrink-0 cursor-pointer focus:outline-none transition-transform duration-150 hover:scale-[1.03]"
         whileTap={{ scale: 0.97 }}
         onClick={() => setOpen(true)}
       >

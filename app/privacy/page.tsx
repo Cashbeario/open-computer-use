@@ -260,8 +260,8 @@ export default function PrivacyPolicyPage() {
                   <motion.div
                     key={section.id}
                     variants={itemVariants}
-                    whileHover={{ scale: 1.01 }}
                     transition={{ duration: 0.2 }}
+                    className="transition-transform duration-200 hover:scale-[1.01]"
                   >
                     <Card 
                       className={cn(

@@ -92,14 +92,13 @@ function HeroVideoPlayer() {
                 className="absolute inset-0 flex items-center justify-center"
               >
                 <motion.button
-                  whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.96 }}
                   className={cn(
                     "relative size-[72px] sm:size-20 rounded-full",
                     "bg-white/90 dark:bg-white/85 backdrop-blur-xl",
                     "shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08)]",
                     "flex items-center justify-center",
-                    "transition-shadow duration-300",
+                    "transition-all duration-300 group-hover:scale-[1.06]",
                     "hover:shadow-[0_12px_48px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)]",
                   )}
                 >

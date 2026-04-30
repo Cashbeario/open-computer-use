@@ -151,7 +151,9 @@ scripts/setup-posthog-dashboards.mjs
 scripts/build-golden-ami.mjs
 scripts/build-windows-golden-ami.mjs
 supabase/migrations/
+supabase/scripts/
 campaigns/*
 
 # infra docker secrets
 infra/docker/.env
+

@@ -86,6 +86,7 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { PageLoader } from "@/components/common/page-loader"
+import { getScheduleLimit, normalizeTier } from "@/lib/tier"
 
 /* ─── Team template types & data ─── */
 interface TeamTemplateEmployee {
@@ -1337,12 +1338,12 @@ export function SchedulesContent() {
         return
       }
 
-      // Check schedule limits — current employees + template employees
+      // Check schedule limits — current employees + template employees.
+      // Limits come from lib/tier.ts (canonical, mirrors backend).
       const neededEmployees = selectedTemplate.employees.length
       const currentScheduleCount = schedules.filter(s => s.enabled && !s.paused_reason).length
-      const tier = machineData.subscriptionTier || "free"
-      const scheduleLimits: Record<string, number> = { free: 3, starter: 3, basic: 3, professional: 10, pro: 10, enterprise: 50 }
-      const maxSchedules = scheduleLimits[tier] ?? 3
+      const tier = normalizeTier(machineData.subscriptionTier)
+      const maxSchedules = getScheduleLimit(tier)
       const availableSlots = maxSchedules - currentScheduleCount
 
       if (availableSlots < neededEmployees) {

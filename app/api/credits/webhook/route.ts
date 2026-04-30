@@ -424,7 +424,18 @@ export async function POST(req: NextRequest) {
             console.log(`Skipped credit granting for subscription ${subscriptionId} - already granted`)
           }
 
-          // RPC function removed - we handle everything directly above
+          // Sync tier across user_credits.subscription_tier + machine_limits.tier
+          // from the just-written user_subscriptions row.  This is the single
+          // canonical projection — see migration 011.  Idempotent.
+          {
+            const { error: syncError } = await (supabase as any).rpc(
+              "sync_user_tier",
+              { p_user_id: userId }
+            )
+            if (syncError) {
+              console.error("sync_user_tier after checkout failed:", syncError)
+            }
+          }
 
           console.log(`Subscription created for user ${userId}: ${tier} plan`)
         } else {
@@ -542,6 +553,18 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          // Sync tier across user_credits + machine_limits from the existing
+          // (now-updated) user_subscriptions row.  Idempotent.
+          {
+            const { error: syncError } = await (supabase as any).rpc(
+              "sync_user_tier",
+              { p_user_id: userId }
+            )
+            if (syncError) {
+              console.error("sync_user_tier after subscription.created (existing) failed:", syncError)
+            }
+          }
+
           break
         }
 
@@ -599,65 +622,215 @@ export async function POST(req: NextRequest) {
             .eq("user_id", userId)
         }
 
+        // Sync tier across user_credits + machine_limits from the just-inserted
+        // user_subscriptions row.  Closes the gap where machine_limits.tier
+        // would otherwise stay at 'free' until the next subscription.updated.
+        {
+          const { error: syncError } = await (supabase as any).rpc(
+            "sync_user_tier",
+            { p_user_id: userId }
+          )
+          if (syncError) {
+            console.error("sync_user_tier after subscription.created (new) failed:", syncError)
+          }
+        }
+
         console.log(`Subscription record created for user ${userId}: ${tier} plan (credits deferred to checkout.session.completed)`)
         break
       }
 
-      // Handle subscription updates
+      // Handle subscription updates (status change, plan change, cancel-at-period-end toggle)
       case "customer.subscription.updated": {
         const subscription = event.data.object as any
-        
-        // Validate timestamps exist
-        if (!subscription.current_period_start || !subscription.current_period_end) {
-          console.error("Subscription update missing period timestamps:", subscription.id)
-          break
-        }
-        
-        // Safely convert timestamps
-        let periodStart: string
-        let periodEnd: string
-        try {
-          periodStart = new Date(subscription.current_period_start * 1000).toISOString()
-          periodEnd = new Date(subscription.current_period_end * 1000).toISOString()
-        } catch (e) {
-          console.error("Invalid subscription update timestamps:", e)
-          break
-        }
-        
-        await (supabase as any).rpc("update_subscription_status", {
-          p_stripe_subscription_id: subscription.id,
-          p_status: subscription.status,
-          p_period_start: periodStart,
-          p_period_end: periodEnd,
-          p_cancel_at_period_end: subscription.cancel_at_period_end,
-        })
 
-        console.log(`Subscription updated: ${subscription.id} - ${subscription.status}`)
+        // Validate timestamps exist (best-effort — RPC tolerates NULLs).
+        let periodStart: string | null = null
+        let periodEnd: string | null = null
+        if (subscription.current_period_start && subscription.current_period_end) {
+          try {
+            periodStart = new Date(subscription.current_period_start * 1000).toISOString()
+            periodEnd = new Date(subscription.current_period_end * 1000).toISOString()
+          } catch (e) {
+            console.error("Invalid subscription update timestamps:", e)
+          }
+        }
+
+        // Detect plan change: pick the FIRST line item's price id and resolve
+        // it against subscription_plans.stripe_price_id.  This corrects the
+        // historical bug where plan changes via the Stripe Customer Portal
+        // never propagated to user_subscriptions.subscription_plan_id.
+        let newPlanId: string | null = null
+        let newPlanTier: string | null = null
+        try {
+          const newPriceId: string | undefined =
+            subscription.items?.data?.[0]?.price?.id ??
+            subscription.items?.data?.[0]?.plan?.id
+          if (newPriceId) {
+            const { data: plan } = await (supabase as any)
+              .from("subscription_plans")
+              .select("id, tier")
+              .eq("stripe_price_id", newPriceId)
+              .maybeSingle()
+            if (plan?.id) {
+              newPlanId = plan.id
+              newPlanTier = plan.tier
+            } else {
+              console.warn(
+                `subscription.updated: price ${newPriceId} not found in subscription_plans; tier change will not propagate`
+              )
+            }
+          }
+        } catch (e) {
+          console.error("subscription.updated: plan lookup failed:", e)
+        }
+
+        // Single atomic RPC: writes user_subscriptions, user_credits, and
+        // machine_limits.tier — see migration 011.
+        const { data: rpcResult, error: rpcError } = await (supabase as any).rpc(
+          "update_subscription_status",
+          {
+            p_stripe_subscription_id: subscription.id,
+            p_status: subscription.status,
+            p_period_start: periodStart,
+            p_period_end: periodEnd,
+            p_cancel_at_period_end: subscription.cancel_at_period_end,
+            p_subscription_plan_id: newPlanId,
+          }
+        )
+        if (rpcError) {
+          console.error("update_subscription_status RPC failed:", rpcError)
+        }
+
+        // Stripe stores the original tier in subscription.metadata.tier.  When
+        // the user changes plan via the Customer Portal, that metadata is
+        // stale.  Patch it so future invoice.payment_succeeded events resolve
+        // the correct tier from metadata.  Best-effort — DB is the source of
+        // truth and the renewal handler reads from DB too.
+        if (newPlanTier && subscription.metadata?.tier !== newPlanTier) {
+          try {
+            await stripe.subscriptions.update(subscription.id, {
+              metadata: { ...(subscription.metadata || {}), tier: newPlanTier },
+            })
+          } catch (e) {
+            console.error("Failed to patch subscription.metadata.tier:", e)
+          }
+        }
+
+        // Reconcile downstream resources whenever tier moved.  Idempotent: if
+        // the user is still within limits, this is a no-op.  Skips when:
+        //   * the subscription was unknown to our DB (no rpcResult)
+        //   * the subscription is past_due/active/trialing AND tier didn't
+        //     drop (we still call reconcile because the user may already be
+        //     over the cap from grandfathered limits — the function tolerates).
+        const resolvedUserId = rpcResult?.[0]?.user_id as string | undefined
+        const resolvedTier = rpcResult?.[0]?.resolved_tier as string | undefined
+        if (resolvedUserId && resolvedTier) {
+          try {
+            const { reconcileForTierChange } = await import(
+              "@/lib/services/tier-reconciler"
+            )
+            const reconcileResult = await reconcileForTierChange({
+              supabase,
+              userId: resolvedUserId,
+              newTier: resolvedTier,
+              reason: "subscription_downgraded",
+            })
+            console.log(
+              `subscription.updated: reconciled user=${resolvedUserId} tier=${resolvedTier} machines={terminated:${reconcileResult.machinesTerminated}, deferred:${reconcileResult.machinesDeferred}, failed:${reconcileResult.machinesFailedToTerminate}} schedules={paused:${reconcileResult.schedulesPaused}}`
+            )
+          } catch (reconcileError) {
+            console.error(
+              `subscription.updated: reconciliation failed for user=${resolvedUserId}:`,
+              reconcileError
+            )
+          }
+        }
+
+        console.log(
+          `Subscription updated: ${subscription.id} status=${subscription.status} planChange=${
+            newPlanId ? `→${newPlanTier}` : "no"
+          } rpcUserId=${rpcResult?.[0]?.user_id ?? "none"}`
+        )
         break
       }
 
-      // Handle subscription deletion/cancellation
+      // Handle subscription deletion/cancellation.  Routes through the same
+      // RPC so machine_limits.tier and user_credits flags are flipped to free
+      // atomically.  Also resolves user_id robustly: never relies on
+      // metadata.user_id (which Stripe may strip on out-of-band subscription
+      // creation, manual Dashboard edits, or migrated subs); instead looks it
+      // up via stripe_customers.stripe_customer_id which is a UNIQUE column.
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription
-        
-        await (supabase as any)
-          .from("user_subscriptions")
-          .update({
-            status: "canceled",
-            canceled_at: new Date().toISOString(),
-          })
-          .eq("stripe_subscription_id", subscription.id)
+        const customerId = (subscription as any).customer as string | undefined
 
-        // Update user_credits
-        const userId = subscription.metadata?.user_id
-        if (userId) {
-          await supabase
-            .from("user_credits")
-            .update({
-              has_active_subscription: false,
-              subscription_tier: null,
-            })
-            .eq("user_id", userId)
+        // Primary path: RPC handles update + tier sync in one transaction,
+        // keyed on stripe_subscription_id (UNIQUE).
+        const { data: rpcResult, error: rpcError } = await (supabase as any).rpc(
+          "update_subscription_status",
+          {
+            p_stripe_subscription_id: subscription.id,
+            p_status: "canceled",
+            p_period_start: null,
+            p_period_end: null,
+            p_cancel_at_period_end: null,
+            p_subscription_plan_id: null,
+          }
+        )
+        if (rpcError) {
+          console.error("subscription.deleted RPC failed:", rpcError)
+        }
+
+        // Defensive fallback: subscription wasn't in our DB.  Find the user
+        // via stripe_customers (NEVER via metadata.user_id — Stripe doesn't
+        // guarantee metadata is preserved on subscription deletion, and a
+        // canceled subscription created via the Dashboard or by a migration
+        // tool may have empty metadata).
+        let resolvedUserId: string | null = rpcResult?.[0]?.user_id ?? null
+        if (!resolvedUserId && customerId) {
+          const { data: customerRow } = await (supabase as any)
+            .from("stripe_customers")
+            .select("user_id")
+            .eq("stripe_customer_id", customerId)
+            .maybeSingle()
+          if (customerRow?.user_id) {
+            resolvedUserId = customerRow.user_id as string
+            await (supabase as any).rpc("sync_user_tier", { p_user_id: resolvedUserId })
+            console.log(
+              `subscription.deleted: ${subscription.id} unknown to DB; resolved user via stripe_customers(${customerId})=${resolvedUserId} and applied sync_user_tier`
+            )
+          }
+        }
+
+        if (!resolvedUserId) {
+          console.warn(
+            `subscription.deleted: ${subscription.id} could not resolve user_id (customer=${customerId ?? "?"}); skipping reconciliation`
+          )
+          console.log(`Subscription canceled: ${subscription.id}`)
+          break
+        }
+
+        // Resource reconciliation — terminate excess machines, pause schedules.
+        // Runs after tier has flipped to free so getTierResourceLimits sees
+        // the post-cancel state.
+        try {
+          const { reconcileForTierChange } = await import(
+            "@/lib/services/tier-reconciler"
+          )
+          const reconcileResult = await reconcileForTierChange({
+            supabase,
+            userId: resolvedUserId,
+            newTier: "free",
+            reason: "subscription_canceled",
+          })
+          console.log(
+            `subscription.deleted: reconciled user=${resolvedUserId} machines={terminated:${reconcileResult.machinesTerminated}, deferred:${reconcileResult.machinesDeferred}, failed:${reconcileResult.machinesFailedToTerminate}} schedules={paused:${reconcileResult.schedulesPaused}}`
+          )
+        } catch (reconcileError) {
+          console.error(
+            `subscription.deleted: reconciliation failed for user=${resolvedUserId}:`,
+            reconcileError
+          )
         }
 
         console.log(`Subscription canceled: ${subscription.id}`)

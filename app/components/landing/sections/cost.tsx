@@ -61,9 +61,9 @@ export function CostSection({ isMobile }: { isMobile: boolean }) {
         />
 
         <motion.div
-          initial={isMobile ? false : "hidden"}
-          whileInView={isMobile ? undefined : "visible"}
-          viewport={{ once: true, amount: 0.15 }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
           variants={{
             hidden: { opacity: 0 },
             visible: {
@@ -255,17 +255,17 @@ function ComparisonColumn({
   decoration?: React.ReactNode
 }) {
   // The horizontal entry direction is symmetric across the divider — left
-  // column slides in from -16, right from +16. Mobile uses 0 for instant.
-  const xFrom = isMobile ? 0 : side === "left" ? -16 : 16
+  // column slides in from -16, right from +16.
+  const xFrom = side === "left" ? -16 : 16
 
   return (
     <div className="relative">
       {/* Eyebrow rail — above the card, with a hairline rule alongside. */}
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 8 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={isMobile ? { duration: 0 } : { duration: 0.5, ease: EASE }}
+        viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+        transition={{ duration: 0.5, ease: EASE }}
         className={cn(
           "flex items-center gap-2.5 mb-3 sm:mb-4",
           eyebrowAlign === "right" ? "justify-end" : "justify-start"
@@ -283,10 +283,10 @@ function ComparisonColumn({
       </motion.div>
 
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={isMobile ? { duration: 0 } : { duration: 0.55, ease: EASE }}
+        viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+        transition={{ duration: 0.55, ease: EASE }}
         className={cn(cardClassName, "h-full flex flex-col")}
       >
         {decoration}
@@ -307,10 +307,10 @@ function ComparisonColumn({
             return (
               <motion.div
                 key={key}
-                initial={isMobile ? false : { opacity: 0, x: xFrom }}
+                initial={{ opacity: 0, x: xFrom }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={isMobile ? { duration: 0 } : {
+                viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+                transition={{
                   duration: 0.5,
                   ease: EASE,
                   delay: 0.25 + i * 0.12,
@@ -437,10 +437,10 @@ function BottomCTA({
 }) {
   return (
     <motion.div
-      initial={isMobile ? false : { opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={isMobile ? { duration: 0 } : { duration: 0.55, ease: EASE, delay: 0.4 }}
+      viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.55, ease: EASE, delay: 0.4 }}
       className="relative max-w-3xl mx-auto mt-12 sm:mt-16"
     >
       <div

@@ -137,10 +137,10 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
 
         {/* Editorial outro — single hairline rule + one quiet line of copy. */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 8 }}
-          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={isMobile ? { duration: 0 } : { duration: 0.6, delay: 0.4, ease: EASE }}
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+          transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
           className="mt-14 flex flex-col items-center gap-4"
         >
           <div className="h-px w-24 bg-foreground/10" />
@@ -206,15 +206,11 @@ function PlanCard({
 
   return (
     <motion.div
-      initial={isMobile ? false : { opacity: 0, y: 16 }}
-      whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
       onViewportEnter={() => setInView(true)}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={
-        isMobile
-          ? { duration: 0 }
-          : { duration: 0.6, delay: cardDelay, ease: EASE }
-      }
+      viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.6, delay: cardDelay, ease: EASE }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
       className={cn(
@@ -342,15 +338,9 @@ function FeatureLine({
 }) {
   return (
     <motion.li
-      initial={isMobile ? false : { opacity: 0, x: -4 }}
-      animate={
-        isMobile
-          ? undefined
-          : inView
-            ? { opacity: 1, x: 0 }
-            : { opacity: 0, x: -4 }
-      }
-      transition={isMobile ? { duration: 0 } : { duration: 0.4, delay, ease: EASE }}
+      initial={{ opacity: 0, x: -4 }}
+      animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -4 }}
+      transition={{ duration: 0.4, delay, ease: EASE }}
       className={cn(
         "flex items-start gap-2 text-[12.5px] leading-snug",
         dim ? "text-foreground/40" : "text-foreground/75",

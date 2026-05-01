@@ -42,10 +42,10 @@ export function LandingSectionHeader({
   const tot = String(total).padStart(2, "0")
   return (
     <motion.header
-      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={isMobile ? { duration: 0 } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         align === "center" ? "text-center" : "text-left",
         "mb-10 sm:mb-14",

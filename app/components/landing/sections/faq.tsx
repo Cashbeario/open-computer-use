@@ -59,9 +59,9 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 lg:gap-16">
           {/* LEFT COLUMN — editorial header */}
           <motion.div
-            initial={isMobile ? false : { opacity: 0, x: -16 }}
-            whileInView={isMobile ? undefined : { opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            initial={{ opacity: 0, x: -16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
             transition={{ duration: 0.6, ease: EASE }}
             className="lg:col-span-5 lg:sticky lg:top-24 lg:self-start"
           >
@@ -157,9 +157,9 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
                 return (
                   <motion.li
                     key={faqKey}
-                    initial={isMobile ? false : { opacity: 0, y: 8 }}
-                    whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.15 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
                     transition={{ duration: 0.5, ease: EASE, delay: index * 0.06 }}
                     className="relative"
                   >

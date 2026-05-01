@@ -353,10 +353,10 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
 
         <motion.div
           ref={containerRef}
-          initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={isMobile ? { duration: 0 } : { duration: 0.7, ease: EASE }}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+          transition={{ duration: 0.7, ease: EASE }}
           className={cn(
             "relative w-full mx-auto",
             "rounded-2xl border border-foreground/10",

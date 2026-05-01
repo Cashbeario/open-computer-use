@@ -208,10 +208,10 @@ function HeroCard({
 }) {
   return (
     <motion.div
-      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={isMobile ? { duration: 0 } : { duration: 0.6, ease: EASE }}
+      viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.6, ease: EASE }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
       className={cn(
@@ -491,14 +491,10 @@ function StandardCard({
 }) {
   return (
     <motion.div
-      initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={
-        isMobile
-          ? { duration: 0 }
-          : { duration: 0.55, ease: EASE, delay: 0.35 + index * 0.08 }
-      }
+      viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+      transition={{ duration: 0.55, ease: EASE, delay: 0.35 + index * 0.08 }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
       className={cn(

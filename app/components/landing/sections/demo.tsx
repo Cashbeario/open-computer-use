@@ -188,7 +188,7 @@ export function DemoSection({ isMobile }: { isMobile: boolean }) {
 
   // Each card slides up + fades in with a staggered delay; row 2 lands a beat
   // after row 1, giving the grid a sense of being dealt in two passes.
-  const cardInitial = isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+  const cardInitial = { opacity: 0, y: 20 }
   const cardAnim = { opacity: 1, y: 0 }
 
   return (
@@ -234,12 +234,8 @@ export function DemoSection({ isMobile }: { isMobile: boolean }) {
               key={demo.chatId}
               initial={cardInitial}
               whileInView={cardAnim}
-              viewport={{ once: true, amount: 0.15 }}
-              transition={
-                isMobile
-                  ? { duration: 0 }
-                  : { duration: 0.55, ease: EASE, delay: i * 0.07 }
-              }
+              viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+              transition={{ duration: 0.55, ease: EASE, delay: i * 0.07 }}
             >
               <DemoCard
                 demo={demo}
@@ -253,10 +249,10 @@ export function DemoSection({ isMobile }: { isMobile: boolean }) {
 
         {/* Footer */}
         <motion.div
-          initial={isMobile ? { opacity: 1 } : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={isMobile ? { duration: 0 } : { duration: 0.5, ease: EASE, delay: 0.5 }}
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
           className="mt-14 flex flex-col items-center gap-5"
         >
           <div className="h-px w-24 bg-foreground/10" />

@@ -146,14 +146,10 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
             return (
               <motion.div
                 key={c.key}
-                initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={
-                  isMobile
-                    ? { duration: 0 }
-                    : { duration: 0.5, delay: i * 0.08, ease: EASE }
-                }
+                viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+                transition={{ duration: 0.5, delay: i * 0.08, ease: EASE }}
                 onMouseMove={!isMobile ? handleCardMouseMove : undefined}
                 onMouseLeave={!isMobile ? handleCardMouseLeave : undefined}
                 className={cn(
@@ -229,10 +225,10 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
 
         {/* section footer — restrained "and more" hairline strip */}
         <motion.div
-          initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={isMobile ? { duration: 0 } : { duration: 0.5, delay: 0.4, ease: EASE }}
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+          transition={{ duration: 0.5, delay: 0.4, ease: EASE }}
           className="mt-10 flex items-center gap-3"
         >
           <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-transparent via-border/60 to-border/20" />

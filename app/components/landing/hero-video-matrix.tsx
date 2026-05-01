@@ -397,26 +397,94 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     const onResize = () => measure()
     window.addEventListener("resize", onResize, { passive: true })
 
-    // Backup scroll listener — fires after Safari momentum scroll ends, even
-    // when rAF was throttled during the gesture. Only does work when state
-    // is wrong, so it costs nothing in the steady state.
+    // ── iOS visibility safety: crossfade is scroll-driven, not rAF-driven ──
+    // The visual hero choreography (zoom, dissolve, vignette, etc.) runs on
+    // rAF for smoothness. But on iOS Safari, rAF is throttled — sometimes
+    // paused entirely — during momentum scroll, which left the entire page
+    // BELOW the hero stuck at opacity 0 / pointer-events:none for users who
+    // scrolled in one big flick. The IntersectionObserver+isPastHero safety
+    // net only covered the "fully past hero" case; users who landed in the
+    // dissolve zone (65–100% of hero) saw an invisible page.
+    //
+    // Scroll events on iOS are coalesced during momentum but always fire
+    // again once momentum ends — and they fire reliably during slow user
+    // scrolls. So we compute crossfade opacity directly from scrollY here
+    // on every scroll event (and once on mount), independent of rAF. If
+    // rAF runs, great — both paths converge to the same opacity. If rAF
+    // is throttled, scroll events alone keep the page visible.
+    const computeCrossfadeOpacity = () => {
+      if (scrollable <= 0) return 1
+      const scrolled = Math.max(0, window.scrollY - containerTop)
+      const p = Math.min(1, scrolled / scrollable)
+      // Same dissolve curve as the rAF path so visuals match exactly.
+      const dissolveP = Math.min(1, Math.max(0, (p - 0.65) / 0.35))
+      const dissolveEased = Math.min(1, dissolveP * dissolveP * 1.1)
+      return Math.max(0, Math.min(1, dissolveEased * 2 - 1))
+    }
+    const syncCrossfade = () => {
+      if (!crossfade) return
+      // Past-hero short-circuit covers the "user scrolled fully past in one
+      // gesture" case — same as forcePostHeroState's intent but cheaper.
+      if (isPastHero()) {
+        if (crossfade.style.opacity !== "1") crossfade.style.opacity = "1"
+        if (crossfade.style.pointerEvents !== "") crossfade.style.pointerEvents = ""
+        return
+      }
+      const target = computeCrossfadeOpacity()
+      // Only write when materially different — Safari invalidates composited
+      // layers on no-op writes, which contributes to flicker.
+      const current = parseFloat(crossfade.style.opacity || "0")
+      if (Math.abs(target - current) > 0.005) {
+        crossfade.style.opacity = String(target)
+      }
+      const wantsPointer = target > 0.3
+      const hasPointer = crossfade.style.pointerEvents !== "none"
+      if (wantsPointer !== hasPointer) {
+        crossfade.style.pointerEvents = wantsPointer ? "" : "none"
+      }
+    }
+
     const onScroll = () => {
+      // Full safety net (header / guides / beams / crossfade) when past hero,
+      // progressive crossfade sync otherwise. Both are O(1) and idempotent.
       if (isPastHero() && crossfade && crossfade.style.opacity !== "1") {
         forcePostHeroState()
+      } else {
+        syncCrossfade()
       }
     }
     window.addEventListener("scroll", onScroll, { passive: true })
 
-    // Initial state: if the page loaded with a saved scroll position past
-    // the hero (back-button restore, refresh mid-page, deep link), force
-    // the visible state immediately so the user sees content right away.
-    if (isPastHero()) forcePostHeroState()
+    // Initial sync — covers (a) deep links / back-button restore past the
+    // hero, and (b) the case where rAF takes a frame or two to start and
+    // the user has already scrolled into the dissolve zone before then.
+    if (isPastHero()) {
+      forcePostHeroState()
+    } else {
+      syncCrossfade()
+    }
+
+    // Hard fail-safe: if the user has scrolled at all but the crossfade is
+    // still effectively invisible after 1.5s, force it visible. This catches
+    // the worst-case iOS scenario where rAF is paused, scroll events were
+    // coalesced into nothing, AND IntersectionObserver hasn't fired. Better
+    // to drop the cinematic intro than to ship an invisible page.
+    const failSafeTimer = window.setTimeout(() => {
+      if (!crossfade) return
+      const past50 = scrollable > 0 && window.scrollY > containerTop + scrollable * 0.5
+      const stillHidden = parseFloat(crossfade.style.opacity || "0") < 0.5
+      if (past50 && stillHidden) {
+        crossfade.style.opacity = "1"
+        crossfade.style.pointerEvents = ""
+      }
+    }, 1500)
 
     rafId = requestAnimationFrame(update)
 
     return () => {
       isActive = false
       if (rafId) cancelAnimationFrame(rafId)
+      window.clearTimeout(failSafeTimer)
       io.disconnect()
       ro.disconnect()
       window.removeEventListener("resize", onResize)

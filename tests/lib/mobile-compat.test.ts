@@ -431,8 +431,11 @@ describe("globals.css: critical mobile rules", () => {
     // Look for a rule whose selector list includes `a` and `button` and
     // whose body contains `touch-action: manipulation`. We don't care about
     // formatting nuances — just that the rule exists.
+    // Negated character classes (`[^}]*`) already cross newlines, so we
+    // don't need the `s` (dotall) flag — and avoiding it keeps us compatible
+    // with the project's ES2017 TypeScript target.
     const ruleRe =
-      /[^}]*\ba\b[^{}]*\bbutton\b[^{]*\{[^}]*touch-action\s*:\s*manipulation\s*;[^}]*\}/s
+      /[^}]*\ba\b[^{}]*\bbutton\b[^{]*\{[^}]*touch-action\s*:\s*manipulation\s*;[^}]*\}/
     expect(
       ruleRe.test(css),
       "globals.css must apply `touch-action: manipulation` to a, button (kills iOS 300ms tap delay).",
@@ -441,7 +444,7 @@ describe("globals.css: critical mobile rules", () => {
 
   it("declares -webkit-tap-highlight-color: transparent on interactive elements", () => {
     const ruleRe =
-      /[^}]*\ba\b[^{}]*\bbutton\b[^{]*\{[^}]*-webkit-tap-highlight-color\s*:\s*transparent\s*;[^}]*\}/s
+      /[^}]*\ba\b[^{}]*\bbutton\b[^{]*\{[^}]*-webkit-tap-highlight-color\s*:\s*transparent\s*;[^}]*\}/
     expect(
       ruleRe.test(css),
       "globals.css must suppress iOS tap-highlight flash on a, button.",
@@ -505,7 +508,7 @@ describe("landing-page hero: iOS visibility safety nets", () => {
     // We allow either `addEventListener("scroll", …, { passive: true })` or
     // a passing `{ passive: true }` option object on a separate line.
     expect(
-      /addEventListener\(\s*["']scroll["'][^)]*passive\s*:\s*true/s.test(src),
+      /addEventListener\(\s*["']scroll["'][^)]*passive\s*:\s*true/.test(src),
       "Passive scroll listener missing — needed for the crossfade safety net to fire on iOS.",
     ).toBe(true)
   })

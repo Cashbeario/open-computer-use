@@ -266,22 +266,25 @@ async function terminateOneMachine(
             machine.user_id,
             machine.display_name ?? "machine"
           )
-          await (supabase as any).from("machine_snapshots").insert({
-            machine_id: machine.id,
-            user_id: machine.user_id,
-            snapshot_name: snapshot.name,
-            snapshot_type: "pre_shutdown",
-            storage_location: snapshot.amiId,
-            size_gb: settings.storageGb || 16,
-            os_state: {
-              provider: "aws",
-              region: settings.awsRegion || process.env.AWS_REGION || "us-east-1",
-              source_instance: settings.awsInstanceId,
-              desktop_enabled: settings.desktopEnabled,
-              reason: opts.reason,
-            },
-          })
-          await awsService.cleanupOldSnapshots(machine.user_id, 2)
+          // null = instance already gone / non-snapshottable. Race-safe skip.
+          if (snapshot) {
+            await (supabase as any).from("machine_snapshots").insert({
+              machine_id: machine.id,
+              user_id: machine.user_id,
+              snapshot_name: snapshot.name,
+              snapshot_type: "pre_shutdown",
+              storage_location: snapshot.amiId,
+              size_gb: settings.storageGb || 16,
+              os_state: {
+                provider: "aws",
+                region: settings.awsRegion || process.env.AWS_REGION || "us-east-1",
+                source_instance: settings.awsInstanceId,
+                desktop_enabled: settings.desktopEnabled,
+                reason: opts.reason,
+              },
+            })
+            await awsService.cleanupOldSnapshots(machine.user_id, 2)
+          }
         } catch (snapErr) {
           // Snapshot failure shouldn't block termination — see existing
           // machine-cleanup.ts behavior at line ~408.

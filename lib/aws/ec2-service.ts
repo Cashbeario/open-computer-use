@@ -304,42 +304,114 @@ export class AwsEc2Service {
   /**
    * Create an AMI from a running or stopped instance.
    * This captures the full machine state including all files, browser data, etc.
+   *
+   * Returns `null` if the instance has already been terminated or is in a
+   * transient state that EC2 won't snapshot from. The previous behaviour was
+   * to surface AWS's `InvalidParameterValue: Instance is not in state
+   * 'running' or 'stopping' or 'stopped'` directly to the caller — a problem
+   * for the 6-hour `runPeriodicSnapshots` loop, which races against
+   * lite-machine cleanup that calls `TerminateInstancesCommand` on the same
+   * instance. The race produced one full-stack `Error: [Object]` traceback
+   * per audit window with no actual user impact (the snapshot was no longer
+   * needed anyway). Resolving the race in code rather than logs:
+   *   1. `DescribeInstances` first — cheap one-RPC pre-check
+   *   2. Skip with a single info-level log if state is terminating/terminated/pending
+   *   3. Fall back to the existing AWS error path only if the state check itself fails
+   *      (so we never silently swallow a genuine snapshot failure)
    */
   async createMachineImage(
     instanceId: string,
     userId: string,
     machineName?: string
-  ): Promise<{ amiId: string; name: string }> {
+  ): Promise<{ amiId: string; name: string } | null> {
+    // Pre-flight: confirm the instance is in a snapshottable state.
+    // EC2 only allows CreateImage when state ∈ {running, stopping, stopped}.
+    // {pending, shutting-down, terminated} all reject with InvalidParameterValue.
+    let preflightState: string | undefined;
+    try {
+      const describe = await this.client.send(
+        new DescribeInstancesCommand({ InstanceIds: [instanceId] })
+      );
+      preflightState = describe.Reservations?.[0]?.Instances?.[0]?.State?.Name;
+    } catch (err: any) {
+      // If the instance is already gone, AWS returns InvalidInstanceID.NotFound.
+      // Treat as "no snapshot needed" rather than as an error.
+      if (err?.name === "InvalidInstanceID.NotFound") {
+        console.log(
+          `[snapshot] Skipping ${instanceId}: instance not found (already terminated)`
+        );
+        return null;
+      }
+      // For any other DescribeInstances error, fall through to the original
+      // CreateImage path so we get a real failure signal — never silently swallow.
+      console.warn(
+        `[snapshot] DescribeInstances pre-check failed for ${instanceId} ` +
+          `(${err?.name}: ${err?.message}); attempting CreateImage anyway.`
+      );
+    }
+
+    if (preflightState && !["running", "stopping", "stopped"].includes(preflightState)) {
+      console.log(
+        `[snapshot] Skipping ${instanceId}: state='${preflightState}' is not snapshottable ` +
+          `(must be running/stopping/stopped). Likely race with cleanup termination.`
+      );
+      return null;
+    }
+
     const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
     const name = `coasty-snapshot-${userId.substring(0, 8)}-${ts}`;
 
-    const result = await this.client.send(
-      new CreateImageCommand({
-        InstanceId: instanceId,
-        Name: name,
-        Description: `Snapshot of ${machineName || instanceId} for user ${userId.substring(0, 8)}`,
-        NoReboot: true, // don't interrupt the running instance
-        TagSpecifications: [
-          {
-            ResourceType: "image",
-            Tags: [
-              { Key: "Name", Value: name },
-              { Key: "UserId", Value: userId },
-              { Key: "ManagedBy", Value: "coasty-snapshot" },
-              { Key: "SourceInstance", Value: instanceId },
-            ],
-          },
-        ],
-      })
-    );
+    try {
+      const result = await this.client.send(
+        new CreateImageCommand({
+          InstanceId: instanceId,
+          Name: name,
+          Description: `Snapshot of ${machineName || instanceId} for user ${userId.substring(0, 8)}`,
+          NoReboot: true, // don't interrupt the running instance
+          TagSpecifications: [
+            {
+              ResourceType: "image",
+              Tags: [
+                { Key: "Name", Value: name },
+                { Key: "UserId", Value: userId },
+                { Key: "ManagedBy", Value: "coasty-snapshot" },
+                { Key: "SourceInstance", Value: instanceId },
+              ],
+            },
+          ],
+        })
+      );
 
-    const amiId = result.ImageId;
-    if (!amiId) {
-      throw new Error("CreateImage returned no image ID");
+      const amiId = result.ImageId;
+      if (!amiId) {
+        throw new Error("CreateImage returned no image ID");
+      }
+
+      console.log(`Created snapshot AMI ${amiId} (${name}) from instance ${instanceId}`);
+      return { amiId, name };
+    } catch (err: any) {
+      // TOCTOU: instance state changed between DescribeInstances and CreateImage.
+      // The pre-flight check eliminates ~99% of these but the window is non-zero.
+      // Treat the same as the pre-flight skip rather than propagating.
+      if (
+        err?.name === "InvalidParameterValue" &&
+        typeof err?.message === "string" &&
+        /Instance is not in state/i.test(err.message)
+      ) {
+        console.log(
+          `[snapshot] Skipping ${instanceId}: TOCTOU race — instance state changed ` +
+            `between pre-flight and CreateImage (${err.message})`
+        );
+        return null;
+      }
+      if (err?.name === "InvalidInstanceID.NotFound") {
+        console.log(
+          `[snapshot] Skipping ${instanceId}: instance terminated between pre-flight and CreateImage`
+        );
+        return null;
+      }
+      throw err;
     }
-
-    console.log(`Created snapshot AMI ${amiId} (${name}) from instance ${instanceId}`);
-    return { amiId, name };
   }
 
   /**

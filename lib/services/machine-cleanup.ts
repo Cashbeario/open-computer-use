@@ -285,6 +285,15 @@ export class MachineCleanupService {
             machine.display_name
           );
 
+          // createMachineImage returns null when the instance has been
+          // terminated or is in a non-snapshottable state — racy with the
+          // lite-machine cleanup loop. Treat as a benign skip rather than
+          // an error so we don't pollute logs with an InvalidParameterValue
+          // traceback per audit window.
+          if (!snapshot) {
+            continue;
+          }
+
           await (supabase as any).from("machine_snapshots").insert({
             machine_id: machine.id,
             user_id: machine.user_id,
@@ -387,24 +396,27 @@ export class MachineCleanupService {
               machine.user_id,
               machine.display_name
             );
-            console.log(`Created pre-termination snapshot: ${snapshot.amiId}`);
+            // null = instance already terminated/non-snapshottable. Race-safe skip.
+            if (snapshot) {
+              console.log(`Created pre-termination snapshot: ${snapshot.amiId}`);
 
-            await (supabase as any).from("machine_snapshots").insert({
-              machine_id: machine.id,
-              user_id: machine.user_id,
-              snapshot_name: snapshot.name,
-              snapshot_type: "pre_shutdown",
-              storage_location: snapshot.amiId,
-              size_gb: settings.storageGb || 16,
-              os_state: {
-                provider: "aws",
-                region: settings.awsRegion || process.env.AWS_REGION || "us-east-1",
-                source_instance: settings.awsInstanceId,
-                desktop_enabled: settings.desktopEnabled,
-              },
-            });
+              await (supabase as any).from("machine_snapshots").insert({
+                machine_id: machine.id,
+                user_id: machine.user_id,
+                snapshot_name: snapshot.name,
+                snapshot_type: "pre_shutdown",
+                storage_location: snapshot.amiId,
+                size_gb: settings.storageGb || 16,
+                os_state: {
+                  provider: "aws",
+                  region: settings.awsRegion || process.env.AWS_REGION || "us-east-1",
+                  source_instance: settings.awsInstanceId,
+                  desktop_enabled: settings.desktopEnabled,
+                },
+              });
 
-            await awsService.cleanupOldSnapshots(machine.user_id, 2);
+              await awsService.cleanupOldSnapshots(machine.user_id, 2);
+            }
           } catch (snapError) {
             console.warn(`Failed to snapshot instance ${settings.awsInstanceId}:`, snapError);
             // Continue with termination — snapshot failure shouldn't block cleanup

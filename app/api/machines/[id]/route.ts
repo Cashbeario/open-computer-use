@@ -387,24 +387,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                 userId,
                 machine.display_name
               );
-              console.log(`Created pre-delete snapshot: ${snapshot.amiId}`);
+              // null = instance already gone / non-snapshottable. Race-safe skip.
+              if (snapshot) {
+                console.log(`Created pre-delete snapshot: ${snapshot.amiId}`);
 
-              await supabase.from("machine_snapshots").insert({
-                machine_id: machineId,
-                user_id: userId,
-                snapshot_name: snapshot.name,
-                snapshot_type: "pre_shutdown",
-                storage_location: snapshot.amiId,
-                size_gb: settings?.storageGb || 16,
-                os_state: {
-                  provider: "aws",
-                  region: settings?.awsRegion || process.env.AWS_REGION || "us-east-1",
-                  source_instance: instanceId,
-                  desktop_enabled: settings?.desktopEnabled,
-                },
-              });
+                await supabase.from("machine_snapshots").insert({
+                  machine_id: machineId,
+                  user_id: userId,
+                  snapshot_name: snapshot.name,
+                  snapshot_type: "pre_shutdown",
+                  storage_location: snapshot.amiId,
+                  size_gb: settings?.storageGb || 16,
+                  os_state: {
+                    provider: "aws",
+                    region: settings?.awsRegion || process.env.AWS_REGION || "us-east-1",
+                    source_instance: instanceId,
+                    desktop_enabled: settings?.desktopEnabled,
+                  },
+                });
 
-              await awsService.cleanupOldSnapshots(userId, 2);
+                await awsService.cleanupOldSnapshots(userId, 2);
+              }
             } catch (snapErr: any) {
               console.warn(`Failed to snapshot before delete:`, snapErr.message);
             }
@@ -456,6 +459,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             userId,
             machine.display_name
           );
+
+          // Manual snapshot endpoint — surface the skip to the user as a 409
+          // (Conflict) so they understand the request didn't take. The
+          // background snapshot paths absorb null silently because they're
+          // best-effort racing cleanup.
+          if (!snapshot) {
+            return NextResponse.json(
+              {
+                error:
+                  "Instance is no longer in a snapshottable state " +
+                  "(pending/shutting-down/terminated). It may have just been " +
+                  "terminated by cleanup; refresh the machines list.",
+              },
+              { status: 409 }
+            );
+          }
 
           await supabase.from("machine_snapshots").insert({
             machine_id: machineId,

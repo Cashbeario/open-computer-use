@@ -64,6 +64,13 @@ function StatCell({
     ? `${prefix}0${suffix}`
     : `${prefix}${animated.toLocaleString()}${suffix}`
 
+  // Three-tier hierarchy with a deliberate family break:
+  //   • Number  — semibold sans, vertical gradient sheen.
+  //   • Label   — mono caps, wide tracking. The "headline" of the metric.
+  //   • Compare — sans, sentence case, quiet. Reads as a caption /
+  //               footnote that explains what the number is benchmarked
+  //               against. Sans→mono→sans creates clear visual rhythm
+  //               without italics or extra ornament.
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -71,40 +78,39 @@ function StatCell({
       onViewportEnter={() => setInView(true)}
       viewport={{ once: true, amount: 0.45 }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex flex-col items-center text-center"
+      className="flex flex-col items-center text-center"
     >
-      {/* Number — confident weight at the same tonal register as the
-          headline. Tabular numerals stop count-up jitter. */}
       <div
         className={cn(
           "font-semibold tabular-nums tracking-[-0.05em] leading-none",
-          "text-foreground/95 dark:text-white/95",
-          isMobile ? "text-[1.45rem]" : "text-[1.7rem] lg:text-[1.85rem]",
+          "bg-clip-text text-transparent",
+          "bg-gradient-to-b from-foreground to-foreground/85",
+          "dark:from-white dark:to-white/80",
+          isMobile ? "text-[1.55rem]" : "text-[1.85rem] lg:text-[2rem]",
         )}
       >
         {display}
       </div>
-
-      {/* Label — mono caps eyebrow. Wide tracking + low opacity is the
-          codebase's editorial signature for metadata strips. */}
       <div
         className={cn(
           "font-mono uppercase leading-tight text-foreground/55 dark:text-white/55",
           isMobile
-            ? "mt-2 text-[8.5px] tracking-[0.18em]"
-            : "mt-2.5 text-[9px] tracking-[0.22em]",
+            ? "mt-3 text-[8.5px] tracking-[0.22em]"
+            : "mt-3 text-[9px] tracking-[0.24em]",
         )}
       >
         {label}
       </div>
-
-      {/* Sublabel — half-step quieter than the label so the hierarchy
-          reads instantly. Same family for typographic continuity. */}
-      {!isMobile && (
-        <div className="mt-1 font-mono text-[8px] uppercase tracking-[0.16em] leading-tight text-foreground/35 dark:text-white/35">
-          {sublabel}
-        </div>
-      )}
+      <div
+        className={cn(
+          "font-light leading-[1.35] text-foreground/35 dark:text-white/35 normal-case",
+          isMobile
+            ? "mt-1.5 max-w-[130px] text-[10px]"
+            : "mt-2 max-w-[150px] text-[11px]",
+        )}
+      >
+        {sublabel}
+      </div>
     </motion.div>
   )
 }
@@ -702,7 +708,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               transition={{ duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative mx-auto",
-                isMobile ? "mt-7 max-w-[320px]" : "mt-8 max-w-[560px]",
+                isMobile ? "mt-7 max-w-[340px]" : "mt-9 max-w-[620px]",
               )}
               aria-label="Resources saved per workflow"
             >
@@ -735,45 +741,80 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                   height: isMobile ? "min(78vh, 700px)" : "min(92vh, 1000px)",
                   transform: "translate3d(-50%, 0, 0)",
                   willChange: "opacity",
-                  // Vertical fade — full opacity for longer so the
-                  // cone holds visibility deep into the section
-                  // before dissolving into the page background.
+                  // Vertical fade — RADIAL gradient instead of linear.
+                  //
+                  // Why radial: linear-gradient masks with multiple stops
+                  // produce visible horizontal "kinks" at every stop
+                  // boundary because GPUs sample mask alpha at lower
+                  // precision than colour channels. Even monotonic stops
+                  // become visible faint horizontal lines. The previous
+                  // 9-stop curve was bleeding banding artefacts.
+                  //
+                  // A radial gradient interpolates concentrically from a
+                  // single point, so there are no horizontal sample lines
+                  // at all — alpha varies smoothly with euclidean distance.
+                  // We use a very-wide ellipse (250% × 70%) centred 42%
+                  // down: the 250% width pushes horizontal influence well
+                  // beyond the cone's own conic feather (so the radial
+                  // acts as a vertical-only fade); the elliptical falloff
+                  // produces a natural gaussian-like bell.
+                  //
+                  // Net effect: invisible at the panel edge → fades in
+                  // smoothly through the upper body → peaks just above
+                  // mid-cone → fades out cleanly to transparent at the
+                  // bottom. No bands, no horizontal lines, no apex rule.
                   maskImage:
-                    "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.25) 80%, transparent 100%)",
+                    "radial-gradient(ellipse 250% 70% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.15) 88%, transparent 100%)",
                   WebkitMaskImage:
-                    "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.25) 80%, transparent 100%)",
+                    "radial-gradient(ellipse 250% 70% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.15) 88%, transparent 100%)",
                 }}
               >
                 <div
                   className="absolute inset-0"
                   style={{
                     // Conic mask — defines the cone shape.
-                    // 0deg = up; clockwise. Opaque core at 145°-215°
-                    // (a 70° flood of light around straight-down),
-                    // feathered out to 110° and 250° (35° each soft
-                    // edge). 140° total cone width — generous spread
-                    // that reaches the page edges quickly.
+                    //
+                    // Reduced to ONE stop per feather edge so each side is
+                    // a single transparent → opaque ramp. Multi-stop conic
+                    // gradients exhibit the same banding the linear vertical
+                    // mask did (visible inflection lines radiating from the
+                    // apex). With only two stops bracketing the feather, the
+                    // browser interpolates the alpha as one continuous ramp
+                    // — no inflection, no visible angular bands.
+                    //
+                    // Geometry: opaque core at 150°-210° (60° flood centred
+                    // straight-down), with 60° of linear feather on each
+                    // side (90°→150° left, 210°→270° right). Total cone
+                    // angular extent including feathers = 180°.
                     maskImage:
-                      "conic-gradient(from 0deg at 50% 0%, transparent 0deg, transparent 110deg, rgba(0,0,0,1) 145deg, rgba(0,0,0,1) 215deg, transparent 250deg, transparent 360deg)",
+                      "conic-gradient(from 0deg at 50% 0%, transparent 90deg, rgba(0,0,0,1) 150deg, rgba(0,0,0,1) 210deg, transparent 270deg)",
                     WebkitMaskImage:
-                      "conic-gradient(from 0deg at 50% 0%, transparent 0deg, transparent 110deg, rgba(0,0,0,1) 145deg, rgba(0,0,0,1) 215deg, transparent 250deg, transparent 360deg)",
+                      "conic-gradient(from 0deg at 50% 0%, transparent 90deg, rgba(0,0,0,1) 150deg, rgba(0,0,0,1) 210deg, transparent 270deg)",
                   }}
                 >
                   <NextImage
-                    src="/lucas-calloch-P-yzuyWFEIk-unsplash.jpg"
+                    src="/chris-stenger-fvJwchRL6xw-unsplash.jpg"
                     alt=""
                     fill
                     sizes="100vw"
                     priority
                     draggable={false}
-                    className="object-cover object-top select-none opacity-[0.45] dark:opacity-[0.58] saturate-[1.25]"
+                    className="object-cover object-top select-none opacity-[0.62] dark:opacity-[0.78] saturate-[1.32] dark:saturate-[1.28] contrast-[1.05]"
                   />
-                  {/* Background-tone wash — eased back so the cone
-                      keeps warmth through its body. Only the tail
-                      and the top edge dissolve to background. */}
+                  {/* Background-tone wash — kept minimal (4 stops) for
+                      the same banding reason. The radial mask above
+                      already does most of the cone-to-page integration;
+                      this wash just nudges the bottom toward the page
+                      background colour so the cone's tail dissolves
+                      cleanly. color-mix(oklch) keeps mid-tones perceptually
+                      even instead of muddying through grey. */}
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-b from-background/5 via-background/20 to-background"
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, transparent 0%, transparent 55%, color-mix(in oklch, var(--background) 35%, transparent) 80%, var(--background) 100%)",
+                    }}
                   />
                 </div>
               </div>
@@ -803,11 +844,17 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                         key={key}
                         className={cn(
                           "relative",
-                          isMobile ? "px-2 py-4" : "px-3 py-6",
+                          // Generous vertical breathing room — space, not
+                          // chrome, is what carries the row's rhythm now.
+                          isMobile ? "px-2 py-5" : "px-4 py-8",
+                          // Dividers eased to a whisper: deeper insets so
+                          // they barely peek above/below the type, lower
+                          // opacity so they read as a hint of structure
+                          // rather than a rule.
                           hasLeftDivider &&
-                            "before:content-[''] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.14] dark:before:via-white/[0.16] before:to-transparent",
+                            "before:content-[''] before:absolute before:left-0 before:top-7 before:bottom-7 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.09] dark:before:via-white/[0.11] before:to-transparent",
                           hasTopDivider &&
-                            "after:content-[''] after:absolute after:top-0 after:left-4 after:right-4 after:h-px after:bg-gradient-to-r after:from-transparent after:via-foreground/[0.14] dark:after:via-white/[0.16] after:to-transparent",
+                            "after:content-[''] after:absolute after:top-0 after:left-6 after:right-6 after:h-px after:bg-gradient-to-r after:from-transparent after:via-foreground/[0.09] dark:after:via-white/[0.11] after:to-transparent",
                         )}
                       >
                         <StatCell

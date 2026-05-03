@@ -78,9 +78,11 @@ export default function CursorMurmuration() {
   // surfaces; the cursor flock is a desktop-only flourish.
   if (tier === "static") return null
 
-  // Sparse cursor counts — with the strong cohesion/alignment tuning the
-  // flock reads as a flock with far fewer instances, and a quieter scene
-  // keeps the hero text uncluttered on big displays.
-  const count = tier === "desktop" ? 70 : 45
+  // Minimal cursor presence — 5 on desktop, 3 on tablet. At this count
+  // the boids no longer read as a flock; each cursor is a deliberate
+  // editorial mark drifting through the scene. The quieter the better:
+  // the cone of light + headline carry the hero, and a few cursors are
+  // enough to suggest "computer agency" without any visual noise.
+  const count = tier === "desktop" ? 5 : 3
   return <CursorMurmurationFlock count={count} />
 }

@@ -16,7 +16,7 @@ import { CostSection } from "./sections/cost"
 import { FeaturesSection } from "./sections/features"
 import { PricingSection } from "./sections/pricing"
 import { FAQSection } from "./sections/faq"
-import { GuideLines, SectionDivider as SharedSectionDivider } from "./guide-lines"
+import { SectionDivider as SharedSectionDivider } from "./guide-lines"
 import dynamic from "next/dynamic"
 
 // Cursor murmuration — boids flock of OS-pointer arrows. Self-gates by
@@ -67,10 +67,6 @@ export function LandingPage() {
           would render the canvas behind the body and disappear. */}
       <div className="min-h-screen bg-background relative isolate overflow-x-clip">
 
-      <div id="guide-lines-wrap">
-        <GuideLines />
-      </div>
-
       {/* Cursor murmuration — hundreds of tiny pointer arrows flocking like
           starlings. WebGL on desktop, static SVG on mobile / reduced-motion.
           The element ID is preserved so the hero scroll choreography in
@@ -109,12 +105,6 @@ export function LandingPage() {
           className="bg-background relative"
           style={{ opacity: 0, pointerEvents: "none" }}
         >
-          {/* Guide lines for the content area — mirrored copy of the outer
-              GuideLines, scoped to #hero-crossfade so they paint on top of
-              this layer's `bg-background` instead of being hidden by it.
-              They fade in with the content via the parent's opacity. */}
-          <GuideLines />
-
           {/* Social Proof Bar removed — these stats now live inside the hero
               overlay (see [hero-video-matrix.tsx](./hero-video-matrix.tsx))
               so users see every value dimension at the same time as the

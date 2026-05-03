@@ -279,6 +279,127 @@ resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency" {
   tags          = { Name = "${var.project_name}-frontend-p99-latency" }
 }
 
+# Short-burst p99 alarm — catches the kind of incident the alarm above misses.
+#
+# 2026-05-02T14:40Z–16:25Z UTC: external ALB p99 hit 55.97 s for 5+ minutes,
+# then dropped, then spiked again — six 5-min buckets above 19 s clustered
+# in a 105 min window. The alarm above (8 of 10 minutes > threshold) never
+# fired because the spikes were short, separated by gaps where p99 fell back
+# under threshold.
+#
+# This companion alarm uses 3-of-5 evaluation at a 10 s threshold so any
+# 3-min burst of p99 > 10 s pages oncall — even if p99 drops back to normal
+# in between bursts, the cluster is recognised as one incident.
+#
+# Why two alarms instead of replacing the first: the 8-of-10 alarm above
+# catches sustained slowness (gradual degradation), this one catches
+# bursty tail latency (intermittent backend hiccups). Both shapes hurt
+# users; both deserve separate signals.
+resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency_burst" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-frontend-p99-latency-burst"
+  alarm_description   = "Frontend P99 latency >10s for 3 of 5 minutes (burst-pattern detector). Catches short tail-latency clusters the sustained alarm misses (e.g. 2026-05-02T14:40-16:25Z had p99=55.97s in scattered buckets but only 6 of 105 min total)."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "TargetResponseTime"
+  extended_statistic  = "p99"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+    TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+  tags          = { Name = "${var.project_name}-frontend-p99-latency-burst" }
+}
+
+# Equivalent burst-pattern p99 alarms for the api / sse / ws split target
+# groups. Yesterday's 14:40-16:25Z incident was DRIVEN by the api/sse path
+# (Bedrock-side flakiness on a single user's CUA chat session), so the
+# internal ALB target groups need the same coverage as the public ALB.
+resource "aws_cloudwatch_metric_alarm" "api_p99_latency_burst" {
+  count               = var.enable_alarms && var.three_service_split_enabled ? 1 : 0
+  alarm_name          = "${var.project_name}-api-p99-latency-burst"
+  alarm_description   = "API P99 latency >10s for 3 of 5 minutes. Catches Bedrock-side tail latency."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "TargetResponseTime"
+  extended_statistic  = "p99"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+    TargetGroup  = aws_lb_target_group.api[0].arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+  tags          = { Name = "${var.project_name}-api-p99-latency-burst" }
+}
+
+resource "aws_cloudwatch_metric_alarm" "sse_p99_latency_burst" {
+  count      = var.enable_alarms && var.three_service_split_enabled ? 1 : 0
+  alarm_name = "${var.project_name}-sse-p99-latency-burst"
+  # SSE serves long-poll/streaming chat endpoints where multi-second p99 is
+  # NORMAL (a 30-second chat response is fine). Threshold raised to 30 s so
+  # the alarm only fires on genuinely-stuck streams, not healthy long ones.
+  alarm_description   = "SSE P99 latency >30s for 3 of 5 minutes. Threshold raised vs api/ws because SSE chat streaming naturally has multi-second p99."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "TargetResponseTime"
+  extended_statistic  = "p99"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = 30
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+    TargetGroup  = aws_lb_target_group.sse[0].arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+  tags          = { Name = "${var.project_name}-sse-p99-latency-burst" }
+}
+
+resource "aws_cloudwatch_metric_alarm" "ws_p99_latency_burst" {
+  count      = var.enable_alarms && var.three_service_split_enabled ? 1 : 0
+  alarm_name = "${var.project_name}-ws-p99-latency-burst"
+  # WS handshake is fast (it upgrades and the connection lives in the
+  # backend, not the ALB latency path). p99 should stay <2 s easily.
+  alarm_description   = "WS P99 latency >5s for 3 of 5 minutes. WS handshake is fast (<1s typical); >5s indicates backend stall during register_owner."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "TargetResponseTime"
+  extended_statistic  = "p99"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = 5
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+    TargetGroup  = aws_lb_target_group.ws[0].arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+  tags          = { Name = "${var.project_name}-ws-p99-latency-burst" }
+}
+
 # Split-service TG health alarms — only created when the split is enabled.
 resource "aws_cloudwatch_metric_alarm" "api_unhealthy" {
   count               = var.enable_alarms && var.three_service_split_enabled ? 1 : 0

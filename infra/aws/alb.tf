@@ -60,6 +60,23 @@ resource "aws_lb_target_group" "frontend" {
   # `timeout`, SSE handlers emit keepalives, and clients reconnect.
   deregistration_delay = 120
 
+  # Slow-start ramps a freshly-registered target's share of traffic from 0%
+  # → 100% over this many seconds. Without it, a Next.js task that just
+  # finished its ALB health check (after a ~5 min cold start: i18n init +
+  # AWS SDK warm-up) gets the full 50 % of incoming RPS instantly and
+  # tail-latency stalls everything in the request queue.
+  #
+  # Added on 2026-05-02 to mitigate the deploy-time 5xx cluster between
+  # 19:21Z–19:57Z (1,002 ELB-side 5xx in one hour). With slow_start = 60s
+  # ALB sends ~6 RPS the first second, ~60 RPS at 10 s, full share at 60 s
+  # — giving each new task ~60 s of low-pressure traffic to complete its
+  # JIT warm-up and Bedrock client preheat before facing peak load.
+  #
+  # Range: 30–900 s per AWS docs. 60 s matches our typical Next.js
+  # cold-start window observed in CloudWatch task-start → first-request
+  # latency.
+  slow_start = 60
+
   # Sticky sessions (uncomment if your app needs session affinity)
   # stickiness {
   #   type            = "lb_cookie"

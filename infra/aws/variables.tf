@@ -80,7 +80,22 @@ variable "frontend_cpu" {
 variable "frontend_memory" {
   description = "Memory (MiB) allocated to the frontend container"
   type        = number
-  default     = 1024
+  # Bumped 1024 → 2048 on 2026-05-02 in response to a JS heap OOM at
+  # 2026-05-02T03:53:00Z on task `8d476ca3…`:
+  #
+  #   FATAL ERROR: Ineffective mark-compacts near heap limit
+  #   Allocation failed - JavaScript heap out of memory
+  #
+  # The crash dropped HealthyHostCount=1 and produced 282 ELB-side 5xx
+  # in the next minute. Driver: per-user EC2 snapshot polling loop
+  # (~1 minute heartbeat × multiple users × 2 tasks duplicating reads)
+  # kept growing the V8 old-generation heap past the 768 MiB
+  # `--max-old-space-size` cap → SIGABRT, no graceful drain.
+  #
+  # Bumping to 2048 + raising NODE_OPTIONS to 1536 (in ecs.tf) gives
+  # V8 enough room for steady-state load while leaving ~25% (512 MiB)
+  # headroom for non-heap overhead.
+  default = 2048
 }
 
 variable "backend_cpu" {

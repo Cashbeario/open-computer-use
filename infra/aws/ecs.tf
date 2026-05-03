@@ -84,34 +84,40 @@ resource "aws_ecs_task_definition" "app" {
               { name = "PORT", value = "3000" },
               # NODE_OPTIONS: cap V8's old-generation heap so a slow leak or a
               # genuinely large request can't push the container into a hard OOM.
-              # Background — 2026-04-24T03:18:36Z incident: container 86867d6a
-              # died with FATAL ERROR: Reached heap limit after a 140 s
+              #
+              # 2026-04-24T03:18:36Z first OOM incident: container 86867d6a
+              # died with `FATAL ERROR: Reached heap limit` after a 140 s
               # mark-sweep that freed only 3 MB (502→499 MB).  Without an
-              # explicit cap, V8's default heap on Node 20 is ~75% of the
-              # memlimit cgroup it sees, which on Fargate is the *task* memory
-              # (2048 MiB), not the per-container reservation (1024 MiB) — so
-              # V8 happily grows past the container limit and the kernel kills
-              # us with no graceful shutdown, no rolling-deploy hooks, no
-              # opportunity to drain in-flight requests.
+              # explicit cap, V8's default heap on Node 20 is ~75 % of the
+              # memlimit cgroup it sees, which on Fargate is the *task*
+              # memory, not the per-container reservation — so V8 happily
+              # grows past the container limit and the kernel kills us with
+              # no graceful shutdown, no drain.
               #
-              # 768 MiB = 75% of the 1024 MiB frontend container reservation.
-              # Stays comfortably below the 1024 MiB memlimit so non-heap
-              # overhead (stacks, V8 code cache, native buffers, async I/O
-              # queues) has ~25% headroom.  V8 will start GCing aggressively
-              # before the container hits the cgroup limit, surfacing pressure
-              # as observable GC pauses and slow responses (which the
-              # ALBRequestCountPerTarget autoscaling policy will catch) rather
-              # than as a sudden SIGKILL.
+              # 2026-05-02T03:53:00Z second OOM (this is what drove the
+              # 1024→2048 MiB bump):
+              #   FATAL ERROR: Ineffective mark-compacts near heap limit
+              #   Allocation failed - JavaScript heap out of memory
+              # on task `8d476ca3…`. Driver was a per-user EC2 snapshot
+              # polling loop that grew the heap past the prior 768 MiB cap
+              # under organic load.  The fix is the SAME shape recommended
+              # in the prior comment: bump frontend_memory to 2048 MiB AND
+              # raise this to 1536 (NOT one without the other — V8 must
+              # have headroom under the cgroup limit).
               #
-              # If profiling later shows we genuinely need a bigger heap, the
-              # right next move is to bump frontend_memory to 2048 MiB AND
-              # raise this to 1536 — NOT to raise this alone, which would let
-              # V8 fight the kernel for memory it doesn't have.
+              # Sizing math (2026-05-02):
+              #   1536 MiB old-generation heap (this knob)
+              #   +  ~512 MiB non-heap (V8 code cache, stacks, native
+              #      buffers, async I/O queues, libuv thread pool stacks)
+              #   = ~2048 MiB total — exactly the new container reservation.
+              # V8 starts GCing aggressively before the cgroup limit, so
+              # slow leaks surface as observable GC pauses and slow
+              # responses (caught by ALBRequestCountPerTarget) rather than
+              # as a sudden SIGKILL.
               #
               # SIGUSR2 heap snapshots (`process.kill(pid, 'SIGUSR2')`) are
-              # available on Node ≥18 if we ever need to capture one from a
-              # running task.  ECS Exec into the task to send the signal.
-              { name = "NODE_OPTIONS", value = "--max-old-space-size=768" },
+              # available on Node ≥18 for live debugging via ECS Exec.
+              { name = "NODE_OPTIONS", value = "--max-old-space-size=1536" },
             ],
             [
               for k, v in var.frontend_env_vars : { name = k, value = v }
@@ -284,8 +290,24 @@ resource "aws_ecs_service" "app" {
   # 2 consecutive ALB checks (60s) to become healthy.  Total: ~120s worst case.
   health_check_grace_period_seconds = 180
 
-  # Rolling deployment: keep at least 100% healthy, spin up to 200% during deploy
-  deployment_minimum_healthy_percent = 100
+  # Rolling deployment: keep at least 150% healthy (i.e. always ≥3 healthy
+  # tasks if desired_count=2), spin up to 200% during deploy.
+  #
+  # Bumped 100 → 150 on 2026-05-02 in response to a deploy-time 5xx
+  # cluster between 19:21Z–19:57Z that produced 1,002 ELB-side 5xx in
+  # one hour. Pattern was:
+  #   1. ECS deregisters one of two tasks for replacement
+  #   2. New replacement task takes ~5 min to warm up (Next.js cold
+  #      start: i18n init + AWS SDK warm-up)
+  #   3. During those ~5 min, HealthyHostCount = 1 — the public ALB
+  #      sees periodic spikes of 200+ RPS that overwhelm a single task,
+  #      surfacing as 503 to users.
+  # With minimum_healthy = 150 ECS now waits for the replacement task
+  # to be HEALTHY before deregistering the next one, so we never sit
+  # at half capacity. Combined with slow_start_seconds=60 on the
+  # target group (alb.tf), in-flight load on freshly-warm tasks ramps
+  # gracefully instead of seeing full traffic instantly.
+  deployment_minimum_healthy_percent = 150
   deployment_maximum_percent         = 200
 
   # Enable ECS deployment circuit breaker to auto-rollback failed deploys
@@ -410,7 +432,7 @@ resource "aws_appautoscaling_policy" "request_count" {
       predefined_metric_type = "ALBRequestCountPerTarget"
       resource_label         = "${aws_lb.main.arn_suffix}/${aws_lb_target_group.frontend.arn_suffix}"
     }
-    target_value       = var.request_count_per_target_target
+    target_value = var.request_count_per_target_target
     # Scale-out fast (60s) so a burst doesn't sit on the queue for long.
     # Scale-in slow (300s) so we don't oscillate when traffic dips briefly.
     scale_in_cooldown  = 300

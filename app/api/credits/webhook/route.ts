@@ -362,7 +362,13 @@ export async function POST(req: NextRequest) {
                   amount: plan.monthly_credits,
                   balance_after: plan.monthly_credits,
                   subscription_id: newSubscription.id,
-                  description: `Initial ${tier} subscription credits`,
+                  // Column is `usage_description` per supabase/schema.sql:1747.
+                  // Pre-fix this used `description:` and silently failed every
+                  // Stripe insert with PGRST204 "Could not find the
+                  // 'description' column of 'credit_transactions' in the
+                  // schema cache" — confirmed via 2026-04-30 webhook for user
+                  // 8d19ce8c-9741-47bd-98c7-eadc6512e642.
+                  usage_description: `Initial ${tier} subscription credits`,
                   metadata: {
                     tier: tier,
                     period_start: periodStart,
@@ -405,7 +411,7 @@ export async function POST(req: NextRequest) {
                   amount: plan.monthly_credits,
                   balance_after: newBalance,
                   subscription_id: newSubscription.id,
-                  description: `Initial ${tier} subscription credits`,
+                  usage_description: `Initial ${tier} subscription credits`,
                   metadata: {
                     tier: tier,
                     period_start: periodStart,
@@ -540,7 +546,7 @@ export async function POST(req: NextRequest) {
                       amount: plan.monthly_credits,
                       balance_after: newBalance,
                       subscription_id: existingSub.id,
-                      description: `${tier} subscription reactivation`,
+                      usage_description: `${tier} subscription reactivation`,
                       metadata: {
                         tier: tier,
                         stripe_subscription_id: subscription.id,
@@ -946,7 +952,7 @@ export async function POST(req: NextRequest) {
                 amount: plan.monthly_credits,
                 balance_after: plan.monthly_credits,
                 subscription_id: subRecord.id,
-                description: `Monthly ${tier} subscription renewal`,
+                usage_description: `Monthly ${tier} subscription renewal`,
                 metadata: {
                   tier: tier,
                   period_start: periodStart,
@@ -983,7 +989,7 @@ export async function POST(req: NextRequest) {
                 amount: plan.monthly_credits,
                 balance_after: newBalance,
                 subscription_id: subRecord.id,
-                description: `Monthly ${tier} subscription renewal`,
+                usage_description: `Monthly ${tier} subscription renewal`,
                 metadata: {
                   tier: tier,
                   period_start: periodStart,

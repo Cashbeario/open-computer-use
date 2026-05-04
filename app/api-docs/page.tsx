@@ -1,6 +1,6 @@
 "use client"
 
-import { GuideLines, SectionDivider } from "@/app/components/landing/guide-lines"
+import { SectionDivider } from "@/app/components/landing/guide-lines"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { APITab } from "@/app/guide/tabs/api"
@@ -668,7 +668,6 @@ function PrimaryCTA({
 export default function ApiDocsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground relative">
-      <GuideLines />
       <LandingHeader />
 
       {/* ─── HERO ─── */}

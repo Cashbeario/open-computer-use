@@ -5,7 +5,6 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { motion } from "framer-motion"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { useTranslations } from "next-intl"
 
 const competitors = [
@@ -35,7 +34,6 @@ export default function ComparePage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <GuideLines />
       <LandingHeader />
 
       <main className="pt-32 sm:pt-36 pb-24">

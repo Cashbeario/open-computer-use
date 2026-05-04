@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion } from "framer-motion"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import {
   CheckCircle,
   Warning,
@@ -667,7 +666,6 @@ export default function StatusPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <GuideLines />
       <LandingHeader />
 
       <main className="pt-28 sm:pt-32 pb-24">

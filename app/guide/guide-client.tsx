@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 import { motion, AnimatePresence } from "framer-motion"
@@ -209,7 +208,6 @@ function GuideContent({ inApp }: { inApp: boolean }) {
   // Public / landing page version
   return (
     <div className="min-h-screen bg-background relative">
-      <GuideLines />
       <LandingHeader />
 
       <div className="pt-28 sm:pt-32 pb-24">

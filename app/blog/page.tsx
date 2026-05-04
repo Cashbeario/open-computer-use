@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { motion } from "framer-motion"
@@ -48,7 +47,6 @@ export default function BlogPage() {
 
   return (
     <div className="relative min-h-screen bg-background isolate overflow-x-clip">
-      <GuideLines />
       <LandingHeader />
 
       <main className="pt-32 sm:pt-36 pb-24">

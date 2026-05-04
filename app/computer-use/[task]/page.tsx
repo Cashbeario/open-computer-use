@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { LandingHeader } from "@/app/components/landing/landing-header"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
@@ -38,7 +37,6 @@ export default function ComputerUseTaskPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <GuideLines />
       <LandingHeader />
 
       <main className="pt-32 sm:pt-36 pb-24">

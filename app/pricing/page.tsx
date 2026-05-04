@@ -1,6 +1,5 @@
 "use client"
 
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { Button } from "@/components/ui/button"
 import { RainbowButton } from "@/components/magicui/rainbow-button"
 import {
@@ -569,7 +568,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
-      <GuideLines />
       <LandingHeader />
 
       {/* ─── Hero ──────────────────────────────────────────────────────── */}

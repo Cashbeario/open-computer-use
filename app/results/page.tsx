@@ -8,7 +8,6 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { ArrowRight, ArrowUpRight, Play } from "lucide-react"
 import { motion } from "framer-motion"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 
 const videos = [
   { label: "Marketing", task: "Market your product on Reddit autonomously", videoId: "icxgLDephHE" },
@@ -222,7 +221,6 @@ export default function ResultsPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <GuideLines />
       <LandingHeader />
 
       <main className="pt-32 sm:pt-36 pb-24">

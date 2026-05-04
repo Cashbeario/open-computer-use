@@ -7,7 +7,6 @@ import { motion } from "framer-motion"
 import { ArrowRight, ArrowLeft, Check, MessageSquare, Zap, ChevronDown } from "lucide-react"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { USE_CASES, USE_CASE_COLORS, getUseCaseBySlug } from "../data"
 import { cn } from "@/lib/utils"
 
@@ -31,7 +30,6 @@ export default function UseCasePage() {
   if (!uc) {
     return (
       <div className="relative min-h-screen bg-background">
-        <GuideLines />
         <LandingHeader />
         <main className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -57,7 +55,6 @@ export default function UseCasePage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      <GuideLines />
       <LandingHeader />
 
       <main>

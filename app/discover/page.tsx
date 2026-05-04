@@ -16,7 +16,6 @@ import {
 import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { PostThumbnail } from "@/components/blog/post-thumbnail"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -290,7 +289,6 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <GuideLines />
 
       <LandingHeader />
 

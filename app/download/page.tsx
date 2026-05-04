@@ -1,6 +1,5 @@
 "use client"
 
-import { GuideLines } from "@/app/components/landing/guide-lines"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -544,7 +543,6 @@ export default function DownloadPage() {
         )}
       </AnimatePresence>
 
-      <GuideLines />
       <LandingHeader />
 
       <main className={cn("relative", isMobile ? "pt-16" : "pt-20")}>

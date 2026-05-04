@@ -213,7 +213,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
 
     // Cache external DOM lookups once — avoids getElementById per frame
     const header = document.getElementById("landing-header-wrap")
-    const guides = document.getElementById("guide-lines-wrap")
     const beamsEl = document.getElementById("beams-bg")
     const crossfade = document.getElementById("hero-crossfade")
 
@@ -319,9 +318,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
           headerDisabled = shouldDisable
         }
       }
-      if (guides) {
-        guides.style.opacity = uiOpacity
-      }
 
       const beamsFadeOut = Math.min(1, p * 4)
       const beamsFadeIn = dissolveP
@@ -371,7 +367,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
         header.style.opacity = "1"
         header.style.pointerEvents = ""
       }
-      if (guides) guides.style.opacity = "1"
       if (beamsEl) beamsEl.style.opacity = "1"
     }
 
@@ -451,7 +446,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     }
 
     const onScroll = () => {
-      // Full safety net (header / guides / beams / crossfade) when past hero,
+      // Full safety net (header / beams / crossfade) when past hero,
       // progressive crossfade sync otherwise. Both are O(1) and idempotent.
       if (isPastHero() && crossfade && crossfade.style.opacity !== "1") {
         forcePostHeroState()
@@ -497,7 +492,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
       window.removeEventListener("scroll", onScroll)
       // Use cached refs — no getElementById in cleanup
       if (header) { header.style.opacity = "1"; header.style.pointerEvents = "" }
-      if (guides) guides.style.opacity = "1"
       if (beamsEl) beamsEl.style.opacity = "1"
       if (crossfade) { crossfade.style.opacity = "1"; crossfade.style.pointerEvents = "" }
     }
@@ -827,34 +821,38 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 <div
                   className={cn(
                     "relative grid",
-                    isMobile ? "grid-cols-2" : "grid-cols-4",
+                    // Mobile: 2x2 of glass pills with breathing-room gap.
+                    // Desktop: 4-up no-chrome row, dividers carry the rhythm.
+                    isMobile ? "grid-cols-2 gap-2.5" : "grid-cols-4",
                   )}
                 >
                   {RESOURCE_STAT_KEYS.map((key, i) => {
-                    // Vertical divider on every cell except the first
-                    // column. Rendered as a tapered gradient pseudo-
-                    // element so it dissolves into the cone of light
-                    // rather than meeting hard edges.
-                    const hasLeftDivider = isMobile ? i % 2 === 1 : i > 0
-                    // On mobile (2x2), bottom row also gets a tapered
-                    // horizontal divider above it.
-                    const hasTopDivider = isMobile && i >= 2
+                    // Tapered vertical divider — desktop ONLY. On mobile each
+                    // cell gets the outlined-glass-pill treatment instead, so
+                    // dividers between pills would be redundant chrome.
+                    const hasLeftDivider = !isMobile && i > 0
                     return (
                       <div
                         key={key}
                         className={cn(
                           "relative",
-                          // Generous vertical breathing room — space, not
-                          // chrome, is what carries the row's rhythm now.
-                          isMobile ? "px-2 py-5" : "px-4 py-8",
-                          // Dividers eased to a whisper: deeper insets so
-                          // they barely peek above/below the type, lower
-                          // opacity so they read as a hint of structure
+                          // Mobile — outlined glass pill (same vocabulary as
+                          // the book-a-demo CTA). A hairline ring at /20, a
+                          // barely-tinted plate at /[0.03], and a 2px backdrop
+                          // blur lift each stat off the cone behind it. Reads
+                          // on any background — bright cone, dim tail, or the
+                          // page bg as the hero un-sticks.
+                          isMobile &&
+                            "rounded-2xl border border-foreground/20 dark:border-white/20 bg-foreground/[0.03] dark:bg-white/[0.04] backdrop-blur-[2px]",
+                          // Padding — denser on mobile inside each pill;
+                          // generous breathing room desktop where space
+                          // alone separates cells.
+                          isMobile ? "px-3 py-5" : "px-4 py-8",
+                          // Desktop divider — eased to a whisper: deep insets,
+                          // low opacity so it reads as a hint of structure
                           // rather than a rule.
                           hasLeftDivider &&
                             "before:content-[''] before:absolute before:left-0 before:top-7 before:bottom-7 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.09] dark:before:via-white/[0.11] before:to-transparent",
-                          hasTopDivider &&
-                            "after:content-[''] after:absolute after:top-0 after:left-6 after:right-6 after:h-px after:bg-gradient-to-r after:from-transparent after:via-foreground/[0.09] dark:after:via-white/[0.11] after:to-transparent",
                         )}
                       >
                         <StatCell
@@ -904,12 +902,29 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "inline-flex items-center gap-1.5 font-medium cursor-pointer",
-                  // Sits at the same /55 middle tier as the description
-                  // so the eye groups them as one editorial pair.
-                  "text-foreground/55 hover:text-foreground/85 dark:text-white/60 dark:hover:text-white/90 transition-all duration-300",
+                  "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
+                  // Outlined glass pill — mirrors the primary's shape and
+                  // size for visual rhythm but trades the solid fill for a
+                  // hairline ring + barely-tinted glass plate. Reads on
+                  // any background colour (white, dark, tinted) because:
+                  //   • Border is foreground-tinted, so it darkens on light
+                  //     backgrounds and lightens on dark ones.
+                  //   • Background is foreground/[0.03] — invisible on
+                  //     plain white but adds a soft glass plate over
+                  //     coloured backgrounds, lifting the button off them.
+                  //   • Text is at full foreground opacity so contrast is
+                  //     guaranteed in both modes.
+                  "border border-foreground/20 dark:border-white/20",
+                  "text-foreground dark:text-white",
+                  "bg-foreground/[0.03] dark:bg-white/[0.04]",
+                  "backdrop-blur-[2px]",
+                  "hover:bg-foreground/[0.07] hover:border-foreground/35",
+                  "dark:hover:bg-white/[0.08] dark:hover:border-white/35",
+                  "transition-[background,border-color,transform] duration-300",
                   "active:scale-[0.985]",
-                  isMobile ? "text-sm" : "text-[14.5px]"
+                  isMobile
+                    ? "px-6 py-3 text-sm"
+                    : "px-7 py-3 text-[14.5px]"
                 )}
               >
                 <Video className="h-3.5 w-3.5" />

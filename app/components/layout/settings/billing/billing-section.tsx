@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner"
 import { useCredits } from "@/lib/hooks/use-credits"
 import { useUser } from "@/lib/user-store/provider"
+import { SVG_SYSTEM_STACK } from "@/lib/fonts"
 import {
   ShoppingCart,
   ArrowUp,
@@ -416,7 +417,7 @@ function UsageChart({
       return (
         <g key={tick}>
           <line x1={padding.left} x2={vbW - padding.right} y1={y} y2={y} stroke="currentColor" strokeOpacity={tick === 0 ? 0.15 : 0.06} strokeWidth={0.5} />
-          <text x={padding.left - 10} y={y + 3.5} textAnchor="end" fontSize={9.5} fill="currentColor" fillOpacity={0.4} fontFamily="system-ui, -apple-system, sans-serif" fontWeight={400}>
+          <text x={padding.left - 10} y={y + 3.5} textAnchor="end" fontSize={9.5} fill="currentColor" fillOpacity={0.4} fontFamily={SVG_SYSTEM_STACK} fontWeight={400}>
             {formatAxisValue(tick)}
           </text>
         </g>
@@ -431,7 +432,7 @@ function UsageChart({
         ? padding.left + (i + 0.5) * (chartW / visibleData.length)
         : padding.left + (i / Math.max(visibleData.length - 1, 1)) * chartW
       return (
-        <text key={i} x={x} y={vbH - 8} textAnchor="middle" fontSize={9} fill="currentColor" fillOpacity={0.4} fontFamily="system-ui, -apple-system, sans-serif" fontWeight={400}>
+        <text key={i} x={x} y={vbH - 8} textAnchor="middle" fontSize={9} fill="currentColor" fillOpacity={0.4} fontFamily={SVG_SYSTEM_STACK} fontWeight={400}>
           {formatShortDate(d.date)}
         </text>
       )

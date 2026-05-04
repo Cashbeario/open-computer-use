@@ -40,6 +40,7 @@ import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 import { Markdown } from "@/components/prompt-kit/markdown"
 import { APP_DOMAIN } from "@/lib/config"
+import { EXPORT_SANS_STACK, EXPORT_MONO_STACK } from "@/lib/fonts"
 import { SwarmTree, type SwarmEvent } from "./swarm-tree"
 import { PageLoader } from "@/components/common/page-loader"
 
@@ -987,7 +988,7 @@ function SwarmRunSummary({ summary }: { summary: string }) {
       <style>
         @page { margin: 0; size: A4; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif; max-width: 100%; margin: 0; padding: 0; color: #1d1d1f; font-size: 13px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+        body { font-family: ${EXPORT_SANS_STACK}; max-width: 100%; margin: 0; padding: 0; color: #1d1d1f; font-size: 13px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
 
         /* ── Header ── */
         .cover { padding: 48px 56px 0 56px; }
@@ -1006,7 +1007,7 @@ function SwarmRunSummary({ summary }: { summary: string }) {
         h2:first-child { margin-top: 0; }
         h3 { font-size: 14px; font-weight: 600; margin-top: 22px; margin-bottom: 4px; color: #3a3a3c; letter-spacing: -0.1px; }
         p { margin: 8px 0; color: #3a3a3c; }
-        code { background: #f5f5f7; padding: 2px 7px; border-radius: 5px; font-size: 11.5px; font-family: "SF Mono", "Fira Code", "Consolas", monospace; color: #1d1d1f; }
+        code { background: #f5f5f7; padding: 2px 7px; border-radius: 5px; font-size: 11.5px; font-family: ${EXPORT_MONO_STACK}; color: #1d1d1f; }
         blockquote { border-left: 3px solid #f97316; margin: 16px 0; padding: 10px 20px; color: #6e6e73; font-size: 12.5px; background: #fffbf5; border-radius: 0 8px 8px 0; }
         ul { padding-left: 20px; margin: 8px 0; }
         li { margin: 5px 0; color: #3a3a3c; }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { FAVICON_SERIF_STACK } from "@/lib/fonts"
 
 const SIZE = 128
 const CYCLE_MS = 7000
@@ -99,7 +100,7 @@ export function AnimatedFavicon() {
 
     const drawLetter = (char: string, x: number, alpha: number) => {
       ctx.save()
-      ctx.font = `200 ${SIZE * 0.82}px "Instrument Serif", "Times New Roman", Georgia, serif`
+      ctx.font = `200 ${SIZE * 0.82}px ${FAVICON_SERIF_STACK}`
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       // Soft cinematic glow halo

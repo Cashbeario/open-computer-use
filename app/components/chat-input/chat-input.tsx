@@ -20,6 +20,7 @@ import { PromptSystem } from "../suggestions/prompt-system"
 import { AnimatePresence, motion } from "motion/react"
 import type { UserMachine } from "@/types/machines.types"
 import { themeConfig } from "@/lib/theme-config"
+import { SVG_SYSTEM_STACK } from "@/lib/fonts"
 // File upload imports
 import { ButtonVMFileUpload } from "./button-vm-file-upload"
 import { FileList } from "./file-list"
@@ -805,9 +806,9 @@ export function ChatInput({
                               </g>
                             ))}
 
-                            <text x="30" y="72" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily="system-ui" opacity="0.6">Prompt</text>
-                            <text x="120" y="105" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily="system-ui" opacity="0.6">Machines</text>
-                            <text x="245" y="105" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily="system-ui" opacity="0.6">Parallel tasks</text>
+                            <text x="30" y="72" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily={SVG_SYSTEM_STACK} opacity="0.6">Prompt</text>
+                            <text x="120" y="105" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily={SVG_SYSTEM_STACK} opacity="0.6">Machines</text>
+                            <text x="245" y="105" textAnchor="middle" className="fill-muted-foreground text-[7px]" fontFamily={SVG_SYSTEM_STACK} opacity="0.6">Parallel tasks</text>
                           </svg>
                         </div>
 

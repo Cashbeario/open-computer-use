@@ -163,11 +163,8 @@ const CONSUMERS: Consumer[] = [
       '"SF Mono", "Fira Code", "Consolas", monospace',
     ],
   },
-  {
-    file: "app/components/chat-input/chat-input.tsx",
-    constants: ["SVG_SYSTEM_STACK"],
-    removedLiterals: ['fontFamily="system-ui"'],
-  },
+  // chat-input.tsx no longer ships an inline swarm SVG (the swarm UI moved
+  // into the VM selector popover), so it no longer needs SVG_SYSTEM_STACK.
   {
     file: "app/components/layout/settings/billing/billing-section.tsx",
     constants: ["SVG_SYSTEM_STACK"],

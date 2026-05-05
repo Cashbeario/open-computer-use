@@ -174,3 +174,4 @@ mcp/coverage/
 mcp/.vitest-cache/
 mcp/*.tsbuildinfo
 mcp/.env
+temp/*

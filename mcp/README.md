@@ -201,32 +201,89 @@ CLI flags override env vars: `--api-key`, `--base-url`, `--timeout`, `--debug`, 
 
 ---
 
-## Develop locally
+## Build & Test
+
+### One-shot pre-publish check
 
 ```bash
 cd mcp
 npm install
-npm run build
-COASTY_API_KEY=sk-coasty-test-... node dist/bin/coasty-mcp.js --debug
+npm run check       # lint + build + tests + binary smoke. ~6s.
 ```
 
-### MCP Inspector
+That's the gate every commit must pass. It does:
+
+1. `npm run lint`  — `tsc --noEmit`, no type errors
+2. `npm run build` — emit `dist/`
+3. `npm test`      — vitest run, 178 tests in 4 files
+4. `npm run smoke` — `node dist/bin/coasty-mcp.js --version && --help` (catches build artifacts that don't actually run)
+
+### Day-to-day
 
 ```bash
-npm run inspector
-# Opens http://localhost:6274 with a UI to call tools and inspect schemas
+npm run build:watch       # tsc in watch mode (rebuilds on save)
+npm run test:watch        # vitest in watch mode (re-runs affected tests)
+npm run test:coverage     # vitest + V8 coverage report → coverage/
 ```
 
-CLI mode for CI:
+### Manual integration via the MCP Inspector
+
+The Inspector is Anthropic's official MCP debugger. It speaks the same wire
+protocol Claude Desktop / Cursor / etc. do, so if a tool works in the
+Inspector it works in every client.
 
 ```bash
-npm run inspector:cli -- --method tools/list
+# UI mode — opens http://localhost:6274 with a tools-list pane and a tool-call form
+COASTY_API_KEY=sk-coasty-test-... npm run inspector
+
+# CLI mode — scriptable, ideal for CI
+npm run inspector:tools     # → list every tool's schema
+npm run inspector:prompts   # → list both prompts
+npm run inspector:cli -- --method tools/call --tool-name coasty_get_credits --tool-arg period=2026-04
 ```
 
-### Tests
+### Test layout
+
+| File | What it covers | Tests |
+|---|---|---|
+| `tests/config.test.ts`           | Env + CLI flag resolution, key-prefix validation, timeout clamping | 11 |
+| `tests/client.test.ts`           | HTTP wrapper: headers, query params, idempotency-key, timeouts, error mapping | 13 |
+| `tests/server.test.ts`           | End-to-end via in-memory transport: every tool registered, schemas self-contained, annotations correct, error roundtrip | 11 |
+| `tests/annotations.test.ts`      | Cross-tool invariants: `readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint` are consistent | 11 |
+| `tests/errors.test.ts`           | Every Coasty error code → expected hint substring (401/402/403/404/409/422/429/500) | 14 |
+| `tests/tools-routing.test.ts`    | Each of the 24 tools forwards to the correct method + path + body | 28 |
+| `tests/tools-validation.test.ts` | Every Zod constraint enforced (min/max bounds, enums, regex, required fields, allowlist commands) | 28 |
+| `tests/prompts.test.ts`          | Both prompts produce expected message text with all arg combinations | 10 |
+| `tests/edge-cases.test.ts`       | Unicode, RTL, very long inputs, network failures, malformed JSON, idempotency-key formats, key redaction | 23 |
+| `tests/schema-validity.test.ts`  | Every JSON schema is well-formed, no external `$ref`, no top-level `oneOf`/`anyOf`, snake_case names | 11 |
+| `tests/inspector-smoke.test.ts`  | Spawns the actual built binary, exercises JSON-RPC initialize → tools/list → prompts/list | 7 |
+| **Total** | | **178** |
+
+### What the tests guarantee
+
+- **Every tool** routes to a known Coasty REST endpoint with the correct method and body shape
+- **Every input field** has its Zod constraints enforced (min/max bounds tested, enum mismatches rejected, regex patterns checked)
+- **Every documented error code** produces a useful "Hint: …" line for the LLM to self-correct
+- **No `console.log`** can sneak into the codepath and corrupt the stdio transport (the smoke test reads stderr/stdout directly)
+- **Annotations stay consistent** — read tools can't accidentally lose `readOnlyHint`, destructive tools can't accidentally lose `destructiveHint`
+- **API key never appears in logs** — debug output is asserted to contain `[redacted]` instead
+- **Schema portability** — no external `$ref`, no top-level unions, no description-on-non-schema, all regex compiles, min ≤ max
+- **Drift detection** — adding a new tool without an annotation, description, or routing test fails CI
+
+### Try it for real
 
 ```bash
-npm test
+# 1. Get a free sandbox key at https://coasty.ai/developers (sk-coasty-test-…)
+# 2. Build
+npm run check
+
+# 3. Stick it in any MCP host
+#    e.g. Claude Code:
+claude mcp add coasty --env COASTY_API_KEY=sk-coasty-test-... -- node $(pwd)/dist/bin/coasty-mcp.js
+claude mcp list   # should show coasty ✓ connected
+
+# 4. Open Claude Code and try:
+#    "Use the start_automation_session prompt with goal='check today's weather on google.com'"
 ```
 
 ---

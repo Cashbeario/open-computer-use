@@ -155,7 +155,9 @@ export function registerPredictTools(server: McpServer, api: CoastyClient): void
       annotations: {
         readOnlyHint: true,
         idempotentHint: true,
-        openWorldHint: false, // pure local parsing — but it does call our API
+        // True because parse still calls /v1/parse — invariant: every Coasty
+        // tool talks to our remote API, so openWorldHint is uniformly true.
+        openWorldHint: true,
       },
     },
     async (args) => runTool(() => api.post("/v1/parse", { code: args.code })),

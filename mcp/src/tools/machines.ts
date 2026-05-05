@@ -47,6 +47,12 @@ const ACTION_VOCAB = [
   "minimize_window",
   "maximize_window",
   "restore_window",
+  // Terminal (require terminal:exec scope on the API key)
+  "terminal_connect",
+  "terminal_execute",
+  "terminal_read",
+  "terminal_clear",
+  "terminal_close",
   // Files (read)
   "file_read",
   "file_exists",

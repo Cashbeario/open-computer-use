@@ -40,7 +40,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "start": "node dist/bin/coasty-mcp.js",
-    "smoke": "node dist/bin/coasty-mcp.js --version && node dist/bin/coasty-mcp.js --help > /dev/null",
+    "smoke": "node scripts/smoke.mjs",
     "inspector": "npx @modelcontextprotocol/inspector node dist/bin/coasty-mcp.js",
     "inspector:cli": "npx @modelcontextprotocol/inspector --cli node dist/bin/coasty-mcp.js",
     "inspector:tools": "npx @modelcontextprotocol/inspector --cli node dist/bin/coasty-mcp.js --method tools/list",

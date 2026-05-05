@@ -308,8 +308,8 @@ const SNIPPETS: Record<LangId, string> = {
 img = base64.b64encode(open("screen.png", "rb").read()).decode()
 
 r = requests.post(
-    "https://coasty.ai/api/v1/cua/predict",
-    headers={"X-API-Key": "cua_sk_..."},
+    "https://coasty.ai/v1/predict",
+    headers={"X-API-Key": "sk-coasty-live-..."},
     json={
         "screenshot": img,
         "instruction": "Click the search bar and type 'hello'",
@@ -320,10 +320,10 @@ for a in r.json()["actions"]:
     print(a["action_type"], a["params"])`,
   javascript: `const img = fs.readFileSync("screen.png").toString("base64")
 
-const res = await fetch("https://coasty.ai/api/v1/cua/predict", {
+const res = await fetch("https://coasty.ai/v1/predict", {
   method: "POST",
   headers: {
-    "X-API-Key": "cua_sk_...",
+    "X-API-Key": "sk-coasty-live-...",
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
@@ -334,8 +334,8 @@ const res = await fetch("https://coasty.ai/api/v1/cua/predict", {
 
 const { actions } = await res.json()
 actions.forEach(a => console.log(a.action_type, a.params))`,
-  curl: `curl https://coasty.ai/api/v1/cua/predict \\
-  -H "X-API-Key: cua_sk_..." \\
+  curl: `curl https://coasty.ai/v1/predict \\
+  -H "X-API-Key: sk-coasty-live-..." \\
   -H "Content-Type: application/json" \\
   -d '{
     "screenshot": "<base64_encoded_png>",
@@ -347,9 +347,9 @@ actions.forEach(a => console.log(a.action_type, a.params))`,
 })
 
 req, _ := http.NewRequest("POST",
-    "https://coasty.ai/api/v1/cua/predict",
+    "https://coasty.ai/v1/predict",
     bytes.NewReader(body))
-req.Header.Set("X-API-Key", "cua_sk_...")
+req.Header.Set("X-API-Key", "sk-coasty-live-...")
 req.Header.Set("Content-Type", "application/json")
 
 resp, _ := http.DefaultClient.Do(req)
@@ -491,7 +491,7 @@ function TryIt() {
           <div className="flex items-center gap-2">
             <Terminal className="h-3.5 w-3.5 text-muted-foreground/40" />
             <span className="text-[11px] font-mono text-muted-foreground/55">
-              POST /api/v1/cua/predict
+              POST /v1/predict
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/35">

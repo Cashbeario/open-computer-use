@@ -174,7 +174,8 @@ const PROTECTED_PREFIXES = [
   "/api/create-chat",
   "/api/update-chat-model",
   "/api/rate-limits",
-  "/api/v1/cua", // public dev API — auth via X-API-Key
+  "/api/v1/cua", // public dev API (legacy alias) — auth via X-API-Key
+  "/v1", // public dev API (canonical) — auth via X-API-Key / Bearer
   "/api/osworld", // auth via X-OSWorld-Key
 ]
 
@@ -408,8 +409,9 @@ describe("api-routes-gauntlet: static security matrix", () => {
           const hasApiKey = /(?:X-OSWorld-Key|X-API-Key|x-api-key|X-Internal-Key)/.test(
             source
           )
-          // Catch-all proxies for /api/v1/cua and /api/osworld delegate auth
-          // to the FastAPI backend — they only need to forward an auth header.
+          // Catch-all proxies for /v1, /api/v1/cua, and /api/osworld delegate
+          // auth to the FastAPI backend — they only need to forward an auth
+          // header. Detected by the [...path] segment in the file path.
           const isCatchAllProxy = /\[\.\.\.\w+\]/.test(filePath)
           // Accept alternative auth mechanisms (HMAC tokens, Stripe webhook
           // signatures, disabled-feature stubs).

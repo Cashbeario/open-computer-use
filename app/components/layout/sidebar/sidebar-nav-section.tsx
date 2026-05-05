@@ -344,11 +344,11 @@ function DevelopersVisual() {
       <div className="flex items-center gap-1 mt-1 shv-fade-up" style={{ animationDelay: "0.8s" }}>
         <div className="flex-1 px-2 py-[3px] rounded border border-foreground/10 bg-foreground/[0.02]">
           <div className="flex items-center gap-[1px]">
-            {Array.from("cua_sk_").map((c, i) => (
-              <span key={i} className="text-[5px] text-purple-500/40 font-mono shv-type-char" style={{ animationDelay: `${1 + i * 0.05}s` }}>{c}</span>
+            {Array.from("sk-coasty-live-").map((c, i) => (
+              <span key={i} className="text-[5px] text-purple-500/40 font-mono shv-type-char" style={{ animationDelay: `${1 + i * 0.04}s` }}>{c}</span>
             ))}
             {Array.from("...").map((c, i) => (
-              <span key={`d${i}`} className="text-[5px] text-foreground/20 font-mono shv-type-char" style={{ animationDelay: `${1.4 + i * 0.05}s` }}>{c}</span>
+              <span key={`d${i}`} className="text-[5px] text-foreground/20 font-mono shv-type-char" style={{ animationDelay: `${1.6 + i * 0.05}s` }}>{c}</span>
             ))}
           </div>
         </div>

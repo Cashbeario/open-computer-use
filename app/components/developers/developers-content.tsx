@@ -91,7 +91,7 @@ function timeAgo(date: string | null) {
 /* ─── Cinematic Create-Key Intro — 3-scene loop ─── */
 
 function ForgeScene() {
-  const target = "cua_sk_9fA2b7dC"
+  const target = "sk-coasty-live-9fA2b7dC"
   const pool = "abcdefghijklmnopqrstuvwxyz0123456789"
   const [text, setText] = useState(target.replace(/[^_]/g, "•"))
   useEffect(() => {
@@ -561,13 +561,15 @@ const SNIPPET_LANGS = [
 type SnippetLangId = (typeof SNIPPET_LANGS)[number]["id"]
 
 /**
- * API keys are `cua_sk_` + 48 hex chars (55 chars total), which alone pushes
- * a single-line assignment past the dialog's ~66 char visible width. For the
- * on-screen version we abbreviate; the clipboard version gets the real key.
+ * API keys are `sk-coasty-live-` (15 chars) + 48 hex chars = 63 chars total
+ * (legacy `cua_sk_` keys are 55 chars). Either way that pushes a single-line
+ * assignment past the dialog's ~66 char visible width. For the on-screen
+ * version we abbreviate; the clipboard version gets the real key.
  */
 function abbreviateKey(key: string): string {
   if (key.length <= 24) return key
-  return `${key.slice(0, 12)}...${key.slice(-5)}`
+  // Show enough leading chars to disambiguate live vs test vs legacy prefix.
+  return `${key.slice(0, 18)}...${key.slice(-5)}`
 }
 
 function getSnippetCode(lang: SnippetLangId, key: string, forCopy: boolean): string {
@@ -583,7 +585,7 @@ img = base64.b64encode(
 ).decode()
 
 r = requests.post(
-    "https://coasty.ai/api/v1/cua/predict",
+    "https://coasty.ai/v1/predict",
     headers={"X-API-Key": KEY},
     json={
         "screenshot": img,
@@ -603,7 +605,7 @@ const img = fs
   .toString("base64")
 
 const res = await fetch(
-  "https://coasty.ai/api/v1/cua/predict",
+  "https://coasty.ai/v1/predict",
   {
     method: "POST",
     headers: {
@@ -624,7 +626,7 @@ const { actions } = await res.json()`
       return `KEY="${k}"
 
 curl -X POST \\
-  https://coasty.ai/api/v1/cua/predict \\
+  https://coasty.ai/v1/predict \\
   -H "X-API-Key: $KEY" \\
   -H "Content-Type: application/json" \\
   -d @- <<EOF
@@ -657,7 +659,7 @@ func main() {
   })
 
   req, _ := http.NewRequest("POST",
-    "https://coasty.ai/api/v1/cua/predict",
+    "https://coasty.ai/v1/predict",
     bytes.NewReader(body))
   req.Header.Set("X-API-Key", KEY)
   req.Header.Set(
@@ -677,7 +679,7 @@ img = Base64.strict_encode64(
 )
 
 uri = URI(
-  "https://coasty.ai/api/v1/cua/predict"
+  "https://coasty.ai/v1/predict"
 )
 req = Net::HTTP::Post.new(uri)
 req["X-API-Key"] = KEY
@@ -699,7 +701,7 @@ $img = base64_encode(
 );
 
 $ch = curl_init(
-  "https://coasty.ai/api/v1/cua/predict"
+  "https://coasty.ai/v1/predict"
 );
 curl_setopt_array($ch, [
   CURLOPT_RETURNTRANSFER => true,

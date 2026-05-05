@@ -52,11 +52,11 @@ const SNIPPETS: Record<LangId, { install?: string; predict: string; session: str
     install: "pip install requests",
     predict: `import requests, base64
 
-API_KEY = "cua_sk_..."
+API_KEY = "sk-coasty-live-..."
 img = base64.b64encode(open("screen.png", "rb").read()).decode()
 
 r = requests.post(
-    "https://coasty.ai/api/v1/cua/predict",
+    "https://coasty.ai/v1/predict",
     headers={"X-API-Key": API_KEY},
     json={
         "screenshot": img,
@@ -68,7 +68,7 @@ for action in r.json()["actions"]:
     print(action["action_type"], action["params"])`,
     session: `# Create a session for multi-step tasks
 s = requests.post(
-    "https://coasty.ai/api/v1/cua/sessions",
+    "https://coasty.ai/v1/sessions",
     headers={"X-API-Key": API_KEY},
     json={"cua_version": "v3", "screen_width": 1920, "screen_height": 1080},
 ).json()
@@ -79,7 +79,7 @@ session_id = s["session_id"]
 while True:
     screenshot = capture_screenshot()  # your screenshot function
     r = requests.post(
-        f"https://coasty.ai/api/v1/cua/sessions/{session_id}/predict",
+        f"https://coasty.ai/v1/sessions/{session_id}/predict",
         headers={"X-API-Key": API_KEY},
         json={"screenshot": screenshot, "instruction": "Complete the form"},
     ).json()
@@ -94,10 +94,10 @@ while True:
     install: "npm install node-fetch  # or use built-in fetch",
     predict: `const fs = require("fs");
 
-const API_KEY = "cua_sk_...";
+const API_KEY = "sk-coasty-live-...";
 const screenshot = fs.readFileSync("screen.png").toString("base64");
 
-const res = await fetch("https://coasty.ai/api/v1/cua/predict", {
+const res = await fetch("https://coasty.ai/v1/predict", {
   method: "POST",
   headers: {
     "X-API-Key": API_KEY,
@@ -112,7 +112,7 @@ const res = await fetch("https://coasty.ai/api/v1/cua/predict", {
 const { actions, reasoning, status } = await res.json();
 actions.forEach(a => console.log(a.action_type, a.params));`,
     session: `// Create session
-const session = await fetch("https://coasty.ai/api/v1/cua/sessions", {
+const session = await fetch("https://coasty.ai/v1/sessions", {
   method: "POST",
   headers: { "X-API-Key": API_KEY, "Content-Type": "application/json" },
   body: JSON.stringify({ cua_version: "v3" }),
@@ -123,7 +123,7 @@ let status = "continue";
 while (status === "continue") {
   const screenshot = await captureScreenshot();
   const res = await fetch(
-    \`https://coasty.ai/api/v1/cua/sessions/\${session.session_id}/predict\`,
+    \`https://coasty.ai/v1/sessions/\${session.session_id}/predict\`,
     {
       method: "POST",
       headers: { "X-API-Key": API_KEY, "Content-Type": "application/json" },
@@ -154,13 +154,13 @@ func main() {
 
     client := resty.New()
     resp, _ := client.R().
-        SetHeader("X-API-Key", "cua_sk_...").
+        SetHeader("X-API-Key", "sk-coasty-live-...").
         SetHeader("Content-Type", "application/json").
         SetBody(map[string]interface{}{
             "screenshot":  b64,
             "instruction": "Click the search bar",
         }).
-        Post("https://coasty.ai/api/v1/cua/predict")
+        Post("https://coasty.ai/v1/predict")
 
     var result map[string]interface{}
     json.Unmarshal(resp.Body(), &result)
@@ -173,22 +173,22 @@ func main() {
     predict: `# Encode screenshot
 SCREENSHOT=$(base64 -w 0 screen.png)
 
-curl -X POST https://coasty.ai/api/v1/cua/predict \\
-  -H "X-API-Key: cua_sk_..." \\
+curl -X POST https://coasty.ai/v1/predict \\
+  -H "X-API-Key: sk-coasty-live-..." \\
   -H "Content-Type: application/json" \\
   -d "{
     \\"screenshot\\": \\"$SCREENSHOT\\",
     \\"instruction\\": \\"Click the login button\\"
   }"`,
     session: `# Create session
-curl -X POST https://coasty.ai/api/v1/cua/sessions \\
-  -H "X-API-Key: cua_sk_..." \\
+curl -X POST https://coasty.ai/v1/sessions \\
+  -H "X-API-Key: sk-coasty-live-..." \\
   -H "Content-Type: application/json" \\
   -d '{"cua_version": "v3"}'
 
 # Predict within session
-curl -X POST https://coasty.ai/api/v1/cua/sessions/{SESSION_ID}/predict \\
-  -H "X-API-Key: cua_sk_..." \\
+curl -X POST https://coasty.ai/v1/sessions/{SESSION_ID}/predict \\
+  -H "X-API-Key: sk-coasty-live-..." \\
   -H "Content-Type: application/json" \\
   -d "{
     \\"screenshot\\": \\"$SCREENSHOT\\",
@@ -201,11 +201,11 @@ curl -X POST https://coasty.ai/api/v1/cua/sessions/{SESSION_ID}/predict \\
 require "base64"
 require "json"
 
-api_key = "cua_sk_..."
+api_key = "sk-coasty-live-..."
 screenshot = Base64.strict_encode64(File.read("screen.png"))
 
 response = HTTParty.post(
-  "https://coasty.ai/api/v1/cua/predict",
+  "https://coasty.ai/v1/predict",
   headers: { "X-API-Key" => api_key, "Content-Type" => "application/json" },
   body: {
     screenshot: screenshot,
@@ -220,10 +220,10 @@ end`,
   },
   php: {
     predict: `<?php
-$apiKey = "cua_sk_...";
+$apiKey = "sk-coasty-live-...";
 $screenshot = base64_encode(file_get_contents("screen.png"));
 
-$ch = curl_init("https://coasty.ai/api/v1/cua/predict");
+$ch = curl_init("https://coasty.ai/v1/predict");
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_RETURNTRANSFER => true,
@@ -248,7 +248,7 @@ foreach ($result["actions"] as $action) {
 import java.nio.file.*;
 import java.util.Base64;
 
-var apiKey = "cua_sk_...";
+var apiKey = "sk-coasty-live-...";
 var img = Base64.getEncoder().encodeToString(Files.readAllBytes(Path.of("screen.png")));
 
 var body = """
@@ -256,7 +256,7 @@ var body = """
   """.formatted(img);
 
 var request = HttpRequest.newBuilder()
-    .uri(URI.create("https://coasty.ai/api/v1/cua/predict"))
+    .uri(URI.create("https://coasty.ai/v1/predict"))
     .header("X-API-Key", apiKey)
     .header("Content-Type", "application/json")
     .POST(HttpRequest.BodyPublishers.ofString(body))
@@ -270,14 +270,14 @@ System.out.println(response.body());`,
     install: "dotnet add package System.Net.Http.Json",
     predict: `using System.Net.Http.Json;
 
-var apiKey = "cua_sk_...";
+var apiKey = "sk-coasty-live-...";
 var screenshot = Convert.ToBase64String(File.ReadAllBytes("screen.png"));
 
 using var client = new HttpClient();
 client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
 
 var response = await client.PostAsJsonAsync(
-    "https://coasty.ai/api/v1/cua/predict",
+    "https://coasty.ai/v1/predict",
     new {
         screenshot,
         instruction = "Click the search bar and type 'hello'"
@@ -647,7 +647,7 @@ export function APITab({ inApp }: { inApp: boolean }) {
                 <> Sign up to create API keys.</>
               )} Credits are deducted per request from your shared balance.
             </p>
-            <GuideCodeBlock label="header" code="X-API-Key: cua_sk_your_key_here" />
+            <GuideCodeBlock label="header" code="X-API-Key: sk-coasty-live-your_key_here" />
           </Section>
         </motion.div>
 
@@ -800,11 +800,11 @@ export function APITab({ inApp }: { inApp: boolean }) {
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST", p: "/api/v1/cua/predict", d: "Stateless prediction", c: "5 cr" },
-                { m: "POST", p: "/api/v1/cua/sessions", d: "Create session", c: "10 cr" },
-                { m: "POST", p: "/api/v1/cua/sessions/{id}/predict", d: "Session prediction", c: "4 cr" },
-                { m: "POST", p: "/api/v1/cua/sessions/{id}/reset", d: "Reset session", c: "Free" },
-                { m: "DELETE", p: "/api/v1/cua/sessions/{id}", d: "Delete session", c: "Free" },
+                { m: "POST", p: "/v1/predict", d: "Stateless prediction", c: "5 cr" },
+                { m: "POST", p: "/v1/sessions", d: "Create session", c: "10 cr" },
+                { m: "POST", p: "/v1/sessions/{id}/predict", d: "Session prediction", c: "4 cr" },
+                { m: "POST", p: "/v1/sessions/{id}/reset", d: "Reset session", c: "Free" },
+                { m: "DELETE", p: "/v1/sessions/{id}", d: "Delete session", c: "Free" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
                   <span className={cn(
@@ -827,9 +827,9 @@ export function APITab({ inApp }: { inApp: boolean }) {
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST", p: "/api/v1/cua/ground", d: "Find (x,y) for element", c: "3 cr" },
-                { m: "POST", p: "/api/v1/cua/ocr", d: "Extract text from image", c: "3 cr" },
-                { m: "POST", p: "/api/v1/cua/parse", d: "Parse pyautogui code", c: "Free" },
+                { m: "POST", p: "/v1/ground", d: "Find (x,y) for element", c: "3 cr" },
+                { m: "POST", p: "/v1/ocr", d: "Extract text from image", c: "3 cr" },
+                { m: "POST", p: "/v1/parse", d: "Parse pyautogui code", c: "Free" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
                   <span className="shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -848,9 +848,9 @@ export function APITab({ inApp }: { inApp: boolean }) {
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "GET", p: "/api/v1/cua/models", d: "List available versions", c: "Free" },
-                { m: "GET", p: "/api/v1/cua/usage", d: "Usage summary", c: "Free" },
-                { m: "GET", p: "/api/v1/cua/sessions", d: "List active sessions", c: "Free" },
+                { m: "GET", p: "/v1/models", d: "List available versions", c: "Free" },
+                { m: "GET", p: "/v1/usage", d: "Usage summary", c: "Free" },
+                { m: "GET", p: "/v1/sessions", d: "List active sessions", c: "Free" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
                   <span className="shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">

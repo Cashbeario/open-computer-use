@@ -1,7 +1,30 @@
+/**
+ * LEGACY proxy — /api/v1/cua/*
+ *
+ * This URL surface is the original public CUA API path. Marked DEPRECATED:
+ * the canonical path is now /v1/* (see app/v1/[...path]/route.ts). We keep
+ * this alive through 2026-11-01 (env: API_KEY_LEGACY_SUNSET_DATE) so existing
+ * customer integrations don't break overnight.
+ *
+ * Per RFC 8594 we surface deprecation via response headers:
+ *   * Sunset: <date> — machine-readable end-of-life timestamp
+ *   * Deprecation: true — boolean flag
+ *   * Link: </v1/...>; rel="successor-version" — points to the new path
+ *
+ * Modern HTTP clients honour these automatically. SDKs we publish should
+ * detect the Sunset header and emit a console warning.
+ */
+
 import { NextRequest, NextResponse } from "next/server"
 
 const PYTHON_BACKEND_URL =
   process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
+
+// Sunset date — IMF-fixdate per RFC 9651. Override via env if ops decides
+// to extend the legacy window.
+const LEGACY_SUNSET_DATE =
+  process.env.API_KEY_LEGACY_SUNSET_DATE_HTTP ||
+  "Sun, 01 Nov 2026 00:00:00 GMT"
 
 async function proxyToBackend(
   req: NextRequest,
@@ -80,6 +103,18 @@ async function proxyToBackend(
         responseHeaders.set(key, value)
       }
     })
+
+    // Deprecation signal — every response from the legacy alias carries
+    // these so SDK clients can surface a warning. The Link header points
+    // to the canonical replacement path (RFC 8288 link relation).
+    responseHeaders.set("Deprecation", "true")
+    responseHeaders.set("Sunset", LEGACY_SUNSET_DATE)
+    const successorPath = `/v1/${path.join("/")}`
+    responseHeaders.set("Link", `<${successorPath}>; rel="successor-version"`)
+    responseHeaders.set(
+      "Warning",
+      `299 - "Deprecated: the /api/v1/cua/* path is deprecated. Use ${successorPath} instead. Sunset: ${LEGACY_SUNSET_DATE}."`,
+    )
 
     return new Response(response.body, {
       status: response.status,

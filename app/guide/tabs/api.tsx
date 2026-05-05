@@ -290,6 +290,302 @@ Console.WriteLine(result.GetProperty("actions"));`,
   },
 }
 
+/* ─── machines API snippets ─── */
+//
+// Three flagship operations (provision / action / terminal) per language.
+// Bodies validated against the strict Pydantic models in
+// backend/app/models/public_machines.py — extra="forbid" rejects typos.
+// Every example here passes that validation.
+
+type MachinesSnippet = { provision: string; action: string; terminal: string }
+
+const MACHINES_SNIPPETS: Record<LangId, MachinesSnippet> = {
+  python: {
+    provision: `import requests
+
+# Provision a fresh Linux desktop VM. Sandbox keys (sk-coasty-test-*)
+# return a mock machine instantly with no AWS billing.
+r = requests.post(
+    "https://coasty.ai/v1/machines",
+    headers={
+        "X-API-Key": "sk-coasty-live-...",
+        "Idempotency-Key": "provision-bot-001",   # safe to retry
+    },
+    json={
+        "display_name": "automation-bot",
+        "os_type": "linux",
+        "desktop_enabled": True,
+    },
+)
+machine = r.json()["machine"]
+print(machine["id"], machine["status"])`,
+    action: `import requests
+
+machine_id = "..."  # from provision response
+r = requests.post(
+    f"https://coasty.ai/v1/machines/{machine_id}/actions",
+    headers={"X-API-Key": "sk-coasty-live-..."},
+    json={
+        "command": "click",
+        "parameters": {"x": 512, "y": 340},
+    },
+)
+result = r.json()
+print(result["success"], result["duration_ms"], "ms")`,
+    terminal: `import requests
+
+# Run a shell command (PowerShell on Windows, bash on Linux).
+# Output is truncated VM-side to 5000 chars.
+r = requests.post(
+    f"https://coasty.ai/v1/machines/{machine_id}/terminal",
+    headers={"X-API-Key": "sk-coasty-live-..."},
+    json={
+        "command": "uname -a && uptime",
+        "timeout_ms": 10_000,
+    },
+)
+print(r.json()["result"]["output"])`,
+  },
+  javascript: {
+    provision: `// Node 18+ (global fetch). Use \`Idempotency-Key\` to safely retry on network errors.
+const res = await fetch("https://coasty.ai/v1/machines", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "sk-coasty-live-...",
+    "Content-Type": "application/json",
+    "Idempotency-Key": "provision-bot-001",
+  },
+  body: JSON.stringify({
+    display_name: "automation-bot",
+    os_type: "linux",
+    desktop_enabled: true,
+  }),
+})
+const { machine } = await res.json()
+console.log(machine.id, machine.status)`,
+    action: `const res = await fetch(
+  \`https://coasty.ai/v1/machines/\${machineId}/actions\`,
+  {
+    method: "POST",
+    headers: {
+      "X-API-Key": "sk-coasty-live-...",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      command: "click",
+      parameters: { x: 512, y: 340 },
+    }),
+  },
+)
+const { success, duration_ms } = await res.json()
+console.log(success, duration_ms, "ms")`,
+    terminal: `const res = await fetch(
+  \`https://coasty.ai/v1/machines/\${machineId}/terminal\`,
+  {
+    method: "POST",
+    headers: {
+      "X-API-Key": "sk-coasty-live-...",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      command: "uname -a && uptime",
+      timeout_ms: 10000,
+    }),
+  },
+)
+const { result } = await res.json()
+console.log(result.output)`,
+  },
+  go: {
+    provision: `package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "net/http"
+)
+
+type provisionReq struct {
+  DisplayName    string \`json:"display_name"\`
+  OSType         string \`json:"os_type"\`
+  DesktopEnabled bool   \`json:"desktop_enabled"\`
+}
+
+func main() {
+  body, _ := json.Marshal(provisionReq{
+    DisplayName:    "automation-bot",
+    OSType:         "linux",
+    DesktopEnabled: true,
+  })
+
+  req, _ := http.NewRequest("POST",
+    "https://coasty.ai/v1/machines",
+    bytes.NewReader(body))
+  req.Header.Set("X-API-Key", "sk-coasty-live-...")
+  req.Header.Set("Content-Type", "application/json")
+  req.Header.Set("Idempotency-Key", "provision-bot-001")
+
+  resp, _ := http.DefaultClient.Do(req)
+  defer resp.Body.Close()
+}`,
+    action: `body, _ := json.Marshal(map[string]any{
+  "command": "click",
+  "parameters": map[string]int{"x": 512, "y": 340},
+})
+
+req, _ := http.NewRequest("POST",
+  fmt.Sprintf("https://coasty.ai/v1/machines/%s/actions", machineID),
+  bytes.NewReader(body))
+req.Header.Set("X-API-Key", "sk-coasty-live-...")
+req.Header.Set("Content-Type", "application/json")
+
+resp, _ := http.DefaultClient.Do(req)
+defer resp.Body.Close()`,
+    terminal: `body, _ := json.Marshal(map[string]any{
+  "command":    "uname -a && uptime",
+  "timeout_ms": 10000,
+})
+
+req, _ := http.NewRequest("POST",
+  fmt.Sprintf("https://coasty.ai/v1/machines/%s/terminal", machineID),
+  bytes.NewReader(body))
+req.Header.Set("X-API-Key", "sk-coasty-live-...")
+req.Header.Set("Content-Type", "application/json")
+
+resp, _ := http.DefaultClient.Do(req)
+defer resp.Body.Close()`,
+  },
+  curl: {
+    provision: `curl -X POST https://coasty.ai/v1/machines \\
+  -H "X-API-Key: sk-coasty-live-..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: provision-bot-001" \\
+  -d '{
+    "display_name": "automation-bot",
+    "os_type": "linux",
+    "desktop_enabled": true
+  }'`,
+    action: `curl -X POST https://coasty.ai/v1/machines/$MACHINE_ID/actions \\
+  -H "X-API-Key: sk-coasty-live-..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "command": "click",
+    "parameters": {"x": 512, "y": 340}
+  }'`,
+    terminal: `curl -X POST https://coasty.ai/v1/machines/$MACHINE_ID/terminal \\
+  -H "X-API-Key: sk-coasty-live-..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "command": "uname -a && uptime",
+    "timeout_ms": 10000
+  }'`,
+  },
+  ruby: {
+    provision: `require "json"
+require "net/http"
+
+uri = URI("https://coasty.ai/v1/machines")
+req = Net::HTTP::Post.new(uri)
+req["X-API-Key"]        = "sk-coasty-live-..."
+req["Content-Type"]     = "application/json"
+req["Idempotency-Key"]  = "provision-bot-001"
+req.body = {
+  display_name: "automation-bot",
+  os_type: "linux",
+  desktop_enabled: true,
+}.to_json
+
+res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+machine = JSON.parse(res.body)["machine"]
+puts machine["id"]`,
+    action: `req = Net::HTTP::Post.new(
+  URI("https://coasty.ai/v1/machines/#{machine_id}/actions")
+)
+req["X-API-Key"]    = "sk-coasty-live-..."
+req["Content-Type"] = "application/json"
+req.body = { command: "click", parameters: { x: 512, y: 340 } }.to_json
+# ... send & read result`,
+    terminal: `req.body = {
+  command: "uname -a && uptime",
+  timeout_ms: 10_000,
+}.to_json
+# POST to /v1/machines/<id>/terminal — same auth headers as above`,
+  },
+  php: {
+    provision: `<?php
+$ch = curl_init("https://coasty.ai/v1/machines");
+curl_setopt_array($ch, [
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_POST           => true,
+  CURLOPT_HTTPHEADER     => [
+    "X-API-Key: sk-coasty-live-...",
+    "Content-Type: application/json",
+    "Idempotency-Key: provision-bot-001",
+  ],
+  CURLOPT_POSTFIELDS     => json_encode([
+    "display_name"    => "automation-bot",
+    "os_type"         => "linux",
+    "desktop_enabled" => true,
+  ]),
+]);
+$body = json_decode(curl_exec($ch), true);
+echo $body["machine"]["id"];`,
+    action: `// POST to /v1/machines/{id}/actions with the same auth headers,
+// body: {"command": "click", "parameters": {"x": 512, "y": 340}}`,
+    terminal: `// POST to /v1/machines/{id}/terminal,
+// body: {"command": "uname -a", "timeout_ms": 10000}`,
+  },
+  java: {
+    provision: `import java.net.URI;
+import java.net.http.*;
+
+var body = """
+  {
+    "display_name": "automation-bot",
+    "os_type": "linux",
+    "desktop_enabled": true
+  }""";
+
+var req = HttpRequest.newBuilder()
+    .uri(URI.create("https://coasty.ai/v1/machines"))
+    .header("X-API-Key", "sk-coasty-live-...")
+    .header("Content-Type", "application/json")
+    .header("Idempotency-Key", "provision-bot-001")
+    .POST(HttpRequest.BodyPublishers.ofString(body))
+    .build();
+
+var resp = HttpClient.newHttpClient()
+    .send(req, HttpResponse.BodyHandlers.ofString());
+System.out.println(resp.body());`,
+    action: `// POST /v1/machines/{id}/actions
+// Body: {"command": "click", "parameters": {"x": 512, "y": 340}}`,
+    terminal: `// POST /v1/machines/{id}/terminal
+// Body: {"command": "uname -a", "timeout_ms": 10000}`,
+  },
+  csharp: {
+    provision: `using System.Net.Http.Json;
+
+var http = new HttpClient();
+http.DefaultRequestHeaders.Add("X-API-Key", "sk-coasty-live-...");
+http.DefaultRequestHeaders.Add("Idempotency-Key", "provision-bot-001");
+
+var resp = await http.PostAsJsonAsync(
+    "https://coasty.ai/v1/machines",
+    new {
+        display_name    = "automation-bot",
+        os_type         = "linux",
+        desktop_enabled = true,
+    }
+);
+var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+Console.WriteLine(body.GetProperty("machine").GetProperty("id"));`,
+    action: `// POST /v1/machines/{id}/actions
+// Body: { command = "click", parameters = new { x = 512, y = 340 } }`,
+    terminal: `// POST /v1/machines/{id}/terminal
+// Body: { command = "uname -a", timeout_ms = 10000 }`,
+  },
+}
+
 /* ─── gradient palettes for sections ─── */
 
 const SECTION_GRADIENTS = [
@@ -389,17 +685,34 @@ function Section({ id, title, children, icon: Icon, description }: {
 
 /* ─── docs nav data + active-section hook ─── */
 
-type DocSection = { id: string; title: string; icon: PhosphorIcon; group: "Start" | "Reference" | "Errors" }
+type DocSection = {
+  id: string
+  title: string
+  icon: PhosphorIcon
+  group: "Start" | "Predict" | "Machines" | "Errors"
+}
 
 const DOC_SECTIONS: DocSection[] = [
-  { id: "authentication", title: "Authentication",  icon: Key,           group: "Start" },
-  { id: "how-it-works",   title: "How it Works",    icon: CursorClick,   group: "Start" },
-  { id: "quickstart",     title: "Quick Start",     icon: Lightning,     group: "Start" },
-  { id: "response",       title: "Response Format", icon: BracketsAngle, group: "Reference" },
-  { id: "actions",        title: "Action Types",    icon: CursorClick,   group: "Reference" },
-  { id: "options",        title: "Request Options", icon: Textbox,       group: "Reference" },
-  { id: "endpoints",      title: "All Endpoints",   icon: Terminal,      group: "Reference" },
-  { id: "errors",         title: "Error Handling",  icon: Eye,           group: "Errors" },
+  // ── Getting Started ──
+  { id: "authentication",       title: "Authentication",         icon: Key,           group: "Start" },
+  { id: "how-it-works",         title: "How it Works",           icon: CursorClick,   group: "Start" },
+  { id: "quickstart",           title: "Quick Start",            icon: Lightning,     group: "Start" },
+
+  // ── Predict API (the screenshot-to-actions surface) ──
+  { id: "response",             title: "Response Format",        icon: BracketsAngle, group: "Predict" },
+  { id: "actions",              title: "Action Types",           icon: CursorClick,   group: "Predict" },
+  { id: "options",              title: "Request Options",        icon: Textbox,       group: "Predict" },
+  { id: "endpoints",            title: "Predict Endpoints",      icon: Terminal,      group: "Predict" },
+
+  // ── Machines API (the new managed-VM surface) ──
+  { id: "machines-overview",    title: "Overview & Scopes",      icon: Plugs,         group: "Machines" },
+  { id: "machines-provision",   title: "Provision & Lifecycle",  icon: Lightning,     group: "Machines" },
+  { id: "machines-actions",     title: "Actions & Batches",      icon: CursorClick,   group: "Machines" },
+  { id: "machines-subapi",      title: "Browser, Terminal, Files", icon: Terminal,    group: "Machines" },
+  { id: "machines-endpoints",   title: "Machines Endpoints",     icon: ListBullets,   group: "Machines" },
+
+  // ── Errors ──
+  { id: "errors",               title: "Error Handling",         icon: Eye,           group: "Errors" },
 ]
 
 function useActiveSection(ids: readonly string[]) {
@@ -790,9 +1103,9 @@ export function APITab({ inApp }: { inApp: boolean }) {
 
       <SectionDivider />
 
-      {/* ════ Endpoints ════ */}
+      {/* ════ Predict Endpoints ════ */}
       <div className="py-8 mb-8">
-        <Section id="endpoints" title="All Endpoints" icon={Terminal} description="All endpoints require the X-API-Key header. Credits deducted from your shared balance.">
+        <Section id="endpoints" title="Predict Endpoints" icon={Terminal} description="Stateless prediction, sessions, and grounding utilities. All require the X-API-Key header.">
           <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
             {/* Group: Prediction */}
             <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
@@ -868,21 +1181,399 @@ export function APITab({ inApp }: { inApp: boolean }) {
 
       <SectionDivider />
 
+      {/* ════════════════════════════════════════════════════════════════════
+           ═════════════════ MACHINES API ═════════════════
+           Managed VM provisioning, action dispatch, browser/terminal/files.
+           Each section below uses the SAME `lang` from Quick Start so the
+           reader can pick a language once and see consistent examples.
+           ════════════════════════════════════════════════════════════════════ */}
+
+      {/* ─── Machines: Overview & Scopes ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="machines-overview"
+          title="Machines API"
+          icon={Plugs}
+          description="Provision a sandbox or production VM, then drive it with actions, terminal commands, browser automation, or file operations. Sandbox keys (sk-coasty-test-*) return mock VMs with no AWS billing."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Scopes card */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Scopes</span>
+              </div>
+              <div className="divide-y divide-foreground/[0.03]">
+                {[
+                  { s: "machines:read",     d: "list, get, screenshot" },
+                  { s: "machines:write",    d: "provision, start, stop, terminate" },
+                  { s: "actions:exec",      d: "click, type, scroll, browser_*" },
+                  { s: "terminal:exec",     d: "shell command execution" },
+                  { s: "files:read",        d: "read, exists, list" },
+                  { s: "files:write",       d: "write, edit, append, delete" },
+                  { s: "browser:execute",   d: "arbitrary JS in browser" },
+                  { s: "snapshots:write",   d: "create AMI snapshots" },
+                  { s: "connection:read",   d: "fetch SSH key + VNC password" },
+                ].map(row => (
+                  <div key={row.s} className="flex items-center gap-3 px-5 py-2.5">
+                    <code className="text-[11px] font-mono font-semibold text-foreground/65 w-32 shrink-0 truncate">{row.s}</code>
+                    <span className="text-[11px] text-muted-foreground/45 flex-1 truncate">{row.d}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pricing card */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Pricing</span>
+              </div>
+              <div className="divide-y divide-foreground/[0.03]">
+                {[
+                  { r: "Provision (any provider)",       c: "20 cr min" },
+                  { r: "Agent run on managed VM",         c: "10 cr/min" },
+                  { r: "Raw VM-hour (Linux)",             c: "50 cr/hr" },
+                  { r: "Raw VM-hour (Windows)",           c: "75 cr/hr" },
+                  { r: "Idle VM (provisioned, unused)",   c: "5 cr/hr" },
+                  { r: "Snapshot create",                 c: "1 cr" },
+                  { r: "Snapshot storage",                c: "1 cr / 2 GB-mo" },
+                  { r: "Egress (after first 10 GB/mo)",   c: "1 cr/GB" },
+                  { r: "Sandbox (sk-coasty-test-*)",      c: "Free" },
+                ].map(row => (
+                  <div key={row.r} className="flex items-center gap-3 px-5 py-2.5">
+                    <span className="text-[11px] text-muted-foreground/55 flex-1 truncate">{row.r}</span>
+                    <code className="text-[10px] font-mono text-foreground/55 shrink-0">{row.c}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-xl border border-amber-500/15 bg-amber-500/[0.03] px-5 py-4">
+            <div className="flex items-start gap-3">
+              <span className="text-[10px] font-semibold text-amber-600/80 dark:text-amber-400/80 uppercase tracking-wider shrink-0 mt-0.5">Tip</span>
+              <span className="text-[12px] text-muted-foreground/55 leading-relaxed">
+                Use a <code className="text-[11px] font-mono text-foreground/65">sk-coasty-test-*</code> key during development —
+                you get instant mock VMs (id <code className="text-[11px] font-mono text-foreground/65">mch_test_…</code>),
+                synthetic action results, and zero billing. The wire format matches production exactly,
+                so you can swap to a live key and ship.
+              </span>
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Machines: Provision & Lifecycle ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="machines-provision"
+          title="Provision & Lifecycle"
+          icon={Lightning}
+          description="Create a VM, list your fleet, and control start/stop/snapshot/terminate. Sandbox keys mock everything in-memory; live keys provision real EC2 / Azure instances."
+        >
+          <GuideCodeBlock label={`provision a vm — ${lang}`} code={MACHINES_SNIPPETS[lang].provision} />
+
+          <div className="mt-5 rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Lifecycle</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {[
+                { m: "GET",    p: "/v1/machines",                d: "List your machines" },
+                { m: "GET",    p: "/v1/machines/{id}",           d: "Get a machine" },
+                { m: "POST",   p: "/v1/machines/{id}/start",     d: "Start a stopped VM" },
+                { m: "POST",   p: "/v1/machines/{id}/stop",      d: "Stop a running VM" },
+                { m: "POST",   p: "/v1/machines/{id}/snapshot",  d: "Create AMI snapshot" },
+                { m: "DELETE", p: "/v1/machines/{id}",           d: "Terminate (irreversible)" },
+              ].map(row => (
+                <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className={cn(
+                    "shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded",
+                    row.m === "GET"    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                    row.m === "POST"   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                                         "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                  )}>
+                    {row.m}
+                  </span>
+                  <code className="text-[11px] font-mono text-foreground/60 flex-1 truncate">{row.p}</code>
+                  <span className="text-[11px] text-muted-foreground/35 hidden sm:block w-44 truncate">{row.d}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Machines: Actions & Batches ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="machines-actions"
+          title="Actions & Batches"
+          icon={CursorClick}
+          description="Dispatch a single action, or chain up to 50 in one batch. Commands are validated against an explicit allowlist — typos return 422, never reach the VM."
+        >
+          <GuideCodeBlock label={`single action — ${lang}`} code={MACHINES_SNIPPETS[lang].action} />
+
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Allowed commands table */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Common Commands</span>
+              </div>
+              <div className="divide-y divide-foreground/[0.03]">
+                {[
+                  { c: "click",            p: "{ x, y, button? }",              s: "actions:exec" },
+                  { c: "type",             p: "{ text }",                        s: "actions:exec" },
+                  { c: "key_press",        p: '{ key: "enter" }',                s: "actions:exec" },
+                  { c: "key_combo",        p: '{ keys: ["ctrl","c"] }',          s: "actions:exec" },
+                  { c: "scroll",           p: "{ x, y, direction, clicks }",    s: "actions:exec" },
+                  { c: "drag",             p: "{ x1, y1, x2, y2 }",              s: "actions:exec" },
+                  { c: "screenshot",       p: "{ }",                              s: "actions:exec" },
+                  { c: "terminal_execute", p: "{ command, timeout? }",            s: "terminal:exec" },
+                  { c: "file_read",        p: "{ path }",                         s: "files:read" },
+                  { c: "file_write",       p: "{ path, content }",                s: "files:write" },
+                  { c: "browser_navigate", p: "{ url }",                          s: "actions:exec" },
+                  { c: "browser_click",    p: "{ selector | x,y | text }",        s: "actions:exec" },
+                  { c: "browser_execute",  p: '{ code: "..." }',                  s: "browser:execute" },
+                ].map(row => (
+                  <div key={row.c} className="flex items-center gap-3 px-5 py-2.5">
+                    <code className="text-[11px] font-mono font-semibold text-foreground/65 w-32 shrink-0 truncate">{row.c}</code>
+                    <code className="text-[10px] font-mono text-muted-foreground/35 flex-1 truncate hidden md:block">{row.p}</code>
+                    <code className="text-[10px] font-mono text-amber-600/55 dark:text-amber-400/55 shrink-0">{row.s}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Batch shape */}
+            <GuideCodeBlock
+              label="batch action — request body"
+              code={`POST /v1/machines/{id}/actions/batch
+Content-Type: application/json
+X-API-Key: sk-coasty-live-...
+
+{
+  "steps": [
+    { "command": "browser_navigate",
+      "parameters": { "url": "https://example.com/login" } },
+    { "command": "browser_type",
+      "parameters": { "selector": "#email", "text": "you@me.com" } },
+    { "command": "browser_type",
+      "parameters": { "selector": "#password", "text": "***" } },
+    { "command": "browser_click",
+      "parameters": { "selector": "button[type=submit]" } }
+  ],
+  "stop_on_error": true
+}
+
+Returns:
+{
+  "results": [...],         // one per step
+  "completed_count": 4,
+  "failed_count": 0,
+  "aborted": false,
+  "request_id": "req_..."
+}`}
+            />
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Machines: Browser, Terminal, Files sub-APIs ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="machines-subapi"
+          title="Browser, Terminal, Files"
+          icon={Terminal}
+          description="Typed convenience endpoints over /actions. Same dispatch path, ergonomic URL shapes, identical scope rules."
+        >
+          <GuideCodeBlock label={`shell command — ${lang}`} code={MACHINES_SNIPPETS[lang].terminal} />
+
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Browser sub-ops */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <code className="text-[10px] font-mono text-muted-foreground/45">/browser/{"{op}"}</code>
+              </div>
+              <div className="px-5 py-3">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                  {[
+                    "open", "navigate", "click", "type",
+                    "dom", "clickables", "state", "info",
+                    "scroll", "close", "screenshot", "wait",
+                    "list-tabs", "open-tab", "close-tab", "switch-tab",
+                  ].map(op => (
+                    <code key={op} className="text-[10px] font-mono text-foreground/55 truncate">{op}</code>
+                  ))}
+                </div>
+                <p className="mt-3 text-[10px] text-muted-foreground/35 leading-relaxed">
+                  Body: <code className="text-[10px] font-mono">{"{ parameters: {…}, timeout_ms? }"}</code>.
+                  <code className="text-[10px] font-mono"> browser_execute</code> NOT here — use /actions with browser:execute.
+                </p>
+              </div>
+            </div>
+
+            {/* Files sub-ops */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <code className="text-[10px] font-mono text-muted-foreground/45">/files/{"{op}"}</code>
+              </div>
+              <div className="px-5 py-3">
+                <div className="space-y-1.5">
+                  <div className="text-[9px] font-semibold text-muted-foreground/35 uppercase tracking-wider mb-1">Read (files:read)</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["read", "exists", "list", "list-directory", "download", "list-downloads"].map(op => (
+                      <code key={op} className="text-[10px] font-mono text-foreground/55 px-1.5 py-0.5 rounded bg-foreground/[0.025]">{op}</code>
+                    ))}
+                  </div>
+                  <div className="text-[9px] font-semibold text-muted-foreground/35 uppercase tracking-wider mt-3 mb-1">Write (files:write)</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["write", "edit", "append", "delete", "delete-directory"].map(op => (
+                      <code key={op} className="text-[10px] font-mono text-foreground/55 px-1.5 py-0.5 rounded bg-foreground/[0.025]">{op}</code>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Terminal */}
+            <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+              <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+                <code className="text-[10px] font-mono text-muted-foreground/45">/terminal</code>
+              </div>
+              <div className="px-5 py-3 text-[10px] text-muted-foreground/45 leading-relaxed">
+                Body: <code className="text-[10px] font-mono">{"{ command, timeout_ms?, session_id?, cwd? }"}</code>
+                <span className="block mt-2">
+                  PowerShell on Windows, bash on Unix. Output capped at 5000 chars VM-side. Pass
+                  <code className="text-[10px] font-mono"> session_id</code> to reuse a persistent shell across calls.
+                </span>
+                <span className="block mt-2 text-amber-600/65 dark:text-amber-400/65">Requires <code className="text-[10px] font-mono">terminal:exec</code> scope.</span>
+              </div>
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Machines: Endpoint reference ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="machines-endpoints"
+          title="Machines Endpoints"
+          icon={ListBullets}
+          description="Full reference. All require X-API-Key (or Authorization: Bearer) except /health."
+        >
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+            {/* Group: Lifecycle */}
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Lifecycle</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {[
+                { m: "POST",   p: "/v1/machines",                  d: "Provision a new VM",       c: "20 cr min" },
+                { m: "GET",    p: "/v1/machines",                  d: "List machines",             c: "Free" },
+                { m: "GET",    p: "/v1/machines/{id}",             d: "Get a machine",             c: "Free" },
+                { m: "DELETE", p: "/v1/machines/{id}",             d: "Terminate (irreversible)",  c: "Free" },
+                { m: "POST",   p: "/v1/machines/{id}/start",       d: "Start stopped VM",          c: "Free" },
+                { m: "POST",   p: "/v1/machines/{id}/stop",        d: "Stop running VM",           c: "Free" },
+                { m: "POST",   p: "/v1/machines/{id}/snapshot",    d: "Create AMI snapshot",       c: "1 cr" },
+              ].map(row => (
+                <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className={cn(
+                    "shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded",
+                    row.m === "GET"    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                    row.m === "POST"   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                                         "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                  )}>
+                    {row.m}
+                  </span>
+                  <code className="text-[11px] font-mono text-foreground/60 flex-1 truncate">{row.p}</code>
+                  <span className="text-[11px] text-muted-foreground/35 hidden sm:block w-48 truncate">{row.d}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground/30 w-16 text-right shrink-0">{row.c}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Group: Actions */}
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-y border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Actions</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {[
+                { m: "POST", p: "/v1/machines/{id}/actions",        d: "Single action",            c: "Free" },
+                { m: "POST", p: "/v1/machines/{id}/actions/batch",  d: "≤ 50 actions",             c: "Free" },
+                { m: "POST", p: "/v1/machines/{id}/browser/{op}",   d: "Browser convenience",       c: "Free" },
+                { m: "POST", p: "/v1/machines/{id}/terminal",       d: "Shell command",             c: "Free" },
+                { m: "POST", p: "/v1/machines/{id}/files/{op}",     d: "File ops",                  c: "Free" },
+              ].map(row => (
+                <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className="shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    {row.m}
+                  </span>
+                  <code className="text-[11px] font-mono text-foreground/60 flex-1 truncate">{row.p}</code>
+                  <span className="text-[11px] text-muted-foreground/35 hidden sm:block w-48 truncate">{row.d}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground/30 w-16 text-right shrink-0">{row.c}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Group: Inspection */}
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-y border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Inspection</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {[
+                { m: "GET", p: "/v1/machines/{id}/screenshot", d: "Capture a screenshot",            c: "Free" },
+                { m: "GET", p: "/v1/machines/{id}/connection", d: "SSH key + VNC pwd (HIGH-RISK)",   c: "Free" },
+                { m: "GET", p: "/v1/machines/health",          d: "Public health probe",              c: "Free" },
+              ].map(row => (
+                <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className="shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    {row.m}
+                  </span>
+                  <code className="text-[11px] font-mono text-foreground/60 flex-1 truncate">{row.p}</code>
+                  <span className="text-[11px] text-muted-foreground/35 hidden sm:block w-48 truncate">{row.d}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground/30 w-16 text-right shrink-0">{row.c}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
       {/* ════ Errors ════ */}
       <div className="py-8 mb-6">
-        <Section id="errors" title="Error Handling" icon={Eye} description="All errors return a JSON body with error.code and error.message fields.">
+        <Section id="errors" title="Error Handling" icon={Eye} description="All errors return a JSON body with error.code, error.message, error.type, and error.request_id fields.">
           <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden divide-y divide-foreground/[0.04]">
             {[
-              { code: "401", name: "INVALID_API_KEY", desc: "Missing or invalid X-API-Key" },
-              { code: "402", name: "INSUFFICIENT_CREDITS", desc: "Not enough credits for this request" },
-              { code: "403", name: "INSUFFICIENT_SCOPE", desc: "API key lacks the required scope" },
-              { code: "429", name: "RATE_LIMIT_EXCEEDED", desc: "Too many requests — check Retry-After header" },
-              { code: "400", name: "INVALID_SCREENSHOT", desc: "Bad base64 or unsupported image format" },
-              { code: "404", name: "SESSION_NOT_FOUND", desc: "Session expired or does not exist" },
-            ].map(row => (
-              <div key={row.name} className="flex items-center gap-4 px-5 py-3.5">
+              { code: "400", name: "INVALID_MACHINE_ID",    desc: "Path id is not a UUID or mch_test_<hex>" },
+              { code: "400", name: "INVALID_IDEMPOTENCY_KEY", desc: "Idempotency-Key has bad chars or > 128 chars" },
+              { code: "400", name: "UNKNOWN_BROWSER_OP",    desc: "Unknown {op} in /browser/{op}" },
+              { code: "400", name: "UNKNOWN_FILE_OP",       desc: "Unknown {op} in /files/{op}" },
+              { code: "401", name: "INVALID_API_KEY",       desc: "Missing or invalid X-API-Key / Bearer token" },
+              { code: "402", name: "INSUFFICIENT_CREDITS",  desc: "Balance below required amount (provision needs ≥ 20 cr)" },
+              { code: "403", name: "INSUFFICIENT_SCOPE",    desc: "API key lacks the required scope for this op" },
+              { code: "404", name: "NOT_FOUND",             desc: "Machine/session not found OR not owned by your key" },
+              { code: "409", name: "INVALID_STATE",         desc: "Action requires status='running'; lifecycle has illegal transition" },
+              { code: "422", name: "IDEMPOTENCY_KEY_REUSED", desc: "Same Idempotency-Key sent with a different request body" },
+              { code: "422", name: "VALIDATION_ERROR",      desc: "Body fails Pydantic — unknown field, wrong type, oversize, bad command" },
+              { code: "429", name: "RATE_LIMIT_EXCEEDED",   desc: "Too many requests — see Retry-After header" },
+              { code: "429", name: "TEST_MACHINE_LIMIT",    desc: "Sandbox keys are capped at 5 mock VMs" },
+              { code: "502", name: "SCREENSHOT_FAILED",     desc: "Screenshot dispatch reached the VM but capture errored" },
+              { code: "503", name: "DB_UNAVAILABLE",        desc: "Backend cannot reach Supabase" },
+              { code: "504", name: "UPSTREAM_TIMEOUT",      desc: "Provision proxy timed out (try Idempotency-Key + retry)" },
+            ].map((row, i) => (
+              <div key={`${row.name}-${i}`} className="flex items-center gap-4 px-5 py-3.5">
                 <span className="text-[11px] font-mono font-bold text-muted-foreground/35 w-8 shrink-0">{row.code}</span>
-                <code className="text-[11px] font-mono text-foreground/60 w-48 shrink-0 truncate">{row.name}</code>
+                <code className="text-[11px] font-mono text-foreground/60 w-52 shrink-0 truncate">{row.name}</code>
                 <span className="text-[12px] text-muted-foreground/45 flex-1">{row.desc}</span>
               </div>
             ))}

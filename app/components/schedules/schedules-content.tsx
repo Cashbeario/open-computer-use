@@ -668,6 +668,11 @@ function ScheduleCalendar({ schedules, selectedDate, onSelectDate, onRun, onPaus
                       <div className="flex items-center gap-2">
                         <p className="text-[13px] font-semibold text-foreground/70 truncate group-hover:text-foreground transition-colors">{s.title || "Untitled"}</p>
                         <span className={cn("text-[10px] font-medium shrink-0", isAct ? "text-emerald-600 dark:text-emerald-400" : isFail ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground/30")}>{isAct ? "On Duty" : isFail ? "Attention" : "Standby"}</span>
+                        {/* API source badge — only shown for schedules created via /v1/schedules.
+                            The backend writes settings.source = 'api' on those rows. */}
+                        {(s as { source?: string })?.source === "api" && (
+                          <span className="text-[8px] font-mono font-semibold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">API</span>
+                        )}
                       </div>
                       <p className="text-[11px] text-muted-foreground/35 mt-0.5 tabular-nums">
                         {task.runsPerDay > 6 ? `${task.runsPerDay}x/day` : task.times.length > 0 ? task.times[0] : formatFrequency(s.frequency)}

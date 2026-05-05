@@ -302,6 +302,9 @@ const LANGS = [
 ] as const
 type LangId = (typeof LANGS)[number]["id"]
 
+// Each Predict snippet is one shape across languages; bodies validate against
+// backend/app/models/public_cua.py (predict request schema) — verified by
+// backend/tests/test_doc_examples.py + test_public_cua_routes.py.
 const SNIPPETS: Record<LangId, string> = {
   python: `import requests, base64
 
@@ -354,6 +357,88 @@ req.Header.Set("Content-Type", "application/json")
 
 resp, _ := http.DefaultClient.Do(req)
 defer resp.Body.Close()`,
+}
+
+// Machines API snippets — provision a sandbox VM in one call. All bodies
+// validate against backend/app/models/public_machines.py (extra="forbid").
+// Verified by backend/tests/test_doc_examples.py.
+const MACHINES_SNIPPETS: Record<LangId, string> = {
+  python: `import requests
+
+# Provision a sandbox VM (sk-coasty-test-* — instant, no AWS, no billing).
+r = requests.post(
+    "https://coasty.ai/v1/machines",
+    headers={
+        "X-API-Key": "sk-coasty-test-...",
+        "Idempotency-Key": "demo-001",
+    },
+    json={
+        "display_name": "automation-bot",
+        "os_type": "linux",
+        "desktop_enabled": True,
+    },
+)
+machine = r.json()["machine"]
+
+# Drive it: click at (512, 340)
+requests.post(
+    f"https://coasty.ai/v1/machines/{machine['id']}/actions",
+    headers={"X-API-Key": "sk-coasty-test-..."},
+    json={"command": "click", "parameters": {"x": 512, "y": 340}},
+)`,
+  javascript: `// Node 18+ — global fetch
+const provision = await fetch("https://coasty.ai/v1/machines", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "sk-coasty-test-...",
+    "Content-Type": "application/json",
+    "Idempotency-Key": "demo-001",
+  },
+  body: JSON.stringify({
+    display_name: "automation-bot",
+    os_type: "linux",
+    desktop_enabled: true,
+  }),
+})
+const { machine } = await provision.json()
+
+// Drive it
+await fetch(\`https://coasty.ai/v1/machines/\${machine.id}/actions\`, {
+  method: "POST",
+  headers: { "X-API-Key": "sk-coasty-test-...", "Content-Type": "application/json" },
+  body: JSON.stringify({ command: "click", parameters: { x: 512, y: 340 } }),
+})`,
+  curl: `# 1. Provision
+curl -X POST https://coasty.ai/v1/machines \\
+  -H "X-API-Key: sk-coasty-test-..." \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: demo-001" \\
+  -d '{
+    "display_name": "automation-bot",
+    "os_type": "linux",
+    "desktop_enabled": true
+  }'
+
+# 2. Drive it (paste the id from step 1)
+curl -X POST https://coasty.ai/v1/machines/$ID/actions \\
+  -H "X-API-Key: sk-coasty-test-..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"command":"click","parameters":{"x":512,"y":340}}'`,
+  go: `body, _ := json.Marshal(map[string]any{
+  "display_name":    "automation-bot",
+  "os_type":         "linux",
+  "desktop_enabled": true,
+})
+req, _ := http.NewRequest("POST",
+  "https://coasty.ai/v1/machines",
+  bytes.NewReader(body))
+req.Header.Set("X-API-Key", "sk-coasty-test-...")
+req.Header.Set("Content-Type", "application/json")
+req.Header.Set("Idempotency-Key", "demo-001")
+
+resp, _ := http.DefaultClient.Do(req)
+defer resp.Body.Close()
+// Parse resp.Body for { "machine": { "id": "..." } }, then POST to /actions.`,
 }
 
 function highlightLine(line: string, lang: LangId) {
@@ -524,6 +609,82 @@ function TryIt() {
         >
           Full reference <ChevronRight className="h-3 w-3" />
         </a>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MACHINES — provision + drive a real VM in one snippet.
+   Mirrors TryIt's tab pattern. Bodies are validated by
+   backend/tests/test_doc_examples.py against the live Pydantic
+   models, so what you copy here is what will actually parse.
+   ═══════════════════════════════════════════════════════════════ */
+
+function MachinesTryIt() {
+  const [lang, setLang] = useState<LangId>("python")
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      {/* Tabs */}
+      <div className="relative inline-flex items-center rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-1 mb-5">
+        {LANGS.map((l) => {
+          const active = l.id === lang
+          return (
+            <button
+              key={l.id}
+              onClick={() => setLang(l.id)}
+              className={`relative px-4 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
+                active ? "text-foreground" : "text-muted-foreground/55 hover:text-foreground/80"
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="machines-lang-pill"
+                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  className="absolute inset-0 rounded-lg bg-foreground/[0.06] border border-border/40"
+                />
+              )}
+              <span className="relative">{l.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="relative rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
+
+        {/* File chrome */}
+        <div className="flex items-center justify-between px-5 py-2.5 border-b border-border/20">
+          <div className="flex items-center gap-2">
+            <Terminal className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <span className="text-[11px] font-mono text-muted-foreground/55">
+              POST /v1/machines  +  POST /v1/machines/{"{id}"}/actions
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/35">
+            <span className="hidden sm:flex items-center gap-1">
+              sandbox · no billing
+            </span>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={lang}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease }}
+          >
+            <CodeBlock code={MACHINES_SNIPPETS[lang]} lang={lang} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-muted-foreground/45">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span>Sandbox keys (sk-coasty-test-*) return a mock VM in &lt; 50 ms — instant retries, zero AWS cost.</span>
       </div>
     </div>
   )
@@ -786,6 +947,67 @@ export default function ApiDocsPage() {
           </motion.div>
 
           <TryIt />
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* ─── MACHINES API ─── */}
+      <section className="py-24 px-7 sm:px-10 relative">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease }}
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center gap-2 h-6 px-3 rounded-full border border-border/30 bg-card/30 text-[10px] font-mono text-muted-foreground/60 mb-5">
+              <Monitor className="h-3 w-3" />
+              Machines API
+            </div>
+            <h2 className="text-[28px] sm:text-4xl font-bold tracking-[-0.02em] mb-4">
+              Real desktops. Real shells. Real automation.
+            </h2>
+            <p className="text-[14px] sm:text-base text-muted-foreground/55 max-w-xl mx-auto">
+              Provision a sandbox or production VM, then drive it with actions, terminal commands,
+              browser automation, or file ops. One auth header, fifteen endpoints.
+            </p>
+          </motion.div>
+
+          <MachinesTryIt />
+
+          {/* Endpoint chips strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1, ease }}
+            className="mt-8 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto"
+          >
+            {[
+              "POST /v1/machines",
+              "GET /v1/machines",
+              "DELETE /v1/machines/{id}",
+              "POST /v1/machines/{id}/start",
+              "POST /v1/machines/{id}/stop",
+              "POST /v1/machines/{id}/snapshot",
+              "GET /v1/machines/{id}/screenshot",
+              "GET /v1/machines/{id}/connection",
+              "POST /v1/machines/{id}/actions",
+              "POST /v1/machines/{id}/actions/batch",
+              "POST /v1/machines/{id}/browser/{op}",
+              "POST /v1/machines/{id}/terminal",
+              "POST /v1/machines/{id}/files/{op}",
+            ].map((path) => (
+              <code
+                key={path}
+                className="text-[10px] font-mono text-muted-foreground/55 px-2.5 py-1 rounded-md border border-border/30 bg-card/30"
+              >
+                {path}
+              </code>
+            ))}
+          </motion.div>
         </div>
       </section>
 

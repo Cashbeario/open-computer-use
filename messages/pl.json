@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - Agent AI do Obsługi Komputera #1 | Pracownik AI do Automatyzacji Pulpitu i Przeglądarki",
       "titleTemplate": "{title} | Coasty - Agent AI do Obsługi Komputera",
-      "description": "Coasty to agent AI do obsługi komputera #1 — 82% w benchmarku OSWorld. Steruje pełnym pulpitem jak człowiek: otwiera przeglądarki, klika, pisze, wypełnia formularze, wysyła e-maile, zarządza arkuszami kalkulacyjnymi. Prawdziwa izolacja na poziomie VM na sesję. Od $20/mo.",
+      "description": "Coasty to agent AI do obsługi komputera #1 — 82% w benchmarku OSWorld. Steruje pełnym pulpitem jak człowiek: otwiera przeglądarki, klika, pisze, wypełnia formularze, wysyła e-maile, zarządza arkuszami kalkulacyjnymi. Prawdziwa izolacja na poziomie VM na sesję. Od $19/mo.",
       "ogTitle": "Coasty - Agent AI do Obsługi Komputera #1 | 82% Benchmark OSWorld",
-      "ogDescription": "Pracownik AI sterujący pulpitem jak człowiek. #1 w benchmarku OSWorld (82%). Automatyzacja przeglądarki, sterowanie pulpitem, rozwiązywanie CAPTCHA, izolacja VM. Od $20/mo.",
-      "twitterDescription": "Pracownik AI sterujący pulpitem jak człowiek. Otwiera przeglądarki, klika, pisze, wypełnia formularze, wysyła e-maile. Prawdziwa izolacja VM. $20/mo vs $3,000/mo ludzki wirtualny asystent."
+      "ogDescription": "Pracownik AI sterujący pulpitem jak człowiek. #1 w benchmarku OSWorld (82%). Automatyzacja przeglądarki, sterowanie pulpitem, rozwiązywanie CAPTCHA, izolacja VM. Od $19/mo.",
+      "twitterDescription": "Pracownik AI sterujący pulpitem jak człowiek. Otwiera przeglądarki, klika, pisze, wypełnia formularze, wysyła e-maile. Prawdziwa izolacja VM. $19/mo vs $3,000/mo ludzki wirtualny asystent."
     },
     "compare": {
       "title": "Porównaj Coasty - Alternatywy Agentów AI i Porównanie Konkurencji",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Cennik — Plany i Ceny Agenta AI Coasty",
-      "description": "Plany cenowe Coasty od $20/mo. Zastąp wirtualnych asystentów za $3,000/mo pracownikiem AI. Darmowy tier dostępny. Użycie oparte na kredytach bez ukrytych opłat.",
+      "description": "Plany cenowe Coasty od $19/mo. Zastąp wirtualnych asystentów za $3,000/mo pracownikiem AI. Darmowy tier dostępny. Użycie oparte na kredytach bez ukrytych opłat.",
       "ogTitle": "Cennik Coasty — Plany Agenta AI",
-      "ogDescription": "Pracownik AI od $20/mo. Zastąp kosztownych wirtualnych asystentów autonomicznym AI. Darmowy tier dostępny."
+      "ogDescription": "Pracownik AI od $19/mo. Zastąp kosztownych wirtualnych asystentów autonomicznym AI. Darmowy tier dostępny."
     },
     "faq": {
       "q1": "Czym jest Coasty?",
@@ -2347,7 +2347,7 @@
       "appDescription": "Agent AI do obsługi komputera #1. Coasty steruje pełnym pulpitem jak człowiek — otwiera przeglądarki, klika, pisze, wypełnia formularze, wysyła e-maile i zarządza arkuszami kalkulacyjnymi autonomicznie. 82% w benchmarku OSWorld. Prawdziwa izolacja na poziomie VM. Wbudowane rozwiązywanie CAPTCHA. Od $20/miesiąc.",
       "orgDescription": "Coasty tworzy agenta AI do obsługi komputera #1. Nasza platforma zapewnia autonomiczne sterowanie pulpitem, automatyzację przeglądarki i orkiestrację wielu agentów z prawdziwą izolacją na poziomie VM.",
       "productDescription": "Agent AI do obsługi komputera sterujący pulpitem jak człowiek. #1 w benchmarku OSWorld (82%). Autonomiczna automatyzacja przeglądarki, sterowanie pulpitem, wysyłanie e-maili, wypełnianie formularzy i zarządzanie arkuszami kalkulacyjnymi z prawdziwą izolacją na poziomie VM.",
-      "websiteDescription": "Platforma agenta AI do obsługi komputera #1. 82% w benchmarku OSWorld. Autonomiczna automatyzacja przeglądarki, pulpitu i terminala z izolacją VM. Od $20/mo.",
+      "websiteDescription": "Platforma agenta AI do obsługi komputera #1. 82% w benchmarku OSWorld. Autonomiczna automatyzacja przeglądarki, pulpitu i terminala z izolacją VM. Od $19/mo.",
       "softwareDescription": "Agent AI do obsługi komputera sterujący pełnym pulpitem jak człowiek. #1 w benchmarku OSWorld ze wskaźnikiem ukończenia 82% w 369 zadaniach ze świata rzeczywistego. Autonomiczna automatyzacja przeglądarki, sterowanie pulpitem, operacje terminala, wysyłanie e-maili, wypełnianie formularzy i zarządzanie arkuszami kalkulacyjnymi.",
       "breadcrumbs": {
         "home": "Strona Główna",

@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - 1 Numaralı Bilgisayar Kullanan AI Ajanı | Masaüstü ve Tarayıcı Otomasyonu için AI Çalışan",
       "titleTemplate": "{title} | Coasty - AI Bilgisayar Kullanım Ajanı",
-      "description": "Coasty, 1 numaralı bilgisayar kullanan AI ajanıdır — OSWorld benchmark'ta 82%. Tam bir masaüstünü insan gibi kontrol eder: tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir, elektronik tablolar yönetir. Oturum başına gerçek VM izolasyonu. $20/mo'dan başlayan fiyatlar.",
+      "description": "Coasty, 1 numaralı bilgisayar kullanan AI ajanıdır — OSWorld benchmark'ta 82%. Tam bir masaüstünü insan gibi kontrol eder: tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir, elektronik tablolar yönetir. Oturum başına gerçek VM izolasyonu. $19/mo'dan başlayan fiyatlar.",
       "ogTitle": "Coasty - 1 Numaralı Bilgisayar Kullanan AI Ajanı | 82% OSWorld Benchmark",
-      "ogDescription": "Masaüstünü insan gibi kontrol eden AI çalışan. OSWorld benchmark'ta 1 numara (82%). Tarayıcı otomasyonu, masaüstü kontrolü, CAPTCHA çözme, VM izolasyonu. $20/mo'dan başlayan fiyatlar.",
-      "twitterDescription": "Masaüstünü insan gibi kontrol eden AI çalışan. Tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir. Gerçek VM izolasyonu. İnsan sanal asistana kıyasla $20/mo vs $3,000/mo."
+      "ogDescription": "Masaüstünü insan gibi kontrol eden AI çalışan. OSWorld benchmark'ta 1 numara (82%). Tarayıcı otomasyonu, masaüstü kontrolü, CAPTCHA çözme, VM izolasyonu. $19/mo'dan başlayan fiyatlar.",
+      "twitterDescription": "Masaüstünü insan gibi kontrol eden AI çalışan. Tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir. Gerçek VM izolasyonu. İnsan sanal asistana kıyasla $19/mo vs $3,000/mo."
     },
     "compare": {
       "title": "Coasty Karşılaştırma - AI Ajanı Alternatifleri ve Rakip Karşılaştırması",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Fiyatlandırma — Coasty AI Ajanı Planları ve Fiyatları",
-      "description": "Coasty fiyatlandırma planları $20/mo'dan başlar. $3,000/mo sanal asistanları AI çalışanla değiştirin. Ücretsiz plan mevcuttur. Gizli ücret olmadan kredi tabanlı kullanım.",
+      "description": "Coasty fiyatlandırma planları $19/mo'dan başlar. $3,000/mo sanal asistanları AI çalışanla değiştirin. Ücretsiz plan mevcuttur. Gizli ücret olmadan kredi tabanlı kullanım.",
       "ogTitle": "Coasty Fiyatlandırma — AI Ajanı Planları",
-      "ogDescription": "$20/mo'dan başlayan AI çalışan. Pahalı sanal asistanları otonom AI ile değiştirin. Ücretsiz plan mevcuttur."
+      "ogDescription": "$19/mo'dan başlayan AI çalışan. Pahalı sanal asistanları otonom AI ile değiştirin. Ücretsiz plan mevcuttur."
     },
     "faq": {
       "q1": "Coasty nedir?",
@@ -2327,7 +2327,7 @@
       "q2": "Coasty, Anthropic Computer Use ile nasıl karşılaştırılır?",
       "a2": "Anthropic Computer Use bilgisayar kontrolü için ham bir API sağlarken, Coasty yönetilen VM altyapısı, yerleşik CAPTCHA çözümü, Mac ve Windows için masaüstü uygulaması, çoklu model desteği ve en yüksek OSWorld benchmark puanı (82%) ile üretime hazır bir platformdur. Coasty eksiksiz çözümü sunar — sadece API değil.",
       "q3": "Coasty'nin maliyeti nedir?",
-      "a3": "Coasty, ücretsiz plan mevcut olmak üzere Starter planı için $20/month'dan başlar. Bu, bir insan sanal asistan için aylık $3,000+ ile karşılaştırılır. Coasty molasız, eğitimsiz ve anında ölçeklenebilir olarak 7/24 çalışır.",
+      "a3": "Coasty, ücretsiz plan mevcut olmak üzere Starter planı için $19/month'dan başlar. Bu, bir insan sanal asistan için aylık $3,000+ ile karşılaştırılır. Coasty molasız, eğitimsiz ve anında ölçeklenebilir olarak 7/24 çalışır.",
       "q4": "Coasty kullanmak güvenli mi?",
       "a4": "Evet. Her Coasty oturumu kendi izole, sandbox sanal makinesinde çalışır. Verileriniz güvende, makinenize dokunulmaz ve oturumlar arasında hiçbir şey sızmaz. Bu gerçek VM düzeyinde izolasyondur, paylaşılan havuzda konteynerler değil.",
       "q5": "OSWorld benchmark nedir?",
@@ -2344,10 +2344,10 @@
       "a10": "Evet. Coasty'nin yerleşik CAPTCHA çözme sistemi vardır, bu nedenle rakip AI ajanların engellenmesi gibi engellenmez. Bu, web sitelerinde CAPTCHA'nın yaygın olduğu gerçek dünya otomasyonu için kritik öneme sahiptir."
     },
     "structuredData": {
-      "appDescription": "1 numaralı bilgisayar kullanan AI ajanı. Coasty tam bir masaüstünü insan gibi kontrol eder — tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir ve elektronik tabloları otonom olarak yönetir. OSWorld benchmark'ta 82%. Gerçek VM düzeyinde izolasyon. Yerleşik CAPTCHA çözümü. $20/month'dan başlayan fiyatlar.",
+      "appDescription": "1 numaralı bilgisayar kullanan AI ajanı. Coasty tam bir masaüstünü insan gibi kontrol eder — tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir ve elektronik tabloları otonom olarak yönetir. OSWorld benchmark'ta 82%. Gerçek VM düzeyinde izolasyon. Yerleşik CAPTCHA çözümü. $19/month'dan başlayan fiyatlar.",
       "orgDescription": "Coasty, 1 numaralı bilgisayar kullanan AI ajanını geliştirir. Platformumuz gerçek VM düzeyinde izolasyonla otonom masaüstü kontrolü, tarayıcı otomasyonu ve çoklu ajan orkestrasyonu sağlar.",
       "productDescription": "Masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. OSWorld benchmark'ta 1 numara (82%). Gerçek VM izolasyonuyla otonom tarayıcı otomasyonu, masaüstü kontrolü, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
-      "websiteDescription": "1 numaralı bilgisayar kullanan AI ajanı platformu. 82% OSWorld benchmark. VM izolasyonuyla otonom tarayıcı, masaüstü ve terminal otomasyonu. $20/mo'dan başlayan fiyatlar.",
+      "websiteDescription": "1 numaralı bilgisayar kullanan AI ajanı platformu. 82% OSWorld benchmark. VM izolasyonuyla otonom tarayıcı, masaüstü ve terminal otomasyonu. $19/mo'dan başlayan fiyatlar.",
       "softwareDescription": "Tam bir masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. 369 gerçek dünya görevinde 82% tamamlama oranıyla OSWorld benchmark'ta 1 numara. Otonom tarayıcı otomasyonu, masaüstü kontrolü, terminal işlemleri, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
       "breadcrumbs": {
         "home": "Ana Sayfa",

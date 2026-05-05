@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - #1 AI-Agent voor Computergebruik | AI-Medewerker voor Desktop- en Browserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-Agent voor Computergebruik",
-      "description": "Coasty is de #1 AI-agent voor computergebruik — 82% op de OSWorld-benchmark. Het bestuurt een volledig bureaublad zoals een mens: opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails, beheert spreadsheets. Echte VM-isolatie per sessie. Vanaf $20/mo.",
+      "description": "Coasty is de #1 AI-agent voor computergebruik — 82% op de OSWorld-benchmark. Het bestuurt een volledig bureaublad zoals een mens: opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails, beheert spreadsheets. Echte VM-isolatie per sessie. Vanaf $19/mo.",
       "ogTitle": "Coasty - #1 AI-Agent voor Computergebruik | 82% OSWorld-Benchmark",
-      "ogDescription": "AI-medewerker die een bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark (82%). Browserautomatisering, desktopbesturing, CAPTCHA-oplossing, VM-isolatie. Vanaf $20/mo.",
-      "twitterDescription": "AI-medewerker die een bureaublad bestuurt zoals een mens. Opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails. Echte VM-isolatie. $20/mo vs $3,000/mo menselijke virtuele assistent."
+      "ogDescription": "AI-medewerker die een bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark (82%). Browserautomatisering, desktopbesturing, CAPTCHA-oplossing, VM-isolatie. Vanaf $19/mo.",
+      "twitterDescription": "AI-medewerker die een bureaublad bestuurt zoals een mens. Opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails. Echte VM-isolatie. $19/mo vs $3,000/mo menselijke virtuele assistent."
     },
     "compare": {
       "title": "Vergelijk Coasty - AI-Agent Alternatieven en Concurrentievergelijking",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Prijzen — Coasty AI-Agent Plannen en Prijzen",
-      "description": "Coasty-prijsplannen vanaf $20/mo. Vervang virtuele assistenten van $3,000/mo door een AI-medewerker. Gratis tier beschikbaar. Op credits gebaseerd gebruik zonder verborgen kosten.",
+      "description": "Coasty-prijsplannen vanaf $19/mo. Vervang virtuele assistenten van $3,000/mo door een AI-medewerker. Gratis tier beschikbaar. Op credits gebaseerd gebruik zonder verborgen kosten.",
       "ogTitle": "Coasty Prijzen — AI-Agent Plannen",
-      "ogDescription": "AI-medewerker vanaf $20/mo. Vervang dure virtuele assistenten door autonome AI. Gratis tier beschikbaar."
+      "ogDescription": "AI-medewerker vanaf $19/mo. Vervang dure virtuele assistenten door autonome AI. Gratis tier beschikbaar."
     },
     "faq": {
       "q1": "Wat is Coasty?",
@@ -2347,7 +2347,7 @@
       "appDescription": "De #1 AI-agent voor computergebruik. Coasty bestuurt een volledig bureaublad zoals een mens — opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails en beheert spreadsheets autonoom. 82% op de OSWorld-benchmark. Echte VM-isolatie. Ingebouwde CAPTCHA-oplossing. Vanaf $20/maand.",
       "orgDescription": "Coasty bouwt de #1 AI-agent voor computergebruik. Ons platform biedt autonome desktopbesturing, browserautomatisering en multi-agent orchestratie met echte VM-isolatie.",
       "productDescription": "AI-computergebruik-agent die een bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark (82%). Autonome browserautomatisering, desktopbesturing, e-mail verzenden, formulieren invullen en spreadsheetbeheer met echte VM-isolatie.",
-      "websiteDescription": "#1 AI-agent platform voor computergebruik. 82% op de OSWorld-benchmark. Autonome browser-, desktop- en terminalautomatisering met VM-isolatie. Vanaf $20/mo.",
+      "websiteDescription": "#1 AI-agent platform voor computergebruik. 82% op de OSWorld-benchmark. Autonome browser-, desktop- en terminalautomatisering met VM-isolatie. Vanaf $19/mo.",
       "softwareDescription": "AI-computergebruik-agent die een volledig bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark met een voltooiingspercentage van 82% over 369 taken uit de echte wereld. Autonome browserautomatisering, desktopbesturing, terminaloperaties, e-mail verzenden, formulieren invullen en spreadsheetbeheer.",
       "breadcrumbs": {
         "home": "Home",

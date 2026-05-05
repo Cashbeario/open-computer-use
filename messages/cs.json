@@ -2327,7 +2327,7 @@
       "q2": "Jak se Coasty srovnává s Anthropic Computer Use?",
       "a2": "Zatímco Anthropic Computer Use poskytuje surové API pro ovládání počítače, Coasty je produkčně připravená platforma se spravovanou VM infrastrukturou, vestavěným řešením CAPTCHA, desktopovou aplikací pro Mac a Windows, podporou více modelů a nejvyšším skóre v benchmarku OSWorld (82%). Coasty poskytuje kompletní řešení — nejen API.",
       "q3": "Kolik stojí Coasty?",
-      "a3": "Coasty začíná na $20/měsíc s plánem Starter a bezplatný tarif je k dispozici. To ve srovnání s více než $3 000/měsíc za lidského virtuálního asistenta. Coasty pracuje 24/7 bez přestávek, bez školení a s okamžitou škálovatelností.",
+      "a3": "Coasty začíná na $19/měsíc s plánem Starter a bezplatný tarif je k dispozici. To ve srovnání s více než $3 000/měsíc za lidského virtuálního asistenta. Coasty pracuje 24/7 bez přestávek, bez školení a s okamžitou škálovatelností.",
       "q4": "Je Coasty bezpečný?",
       "a4": "Ano. Každá relace Coasty běží ve vlastním izolovaném, sandboxovaném virtuálním stroji. Vaše data zůstávají v bezpečí, váš stroj zůstává nedotčen a nic neuniká mezi relacemi. Toto je skutečná izolace na úrovni VM, nikoli jen kontejnery ve sdíleném prostředí.",
       "q5": "Co je benchmark OSWorld?",
@@ -2344,7 +2344,7 @@
       "a10": "Ano. Coasty má vestavěný pipeline pro řešení CAPTCHA, takže se nezasekne jako konkurenční AI agenti. To je zásadní pro reálnou automatizaci, kde jsou CAPTCHA na webových stránkách běžné."
     },
     "structuredData": {
-      "appDescription": "#1 hodnocený AI agent ovládající počítač. Coasty ovládá plný desktop jako člověk — otevírá prohlížeče, kliká, píše, vyplňuje formuláře, posílá e-maily a spravuje tabulky autonomně. 82% v benchmarku OSWorld. Skutečná izolace na úrovni VM. Vestavěné řešení CAPTCHA. Od $20/měsíc.",
+      "appDescription": "#1 hodnocený AI agent ovládající počítač. Coasty ovládá plný desktop jako člověk — otevírá prohlížeče, kliká, píše, vyplňuje formuláře, posílá e-maily a spravuje tabulky autonomně. 82% v benchmarku OSWorld. Skutečná izolace na úrovni VM. Vestavěné řešení CAPTCHA. Od $19/měsíc.",
       "orgDescription": "Coasty vyvíjí #1 AI agenta ovládajícího počítač. Naše platforma poskytuje autonomní ovládání desktopu, automatizaci prohlížeče a orchestraci více agentů se skutečnou izolací na úrovni VM.",
       "productDescription": "AI agent ovládající počítač, který řídí desktop jako člověk. #1 v benchmarku OSWorld (82%). Autonomní automatizace prohlížeče, ovládání desktopu, odesílání e-mailů, vyplňování formulářů a správa tabulek se skutečnou izolací na úrovni VM.",
       "websiteDescription": "#1 platforma AI agenta ovládajícího počítač. 82% OSWorld benchmark. Autonomní automatizace prohlížeče, desktopu a terminálu s izolací VM. Od $20/měs.",

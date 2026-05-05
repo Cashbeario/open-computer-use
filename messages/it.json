@@ -1992,7 +1992,7 @@
     "featureComparison": "Confronto funzionalità",
     "whyChooseCoasty": "Perché scegliere Coasty",
     "strengthsOf": "Punti di forza di {name}",
-    "ctaDescription": "82% OSWorld benchmark. Isolamento VM. Risoluzione CAPTCHA. A partire da $20/mese.",
+    "ctaDescription": "82% OSWorld benchmark. Isolamento VM. Risoluzione CAPTCHA. A partire da $19/mese.",
     "watchCaseStudies": "Guarda i casi studio"
   },
   "agentSwarms": {
@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - Agente IA per l'Uso del Computer #1 | Dipendente IA per l'Automazione di Desktop e Browser",
       "titleTemplate": "{title} | Coasty - Agente IA per l'Uso del Computer",
-      "description": "Coasty è l'agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld. Controlla un desktop completo come un umano: apre browser, clicca, digita, compila moduli, invia e-mail, gestisce fogli di calcolo. Vero isolamento a livello VM per sessione. A partire da $20/mo.",
+      "description": "Coasty è l'agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld. Controlla un desktop completo come un umano: apre browser, clicca, digita, compila moduli, invia e-mail, gestisce fogli di calcolo. Vero isolamento a livello VM per sessione. A partire da $19/mo.",
       "ogTitle": "Coasty - Agente IA per l'Uso del Computer #1 | 82% Benchmark OSWorld",
-      "ogDescription": "Dipendente IA che controlla un desktop come un umano. #1 nel benchmark OSWorld (82%). Automazione del browser, controllo del desktop, risoluzione CAPTCHA, isolamento VM. A partire da $20/mo.",
-      "twitterDescription": "Dipendente IA che controlla un desktop come un umano. Apre browser, clicca, digita, compila moduli, invia e-mail. Vero isolamento VM. $20/mo vs $3,000/mo assistente virtuale umano."
+      "ogDescription": "Dipendente IA che controlla un desktop come un umano. #1 nel benchmark OSWorld (82%). Automazione del browser, controllo del desktop, risoluzione CAPTCHA, isolamento VM. A partire da $19/mo.",
+      "twitterDescription": "Dipendente IA che controlla un desktop come un umano. Apre browser, clicca, digita, compila moduli, invia e-mail. Vero isolamento VM. $19/mo vs $3,000/mo assistente virtuale umano."
     },
     "compare": {
       "title": "Confronta Coasty - Alternative di Agenti IA e Confronto con i Concorrenti",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Prezzi — Piani e Prezzi dell'Agente IA Coasty",
-      "description": "Piani tariffari Coasty a partire da $20/mo. Sostituisci assistenti virtuali da $3,000/mo con un dipendente IA. Livello gratuito disponibile. Utilizzo basato su crediti senza costi nascosti.",
+      "description": "Piani tariffari Coasty a partire da $19/mo. Sostituisci assistenti virtuali da $3,000/mo con un dipendente IA. Livello gratuito disponibile. Utilizzo basato su crediti senza costi nascosti.",
       "ogTitle": "Prezzi Coasty — Piani Agente IA",
-      "ogDescription": "Dipendente IA a partire da $20/mo. Sostituisci costosi assistenti virtuali con IA autonoma. Livello gratuito disponibile."
+      "ogDescription": "Dipendente IA a partire da $19/mo. Sostituisci costosi assistenti virtuali con IA autonoma. Livello gratuito disponibile."
     },
     "faq": {
       "q1": "Cos'è Coasty?",
@@ -2327,7 +2327,7 @@
       "q2": "Come si confronta Coasty con Anthropic Computer Use?",
       "a2": "Mentre Anthropic Computer Use fornisce un'API grezza per il controllo del computer, Coasty è una piattaforma pronta per la produzione con infrastruttura VM gestita, risoluzione CAPTCHA integrata, un'app desktop per Mac e Windows, supporto multi-modello e il punteggio più alto nel benchmark OSWorld (82%). Coasty fornisce la soluzione completa — non solo l'API.",
       "q3": "Quanto costa Coasty?",
-      "a3": "Coasty parte da $20/mese per il piano Starter con un livello gratuito disponibile. Questo si confronta con oltre $3,000 al mese per un assistente virtuale umano. Coasty lavora 24/7 senza pause, senza formazione e con scalabilità istantanea.",
+      "a3": "Coasty parte da $19/mese per il piano Starter con un livello gratuito disponibile. Questo si confronta con oltre $3,000 al mese per un assistente virtuale umano. Coasty lavora 24/7 senza pause, senza formazione e con scalabilità istantanea.",
       "q4": "È sicuro usare Coasty?",
       "a4": "Sì. Ogni sessione Coasty viene eseguita nella propria macchina virtuale isolata e protetta. I tuoi dati restano al sicuro, la tua macchina non viene toccata e nulla trapela tra le sessioni. Questo è vero isolamento a livello VM, non solo container in un pool condiviso.",
       "q5": "Cos'è il benchmark OSWorld?",
@@ -2344,10 +2344,10 @@
       "a10": "Sì. Coasty ha una pipeline di risoluzione CAPTCHA integrata, quindi non viene bloccato come gli agenti IA concorrenti. Questo è fondamentale per l'automazione reale dove i CAPTCHA sono comuni sui siti web."
     },
     "structuredData": {
-      "appDescription": "L'agente IA per l'uso del computer #1. Coasty controlla un desktop completo come un umano — apre browser, clicca, digita, compila moduli, invia e-mail e gestisce fogli di calcolo in autonomia. 82% nel benchmark OSWorld. Vero isolamento a livello VM. Risoluzione CAPTCHA integrata. A partire da $20/mese.",
+      "appDescription": "L'agente IA per l'uso del computer #1. Coasty controlla un desktop completo come un umano — apre browser, clicca, digita, compila moduli, invia e-mail e gestisce fogli di calcolo in autonomia. 82% nel benchmark OSWorld. Vero isolamento a livello VM. Risoluzione CAPTCHA integrata. A partire da $19/mese.",
       "orgDescription": "Coasty sviluppa l'agente IA per l'uso del computer #1. La nostra piattaforma fornisce controllo autonomo del desktop, automazione del browser e orchestrazione multi-agente con vero isolamento a livello VM.",
       "productDescription": "Agente IA per l'uso del computer che controlla un desktop come un umano. #1 nel benchmark OSWorld (82%). Automazione autonoma del browser, controllo del desktop, invio e-mail, compilazione moduli e gestione fogli di calcolo con vero isolamento a livello VM.",
-      "websiteDescription": "Piattaforma di agente IA per l'uso del computer #1. 82% nel benchmark OSWorld. Automazione autonoma di browser, desktop e terminale con isolamento VM. A partire da $20/mo.",
+      "websiteDescription": "Piattaforma di agente IA per l'uso del computer #1. 82% nel benchmark OSWorld. Automazione autonoma di browser, desktop e terminale con isolamento VM. A partire da $19/mo.",
       "softwareDescription": "Agente IA per l'uso del computer che controlla un desktop completo come un umano. #1 nel benchmark OSWorld con un tasso di completamento dell'82% su 369 attività reali. Automazione autonoma del browser, controllo del desktop, operazioni di terminale, invio e-mail, compilazione moduli e gestione fogli di calcolo.",
       "breadcrumbs": {
         "home": "Home",

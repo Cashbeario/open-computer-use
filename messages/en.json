@@ -1783,7 +1783,7 @@
     "featureComparison": "Feature Comparison",
     "whyChooseCoasty": "Why Choose Coasty",
     "strengthsOf": "{name} Strengths",
-    "ctaDescription": "82% OSWorld benchmark. VM isolation. CAPTCHA solving. Starting at $20/mo.",
+    "ctaDescription": "82% OSWorld benchmark. VM isolation. CAPTCHA solving. Starting at $19/mo.",
     "watchCaseStudies": "Watch Case Studies"
   },
 
@@ -1979,10 +1979,10 @@
     "home": {
       "title": "Coasty - #1 Computer-Use AI Agent | AI Employee for Desktop & Browser Automation",
       "titleTemplate": "{title} | Coasty - AI Computer-Use Agent",
-      "description": "Coasty is the #1 ranked computer-using AI agent — 82% on the OSWorld benchmark. It controls a full desktop like a human: opens browsers, clicks, types, fills forms, sends emails, manages spreadsheets. True VM-level isolation per session. Starting at $20/mo.",
+      "description": "Coasty is the #1 ranked computer-using AI agent — 82% on the OSWorld benchmark. It controls a full desktop like a human: opens browsers, clicks, types, fills forms, sends emails, manages spreadsheets. True VM-level isolation per session. Starting at $19/mo.",
       "ogTitle": "Coasty - #1 Computer-Use AI Agent | 82% OSWorld Benchmark",
-      "ogDescription": "AI employee that controls a desktop like a human. #1 on OSWorld benchmark (82%). Browser automation, desktop control, CAPTCHA solving, VM isolation. Starting at $20/mo.",
-      "twitterDescription": "AI employee that controls a desktop like a human. Opens browsers, clicks, types, fills forms, sends emails. True VM isolation. $20/mo vs $3k/mo human VA."
+      "ogDescription": "AI employee that controls a desktop like a human. #1 on OSWorld benchmark (82%). Browser automation, desktop control, CAPTCHA solving, VM isolation. Starting at $19/mo.",
+      "twitterDescription": "AI employee that controls a desktop like a human. Opens browsers, clicks, types, fills forms, sends emails. True VM isolation. $19/mo vs $3k/mo human VA."
     },
     "compare": {
       "title": "Compare Coasty - AI Agent Alternatives & Competitor Comparison",
@@ -2040,9 +2040,9 @@
     },
     "pricing": {
       "title": "Pricing — Coasty AI Agent Plans & Pricing",
-      "description": "Coasty pricing plans starting at $20/mo. Replace $3,000/mo virtual assistants with an AI employee. Free tier available. Credits-based usage with no hidden fees.",
+      "description": "Coasty pricing plans starting at $19/mo. Replace $3,000/mo virtual assistants with an AI employee. Free tier available. Credits-based usage with no hidden fees.",
       "ogTitle": "Coasty Pricing — AI Agent Plans",
-      "ogDescription": "AI employee starting at $20/mo. Replace expensive VAs with autonomous AI. Free tier available."
+      "ogDescription": "AI employee starting at $19/mo. Replace expensive VAs with autonomous AI. Free tier available."
     },
     "faq": {
       "q1": "What is Coasty?",
@@ -2050,7 +2050,7 @@
       "q2": "How does Coasty compare to Anthropic Computer Use?",
       "a2": "While Anthropic Computer Use provides a raw API for computer control, Coasty is a production-ready platform with managed VM infrastructure, built-in CAPTCHA solving, a desktop app for Mac and Windows, multi-model support, and the highest OSWorld benchmark score (82%). Coasty provides the complete solution — not just the API.",
       "q3": "How much does Coasty cost?",
-      "a3": "Coasty starts at $20/month for the Starter plan with a free tier available. This compares to $3,000+ per month for a human virtual assistant. Coasty works 24/7 with no breaks, no training, and instant scalability.",
+      "a3": "Coasty starts at $19/month for the Starter plan with a free tier available. This compares to $3,000+ per month for a human virtual assistant. Coasty works 24/7 with no breaks, no training, and instant scalability.",
       "q4": "Is Coasty safe to use?",
       "a4": "Yes. Every Coasty session runs in its own isolated, sandboxed virtual machine. Your data stays safe, your machine stays untouched, and nothing leaks between sessions. This is true VM-level isolation, not just containers in a shared pool.",
       "q5": "What is the OSWorld benchmark?",
@@ -2067,10 +2067,10 @@
       "a10": "Yes. Coasty has a built-in CAPTCHA-solving pipeline, so it doesn't get blocked the way competing AI agents do. This is critical for real-world automation where CAPTCHAs are common on websites."
     },
     "structuredData": {
-      "appDescription": "The #1 ranked computer-using AI agent. Coasty controls a full desktop like a human — opens browsers, clicks, types, fills forms, sends emails, and manages spreadsheets autonomously. 82% on the OSWorld benchmark. True VM-level isolation. Built-in CAPTCHA solving. Starting at $20/month.",
+      "appDescription": "The #1 ranked computer-using AI agent. Coasty controls a full desktop like a human — opens browsers, clicks, types, fills forms, sends emails, and manages spreadsheets autonomously. 82% on the OSWorld benchmark. True VM-level isolation. Built-in CAPTCHA solving. Starting at $19/month.",
       "orgDescription": "Coasty builds the #1 computer-using AI agent. Our platform provides autonomous desktop control, browser automation, and multi-agent orchestration with true VM-level isolation.",
       "productDescription": "AI computer-using agent that controls a desktop like a human. #1 on OSWorld benchmark (82%). Autonomous browser automation, desktop control, email sending, form filling, and spreadsheet management with true VM-level isolation.",
-      "websiteDescription": "#1 computer-using AI agent platform. 82% OSWorld benchmark. Autonomous browser, desktop, and terminal automation with VM isolation. Starting at $20/mo.",
+      "websiteDescription": "#1 computer-using AI agent platform. 82% OSWorld benchmark. Autonomous browser, desktop, and terminal automation with VM isolation. Starting at $19/mo.",
       "softwareDescription": "AI computer-using agent that controls a full desktop like a human. #1 on OSWorld benchmark with 82% completion rate across 369 real-world tasks. Autonomous browser automation, desktop control, terminal operations, email sending, form filling, and spreadsheet management.",
       "breadcrumbs": {
         "home": "Home",

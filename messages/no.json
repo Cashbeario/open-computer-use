@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - #1 AI-agent for datamaskinbruk | AI-ansatt for skrivebords- og nettleserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-agent for datamaskinbruk",
-      "description": "Coasty er den #1-rangerte AI-agenten for datamaskinbruk — 82% på OSWorld benchmark. Styrer et helt skrivebord som et menneske: åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post, administrerer regneark. Ekte VM-isolering per økt. Fra $20/mo.",
+      "description": "Coasty er den #1-rangerte AI-agenten for datamaskinbruk — 82% på OSWorld benchmark. Styrer et helt skrivebord som et menneske: åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post, administrerer regneark. Ekte VM-isolering per økt. Fra $19/mo.",
       "ogTitle": "Coasty - #1 AI-agent for datamaskinbruk | 82% OSWorld Benchmark",
-      "ogDescription": "AI-ansatt som styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Nettleserautomatisering, skrivebordskontroll, CAPTCHA-løsning, VM-isolering. Fra $20/mo.",
-      "twitterDescription": "AI-ansatt som styrer et skrivebord som et menneske. Åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post. Ekte VM-isolering. $20/mo mot $3,000/mo menneskelig virtuell assistent."
+      "ogDescription": "AI-ansatt som styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Nettleserautomatisering, skrivebordskontroll, CAPTCHA-løsning, VM-isolering. Fra $19/mo.",
+      "twitterDescription": "AI-ansatt som styrer et skrivebord som et menneske. Åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post. Ekte VM-isolering. $19/mo mot $3,000/mo menneskelig virtuell assistent."
     },
     "compare": {
       "title": "Sammenlign Coasty - AI-agentalternativer og konkurrentsammenligning",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Priser — Coasty AI-agentplaner og priser",
-      "description": "Coasty-priser fra $20/mo. Erstatt virtuelle assistenter til $3,000/mo med en AI-ansatt. Gratis plan tilgjengelig. Kredittbasert forbruk uten skjulte avgifter.",
+      "description": "Coasty-priser fra $19/mo. Erstatt virtuelle assistenter til $3,000/mo med en AI-ansatt. Gratis plan tilgjengelig. Kredittbasert forbruk uten skjulte avgifter.",
       "ogTitle": "Coasty-priser — AI-agentplaner",
-      "ogDescription": "AI-ansatt fra $20/mo. Erstatt dyre VA-er med autonom AI. Gratis plan tilgjengelig."
+      "ogDescription": "AI-ansatt fra $19/mo. Erstatt dyre VA-er med autonom AI. Gratis plan tilgjengelig."
     },
     "faq": {
       "q1": "Hva er Coasty?",
@@ -2327,7 +2327,7 @@
       "q2": "Hvordan sammenligner Coasty seg med Anthropic Computer Use?",
       "a2": "Mens Anthropic Computer Use tilbyr et rått API for datamaskinkontroll, er Coasty en produksjonsklar plattform med administrert VM-infrastruktur, innebygd CAPTCHA-løsning, skrivebordsapp for Mac og Windows, støtte for flere modeller og den høyeste OSWorld benchmark-poengsummen (82%). Coasty gir den komplette løsningen — ikke bare API-et.",
       "q3": "Hva koster Coasty?",
-      "a3": "Coasty starter på $20/month for Starter-planen med en gratis plan tilgjengelig. Sammenlign med $3,000+ per måned for en menneskelig virtuell assistent. Coasty jobber 24/7 uten pauser, ingen opplæring nødvendig og umiddelbar skalerbarhet.",
+      "a3": "Coasty starter på $19/month for Starter-planen med en gratis plan tilgjengelig. Sammenlign med $3,000+ per måned for en menneskelig virtuell assistent. Coasty jobber 24/7 uten pauser, ingen opplæring nødvendig og umiddelbar skalerbarhet.",
       "q4": "Er Coasty trygt å bruke?",
       "a4": "Ja. Hver Coasty-økt kjører i sin egen isolerte, sandkassebaserte virtuelle maskin. Dataene dine er trygge, maskinen din forblir urørt, og ingenting lekker mellom økter. Dette er ekte VM-nivå isolering, ikke bare containere i en delt pool.",
       "q5": "Hva er OSWorld benchmark?",
@@ -2344,10 +2344,10 @@
       "a10": "Ja. Coasty har en innebygd CAPTCHA-løsningspipeline, så den blir ikke blokkert slik konkurrerende AI-agenter gjør. Dette er avgjørende for automatisering i den virkelige verden der CAPTCHA-er er vanlige på nettsider."
     },
     "structuredData": {
-      "appDescription": "Den #1-rangerte AI-agenten for datamaskinbruk. Coasty styrer et helt skrivebord som et menneske — åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post og administrerer regneark autonomt. 82% på OSWorld benchmark. Ekte VM-nivå isolering. Innebygd CAPTCHA-løsning. Fra $20/month.",
+      "appDescription": "Den #1-rangerte AI-agenten for datamaskinbruk. Coasty styrer et helt skrivebord som et menneske — åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post og administrerer regneark autonomt. 82% på OSWorld benchmark. Ekte VM-nivå isolering. Innebygd CAPTCHA-løsning. Fra $19/month.",
       "orgDescription": "Coasty bygger den #1-rangerte AI-agenten for datamaskinbruk. Vår plattform tilbyr autonom skrivebordskontroll, nettleserautomatisering og orkestrering av flere agenter med ekte VM-nivå isolering.",
       "productDescription": "AI-datamaskinbruksagent som styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Autonom nettleserautomatisering, skrivebordskontroll, e-postsending, skjemautfylling og regnearkhåndtering med ekte VM-nivå isolering.",
-      "websiteDescription": "#1 AI-agentplattform for datamaskinbruk. 82% OSWorld benchmark. Autonom nettleser-, skrivebords- og terminalautomatisering med VM-isolering. Fra $20/mo.",
+      "websiteDescription": "#1 AI-agentplattform for datamaskinbruk. 82% OSWorld benchmark. Autonom nettleser-, skrivebords- og terminalautomatisering med VM-isolering. Fra $19/mo.",
       "softwareDescription": "AI-datamaskinbruksagent som styrer et helt skrivebord som et menneske. #1 på OSWorld benchmark med 82% fullføringsrate over 369 virkelige oppgaver. Autonom nettleserautomatisering, skrivebordskontroll, terminaloperasjoner, e-postsending, skjemautfylling og regnearkhåndtering.",
       "breadcrumbs": {
         "home": "Hjem",

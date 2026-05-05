@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - #1 AI-agent til computerbrug | AI-medarbejder til skrivebords- og browserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-agent til computerbrug",
-      "description": "Coasty er den #1-rangerede AI-agent til computerbrug — 82% på OSWorld benchmark. Styrer et helt skrivebord som et menneske: åbner browsere, klikker, skriver, udfylder formularer, sender e-mails, administrerer regneark. Ægte VM-isolering per session. Fra $20/mo.",
+      "description": "Coasty er den #1-rangerede AI-agent til computerbrug — 82% på OSWorld benchmark. Styrer et helt skrivebord som et menneske: åbner browsere, klikker, skriver, udfylder formularer, sender e-mails, administrerer regneark. Ægte VM-isolering per session. Fra $19/mo.",
       "ogTitle": "Coasty - #1 AI-agent til computerbrug | 82% OSWorld Benchmark",
-      "ogDescription": "AI-medarbejder der styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Browserautomatisering, skrivebordskontrol, CAPTCHA-løsning, VM-isolering. Fra $20/mo.",
-      "twitterDescription": "AI-medarbejder der styrer et skrivebord som et menneske. Åbner browsere, klikker, skriver, udfylder formularer, sender e-mails. Ægte VM-isolering. $20/mo mod $3,000/mo menneskelig virtuel assistent."
+      "ogDescription": "AI-medarbejder der styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Browserautomatisering, skrivebordskontrol, CAPTCHA-løsning, VM-isolering. Fra $19/mo.",
+      "twitterDescription": "AI-medarbejder der styrer et skrivebord som et menneske. Åbner browsere, klikker, skriver, udfylder formularer, sender e-mails. Ægte VM-isolering. $19/mo mod $3,000/mo menneskelig virtuel assistent."
     },
     "compare": {
       "title": "Sammenlign Coasty - AI-agentalternativer og konkurrentsammenligning",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Priser — Coasty AI-agentplaner og priser",
-      "description": "Coasty-priser fra $20/mo. Erstat virtuelle assistenter til $3,000/mo med en AI-medarbejder. Gratis plan tilgængelig. Kreditbaseret forbrug uden skjulte gebyrer.",
+      "description": "Coasty-priser fra $19/mo. Erstat virtuelle assistenter til $3,000/mo med en AI-medarbejder. Gratis plan tilgængelig. Kreditbaseret forbrug uden skjulte gebyrer.",
       "ogTitle": "Coasty-priser — AI-agentplaner",
-      "ogDescription": "AI-medarbejder fra $20/mo. Erstat dyre VA'er med autonom AI. Gratis plan tilgængelig."
+      "ogDescription": "AI-medarbejder fra $19/mo. Erstat dyre VA'er med autonom AI. Gratis plan tilgængelig."
     },
     "faq": {
       "q1": "Hvad er Coasty?",
@@ -2327,7 +2327,7 @@
       "q2": "Hvordan sammenligner Coasty sig med Anthropic Computer Use?",
       "a2": "Mens Anthropic Computer Use leverer et rå API til computerkontrol, er Coasty en produktionsklar platform med administreret VM-infrastruktur, indbygget CAPTCHA-løsning, desktopapp til Mac og Windows, understøttelse af flere modeller og den højeste OSWorld benchmark-score (82%). Coasty giver den komplette løsning — ikke bare API'et.",
       "q3": "Hvad koster Coasty?",
-      "a3": "Coasty starter ved $20/month for Starter-planen med en gratis plan tilgængelig. Sammenlign med $3,000+ om måneden for en menneskelig virtuel assistent. Coasty arbejder 24/7 uden pauser, ingen træning nødvendig og øjeblikkelig skalerbarhed.",
+      "a3": "Coasty starter ved $19/month for Starter-planen med en gratis plan tilgængelig. Sammenlign med $3,000+ om måneden for en menneskelig virtuel assistent. Coasty arbejder 24/7 uden pauser, ingen træning nødvendig og øjeblikkelig skalerbarhed.",
       "q4": "Er Coasty sikkert at bruge?",
       "a4": "Ja. Hver Coasty-session kører i sin egen isolerede, sandkassebaserede virtuelle maskine. Dine data er sikre, din maskine forbliver urørt, og intet lækker mellem sessioner. Dette er ægte VM-niveau isolering, ikke bare containere i en delt pulje.",
       "q5": "Hvad er OSWorld benchmark?",
@@ -2344,10 +2344,10 @@
       "a10": "Ja. Coasty har en indbygget CAPTCHA-løsningspipeline, så den bliver ikke blokeret som konkurrerende AI-agenter. Dette er afgørende for automatisering i den virkelige verden, hvor CAPTCHA'er er almindelige på hjemmesider."
     },
     "structuredData": {
-      "appDescription": "Den #1-rangerede AI-agent til computerbrug. Coasty styrer et helt skrivebord som et menneske — åbner browsere, klikker, skriver, udfylder formularer, sender e-mails og administrerer regneark autonomt. 82% på OSWorld benchmark. Ægte VM-niveau isolering. Indbygget CAPTCHA-løsning. Fra $20/month.",
+      "appDescription": "Den #1-rangerede AI-agent til computerbrug. Coasty styrer et helt skrivebord som et menneske — åbner browsere, klikker, skriver, udfylder formularer, sender e-mails og administrerer regneark autonomt. 82% på OSWorld benchmark. Ægte VM-niveau isolering. Indbygget CAPTCHA-løsning. Fra $19/month.",
       "orgDescription": "Coasty bygger den #1-rangerede AI-agent til computerbrug. Vores platform tilbyder autonom skrivebordskontrol, browserautomatisering og orkestrering af flere agenter med ægte VM-niveau isolering.",
       "productDescription": "AI-computerbrugsagent der styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). Autonom browserautomatisering, skrivebordskontrol, e-mailafsendelse, formularudfyldning og regnearkshåndtering med ægte VM-niveau isolering.",
-      "websiteDescription": "#1 AI-agentplatform til computerbrug. 82% OSWorld benchmark. Autonom browser-, skrivebords- og terminalautomatisering med VM-isolering. Fra $20/mo.",
+      "websiteDescription": "#1 AI-agentplatform til computerbrug. 82% OSWorld benchmark. Autonom browser-, skrivebords- og terminalautomatisering med VM-isolering. Fra $19/mo.",
       "softwareDescription": "AI-computerbrugsagent der styrer et helt skrivebord som et menneske. #1 på OSWorld benchmark med 82% fuldførelsesrate over 369 virkelige opgaver. Autonom browserautomatisering, skrivebordskontrol, terminaloperationer, e-mailafsendelse, formularudfyldning og regnearkshåndtering.",
       "breadcrumbs": {
         "home": "Hjem",

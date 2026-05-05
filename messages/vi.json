@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Nhân viên AI cho tự động hóa máy tính và trình duyệt",
       "titleTemplate": "{title} | Coasty - Trợ lý AI sử dụng máy tính",
-      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark. Điều khiển toàn bộ máy tính như con người: mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email, quản lý bảng tính. Cách ly VM cho mỗi phiên. Bắt đầu từ $20/mo.",
+      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark. Điều khiển toàn bộ máy tính như con người: mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email, quản lý bảng tính. Cách ly VM cho mỗi phiên. Bắt đầu từ $19/mo.",
       "ogTitle": "Coasty - Trợ lý AI sử dụng máy tính số 1 | 82% OSWorld Benchmark",
-      "ogDescription": "Nhân viên AI điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Tự động hóa trình duyệt, điều khiển máy tính, giải CAPTCHA, cách ly VM. Bắt đầu từ $20/mo.",
-      "twitterDescription": "Nhân viên AI điều khiển máy tính như con người. Mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email. Cách ly VM thực sự. $20/mo so với $3,000/mo trợ lý ảo."
+      "ogDescription": "Nhân viên AI điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Tự động hóa trình duyệt, điều khiển máy tính, giải CAPTCHA, cách ly VM. Bắt đầu từ $19/mo.",
+      "twitterDescription": "Nhân viên AI điều khiển máy tính như con người. Mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email. Cách ly VM thực sự. $19/mo so với $3,000/mo trợ lý ảo."
     },
     "compare": {
       "title": "So sánh Coasty - Các giải pháp thay thế trợ lý AI và so sánh đối thủ",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Bảng giá — Gói và giá trợ lý AI Coasty",
-      "description": "Gói giá Coasty bắt đầu từ $20/mo. Thay thế trợ lý ảo $3,000/mo bằng nhân viên AI. Có gói miễn phí. Sử dụng theo tín dụng, không phí ẩn.",
+      "description": "Gói giá Coasty bắt đầu từ $19/mo. Thay thế trợ lý ảo $3,000/mo bằng nhân viên AI. Có gói miễn phí. Sử dụng theo tín dụng, không phí ẩn.",
       "ogTitle": "Bảng giá Coasty — Gói trợ lý AI",
-      "ogDescription": "Nhân viên AI bắt đầu từ $20/mo. Thay thế VA đắt đỏ bằng AI tự động. Có gói miễn phí."
+      "ogDescription": "Nhân viên AI bắt đầu từ $19/mo. Thay thế VA đắt đỏ bằng AI tự động. Có gói miễn phí."
     },
     "faq": {
       "q1": "Coasty là gì?",
@@ -2327,7 +2327,7 @@
       "q2": "Coasty so với Anthropic Computer Use như thế nào?",
       "a2": "Trong khi Anthropic Computer Use cung cấp API thô để điều khiển máy tính, Coasty là nền tảng sẵn sàng sản xuất với hạ tầng VM được quản lý, giải CAPTCHA tích hợp, ứng dụng máy tính cho Mac và Windows, hỗ trợ nhiều mô hình và điểm OSWorld benchmark cao nhất (82%). Coasty cung cấp giải pháp hoàn chỉnh — không chỉ API.",
       "q3": "Coasty giá bao nhiêu?",
-      "a3": "Coasty bắt đầu từ $20/month cho gói Starter với gói miễn phí có sẵn. So với $3,000+ mỗi tháng cho trợ lý ảo. Coasty hoạt động 24/7 không nghỉ, không cần đào tạo và mở rộng ngay lập tức.",
+      "a3": "Coasty bắt đầu từ $19/month cho gói Starter với gói miễn phí có sẵn. So với $3,000+ mỗi tháng cho trợ lý ảo. Coasty hoạt động 24/7 không nghỉ, không cần đào tạo và mở rộng ngay lập tức.",
       "q4": "Coasty có an toàn không?",
       "a4": "Có. Mọi phiên Coasty chạy trong VM cách ly, sandbox riêng. Dữ liệu của bạn an toàn, máy của bạn không bị ảnh hưởng và không có gì rò rỉ giữa các phiên. Đây là cách ly VM thực sự, không chỉ container trong pool chung.",
       "q5": "OSWorld benchmark là gì?",
@@ -2344,10 +2344,10 @@
       "a10": "Có. Coasty có hệ thống giải CAPTCHA tích hợp, nên không bị chặn như các trợ lý AI cạnh tranh. Điều này rất quan trọng cho tự động hóa thực tế khi CAPTCHA phổ biến trên các trang web."
     },
     "structuredData": {
-      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark. Cách ly VM thực sự. Giải CAPTCHA tích hợp. Bắt đầu từ $20/month.",
+      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark. Cách ly VM thực sự. Giải CAPTCHA tích hợp. Bắt đầu từ $19/month.",
       "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly VM thực sự.",
       "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính với cách ly VM thực sự.",
-      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1. 82% OSWorld benchmark. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Bắt đầu từ $20/mo.",
+      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1. 82% OSWorld benchmark. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Bắt đầu từ $19/mo.",
       "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
       "breadcrumbs": {
         "home": "Trang chủ",

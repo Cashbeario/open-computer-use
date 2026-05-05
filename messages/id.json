@@ -2256,10 +2256,10 @@
     "home": {
       "title": "Coasty - Agen AI Penggunaan Komputer #1 | Karyawan AI untuk Otomasi Desktop & Browser",
       "titleTemplate": "{title} | Coasty - Agen AI Penggunaan Komputer",
-      "description": "Coasty adalah agen AI penggunaan komputer peringkat #1 — 82% pada OSWorld benchmark. Mengendalikan desktop penuh seperti manusia: membuka browser, mengklik, mengetik, mengisi formulir, mengirim email, mengelola spreadsheet. Isolasi VM per sesi. Mulai dari $20/mo.",
+      "description": "Coasty adalah agen AI penggunaan komputer peringkat #1 — 82% pada OSWorld benchmark. Mengendalikan desktop penuh seperti manusia: membuka browser, mengklik, mengetik, mengisi formulir, mengirim email, mengelola spreadsheet. Isolasi VM per sesi. Mulai dari $19/mo.",
       "ogTitle": "Coasty - Agen AI Penggunaan Komputer #1 | 82% OSWorld Benchmark",
-      "ogDescription": "Karyawan AI yang mengendalikan desktop seperti manusia. #1 pada OSWorld benchmark (82%). Otomasi browser, kontrol desktop, pemecahan CAPTCHA, isolasi VM. Mulai dari $20/mo.",
-      "twitterDescription": "Karyawan AI yang mengendalikan desktop seperti manusia. Membuka browser, mengklik, mengetik, mengisi formulir, mengirim email. Isolasi VM nyata. $20/mo vs $3,000/mo asisten virtual."
+      "ogDescription": "Karyawan AI yang mengendalikan desktop seperti manusia. #1 pada OSWorld benchmark (82%). Otomasi browser, kontrol desktop, pemecahan CAPTCHA, isolasi VM. Mulai dari $19/mo.",
+      "twitterDescription": "Karyawan AI yang mengendalikan desktop seperti manusia. Membuka browser, mengklik, mengetik, mengisi formulir, mengirim email. Isolasi VM nyata. $19/mo vs $3,000/mo asisten virtual."
     },
     "compare": {
       "title": "Bandingkan Coasty - Alternatif Agen AI & Perbandingan Kompetitor",
@@ -2317,9 +2317,9 @@
     },
     "pricing": {
       "title": "Harga — Paket & Harga Agen AI Coasty",
-      "description": "Paket harga Coasty mulai dari $20/mo. Ganti asisten virtual $3,000/mo dengan karyawan AI. Paket gratis tersedia. Penggunaan berbasis kredit tanpa biaya tersembunyi.",
+      "description": "Paket harga Coasty mulai dari $19/mo. Ganti asisten virtual $3,000/mo dengan karyawan AI. Paket gratis tersedia. Penggunaan berbasis kredit tanpa biaya tersembunyi.",
       "ogTitle": "Harga Coasty — Paket Agen AI",
-      "ogDescription": "Karyawan AI mulai dari $20/mo. Ganti VA mahal dengan AI otonom. Paket gratis tersedia."
+      "ogDescription": "Karyawan AI mulai dari $19/mo. Ganti VA mahal dengan AI otonom. Paket gratis tersedia."
     },
     "faq": {
       "q1": "Apa itu Coasty?",
@@ -2327,7 +2327,7 @@
       "q2": "Bagaimana Coasty dibandingkan dengan Anthropic Computer Use?",
       "a2": "Sementara Anthropic Computer Use menyediakan API mentah untuk kontrol komputer, Coasty adalah platform siap produksi dengan infrastruktur VM terkelola, pemecahan CAPTCHA bawaan, aplikasi desktop untuk Mac dan Windows, dukungan multi-model, dan skor OSWorld benchmark tertinggi (82%). Coasty menyediakan solusi lengkap — bukan hanya API.",
       "q3": "Berapa biaya Coasty?",
-      "a3": "Coasty mulai dari $20/month untuk paket Starter dengan paket gratis tersedia. Dibandingkan dengan $3,000+ per bulan untuk asisten virtual manusia. Coasty bekerja 24/7 tanpa istirahat, tanpa pelatihan, dan skalabilitas instan.",
+      "a3": "Coasty mulai dari $19/month untuk paket Starter dengan paket gratis tersedia. Dibandingkan dengan $3,000+ per bulan untuk asisten virtual manusia. Coasty bekerja 24/7 tanpa istirahat, tanpa pelatihan, dan skalabilitas instan.",
       "q4": "Apakah Coasty aman digunakan?",
       "a4": "Ya. Setiap sesi Coasty berjalan di VM terisolasi dan sandbox-nya sendiri. Data Anda aman, mesin Anda tidak tersentuh, dan tidak ada yang bocor antar sesi. Ini isolasi tingkat VM nyata, bukan hanya container dalam pool bersama.",
       "q5": "Apa itu OSWorld benchmark?",
@@ -2344,10 +2344,10 @@
       "a10": "Ya. Coasty memiliki pipeline pemecahan CAPTCHA bawaan, sehingga tidak diblokir seperti agen AI pesaing. Ini penting untuk otomasi dunia nyata di mana CAPTCHA umum di situs web."
     },
     "structuredData": {
-      "appDescription": "Agen AI penggunaan komputer peringkat #1. Coasty mengendalikan desktop penuh seperti manusia — membuka browser, mengklik, mengetik, mengisi formulir, mengirim email, dan mengelola spreadsheet secara otonom. 82% pada OSWorld benchmark. Isolasi tingkat VM nyata. Pemecahan CAPTCHA bawaan. Mulai dari $20/month.",
+      "appDescription": "Agen AI penggunaan komputer peringkat #1. Coasty mengendalikan desktop penuh seperti manusia — membuka browser, mengklik, mengetik, mengisi formulir, mengirim email, dan mengelola spreadsheet secara otonom. 82% pada OSWorld benchmark. Isolasi tingkat VM nyata. Pemecahan CAPTCHA bawaan. Mulai dari $19/month.",
       "orgDescription": "Coasty membangun agen AI penggunaan komputer #1. Platform kami menyediakan kontrol desktop otonom, otomasi browser, dan orkestrasi multi-agen dengan isolasi tingkat VM nyata.",
       "productDescription": "Agen AI penggunaan komputer yang mengendalikan desktop seperti manusia. #1 pada OSWorld benchmark (82%). Otomasi browser otonom, kontrol desktop, pengiriman email, pengisian formulir, dan pengelolaan spreadsheet dengan isolasi tingkat VM nyata.",
-      "websiteDescription": "Platform agen AI penggunaan komputer #1. 82% OSWorld benchmark. Otomasi browser, desktop, dan terminal otonom dengan isolasi VM. Mulai dari $20/mo.",
+      "websiteDescription": "Platform agen AI penggunaan komputer #1. 82% OSWorld benchmark. Otomasi browser, desktop, dan terminal otonom dengan isolasi VM. Mulai dari $19/mo.",
       "softwareDescription": "Agen AI penggunaan komputer yang mengendalikan desktop penuh seperti manusia. #1 pada OSWorld benchmark dengan tingkat penyelesaian 82% di 369 tugas dunia nyata. Otomasi browser otonom, kontrol desktop, operasi terminal, pengiriman email, pengisian formulir, dan pengelolaan spreadsheet.",
       "breadcrumbs": {
         "home": "Beranda",

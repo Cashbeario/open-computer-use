@@ -1,0 +1,68 @@
+{
+  "name": "@coasty/mcp",
+  "version": "1.0.0",
+  "description": "Coasty MCP server — drive Coasty's screenshot prediction, managed VMs, and schedule automation from Claude Desktop, Cursor, Windsurf, Claude Code, and any other MCP client.",
+  "license": "MIT",
+  "homepage": "https://coasty.ai/api-docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coasty-ai/coasty-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/coasty-ai/coasty-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "coasty",
+    "claude",
+    "cursor",
+    "agent",
+    "automation",
+    "computer-use",
+    "browser-automation"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "coasty-mcp": "dist/bin/coasty-mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "node dist/bin/coasty-mcp.js",
+    "smoke": "node dist/bin/coasty-mcp.js --version && node dist/bin/coasty-mcp.js --help > /dev/null",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/bin/coasty-mcp.js",
+    "inspector:cli": "npx @modelcontextprotocol/inspector --cli node dist/bin/coasty-mcp.js",
+    "inspector:tools": "npx @modelcontextprotocol/inspector --cli node dist/bin/coasty-mcp.js --method tools/list",
+    "inspector:prompts": "npx @modelcontextprotocol/inspector --cli node dist/bin/coasty-mcp.js --method prompts/list",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "check": "npm run lint && npm run build && npm test && npm run smoke",
+    "prepublishOnly": "npm run check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

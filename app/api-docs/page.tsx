@@ -359,6 +359,140 @@ resp, _ := http.DefaultClient.Do(req)
 defer resp.Body.Close()`,
 }
 
+// Schedules API snippets — create + add a webhook trigger + sign a webhook
+// fire from the customer side. The webhook signing math is roundtrip-tested
+// in backend/tests/test_public_schedules.py::TestEndToEndWebhookSigning, so
+// the snippet below produces a Coasty-Signature the verifier accepts.
+const SCHEDULES_SNIPPETS: Record<LangId, string> = {
+  python: `import requests, hmac, hashlib, time
+
+# 1. Create a daily 9 AM ET schedule
+sched = requests.post(
+    "https://coasty.ai/v1/schedules",
+    headers={"X-API-Key": "sk-coasty-test-..."},
+    json={
+        "name": "morning briefing",
+        "machine_id": "550e8400-e29b-41d4-a716-446655440000",
+        "task_prompt": "Summarize unread Gmail and post to Slack.",
+        "frequency": "daily",
+        "time": "09:00",
+        "timezone": "America/New_York",
+    },
+).json()
+
+# 2. Add a webhook trigger — store the secret immediately
+trigger = requests.post(
+    f"https://coasty.ai/v1/schedules/{sched['id']}/triggers",
+    headers={"X-API-Key": "sk-coasty-test-..."},
+    json={"kind": "webhook"},
+).json()
+secret = trigger["webhook_secret"]   # whsec_<64 hex>  — store this
+
+# 3. Sign + fire the webhook from any external system
+ts = int(time.time())
+body = b'{"event":"order.placed"}'
+sig = hmac.new(secret.encode(), f"{ts}.".encode() + body,
+               hashlib.sha256).hexdigest()
+requests.post(
+    trigger["webhook_url"],
+    headers={"Coasty-Signature": f"t={ts},v1={sig}"},
+    data=body,
+)`,
+  javascript: `// Node 18+ — global fetch + node:crypto
+import { createHmac } from "node:crypto"
+
+// 1. Create a schedule
+const sched = await (await fetch("https://coasty.ai/v1/schedules", {
+  method: "POST",
+  headers: { "X-API-Key": "sk-coasty-test-...", "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name: "morning briefing",
+    machine_id: "550e8400-e29b-41d4-a716-446655440000",
+    task_prompt: "Summarize unread Gmail and post to Slack.",
+    frequency: "daily",
+    time: "09:00",
+    timezone: "America/New_York",
+  }),
+})).json()
+
+// 2. Add a webhook trigger
+const trigger = await (await fetch(
+  \`https://coasty.ai/v1/schedules/\${sched.id}/triggers\`,
+  {
+    method: "POST",
+    headers: { "X-API-Key": "sk-coasty-test-...", "Content-Type": "application/json" },
+    body: JSON.stringify({ kind: "webhook" }),
+  },
+)).json()
+const secret = trigger.webhook_secret
+
+// 3. Sign + fire
+const ts = Math.floor(Date.now() / 1000)
+const body = Buffer.from('{"event":"order.placed"}')
+const payload = Buffer.concat([Buffer.from(\`\${ts}.\`), body])
+const sig = createHmac("sha256", secret).update(payload).digest("hex")
+await fetch(trigger.webhook_url, {
+  method: "POST",
+  headers: { "Coasty-Signature": \`t=\${ts},v1=\${sig}\`, "Content-Type": "application/json" },
+  body,
+})`,
+  curl: `# 1. Create a schedule
+SCHED=$(curl -s -X POST https://coasty.ai/v1/schedules \\
+  -H "X-API-Key: sk-coasty-test-..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "morning briefing",
+    "machine_id": "550e8400-e29b-41d4-a716-446655440000",
+    "task_prompt": "Summarize unread Gmail and post to Slack.",
+    "frequency": "daily",
+    "time": "09:00",
+    "timezone": "America/New_York"
+  }' | jq -r .id)
+
+# 2. Add a webhook trigger
+TRIG=$(curl -s -X POST https://coasty.ai/v1/schedules/$SCHED/triggers \\
+  -H "X-API-Key: sk-coasty-test-..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"kind":"webhook"}')
+SECRET=$(echo $TRIG | jq -r .webhook_secret)
+URL=$(echo $TRIG | jq -r .webhook_url)
+
+# 3. Sign + fire
+TS=$(date +%s)
+BODY='{"event":"order.placed"}'
+SIG=$(printf '%s.%s' "$TS" "$BODY" | \\
+      openssl dgst -sha256 -hmac "$SECRET" -hex | awk '{print $2}')
+curl -X POST "$URL" \\
+  -H "Coasty-Signature: t=$TS,v1=$SIG" \\
+  -H "Content-Type: application/json" \\
+  --data "$BODY"`,
+  go: `// import: net/http, encoding/json, crypto/hmac, crypto/sha256,
+// encoding/hex, fmt, time, bytes
+body, _ := json.Marshal(map[string]any{
+  "name":        "morning briefing",
+  "machine_id":  "550e8400-e29b-41d4-a716-446655440000",
+  "task_prompt": "Summarize unread Gmail and post to Slack.",
+  "frequency":   "daily",
+  "time":        "09:00",
+  "timezone":    "America/New_York",
+})
+
+req, _ := http.NewRequest("POST",
+  "https://coasty.ai/v1/schedules",
+  bytes.NewReader(body))
+req.Header.Set("X-API-Key", "sk-coasty-test-...")
+req.Header.Set("Content-Type", "application/json")
+
+// Add a webhook trigger and sign as customer:
+// secret := triggerResponse["webhook_secret"]
+// ts := time.Now().Unix()
+// payload := append([]byte(fmt.Sprintf("%d.", ts)), body...)
+// h := hmac.New(sha256.New, []byte(secret))
+// h.Write(payload)
+// sig := hex.EncodeToString(h.Sum(nil))
+// "Coasty-Signature: t=<ts>,v1=<sig>"`,
+}
+
 // Machines API snippets — provision a sandbox VM in one call. All bodies
 // validate against backend/app/models/public_machines.py (extra="forbid").
 // Verified by backend/tests/test_doc_examples.py.
@@ -691,6 +825,78 @@ function MachinesTryIt() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   SCHEDULES — create + add webhook trigger + sign a fire end-to-end.
+   The webhook signing math here is roundtrip-tested against the
+   actual verifier in backend/tests/test_public_schedules.py, so the
+   snippets you copy from this page WILL produce a valid Coasty-Signature.
+   ═══════════════════════════════════════════════════════════════ */
+
+function SchedulesTryIt() {
+  const [lang, setLang] = useState<LangId>("python")
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      <div className="relative inline-flex items-center rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-1 mb-5">
+        {LANGS.map((l) => {
+          const active = l.id === lang
+          return (
+            <button
+              key={l.id}
+              onClick={() => setLang(l.id)}
+              className={`relative px-4 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
+                active ? "text-foreground" : "text-muted-foreground/55 hover:text-foreground/80"
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="schedules-lang-pill"
+                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  className="absolute inset-0 rounded-lg bg-foreground/[0.06] border border-border/40"
+                />
+              )}
+              <span className="relative">{l.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="relative rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
+
+        <div className="flex items-center justify-between px-5 py-2.5 border-b border-border/20">
+          <div className="flex items-center gap-2">
+            <Terminal className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <span className="text-[11px] font-mono text-muted-foreground/55">
+              POST /v1/schedules &nbsp;+&nbsp; POST /triggers (webhook) &nbsp;+&nbsp; sign &amp; fire
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/35">
+            <span className="hidden sm:flex items-center gap-1">HMAC-SHA256 · 5-min replay window</span>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={lang}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease }}
+          >
+            <CodeBlock code={SCHEDULES_SNIPPETS[lang]} lang={lang} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-muted-foreground/45">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span>Schedules created via API show up in your /schedules dashboard automatically — same user_id, same view.</span>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
    FEATURE CARD — border-light hover, signature icon watermark
    ═══════════════════════════════════════════════════════════════ */
 
@@ -999,6 +1205,66 @@ export default function ApiDocsPage() {
               "POST /v1/machines/{id}/browser/{op}",
               "POST /v1/machines/{id}/terminal",
               "POST /v1/machines/{id}/files/{op}",
+            ].map((path) => (
+              <code
+                key={path}
+                className="text-[10px] font-mono text-muted-foreground/55 px-2.5 py-1 rounded-md border border-border/30 bg-card/30"
+              >
+                {path}
+              </code>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* ─── SCHEDULES API ─── */}
+      <section className="py-24 px-7 sm:px-10 relative">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease }}
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center gap-2 h-6 px-3 rounded-full border border-border/30 bg-card/30 text-[10px] font-mono text-muted-foreground/60 mb-5">
+              <Terminal className="h-3 w-3" />
+              Schedules API
+            </div>
+            <h2 className="text-[28px] sm:text-4xl font-bold tracking-[-0.02em] mb-4">
+              Cron, webhooks, email, chains.
+            </h2>
+            <p className="text-[14px] sm:text-base text-muted-foreground/55 max-w-xl mx-auto">
+              Run an agent on a cron, fire it from any webhook with HMAC, or chain schedules together.
+              Per-fire 10 cr/min · webhook routing 1 cr / 200 fires · sandbox is free.
+            </p>
+          </motion.div>
+
+          <SchedulesTryIt />
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1, ease }}
+            className="mt-8 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto"
+          >
+            {[
+              "POST /v1/schedules",
+              "GET /v1/schedules",
+              "PATCH /v1/schedules/{id}",
+              "DELETE /v1/schedules/{id}",
+              "POST /v1/schedules/{id}/run",
+              "POST /v1/schedules/{id}/pause",
+              "POST /v1/schedules/{id}/resume",
+              "GET /v1/schedules/{id}/runs",
+              "GET /v1/schedules/{id}/runs/{run_id}",
+              "POST /v1/schedules/{id}/triggers",
+              "DELETE /v1/schedules/{id}/triggers/{tid}",
+              "POST /v1/triggers/webhook/{wh}  ←  unauth · HMAC",
+              "POST /v1/triggers/email-mailbox",
             ].map((path) => (
               <code
                 key={path}

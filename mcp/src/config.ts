@@ -93,7 +93,7 @@ function getPackageVersion(): string {
     // We can't statically import package.json because of NodeNext + isolatedModules,
     // and we want this to work both in dist/ and in test contexts.
     // Hardcode the version — bumped by the publish workflow.
-    return "1.0.0";
+    return "1.1.0";
   } catch {
     return "0.0.0";
   }

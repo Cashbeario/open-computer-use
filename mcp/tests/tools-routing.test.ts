@@ -426,3 +426,51 @@ describe("Account tool routing", () => {
     expect(lastCall().search).toBe("?period=2026-04");
   });
 });
+
+// ─── Discovery ──────────────────────────────────────────────────────────────
+
+describe("Discovery tool routing", () => {
+  it("coasty_get_pricing → GET /api/pricing (public, unauthenticated CDN endpoint)", async () => {
+    const c = await setup();
+    await c.callTool({ name: "coasty_get_pricing", arguments: {} });
+    const r = lastCall();
+    expect(r.method).toBe("GET");
+    expect(r.pathname).toBe("/api/pricing");
+  });
+
+  it("coasty_get_capabilities does NOT make an API call (fully local)", async () => {
+    const c = await setup();
+    const fetchCallsBefore = fetchSpy.mock.calls.length;
+    const res = await c.callTool({ name: "coasty_get_capabilities", arguments: {} });
+    expect(fetchSpy.mock.calls.length).toBe(fetchCallsBefore);
+    expect(res.isError).toBeFalsy();
+    // Sanity check the structured payload exposes the documented shape.
+    const sc = (res as { structuredContent?: Record<string, unknown> }).structuredContent;
+    expect(sc).toBeDefined();
+    expect(sc!.service).toBeDefined();
+    expect(sc!.discovery).toBeDefined();
+    expect(sc!.auth).toBeDefined();
+    expect(Array.isArray(sc!.tools)).toBe(true);
+    expect(sc!.limits).toBeDefined();
+  });
+
+  it("get_capabilities tool catalog includes every registered tool", async () => {
+    const c = await setup();
+    const list = await c.listTools();
+    const registeredNames = new Set(list.tools.map((t) => t.name));
+
+    const res = await c.callTool({ name: "coasty_get_capabilities", arguments: {} });
+    const sc = (res as { structuredContent?: Record<string, unknown> }).structuredContent!;
+    const cataloged = (sc.tools as Array<{ name: string }>).map((t) => t.name);
+
+    // Every tool the server advertises must appear in the capabilities catalog —
+    // otherwise the agent would discover a tool it can't read documentation for.
+    for (const name of registeredNames) {
+      expect(cataloged.includes(name), `catalog missing registered tool: ${name}`).toBe(true);
+    }
+    // And vice versa — no stale entries.
+    for (const name of cataloged) {
+      expect(registeredNames.has(name), `catalog has unknown tool: ${name}`).toBe(true);
+    }
+  });
+});

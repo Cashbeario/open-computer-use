@@ -86,6 +86,9 @@ describe("MCP server", () => {
       "coasty_remove_trigger",
       // Account
       "coasty_get_credits",
+      // Discovery
+      "coasty_get_pricing",
+      "coasty_get_capabilities",
     ];
     for (const name of expected) {
       expect(names.has(name), `missing tool: ${name}`).toBe(true);
@@ -129,6 +132,8 @@ describe("MCP server", () => {
       "coasty_get_schedule",
       "coasty_list_schedule_runs",
       "coasty_get_credits",
+      "coasty_get_pricing",
+      "coasty_get_capabilities",
     ];
     for (const name of readOnlyTools) {
       const t = res.tools.find((x) => x.name === name);

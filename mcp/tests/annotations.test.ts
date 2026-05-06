@@ -40,10 +40,18 @@ describe("Tool annotation invariants", () => {
     }
   });
 
-  it("every tool has openWorldHint=true (we always talk to a remote API)", async () => {
+  it("every tool has openWorldHint=true (we always talk to a remote API), except local-only discovery", async () => {
     const tools = await getTools();
+    // The capabilities tool is intentionally local — the snapshot is hardcoded
+    // in src/tools/discovery.ts and never hits the network. Every other tool
+    // talks to the Coasty REST API and is therefore open-world.
+    const LOCAL_ONLY = new Set(["coasty_get_capabilities"]);
     for (const t of tools) {
-      expect(t.annotations?.openWorldHint, `${t.name} should have openWorldHint`).toBe(true);
+      if (LOCAL_ONLY.has(t.name)) {
+        expect(t.annotations?.openWorldHint, `${t.name} should be local-only`).toBe(false);
+      } else {
+        expect(t.annotations?.openWorldHint, `${t.name} should have openWorldHint`).toBe(true);
+      }
     }
   });
 

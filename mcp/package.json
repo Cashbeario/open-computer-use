@@ -1,26 +1,49 @@
 {
   "name": "@coasty/mcp",
-  "version": "1.0.0",
-  "description": "Coasty MCP server — drive Coasty's screenshot prediction, managed VMs, and schedule automation from Claude Desktop, Cursor, Windsurf, Claude Code, and any other MCP client.",
+  "version": "1.1.0",
+  "description": "MCP server for Coasty — full computer use (desktop, browser, terminal, files, schedules) from Claude Desktop, Claude Code, Cursor, Windsurf, and VS Code Copilot. Sandbox VMs free, AWS/Azure for production. 26 tools, 4-mode approval, HMAC webhooks.",
   "license": "MIT",
-  "homepage": "https://coasty.ai/api-docs",
+  "author": {
+    "name": "Coasty",
+    "email": "support@coasty.ai",
+    "url": "https://coasty.ai"
+  },
+  "homepage": "https://coasty.ai/api-docs#mcp",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/coasty-ai/coasty-mcp.git"
+    "url": "git+https://github.com/coasty-ai/coasty-mcp.git",
+    "directory": "mcp"
   },
   "bugs": {
-    "url": "https://github.com/coasty-ai/coasty-mcp/issues"
+    "url": "https://github.com/coasty-ai/coasty-mcp/issues",
+    "email": "support@coasty.ai"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://coasty.ai/pricing"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
-    "coasty",
+    "modelcontextprotocol",
     "claude",
+    "claude-desktop",
+    "claude-code",
     "cursor",
-    "agent",
-    "automation",
+    "windsurf",
+    "vscode",
     "computer-use",
-    "browser-automation"
+    "browser-automation",
+    "desktop-automation",
+    "terminal",
+    "scheduling",
+    "cron",
+    "webhook",
+    "ai-agent",
+    "anthropic",
+    "automation",
+    "agentic",
+    "coasty"
   ],
   "type": "module",
   "main": "dist/index.js",
@@ -30,6 +53,11 @@
   },
   "files": [
     "dist",
+    "scripts",
+    "server.json",
+    "manifest.json",
+    "icon.svg",
+    "llms.txt",
     "README.md",
     "LICENSE"
   ],

@@ -78,7 +78,7 @@ async function main(): Promise<void> {
     process.exit(0);
   }
   if (flags.showVersion) {
-    process.stdout.write("1.0.0\n");
+    process.stdout.write("1.1.0\n");
     process.exit(0);
   }
 

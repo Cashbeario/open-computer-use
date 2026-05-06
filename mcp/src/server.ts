@@ -14,7 +14,7 @@ import { registerPrompts } from "./prompts/index.js";
 import { registerAllTools } from "./tools/index.js";
 
 const SERVER_NAME = "coasty";
-const SERVER_VERSION = "1.0.0";
+const SERVER_VERSION = "1.1.0";
 
 export function buildServer(cfg: Config): { server: McpServer; api: CoastyClient } {
   const api = new CoastyClient(cfg);

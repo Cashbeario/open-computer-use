@@ -1123,7 +1123,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           and remembers manual toggles in localStorage.
           Collapsed: a single IconStack2 button that opens a popover
           flyout with the same three destinations — so no items are
-          hidden in the narrow rail. Developer API stays as its own
+          hidden in the narrow rail. Developers stays as its own
           row below — it's a distinct destination, not a resource. */}
       <div className="space-y-0.5">
         {(() => {
@@ -1169,15 +1169,15 @@ export const SidebarNavSection = memo(function SidebarNavSection({
         <NavButton
           id="sidebar-developers-link"
           icon={<IconKey size={16} stroke={1.5} className="shrink-0" />}
-          label="Developer API"
-          tooltip="API keys & integration"
+          label="Developers"
+          tooltip="API, MCP & integrations"
           href="/developers"
           isActive={isItemActive("/developers")}
           accentColor="text-purple-500 dark:text-purple-400"
           onClick={closeMobileIfNeeded}
           hoverInfo={{
-            description: "Developer API",
-            detail: "Create API keys, view endpoints, and integrate computer-use intelligence into your apps.",
+            description: "Developers",
+            detail: "API keys, MCP, SDKs, and everything to integrate computer-use intelligence into your apps.",
             visual: "developers",
           }}
         />

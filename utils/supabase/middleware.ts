@@ -1,8 +1,24 @@
 import { isSupabaseEnabled } from "@/lib/supabase/config"
+import { isOssMode } from "@/lib/oss-mode"
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
+  // OSS-mode short-circuit. Self-host deployments do not have a Supabase
+  // project — they talk straight to the public Coasty REST API with a single
+  // COASTY_API_KEY. Calling `createServerClient` here would either throw on
+  // missing env or hang on a network request to a non-existent project.
+  //
+  // SECURITY: This bypass is gated by `isOssMode()` (see `lib/oss-mode.ts` for
+  // the resolution order). The auto-detect path requires
+  // `NEXT_PUBLIC_SUPABASE_URL` to be UNSET, so a production deployment with
+  // Supabase configured can never accidentally enter this branch. Auth
+  // gating in OSS mode is the responsibility of the upstream
+  // `validateCoastyApiKey` middleware on the API routes themselves.
+  if (isOssMode()) {
+    return NextResponse.next({ request })
+  }
+
   if (!isSupabaseEnabled) {
     return NextResponse.next({
       request,

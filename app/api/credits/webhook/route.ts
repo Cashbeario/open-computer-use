@@ -17,88 +17,80 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 async function handleCreditPurchase(session: Stripe.Checkout.Session, supabase: any) {
   const userId = session.metadata?.user_id
   const credits = parseInt(session.metadata?.credits || "0")
-  
+
   if (!userId || !credits) {
     console.error("Missing user_id or credits in session metadata")
     return
   }
 
-  // Get current balance
-  const { data: currentCredits } = await supabase
-    .from("user_credits")
-    .select("balance, total_purchased")
-    .eq("user_id", userId)
-    .single()
+  // Atomic balance increment via migration 014 RPC.  Replaces the legacy
+  // SELECT-then-UPDATE pattern that lost concurrent updates between
+  // replicas.  The RPC also handles the "user_credits row missing" case
+  // via INSERT ... ON CONFLICT, so we don't need a separate branch.
+  const { data: rpcRows, error: rpcError } = await supabase.rpc(
+    "add_credits_atomic",
+    {
+      p_user_id: userId,
+      p_amount: credits,
+    }
+  )
 
-  if (currentCredits) {
-    // User already has credits - update them
-    const newBalance = currentCredits.balance + credits
-    const newTotalPurchased = currentCredits.total_purchased + credits
+  if (rpcError) {
+    console.error("add_credits_atomic RPC failed:", rpcError)
+    return
+  }
 
-    const { error: updateError } = await supabase
-      .from("user_credits")
-      .update({
-        balance: newBalance,
-        total_purchased: newTotalPurchased,
-        last_purchase_at: new Date().toISOString(),
-      })
-      .eq("user_id", userId)
+  const newBalance: number =
+    (Array.isArray(rpcRows) ? rpcRows[0]?.new_balance : (rpcRows as any)?.new_balance) ?? credits
 
-    if (updateError) {
-      console.error("Error updating user credits:", updateError)
+  // Record transaction.  The credit_transactions partial UNIQUE on
+  // stripe_payment_intent_id (migration 014) means a Stripe retry of the
+  // SAME PaymentIntent will fail with 23505 here.  In that case we must
+  // compensate by subtracting back the duplicate increment we just made,
+  // otherwise balance > sum(transactions).
+  const { error: txnError } = await supabase
+    .from("credit_transactions")
+    .insert({
+      user_id: userId,
+      type: "purchase",
+      amount: credits,
+      balance_after: newBalance,
+      stripe_payment_intent_id: session.payment_intent as string,
+      stripe_checkout_session_id: session.id,
+      currency: session.currency,
+      price_paid: (session.amount_total || 0) / 100,
+      metadata: {
+        session_id: session.id,
+        customer_email: session.customer_email,
+      },
+    })
+
+  if (txnError) {
+    if ((txnError as any).code === '23505') {
+      // PaymentIntent already recorded — Stripe is retrying a delivery
+      // that we processed previously (or a sibling replica did).  Subtract
+      // back the duplicate increment that add_credits_atomic just made so
+      // balance stays consistent with the transactions log.
+      console.log(
+        `credit_transactions row already recorded for PaymentIntent ${session.payment_intent}; compensating by reverting the duplicate increment`
+      )
+      const { error: compensateError } = await supabase.rpc(
+        "add_credits_atomic",
+        {
+          p_user_id: userId,
+          p_amount: -credits,
+        }
+      )
+      if (compensateError) {
+        console.error(
+          "Failed to compensate duplicate-insert race:",
+          compensateError
+        )
+      }
       return
     }
-
-    // Record transaction with new balance
-    await supabase
-      .from("credit_transactions")
-      .insert({
-        user_id: userId,
-        type: "purchase",
-        amount: credits,
-        balance_after: newBalance,
-        stripe_payment_intent_id: session.payment_intent as string,
-        stripe_checkout_session_id: session.id,
-        currency: session.currency,
-        price_paid: (session.amount_total || 0) / 100,
-        metadata: {
-          session_id: session.id,
-          customer_email: session.customer_email,
-        },
-      })
-  } else {
-    // User doesn't have credits yet - create new record
-    const { error: insertError } = await supabase
-      .from("user_credits")
-      .insert({
-        user_id: userId,
-        balance: credits,
-        total_purchased: credits,
-        last_purchase_at: new Date().toISOString(),
-      })
-
-    if (insertError) {
-      console.error("Error creating user credits:", insertError)
-      return
-    }
-
-    // Record transaction
-    await supabase
-      .from("credit_transactions")
-      .insert({
-        user_id: userId,
-        type: "purchase",
-        amount: credits,
-        balance_after: credits,
-        stripe_payment_intent_id: session.payment_intent as string,
-        stripe_checkout_session_id: session.id,
-        currency: session.currency,
-        price_paid: (session.amount_total || 0) / 100,
-        metadata: {
-          session_id: session.id,
-          customer_email: session.customer_email,
-        },
-      })
+    console.error("Error inserting credit_transactions row:", txnError)
+    return
   }
 
   console.log(`Successfully processed payment: ${credits} credits`)
@@ -333,108 +325,57 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // Only grant credits if we haven't already
+          // Only grant credits if we haven't already.  Belt-and-braces:
+          // the existingGrant short-circuit above is application-level
+          // dedup; the RPC also dedupes natively via the UNIQUE constraint
+          // on subscription_credit_grants(subscription_id, billing_period_start).
           if (!existingGrant) {
-            // First, ensure user_credits record exists
-            const { data: existingCredits } = await (supabase as any)
-              .from("user_credits")
-              .select("*")
-              .eq("user_id", userId)
-              .single()
+            // Atomic + idempotent grant via migration 014 RPC.  Replaces
+            // the legacy SELECT/UPDATE/INSERT triple that lost concurrent
+            // updates between replicas.  The RPC handles the "user_credits
+            // row missing" case via INSERT ... ON CONFLICT, takes a
+            // FOR UPDATE row lock, and inserts the credit_transactions
+            // row with the post-update balance — see migration 014.
+            //
+            // Column is `usage_description` per supabase/schema.sql:1747.
+            // Pre-fix this used `description:` and silently failed every
+            // Stripe insert with PGRST204 "Could not find the
+            // 'description' column of 'credit_transactions' in the
+            // schema cache" — confirmed via 2026-04-30 webhook for user
+            // 8d19ce8c-9741-47bd-98c7-eadc6512e642.
+            const { data: rpcRows, error: rpcError } = await (supabase as any).rpc(
+              "grant_subscription_credits_atomic",
+              {
+                p_user_id: userId,
+                p_subscription_id: newSubscription.id,
+                p_credits: plan.monthly_credits,
+                p_period_start: periodStart,
+                p_period_end: periodEnd,
+                p_invoice_id: null,
+                p_transaction_type: "subscription_grant",
+                p_usage_description: `Initial ${tier} subscription credits`,
+                p_metadata: {
+                  tier: tier,
+                  period_start: periodStart,
+                  period_end: periodEnd,
+                  stripe_subscription_id: subscriptionId,
+                  event_type: "checkout.session.completed"
+                },
+              }
+            )
 
-            if (!existingCredits) {
-              // Create user_credits record if it doesn't exist
-              const { error: createCreditsError } = await (supabase as any)
-                .from("user_credits")
-                .insert({
-                  user_id: userId,
-                  balance: plan.monthly_credits,
-                  total_purchased: 0,
-                  total_used: 0,
-                  has_active_subscription: true,
-                  subscription_tier: tier,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                })
-
-              if (createCreditsError) {
-                console.error("Error creating user_credits record:", createCreditsError)
-                // Still try to record the transaction
+            if (rpcError) {
+              console.error("grant_subscription_credits_atomic (checkout) failed:", rpcError)
+            } else {
+              const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
+              if (result?.was_granted) {
+                console.log(
+                  `Atomically granted ${plan.monthly_credits} credits for subscription ${subscriptionId}; new balance: ${result?.new_balance}`
+                )
               } else {
-                console.log(`Created user_credits record with ${plan.monthly_credits} credits`)
-              }
-
-              // Record the initial credit grant as a transaction
-              const { error: transactionError } = await (supabase as any)
-                .from("credit_transactions")
-                .insert({
-                  user_id: userId,
-                  type: "subscription_grant",
-                  amount: plan.monthly_credits,
-                  balance_after: plan.monthly_credits,
-                  subscription_id: newSubscription.id,
-                  // Column is `usage_description` per supabase/schema.sql:1747.
-                  // Pre-fix this used `description:` and silently failed every
-                  // Stripe insert with PGRST204 "Could not find the
-                  // 'description' column of 'credit_transactions' in the
-                  // schema cache" — confirmed via 2026-04-30 webhook for user
-                  // 8d19ce8c-9741-47bd-98c7-eadc6512e642.
-                  usage_description: `Initial ${tier} subscription credits`,
-                  metadata: {
-                    tier: tier,
-                    period_start: periodStart,
-                    period_end: periodEnd,
-                    stripe_subscription_id: subscriptionId,
-                    event_type: "checkout.session.completed"
-                  },
-                  created_at: new Date().toISOString()
-                })
-
-              if (transactionError) {
-                console.error("Error recording credit transaction:", transactionError)
-              }
-            } else {
-            // Update existing user_credits record
-            const newBalance = (existingCredits.balance || 0) + plan.monthly_credits
-            
-            const { error: updateError } = await (supabase as any)
-              .from("user_credits")
-              .update({
-                balance: newBalance,
-                has_active_subscription: true,
-                subscription_tier: tier,
-                updated_at: new Date().toISOString()
-              })
-              .eq("user_id", userId)
-
-            if (updateError) {
-              console.error("Error updating user_credits:", updateError)
-            } else {
-              console.log(`Updated user balance: ${newBalance} credits (added ${plan.monthly_credits})`)
-            }
-
-              // Record the credit grant as a transaction
-              const { error: transactionError } = await (supabase as any)
-                .from("credit_transactions")
-                .insert({
-                  user_id: userId,
-                  type: "subscription_grant",
-                  amount: plan.monthly_credits,
-                  balance_after: newBalance,
-                  subscription_id: newSubscription.id,
-                  usage_description: `Initial ${tier} subscription credits`,
-                  metadata: {
-                    tier: tier,
-                    period_start: periodStart,
-                    period_end: periodEnd,
-                    stripe_subscription_id: subscriptionId,
-                    event_type: "checkout.session.completed"
-                  },
-                  created_at: new Date().toISOString()
-                })
-
-              if (transactionError) {
-                console.error("Error recording credit transaction:", transactionError)
+                console.log(
+                  `Subscription ${subscriptionId} period ${periodStart} already granted (RPC dedup); skipping`
+                )
               }
             }
           } else {
@@ -527,44 +468,58 @@ export async function POST(req: NextRequest) {
                 .single()
 
               if (plan) {
-                // Grant reactivation credits
-                const { data: currentCredits } = await (supabase as any)
-                  .from("user_credits")
-                  .select("*")
-                  .eq("user_id", userId)
-                  .single()
+                // Reactivation period derivation — prefer Stripe's
+                // current_period_*, fall back to NOW()/+30d.  This timestamp
+                // is the dedup key for the RPC.
+                let reactivationPeriodStart: string
+                let reactivationPeriodEnd: string
+                if (subscription.current_period_start && subscription.current_period_end) {
+                  try {
+                    reactivationPeriodStart = new Date(subscription.current_period_start * 1000).toISOString()
+                    reactivationPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString()
+                  } catch {
+                    reactivationPeriodStart = new Date().toISOString()
+                    reactivationPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                  }
+                } else {
+                  reactivationPeriodStart = new Date().toISOString()
+                  reactivationPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                }
 
-                if (currentCredits) {
-                  const newBalance = (currentCredits.balance || 0) + plan.monthly_credits
-                  await (supabase as any)
-                    .from("user_credits")
-                    .update({
-                      balance: newBalance,
-                      has_active_subscription: true,
-                      subscription_tier: tier,
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq("user_id", userId)
+                // Atomic + idempotent grant via migration 014 RPC.
+                // Replaces the legacy SELECT/UPDATE/INSERT triple.
+                const { data: rpcRows, error: rpcError } = await (supabase as any).rpc(
+                  "grant_subscription_credits_atomic",
+                  {
+                    p_user_id: userId,
+                    p_subscription_id: existingSub.id,
+                    p_credits: plan.monthly_credits,
+                    p_period_start: reactivationPeriodStart,
+                    p_period_end: reactivationPeriodEnd,
+                    p_invoice_id: null,
+                    p_transaction_type: "subscription_reactivation",
+                    p_usage_description: `${tier} subscription reactivation`,
+                    p_metadata: {
+                      tier: tier,
+                      stripe_subscription_id: subscription.id,
+                      event: "customer.subscription.created (reactivation)"
+                    },
+                  }
+                )
 
-                  console.log(`Reactivation: Added ${plan.monthly_credits} credits for user ${userId}, new balance: ${newBalance}`)
-
-                  // Record transaction
-                  await (supabase as any)
-                    .from("credit_transactions")
-                    .insert({
-                      user_id: userId,
-                      type: "subscription_reactivation",
-                      amount: plan.monthly_credits,
-                      balance_after: newBalance,
-                      subscription_id: existingSub.id,
-                      usage_description: `${tier} subscription reactivation`,
-                      metadata: {
-                        tier: tier,
-                        stripe_subscription_id: subscription.id,
-                        event: "customer.subscription.created (reactivation)"
-                      },
-                      created_at: new Date().toISOString()
-                    })
+                if (rpcError) {
+                  console.error("grant_subscription_credits_atomic (reactivation) failed:", rpcError)
+                } else {
+                  const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
+                  if (result?.was_granted) {
+                    console.log(
+                      `Reactivation: Atomically added ${plan.monthly_credits} credits for user ${userId}, new balance: ${result?.new_balance}`
+                    )
+                  } else {
+                    console.log(
+                      `Reactivation: subscription ${subscription.id} period ${reactivationPeriodStart} already granted (RPC dedup); skipping`
+                    )
+                  }
                 }
               }
             }
@@ -1016,90 +971,48 @@ export async function POST(req: NextRequest) {
             console.log(`Credits already granted for this billing period (${periodStart} to ${periodEnd}), skipping`)
             break
           }
-          
-          // Get current user credits
-          const { data: currentCredits } = await (supabase as any)
-            .from("user_credits")
-            .select("*")
-            .eq("user_id", userId)
-            .single()
 
-          if (!currentCredits) {
-            console.error(`User credits not found for user ${userId}, creating new record`)
-            // Create user_credits record if it doesn't exist
-            const { error: createError } = await (supabase as any)
-              .from("user_credits")
-              .insert({
-                user_id: userId,
-                balance: plan.monthly_credits,
-                total_purchased: 0,
-                total_used: 0,
-                has_active_subscription: true,
-                subscription_tier: tier,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              })
-
-            if (createError) {
-              console.error("Error creating user_credits for monthly renewal:", createError)
+          // Atomic + idempotent renewal grant via migration 014 RPC.
+          // Replaces the legacy SELECT/UPDATE/INSERT triple that lost
+          // concurrent updates between replicas.  The RPC's dedup is
+          // keyed on (subscription_id, billing_period_start) and uses
+          // a UNIQUE constraint, so concurrent webhook deliveries land
+          // on the same row.  Belt-and-braces: the existingRenewal
+          // short-circuit above remains as application-level dedup.
+          const { data: rpcRows, error: rpcError } = await (supabase as any).rpc(
+            "grant_subscription_credits_atomic",
+            {
+              p_user_id: userId,
+              p_subscription_id: subRecord.id,
+              p_credits: plan.monthly_credits,
+              p_period_start: periodStart,
+              p_period_end: periodEnd,
+              p_invoice_id: invoice.id,
+              p_transaction_type: "subscription_renewal",
+              p_usage_description: `Monthly ${tier} subscription renewal`,
+              p_metadata: {
+                tier: tier,
+                period_start: periodStart,
+                period_end: periodEnd,
+                stripe_subscription_id: subscriptionId,
+                invoice_id: invoice.id
+              },
             }
+          )
 
-            // Record the transaction
-            await (supabase as any)
-              .from("credit_transactions")
-              .insert({
-                user_id: userId,
-                type: "subscription_renewal",
-                amount: plan.monthly_credits,
-                balance_after: plan.monthly_credits,
-                subscription_id: subRecord.id,
-                usage_description: `Monthly ${tier} subscription renewal`,
-                metadata: {
-                  tier: tier,
-                  period_start: periodStart,
-                  period_end: periodEnd,
-                  stripe_subscription_id: subscriptionId,
-                  invoice_id: invoice.id
-                },
-                created_at: new Date().toISOString()
-              })
+          if (rpcError) {
+            console.error("grant_subscription_credits_atomic (renewal) failed:", rpcError)
           } else {
-            // Update existing balance
-            const newBalance = (currentCredits.balance || 0) + plan.monthly_credits
-            
-            const { error: updateError } = await (supabase as any)
-              .from("user_credits")
-              .update({
-                balance: newBalance,
-                updated_at: new Date().toISOString()
-              })
-              .eq("user_id", userId)
-
-            if (updateError) {
-              console.error("Error updating user credits for monthly renewal:", updateError)
+            const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
+            if (result?.was_granted) {
+              console.log(
+                `Monthly renewal: Atomically added ${plan.monthly_credits} credits for user ${userId}, new balance: ${result?.new_balance}`
+              )
             } else {
-              console.log(`Monthly renewal: Updated user ${userId} balance to ${newBalance} (added ${plan.monthly_credits})`)
+              console.log(
+                `Monthly renewal: subscription ${subscriptionId} period ${periodStart} already granted (RPC dedup); skipping`
+              )
             }
-
-            // Record the transaction
-            await (supabase as any)
-              .from("credit_transactions")
-              .insert({
-                user_id: userId,
-                type: "subscription_renewal",
-                amount: plan.monthly_credits,
-                balance_after: newBalance,
-                subscription_id: subRecord.id,
-                usage_description: `Monthly ${tier} subscription renewal`,
-                metadata: {
-                  tier: tier,
-                  period_start: periodStart,
-                  period_end: periodEnd,
-                  stripe_subscription_id: subscriptionId,
-                  invoice_id: invoice.id
-                },
-                created_at: new Date().toISOString()
-              })
           }
 
           // RPC function removed - we handle everything directly above

@@ -359,7 +359,15 @@ export class AwsEc2Service {
     }
 
     const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 15);
-    const name = `coasty-snapshot-${userId.substring(0, 8)}-${ts}`;
+    // Defense-in-depth: even with the cross-replica cron lock holding most of
+    // the line, we still append a per-call random hex jitter so two callers
+    // racing in the same wall-clock second can never collide on the AMI Name
+    // (`InvalidAMIName.Duplicate`). 6 hex chars = 16M space, ample for the
+    // ~handful of CreateImage calls per second in production.
+    const jitter = Math.floor(Math.random() * 0xffffff)
+      .toString(16)
+      .padStart(6, "0");
+    const name = `coasty-snapshot-${userId.substring(0, 8)}-${ts}-${jitter}`;
 
     try {
       const result = await this.client.send(

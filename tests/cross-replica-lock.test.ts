@@ -44,27 +44,24 @@ function makeMockSupabase(behaviour: {
       }),
       update: vi.fn((patch: any) => {
         calls.updates.push({ table: name, patch });
-        const updateChain = {
+        // After two .eq()s (job_name + run_window), the LAST .eq returns a
+        // thenable resolving to the update result so `await
+        // .update().eq().eq()` resolves correctly. Single definition with
+        // union return type — initializing eq twice triggers a TS narrowing
+        // error because the second assignment widens the original mock type.
+        let eqCount = 0;
+        const updateChain: {
+          eq: (col: string, val: string) => typeof updateChain | Promise<{ error: any }>;
+        } = {
           eq: vi.fn((col: string, val: string) => {
+            eqCount++;
             calls.updateEqs.push({ col, val });
-            // Allow .eq().eq() chain
+            if (eqCount === 2) {
+              return Promise.resolve(behaviour.updateResult ?? { error: null });
+            }
             return updateChain;
           }),
         };
-        // After two .eq()s (job_name + run_window), call .then-style by making
-        // the LAST .eq return a thenable that resolves to the update result.
-        // For test simplicity, we make .eq() resolve directly when awaited
-        // by adding a `.then` that fires the result on the second call.
-        let eqCount = 0;
-        updateChain.eq = vi.fn((col: string, val: string) => {
-          eqCount++;
-          calls.updateEqs.push({ col, val });
-          if (eqCount === 2) {
-            // Return a thenable so `await ...eq().eq()` resolves the result
-            return Promise.resolve(behaviour.updateResult ?? { error: null });
-          }
-          return updateChain;
-        });
         return updateChain;
       }),
     };

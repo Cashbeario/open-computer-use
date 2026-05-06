@@ -1,11 +1,17 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { deleteSwarmMailbox } from "@/lib/services/workmail-service";
+import { withCronLock } from "@/lib/services/cross-replica-lock";
 
 interface CleanupStats {
   deleted: number;
   errors: number;
   processed: number;
 }
+
+// Cross-replica lock bucket sizes (in minutes). The interval loop fires every
+// 2 hours, so a 120-min bucket means each cycle's runs (across all replicas)
+// race for the same lock; exactly one replica wins per cycle.
+const CLEANUP_BUCKET_MINUTES = 120;
 
 export class MachineCleanupService {
   private intervalId: NodeJS.Timeout | null = null;
@@ -24,19 +30,67 @@ export class MachineCleanupService {
 
     console.log("Starting machine cleanup service - runs every 2 hours");
 
-    // Run immediately on start
-    this.runCleanup();
-    this.cleanupLiteMachines();
-    this.runPeriodicSnapshots();
-    this.cleanupSwarmMachines();
+    // Run immediately on start. All inner cleanups are wrapped in a
+    // cross-replica advisory lock (cron_runs table + 23505 unique-violation)
+    // so only one Next.js replica actually executes per bucket. See
+    // lib/services/cross-replica-lock.ts and migration 013 for details.
+    this.runCleanupLocked();
+    this.cleanupLiteMachinesLocked();
+    this.runPeriodicSnapshotsLocked();
+    this.cleanupSwarmMachinesLocked();
 
     // Then run every 2 hours (2 * 60 * 60 * 1000 ms)
     this.intervalId = setInterval(() => {
-      this.runCleanup();
-      this.cleanupLiteMachines();
-      this.runPeriodicSnapshots();
-      this.cleanupSwarmMachines();
+      this.runCleanupLocked();
+      this.cleanupLiteMachinesLocked();
+      this.runPeriodicSnapshotsLocked();
+      this.cleanupSwarmMachinesLocked();
     }, 2 * 60 * 60 * 1000);
+  }
+
+  /**
+   * Cross-replica-locked wrapper for runCleanup. Only the replica that wins
+   * the cron_runs INSERT for this bucket actually runs the work; other
+   * replicas log + skip. Fail-safe: if the DB / migration is unavailable,
+   * the lock returns null and we skip rather than risk the original
+   * double-execution race.
+   */
+  private async runCleanupLocked(): Promise<void> {
+    await withCronLock("runCleanup", CLEANUP_BUCKET_MINUTES, async (report) => {
+      const stats = await this.runCleanup();
+      report({ deleted: stats.deleted, errors: stats.errors, processed: stats.processed });
+    });
+  }
+
+  /**
+   * Cross-replica-locked wrapper for cleanupLiteMachines.
+   */
+  private async cleanupLiteMachinesLocked(): Promise<void> {
+    await withCronLock("cleanupLiteMachines", CLEANUP_BUCKET_MINUTES, async () => {
+      await this.cleanupLiteMachines();
+    });
+  }
+
+  /**
+   * Cross-replica-locked wrapper for runPeriodicSnapshots. This is the
+   * concrete cron the 2026-05-02 NEW-3 audit caught firing on both replicas
+   * → 6× InvalidAMIName.Duplicate. The lock makes only one replica run
+   * createMachineImage per bucket; the AMI-name jitter in
+   * lib/aws/ec2-service.ts is defense-in-depth for the rest.
+   */
+  private async runPeriodicSnapshotsLocked(): Promise<void> {
+    await withCronLock("runPeriodicSnapshots", CLEANUP_BUCKET_MINUTES, async () => {
+      await this.runPeriodicSnapshots();
+    });
+  }
+
+  /**
+   * Cross-replica-locked wrapper for cleanupSwarmMachines.
+   */
+  private async cleanupSwarmMachinesLocked(): Promise<void> {
+    await withCronLock("cleanupSwarmMachines", CLEANUP_BUCKET_MINUTES, async () => {
+      await this.cleanupSwarmMachines();
+    });
   }
 
   /**

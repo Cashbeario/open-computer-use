@@ -1,10 +1,18 @@
 import { createClient } from "@/lib/supabase/server"
+import { isOssMode } from "@/lib/oss-mode"
 import { redirect } from "next/navigation"
 import { OnboardingFlow } from "./onboarding-flow"
 
 export const dynamic = "force-dynamic"
 
 export default async function OnboardingPage() {
+  // OSS mode has no real user/account flow — short-circuit straight back to
+  // the chat surface instead of trying to render an onboarding wizard that
+  // assumes Supabase is wired in.
+  if (isOssMode()) {
+    redirect("/")
+  }
+
   const supabase = await createClient()
 
   if (!supabase) {

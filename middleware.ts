@@ -1,7 +1,15 @@
 import { updateSession } from "@/utils/supabase/middleware"
 import { NextResponse, type NextRequest } from "next/server"
 import { validateCsrfToken } from "./lib/csrf"
+import { describeMode } from "./lib/oss-mode"
 import { locales, defaultLocale, type Locale } from "./i18n/config"
+
+// One-shot mode log: emit `[coasty] mode=oss|production` on the first
+// middleware invocation of the process so operators can see at a glance which
+// path their deployment is running. Subsequent requests skip this — flag is
+// scoped to the module, so a `vi.resetModules()` in tests makes it fire again
+// (each test gets a fresh log).
+let _modeLogged = false
 
 function detectLocaleFromHeader(request: NextRequest): Locale {
   const acceptLanguage = request.headers.get("accept-language")
@@ -24,6 +32,14 @@ function detectLocaleFromHeader(request: NextRequest): Locale {
 }
 
 export async function middleware(request: NextRequest) {
+  // Boot-time mode log — once per process. Format is exactly
+  // `[coasty] mode=oss` or `[coasty] mode=production` so log parsers can grep
+  // for it cheaply. Tests rely on this exact format & one-shot semantics.
+  if (!_modeLogged) {
+    _modeLogged = true
+    console.log(`[coasty] mode=${describeMode()}`)
+  }
+
   // --- Per-request access logging: capture inputs at start ---
   // Capture cheap, sync facts up front so we can log even on early-return / throw.
   // Note: req.ip was removed in Next 15; rely on forwarding headers (Cloudflare, ALB).

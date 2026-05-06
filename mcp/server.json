@@ -6,7 +6,7 @@
   "version": "1.1.0",
   "websiteUrl": "https://coasty.ai/api-docs#mcp",
   "repository": {
-    "url": "https://github.com/coasty-ai/coasty-mcp",
+    "url": "https://github.com/coasty-ai/open-computer-use",
     "source": "github",
     "subfolder": "mcp"
   },
@@ -46,18 +46,7 @@
       ]
     }
   ],
-  "remotes": [
-    {
-      "type": "streamable-http",
-      "url": "https://mcp.coasty.ai/mcp",
-      "headers": [
-        {
-          "name": "Authorization",
-          "description": "Bearer <COASTY_API_KEY>"
-        }
-      ]
-    }
-  ],
+  "remotes": [],
   "_meta": {
     "ai.coasty/publisher-provided": {
       "categories": [

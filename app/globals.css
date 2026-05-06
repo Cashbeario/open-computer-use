@@ -11,6 +11,36 @@
   50% { opacity: 0; }
 }
 
+/* Blog list entrance: pure CSS so we don't wrap <Link> in framer-motion
+ * (motion's gesture system intercepts the first tap on touch devices,
+ * which forced users to double-tap to navigate to a post).
+ *
+ * Each card sets `--blog-card-i: <index>` inline and gets the animation
+ * with a per-card delay, mirroring the original framer-motion stagger. */
+@keyframes blog-card-enter {
+  0%   { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.blog-card-enter {
+  animation: blog-card-enter 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation-delay: calc(var(--blog-card-i, 0) * 40ms);
+}
+@keyframes blog-featured-enter {
+  0%   { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.blog-featured-enter {
+  animation: blog-featured-enter 700ms cubic-bezier(0.25, 0.1, 0.25, 1) 200ms both;
+}
+/* Respect reduced-motion preferences — disable the entrance entirely. */
+@media (prefers-reduced-motion: reduce) {
+  .blog-card-enter, .blog-featured-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Shimmer animation for tool invocation placeholder */
 @keyframes shimmer {
   0% {

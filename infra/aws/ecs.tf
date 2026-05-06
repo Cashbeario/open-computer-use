@@ -290,24 +290,27 @@ resource "aws_ecs_service" "app" {
   # 2 consecutive ALB checks (60s) to become healthy.  Total: ~120s worst case.
   health_check_grace_period_seconds = 180
 
-  # Rolling deployment: keep at least 150% healthy (i.e. always ≥3 healthy
-  # tasks if desired_count=2), spin up to 200% during deploy.
+  # Rolling deployment: never drop below current capacity, allow up to
+  # 200% during deploy so new tasks come up before old ones drain.
   #
-  # Bumped 100 → 150 on 2026-05-02 in response to a deploy-time 5xx
-  # cluster between 19:21Z–19:57Z that produced 1,002 ELB-side 5xx in
-  # one hour. Pattern was:
-  #   1. ECS deregisters one of two tasks for replacement
-  #   2. New replacement task takes ~5 min to warm up (Next.js cold
-  #      start: i18n init + AWS SDK warm-up)
-  #   3. During those ~5 min, HealthyHostCount = 1 — the public ALB
-  #      sees periodic spikes of 200+ RPS that overwhelm a single task,
-  #      surfacing as 503 to users.
-  # With minimum_healthy = 150 ECS now waits for the replacement task
-  # to be HEALTHY before deregistering the next one, so we never sit
-  # at half capacity. Combined with slow_start_seconds=60 on the
-  # target group (alb.tf), in-flight load on freshly-warm tasks ramps
-  # gracefully instead of seeing full traffic instantly.
-  deployment_minimum_healthy_percent = 150
+  # NOTE: deployment_minimum_healthy_percent is hard-capped at 100 by the
+  # ECS API (InvalidParameterException otherwise). A 2026-05-02 change set
+  # this to 150 to mitigate a deploy-time 5xx incident (1,002 ELB 5xx
+  # between 19:21Z–19:57Z; root cause: Next.js cold start ~5 min, during
+  # which HealthyHostCount sat at 1 and got overwhelmed by 200+ RPS).
+  # That fix was rejected by the API on the next apply — the field can't
+  # express "wait for ALB-healthy before draining", it only governs the
+  # RUNNING-state floor.
+  #
+  # Reverted to 100 (the max legal value) on 2026-05-05 to unblock apply.
+  # If the cold-start 5xx pattern returns, the real levers are:
+  #   • bump min_capacity / desired_count so a single warming task is
+  #     never the only healthy host
+  #   • increase slow_start_seconds on the frontend target group
+  #     (alb.tf) so traffic ramps gracefully onto freshly-warm tasks
+  #   • move to ECS blue/green via CodeDeploy (full new fleet stands up
+  #     and passes health checks before any traffic shifts)
+  deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
 
   # Enable ECS deployment circuit breaker to auto-rollback failed deploys

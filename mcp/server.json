@@ -69,7 +69,7 @@
         "agents"
       ],
       "tagline": "The only MCP server that gives Claude full computer access — desktop, browser, terminal, files, schedules — on a cloud VM or your local machine.",
-      "tools_count": 26,
+      "tools_count": 27,
       "prompts_count": 2,
       "supported_clients": [
         "Claude Desktop",

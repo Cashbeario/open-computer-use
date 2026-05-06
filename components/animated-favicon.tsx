@@ -6,14 +6,10 @@ import { FAVICON_SERIF_STACK } from "@/lib/fonts"
 const SIZE = 128
 const CYCLE_MS = 7000
 const FPS = 24
-const LETTERS = "COASTY"
-const LETTER_PER = 0.17 // each letter's full lifetime as fraction of cycle (~1.19s)
-const LETTER_STAGGER = 0.085 // delay between letter starts (~0.6s) — ~50% overlap
-const PARADE_END = LETTER_STAGGER * (LETTERS.length - 1) + LETTER_PER // ~0.595
+const WORD = "COASTY"
+const SLIDE_END = 0.58 // word slide finishes at this fraction of cycle
 
-const easeIn = (t: number) => t * t * t
 const easeInOut = (t: number) => t * t * (3 - 2 * t)
-const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5)
 
 export function AnimatedFavicon() {
   useEffect(() => {
@@ -40,6 +36,14 @@ export function AnimatedFavicon() {
     const cy = SIZE / 2
     const orbR = SIZE * (160 / 512)
     const cornerR = SIZE * (108 / 512)
+
+    const FONT = `200 ${SIZE * 0.82}px ${FAVICON_SERIF_STACK}`
+
+    // Pre-measure the full word so we know exactly where it enters/exits
+    ctx.font = FONT
+    const wordWidth = ctx.measureText(WORD).width
+    const slideStartX = SIZE + wordWidth / 2 + SIZE * 0.04 // off-right
+    const slideEndX = -wordWidth / 2 - SIZE * 0.04 // off-left
 
     const drawRoundedRect = (r: number) => {
       ctx.beginPath()
@@ -98,17 +102,36 @@ export function AnimatedFavicon() {
       ctx.restore()
     }
 
-    const drawLetter = (char: string, x: number, alpha: number) => {
+    const drawWordSlide = (xCenter: number, alpha: number) => {
       ctx.save()
-      ctx.font = `200 ${SIZE * 0.82}px ${FAVICON_SERIF_STACK}`
+      // Clip to rounded rect so the word feathers cleanly at the corners
+      drawRoundedRect(cornerR)
+      ctx.clip()
+      ctx.font = FONT
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
-      // Soft cinematic glow halo
-      ctx.shadowColor = `rgba(255,255,255,${0.55 * alpha})`
+      ctx.shadowColor = `rgba(255,255,255,${0.45 * alpha})`
       ctx.shadowBlur = SIZE * 0.18
       ctx.fillStyle = `rgba(255,255,255,${alpha})`
-      ctx.fillText(char, x, cy + SIZE * 0.02)
-      ctx.shadowBlur = 0
+      ctx.fillText(WORD, xCenter, cy + SIZE * 0.02)
+      ctx.restore()
+
+      // Soft horizontal feather at left/right canvas edges so partial letters
+      // dissolve into the background instead of hard-clipping
+      ctx.save()
+      drawRoundedRect(cornerR)
+      ctx.clip()
+      const featherW = SIZE * 0.14
+      const leftFade = ctx.createLinearGradient(0, 0, featherW, 0)
+      leftFade.addColorStop(0, "rgba(10,10,10,1)")
+      leftFade.addColorStop(1, "rgba(10,10,10,0)")
+      ctx.fillStyle = leftFade
+      ctx.fillRect(0, 0, featherW, SIZE)
+      const rightFade = ctx.createLinearGradient(SIZE - featherW, 0, SIZE, 0)
+      rightFade.addColorStop(0, "rgba(23,23,23,0)")
+      rightFade.addColorStop(1, "rgba(23,23,23,1)")
+      ctx.fillStyle = rightFade
+      ctx.fillRect(SIZE - featherW, 0, featherW, SIZE)
       ctx.restore()
     }
 
@@ -135,6 +158,7 @@ export function AnimatedFavicon() {
       lastDraw = now
       if (document.hidden) return
 
+      // Modulo guarantees the cycle restarts indefinitely
       const t = ((now - start) % CYCLE_MS) / CYCLE_MS
 
       ctx.clearRect(0, 0, SIZE, SIZE)
@@ -146,40 +170,26 @@ export function AnimatedFavicon() {
       drawRoundedRect(cornerR)
       ctx.stroke()
 
-      // Cinematic timeline (7s):
-      // 0.000–0.595  COASTY letters parade — each enters from right, holds, exits left
-      // 0.595–0.700  bright nucleus slowly blooms at center
-      // 0.700–0.800  orb fades up from the nucleus (no scale-pop, just dissolve)
+      // Cinematic timeline (7s, repeats):
+      // 0.000–0.580  COASTY slides as a single unit, off-right → off-left
+      // 0.580–0.700  bright nucleus blooms at center
+      // 0.700–0.800  orb dissolves up at full size
       // 0.800–0.950  glow swells on a long bell curve, then settles
       // 0.950–1.000  ambient hold before loop
-      if (t < PARADE_END) {
-        for (let i = 0; i < LETTERS.length; i++) {
-          const lstart = i * LETTER_STAGGER
-          const lend = lstart + LETTER_PER
-          if (t < lstart || t >= lend) continue
-          const lp = (t - lstart) / LETTER_PER
-
-          let x: number
-          let alpha: number
-          if (lp < 0.35) {
-            // glide in from off-right with quintic deceleration
-            const p = easeOutQuint(lp / 0.35)
-            x = SIZE * 1.3 + (cx - SIZE * 1.3) * p
-            alpha = easeInOut(lp / 0.35)
-          } else if (lp < 0.62) {
-            // hold at center, fully present
-            x = cx
-            alpha = 1
-          } else {
-            // drift out to the left, accelerating
-            const p = easeIn((lp - 0.62) / 0.38)
-            x = cx + (-SIZE * 0.3 - cx) * p
-            alpha = 1 - easeInOut((lp - 0.62) / 0.38)
-          }
-          drawLetter(LETTERS[i], x, alpha)
-        }
+      if (t < SLIDE_END) {
+        const raw = t / SLIDE_END
+        // Gentle ease at very start and very end, near-linear in the middle —
+        // cinematic glide without the word lingering at the edges.
+        const p =
+          raw < 0.12
+            ? easeInOut(raw / 0.12) * 0.12
+            : raw > 0.88
+              ? 0.88 + easeInOut((raw - 0.88) / 0.12) * 0.12
+              : raw
+        const xCenter = slideStartX + (slideEndX - slideStartX) * p
+        drawWordSlide(xCenter, 1)
       } else if (t < 0.70) {
-        const p = easeInOut((t - PARADE_END) / (0.70 - PARADE_END))
+        const p = easeInOut((t - SLIDE_END) / (0.70 - SLIDE_END))
         const nR = orbR * (0.4 + 0.7 * p)
         const nucleus = ctx.createRadialGradient(cx, cy, 0, cx, cy, nR)
         nucleus.addColorStop(0, `rgba(255,255,255,${Math.min(1, 0.85 * p)})`)
@@ -191,13 +201,11 @@ export function AnimatedFavicon() {
         ctx.fill()
       } else if (t < 0.80) {
         const p = easeInOut((t - 0.70) / 0.10)
-        // Orb dissolves in at full size — cinematic, no cartoony scale-up
         drawOrb(1, 0.4 + 0.4 * (1 - p), p)
       } else if (t < 0.95) {
         const p = (t - 0.80) / 0.15
         const pulse = Math.exp(-Math.pow((p - 0.30) / 0.28, 2)) * 0.75
-        const glow = pulse + 0.08
-        drawOrb(1, glow)
+        drawOrb(1, pulse + 0.08)
       } else {
         drawOrb(1, 0.08)
       }

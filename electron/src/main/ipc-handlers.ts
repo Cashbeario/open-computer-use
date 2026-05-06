@@ -6,6 +6,30 @@ import { ElectronAuth } from './auth'
 import { WebSocketBridge } from './ws-bridge'
 import { ApprovalManager } from './approval-manager'
 import { suspendTopmost, resumeTopmost } from './window-manager'
+import {
+  isOssMode,
+  getStoredKey,
+  clearStoredKey,
+  getCoastyApiBaseUrl,
+  hashApiKeyToUserId,
+} from './oss-mode'
+
+/**
+ * Standard header set for all OSS-mode coasty.ai calls. Centralised so the
+ * X-API-Key + X-Coasty-Source pair is identical across every handler — the
+ * backend keys off `X-Coasty-Source: electron-oss` to route into the OSS
+ * tenancy and emit OSS-tier billing events; missing it on a single endpoint
+ * would silently drop those events.
+ */
+function ossHeaders(key: string): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-API-Key': key,
+    'X-Coasty-Source': 'electron-oss',
+    'User-Agent': 'coasty-electron/1.0',
+  }
+}
 
 export function registerIpcHandlers(
   auth: ElectronAuth,
@@ -134,7 +158,15 @@ export function registerIpcHandlers(
       if (bridge) {
         bridge.disconnect()
       }
-      await auth.signOut()
+      // OSS mode: there's no Supabase session to revoke — the only piece of
+      // identity is the encrypted API key on disk, so wipe that and stop.
+      // Calling auth.signOut() here would attempt to revoke a non-existent
+      // Supabase session and throw.
+      if (await isOssMode()) {
+        await clearStoredKey()
+      } else {
+        await auth.signOut()
+      }
       return { success: true }
     } catch (error: any) {
       return { success: false, error: error.message }
@@ -142,8 +174,26 @@ export function registerIpcHandlers(
   })
 
   secureHandle('auth:get-session', async () => {
+    // OSS mode: synthesise a session keyed off a hash of the API key.
+    // The renderer treats `kind === 'oss'` as the signal to skip Supabase-
+    // dependent paths (profile photo lookups, OAuth-only menus, etc.) and
+    // route directly through the IPC handlers below. `email` is null
+    // because we have no identity beyond the API key itself.
+    if (await isOssMode()) {
+      const key = await getStoredKey()
+      return {
+        isAuthenticated: true,
+        kind: 'oss',
+        userId: key ? hashApiKeyToUserId(key) : null,
+        email: null,
+        name: null,
+        avatar: null,
+        machineId: auth.getMachineId(),
+      }
+    }
     return {
       isAuthenticated: auth.isAuthenticated(),
+      kind: 'production',
       userId: auth.getUserId(),
       email: auth.getUserEmail(),
       name: auth.getUserName(),
@@ -153,15 +203,47 @@ export function registerIpcHandlers(
   })
 
   secureHandle('auth:get-token', async () => {
+    // OSS mode has no Bearer JWT — the backend authenticates via X-API-Key
+    // headers in IPC handlers and the auth-message body in the WS bridge.
+    // Returning null here makes any caller that reflexively adds a
+    // `Bearer ${token}` header skip that header (the existing handlers do
+    // exactly this — see chat:resume-human).
+    if (await isOssMode()) return null
     return await auth.getAccessToken()
   })
 
   // WebSocket bridge handlers
   secureHandle('bridge:connect', async () => {
     try {
+      const machineId = auth.getMachineId()
+
+      // OSS mode: use the stored API key as the WS token. The bridge's
+      // `looksLikeCoastyApiKey` heuristic will detect the `coasty_*` prefix
+      // and tag the URL + auth message with `source=electron-oss`, which is
+      // what the backend's WS handler keys off. The token-provider on
+      // reconnect re-reads the encrypted file rather than calling Supabase
+      // — keys don't expire so this is mostly a safety net (e.g. user
+      // rotated their key from the web UI mid-session).
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) {
+          return { success: false, error: 'No API key stored — sign in with a Coasty API key' }
+        }
+        const userId = hashApiKeyToUserId(key)
+
+        let bridge = getWsBridge()
+        if (bridge) bridge.disconnect()
+
+        bridge = new WebSocketBridge(backendUrl, key, machineId, userId, approvalManager)
+        bridge.setTokenProvider(async () => await getStoredKey())
+        setWsBridge(bridge)
+        bridge.connect()
+
+        return { success: true, machineId }
+      }
+
       const token = await auth.getAccessToken()
       const userId = auth.getUserId()
-      const machineId = auth.getMachineId()
 
       if (!token || !userId) {
         return { success: false, error: 'Not authenticated' }
@@ -222,8 +304,38 @@ export function registerIpcHandlers(
 
   secureHandle('chats:create', async (_event, params: { title?: string; model?: string }) => {
     try {
-      const userId = auth.getUserId()
       const machineId = auth.getMachineId()
+
+      // OSS path: POST /v1/chats with X-API-Key. Body matches the
+      // production Supabase row shape (title/model + room_settings) but is
+      // flattened — the backend persists it server-side under the API
+      // key's tenant rather than the user's Supabase row. `source` is
+      // duplicated into the body so the API server can emit the right
+      // billing event without re-parsing the X-Coasty-Source header.
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const res = await fetch(`${getCoastyApiBaseUrl()}/v1/chats`, {
+          method: 'POST',
+          headers: ossHeaders(key),
+          body: JSON.stringify({
+            title: params.title || 'New Task',
+            model: params.model || 'default',
+            source: 'electron-oss',
+            machine_id: machineId,
+            machine_name: `${os.hostname()} (Desktop)`,
+            platform: process.platform,
+          }),
+        })
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        const body: any = await res.json().catch(() => ({}))
+        return { success: true, chat: body.chat ?? body }
+      }
+
+      const userId = auth.getUserId()
       if (!userId) return { success: false, error: 'Not authenticated' }
 
       const supabase = await auth.getSupabaseClient()
@@ -253,8 +365,26 @@ export function registerIpcHandlers(
 
   secureHandle('chats:list', async () => {
     try {
-      const userId = auth.getUserId()
       const machineId = auth.getMachineId()
+
+      // OSS path: server-side filter by machine_id via query param. The
+      // production Supabase path filters in-process because RLS already
+      // narrows to user_id; the OSS API has to do the machine-id narrow
+      // server-side because the API key's tenancy can span machines.
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const url = `${getCoastyApiBaseUrl()}/v1/chats?machine_id=${encodeURIComponent(machineId)}`
+        const res = await fetch(url, { method: 'GET', headers: ossHeaders(key) })
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        const body: any = await res.json().catch(() => ({}))
+        return { success: true, chats: body.chats ?? [] }
+      }
+
+      const userId = auth.getUserId()
       if (!userId) return { success: false, error: 'Not authenticated' }
 
       const supabase = await auth.getSupabaseClient()
@@ -281,6 +411,21 @@ export function registerIpcHandlers(
 
   secureHandle('chats:get-messages', async (_event, chatId: string) => {
     try {
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const res = await fetch(
+          `${getCoastyApiBaseUrl()}/v1/chats/${encodeURIComponent(chatId)}/messages`,
+          { method: 'GET', headers: ossHeaders(key) },
+        )
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        const body: any = await res.json().catch(() => ({}))
+        return { success: true, messages: body.messages ?? [] }
+      }
+
       const supabase = await auth.getSupabaseClient()
       const { data: messages, error } = await supabase
         .from('messages')
@@ -298,6 +443,24 @@ export function registerIpcHandlers(
 
   secureHandle('chats:update', async (_event, params: { chatId: string; title: string }) => {
     try {
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const res = await fetch(
+          `${getCoastyApiBaseUrl()}/v1/chats/${encodeURIComponent(params.chatId)}`,
+          {
+            method: 'PATCH',
+            headers: ossHeaders(key),
+            body: JSON.stringify({ title: params.title }),
+          },
+        )
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        return { success: true }
+      }
+
       const userId = auth.getUserId()
       if (!userId) return { success: false, error: 'Not authenticated' }
 
@@ -318,6 +481,20 @@ export function registerIpcHandlers(
 
   secureHandle('chats:delete', async (_event, chatId: string) => {
     try {
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const res = await fetch(
+          `${getCoastyApiBaseUrl()}/v1/chats/${encodeURIComponent(chatId)}`,
+          { method: 'DELETE', headers: ossHeaders(key) },
+        )
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        return { success: true }
+      }
+
       const userId = auth.getUserId()
       if (!userId) return { success: false, error: 'Not authenticated' }
 
@@ -341,6 +518,31 @@ export function registerIpcHandlers(
   // This is the same query the Next.js /api/credits/balance route does.
   secureHandle('credits:get-balance', async () => {
     try {
+      // OSS path: hit /v1/credits with X-API-Key. Same balance/threshold
+      // semantics as production (>=20 credits to start a session, ~10
+      // credits per minute) so the renderer's gating logic works
+      // unchanged. Never reach Supabase here — there's no user_id row.
+      if (await isOssMode()) {
+        const key = await getStoredKey()
+        if (!key) return { success: false, error: 'No API key stored' }
+        const res = await fetch(`${getCoastyApiBaseUrl()}/v1/credits`, {
+          method: 'GET',
+          headers: ossHeaders(key),
+        })
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: `coasty.ai ${res.status}: ${text.slice(0, 200)}` }
+        }
+        const body: any = await res.json().catch(() => ({}))
+        const balance = typeof body.balance === 'number' ? body.balance : 0
+        return {
+          success: true,
+          balance,
+          can_start_session: balance >= 20,
+          estimated_runtime_minutes: Math.floor(balance / 10),
+        }
+      }
+
       const userId = auth.getUserId()
       if (!userId) return { success: false, error: 'Not authenticated' }
 
@@ -429,14 +631,32 @@ export function registerIpcHandlers(
     machineId: string
     model?: string
   }) => {
-    const token = await auth.getAccessToken()
-
     // Clear the stopped flag so the WebSocket bridge accepts commands for this new task
     const bridge = getWsBridge()
     if (bridge) bridge.resumeTask()
 
-    // Use the Next.js /api/chat/ route which accepts Bearer tokens
-    const url = `${backendUrl}/api/chat/`
+    // OSS mode: stream from coasty.ai/v1/chat with X-API-Key (no Bearer).
+    // Production: stream from local backend's /api/chat/ with Bearer JWT.
+    // Both paths share the same SSE wire format below, so only the URL
+    // and auth header differ.
+    let url: string
+    let authHeaders: Record<string, string>
+    const oss = await isOssMode()
+    if (oss) {
+      const key = await getStoredKey()
+      if (!key) return { success: false, error: 'No API key stored' }
+      url = `${getCoastyApiBaseUrl()}/v1/chat`
+      authHeaders = {
+        'X-API-Key': key,
+        'X-Coasty-Source': 'electron-oss',
+        'User-Agent': 'coasty-electron/1.0',
+      }
+    } else {
+      const token = await auth.getAccessToken()
+      url = `${backendUrl}/api/chat/`
+      authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {}
+    }
+
     const controller = new AbortController()
     chatAbortControllers.set(params.requestId, controller)
 
@@ -446,7 +666,7 @@ export function registerIpcHandlers(
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...authHeaders,
         },
         body: JSON.stringify({
           messages: params.messages,
@@ -455,6 +675,7 @@ export function registerIpcHandlers(
           machine_id: params.machineId,
           model: params.model || 'default',
           is_authenticated: true,
+          ...(oss ? { source: 'electron-oss' } : {}),
         }),
         signal: controller.signal,
       })

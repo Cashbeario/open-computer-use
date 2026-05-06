@@ -72,6 +72,23 @@ function formatFailureReason(result: any): string {
   return parts.length ? parts.join(' | ') : 'unknown failure (no error message in result)'
 }
 
+/**
+ * Heuristic for an OSS-mode Coasty API key.
+ *
+ * Production tokens are JWTs (compact serialization: three base64-url segments
+ * separated by dots; the header always decodes to JSON starting with `{"alg"`,
+ * which after base64-url-encoding always begins with `eyJ`). API keys minted
+ * by coasty.ai start with the literal prefix `coasty_`. Treat anything that
+ * doesn't start with `eyJ` AND does start with `coasty_` as an API key.
+ *
+ * The two callers (URL builder + auth message) MUST use the same predicate so
+ * the backend never sees a mismatch (e.g. a JWT in the URL and an API key in
+ * the auth body, or vice versa).
+ */
+function looksLikeCoastyApiKey(token: string): boolean {
+  return typeof token === 'string' && token.startsWith('coasty_')
+}
+
 /** Collect local system details to send to the backend. */
 function getSystemInfo(): Record<string, string> {
   const primary = screen.getPrimaryDisplay()
@@ -279,8 +296,18 @@ export class WebSocketBridge {
     // Auth credentials (token, user_id, machine_id) are sent in the
     // first message after the connection opens — this avoids exposing
     // tokens in URLs which get logged by proxies, servers, and CDNs.
+    //
+    // OSS-mode hint: when the token is an API key (not a JWT), tag the URL
+    // with `source=electron-oss` so the backend's WS handler can route the
+    // session through the API-key auth path before the body's `auth` message
+    // arrives. The hint is a routing breadcrumb only — the actual key never
+    // travels in the URL; it goes in the body's auth message like all other
+    // credentials.
     const sysInfo = getSystemInfo()
     const params = new URLSearchParams(sysInfo)
+    if (looksLikeCoastyApiKey(this.token)) {
+      params.set('source', 'electron-oss')
+    }
     const wsUrl = `${this.backendUrl.replace(/^http/, 'ws')}/api/electron/ws?${params.toString()}`
 
     this.ws = new WebSocket(wsUrl)
@@ -299,13 +326,22 @@ export class WebSocketBridge {
           console.error('[WS Bridge] Failed to refresh token on reconnect:', err)
         }
       }
-      // Send auth credentials in the message body, not the URL
-      this.send({
+      // Send auth credentials in the message body, not the URL.
+      // OSS mode: also include explicit `apiKey` + `source` fields so the
+      // backend's WS auth path can take the API-key branch without having
+      // to re-sniff the token shape. `token` is left populated for backward
+      // compat (older backend builds only read `token`).
+      const authMsg: Record<string, unknown> = {
         type: 'auth',
         token: this.token,
         machine_id: this.machineId,
         user_id: this.userId,
-      })
+      }
+      if (looksLikeCoastyApiKey(this.token)) {
+        authMsg.apiKey = this.token
+        authMsg.source = 'electron-oss'
+      }
+      this.send(authMsg)
     })
 
     this.ws.on('message', async (data: WebSocket.RawData) => {
@@ -489,12 +525,17 @@ export class WebSocketBridge {
     // This avoids a visible 'disconnected' flicker in the UI every ~55 minutes
     // when the scheduled token refresh fires.
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.send({
+      const authMsg: Record<string, unknown> = {
         type: 'auth',
         token: this.token,
         machine_id: this.machineId,
         user_id: this.userId,
-      })
+      }
+      if (looksLikeCoastyApiKey(this.token)) {
+        authMsg.apiKey = this.token
+        authMsg.source = 'electron-oss'
+      }
+      this.send(authMsg)
     }
   }
 

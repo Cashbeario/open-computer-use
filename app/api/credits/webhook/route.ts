@@ -238,6 +238,17 @@ export async function POST(req: NextRequest) {
             }
           } else {
             // Subscription timestamps not available yet, use defaults
+            // TODO(NEW-4 audit): These NOW()/NOW()+30d fallbacks are NOT stable
+            // across webhook retries. The priority-ordered period derivation
+            // applied to the invoice.payment_succeeded handler should also be
+            // applied here. For checkout.session.completed the impact is bounded
+            // to the *initial* grant: the existing-grant dedupe is keyed on
+            // metadata->>stripe_subscription_id (not the unstable period), so
+            // a retry with a different "now" cannot double-grant — it would be
+            // skipped by the existingGrant short-circuit. The cosmetic side
+            // effect is that the persisted period column may not match Stripe.
+            // Fix path: when the session has an `invoice` reference, retrieve
+            // it and use invoice.lines.data[0].period.{start,end}.
             console.log("Subscription timestamps not available yet, using defaults")
             periodStart = new Date().toISOString()
             periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
@@ -728,8 +739,11 @@ export async function POST(req: NextRequest) {
         //   * the subscription is past_due/active/trialing AND tier didn't
         //     drop (we still call reconcile because the user may already be
         //     over the cap from grandfathered limits — the function tolerates).
-        const resolvedUserId = rpcResult?.[0]?.user_id as string | undefined
-        const resolvedTier = rpcResult?.[0]?.resolved_tier as string | undefined
+        // NOTE: OUT columns are prefixed with `out_` to avoid PG 42702
+        // "ambiguous user_id" inside the RPC body — see
+        // supabase/migrations/015_fix_ambiguous_user_id.sql.
+        const resolvedUserId = rpcResult?.[0]?.out_user_id as string | undefined
+        const resolvedTier = rpcResult?.[0]?.out_resolved_tier as string | undefined
         if (resolvedUserId && resolvedTier) {
           try {
             const { reconcileForTierChange } = await import(
@@ -755,7 +769,7 @@ export async function POST(req: NextRequest) {
         console.log(
           `Subscription updated: ${subscription.id} status=${subscription.status} planChange=${
             newPlanId ? `→${newPlanTier}` : "no"
-          } rpcUserId=${rpcResult?.[0]?.user_id ?? "none"}`
+          } rpcUserId=${rpcResult?.[0]?.out_user_id ?? "none"}`
         )
         break
       }
@@ -792,7 +806,8 @@ export async function POST(req: NextRequest) {
         // guarantee metadata is preserved on subscription deletion, and a
         // canceled subscription created via the Dashboard or by a migration
         // tool may have empty metadata).
-        let resolvedUserId: string | null = rpcResult?.[0]?.user_id ?? null
+        // OUT columns prefixed with `out_` — see migration 015.
+        let resolvedUserId: string | null = rpcResult?.[0]?.out_user_id ?? null
         if (!resolvedUserId && customerId) {
           const { data: customerRow } = await (supabase as any)
             .from("stripe_customers")
@@ -854,7 +869,7 @@ export async function POST(req: NextRequest) {
         }
 
         const subscriptionId = invoice.subscription as string
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
+        let subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
         const userId = subscription.metadata?.user_id
         const tier = subscription.metadata?.tier
 
@@ -883,23 +898,109 @@ export async function POST(req: NextRequest) {
           .single()
 
         if (subRecord) {
-          // Validate timestamps exist
-          if (!subscription.current_period_start || !subscription.current_period_end) {
-            console.error("Invoice payment subscription missing period timestamps:", subscriptionId)
-            break
+          // ─── Period derivation with priority-ordered fallback (NEW-4 fix) ───
+          // Stripe has a known timing window where the parent subscription's
+          // current_period_* fields lag the invoice. Previously we'd `break`
+          // on missing timestamps, silently skipping the credit grant. Now we
+          // walk a fallback chain and only fail (HTTP 500 → Stripe retries)
+          // if every source is exhausted.
+          //
+          // CRITICAL idempotency requirement: every fallback timestamp MUST be
+          // stable across retries so the existingRenewal dedupe check by
+          // (user_id, type, subscription_id, created_at∈[periodStart,periodEnd])
+          // produces the same result on every delivery. The "now() / now()+30d"
+          // pattern from checkout.session.completed is NEVER acceptable here.
+          const toIso = (epoch: number | null | undefined): string | null => {
+            if (!epoch || typeof epoch !== "number") return null
+            try {
+              return new Date(epoch * 1000).toISOString()
+            } catch {
+              return null
+            }
           }
-          
-          // Safely convert timestamps
-          let periodStart: string
-          let periodEnd: string
-          try {
-            periodStart = new Date(subscription.current_period_start * 1000).toISOString()
-            periodEnd = new Date(subscription.current_period_end * 1000).toISOString()
-          } catch (e) {
-            console.error("Invalid invoice payment timestamps:", e)
-            break
+
+          let periodStart: string | null = null
+          let periodEnd: string | null = null
+          let periodSource: string = "none"
+
+          // (a) Primary: subscription.current_period_*
+          periodStart = toIso(subscription.current_period_start)
+          periodEnd = toIso(subscription.current_period_end)
+          if (periodStart && periodEnd) {
+            periodSource = "subscription_period"
+            console.log(
+              `webhook.invoice.fallback.subscription_period subscription=${subscriptionId} invoice=${invoice.id}`
+            )
+          } else {
+            // (b) Line item period — almost always present on invoice lines.
+            //     Stable across retries (the invoice is immutable).
+            const linePeriod = invoice?.lines?.data?.[0]?.period
+            const lineStart = toIso(linePeriod?.start)
+            const lineEnd = toIso(linePeriod?.end)
+            if (lineStart && lineEnd) {
+              periodStart = lineStart
+              periodEnd = lineEnd
+              periodSource = "line_period"
+              console.log(
+                `webhook.invoice.fallback.line_period subscription=${subscriptionId} invoice=${invoice.id} reason=subscription_period_missing`
+              )
+            } else {
+              // (c) Top-level invoice.period_start / invoice.period_end
+              const invStart = toIso(invoice.period_start)
+              const invEnd = toIso(invoice.period_end)
+              if (invStart && invEnd) {
+                periodStart = invStart
+                periodEnd = invEnd
+                periodSource = "invoice_period"
+                console.log(
+                  `webhook.invoice.fallback.invoice_period subscription=${subscriptionId} invoice=${invoice.id} reason=line_period_missing`
+                )
+              } else {
+                // (d) Last-resort: re-fetch the subscription once. The first
+                //     retrieve may have hit a stale/cached read replica.
+                console.log(
+                  `webhook.invoice.fallback.refetch subscription=${subscriptionId} invoice=${invoice.id} reason=all_invoice_periods_missing`
+                )
+                try {
+                  subscription = await stripe.subscriptions.retrieve(
+                    subscriptionId,
+                    { expand: ["items.data.price"] }
+                  ) as any
+                  periodStart = toIso(subscription.current_period_start)
+                  periodEnd = toIso(subscription.current_period_end)
+                  if (periodStart && periodEnd) {
+                    periodSource = "refetch"
+                  }
+                } catch (refetchErr) {
+                  console.error(
+                    `webhook.invoice.fallback.refetch failed for ${subscriptionId}:`,
+                    refetchErr
+                  )
+                }
+              }
+            }
           }
-          
+
+          if (!periodStart || !periodEnd) {
+            // All paths exhausted. Return 500 so Stripe retries the webhook
+            // instead of silently swallowing the renewal credit grant.
+            console.error(
+              `webhook.invoice.fallback.exhausted subscription=${subscriptionId} invoice=${invoice.id} — returning 500 for Stripe to retry`
+            )
+            return NextResponse.json(
+              {
+                error: "Unable to derive billing period for renewal",
+                subscription_id: subscriptionId,
+                invoice_id: invoice.id,
+              },
+              { status: 500 }
+            )
+          }
+
+          console.log(
+            `Renewal billing period resolved via ${periodSource}: ${periodStart} → ${periodEnd}`
+          )
+
           // Check if we've already granted credits for this billing period
           const { data: existingRenewal } = await (supabase as any)
             .from("credit_transactions")

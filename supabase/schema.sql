@@ -186,7 +186,11 @@ $$;
 ALTER FUNCTION "public"."can_user_create_machine"("p_user_id" "uuid") OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."can_user_join_room"("p_invite_code" "text", "p_user_id" "uuid") RETURNS TABLE("chat_id" "uuid", "can_join" boolean, "reason" "text")
+-- OUT columns are prefixed with ``out_`` (migration 015) for defence-in-depth
+-- against the RETURNS-TABLE shadowing footgun that caused the
+-- update_subscription_status 42702 bug (NEW-1).  Body uses table aliases on
+-- chat_participants so the column reference can never shadow the OUT param.
+CREATE OR REPLACE FUNCTION "public"."can_user_join_room"("p_invite_code" "text", "p_user_id" "uuid") RETURNS TABLE("out_chat_id" "uuid", "out_can_join" boolean, "out_reason" "text")
     LANGUAGE "plpgsql"
     AS $$
 DECLARE
@@ -203,31 +207,31 @@ BEGIN
     AND i.is_active = true
     AND (i.expires_at IS NULL OR i.expires_at > CURRENT_TIMESTAMP)
     AND (i.max_uses IS NULL OR i.uses_count < i.max_uses);
-    
+
     IF NOT FOUND THEN
         RETURN QUERY SELECT NULL::UUID, false, 'Invalid or expired invitation code';
         RETURN;
     END IF;
-    
+
     -- Check if user is already a participant
     IF EXISTS (
-        SELECT 1 FROM chat_participants
-        WHERE chat_id = v_invitation.chat_id AND user_id = p_user_id
+        SELECT 1 FROM chat_participants cp
+        WHERE cp.chat_id = v_invitation.chat_id AND cp.user_id = p_user_id
     ) THEN
         RETURN QUERY SELECT v_invitation.chat_id, false, 'You are already a participant in this room';
         RETURN;
     END IF;
-    
+
     -- Check if room is at capacity
     SELECT COUNT(*) INTO v_participant_count
-    FROM chat_participants
-    WHERE chat_id = v_invitation.chat_id;
-    
+    FROM chat_participants cp
+    WHERE cp.chat_id = v_invitation.chat_id;
+
     IF v_participant_count >= v_invitation.max_participants THEN
         RETURN QUERY SELECT v_invitation.chat_id, false, 'Room is at maximum capacity';
         RETURN;
     END IF;
-    
+
     RETURN QUERY SELECT v_invitation.chat_id, true, 'Can join room';
 END;
 $$;

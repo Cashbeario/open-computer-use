@@ -148,89 +148,137 @@ Frontend (Next.js 15)         Backend (FastAPI)              VM (Docker)
 
 ## Quick Start
 
-### Prerequisites
-
-Node.js 20+ · Python 3.10+ · Docker · [Supabase](https://supabase.com) account · AI provider API key
-
-### 1. Clone & install
+You only need **one API key** to run the app. Get a free sandbox key at [coasty.ai/developers](https://coasty.ai/developers) — sandbox keys (`sk-coasty-test-*`) return mock infrastructure for free; live keys provision real VMs.
 
 ```bash
 git clone https://github.com/coasty-ai/open-computer-use.git
 cd open-computer-use
-
-# Frontend
 npm install
+cp .env.oss.example .env.local
+```
 
-# Backend
+Open `.env.local` and paste your key:
+
+```env
+COASTY_API_KEY=sk-coasty-test-your-key-here
+```
+
+Then:
+
+```bash
+npm run dev
+```
+
+Open **[http://localhost:3000](http://localhost:3000)** and start a chat. That's it — no Supabase, no AWS, no Stripe to configure.
+
+> First boot auto-generates `CSRF_SECRET` and `ENCRYPTION_KEY` into `.env.local` (already gitignored). Safe to delete; we'll regenerate.
+
+<details>
+<summary><strong>Want the full self-hosted stack?</strong> (Supabase + AWS Bedrock + Stripe)</summary>
+
+<br />
+
+You'll need:
+
+- A [Supabase](https://supabase.com) project
+- AWS credentials with [Bedrock model access enabled](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) in your region
+- Optional: Stripe keys for billing UI, Google Custom Search keys for the web-search tool
+
+### 1. Install backend deps
+
+```bash
 cd backend
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cd ..
 ```
 
-### 2. Configure environment
+### 2. Set environment variables
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 cp backend/.env.example backend/.env
 ```
 
-Set these in both `.env` files:
+Required in **both** `.env.local` and `backend/.env`:
 
 ```env
-# Supabase (required)
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE=your-service-role-key
 
-# Security (required — generate with: openssl rand -hex 32)
-ENCRYPTION_KEY=...
-CSRF_SECRET=...
-
-# AI provider (at least one)
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Google Search (required for web search)
-GOOGLE_SEARCH_KEY=...
-GOOGLE_SEARCH_CX=...
+# Security — generate each with: openssl rand -hex 32 (or base64 32 for ENCRYPTION_KEY)
+ENCRYPTION_KEY=
+CSRF_SECRET=
+INTERNAL_API_KEY=          # MUST match in both files
 ```
 
-### 3. Set up database
+Required only in **`backend/.env`**:
+
+```env
+# AWS Bedrock (LLM)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+BEDROCK_DEFAULT_MODEL=anthropic.claude-sonnet-4-20250514-v1:0
+
+# Optional: web-search tool
+GOOGLE_SEARCH_KEY=
+GOOGLE_SEARCH_CX=
+```
+
+> Bedrock requires per-model access enablement in the AWS console. See [AWS docs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+
+### 3. Set up the database
 
 ```bash
-# Via Supabase CLI
 npm install -g supabase
 supabase login
 supabase link --project-ref your-project-ref
 supabase db push
-
-# Or paste supabase/schema.sql into the Supabase SQL Editor
 ```
+
+Or paste `supabase/schema.sql` into the Supabase SQL Editor.
 
 ### 4. Run
-
-**Docker (recommended):**
-
-```bash
-docker-compose up --build
-```
-
-**Manual:**
 
 ```bash
 # Terminal 1 — Frontend
 npm run dev
 
-# Terminal 2 — Backend
+# Terminal 2 — Backend (dev)
 cd backend && python main.py
 
-# Terminal 3 — AI Desktop VM (optional)
+# Terminal 3 — Optional: local AI desktop VM
 docker-compose -f docker-compose.ai-desktop.yml up --build
 ```
 
-Open **http://localhost:3000**, sign in, start a chat, and give your agent a task.
+Or all together:
+
+```bash
+docker-compose up --build
+```
+
+Open **[http://localhost:3000](http://localhost:3000)** and sign in.
+
+</details>
+
+<details>
+<summary><strong>Prefer the MCP server?</strong></summary>
+
+<br />
+
+The same `COASTY_API_KEY` works with [`@coasty/mcp`](https://www.npmjs.com/package/@coasty/mcp), an npm package that gives Claude Desktop / Cursor / Windsurf full computer-use tools over MCP.
+
+```bash
+npx @coasty/mcp
+```
+
+See [`mcp/`](./mcp) for details.
+
+</details>
 
 <br />
 

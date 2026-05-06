@@ -1004,4 +1004,349 @@ describe("Billing Webhook — Credit Granting", () => {
       expect(credits!.has_active_subscription).toBe(true)
     })
   })
+
+  // ── Scenario 13: NEW-5 — subscription.updated price not seeded ────────────
+  //
+  // Bug: a `customer.subscription.updated` event for sub
+  // sub_1THnNOKk9kzNS1Shmrwjftil carried price_1S44vpKk9kzNS1ShGXxgI9c0,
+  // which had no row in subscription_plans.  The original handler logged a
+  // bare console.warn and silently dropped the tier change.
+  //
+  // Fix: when the bare lookup misses, fall back to Stripe's
+  // prices.retrieve(..., expand: ['product']) and read product.metadata.tier.
+  // If that resolves, self-heal subscription_plans + propagate the tier.
+  // If neither path resolves, surface the error LOUDLY (stripe_events.error
+  // populated, console.error with stable grep token).
+
+  describe("Scenario 13: NEW-5 — subscription.updated price not in subscription_plans", () => {
+    interface PriceLookupOutcome {
+      newPlanId: string | null
+      newPlanTier: string | null
+      priceLookupError: string | null
+      stripeEventsErrorWritten: string | null
+    }
+
+    interface ProductMetadata {
+      tier: string
+    }
+
+    interface FakeStripePrice {
+      id: string
+      product: {
+        id: string
+        name: string
+        deleted?: boolean
+        metadata: ProductMetadata | Record<string, never>
+      }
+      unit_amount: number
+      currency: string
+      recurring: { interval: string }
+    }
+
+    /**
+     * Mirrors the production lookup chain in route.ts → subscription.updated:
+     *   1. SELECT id, tier FROM subscription_plans WHERE stripe_price_id = $1
+     *   2. On miss → resolvePriceFromStripe(): fetch + read product.metadata.tier
+     *      → self-heal subscription_plans + return resolved row
+     *   3. On miss → record error to stripe_events.error and emit stable
+     *      grep token via console.error.
+     */
+    function handleSubscriptionUpdatedPriceLookup(
+      db: MockDB,
+      _eventId: string,
+      subscription: { id: string; items: { data: Array<{ price: { id: string } }> } },
+      stripeMock: {
+        retrievePrice?: (id: string) => FakeStripePrice | null
+      }
+    ): PriceLookupOutcome {
+      const VALID_TIERS = new Set(["lite", "starter", "professional", "enterprise"])
+
+      let newPlanId: string | null = null
+      let newPlanTier: string | null = null
+      let priceLookupError: string | null = null
+      let stripeEventsErrorWritten: string | null = null
+
+      const newPriceId = subscription.items?.data?.[0]?.price?.id
+      if (!newPriceId) {
+        return { newPlanId, newPlanTier, priceLookupError, stripeEventsErrorWritten }
+      }
+
+      // 1. Bare DB lookup by stripe_price_id
+      const found = db.subscription_plans.find(
+        (p: any) => p.stripe_price_id === newPriceId
+      )
+      if (found) {
+        newPlanId = found.id
+        newPlanTier = found.tier
+        return { newPlanId, newPlanTier, priceLookupError, stripeEventsErrorWritten }
+      }
+
+      // 2. Stripe fallback (resolvePriceFromStripe)
+      const priceObj = stripeMock.retrievePrice?.(newPriceId)
+      if (priceObj && priceObj.product && !priceObj.product.deleted) {
+        const rawTier = String(priceObj.product.metadata?.tier ?? "").trim().toLowerCase()
+        const tier =
+          rawTier === "plus" || rawTier === "pro" ? "professional" : rawTier
+        if (VALID_TIERS.has(tier)) {
+          // self-heal: update an existing same-tier row OR insert a new one
+          const existingByTier = db.subscription_plans.find(
+            (p: any) => p.tier === tier
+          )
+          if (existingByTier) {
+            ;(existingByTier as any).stripe_price_id = newPriceId
+            newPlanId = existingByTier.id
+            newPlanTier = existingByTier.tier
+          } else {
+            const newId = `plan_${tier}_recovered`
+            db.subscription_plans.push({
+              id: newId,
+              tier,
+              monthly_credits:
+                tier === "lite" ? 100 :
+                tier === "starter" ? 200 :
+                tier === "professional" ? 600 : 0,
+              name: priceObj.product.name,
+              price: priceObj.unit_amount / 100,
+              stripe_price_id: newPriceId,
+            } as any)
+            newPlanId = newId
+            newPlanTier = tier
+          }
+          return { newPlanId, newPlanTier, priceLookupError, stripeEventsErrorWritten }
+        }
+      }
+
+      // 3. Last resort — surface the error
+      priceLookupError = `SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS price=${newPriceId} sub=${subscription.id}`
+      stripeEventsErrorWritten = priceLookupError
+      // (in real code: console.error + UPDATE stripe_events SET error = ...)
+      return { newPlanId, newPlanTier, priceLookupError, stripeEventsErrorWritten }
+    }
+
+    let scenarioDb: MockDB
+
+    beforeEach(() => {
+      scenarioDb = new MockDB()
+      // Pre-seed subscription_plans with stripe_price_id columns (the test
+      // mock previously didn't track them — extend the rows in-place).
+      const priceMap: Record<string, string> = {
+        starter: "price_known_starter",
+        professional: "price_known_pro",
+        enterprise: "price_known_ent",
+      }
+      scenarioDb.subscription_plans.forEach((p: any) => {
+        p.stripe_price_id = priceMap[p.tier] ?? `price_known_${p.tier}`
+      })
+      scenarioDb.initializeUserCredits(USER_ID)
+    })
+
+    it("happy path: known price_id resolves directly from subscription_plans (unchanged behaviour)", () => {
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt_known",
+        { id: SUB_ID, items: { data: [{ price: { id: "price_known_pro" } }] } },
+        { retrievePrice: () => null } // Stripe should never be called
+      )
+
+      expect(outcome.newPlanId).toBe("plan_professional")
+      expect(outcome.newPlanTier).toBe("professional")
+      expect(outcome.priceLookupError).toBeNull()
+      expect(outcome.stripeEventsErrorWritten).toBeNull()
+    })
+
+    it("self-heals when price_id is unknown but Stripe product has metadata.tier=professional", () => {
+      // The exact NEW-5 scenario: live price NOT in subscription_plans.
+      const ORPHAN_PRICE = "price_1S44vpKk9kzNS1ShGXxgI9c0"
+
+      // Sanity: nothing in subscription_plans matches.
+      expect(
+        scenarioDb.subscription_plans.find((p: any) => p.stripe_price_id === ORPHAN_PRICE)
+      ).toBeUndefined()
+
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt_orphan",
+        {
+          id: "sub_1THnNOKk9kzNS1Shmrwjftil",
+          items: { data: [{ price: { id: ORPHAN_PRICE } }] },
+        },
+        {
+          retrievePrice: (id: string) => {
+            expect(id).toBe(ORPHAN_PRICE)
+            return {
+              id,
+              product: {
+                id: "prod_pro_2026",
+                name: "Plus",
+                metadata: { tier: "professional" },
+              },
+              unit_amount: 5000,
+              currency: "usd",
+              recurring: { interval: "month" },
+            }
+          },
+        }
+      )
+
+      expect(outcome.newPlanId).toBe("plan_professional") // existing row updated
+      expect(outcome.newPlanTier).toBe("professional")
+      expect(outcome.priceLookupError).toBeNull()
+      expect(outcome.stripeEventsErrorWritten).toBeNull()
+
+      // Self-heal: the existing professional row now has the orphan price id.
+      const proRow = scenarioDb.subscription_plans.find((p: any) => p.tier === "professional")! as any
+      expect(proRow.stripe_price_id).toBe(ORPHAN_PRICE)
+    })
+
+    it("normalises Stripe product.metadata.tier='plus' to canonical 'professional'", () => {
+      const ORPHAN = "price_plus_alias"
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt",
+        { id: SUB_ID, items: { data: [{ price: { id: ORPHAN } }] } },
+        {
+          retrievePrice: () => ({
+            id: ORPHAN,
+            product: { id: "prod_plus", name: "Plus", metadata: { tier: "plus" } },
+            unit_amount: 5000,
+            currency: "usd",
+            recurring: { interval: "month" },
+          }),
+        }
+      )
+
+      expect(outcome.newPlanTier).toBe("professional")
+      expect(outcome.priceLookupError).toBeNull()
+    })
+
+    it("surfaces SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS when neither path resolves", () => {
+      const ORPHAN = "price_truly_unknown"
+
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt",
+        { id: SUB_ID, items: { data: [{ price: { id: ORPHAN } }] } },
+        {
+          retrievePrice: () => ({
+            id: ORPHAN,
+            product: {
+              id: "prod_no_meta",
+              name: "Mystery",
+              metadata: {} as any, // no tier metadata
+            },
+            unit_amount: 1900,
+            currency: "usd",
+            recurring: { interval: "month" },
+          }),
+        }
+      )
+
+      expect(outcome.newPlanId).toBeNull()
+      expect(outcome.newPlanTier).toBeNull()
+      // Loud failure — never silent
+      expect(outcome.priceLookupError).not.toBeNull()
+      expect(outcome.priceLookupError).toMatch(/SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS/)
+      expect(outcome.priceLookupError).toContain(ORPHAN)
+      expect(outcome.priceLookupError).toContain(SUB_ID)
+      expect(outcome.stripeEventsErrorWritten).toBe(outcome.priceLookupError)
+    })
+
+    it("surfaces error when Stripe price fetch returns nothing (network / 404)", () => {
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt",
+        { id: SUB_ID, items: { data: [{ price: { id: "price_404" } }] } },
+        { retrievePrice: () => null } // Stripe returns nothing
+      )
+
+      expect(outcome.newPlanId).toBeNull()
+      expect(outcome.priceLookupError).toMatch(/SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS/)
+      expect(outcome.stripeEventsErrorWritten).not.toBeNull()
+    })
+
+    it("ignores deleted Stripe products (cannot self-heal)", () => {
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt",
+        { id: SUB_ID, items: { data: [{ price: { id: "price_dead" } }] } },
+        {
+          retrievePrice: () => ({
+            id: "price_dead",
+            product: { id: "prod_dead", name: "Gone", deleted: true, metadata: {} as any },
+            unit_amount: 1900,
+            currency: "usd",
+            recurring: { interval: "month" },
+          }),
+        }
+      )
+
+      expect(outcome.newPlanId).toBeNull()
+      expect(outcome.priceLookupError).toMatch(/SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS/)
+    })
+
+    it("rejects unrecognised tier metadata (e.g. 'gold' typo on the Stripe product)", () => {
+      const outcome = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt",
+        { id: SUB_ID, items: { data: [{ price: { id: "price_typo" } }] } },
+        {
+          retrievePrice: () => ({
+            id: "price_typo",
+            product: {
+              id: "prod_typo",
+              name: "Gold",
+              metadata: { tier: "gold" }, // typo / unknown
+            },
+            unit_amount: 9900,
+            currency: "usd",
+            recurring: { interval: "month" },
+          }),
+        }
+      )
+
+      expect(outcome.newPlanId).toBeNull()
+      expect(outcome.priceLookupError).toMatch(/SUBSCRIPTION_PLANS_PRICE_LOOKUP_MISS/)
+    })
+
+    it("idempotent: replaying the same event after self-heal hits the cache (no duplicate inserts)", () => {
+      const ORPHAN = "price_replay"
+      const planCountBefore = scenarioDb.subscription_plans.length
+
+      // First delivery: self-heals (existing row updated, no new insert
+      // because we have a same-tier row already).
+      const first = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt_1",
+        { id: SUB_ID, items: { data: [{ price: { id: ORPHAN } }] } },
+        {
+          retrievePrice: () => ({
+            id: ORPHAN,
+            product: { id: "prod_starter", name: "Starter", metadata: { tier: "starter" } },
+            unit_amount: 1900,
+            currency: "usd",
+            recurring: { interval: "month" },
+          }),
+        }
+      )
+      expect(first.newPlanTier).toBe("starter")
+      expect(scenarioDb.subscription_plans.length).toBe(planCountBefore) // updated, not inserted
+
+      // Second delivery: bare DB lookup hits — no Stripe call needed.
+      let stripeCalled = false
+      const second = handleSubscriptionUpdatedPriceLookup(
+        scenarioDb,
+        "evt_2",
+        { id: SUB_ID, items: { data: [{ price: { id: ORPHAN } }] } },
+        {
+          retrievePrice: () => {
+            stripeCalled = true
+            return null
+          },
+        }
+      )
+      expect(second.newPlanTier).toBe("starter")
+      expect(stripeCalled).toBe(false)
+      expect(scenarioDb.subscription_plans.length).toBe(planCountBefore)
+    })
+  })
 })

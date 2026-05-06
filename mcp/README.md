@@ -364,7 +364,7 @@ The API key is never sent to the model — it stays in your MCP host's environme
 
 ### How do I report a bug or request a feature?
 
-GitHub issues, or email <support@coasty.ai>. Security disclosures: see [SECURITY.md](https://github.com/coasty-ai/coasty-mcp/blob/main/SECURITY.md).
+GitHub issues, or email <founders@coasty.ai>. Security disclosures: see [SECURITY.md](https://github.com/coasty-ai/coasty-mcp/blob/main/SECURITY.md).
 
 ---
 

@@ -46,7 +46,7 @@ const manifest = {
     has_user_authentication: true,
   },
   logo_url: `${ORIGIN}/icon-512.svg`,
-  contact_email: "support@coasty.ai",
+  contact_email: "founders@coasty.ai",
   legal_info_url: `${ORIGIN}/terms`,
   // Custom extensions readable by modern agents:
   x_coasty: {

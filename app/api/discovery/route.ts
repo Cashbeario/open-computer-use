@@ -45,7 +45,7 @@ const manifest = {
     tagline: "Computer-use AI agents — controllable, schedulable, billable per credit.",
     homepage: ORIGIN,
     statusPage: "https://status.coasty.ai",
-    supportEmail: "support@coasty.ai",
+    supportEmail: "founders@coasty.ai",
     foundingYear: 2025,
     licenseModel: "credit-based-subscription",
     sandboxAvailable: true,
@@ -173,7 +173,7 @@ const manifest = {
 
   // ── Where to file issues / vulnerabilities ──────────────────────────
   contact: {
-    support: "support@coasty.ai",
+    support: "founders@coasty.ai",
     security: "founders@coasty.ai",
     securityTxt: `${ORIGIN}/.well-known/security.txt`,
     abuse: "abuse@coasty.ai",

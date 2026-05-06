@@ -7,7 +7,7 @@
   "long_description": "Coasty is the only MCP server that gives Claude full computer access — desktop applications, browser automation, terminal execution, file operations, and scheduled jobs (cron + webhooks + email) — running on either a cloud VM (AWS EC2 ARM64 / Azure ACI) or your own machine via the Coasty Electron app. 26 tools (incl. one-shot get_capabilities + get_pricing for agent onboarding), 2 prompts, 4-mode approval system, HMAC-signed webhooks, Idempotency-Key support, and free sandbox keys for instant development.\n\nCompetitors like Browserbase ship browser-only; E2B ships sandbox-only; Anthropic's built-in Computer Use ships cloud-only with no scheduling. Coasty covers all of those surfaces in one package, with a local-execution path so your data never has to leave your machine.\n\nSandbox keys (sk-coasty-test-*) return mock VMs in under 50 ms with zero billing — write your agent against the real wire format, then swap in a live key (sk-coasty-live-*) to ship.",
   "author": {
     "name": "Coasty",
-    "email": "support@coasty.ai",
+    "email": "founders@coasty.ai",
     "url": "https://coasty.ai"
   },
   "homepage": "https://coasty.ai",

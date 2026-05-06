@@ -2097,7 +2097,7 @@ export const COASTY_OPENAPI_SPEC: OpenApiV31Spec = {
     contact: {
       name: "Coasty Developer Support",
       url: "https://coasty.ai/support",
-      email: "support@coasty.ai",
+      email: "founders@coasty.ai",
     },
     license: {
       name: "MIT",

@@ -62,7 +62,7 @@ export function describeError(err: CoastyError): string {
   } else if (err.status === 429) {
     lines.push("Hint: Rate-limited. Retry after the Retry-After window (1-60s).");
   } else if (err.status >= 500) {
-    lines.push("Hint: Server-side error. Retry with exponential backoff or contact support@coasty.ai.");
+    lines.push("Hint: Server-side error. Retry with exponential backoff or contact founders@coasty.ai.");
   }
   return lines.join("\n");
 }

@@ -131,8 +131,8 @@ describe('setWindowOpenHandler: scheme allowlist (expected behavior)', () => {
   })
 
   it('mailto: → opens external mail client', () => {
-    handler({ url: 'mailto:support@coasty.ai' })
-    expect(mockOpenExternal).toHaveBeenCalledWith('mailto:support@coasty.ai')
+    handler({ url: 'mailto:founders@coasty.ai' })
+    expect(mockOpenExternal).toHaveBeenCalledWith('mailto:founders@coasty.ai')
   })
 
   it('javascript: → blocked, NOT forwarded to shell', () => {

@@ -126,7 +126,7 @@ Every API key has scopes (`machines:write`, `terminal:exec`, `browser:execute`, 
 
 - Docs: https://coasty.ai/api-docs
 - Repository: https://github.com/coasty-ai/coasty-mcp
-- Email: support@coasty.ai
+- Email: founders@coasty.ai
 
 ## Source code
 

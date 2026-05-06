@@ -2,7 +2,7 @@
   "name": "coasty-desktop",
   "version": "4.1.2",
   "description": "Coasty Desktop - AI agent for your local machine",
-  "author": "Coasty <support@coasty.ai>",
+  "author": "Coasty <founders@coasty.ai>",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

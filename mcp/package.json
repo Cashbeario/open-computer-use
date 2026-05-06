@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": {
     "name": "Coasty",
-    "email": "support@coasty.ai",
+    "email": "founders@coasty.ai",
     "url": "https://coasty.ai"
   },
   "homepage": "https://coasty.ai/api-docs#mcp",
@@ -16,7 +16,7 @@
   },
   "bugs": {
     "url": "https://github.com/coasty-ai/coasty-mcp/issues",
-    "email": "support@coasty.ai"
+    "email": "founders@coasty.ai"
   },
   "funding": {
     "type": "individual",

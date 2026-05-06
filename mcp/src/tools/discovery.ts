@@ -358,7 +358,7 @@ export function buildCapabilities(): Record<string, unknown> {
       tagline: "Computer-use AI agents you control via API or MCP",
       homepage: "https://coasty.ai",
       status_page: "https://status.coasty.ai",
-      support_email: "support@coasty.ai",
+      support_email: "founders@coasty.ai",
     },
     discovery: {
       openapi: "https://coasty.ai/.well-known/openapi.json",

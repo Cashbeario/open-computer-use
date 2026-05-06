@@ -287,7 +287,7 @@ export default async function RootLayout({
               {
                 "@type": "ContactPoint",
                 "contactType": "customer support",
-                "email": "support@coasty.ai",
+                "email": "founders@coasty.ai",
                 "areaServed": "Worldwide",
                 "availableLanguage": availableLanguages
               }

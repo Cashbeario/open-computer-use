@@ -22,6 +22,7 @@ import { IntlClientProvider } from "./intl-client-provider"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { locales, rtlLocales, type Locale } from "@/i18n/config"
 import { getHreflangAlternates } from "@/lib/seo"
+import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -150,6 +151,58 @@ export default async function RootLayout({
   const dir = rtlLocales.includes(locale as Locale) ? "rtl" : "ltr"
   const availableLanguages = locales.map(l => l === "fil" ? "Filipino" : l)
 
+  // ─── Canonical pricing → JSON-LD offers ──────────────────────────────────
+  // Sourced from `lib/pricing/tiers.ts` so structured data never goes stale.
+  // Used by the WebApplication and SoftwareApplication blocks below.
+  const digitalShipping = {
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
+      "deliveryTime": {
+        "@type": "ShippingDeliveryTime",
+        "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
+        "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" }
+      },
+      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "US",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+      "merchantReturnDays": "0"
+    }
+  }
+  const purchasableTiers = VISIBLE_TIERS.filter(t => t.priceUSD !== null)
+  const tierOffers = purchasableTiers.map(tier => ({
+    "@type": "Offer",
+    "name": `${tier.name} Plan`,
+    "price": String(tier.priceUSD),
+    "priceCurrency": "USD",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": tier.priceUSD,
+      "priceCurrency": "USD",
+      "billingDuration": "P1M",
+      "billingIncrement": 1
+    },
+    "category": "subscription",
+    "eligibleQuantity": {
+      "@type": "QuantitativeValue",
+      "value": tier.creditsPerMonth,
+      "unitText": "credits/month"
+    },
+    "priceValidUntil": "2027-12-31",
+    "availability": "https://schema.org/InStock",
+    "url": `https://coasty.ai/pricing#${tier.id}`,
+    ...digitalShipping
+  }))
+  // High/low for the SoftwareApplication AggregateOffer summary.
+  const tierPrices = purchasableTiers.map(t => t.priceUSD as number)
+  const boostPrices = BOOST_PACKAGES.map(p => p.priceUSD)
+  const allPrices = [...tierPrices, ...boostPrices]
+  const lowPrice = Math.min(...allPrices)
+  const highPrice = Math.max(...allPrices)
+
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
@@ -175,57 +228,7 @@ export default async function RootLayout({
             "description": seoT("structuredData.appDescription"),
             "applicationCategory": "ProductivityApplication",
             "operatingSystem": "Web Browser, Windows, macOS",
-            "offers": [
-              {
-                "@type": "Offer",
-                "name": "Free Tier",
-                "price": "0",
-                "priceCurrency": "USD",
-                "priceValidUntil": "2027-12-31",
-                "availability": "https://schema.org/InStock",
-                "shippingDetails": {
-                  "@type": "OfferShippingDetails",
-                  "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-                  "deliveryTime": {
-                    "@type": "ShippingDeliveryTime",
-                    "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-                    "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" }
-                  },
-                  "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
-                },
-                "hasMerchantReturnPolicy": {
-                  "@type": "MerchantReturnPolicy",
-                  "applicableCountry": "US",
-                  "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-                  "merchantReturnDays": "0"
-                }
-              },
-              {
-                "@type": "Offer",
-                "name": "Starter Plan",
-                "price": "20",
-                "priceCurrency": "USD",
-                "billingIncrement": "month",
-                "priceValidUntil": "2027-12-31",
-                "availability": "https://schema.org/InStock",
-                "shippingDetails": {
-                  "@type": "OfferShippingDetails",
-                  "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-                  "deliveryTime": {
-                    "@type": "ShippingDeliveryTime",
-                    "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-                    "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" }
-                  },
-                  "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
-                },
-                "hasMerchantReturnPolicy": {
-                  "@type": "MerchantReturnPolicy",
-                  "applicableCountry": "US",
-                  "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-                  "merchantReturnDays": "0"
-                }
-              }
-            ],
+            "offers": tierOffers,
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.8",
@@ -269,21 +272,26 @@ export default async function RootLayout({
             "name": "Coasty",
             "alternateName": "Coasty AI",
             "url": "https://coasty.ai",
-            "logo": "https://coasty.ai/logo_light.svg",
+            "logo": "https://coasty.ai/logo_dark.svg",
             "description": seoT("structuredData.orgDescription"),
             "foundingDate": "2025",
             "knowsAbout": ["Computer Use Agents", "AI Automation", "Desktop Automation", "Browser Automation", "Autonomous AI Agents", "Virtual Machine Isolation"],
             "sameAs": [
               "https://x.com/coasty_ai",
+              "https://twitter.com/coasty_ai",
               "https://github.com/anthropics/open-computer-use",
+              "https://www.linkedin.com/company/coasty",
               "https://www.producthunt.com/products/coasty"
             ],
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "contactType": "customer support",
-              "email": "support@coasty.ai",
-              "availableLanguage": availableLanguages
-            }
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "email": "support@coasty.ai",
+                "areaServed": "Worldwide",
+                "availableLanguage": availableLanguages
+              }
+            ]
           })
         }}
       />
@@ -328,10 +336,10 @@ export default async function RootLayout({
             "isAccessibleForFree": true,
             "offers": {
               "@type": "AggregateOffer",
-              "lowPrice": "0",
-              "highPrice": "20",
+              "lowPrice": String(lowPrice),
+              "highPrice": String(highPrice),
               "priceCurrency": "USD",
-              "offerCount": "2"
+              "offerCount": String(tierOffers.length + BOOST_PACKAGES.length)
             },
             "aggregateRating": {
               "@type": "AggregateRating",

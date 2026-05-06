@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server"
+import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
 
 export async function FAQSchema({ locale }: { locale: string }) {
   let t: (key: string) => string
@@ -42,6 +43,75 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     t = (key: string) => key
   }
 
+  // Shared shipping/return shape — Google Merchant requires both fields on
+  // every Offer. SaaS has no physical fulfillment so we emit zero-day digital
+  // delivery + no-returns.
+  const digitalShipping = {
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
+      "deliveryTime": {
+        "@type": "ShippingDeliveryTime",
+        "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
+        "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
+      },
+      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "US",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+      "merchantReturnDays": "0",
+    },
+  }
+
+  // Subscription tiers — sourced from `lib/pricing/tiers.ts`. Enterprise is
+  // priceUSD === null, so it's filtered out (it's a contact-sales play, not
+  // a self-serve Offer).
+  const subscriptionOffers = VISIBLE_TIERS
+    .filter((tier) => tier.priceUSD !== null)
+    .map((tier) => ({
+      "@type": "Offer",
+      "name": `${tier.name} Plan`,
+      "price": String(tier.priceUSD),
+      "priceCurrency": "USD",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": tier.priceUSD,
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+        "billingIncrement": 1,
+      },
+      "category": "subscription",
+      "eligibleQuantity": {
+        "@type": "QuantitativeValue",
+        "value": tier.creditsPerMonth,
+        "unitText": "credits/month",
+      },
+      "priceValidUntil": "2027-12-31",
+      "availability": "https://schema.org/InStock",
+      "url": `https://coasty.ai/pricing#${tier.id}`,
+      ...digitalShipping,
+    }))
+
+  // One-time boost packages.
+  const boostOffers = BOOST_PACKAGES.map((pkg) => ({
+    "@type": "Offer",
+    "name": pkg.name,
+    "price": String(pkg.priceUSD),
+    "priceCurrency": "USD",
+    "category": "one-time-purchase",
+    "eligibleQuantity": {
+      "@type": "QuantitativeValue",
+      "value": pkg.credits,
+      "unitText": "credits",
+    },
+    "priceValidUntil": "2027-12-31",
+    "availability": "https://schema.org/InStock",
+    "url": "https://coasty.ai/pricing#boosts",
+    ...digitalShipping,
+  }))
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -52,58 +122,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "image": "https://coasty.ai/demo-screenshot.png",
     "url": "https://coasty.ai",
     "inLanguage": locale,
-    "offers": [
-      {
-        "@type": "Offer",
-        "name": "Free Tier",
-        "price": "0",
-        "priceCurrency": "USD",
-        "priceValidUntil": "2027-12-31",
-        "availability": "https://schema.org/InStock",
-        "url": "https://coasty.ai/auth",
-        "shippingDetails": {
-          "@type": "OfferShippingDetails",
-          "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-          "deliveryTime": {
-            "@type": "ShippingDeliveryTime",
-            "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-            "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-          },
-          "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" },
-        },
-        "hasMerchantReturnPolicy": {
-          "@type": "MerchantReturnPolicy",
-          "applicableCountry": "US",
-          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-          "merchantReturnDays": "0",
-        },
-      },
-      {
-        "@type": "Offer",
-        "name": "Starter Plan",
-        "price": "20",
-        "priceCurrency": "USD",
-        "priceValidUntil": "2027-12-31",
-        "availability": "https://schema.org/InStock",
-        "url": "https://coasty.ai/auth",
-        "shippingDetails": {
-          "@type": "OfferShippingDetails",
-          "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-          "deliveryTime": {
-            "@type": "ShippingDeliveryTime",
-            "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-            "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-          },
-          "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" },
-        },
-        "hasMerchantReturnPolicy": {
-          "@type": "MerchantReturnPolicy",
-          "applicableCountry": "US",
-          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-          "merchantReturnDays": "0",
-        },
-      },
-    ],
+    "offers": [...subscriptionOffers, ...boostOffers],
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",

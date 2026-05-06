@@ -1575,6 +1575,18 @@ class Agent:
  def _fld(self,p):
   try:
    path=os.path.expanduser(p.get("dirpath",p.get("path",HOME_DIR)))
+   # Cross-OS path remap: the web UI historically defaulted to
+   # /home/desktop/<...> which the Linux Ubuntu agent maps to
+   # /home/ubuntu/<...>.  Apply the same convention on Windows so
+   # the FILES tab works on a fresh Windows VM without the user
+   # having to re-navigate — map /home/desktop[...] to the user's
+   # Desktop folder, and /home/ubuntu[...] to the Windows home.
+   if path.startswith("/home/desktop"):
+    rest=path[len("/home/desktop"):].lstrip("/")
+    path=os.path.join(DESKTOP_DIR,rest) if rest else DESKTOP_DIR
+   elif path.startswith("/home/ubuntu"):
+    rest=path[len("/home/ubuntu"):].lstrip("/")
+    path=os.path.join(HOME_DIR,rest) if rest else HOME_DIR
    if not os.path.isdir(path):return{"success":False,"error":f"Not a directory: {path}"}
    files=[]
    for e in sorted(os.listdir(path)):

@@ -11,18 +11,36 @@
   50% { opacity: 0; }
 }
 
-/* Blog list entrance: pure CSS so we don't wrap <Link> in framer-motion
- * (motion's gesture system intercepts the first tap on touch devices,
- * which forced users to double-tap to navigate to a post).
+/* Pure-CSS entrance animations for any clickable card/CTA on public pages.
  *
- * Each card sets `--blog-card-i: <index>` inline and gets the animation
- * with a per-card delay, mirroring the original framer-motion stagger. */
-@keyframes blog-card-enter {
+ * Why pure CSS instead of framer-motion: wrapping a Next.js <Link>, <button>,
+ * or any clickable element in <motion.*> causes a mobile double-tap bug.
+ * Motion's gesture system (whileTap/whileHover/drag detection) intercepts
+ * the first pointerdown on touch devices to disambiguate tap vs drag, which
+ * swallows the click — users have to tap twice to navigate. CSS keyframes
+ * have no such gesture layer, so the first tap fires the link/button
+ * immediately.
+ *
+ * Stagger model: each card sets `--card-i: <index>` inline; the delay is
+ * `--card-i * --card-stagger-ms` (default 40ms). Single-element fade-ups
+ * use `--card-d: <ms>` for an explicit delay. */
+@keyframes public-fade-up {
   0%   { opacity: 0; transform: translateY(24px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+.public-card-enter {
+  animation: public-fade-up 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation-delay: calc(var(--card-i, 0) * var(--card-stagger-ms, 40ms));
+}
+.public-fade-up {
+  animation: public-fade-up 600ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation-delay: calc(var(--card-d, 0) * 1ms);
+}
+
+/* Legacy aliases — kept so existing blog-list-client.tsx markup still works.
+ * `--blog-card-i` is mapped onto `--card-i` via the same delay formula. */
 .blog-card-enter {
-  animation: blog-card-enter 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation: public-fade-up 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
   animation-delay: calc(var(--blog-card-i, 0) * 40ms);
 }
 @keyframes blog-featured-enter {
@@ -32,8 +50,10 @@
 .blog-featured-enter {
   animation: blog-featured-enter 700ms cubic-bezier(0.25, 0.1, 0.25, 1) 200ms both;
 }
-/* Respect reduced-motion preferences — disable the entrance entirely. */
+
+/* Respect reduced-motion preferences — disable entrances entirely. */
 @media (prefers-reduced-motion: reduce) {
+  .public-card-enter, .public-fade-up,
   .blog-card-enter, .blog-featured-enter {
     animation: none !important;
     opacity: 1 !important;

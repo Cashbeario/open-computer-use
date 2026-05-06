@@ -372,17 +372,45 @@ function ScheduleCard({
   const router = useRouter()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
+  // Surface errors via toast instead of silently swallowing them.  The
+  // schedules-api functions already sanitize backend responses, so
+  // `err.message` here is guaranteed to be user-friendly (no
+  // "CSRF token missing", no exception class names, no file paths).
   async function handleRunNow() {
     setActionLoading("run")
-    try { await triggerScheduleNow(schedule.chat_id); onUpdate() } catch {} finally { setActionLoading(null) }
+    try {
+      await triggerScheduleNow(schedule.chat_id)
+      onUpdate()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't run the schedule.")
+    } finally {
+      setActionLoading(null)
+    }
   }
   async function handleTogglePause() {
     setActionLoading("pause")
-    try { await pauseSchedule(schedule.chat_id); onUpdate() } catch {} finally { setActionLoading(null) }
+    try {
+      await pauseSchedule(schedule.chat_id)
+      onUpdate()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't update the schedule.")
+    } finally {
+      setActionLoading(null)
+    }
   }
   async function handleDelete() {
     setActionLoading("delete")
-    try { await deleteSchedule(schedule.chat_id); onUpdate() } catch {} finally { setActionLoading(null) }
+    try {
+      await deleteSchedule(schedule.chat_id)
+      onUpdate()
+    } catch (err) {
+      // The bug case: surface a user-friendly message instead of
+      // letting the user click Delete and see nothing happen.  The
+      // sanitizer in schedules-api ensures `err.message` is safe.
+      toast.error(err instanceof Error ? err.message : "Couldn't remove the schedule.")
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const isActive = schedule.enabled && !schedule.paused_reason

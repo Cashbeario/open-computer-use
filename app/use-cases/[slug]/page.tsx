@@ -66,7 +66,11 @@ export default function UseCasePage() {
               animate="visible"
               variants={stagger}
             >
-              <motion.div variants={fadeIn} transition={{ duration: 0.5 }}>
+              {/* Plain <div>, not <motion.div>: motion's gesture system
+                  swallows the first tap on touch devices, forcing users to
+                  double-tap the link. The CSS class below mirrors the
+                  fade-in visually. */}
+              <div className="public-fade-up">
                 <Link
                   href="/use-cases"
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
@@ -74,7 +78,7 @@ export default function UseCasePage() {
                   <ArrowLeft className="w-4 h-4" />
                   All use cases
                 </Link>
-              </motion.div>
+              </div>
 
               <motion.div
                 variants={fadeIn}
@@ -121,7 +125,10 @@ export default function UseCasePage() {
                 <p className="text-lg text-muted-foreground mt-2">{uc.heroStatLabel}</p>
               </motion.div>
 
-              <motion.div variants={fadeIn} transition={{ duration: 0.5, delay: 0.25 }}>
+              <div
+                className="public-fade-up"
+                style={{ ["--card-d" as string]: 250 }}
+              >
                 <Link
                   href="/auth"
                   className={cn(
@@ -132,7 +139,7 @@ export default function UseCasePage() {
                   Try this now
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>
@@ -249,12 +256,9 @@ export default function UseCasePage() {
               <p className="text-base sm:text-lg leading-relaxed">{uc.examplePrompt}</p>
             </motion.div>
 
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeIn}
-              transition={{ duration: 0.5, delay: 0.2 }}
+            <div
+              className="public-fade-up"
+              style={{ ["--card-d" as string]: 200 }}
             >
               <Link
                 href="/auth"
@@ -266,7 +270,7 @@ export default function UseCasePage() {
                 Run this on Coasty
                 <ArrowRight className="w-5 h-5" />
               </Link>
-            </motion.div>
+            </div>
           </div>
         </section>
 
@@ -354,10 +358,9 @@ export default function UseCasePage() {
                 <p className="text-lg text-muted-foreground mt-2">{uc.heroStatLabel}</p>
               </motion.div>
 
-              <motion.div
-                variants={fadeIn}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-10"
+              <div
+                className="mt-10 public-fade-up"
+                style={{ ["--card-d" as string]: 200 }}
               >
                 <Link
                   href="/auth"
@@ -369,7 +372,7 @@ export default function UseCasePage() {
                   Get started free
                   <Zap className="w-5 h-5" />
                 </Link>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>
@@ -395,14 +398,17 @@ export default function UseCasePage() {
               variants={stagger}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {otherUseCases.map((other) => {
+              {otherUseCases.map((other, i) => {
                 const otherColors = USE_CASE_COLORS[other.color]
                 const OtherIcon = other.icon
                 return (
-                  <motion.div
+                  <div
                     key={other.slug}
-                    variants={fadeIn}
-                    transition={{ duration: 0.4 }}
+                    className="public-card-enter"
+                    style={{
+                      ["--card-i" as string]: i,
+                      ["--card-stagger-ms" as string]: "60ms",
+                    }}
                   >
                     <Link
                       href={`/use-cases/${other.slug}`}
@@ -418,7 +424,7 @@ export default function UseCasePage() {
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </Link>
-                  </motion.div>
+                  </div>
                 )
               })}
             </motion.div>

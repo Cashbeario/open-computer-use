@@ -563,6 +563,15 @@ export function MachineDetailContent({ machineId }: MachineDetailContentProps) {
               publicIpAddress: machine.publicIpAddress,
               vncPort: machine.vncPort,
               vncPassword: machine.vncPassword,
+              // Pass the VM OS so FileTransfer picks an OS-appropriate
+              // starting directory.  Without this the panel hard-coded a
+              // Linux-style /home/desktop/Desktop, which only worked on
+              // Ubuntu cloud VMs (whose agent has a remap for that prefix);
+              // Windows VMs and freshly-launched machines whose UserData
+              // hadn't created the Desktop folder yet showed an empty
+              // list with no error — the deployed-but-not-local symptom.
+              osType: machine.settings?.osType,
+              provider: machine.settings?.provider,
             }}
           />
         );

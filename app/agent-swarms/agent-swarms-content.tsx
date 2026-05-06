@@ -83,26 +83,32 @@ function HeroVideoPlayer() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/20" />
               </div>
 
-              {/* Center play button — large, frosted glass */}
+              {/* Center play button — large, frosted glass.
+                  Plain <button> with `active:scale-[0.96]` for press feedback.
+                  Originally `<motion.button whileTap>`, but motion's tap
+                  detection on a button-INSIDE-a-clickable-parent ate the
+                  first tap on touch devices (the parent <div onClick>
+                  setIsPlaying never fired), forcing a double-tap to start
+                  the video. */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={inView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
+                <button
+                  type="button"
                   className={cn(
                     "relative size-[72px] sm:size-20 rounded-full",
                     "bg-white/90 dark:bg-white/85 backdrop-blur-xl",
                     "shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08)]",
                     "flex items-center justify-center",
-                    "transition-all duration-300 group-hover:scale-[1.06]",
+                    "transition-all duration-300 group-hover:scale-[1.06] active:scale-[0.96]",
                     "hover:shadow-[0_12px_48px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)]",
                   )}
                 >
                   <Play className="size-7 sm:size-8 text-neutral-900 ml-1" fill="currentColor" />
-                </motion.button>
+                </button>
               </motion.div>
 
               {/* Bottom label — "Watch the demo" */}

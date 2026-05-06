@@ -447,6 +447,11 @@ export function ScheduleDialog({
       onScheduleDeleted?.()
       onOpenChange(false)
     } catch (err: unknown) {
+      // Anti-regression for the original bug: `deleteSchedule` calls
+      // `sanitizeBackendError` so `err.message` is guaranteed safe — no
+      // "CSRF token missing", no header names, no exception classes.
+      // The `t("removeFailed")` fallback is the very last resort if
+      // the thrown value was somehow not an Error.
       setError(err instanceof Error ? err.message : t("removeFailed"))
     } finally {
       setLoading(false)

@@ -8,14 +8,12 @@ import { ArrowRight } from "lucide-react"
 import { USE_CASES, USE_CASE_COLORS } from "./data"
 import { cn } from "@/lib/utils"
 
-const fade = {
-  hidden: { opacity: 0, y: 24 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] as const },
-  }),
-}
+// Card stagger + CTA delay (ms) — kept here so the original framer-motion
+// rhythm is preserved while the actual animation runs as pure CSS via the
+// `.public-card-enter` / `.public-fade-up` classes. See globals.css for the
+// keyframes and the rationale (mobile double-tap bug when motion wraps
+// clickable elements).
+const CARD_STAGGER_MS = 50
 
 export default function UseCasesPage() {
   return (
@@ -58,12 +56,13 @@ export default function UseCasesPage() {
               const Icon = uc.icon
 
               return (
-                <motion.div
+                <div
                   key={uc.slug}
-                  custom={i}
-                  initial="hidden"
-                  animate="show"
-                  variants={fade}
+                  className="public-card-enter"
+                  style={{
+                    ["--card-i" as string]: i,
+                    ["--card-stagger-ms" as string]: `${CARD_STAGGER_MS}ms`,
+                  }}
                 >
                   <Link href={`/use-cases/${uc.slug}`}>
                     <div className="h-full rounded-xl overflow-hidden border border-border/30 bg-card hover:border-border/60 transition-all duration-300 flex flex-col group">
@@ -103,7 +102,7 @@ export default function UseCasesPage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               )
             })}
           </div>
@@ -112,11 +111,9 @@ export default function UseCasesPage() {
         {/* CTA */}
         <div className="max-w-5xl mx-auto px-7 sm:px-10">
           <div className="border-t border-border/30" />
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-24 text-center"
+          <div
+            className="mt-24 text-center public-fade-up"
+            style={{ ["--card-d" as string]: 400 }}
           >
             <p className="text-muted-foreground/60 text-sm mb-6">
               Ready to 10x your output?
@@ -131,7 +128,7 @@ export default function UseCasesPage() {
             <p className="text-[11px] text-muted-foreground/30 mt-4">
               No credit card required
             </p>
-          </motion.div>
+          </div>
         </div>
       </main>
 

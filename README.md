@@ -100,7 +100,7 @@ Browser automation · Terminal access · Desktop control · Multi-agent orchestr
 
 ## What is this?
 
-Open Computer Use is an open-source platform that gives AI agents real computer control. Unlike chatbots that only *talk* about tasks, agents here **actually perform them** — browsing the web, running commands, clicking through UIs, and orchestrating multi-step workflows in isolated containers.
+Open Computer Use is an open-source platform that gives AI agents real computer control. Unlike chatbots that only *talk* about tasks, agents here **actually perform them** — browsing the web, running commands, clicking through UIs, and orchestrating multi-step workflows.
 
 > Computer use capabilities similar to Anthropic's Claude Computer Use, but fully open-source and extensible.
 
@@ -126,29 +126,9 @@ Open Computer Use is an open-source platform that gives AI agents real computer 
 
 <br />
 
-## Architecture
-
-```
-Frontend (Next.js 15)         Backend (FastAPI)              VM (Docker)
-┌──────────────────┐     ┌─────────────────────────┐     ┌──────────────────┐
-│  Chat UI         │────▶│  Multi-Agent Executor    │────▶│  Chrome Browser  │
-│  Model Selector  │ SSE │  ├─ Planner Agent        │ WS  │  Terminal        │
-│  VM Management   │◀────│  ├─ Browser Agent        │◀────│  Desktop (XFCE)  │
-│  Zustand Stores  │     │  ├─ Terminal Agent       │     │  Agent Server    │
-└──────────────────┘     │  └─ Desktop Agent        │     │  VNC :5900       │
-                         │  WebSocket · DB · Billing│     └──────────────────┘
-                         └─────────────────────────┘
-```
-
-<br />
-
----
-
-<br />
-
 ## Quick Start
 
-You only need **one API key** to run the app. Get a free sandbox key at [coasty.ai/developers](https://coasty.ai/developers) — sandbox keys (`sk-coasty-test-*`) return mock infrastructure for free; live keys provision real VMs.
+You only need **one API key**. Get a free sandbox key at [coasty.ai/developers](https://coasty.ai/developers).
 
 ```bash
 git clone https://github.com/coasty-ai/open-computer-use.git
@@ -163,187 +143,47 @@ Open `.env.local` and paste your key:
 COASTY_API_KEY=sk-coasty-test-your-key-here
 ```
 
-Then:
+Then run:
 
 ```bash
 npm run dev
 ```
 
-Open **[http://localhost:3000](http://localhost:3000)** and start a chat. That's it — no Supabase, no AWS, no Stripe to configure.
-
-> First boot auto-generates `CSRF_SECRET` and `ENCRYPTION_KEY` into `.env.local` (already gitignored). Safe to delete; we'll regenerate.
-
-<details>
-<summary><strong>Want the full self-hosted stack?</strong> (Supabase + AWS Bedrock + Stripe)</summary>
+Open **[http://localhost:3000](http://localhost:3000)** and start a chat. That's it.
 
 <br />
 
-You'll need:
+---
 
-- A [Supabase](https://supabase.com) project
-- AWS credentials with [Bedrock model access enabled](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) in your region
-- Optional: Stripe keys for billing UI, Google Custom Search keys for the web-search tool
+<br />
 
-### 1. Install backend deps
+## Desktop App
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate    # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cd ..
-```
-
-### 2. Set environment variables
+A lightweight overlay that runs AI agent commands directly on your local machine.
 
 ```bash
-cp .env.example .env.local
-cp backend/.env.example backend/.env
-```
-
-Required in **both** `.env.local` and `backend/.env`:
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE=your-service-role-key
-
-# Security — generate each with: openssl rand -hex 32 (or base64 32 for ENCRYPTION_KEY)
-ENCRYPTION_KEY=
-CSRF_SECRET=
-INTERNAL_API_KEY=          # MUST match in both files
-```
-
-Required only in **`backend/.env`**:
-
-```env
-# AWS Bedrock (LLM)
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
-BEDROCK_DEFAULT_MODEL=anthropic.claude-sonnet-4-20250514-v1:0
-
-# Optional: web-search tool
-GOOGLE_SEARCH_KEY=
-GOOGLE_SEARCH_CX=
-```
-
-> Bedrock requires per-model access enablement in the AWS console. See [AWS docs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
-
-### 3. Set up the database
-
-```bash
-npm install -g supabase
-supabase login
-supabase link --project-ref your-project-ref
-supabase db push
-```
-
-Or paste `supabase/schema.sql` into the Supabase SQL Editor.
-
-### 4. Run
-
-```bash
-# Terminal 1 — Frontend
+cd electron
+npm install
 npm run dev
-
-# Terminal 2 — Backend (dev)
-cd backend && python main.py
-
-# Terminal 3 — Optional: local AI desktop VM
-docker-compose -f docker-compose.ai-desktop.yml up --build
 ```
 
-Or all together:
-
-```bash
-docker-compose up --build
-```
-
-Open **[http://localhost:3000](http://localhost:3000)** and sign in.
-
-</details>
-
-<details>
-<summary><strong>Prefer the MCP server?</strong></summary>
+Native automation on Windows, macOS, and Linux. Floating always-on-top pill UI with expanded chat panel.
 
 <br />
 
-The same `COASTY_API_KEY` works with [`@coasty/mcp`](https://www.npmjs.com/package/@coasty/mcp), an npm package that gives Claude Desktop / Cursor / Windsurf full computer-use tools over MCP.
+---
+
+<br />
+
+## MCP Server
+
+Use the same API key with Claude Desktop, Cursor, or Windsurf via MCP:
 
 ```bash
 npx @coasty/mcp
 ```
 
 See [`mcp/`](./mcp) for details.
-
-</details>
-
-<br />
-
----
-
-<br />
-
-## Tech Stack
-
-| Layer | Technologies |
-| --- | --- |
-| **Frontend** | Next.js 15, React 19, TypeScript, Tailwind CSS, Radix UI, Zustand, Vercel AI SDK |
-| **Backend** | FastAPI, Python 3.10+, WebSockets, asyncio, uvicorn |
-| **AI Providers** | OpenAI, Anthropic, Google, Azure, xAI, Mistral, Perplexity, OpenRouter |
-| **Infrastructure** | Docker, Ubuntu 22.04 + XFCE, Chrome, Selenium, Supabase, Stripe |
-| **Desktop App** | Electron 40, Puppeteer-core, platform-native automation (Win32 / CoreGraphics / xdotool) |
-
-<br />
-
----
-
-<br />
-
-## Electron Desktop App
-
-A lightweight overlay that runs AI agent commands directly on your local machine instead of a remote VM.
-
-- Floating always-on-top pill UI with expanded chat panel
-- Platform-native automation (PowerShell/Win32 on Windows, CoreGraphics/osascript on macOS, xdotool on Linux)
-- Browser control via Puppeteer-core, shell execution, file operations
-- WebSocket bridge to backend with auto-reconnect
-
-```bash
-cd electron
-npm install
-npm run dev        # Development with hot reload
-npm run package    # Build for current platform
-```
-
-<br />
-
----
-
-<br />
-
-## Project Structure
-
-```
-├── app/                    # Next.js routes & pages
-├── components/             # React components (UI, chat, prompts)
-├── lib/                    # Stores, providers, services, utilities
-├── backend/
-│   └── app/
-│       ├── api/routes/     # FastAPI endpoints
-│       ├── services/       # Multi-agent executor, VM control, billing
-│       ├── providers/      # AI provider integrations
-│       └── core/           # Config, middleware, logging
-├── electron/
-│   └── src/
-│       ├── main/           # App lifecycle, IPC, automation modules
-│       ├── preload/        # Context bridge API
-│       └── renderer/       # React UI, stores, components
-├── docker/ai-desktop/      # Ubuntu VM container
-└── supabase/               # Database schema
-```
 
 <br />
 
@@ -371,7 +211,6 @@ Bug reports and feature requests welcome in [Issues](https://github.com/coasty-a
 - [ ] Multi-VM parallel orchestration
 - [ ] Visual workflow builder
 - [ ] Agent marketplace & templates
-- [ ] Windows / macOS VM support
 - [ ] Plugin system for custom tools
 - [ ] Collaborative sessions
 - [ ] Voice control & video understanding

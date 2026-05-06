@@ -161,6 +161,53 @@ export async function getAllBlogPostIds(): Promise<string[]> {
   }
 }
 
+/**
+ * Sitemap-tuned variant of {@link getAllBlogPostIds} that includes the
+ * real `updated_at` (or fallback `date`) so `app/sitemap.ts` can emit
+ * truthful `lastModified` values instead of build-time-now stamps.
+ *
+ * Crawlers (Google, Bing, ChatGPT browse) use `lastModified` to decide
+ * recrawl priority — emitting `new Date()` for every URL on every build
+ * trains them to ignore the field entirely. Returning the actual write
+ * timestamp restores its meaning.
+ */
+export interface BlogPostSitemapEntry {
+  id: string
+  /** ISO-8601 string. Prefer `updated_at`; fall back to `date` if null. */
+  lastModified: string
+}
+
+export async function getAllBlogPostsForSitemap(): Promise<BlogPostSitemapEntry[]> {
+  const supabase = getClient()
+  if (!supabase) return []
+
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("id, date, updated_at")
+      .eq("published", true)
+      .order("date", { ascending: false })
+
+    if (error) {
+      console.error(
+        `Failed to list blog posts for sitemap (postgrest): ${error.message} [host=${upstreamHost()}]`,
+      )
+      return []
+    }
+    return (data ?? []).map(
+      (p: { id: string; date: string; updated_at: string | null }) => ({
+        id: p.id,
+        lastModified: p.updated_at ?? p.date,
+      }),
+    )
+  } catch (err) {
+    console.error(
+      `Failed to list blog posts for sitemap (connection): ${describeFetchError(err)} [host=${upstreamHost()}]`,
+    )
+    return []
+  }
+}
+
 export async function upsertBlogPost(post: Omit<BlogPost, "created_at" | "updated_at">): Promise<{ success: boolean; error?: string }> {
   const supabase = getClient()
   if (!supabase) return { success: false, error: "Supabase not configured" }
@@ -251,6 +298,51 @@ export async function getAllSeoPageSlugs(): Promise<string[]> {
   } catch (err) {
     console.error(
       `Failed to list SEO page slugs (connection): ${describeFetchError(err)} [host=${upstreamHost()}]`,
+    )
+    return []
+  }
+}
+
+/**
+ * Sitemap-tuned variant of {@link getAllSeoPageSlugs}. Returns slug +
+ * real `updated_at` so `app/sitemap.ts` can emit truthful `lastModified`
+ * values for `/computer-use/{slug}` URLs.
+ *
+ * Falls back to `created_at` if `updated_at` is null (newly imported
+ * pages can have null updated_at until first edit).
+ */
+export interface SeoPageSitemapEntry {
+  slug: string
+  /** ISO-8601 string. Prefer `updated_at`, fall back to `created_at`. */
+  lastModified: string
+}
+
+export async function getAllSeoPagesForSitemap(): Promise<SeoPageSitemapEntry[]> {
+  const supabase = getClient()
+  if (!supabase) return []
+
+  try {
+    const { data, error } = await supabase
+      .from("seo_pages")
+      .select("slug, created_at, updated_at")
+      .eq("published", true)
+      .order("slug", { ascending: true })
+
+    if (error) {
+      console.error(
+        `Failed to list SEO pages for sitemap (postgrest): ${error.message} [host=${upstreamHost()}]`,
+      )
+      return []
+    }
+    return (data ?? []).map(
+      (p: { slug: string; created_at: string; updated_at: string | null }) => ({
+        slug: p.slug,
+        lastModified: p.updated_at ?? p.created_at,
+      }),
+    )
+  } catch (err) {
+    console.error(
+      `Failed to list SEO pages for sitemap (connection): ${describeFetchError(err)} [host=${upstreamHost()}]`,
     )
     return []
   }

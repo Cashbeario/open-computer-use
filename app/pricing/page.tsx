@@ -26,11 +26,15 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "next-intl"
+import {
+  VISIBLE_TIERS,
+  type SubscriptionTierId,
+} from "@/lib/pricing/tiers"
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface Plan {
-  id: string
+  id: SubscriptionTierId
   name: string
   price: number
   tagline: string
@@ -43,6 +47,16 @@ interface Plan {
   search: boolean
 }
 
+interface PlanViewModel {
+  id: SubscriptionTierId
+  price: number
+  credits: number
+  machines: number
+  swarm: number
+  highlighted: boolean
+  search: boolean
+}
+
 interface Feature {
   icon: LucideIcon
   title: string
@@ -51,14 +65,25 @@ interface Feature {
 }
 
 // ─── Static data (non-translatable) ────────────────────────────────────────
+//
+// Numeric data is derived from `lib/pricing/tiers.ts` (canonical). Names,
+// taglines, CTAs, and badges still come from i18n via `t("plans.<id>.*")`.
+// Enterprise is filtered out — it's surfaced separately in the Enterprise
+// callout block below the main grid.
 
-const planData = [
-  { id: "free", price: 0, credits: 0, machines: 0, swarm: 0, highlighted: false, search: false },
-  { id: "lite", price: 9, credits: 100, machines: 1, swarm: 2, highlighted: false, search: false },
-  { id: "starter", price: 19, credits: 200, machines: 1, swarm: 3, highlighted: false, search: true },
-  { id: "plus", price: 50, credits: 600, machines: 2, swarm: 6, highlighted: true, search: true },
-  { id: "pro", price: 100, credits: 1500, machines: 3, swarm: 9, highlighted: false, search: true },
-] as const
+const planData: PlanViewModel[] = VISIBLE_TIERS
+  .filter((tier) => tier.id !== "enterprise")
+  .map((tier) => ({
+    id: tier.id,
+    price: tier.priceUSD ?? 0,
+    credits: tier.creditsPerMonth,
+    machines: tier.machinesIncluded,
+    swarm: tier.swarmAgentsLimit,
+    highlighted: tier.highlighted,
+    // Preserve current pricing-page heuristic: starter + professional API
+    // tier (plus, pro) get the "advanced search" perk in the feature grid.
+    search: tier.id === "starter" || tier.apiTier === "professional",
+  }))
 
 const featureIcons: LucideIcon[] = [Monitor, Workflow, Shield, Zap, HardDrive, Globe]
 

@@ -19,16 +19,34 @@ import { useTranslations } from "next-intl"
 import { ArrowRight, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LandingSectionTopGlow, LandingSectionHeader } from "../section-shell"
+import { VISIBLE_TIERS, type SubscriptionTierId } from "@/lib/pricing/tiers"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
-const PLAN_DATA = [
-  { key: "free" as const,    price: "$0",   credits: 0,    machines: 0, swarm: 0, highlighted: false },
-  { key: "lite" as const,    price: "$9",   credits: 100,  machines: 1, swarm: 2, highlighted: false },
-  { key: "starter" as const, price: "$19",  credits: 200,  machines: 1, swarm: 3, highlighted: false },
-  { key: "plus" as const,    price: "$50",  credits: 600,  machines: 2, swarm: 6, highlighted: true  },
-  { key: "pro" as const,     price: "$100", credits: 1500, machines: 3, swarm: 9, highlighted: false },
-]
+// Numeric data sourced from `lib/pricing/tiers.ts` (canonical). Names,
+// descriptions, and CTAs come from i18n via `t("pricing.plans.<key>.*")`.
+// Enterprise is filtered out — landing surfaces only the five purchasable
+// tiers; enterprise is a footer/contact-sales play, not a card.
+type PlanRow = {
+  key: SubscriptionTierId
+  /** Pre-formatted price string ("$0", "$19", "$100") for display + count-up parsing */
+  price: string
+  credits: number
+  machines: number
+  swarm: number
+  highlighted: boolean
+}
+
+const PLAN_DATA: PlanRow[] = VISIBLE_TIERS
+  .filter((tier) => tier.id !== "enterprise")
+  .map((tier) => ({
+    key: tier.id,
+    price: `$${tier.priceUSD ?? 0}`,
+    credits: tier.creditsPerMonth,
+    machines: tier.machinesIncluded,
+    swarm: tier.swarmAgentsLimit,
+    highlighted: tier.highlighted,
+  }))
 
 // Count-up: integer ramps from 0 → target with ease-out cubic, gated on
 // `start` so each card animates only after its viewport entry.

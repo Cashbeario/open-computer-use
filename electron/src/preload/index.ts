@@ -187,6 +187,10 @@ export interface CoastyAPI {
   signOut: () => Promise<{ success: boolean; error?: string }>
   getSession: () => Promise<{
     isAuthenticated: boolean
+    // 'oss' = signed in via Coasty API key (no Supabase session, no email/avatar);
+    // 'production' = Supabase OAuth/email session. Renderer code that branches on
+    // session capabilities (e.g. profile photo, billing portal links) keys off this.
+    kind: 'oss' | 'production'
     userId: string | null
     email: string | null
     name: string | null

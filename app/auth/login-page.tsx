@@ -529,7 +529,27 @@ export default function LoginPage() {
 
       if (data?.user) {
         trackSignIn("email")
-        router.push("/")
+        // Hard navigation, not router.push.
+        //
+        // Why: signInWithPassword sets the auth cookie via a Set-Cookie
+        // response, but the React Server Component cache for "/" was
+        // already populated (unauthenticated) when the user landed on
+        // /auth/login. router.push does a client-side nav that reuses
+        // that cached RSC payload, so the home page renders with
+        // isAuthenticated=false and shows the LandingPage cinematic.
+        // Only on a manual refresh does Next.js re-fetch "/" with the
+        // new cookie, see the user, and render the chat.
+        //
+        // We saw the symmetrical bug for sign-OUT — see the comment in
+        // lib/user-store/provider.tsx around `signOut`. Same fix
+        // applies here: full-page navigation guarantees the auth cookie
+        // is on the request, every server component re-runs, every
+        // provider re-initializes with the fresh user, and the URL is
+        // replaced (not pushed) so Back doesn't return to /auth/login.
+        if (typeof window !== "undefined") {
+          window.location.replace("/")
+        }
+        return
       }
     } catch (err: unknown) {
       const message = (err as Error).message

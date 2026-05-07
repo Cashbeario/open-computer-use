@@ -576,16 +576,35 @@ export function SwarmPanel({ isActive, swarmId, prompt, machineCount, persistent
           </div>
         )}
 
-        {/* Tree graph — fills the remaining space once events start */}
+        {/* Tree graph.
+              While running (no summary yet): fills the remaining space.
+              After completion (summary present): collapses to a compact
+              fixed-height strip so the summary can take the rest of the
+              panel with its own internal scroll.
+            Why the height switch matters — there's a positioning bug
+              hidden in the layout: SwarmTree's zoom/pan controls are
+              `absolute top-3 right-3` of its outer relative box. If we
+              kept this wrapper as `flex-1 min-h-0` while a long summary
+              demands all the space, flex starves this child to ~0px,
+              the absolute controls ignore that 0px box and render at
+              their own offsets — which is exactly where the SwarmSummary
+              header (Markdown / PDF download buttons) now sits. Pinning
+              the wrapper's height keeps the controls inside the tree
+              region and never on top of the summary. */}
         {hasTreeEvents && (
-          <div className="flex-1 min-h-0">
+          <div className={cn(
+            "min-h-0",
+            swarmSummary
+              ? "shrink-0 h-[240px] sm:h-[300px] border-b border-border/30"
+              : "flex-1",
+          )}>
             <SwarmTree
               events={swarmEvents}
               machineCount={machineCount || total}
               prompt={prompt}
               status={overallStatus}
               className="h-full"
-              containerClassName="rounded-b-xl"
+              containerClassName={swarmSummary ? "" : "rounded-b-xl"}
             />
           </div>
         )}
@@ -779,8 +798,17 @@ function SwarmSummaryBlock({ summary }: { summary: string }) {
   }, [summary])
 
   return (
-    <div className="shrink-0 border-t border-border/20 bg-muted/20">
-      <div className="flex items-center justify-between px-4 sm:px-5 pt-4 pb-2">
+    // flex-1 min-h-0 + flex-col so the summary takes the remaining panel
+    // height (after the compact tree strip above) and the inner body
+    // can be `flex-1 overflow-y-auto`. The previous `shrink-0` made this
+    // block size to its content, which on long summaries silently
+    // overflowed the panel's `overflow-hidden` parent — the user could
+    // not see or scroll past the bottom of the report.
+    <div className="flex-1 min-h-0 flex flex-col border-t border-border/20 bg-muted/20">
+      {/* Header — shrink-0 so download controls stay fixed at the top
+            of the summary, always reachable regardless of how far down
+            the markdown body has scrolled. */}
+      <div className="shrink-0 flex items-center justify-between px-4 sm:px-5 pt-4 pb-2">
         <p className="text-sm font-semibold text-orange-500 dark:text-orange-400 uppercase tracking-widest">
           Summary
         </p>
@@ -803,7 +831,12 @@ function SwarmSummaryBlock({ summary }: { summary: string }) {
           </button>
         </div>
       </div>
-      <div className="px-4 sm:px-5 pb-4">
+      {/* Body — flex-1 min-h-0 + overflow-y-auto: takes the remaining
+            vertical space inside the summary block and scrolls
+            internally. overscroll-contain prevents an overscroll at
+            the bottom from chaining up into the page scroll, which
+            is jarring inside a chat thread. */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-5 pb-4">
         <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed text-foreground/70 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground/90 [&_h2]:mt-3 [&_h2]:mb-1.5 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-foreground/80 [&_h3]:mt-2 [&_h3]:mb-1 [&_p]:my-1 [&_ul]:my-1 [&_ul]:pl-4 [&_li]:my-0.5 [&_blockquote]:my-1.5 [&_blockquote]:border-border/30 [&_blockquote]:text-muted-foreground [&_blockquote]:bg-muted/30 [&_blockquote]:rounded-md [&_blockquote]:px-3 [&_blockquote]:py-1.5 [&_code]:text-[11px] [&_code]:bg-muted/50 [&_code]:text-foreground/60 [&_strong]:text-foreground/90">
           <Markdown>{summary}</Markdown>
         </div>

@@ -247,6 +247,22 @@ a, button, [role="button"], [role="link"], input[type="button"], input[type="sub
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Sign-out kill-switch.
+   `markSigningOut()` (lib/user-store/sign-out-state.ts) adds
+   `.coasty-signing-out` to <body> when the sign-out flow begins. This
+   rule hides every Sonner toast surface for the brief window between
+   supabase.auth.signOut() and window.location.replace("/"). Without it,
+   any in-flight chat stream / fetch / query that errors during the
+   cookie-cleared window flashes a red "Something went wrong" toast on
+   the way to the landing page. Pure-CSS so it can't be bypassed by
+   direct sonner imports, multi-sweep dismiss races, or React re-render
+   timing. `display: none` (not opacity) so the element doesn't even
+   take up layout space mid-fade. */
+body.coasty-signing-out [data-sonner-toaster],
+body.coasty-signing-out [data-sonner-toast] {
+  display: none !important;
+}
+
 /* Global scrollbar hiding */
 *::-webkit-scrollbar {
   display: none;

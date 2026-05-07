@@ -65,8 +65,11 @@ vi.mock("@/lib/posthog/analytics", () => ({
 }))
 
 // Toast — keep the surface real-import-able even though we never assert it.
+// dismissAllToasts is called by provider.signOut to sweep toasts that
+// rendered a tick before the sign-out sentinel flipped; mock it as a noop.
 vi.mock("@/components/ui/toast", () => ({
   toast: vi.fn(),
+  dismissAllToasts: vi.fn(),
 }))
 
 // Now import the SUT.

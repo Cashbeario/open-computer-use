@@ -10,6 +10,8 @@ import {
 import { clearAllIndexedDBStores } from "@/lib/chat-store/persist"
 import type { UserProfile } from "@/lib/user/types"
 import { identifyUser, resetUser, trackSignOut } from "@/lib/posthog/analytics"
+import { clearSigningOut, markSigningOut } from "@/lib/user-store/sign-out-state"
+import { dismissAllToasts } from "@/components/ui/toast"
 import { createContext, useContext, useEffect, useState } from "react"
 
 type UserContextType = {
@@ -85,23 +87,49 @@ export function UserProvider({
     // the next page load won't read from those stores until after they're
     // gone (the messages/chats providers are unmounted by the redirect).
     setIsLoading(true)
+    // Set the sentinel BEFORE we touch supabase. Anything in-flight on the
+    // page (the AI chat's streaming fetch, TanStack queries, realtime
+    // channels) is about to start failing as soon as the auth cookie is
+    // cleared a few lines below — without this flag, those failures bubble
+    // up as toasts ("An error occurred", "Failed to ...") right as the
+    // user is being navigated away. Listeners that surface transient
+    // errors check `isSigningOut()` and stay quiet.
+    markSigningOut()
+    // Tear down any toasts that rendered just before our sentinel was
+    // set. Even with the sentinel in place, a toast that was already
+    // queued one tick before this call would still flash; dismissAll
+    // sweeps the slate clean.
+    dismissAllToasts()
     try {
       const success = await signOutUser()
       if (!success) {
         // signOutUser already toasted the failure reason. Stay put so the
         // user can retry rather than being silently kicked to landing.
+        clearSigningOut()
         setIsLoading(false)
         return
       }
 
+      // PostHog uses navigator.sendBeacon for the identify/reset event —
+      // survives the unload, so calling this before replace() is safe.
       trackSignOut()
       resetUser()
       setUser(null)
-      // Fire-and-forget: cleanup runs in parallel with the navigation. Wrap
-      // in catch so a stale tab without IDB access doesn't block sign-out.
+      // Fire-and-forget IDB cleanup. The deletes are queued by `idb` and
+      // complete after the unload starts; that's fine because the next
+      // page (LandingPage) doesn't read those stores until they're gone.
       clearAllIndexedDBStores().catch((e) =>
         console.warn("clearAllIndexedDBStores failed during signOut:", e),
       )
+
+      // setUser(null) above triggers a re-render of every UserContext
+      // consumer with `user=null`. Some of those have useEffect deps on
+      // `user` and will refetch — with the just-cleared auth cookie that
+      // returns 401, and the call site might toast. We don't try to
+      // prevent the refetches (it'd require touching every provider in
+      // the tree); instead, the toast() utility checks `isSigningOut()`
+      // and silently drops error/warning toasts during this window.
+      // See components/ui/toast.tsx + lib/user-store/sign-out-state.ts.
 
       // Guard for SSR / non-browser callers (tests, server components if
       // anyone re-uses this hook by mistake).
@@ -110,6 +138,7 @@ export function UserProvider({
       }
     } catch (e) {
       console.error("signOut threw:", e)
+      clearSigningOut()
       setIsLoading(false)
     }
   }

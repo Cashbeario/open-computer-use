@@ -169,8 +169,23 @@ export function OnboardingFlow({
       })
 
       if (res.ok) {
-        router.push("/")
-        router.refresh()
+        // Hard navigation, not router.push + router.refresh.
+        //
+        // The onboarding completion flips users.onboarding_completed
+        // from false → true server-side. The home page's RSC reads
+        // that flag (app/page.tsx) to decide whether to bounce the
+        // user back to /onboarding. router.push("/") + router.refresh()
+        // races: push starts the nav using the still-cached "/" RSC
+        // payload (where the flag was false), refresh invalidates the
+        // SOURCE route's data, and we end up on / with stale auth
+        // state — the LandingPage cinematic flashes before the next
+        // tick reconciles. window.location.replace forces a full
+        // request that re-runs every server component with the
+        // updated DB row and lands directly in the chat.
+        if (typeof window !== "undefined") {
+          window.location.replace("/")
+        }
+        return
       } else {
         console.error("Onboarding save failed")
         setIsSubmitting(false)
@@ -984,8 +999,14 @@ export function OnboardingFlow({
                         }),
                       })
                       if (res.ok) {
-                        router.push("/guide")
-                        router.refresh()
+                        // Same reasoning as the main onboarding submit
+                        // above — hard nav so the destination route's
+                        // server components re-run with onboarding_completed=true
+                        // instead of the stale RSC cache.
+                        if (typeof window !== "undefined") {
+                          window.location.replace("/guide")
+                        }
+                        return
                       } else {
                         setIsSubmitting(false)
                       }

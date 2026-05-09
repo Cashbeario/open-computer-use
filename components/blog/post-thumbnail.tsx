@@ -89,7 +89,15 @@ export function PostThumbnail({ postId, className = "" }: PostThumbnailProps) {
   }, [postId])
 
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`} style={{ aspectRatio: "16/9" }}>
+    // pointer-events-none on the wrapper. The thumbnail is purely
+    // decorative — every absolute child (blobs, kbd keys with
+    // backdrop-blur, noise overlay, vignette) is a separate compositor
+    // layer. On iOS Safari, taps that land on a child layer don't
+    // always bubble cleanly to the parent <Link>'s click handler
+    // (especially when the layer was promoted by backdrop-filter).
+    // Disabling pointer-events here makes the thumbnail completely
+    // transparent to taps — taps go straight to the <Link>.
+    <div className={`pointer-events-none relative overflow-hidden rounded-lg ${className}`} style={{ aspectRatio: "16/9" }}>
       {/* Base — adapts to theme */}
       <div className="absolute inset-0 bg-neutral-100 dark:bg-neutral-950" />
 
@@ -191,7 +199,10 @@ export function FeaturedThumbnail({ postId, className = "" }: FeaturedThumbnailP
   }, [postId])
 
   return (
-    <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ aspectRatio: "21/9" }}>
+    // pointer-events-none — see PostThumbnail above for the iOS hit-test
+    // rationale. Featured thumbnail has the same compositor-layer
+    // descendants and the same need to pass taps through to the Link.
+    <div className={`pointer-events-none relative overflow-hidden rounded-xl ${className}`} style={{ aspectRatio: "21/9" }}>
       {/* Base — adapts to theme */}
       <div className="absolute inset-0 bg-neutral-100 dark:bg-neutral-950" />
 

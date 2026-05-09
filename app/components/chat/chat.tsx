@@ -32,7 +32,8 @@ import { themeConfig } from "@/lib/theme-config"
 import { QuickStartGuide } from "./quick-start-guide"
 import { Search, Bug, Globe, FileText, BarChart3, Mail, Zap, Sparkles, PenTool, MonitorSmartphone, Clipboard, Users, TrendingUp, Eye, FileCode, LayoutGrid, Send, ShoppingCart, MessageCircle, Bot } from "lucide-react"
 import { SwarmPanel } from "./swarm-panel"
-import { CinematicIntro, TaglineIntro, shouldShowIntro, isIntroDismissed } from "./cinematic-intro"
+import { CinematicIntro, TaglineIntro } from "./cinematic-intro"
+import { useIntroStore } from "@/lib/intro-store"
 import { ActiveSwarmBanner, type ActiveSwarm } from "./active-swarm-banner"
 import { RemoteApproval } from "./remote-approval"
 
@@ -1004,16 +1005,20 @@ export function Chat() {
   const showOnboarding = !effectiveChatId && redirectCheckMessages.length === 0
 
   // ── Cinematic intro ──
-  // Starts as "done" for SSR. Client mount resolves to the real state via useEffect.
-  // "pending" is a transient client-only state that shows a blank blocking overlay
-  // so chat content never flashes before the intro portal mounts.
-  const [introPhase, setIntroPhase] = useState<"pending" | "active" | "tagline-only" | "fading" | "done">("done")
+  // Phase lives in a shared store so the app header (rendered above us in
+  // LayoutApp) can stay invisible until the intro completes — otherwise it
+  // flashes in for a frame before the overlay portal covers the screen.
+  const introPhase = useIntroStore((s) => s.phase)
+  const setIntroPhase = useIntroStore((s) => s.setPhase)
+  const resolveIntro = useIntroStore((s) => s.resolve)
   const [introResolved, setIntroResolved] = useState(false)
+  const introInitializedRef = useRef(false)
   useEffect(() => {
-    if (shouldShowIntro()) setIntroPhase("active")
-    else if (isIntroDismissed()) setIntroPhase("tagline-only")
-    else setIntroPhase("done")
+    if (introInitializedRef.current) return
+    introInitializedRef.current = true
+    resolveIntro(showOnboarding && !!user)
     setIntroResolved(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const introVisible = (introPhase === "active" || introPhase === "fading") && showOnboarding && !!user
 

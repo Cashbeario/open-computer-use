@@ -61,6 +61,41 @@
   }
 }
 
+/* iOS double-tap defense.
+ *
+ * Why this rule exists. The keyframes above animate
+ *   transform: translateY(24px) → translateY(0)
+ * with `animation-fill-mode: both`, so every animated card has a
+ * persistent `transform: translateY(0)` on it after the animation ends.
+ * That is NOT a no-op on iOS Safari:
+ *   - It promotes the element to its own GPU compositor layer.
+ *   - On a touch device, Safari then has a known hit-testing
+ *     off-by-subpixel bug for taps that land on a `<Link>` whose
+ *     ancestor (or itself) is a transformed compositor layer. The
+ *     first tap "misses" and resolves to the document body; the second
+ *     tap (after the layer has settled) lands correctly. Users
+ *     experience this as needing to double-tap every blog card to
+ *     navigate.
+ *
+ * The fix: on any touch-only viewport, drop the animation completely.
+ * No transform, no compositor layer, no hit-test bug. The cards just
+ * appear in place — a perfectly fine UX on phones, where the staggered
+ * fade was visual polish, not load-bearing.
+ *
+ * `(hover: none)` matches phones, iPad in pure-touch mode, and most
+ * Android devices. `(max-width: 639px)` is the belt-and-suspenders
+ * fallback for any device that mis-reports `hover` (some webviews do)
+ * but is clearly a phone by viewport width. Either condition disables
+ * the animation. */
+@media (hover: none), (max-width: 639px) {
+  .public-card-enter, .public-fade-up,
+  .blog-card-enter, .blog-featured-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Shimmer animation for tool invocation placeholder */
 @keyframes shimmer {
   0% {

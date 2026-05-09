@@ -17,6 +17,7 @@ import { ChatStreamingProvider } from "@/lib/chat-streaming-store/provider"
 import dynamic from "next/dynamic"
 import { AccountDialog } from "@/app/components/layout/account-dialog"
 import { ChatBackgroundLayer } from "@/app/components/chat/chat-background"
+import { useIntroStore } from "@/lib/intro-store"
 
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -56,11 +57,18 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    
+
     return () => {
       window.removeEventListener('resize', checkMobile)
     }
   }, [])
+
+  // Hide the top header/topbar on the homepage until the cinematic intro
+  // finishes — otherwise it flashes for a frame before the intro overlay
+  // mounts. On any non-homepage route, the header is always visible.
+  const introPhase = useIntroStore((s) => s.phase)
+  const isHomepage = pathname === "/"
+  const headerHidden = isHomepage && introPhase !== "done"
 
   // During hydration, always render the default layout to avoid mismatch
   // The layout will update after preferences are loaded
@@ -79,11 +87,21 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           mounted && hasSidebar && !isHorizontal && "md:rounded-2xl md:overflow-hidden md:shadow-sm"
         )}>
           {mounted && isChatSurface && <ChatBackgroundLayer background={preferences.chatBackground} />}
-          {isHorizontal ? (
-            <AppTopBar />
-          ) : (
-            <Header hasSidebar={hasSidebar} />
-          )}
+          <div
+            className={cn(
+              "transition-opacity ease-out",
+              headerHidden
+                ? "opacity-0 pointer-events-none duration-0"
+                : "opacity-100 duration-700"
+            )}
+            aria-hidden={headerHidden}
+          >
+            {isHorizontal ? (
+              <AppTopBar />
+            ) : (
+              <Header hasSidebar={hasSidebar} />
+            )}
+          </div>
           <div
             className={cn(
               "relative h-full overflow-hidden scrollbar-invisible",

@@ -43,10 +43,10 @@ const blogDropdownDef = [
   { href: "/blog", labelKey: "allPosts", icon: Newspaper, stat: "50+", statKey: "allPosts" },
   { href: "/guide", labelKey: "guide", icon: BookOpen, stat: "12", statKey: "guide" },
   { href: "/results", labelKey: "demosResults", icon: Eye, stat: "20+", statKey: "demosResults" },
+  { href: "/discover", labelKey: "discover", icon: Compass, stat: "1k+", statKey: "discover" },
 ]
 
 const navItemsDef = [
-  { href: "/discover", labelKey: "discover", label: "Community", external: true },
   { href: "/pricing", labelKey: "pricing", label: "Pricing", external: true },
   { href: "/api-docs", labelKey: "api", label: "API", external: true },
 ]
@@ -868,7 +868,6 @@ export function LandingHeader({
             { href: "/blog", label: t("blog") },
             { href: "/guide", label: t("blogItems.guide") },
             { href: "/api-docs", label: "API" },
-            { href: "/discover", label: "Community" },
             { href: "/download", label: t("download") },
           ]
           // 35ms stagger keeps the cascade brisk — at 10 rows that's a

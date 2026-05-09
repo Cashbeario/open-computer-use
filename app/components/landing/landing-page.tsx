@@ -6,6 +6,14 @@ import { useSearchParams } from "next/navigation"
 import { LandingHeader } from "./landing-header"
 import { LandingFooter } from "./landing-footer"
 import { HeroVideoMatrix } from "./hero-video-matrix"
+import {
+  HeroTaskShots,
+  getFeaturedSide,
+  FEATURED_RESERVE,
+  FEATURED_RESERVE_OPPOSITE,
+  type TriggerSection,
+} from "./hero-task-shots"
+import { cn } from "@/lib/utils"
 import { TopAnnouncementBanner } from "./top-announcement-banner"
 import { BenchmarkSection } from "./sections/benchmark"
 import { WhyCoastySection } from "./sections/why-coasty"
@@ -16,8 +24,23 @@ import { PricingSection } from "./sections/pricing"
 import { FAQSection } from "./sections/faq"
 import { SectionDivider as SharedSectionDivider } from "./guide-lines"
 
+// Sections that have a HeroTaskShots video paired with them. Order
+// matches the visual scroll order of the page so the IntersectionObserver
+// resolution (when multiple sections are mid-band during fast scroll)
+// always picks the topmost one — i.e. the one the user just scrolled
+// through, not the one they're about to leave.
+const TRIGGER_SECTIONS = [
+  "benchmark",
+  "features",
+  "why-coasty",
+  "demo",
+  "cost",
+  "pricing",
+] as const satisfies readonly TriggerSection[]
+
 export function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
+  const [currentSection, setCurrentSection] = useState<TriggerSection | null>(null)
 
   const searchParams = useSearchParams()
 
@@ -41,7 +64,63 @@ export function LandingPage() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
+  // ── Section-in-view tracking for HeroTaskShots ──
+  // One IntersectionObserver watches every trigger-mapped section.
+  // A section is considered "in view" when its middle band crosses
+  // the middle 40% of the viewport (rootMargin: -30% / -30%). That
+  // band is narrow enough to give a clear "this is the section the
+  // user is reading right now" signal without flickering at the
+  // boundaries between adjacent sections.
+  //
+  // We don't watch the hero or footer — when no trigger section is
+  // mid-band, currentSection is null and no card is featured.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (window.innerWidth < 1536) return // matches HeroTaskShots `2xl:block` gate
+
+    const inView = new Set<TriggerSection>()
+    const elements: { id: TriggerSection; el: HTMLElement }[] = []
+    for (const id of TRIGGER_SECTIONS) {
+      const el = document.getElementById(id)
+      if (el) elements.push({ id, el })
+    }
+    if (elements.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).id as TriggerSection
+          if (entry.isIntersecting) inView.add(id)
+          else inView.delete(id)
+        }
+        // TRIGGER_SECTIONS is in scroll order; .find returns the topmost
+        // one in view (matches what the user just scrolled into).
+        const topMost = TRIGGER_SECTIONS.find((id) => inView.has(id)) ?? null
+        setCurrentSection(topMost)
+      },
+      {
+        // Centre band of the viewport — a section is "in view" when
+        // ANY of its body crosses the middle 40%. Generous enough that
+        // every trigger section reliably activates at typical scroll
+        // speeds without ping-ponging between adjacent sections.
+        rootMargin: "-30% 0px -30% 0px",
+        threshold: 0,
+      },
+    )
+
+    for (const { el } of elements) observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const SectionDivider = SharedSectionDivider
+
+  // Which side is the featured card on right now? Drives the
+  // section-content reflow below — when a card is featured on the
+  // right, sections shift LEFT to clear room for the floating
+  // video; vice versa for left. Returns null during hero / between
+  // trigger sections / after pricing → no reflow, sections sit
+  // centred normally.
+  const featuredSide = getFeaturedSide(currentSection)
 
   return (
     <>
@@ -58,18 +137,32 @@ export function LandingPage() {
         <LandingHeader />
       </div>
 
-      {/* Hero Section — cinematic zoom-out video matrix */}
+      {/* Hero Section */}
       <HeroVideoMatrix isMobile={isMobile} />
 
-      {/* Main content — pulled up 100vh so it fills the viewport exactly when
-          the hero un-sticks. z-[1] places it above the hero. The hero's rAF
-          loop cross-fades #hero-crossfade from opacity 0→1 during the dissolve
-          phase, creating a seamless cinema dissolve from grid to content. */}
-      <main className="relative z-[1]" style={{ marginTop: '-100vh' }}>
+      {/* Hero task shots — fixed-position overlay that follows the
+          viewport across all sections. Each card lives in a gutter
+          position by default; when the user scrolls into one of the
+          trigger sections (benchmark / features / …), the matched
+          card animates to a featured spot and plays a short demo
+          video. Hidden below 2xl (1536px) and on mobile to avoid
+          overlapping section content. */}
+      <HeroTaskShots
+        isMobile={isMobile}
+        currentSection={currentSection}
+      />
+
+      {/* Main content — natural scroll. The hero is a single
+          viewport tall and the page flows straight into the next
+          section below, no sticky / cinema dissolve / negative
+          margin tricks. Smoothest possible scroll on every device.
+          (#hero-crossfade kept as the wrapper id in case the
+          cinematic intro is ever re-enabled — the rAF reads it
+          by id.) */}
+      <main className="relative">
         <div
           id="hero-crossfade"
           className="bg-background relative"
-          style={{ opacity: 0, pointerEvents: "none" }}
         >
           {/* Social Proof Bar removed — these stats now live inside the hero
               overlay (see [hero-video-matrix.tsx](./hero-video-matrix.tsx))
@@ -83,8 +176,64 @@ export function LandingPage() {
             Each section sits at its natural height with consistent
             rhythm (py-20 sm:py-24 lg:py-32) inside a max-w-6xl container.
             Section transitions are handled by SectionDivider between them.
+
+            featuredSide-driven horizontal reflow:
+              When a HeroTaskShots card is featured on the right, this
+              wrapper grows its right padding by FEATURED_RESERVE so
+              section content shifts left and clears room for the
+              floating card. Mirrored for the left side. The padding
+              animates over 550ms with the same quint ease-out curve
+              the card itself uses, so the reflow feels coupled to
+              the reveal.
            ══════════════════════════════════════════════════════════════ */}
-        <div className="max-w-7xl mx-auto">
+        <div
+          // Named group so descendant sections can opt into
+          // narrow-mode layout overrides via `group-data-[narrow]/feat:`
+          // arbitrary variants. The data attribute is set whenever a
+          // card is featured — that's also when the wrapper reflows
+          // and the section content area shrinks to ~720px.
+          className={cn(
+            "group/feat max-w-7xl mx-auto",
+            // Bottom padding on the trigger wrapper gives the last
+            // section (pricing) visual breathing room before the
+            // SectionDivider + FAQ that follow. It also creates a
+            // scroll buffer so the featured-card exit transition
+            // can complete cleanly as the user crosses out of
+            // pricing's centre band.
+            "pb-16 sm:pb-20 lg:pb-24",
+            // Only animate / apply the reflow on viewports wide enough
+            // to host the featured card (the cards themselves are
+            // gated at 2xl). The arbitrary-value padding utilities
+            // below are also `2xl:` prefixed so below 1536px no
+            // padding is applied — section content stays centred.
+            "2xl:transition-[padding] 2xl:duration-[550ms] 2xl:ease-[cubic-bezier(0.16,1,0.3,1)]",
+            // Featured-LEFT: section gets the big reserve on the
+            // left (clears the featured card) AND a smaller
+            // reserve on the right (clears the OPPOSITE side's
+            // dim gutter cards still rendered at their `)(`
+            // positions). Mirrored for featured-right.
+            featuredSide === "left" &&
+              "2xl:pl-[var(--reserve-featured)] 2xl:pr-[var(--reserve-opposite)]",
+            featuredSide === "right" &&
+              "2xl:pr-[var(--reserve-featured)] 2xl:pl-[var(--reserve-opposite)]",
+          )}
+          // data-narrow is set whenever any card is featured. Sections
+          // inside the group key narrow-mode classes off this attribute
+          // via `group-data-[narrow]/feat:` arbitrary variants — that's
+          // how pricing collapses to 2-col, features bento drops a
+          // tier, etc. when the column is squeezed.
+          data-narrow={featuredSide ? "" : undefined}
+          style={
+            // CSS variables hold the two px reserves — featured
+            // side and opposite side. Sourced from the hero-task
+            // shots module so any geometry change there flows
+            // through to the section reflow without further edits.
+            {
+              "--reserve-featured": `${FEATURED_RESERVE}px`,
+              "--reserve-opposite": `${FEATURED_RESERVE_OPPOSITE}px`,
+            } as React.CSSProperties
+          }
+        >
 
         <BenchmarkSection isMobile={isMobile} />
 

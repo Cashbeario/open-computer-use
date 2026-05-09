@@ -129,6 +129,11 @@ const HEADLINE_KEYS = [
 // Per-row column offsets prevent adjacent duplicate thumbnails
 const ROW_OFFSETS = [0, 3, 1, 5, 2, 4, 1]
 
+// Master switch for the cinematic zoom-out + dissolve intro.
+// false: hero scrolls naturally — smoothest on every device.
+// true:  original 250vh sticky cinema sequence is restored.
+const ENABLE_CINEMATIC_INTRO = false
+
 export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   const cols = isMobile ? 9 : 11
   const rows = isMobile ? 7 : 7
@@ -189,19 +194,18 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     })
   }, [cols, rows, centerCol, centerRow])
 
-  // ─── Scroll-driven animation via continuous rAF loop ───
-  // We run a rAF loop instead of `scroll` events because Safari coalesces
-  // scroll events during momentum scroll and can even stop updating
-  // window.scrollY mid-gesture — which causes visible jumps.
-  //
-  // Performance note: we READ `window.scrollY` (cached by the browser, no
-  // layout) and subtract a CACHED container offset. Previously this loop
-  // called getBoundingClientRect() every frame, which forced a layout
-  // recalc after each style write — a classic 60fps→30fps thrash on older
-  // hardware. We recompute the cache only on resize.
-  //
-  // An IntersectionObserver pauses the loop while the hero is offscreen.
+  // ─── Scroll-driven cinematic intro: DISABLED ───
+  // The hero now scrolls naturally — no zoom-out, no dissolve,
+  // no sticky positioning. Page flows into the next section
+  // straight from the bottom of the viewport-height hero, which
+  // is the smoothest possible behavior on every device (mobile
+  // momentum scroll, low-power laptops, every browser).
+  // The original rAF implementation is preserved below in an
+  // `if (false)` block so it can be re-enabled by flipping the
+  // gate. Refs / IntersectionObservers / fail-safe timers all
+  // come back together as one unit.
   useEffect(() => {
+    if (!ENABLE_CINEMATIC_INTRO) return
     const container = containerRef.current
     const grid = gridRef.current
     const overlay = overlayRef.current
@@ -501,99 +505,122 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     <section
       id="hero"
       ref={containerRef}
-      style={{ height: "250vh" }}
-      className="relative"
+      // Cinematic mode: 250vh sticky container.
+      // Natural mode: a single viewport-height container so the page
+      // flows straight from the hero into the next section. We use
+      // min-h-screen so the section can grow if content overflows on
+      // unusual viewports (very short landscape phones), while the
+      // inner div is a strict h-screen so the overlay's percentage-
+      // anchored cards (top: 32%, etc.) resolve against a real 100vh
+      // frame — without that, the overlay collapses to content height
+      // and the side-gutter cards crush together.
+      style={ENABLE_CINEMATIC_INTRO ? { height: "250vh" } : undefined}
+      className={cn(
+        "relative",
+        !ENABLE_CINEMATIC_INTRO && "min-h-screen overflow-hidden",
+      )}
     >
       <div
         ref={stickyRef}
-        className="sticky top-0 h-screen overflow-hidden flex items-center justify-center"
-        style={{
-          // Promote the sticky element to its own compositor layer.
-          // Works around a WebKit bug where child transforms cause the sticky
-          // element to jitter by a few pixels during scroll.
-          willChange: "transform",
-          transform: "translateZ(0)",
-        }}
-      >
-        {/* ─── Background fader (separate layer — avoids repainting sticky) ─── */}
-        <div
-          ref={bgLayerRef}
-          className="absolute inset-0 bg-background pointer-events-none"
-          style={{ opacity: 0.001, zIndex: 0, willChange: "opacity", transform: "translateZ(0)" }}
-          aria-hidden="true"
-        />
-        {/* ─── Video tile grid ─── */}
-        <div
-          ref={gridRef}
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gap,
-            // Ensure center tile fills viewport on ALL aspect ratios:
-            // - 110vw covers width (with buffer for inter-tile gaps)
-            // - 200vh * 9/16 = 112.5vh covers height on tall screens (MacBooks, iPads, phones)
-            width: "max(110vw, 200vh)",
-            transform: `scale3d(${cols}, ${cols}, 1)`,
-            transformOrigin: "center center",
-            willChange: "transform, opacity",
-          }}
-        >
-          {tiles.map((tile, i) => (
-            <div
-              key={i}
-              className={cn(
-                "relative overflow-hidden aspect-video rounded-[2px]",
-                tile.isCenter ? "bg-transparent" : "bg-neutral-900"
-              )}
-              style={
-                tile.isCenter
-                  ? undefined
-                  : ({
-                      opacity: "var(--tile-opacity, 0)",
-                    } as React.CSSProperties)
+        className={cn(
+          ENABLE_CINEMATIC_INTRO
+            ? "sticky top-0 h-screen overflow-hidden flex items-center justify-center"
+            : "relative w-full h-screen flex items-center justify-center",
+        )}
+        style={
+          ENABLE_CINEMATIC_INTRO
+            ? {
+                // Promote the sticky element to its own compositor layer.
+                // Works around a WebKit bug where child transforms cause the sticky
+                // element to jitter by a few pixels during scroll.
+                willChange: "transform",
+                transform: "translateZ(0)",
               }
+            : undefined
+        }
+      >
+        {/* ─── Cinematic-mode-only chrome ───
+            All the layers below (bg fader, video tile grid, vignette,
+            bottom fade) only mean something when the rAF loop is
+            driving them. In natural-scroll mode they're dead weight
+            (77 image fetches, sticky-related GPU work, layout). The
+            gate keeps them in source for easy re-enable but doesn't
+            ship a single byte to the client when disabled. */}
+        {ENABLE_CINEMATIC_INTRO && (
+          <>
+            {/* ─── Background fader (separate layer — avoids repainting sticky) ─── */}
+            <div
+              ref={bgLayerRef}
+              className="absolute inset-0 bg-background pointer-events-none"
+              style={{ opacity: 0.001, zIndex: 0, willChange: "opacity", transform: "translateZ(0)" }}
+              aria-hidden="true"
+            />
+            {/* ─── Video tile grid ─── */}
+            <div
+              ref={gridRef}
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                gap,
+                width: "max(110vw, 200vh)",
+                transform: `scale3d(${cols}, ${cols}, 1)`,
+                transformOrigin: "center center",
+                willChange: "transform, opacity",
+              }}
             >
-              {!tile.isCenter && (
-                <>
-                  <NextImage
-                    src={`https://img.youtube.com/vi/${tile.videoId}/hqdefault.jpg`}
-                    alt=""
-                    fill
-                    // Tiles are tiny once the grid zooms out — pin sizes to
-                    // ~12vw so Next/Image picks the smallest variant. Six
-                    // unique URLs across 77 tiles → only 6 actual fetches.
-                    sizes="(max-width: 768px) 12vw, 10vw"
-                    draggable={false}
-                    unoptimized
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/15 dark:bg-black/25" />
-                </>
-              )}
+              {tiles.map((tile, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "relative overflow-hidden aspect-video rounded-[2px]",
+                    tile.isCenter ? "bg-transparent" : "bg-neutral-900"
+                  )}
+                  style={
+                    tile.isCenter
+                      ? undefined
+                      : ({
+                          opacity: "var(--tile-opacity, 0)",
+                        } as React.CSSProperties)
+                  }
+                >
+                  {!tile.isCenter && (
+                    <>
+                      <NextImage
+                        src={`https://img.youtube.com/vi/${tile.videoId}/hqdefault.jpg`}
+                        alt=""
+                        fill
+                        sizes="(max-width: 768px) 12vw, 10vw"
+                        draggable={false}
+                        unoptimized
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/15 dark:bg-black/25" />
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* ─── Vignette: page bg bleeds in from edges ─── */}
-        {/* Uses a radial-gradient background instead of mask-image because
-            Safari re-rasterizes masks on every opacity change, causing flicker. */}
-        <div
-          ref={vignetteRef}
-          className="absolute inset-0 pointer-events-none z-[5]"
-          style={{
-            background:
-              "radial-gradient(ellipse 55% 45% at 50% 50%, transparent 20%, var(--background) 75%)",
-            willChange: "opacity",
-            transform: "translateZ(0)",
-          }}
-        />
+            {/* ─── Vignette ─── */}
+            <div
+              ref={vignetteRef}
+              className="absolute inset-0 pointer-events-none z-[5]"
+              style={{
+                background:
+                  "radial-gradient(ellipse 55% 45% at 50% 50%, transparent 20%, var(--background) 75%)",
+                willChange: "opacity",
+                transform: "translateZ(0)",
+              }}
+            />
 
-        {/* ─── Bottom gradient for transition to content ─── */}
-        <div
-          ref={bottomFadeRef}
-          className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[6] bg-gradient-to-t from-background via-background/60 to-transparent"
-          style={{ opacity: 0.001, willChange: "opacity", transform: "translateZ(0)" }}
-        />
+            {/* ─── Bottom gradient for transition to content ─── */}
+            <div
+              ref={bottomFadeRef}
+              className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none z-[6] bg-gradient-to-t from-background via-background/60 to-transparent"
+              style={{ opacity: 0.001, willChange: "opacity", transform: "translateZ(0)" }}
+            />
+          </>
+        )}
 
         {/* ─── Hero text — separate overlay, scales in sync with grid ─── */}
         <div
@@ -607,6 +634,12 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
             transformOrigin: "center center",
           }}
         >
+          {/* HeroTaskShots is no longer rendered here — it now lives
+              at the landing-page level as a fixed-position overlay so
+              the cards "follow" the viewport across all sections and
+              can swap their imagery for per-section video on scroll.
+              See app/components/landing/landing-page.tsx. */}
+
           <div
             className={cn(
               "pointer-events-auto text-center w-full",
@@ -691,10 +724,9 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 vocabulary: low-opacity tinted panel, hairline border,
                 backdrop blur, single signature top hairline. Tapered
                 vertical hairlines between columns give the row the
-                feel of an editorial spec sheet. A photographic light
-                cone projects from the panel's bottom edge down through
-                the rest of the hero — restrained ambient warmth, the
-                glass plate's "shadow" cast as light. */}
+                feel of an editorial spec sheet. No ambient cone or
+                wash behind it — the stats stand on their own against
+                the page background. */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -706,112 +738,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               )}
               aria-label="Resources saved per workflow"
             >
-              {/* ─── Light cone ───
-                  A true cone of light projected downward from the
-                  panel's TOP edge. Two masks compose to shape it:
-                    • Outer mask (vertical linear-gradient) — opaque
-                      at top (panel edge), dissolving to transparent
-                      before the section's bottom.
-                    • Inner mask (conic-gradient at top-center) — a
-                      ~96° opaque angular sector (132°–228°) with
-                      feathered 36° soft edges on each side. The
-                      cone's apex is the origin point (a single
-                      pixel) and its sides expand naturally with
-                      distance — at full container height the cone
-                      reaches past the page edges, so the visible
-                      base lands exactly on the guide rails.
-                  z-[-1] escapes to the overlay's stacking context
-                  (overlay has z-10 + position:absolute = stacking
-                  context) where it paints in the negative-z step —
-                  before all static / auto-z descendants. So the
-                  cone sits behind the CTAs and the panel while
-                  still scaling and fading with the overlay's
-                  scroll-driven transform. */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute top-0 left-1/2 z-[-1]"
-                style={{
-                  width: "100vw",
-                  height: isMobile ? "min(78vh, 700px)" : "min(92vh, 1000px)",
-                  transform: "translate3d(-50%, 0, 0)",
-                  willChange: "opacity",
-                  // Vertical fade — RADIAL gradient instead of linear.
-                  //
-                  // Why radial: linear-gradient masks with multiple stops
-                  // produce visible horizontal "kinks" at every stop
-                  // boundary because GPUs sample mask alpha at lower
-                  // precision than colour channels. Even monotonic stops
-                  // become visible faint horizontal lines. The previous
-                  // 9-stop curve was bleeding banding artefacts.
-                  //
-                  // A radial gradient interpolates concentrically from a
-                  // single point, so there are no horizontal sample lines
-                  // at all — alpha varies smoothly with euclidean distance.
-                  // We use a very-wide ellipse (250% × 70%) centred 42%
-                  // down: the 250% width pushes horizontal influence well
-                  // beyond the cone's own conic feather (so the radial
-                  // acts as a vertical-only fade); the elliptical falloff
-                  // produces a natural gaussian-like bell.
-                  //
-                  // Net effect: invisible at the panel edge → fades in
-                  // smoothly through the upper body → peaks just above
-                  // mid-cone → fades out cleanly to transparent at the
-                  // bottom. No bands, no horizontal lines, no apex rule.
-                  maskImage:
-                    "radial-gradient(ellipse 250% 70% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.15) 88%, transparent 100%)",
-                  WebkitMaskImage:
-                    "radial-gradient(ellipse 250% 70% at 50% 42%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.15) 88%, transparent 100%)",
-                }}
-              >
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    // Conic mask — defines the cone shape.
-                    //
-                    // Reduced to ONE stop per feather edge so each side is
-                    // a single transparent → opaque ramp. Multi-stop conic
-                    // gradients exhibit the same banding the linear vertical
-                    // mask did (visible inflection lines radiating from the
-                    // apex). With only two stops bracketing the feather, the
-                    // browser interpolates the alpha as one continuous ramp
-                    // — no inflection, no visible angular bands.
-                    //
-                    // Geometry: opaque core at 150°-210° (60° flood centred
-                    // straight-down), with 60° of linear feather on each
-                    // side (90°→150° left, 210°→270° right). Total cone
-                    // angular extent including feathers = 180°.
-                    maskImage:
-                      "conic-gradient(from 0deg at 50% 0%, transparent 90deg, rgba(0,0,0,1) 150deg, rgba(0,0,0,1) 210deg, transparent 270deg)",
-                    WebkitMaskImage:
-                      "conic-gradient(from 0deg at 50% 0%, transparent 90deg, rgba(0,0,0,1) 150deg, rgba(0,0,0,1) 210deg, transparent 270deg)",
-                  }}
-                >
-                  <NextImage
-                    src="/chris-stenger-fvJwchRL6xw-unsplash.jpg"
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    priority
-                    draggable={false}
-                    className="object-cover object-top select-none opacity-[0.62] dark:opacity-[0.78] saturate-[1.32] dark:saturate-[1.28] contrast-[1.05]"
-                  />
-                  {/* Background-tone wash — kept minimal (4 stops) for
-                      the same banding reason. The radial mask above
-                      already does most of the cone-to-page integration;
-                      this wash just nudges the bottom toward the page
-                      background colour so the cone's tail dissolves
-                      cleanly. color-mix(oklch) keeps mid-tones perceptually
-                      even instead of muddying through grey. */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, transparent 0%, transparent 55%, color-mix(in oklch, var(--background) 35%, transparent) 80%, var(--background) 100%)",
-                    }}
-                  />
-                </div>
-              </div>
 
               {/* No panel chrome, no top rule — the cone of light
                   behind defines the moment, and the tapered cell
@@ -934,39 +860,39 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
           </div>
         </div>
 
-        {/* ─── Scroll indicator (independent, does not scale) ───
-            Quieter than the previous treatment — mono caps with the same
-            0.22em tracking the rest of the editorial system uses, a
-            tighter 4px bounce, and a smaller chevron so the eye reads
-            the cue without being pulled away from the headline. */}
-        <div
-          ref={scrollIndRef}
-          className={cn(
-            "absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-foreground/30 dark:text-white/30",
-            isMobile ? "bottom-6" : "bottom-10"
-          )}
-        >
-          <span
+        {/* ─── Scroll indicator ───
+            Cinematic-mode only — the cue makes sense when the user
+            needs to know "this hero unfolds as you scroll." In
+            natural-scroll mode the page just continues normally and
+            the indicator is redundant. */}
+        {ENABLE_CINEMATIC_INTRO && (
+          <div
+            ref={scrollIndRef}
             className={cn(
-              "font-mono text-[9px] uppercase",
-              // Mirror the StatCell label scale so every editorial mono
-              // strip on the hero shares the same tracking rhythm.
-              isMobile ? "tracking-[0.18em]" : "tracking-[0.22em]"
+              "absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-foreground/30 dark:text-white/30",
+              isMobile ? "bottom-6" : "bottom-10"
             )}
           >
-            Scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 4, 0] }}
-            transition={{
-              duration: 2.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.6} />
-          </motion.div>
-        </div>
+            <span
+              className={cn(
+                "font-mono text-[9px] uppercase",
+                isMobile ? "tracking-[0.18em]" : "tracking-[0.22em]"
+              )}
+            >
+              Scroll
+            </span>
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.6} />
+            </motion.div>
+          </div>
+        )}
       </div>
     </section>
   )

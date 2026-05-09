@@ -13,19 +13,18 @@ type Entry = {
   org: string
   score: number
   highlight?: boolean
-  type: "framework" | "model"
 }
 
 const LEADERBOARD: Entry[] = [
-  { name: "Coasty", org: "Ours", score: 82.0, highlight: true, type: "framework" },
-  { name: "Agent S3", org: "Simular · Opus 4.5 + GPT-5", score: 72.6, type: "framework" },
-  { name: "Agent S3", org: "Simular · GPT-5", score: 69.9, type: "framework" },
-  { name: "UiPath Screen Agent", org: "UiPath · Opus 4.5", score: 67.1, type: "framework" },
-  { name: "Agent S3", org: "Simular · Opus 4.5", score: 66.0, type: "framework" },
-  { name: "Kimi K2.5", org: "Moonshot AI", score: 63.3, type: "model" },
-  { name: "Claude Sonnet 4.5", org: "Anthropic", score: 62.9, type: "model" },
-  { name: "Seed-1.8", org: "ByteDance", score: 61.9, type: "model" },
-  { name: "Claude Sonnet 4.5", org: "Anthropic · 50 steps", score: 58.1, type: "model" },
+  { name: "Coasty", org: "Ours", score: 82.0, highlight: true },
+  { name: "Agent S3", org: "Simular · Opus 4.5 + GPT-5", score: 72.6 },
+  { name: "Agent S3", org: "Simular · GPT-5", score: 69.9 },
+  { name: "UiPath Screen Agent", org: "UiPath · Opus 4.5", score: 67.1 },
+  { name: "Agent S3", org: "Simular · Opus 4.5", score: 66.0 },
+  { name: "Kimi K2.5", org: "Moonshot AI", score: 63.3 },
+  { name: "Claude Sonnet 4.5", org: "Anthropic", score: 62.9 },
+  { name: "Seed-1.8", org: "ByteDance", score: 61.9 },
+  { name: "Claude Sonnet 4.5", org: "Anthropic · 50 steps", score: 58.1 },
 ]
 
 const LEADER_SCORE = 82.0
@@ -76,24 +75,6 @@ function ScoreValue({
   )
 }
 
-function TypePill({ type, className }: { type: Entry["type"]; className?: string }) {
-  const label = type === "framework" ? "FRAMEWORK" : "MODEL"
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center rounded-sm border px-1.5 py-[1px]",
-        "font-mono uppercase tracking-[0.18em] text-[9px] leading-[1.4]",
-        type === "framework"
-          ? "border-foreground/25 text-foreground/65"
-          : "border-foreground/12 text-foreground/40",
-        className
-      )}
-    >
-      {label}
-    </span>
-  )
-}
-
 function BenchmarkRow({
   entry,
   rank,
@@ -139,7 +120,6 @@ function BenchmarkRow({
             )}>
               {entry.name}
             </span>
-            <TypePill type={entry.type} className="shrink-0" />
           </div>
           <ScoreValue
             score={entry.score}
@@ -184,8 +164,15 @@ function BenchmarkRow({
       transition={{ delay: animDelay, duration: 0.55, ease: EASE }}
       className={cn(
         "grid items-center gap-4",
-        // [rank] [name+org] [pill] [bar] [delta]
-        "grid-cols-[36px_minmax(180px,220px)_88px_minmax(0,1fr)_92px]",
+        // [rank] [name+org] [bar] [delta] — pill column removed so the
+        // bar gets the freed-up 88px + gap (≈104px) of horizontal room.
+        // The framework/model distinction is no longer surfaced; the
+        // hierarchy comes from the score and bar length alone.
+        "grid-cols-[36px_minmax(180px,220px)_minmax(0,1fr)_92px]",
+        // Narrow mode (parent has data-narrow): tighten the rank +
+        // name + delta tracks so the bar stays as the dominant column
+        // even when the wrapper compresses to ~720px.
+        "group-data-[narrow]/feat:grid-cols-[28px_minmax(140px,180px)_minmax(0,1fr)_72px] group-data-[narrow]/feat:gap-3",
         entry.highlight ? "py-2" : "py-1"
       )}
     >
@@ -223,11 +210,6 @@ function BenchmarkRow({
         <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/40 truncate mt-0.5">
           {entry.org}
         </div>
-      </div>
-
-      {/* Type pill */}
-      <div className="flex justify-start">
-        <TypePill type={entry.type} />
       </div>
 
       {/* Bar */}
@@ -396,10 +378,14 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
               transition={{ duration: 0.4, ease: EASE }}
               // Reuse the same grid geometry as the row so the axis aligns
               // exactly with the bar column without hardcoded padding math.
-              className="grid items-end gap-4 grid-cols-[36px_minmax(180px,220px)_88px_minmax(0,1fr)_92px] mb-8"
+              className={cn(
+                "grid items-end gap-4 mb-8",
+                "grid-cols-[36px_minmax(180px,220px)_minmax(0,1fr)_92px]",
+                "group-data-[narrow]/feat:grid-cols-[28px_minmax(140px,180px)_minmax(0,1fr)_72px] group-data-[narrow]/feat:gap-3",
+              )}
             >
-              {/* spacers for rank, name, pill */}
-              <div /><div /><div />
+              {/* spacers for rank, name */}
+              <div /><div />
               <div className="relative h-9">
                 {/* Base axis line */}
                 <div className="absolute left-0 right-0 bottom-3 h-px bg-foreground/10" />
@@ -455,10 +441,14 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
                 initial={{ opacity: 0, scaleY: 0 }}
                 animate={inView ? { opacity: 1, scaleY: 1 } : { opacity: 0, scaleY: 0 }}
                 transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
-                className="pointer-events-none absolute inset-0 grid items-stretch gap-4 grid-cols-[36px_minmax(180px,220px)_88px_minmax(0,1fr)_92px] origin-top"
+                className={cn(
+                  "pointer-events-none absolute inset-0 grid items-stretch gap-4 origin-top",
+                  "grid-cols-[36px_minmax(180px,220px)_minmax(0,1fr)_92px]",
+                  "group-data-[narrow]/feat:grid-cols-[28px_minmax(140px,180px)_minmax(0,1fr)_72px] group-data-[narrow]/feat:gap-3",
+                )}
               >
-                {/* spacers for rank, name, pill */}
-                <div /><div /><div />
+                {/* spacers for rank, name */}
+                <div /><div />
                 <div className="relative">
                   <div
                     className="absolute top-0 bottom-0 w-px bg-gradient-to-b from-foreground/45 via-foreground/15 to-foreground/5"

@@ -138,7 +138,14 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
           className={cn(
             "grid gap-4",
             // Mobile: single column. Desktop: 3-col, 3-row bento with auto rows.
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3 lg:auto-rows-[minmax(0,auto)]"
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3 lg:auto-rows-[minmax(0,auto)]",
+            // Narrow mode (sibling video card is featured, container
+            // is ~720px): collapse the bento to a single vertical
+            // column. The per-card col-span / col-start placements
+            // become no-ops when there's only one column. Cards stack
+            // top-to-bottom at full width — much more legible than
+            // 3 cards crammed into 720px.
+            !isMobile && "group-data-[narrow]/feat:lg:grid-cols-1 group-data-[narrow]/feat:max-w-2xl group-data-[narrow]/feat:mx-auto",
           )}
         >
           {cards.map((c, i) => {
@@ -163,6 +170,13 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
                   c.hero ? "p-6 sm:p-8" : "p-5 sm:p-6",
                   // grid placement (desktop only — on mobile cards stack)
                   !isMobile && c.span,
+                  // Narrow mode: parent grid drops to 1-col, so the
+                  // per-card `lg:col-span-2 / lg:col-start-3 / row-span-2`
+                  // placements become invalid (cards try to span past
+                  // the only column, or start in non-existent col 3).
+                  // Reset every grid-area property to `auto` so cards
+                  // flow naturally in row order.
+                  !isMobile && "group-data-[narrow]/feat:lg:[grid-area:auto]",
                   // flex column so the vignette grows and the title/desc sit at the bottom
                   "flex flex-col"
                 )}

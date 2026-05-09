@@ -78,7 +78,15 @@ export function CostSection({ isMobile }: { isMobile: boolean }) {
               "relative",
               isMobile
                 ? "flex flex-col gap-0"
-                : "grid grid-cols-[1fr_auto_1fr] gap-0 items-stretch"
+                : "grid grid-cols-[1fr_auto_1fr] gap-0 items-stretch",
+              // Narrow mode: 720px container makes the 2-col
+              // comparison feel cramped (~360px / col with rows of
+              // label-and-value pairs). Collapse the grid to a
+              // single column so the manual / Coasty columns stack
+              // vertically — the centre divider element flows
+              // between them, reading as a horizontal separator
+              // rather than a vertical one.
+              !isMobile && "group-data-[narrow]/feat:[grid-template-columns:1fr] group-data-[narrow]/feat:max-w-xl group-data-[narrow]/feat:mx-auto",
             )}
           >
             {/* ── LEFT COLUMN — Hiring / Manual ─────────────────────── */}

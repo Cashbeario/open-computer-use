@@ -156,7 +156,13 @@ export function WhyCoastySection({ isMobile }: { isMobile: boolean }) {
             // all three columns on the top row, then the three standard cards
             // sit equally below (each col-span-1). This keeps the bento dense
             // — no dead zones beside a hero that's shorter than its row.
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3",
+            // Narrow mode: container is ~720px, 3-col would put each
+            // card at ~230px which crushes the vignette + copy. Drop
+            // to single column — hero stays full-width, the 3 standard
+            // cards stack vertically beneath it. Hero's internal
+            // sm:grid-cols-[1.15fr_1fr] split still works at 720px.
+            !isMobile && "group-data-[narrow]/feat:lg:grid-cols-1 group-data-[narrow]/feat:max-w-2xl group-data-[narrow]/feat:mx-auto",
           )}
         >
           {/* ── Hero card — full-width top row ───────────────────────── */}
@@ -220,6 +226,10 @@ function HeroCard({
         "bg-card/40 backdrop-blur-[2px]",
         // Hero takes the full top row (all 3 cols on lg+).
         !isMobile && "lg:col-span-3",
+        // Narrow mode: parent grid drops to 1-col so `lg:col-span-3`
+        // would force the hero to span 3 cols when only 1 exists,
+        // pushing cards out of bounds. Reset grid placement.
+        !isMobile && "group-data-[narrow]/feat:lg:[grid-area:auto]",
         isMobile ? "p-6" : "p-8 sm:p-10"
       )}
       style={{ "--mouse-x": "50%", "--mouse-y": "50%" } as React.CSSProperties}
@@ -246,7 +256,16 @@ function HeroCard({
         />
       )}
 
-      <div className={cn("relative z-10 grid gap-8", !isMobile && "sm:grid-cols-[1.15fr_1fr] sm:items-center")}>
+      <div
+        className={cn(
+          "relative z-10 grid gap-8",
+          !isMobile && "sm:grid-cols-[1.15fr_1fr] sm:items-center",
+          // Narrow mode: stack vignette + copy into a single column
+          // — the 1.15fr+1fr split crushes both halves at ~720px
+          // hero width.
+          !isMobile && "group-data-[narrow]/feat:sm:grid-cols-1",
+        )}
+      >
         {/* ── Vignette: cinematic interface tile with cursor + click + type ── */}
         <HeroVignette isMobile={isMobile} />
 

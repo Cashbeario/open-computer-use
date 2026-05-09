@@ -53,7 +53,18 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
   return (
     <section
       id="faq"
-      className="relative py-20 sm:py-24 lg:py-32 px-8 sm:px-10"
+      className={cn(
+        "relative py-20 sm:py-24 lg:py-32 px-8 sm:px-10",
+        // 2xl-only side padding: at 1536px+ viewports the hero
+        // task-shot gutter cards stand at full opacity (no
+        // featured card during FAQ), and their `)(` arrangement
+        // extends ~250px in from each viewport edge. Without
+        // this padding the FAQ's max-w-6xl column reaches into
+        // the cards' silhouettes. ~280px clears the deepest
+        // gutter inset (+50 + 200 width) plus a 30px breathing
+        // margin so the content reads as deliberately separated.
+        "2xl:px-[280px]",
+      )}
     >
       <div className="max-w-6xl w-full mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 lg:gap-16">

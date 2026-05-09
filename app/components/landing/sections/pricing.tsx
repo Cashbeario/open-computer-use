@@ -107,7 +107,17 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
             "relative grid gap-3 sm:gap-4",
             isMobile
               ? "grid-cols-1 max-w-md mx-auto"
-              : "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+              : cn(
+                  "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+                  // Narrow mode (parent has data-narrow because a video
+                  // card is featured): drop from 5-col to 2-col so each
+                  // pricing card stays ~340px and the price + feature
+                  // list stay legible. Without this override the cards
+                  // collapse to ~145px and the price text crashes into
+                  // the feature checks.
+                  "group-data-[narrow]/feat:grid-cols-1 group-data-[narrow]/feat:lg:grid-cols-2 group-data-[narrow]/feat:xl:grid-cols-2",
+                  "group-data-[narrow]/feat:max-w-2xl group-data-[narrow]/feat:mx-auto",
+                ),
           )}
         >
           {PLAN_DATA.map((plan, planIdx) => {

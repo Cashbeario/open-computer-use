@@ -595,18 +595,21 @@
     "getStarted": "Bat dau",
     "settingUp": "Dang thiet lap...",
     "welcome": {
-      "titleReturning": "Chao mung tro lai{name}!",
-      "titleNew": "Chao mung den voi Coasty",
-      "descriptionReturning": "Chung toi muon tim hieu them ve ban de cai thien trai nghiem",
-      "descriptionNew": "Hay thiet lap tai khoan de chung toi ca nhan hoa trai nghiem cua ban"
+      "titleReturning": "Chào mừng bạn trở lại{name}",
+      "titleNew": "Chào mừng đến với Coasty",
+      "eyebrowNew": "Hãy làm quen nào",
+      "eyebrowReturning": "Gần xong rồi",
+      "descriptionReturning": "Chỉ vài chi tiết nữa và Coasty sẽ được tinh chỉnh hoàn toàn phù hợp với cách bạn làm việc.",
+      "descriptionNew": "Coasty hoạt động trên máy tính thật — duyệt, nhấp, gõ, hoàn thành. Vài chi tiết nhanh để phù hợp với phong cách của bạn.",
+      "footerNote": "Mất khoảng một phút. Bạn có thể thay đổi mọi thứ sau trong Cài đặt."
     },
-    "nameLabel": "Chung toi nen goi ban la gi?",
-    "namePlaceholder": "Ten cua ban",
-    "companyLabel": "Cong ty",
-    "optional": "(tuy chon)",
-    "companyPlaceholder": "MacroHard",
+    "nameLabel": "Chúng tôi nên gọi bạn là gì?",
+    "namePlaceholder": "Chỉ tên gọi của bạn",
+    "companyLabel": "Bạn làm việc ở đâu?",
+    "optional": "(tùy chọn)",
+    "companyPlaceholder": "Công ty hoặc nhóm của bạn",
     "websiteLabel": "Trang web",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "congtybanban.com",
     "roleStep": {
       "title": "Dieu gi mo ta ban tot nhat?",
       "subtitle": "Chon tat ca phu hop — dieu nay giup chung toi tuy chinh trai nghiem cua ban"

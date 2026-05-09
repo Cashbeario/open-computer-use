@@ -595,18 +595,21 @@
     "getStarted": "Kom i gang",
     "settingUp": "Opsaetter...",
     "welcome": {
-      "titleReturning": "Velkommen tilbage{name}!",
+      "titleReturning": "Velkommen tilbage{name}",
       "titleNew": "Velkommen til Coasty",
-      "descriptionReturning": "Vi vil gerne laere lidt mere om dig for at forbedre din oplevelse",
-      "descriptionNew": "Lad os opsaette din konto sa vi kan tilpasse din oplevelse"
+      "eyebrowNew": "Lad os lære dig at kende",
+      "eyebrowReturning": "Næsten færdig",
+      "descriptionReturning": "Bare et par detaljer mere, og Coasty vil være fuldt tilpasset din arbejdsmåde.",
+      "descriptionNew": "Coasty arbejder på rigtige computere — browser, klikker, skriver, leverer. Et par hurtige detaljer, så det passer til din stil.",
+      "footerNote": "Tager cirka et minut. Du kan ændre alt senere i Indstillinger."
     },
     "nameLabel": "Hvad skal vi kalde dig?",
-    "namePlaceholder": "Dit navn",
-    "companyLabel": "Virksomhed",
+    "namePlaceholder": "Bare dit fornavn",
+    "companyLabel": "Hvor arbejder du?",
     "optional": "(valgfrit)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Din virksomhed eller dit team",
     "websiteLabel": "Hjemmeside",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "ditfirma.com",
     "roleStep": {
       "title": "Hvad beskriver dig bedst?",
       "subtitle": "Vaelg alle der passer — dette hjaelper os med at tilpasse din oplevelse"

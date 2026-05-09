@@ -595,18 +595,21 @@
     "getStarted": "Aloita",
     "settingUp": "Valmistellaan...",
     "welcome": {
-      "titleReturning": "Tervetuloa takaisin{name}!",
+      "titleReturning": "Tervetuloa takaisin{name}",
       "titleNew": "Tervetuloa Coastyyn",
-      "descriptionReturning": "Haluaisimme oppia sinusta hieman lisää parantaaksemme kokemustasi",
-      "descriptionNew": "Perustetaan tilisi, jotta voimme personoida kokemustasi"
+      "eyebrowNew": "Tutustutaan",
+      "eyebrowReturning": "Melkein valmis",
+      "descriptionReturning": "Vielä muutama yksityiskohta ja Coasty on täysin viritetty työskentelytavallesi.",
+      "descriptionNew": "Coasty toimii oikeilla tietokoneilla — selaa, klikkaa, kirjoittaa, toimittaa. Muutama nopea yksityiskohta, jotta se sopii tyyliisi.",
+      "footerNote": "Vie noin minuutin. Voit muuttaa mitä tahansa myöhemmin Asetuksissa."
     },
     "nameLabel": "Miten meidän pitäisi kutsua sinua?",
-    "namePlaceholder": "Nimesi",
-    "companyLabel": "Yritys",
+    "namePlaceholder": "Pelkkä etunimi riittää",
+    "companyLabel": "Missä työskentelet?",
     "optional": "(valinnainen)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Yrityksesi tai tiimisi",
     "websiteLabel": "Verkkosivusto",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yrityksesi.com",
     "roleStep": {
       "title": "Mikä kuvaa sinua parhaiten?",
       "subtitle": "Valitse kaikki sopivat — tämä auttaa meitä räätälöimään kokemustasi"

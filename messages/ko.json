@@ -595,18 +595,21 @@
     "getStarted": "시작하기",
     "settingUp": "설정 중...",
     "welcome": {
-      "titleReturning": "다시 오신 것을 환영합니다{name}!",
+      "titleReturning": "다시 오신 것을 환영합니다{name}",
       "titleNew": "Coasty에 오신 것을 환영합니다",
-      "descriptionReturning": "더 나은 경험을 위해 조금 더 알려주세요",
-      "descriptionNew": "경험을 맞춤화하기 위해 계정을 설정해 봅시다"
+      "eyebrowNew": "자기소개부터",
+      "eyebrowReturning": "거의 다 왔어요",
+      "descriptionReturning": "몇 가지 정보만 더 입력하면 Coasty가 회원님의 업무 방식에 완벽하게 맞춰집니다.",
+      "descriptionNew": "Coasty는 실제 컴퓨터에서 동작합니다 — 탐색, 클릭, 입력, 전달까지. 회원님의 스타일에 맞춰드릴 몇 가지 간단한 질문이 있습니다.",
+      "footerNote": "약 1분 소요됩니다. 나중에 설정에서 언제든지 변경할 수 있습니다."
     },
-    "nameLabel": "무엇으로 불러드릴까요?",
-    "namePlaceholder": "이름",
-    "companyLabel": "회사",
-    "optional": "(선택사항)",
-    "companyPlaceholder": "MacroHard",
+    "nameLabel": "어떻게 불러드릴까요?",
+    "namePlaceholder": "이름만 적어주세요",
+    "companyLabel": "어디에서 일하시나요?",
+    "optional": "(선택)",
+    "companyPlaceholder": "회사 또는 팀",
     "websiteLabel": "웹사이트",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "당신을 가장 잘 설명하는 것은?",
       "subtitle": "해당하는 항목을 모두 선택 — 경험을 맞춤화하는 데 도움이 됩니다"

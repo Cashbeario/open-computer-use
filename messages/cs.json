@@ -595,18 +595,21 @@
     "getStarted": "Začít",
     "settingUp": "Nastavování...",
     "welcome": {
-      "titleReturning": "Vítejte zpět{name}!",
+      "titleReturning": "Vítejte zpět{name}",
       "titleNew": "Vítejte v Coasty",
-      "descriptionReturning": "Rádi bychom se o vás dozvěděli trochu více, abychom zlepšili váš zážitek",
-      "descriptionNew": "Pojďme nastavit váš účet, abychom mohli přizpůsobit váš zážitek"
+      "eyebrowNew": "Pojďme se poznat",
+      "eyebrowReturning": "Skoro hotovo",
+      "descriptionReturning": "Ještě pár detailů a Coasty bude plně přizpůsoben vašemu způsobu práce.",
+      "descriptionNew": "Coasty pracuje na skutečných počítačích — prohlíží, klikne, píše, doručuje. Pár rychlých detailů, aby seděl vašemu stylu.",
+      "footerNote": "Trvá to asi minutu. Cokoli můžete později změnit v Nastavení."
     },
-    "nameLabel": "Jak vám máme říkat?",
-    "namePlaceholder": "Vaše jméno",
-    "companyLabel": "Společnost",
+    "nameLabel": "Jak vás máme oslovovat?",
+    "namePlaceholder": "Stačí křestní jméno",
+    "companyLabel": "Kde pracujete?",
     "optional": "(volitelné)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Vaše firma nebo tým",
     "websiteLabel": "Web",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "vasefirma.com",
     "roleStep": {
       "title": "Co vás nejlépe vystihuje?",
       "subtitle": "Vyberte vše, co platí — pomůže nám to přizpůsobit váš zážitek"

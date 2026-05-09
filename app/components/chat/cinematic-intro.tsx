@@ -290,7 +290,7 @@ export function CinematicIntro({
       onAnimationComplete={() => {
         if (phase === "done") onCompleteRef.current()
       }}
-      className="fixed inset-0 z-[200] overflow-hidden bg-background"
+      className="fixed inset-0 z-[2147483647] overflow-hidden bg-background"
       style={{ perspective: "900px", perspectiveOrigin: "50% 50%" }}
     >
       {/* Drift keyframes — injected once */}
@@ -588,7 +588,7 @@ export function TaglineIntro({
       onAnimationComplete={() => {
         if (phase === "done") onCompleteRef.current()
       }}
-      className="fixed inset-0 z-[200] overflow-hidden bg-background"
+      className="fixed inset-0 z-[2147483647] overflow-hidden bg-background"
     >
       <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
         <motion.h1

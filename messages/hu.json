@@ -595,18 +595,21 @@
     "getStarted": "Kezdés",
     "settingUp": "Beállítás...",
     "welcome": {
-      "titleReturning": "Üdv újra{name}!",
-      "titleNew": "Üdvözlünk a Coasty-ban",
-      "descriptionReturning": "Szeretnénk egy kicsit jobban megismerni téged, hogy javíthassuk az élményed",
-      "descriptionNew": "Állítsuk be a fiókodat, hogy személyre szabhassuk az élményed"
+      "titleReturning": "Üdv újra itt{name}",
+      "titleNew": "Üdvözlünk a Coastynál",
+      "eyebrowNew": "Ismerkedjünk meg",
+      "eyebrowReturning": "Mindjárt kész",
+      "descriptionReturning": "Még néhány részlet, és a Coasty teljesen a munkamódszeredre lesz hangolva.",
+      "descriptionNew": "A Coasty igazi számítógépeken dolgozik — böngészik, kattint, gépel, szállít. Néhány gyors részlet, hogy az ízlésedhez igazodjon.",
+      "footerNote": "Körülbelül egy percig tart. Bármit módosíthatsz később a Beállításokban."
     },
     "nameLabel": "Hogyan szólítsunk?",
-    "namePlaceholder": "A neved",
-    "companyLabel": "Vállalat",
+    "namePlaceholder": "Elég a keresztneved",
+    "companyLabel": "Hol dolgozol?",
     "optional": "(opcionális)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Weboldal",
-    "websitePlaceholder": "xai.com",
+    "companyPlaceholder": "A céged vagy csapatod",
+    "websiteLabel": "Webhely",
+    "websitePlaceholder": "ceged.hu",
     "roleStep": {
       "title": "Mi jellemez téged a legjobban?",
       "subtitle": "Válaszd ki az összes releváns lehetőséget — ez segít nekünk személyre szabni az élményed"

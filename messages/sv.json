@@ -595,18 +595,21 @@
     "getStarted": "Kom igang",
     "settingUp": "Konfigurera...",
     "welcome": {
-      "titleReturning": "Valkommen tillbaka{name}!",
-      "titleNew": "Valkommen till Coasty",
-      "descriptionReturning": "Vi vill garna lara oss lite mer om dig for att forbattra din upplevelse",
-      "descriptionNew": "Lat oss konfigurera ditt konto sa vi kan anpassa din upplevelse"
+      "titleReturning": "Välkommen tillbaka{name}",
+      "titleNew": "Välkommen till Coasty",
+      "eyebrowNew": "Låt oss lära känna varandra",
+      "eyebrowReturning": "Nästan klart",
+      "descriptionReturning": "Bara några fler detaljer och Coasty är helt anpassad till hur du arbetar.",
+      "descriptionNew": "Coasty arbetar på riktiga datorer — surfar, klickar, skriver, levererar. Några snabba detaljer så att det passar din stil.",
+      "footerNote": "Tar ungefär en minut. Du kan ändra allt senare i Inställningar."
     },
     "nameLabel": "Vad ska vi kalla dig?",
-    "namePlaceholder": "Ditt namn",
-    "companyLabel": "Foretag",
+    "namePlaceholder": "Bara ditt förnamn",
+    "companyLabel": "Var jobbar du?",
     "optional": "(valfritt)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Ditt företag eller team",
     "websiteLabel": "Webbplats",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "dittforetag.se",
     "roleStep": {
       "title": "Vad beskriver dig bast?",
       "subtitle": "Valj alla som stammer — detta hjalper oss anpassa din upplevelse"

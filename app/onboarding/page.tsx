@@ -52,14 +52,12 @@ export default async function OnboardingPage() {
     ""
 
   const initialEmail = user.email || ""
-  const avatarUrl = user.user_metadata?.avatar_url || ""
 
   return (
     <OnboardingFlow
       userId={user.id}
       initialName={initialName}
       initialEmail={initialEmail}
-      avatarUrl={avatarUrl}
       isExistingUser={isExistingUser}
       existingData={{
         role: userData?.role || "",

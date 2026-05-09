@@ -595,18 +595,21 @@
     "getStarted": "Loslegen",
     "settingUp": "Wird eingerichtet...",
     "welcome": {
-      "titleReturning": "Willkommen zurück{name}!",
+      "titleReturning": "Willkommen zurück{name}",
       "titleNew": "Willkommen bei Coasty",
-      "descriptionReturning": "Wir würden gerne etwas mehr über Sie erfahren, um Ihre Erfahrung zu verbessern",
-      "descriptionNew": "Lassen Sie uns Ihr Konto einrichten, damit wir Ihre Erfahrung personalisieren können"
+      "eyebrowNew": "Lass uns dich kennenlernen",
+      "eyebrowReturning": "Fast geschafft",
+      "descriptionReturning": "Noch ein paar Details und Coasty ist perfekt auf deine Arbeitsweise abgestimmt.",
+      "descriptionNew": "Coasty arbeitet auf echten Computern — surft, klickt, tippt, liefert. Ein paar schnelle Details, damit es zu deinem Stil passt.",
+      "footerNote": "Dauert etwa eine Minute. Du kannst alles später in den Einstellungen ändern."
     },
-    "nameLabel": "Wie sollen wir Sie nennen?",
-    "namePlaceholder": "Ihr Name",
-    "companyLabel": "Unternehmen",
+    "nameLabel": "Wie sollen wir dich nennen?",
+    "namePlaceholder": "Nur dein Vorname",
+    "companyLabel": "Wo arbeitest du?",
     "optional": "(optional)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Webseite",
-    "websitePlaceholder": "xai.com",
+    "companyPlaceholder": "Dein Unternehmen oder Team",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "deinefirma.de",
     "roleStep": {
       "title": "Was beschreibt Sie am besten?",
       "subtitle": "Wählen Sie alle zutreffenden aus — das hilft uns, Ihre Erfahrung anzupassen"

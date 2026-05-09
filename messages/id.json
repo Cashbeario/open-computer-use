@@ -595,18 +595,21 @@
     "getStarted": "Mulai",
     "settingUp": "Menyiapkan...",
     "welcome": {
-      "titleReturning": "Selamat datang kembali{name}!",
+      "titleReturning": "Selamat datang kembali{name}",
       "titleNew": "Selamat datang di Coasty",
-      "descriptionReturning": "Kami ingin mengenal Anda lebih baik untuk meningkatkan pengalaman Anda",
-      "descriptionNew": "Mari siapkan akun Anda agar kami dapat mempersonalisasi pengalaman Anda"
+      "eyebrowNew": "Mari berkenalan",
+      "eyebrowReturning": "Hampir selesai",
+      "descriptionReturning": "Hanya beberapa detail lagi dan Coasty akan sepenuhnya disesuaikan dengan cara Anda bekerja.",
+      "descriptionNew": "Coasty bekerja di komputer sungguhan — menjelajah, mengklik, mengetik, mengirim. Beberapa detail cepat agar sesuai dengan gaya Anda.",
+      "footerNote": "Hanya butuh sekitar satu menit. Anda dapat mengubah apa pun nanti di Pengaturan."
     },
     "nameLabel": "Apa yang harus kami panggil Anda?",
-    "namePlaceholder": "Nama Anda",
-    "companyLabel": "Perusahaan",
+    "namePlaceholder": "Cukup nama depan saja",
+    "companyLabel": "Di mana Anda bekerja?",
     "optional": "(opsional)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Website",
-    "websitePlaceholder": "xai.com",
+    "companyPlaceholder": "Perusahaan atau tim Anda",
+    "websiteLabel": "Situs web",
+    "websitePlaceholder": "perusahaananda.com",
     "roleStep": {
       "title": "Apa yang paling menggambarkan Anda?",
       "subtitle": "Pilih semua yang sesuai — ini membantu kami menyesuaikan pengalaman Anda"

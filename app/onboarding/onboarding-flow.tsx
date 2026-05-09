@@ -51,7 +51,6 @@ interface OnboardingFlowProps {
   userId: string
   initialName: string
   initialEmail: string
-  avatarUrl: string
   isExistingUser?: boolean
   existingData?: ExistingData
 }
@@ -104,7 +103,6 @@ export function OnboardingFlow({
   userId,
   initialName,
   initialEmail,
-  avatarUrl,
   isExistingUser = false,
   existingData,
 }: OnboardingFlowProps) {
@@ -517,35 +515,25 @@ export function OnboardingFlow({
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-8"
               >
-                <div className="text-center space-y-3">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                      className="size-16 rounded-full mx-auto ring-2 ring-border/50"
-                    />
-                  ) : (
-                    <div
-                      className="size-16 rounded-full mx-auto flex items-center justify-center ring-2 ring-border/30 shadow-lg"
-                      style={{
-                        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)",
-                      }}
-                    >
-                      {initialName ? (
-                        <span className="text-xl font-semibold text-white/90 select-none">
-                          {initialName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()}
-                        </span>
-                      ) : (
-                        <User className="size-7 text-white/80" />
-                      )}
-                    </div>
-                  )}
-                  <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground">
+                <div className="text-center space-y-4">
+                  {/* Eyebrow — quiet uppercase label that sets the tone
+                      before the heading lands. The single signature
+                      element on this surface. Tracking-widest reads as
+                      "editorial caps" rather than "shouty caps". */}
+                  <span className="inline-block text-[10.5px] font-semibold uppercase tracking-[0.22em] text-foreground/45">
+                    {isExistingUser
+                      ? t("welcome.eyebrowReturning")
+                      : t("welcome.eyebrowNew")}
+                  </span>
+                  <h1 className="text-[28px] sm:text-[34px] font-semibold tracking-[-0.02em] text-foreground leading-[1.1]">
                     {isExistingUser
                       ? t("welcome.titleReturning", { name: initialName ? `, ${initialName.split(" ")[0]}` : "" })
                       : t("welcome.titleNew")}
                   </h1>
-                  <p className="text-muted-foreground text-sm sm:text-base max-w-sm mx-auto">
+                  {/* max-w-md (was -sm) gives the longer, value-prop
+                      description room to breathe in two lines on
+                      desktop instead of three on phone. */}
+                  <p className="text-muted-foreground text-[14.5px] sm:text-[15px] leading-relaxed max-w-md mx-auto">
                     {isExistingUser
                       ? t("welcome.descriptionReturning")
                       : t("welcome.descriptionNew")}
@@ -612,6 +600,16 @@ export function OnboardingFlow({
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Reassurance footer — quiet, hairline-divided. Sets the
+                    expectation that nothing here is permanent and that
+                    the wizard is short. Anchors the form so the eye
+                    has somewhere to land before the Continue button. */}
+                <div className="pt-1">
+                  <p className="text-[12px] leading-relaxed text-muted-foreground/55 text-center">
+                    {t("welcome.footerNote")}
+                  </p>
                 </div>
               </motion.div>
             )}

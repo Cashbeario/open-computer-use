@@ -595,18 +595,21 @@
     "getStarted": "Розпочати",
     "settingUp": "Налаштування...",
     "welcome": {
-      "titleReturning": "З поверненням{name}!",
+      "titleReturning": "З поверненням{name}",
       "titleNew": "Ласкаво просимо до Coasty",
-      "descriptionReturning": "Ми хотіли б дізнатися трохи більше про вас, щоб покращити ваш досвід",
-      "descriptionNew": "Давайте налаштуємо ваш акаунт, щоб персоналізувати ваш досвід"
+      "eyebrowNew": "Давайте познайомимось",
+      "eyebrowReturning": "Майже готово",
+      "descriptionReturning": "Ще кілька деталей, і Coasty буде повністю налаштований під ваш стиль роботи.",
+      "descriptionNew": "Coasty працює на справжніх комп'ютерах — переглядає, натискає, друкує, доставляє. Кілька швидких деталей, щоб налаштувати під ваш стиль.",
+      "footerNote": "Займає близько хвилини. Усе можна змінити пізніше в Налаштуваннях."
     },
     "nameLabel": "Як до вас звертатися?",
-    "namePlaceholder": "Ваше ім'я",
-    "companyLabel": "Компанія",
+    "namePlaceholder": "Просто ім'я",
+    "companyLabel": "Де ви працюєте?",
     "optional": "(необов'язково)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Веб-сайт",
-    "websitePlaceholder": "xai.com",
+    "companyPlaceholder": "Ваша компанія чи команда",
+    "websiteLabel": "Вебсайт",
+    "websitePlaceholder": "вашакомпанія.ua",
     "roleStep": {
       "title": "Що вас найкраще описує?",
       "subtitle": "Виберіть усе, що підходить — це допоможе нам налаштувати ваш досвід"

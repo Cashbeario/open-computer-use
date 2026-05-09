@@ -595,18 +595,21 @@
     "getStarted": "はじめる",
     "settingUp": "設定中...",
     "welcome": {
-      "titleReturning": "おかえりなさい{name}！",
+      "titleReturning": "おかえりなさい{name}",
       "titleNew": "Coasty へようこそ",
-      "descriptionReturning": "体験を向上させるために、もう少し詳しく教えてください",
-      "descriptionNew": "体験をパーソナライズするためにアカウントを設定しましょう"
+      "eyebrowNew": "はじめまして",
+      "eyebrowReturning": "あと少し",
+      "descriptionReturning": "あと少しの情報で、Coasty があなたの働き方に最適化されます。",
+      "descriptionNew": "Coasty は本物のコンピュータで動きます — ブラウズ、クリック、入力、納品。あなたのスタイルに合わせるためのいくつかの簡単な質問です。",
+      "footerNote": "約1分かかります。後から設定でいつでも変更できます。"
     },
-    "nameLabel": "お名前は何ですか？",
-    "namePlaceholder": "お名前",
-    "companyLabel": "会社",
-    "optional": "（任意）",
-    "companyPlaceholder": "MacroHard",
+    "nameLabel": "なんとお呼びしましょうか？",
+    "namePlaceholder": "ファーストネームで結構です",
+    "companyLabel": "どちらでお勤めですか？",
+    "optional": "(任意)",
+    "companyPlaceholder": "会社名またはチーム名",
     "websiteLabel": "ウェブサイト",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "あなたに最も当てはまるのは？",
       "subtitle": "該当するものをすべて選択 — 体験のカスタマイズに役立ちます"

@@ -1072,7 +1072,7 @@ export function Chat() {
           document.body
         )}
         {!introResolved && showOnboarding && (
-          <div className="fixed inset-0 z-[200] bg-background" />
+          <div className="fixed inset-0 z-[2147483647] bg-background" />
         )}
         <DialogAuth open={hasDialogAuth} setOpen={setHasDialogAuth} />
         <InsufficientCreditsModal

@@ -595,18 +595,21 @@
     "getStarted": "เริ่มต้นใช้งาน",
     "settingUp": "กำลังตั้งค่า...",
     "welcome": {
-      "titleReturning": "ยินดีต้อนรับกลับ{name}!",
+      "titleReturning": "ยินดีต้อนรับกลับ{name}",
       "titleNew": "ยินดีต้อนรับสู่ Coasty",
-      "descriptionReturning": "เราอยากเรียนรู้เพิ่มเติมเกี่ยวกับคุณเพื่อปรับปรุงประสบการณ์การใช้งาน",
-      "descriptionNew": "มาตั้งค่าบัญชีเพื่อปรับแต่งประสบการณ์ของคุณกัน"
+      "eyebrowNew": "มาทำความรู้จักกัน",
+      "eyebrowReturning": "ใกล้เสร็จแล้ว",
+      "descriptionReturning": "อีกเพียงไม่กี่รายละเอียด แล้ว Coasty จะถูกปรับให้เข้ากับวิธีการทำงานของคุณอย่างสมบูรณ์",
+      "descriptionNew": "Coasty ทำงานบนคอมพิวเตอร์จริง — ท่อง คลิก พิมพ์ ส่งมอบ รายละเอียดสั้น ๆ ไม่กี่ข้อเพื่อปรับให้เข้ากับสไตล์ของคุณ",
+      "footerNote": "ใช้เวลาประมาณหนึ่งนาที คุณสามารถเปลี่ยนแปลงได้ทุกอย่างในการตั้งค่าภายหลัง"
     },
     "nameLabel": "เราควรเรียกคุณว่าอะไร?",
-    "namePlaceholder": "ชื่อของคุณ",
-    "companyLabel": "บริษัท",
+    "namePlaceholder": "แค่ชื่อจริงก็พอ",
+    "companyLabel": "คุณทำงานที่ไหน?",
     "optional": "(ไม่บังคับ)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "บริษัทหรือทีมของคุณ",
     "websiteLabel": "เว็บไซต์",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "คุณเป็นใครมากที่สุด?",
       "subtitle": "เลือกทั้งหมดที่ตรง — ช่วยให้เราปรับแต่งประสบการณ์ให้คุณ"

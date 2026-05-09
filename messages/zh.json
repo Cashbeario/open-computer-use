@@ -595,18 +595,21 @@
     "getStarted": "开始使用",
     "settingUp": "设置中...",
     "welcome": {
-      "titleReturning": "欢迎回来{name}！",
-      "titleNew": "欢迎来到 Coasty",
-      "descriptionReturning": "我们想更多地了解您，以改善您的体验",
-      "descriptionNew": "让我们设置您的账户，以便个性化您的体验"
+      "titleReturning": "欢迎回来{name}",
+      "titleNew": "欢迎使用 Coasty",
+      "eyebrowNew": "让我们认识一下",
+      "eyebrowReturning": "马上就好",
+      "descriptionReturning": "再补充几项资料，Coasty 就能完全贴合你的工作方式。",
+      "descriptionNew": "Coasty 在真实的电脑上工作 — 浏览、点击、输入、交付。回答几个简短问题，让它契合你的风格。",
+      "footerNote": "大约需要一分钟。你可以稍后在设置中更改任何内容。"
     },
-    "nameLabel": "您希望我们怎么称呼您？",
-    "namePlaceholder": "您的姓名",
-    "companyLabel": "公司",
-    "optional": "（选填）",
-    "companyPlaceholder": "MacroHard",
+    "nameLabel": "我们怎么称呼你？",
+    "namePlaceholder": "只需名字即可",
+    "companyLabel": "你在哪里工作？",
+    "optional": "(可选)",
+    "companyPlaceholder": "你的公司或团队",
     "websiteLabel": "网站",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "哪个最能描述您？",
       "subtitle": "选择所有适用的 — 这有助于我们定制您的体验"

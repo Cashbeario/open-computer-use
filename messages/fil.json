@@ -595,18 +595,21 @@
     "getStarted": "Magsimula",
     "settingUp": "Sine-setup...",
     "welcome": {
-      "titleReturning": "Welcome back{name}!",
-      "titleNew": "Welcome sa Coasty",
-      "descriptionReturning": "Gusto naming malaman pa ang kaunti tungkol sa iyo para mapabuti ang iyong karanasan",
-      "descriptionNew": "I-setup natin ang iyong account para ma-personalize ang iyong karanasan"
+      "titleReturning": "Maligayang pagbabalik{name}",
+      "titleNew": "Maligayang pagdating sa Coasty",
+      "eyebrowNew": "Magpakilala muna",
+      "eyebrowReturning": "Malapit na",
+      "descriptionReturning": "Ilang detalye na lang at lubos nang akma ang Coasty sa paraan mo ng pagtatrabaho.",
+      "descriptionNew": "Gumagana ang Coasty sa totoong mga computer — nag-bo-browse, nag-cli-click, nagta-type, naghahatid. Ilang mabilis na detalye para iangkop ito sa style mo.",
+      "footerNote": "Mga isang minuto lang. Pwede mong baguhin lahat sa Settings mamaya."
     },
-    "nameLabel": "Ano ang itatawag namin sa iyo?",
-    "namePlaceholder": "Ang pangalan mo",
-    "companyLabel": "Kumpanya",
+    "nameLabel": "Anong itatawag namin sa iyo?",
+    "namePlaceholder": "First name lang",
+    "companyLabel": "Saan ka nagtatrabaho?",
     "optional": "(opsyonal)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Ang kumpanya o team mo",
     "websiteLabel": "Website",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "kumpanyamo.com",
     "roleStep": {
       "title": "Ano ang pinaka-naglalarawan sa iyo?",
       "subtitle": "Piliin ang lahat ng naaangkop — tumutulong ito sa amin na i-tailor ang iyong karanasan"

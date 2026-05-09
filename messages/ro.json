@@ -595,18 +595,21 @@
     "getStarted": "Incepe",
     "settingUp": "Se configureaza...",
     "welcome": {
-      "titleReturning": "Bine ai revenit{name}!",
+      "titleReturning": "Bine ai revenit{name}",
       "titleNew": "Bine ai venit la Coasty",
-      "descriptionReturning": "Am dori sa aflam putin mai multe despre tine pentru a imbunatati experienta ta",
-      "descriptionNew": "Sa iti configuram contul pentru a personaliza experienta ta"
+      "eyebrowNew": "Să ne cunoaștem",
+      "eyebrowReturning": "Aproape gata",
+      "descriptionReturning": "Încă câteva detalii și Coasty va fi complet adaptat la modul tău de a lucra.",
+      "descriptionNew": "Coasty funcționează pe calculatoare reale — navighează, dă clic, tastează, livrează. Câteva detalii rapide pentru a se adapta stilului tău.",
+      "footerNote": "Durează aproximativ un minut. Poți schimba orice mai târziu în Setări."
     },
-    "nameLabel": "Cum sa iti spunem?",
-    "namePlaceholder": "Numele tau",
-    "companyLabel": "Companie",
-    "optional": "(optional)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Website",
-    "websitePlaceholder": "xai.com",
+    "nameLabel": "Cum să-ți spunem?",
+    "namePlaceholder": "Doar prenumele",
+    "companyLabel": "Unde lucrezi?",
+    "optional": "(opțional)",
+    "companyPlaceholder": "Compania sau echipa ta",
+    "websiteLabel": "Site web",
+    "websitePlaceholder": "compania-ta.ro",
     "roleStep": {
       "title": "Ce te descrie cel mai bine?",
       "subtitle": "Selecteaza tot ce se aplica — ne ajuta sa iti personalizam experienta"

@@ -595,18 +595,21 @@
     "getStarted": "Ξεκινήστε",
     "settingUp": "Ρύθμιση...",
     "welcome": {
-      "titleReturning": "Καλώς ήρθατε πίσω{name}!",
-      "titleNew": "Καλώς ήρθατε στο Coasty",
-      "descriptionReturning": "Θα θέλαμε να μάθουμε λίγα περισσότερα για εσάς για να βελτιώσουμε την εμπειρία σας",
-      "descriptionNew": "Ας ρυθμίσουμε τον λογαριασμό σας για να εξατομικεύσουμε την εμπειρία σας"
+      "titleReturning": "Καλώς ήρθες πίσω{name}",
+      "titleNew": "Καλώς ήρθες στο Coasty",
+      "eyebrowNew": "Ας γνωριστούμε",
+      "eyebrowReturning": "Σχεδόν έτοιμοι",
+      "descriptionReturning": "Μερικές ακόμη λεπτομέρειες και το Coasty θα είναι πλήρως προσαρμοσμένο στον τρόπο που εργάζεσαι.",
+      "descriptionNew": "Το Coasty δουλεύει σε πραγματικούς υπολογιστές — περιηγείται, κάνει κλικ, πληκτρολογεί, παραδίδει. Μερικές γρήγορες λεπτομέρειες για να ταιριάζει στο στυλ σου.",
+      "footerNote": "Παίρνει περίπου ένα λεπτό. Μπορείς να αλλάξεις τα πάντα αργότερα στις Ρυθμίσεις."
     },
-    "nameLabel": "Πώς να σας αποκαλούμε;",
-    "namePlaceholder": "Το όνομά σας",
-    "companyLabel": "Εταιρεία",
+    "nameLabel": "Πώς να σε αποκαλούμε;",
+    "namePlaceholder": "Μόνο το όνομά σου",
+    "companyLabel": "Πού εργάζεσαι;",
     "optional": "(προαιρετικό)",
-    "companyPlaceholder": "MacroHard",
-    "websiteLabel": "Ιστοσελίδα",
-    "websitePlaceholder": "xai.com",
+    "companyPlaceholder": "Η εταιρεία ή η ομάδα σου",
+    "websiteLabel": "Ιστότοπος",
+    "websitePlaceholder": "etaireia-sou.com",
     "roleStep": {
       "title": "Τι σας περιγράφει καλύτερα;",
       "subtitle": "Επιλέξτε όσα ισχύουν — αυτό μας βοηθά να προσαρμόσουμε την εμπειρία σας"

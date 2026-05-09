@@ -184,13 +184,14 @@ export function AppSidebar() {
             </button>
 
             {/* ── Pin toggle ──
-                Only visible when expanded. Filled-pin tilted 45°
-                in pinned state reads as "stuck"; outline-pin upright
-                reads as "loose / will close on mouse-out". Color
-                shifts from a quiet foreground/30 to a deliberate
-                foreground/75 with a subtle bg when active, so the
-                pinned state pops without shouting. */}
-            {expanded && (
+                Desktop-only — on mobile the sidebar is a sheet
+                drawer with no hover-to-expand, so pinning has no
+                meaning. Filled-pin tilted 45° in pinned state reads
+                as "stuck"; outline-pin upright reads as "loose /
+                will close on mouse-out". Color shifts from a quiet
+                foreground/30 to a deliberate foreground/75 with a
+                subtle bg when active. */}
+            {expanded && !isMobile && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button

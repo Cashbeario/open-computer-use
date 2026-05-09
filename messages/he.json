@@ -595,18 +595,21 @@
     "getStarted": "התחל",
     "settingUp": "מגדיר...",
     "welcome": {
-      "titleReturning": "ברוך שובך{name}!",
+      "titleReturning": "ברוכים השבים{name}",
       "titleNew": "ברוכים הבאים ל-Coasty",
-      "descriptionReturning": "נשמח ללמוד עוד קצת עליך כדי לשפר את החוויה שלך",
-      "descriptionNew": "בוא נגדיר את החשבון שלך כדי שנוכל להתאים אישית את החוויה"
+      "eyebrowNew": "בואו נכיר",
+      "eyebrowReturning": "כמעט שם",
+      "descriptionReturning": "עוד כמה פרטים ו-Coasty יותאם באופן מלא לאופן העבודה שלכם.",
+      "descriptionNew": "Coasty עובד על מחשבים אמיתיים — גולש, לוחץ, מקליד, מספק. כמה פרטים מהירים כדי שיתאים לסגנון שלכם.",
+      "footerNote": "לוקח בערך דקה. אפשר לשנות הכול מאוחר יותר בהגדרות."
     },
-    "nameLabel": "איך לקרוא לך?",
-    "namePlaceholder": "השם שלך",
-    "companyLabel": "חברה",
+    "nameLabel": "איך נקרא לכם?",
+    "namePlaceholder": "רק השם הפרטי",
+    "companyLabel": "איפה אתם עובדים?",
     "optional": "(אופציונלי)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "החברה או הצוות שלכם",
     "websiteLabel": "אתר אינטרנט",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "מה מתאר אותך הכי טוב?",
       "subtitle": "בחר את כל מה שמתאים — זה עוזר לנו להתאים את החוויה שלך"

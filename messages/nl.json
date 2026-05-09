@@ -595,18 +595,21 @@
     "getStarted": "Aan de slag",
     "settingUp": "Instellen...",
     "welcome": {
-      "titleReturning": "Welkom terug{name}!",
+      "titleReturning": "Welkom terug{name}",
       "titleNew": "Welkom bij Coasty",
-      "descriptionReturning": "We willen graag iets meer over je weten om je ervaring te verbeteren",
-      "descriptionNew": "Laten we je account instellen zodat we je ervaring kunnen personaliseren"
+      "eyebrowNew": "Laten we kennismaken",
+      "eyebrowReturning": "Bijna klaar",
+      "descriptionReturning": "Nog een paar details en Coasty is volledig afgestemd op jouw manier van werken.",
+      "descriptionNew": "Coasty werkt op echte computers — bladert, klikt, typt, levert. Een paar snelle details zodat het bij jouw stijl past.",
+      "footerNote": "Duurt ongeveer een minuut. Je kunt alles later wijzigen in Instellingen."
     },
     "nameLabel": "Hoe moeten we je noemen?",
-    "namePlaceholder": "Je naam",
-    "companyLabel": "Bedrijf",
+    "namePlaceholder": "Gewoon je voornaam",
+    "companyLabel": "Waar werk je?",
     "optional": "(optioneel)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "Je bedrijf of team",
     "websiteLabel": "Website",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "jouwbedrijf.nl",
     "roleStep": {
       "title": "Wat beschrijft jou het best?",
       "subtitle": "Selecteer alles wat van toepassing is — dit helpt ons je ervaring af te stemmen"

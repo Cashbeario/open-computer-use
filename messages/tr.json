@@ -595,18 +595,21 @@
     "getStarted": "Basla",
     "settingUp": "Hazirlaniyor...",
     "welcome": {
-      "titleReturning": "Tekrar hos geldiniz{name}!",
-      "titleNew": "Coasty'ye hos geldiniz",
-      "descriptionReturning": "Deneyiminizi iyilestirmek icin sizin hakkinda biraz daha bilgi edinmek isteriz",
-      "descriptionNew": "Deneyiminizi kisisellestirebilmemiz icin hesabinizi ayarlayalim"
+      "titleReturning": "Tekrar hoş geldin{name}",
+      "titleNew": "Coasty'ye hoş geldin",
+      "eyebrowNew": "Tanışalım",
+      "eyebrowReturning": "Neredeyse bitti",
+      "descriptionReturning": "Birkaç ayrıntı daha ve Coasty çalışma şekline tamamen uyarlanmış olacak.",
+      "descriptionNew": "Coasty gerçek bilgisayarlarda çalışır — gezinir, tıklar, yazar, teslim eder. Tarzına uyarlamak için birkaç hızlı ayrıntı.",
+      "footerNote": "Yaklaşık bir dakika sürer. Her şeyi daha sonra Ayarlar'dan değiştirebilirsin."
     },
-    "nameLabel": "Size ne diyelim?",
-    "namePlaceholder": "Adiniz",
-    "companyLabel": "Sirket",
-    "optional": "(istege bagli)",
-    "companyPlaceholder": "MacroHard",
+    "nameLabel": "Sana nasıl hitap edelim?",
+    "namePlaceholder": "Sadece adın",
+    "companyLabel": "Nerede çalışıyorsun?",
+    "optional": "(isteğe bağlı)",
+    "companyPlaceholder": "Şirketin veya ekibin",
     "websiteLabel": "Web sitesi",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "sirketin.com",
     "roleStep": {
       "title": "Sizi en iyi ne tanimlar?",
       "subtitle": "Gecerli olan tumu secin — bu deneyiminizi ozellestirmemize yardimci olur"

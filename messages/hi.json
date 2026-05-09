@@ -595,18 +595,21 @@
     "getStarted": "शुरू करें",
     "settingUp": "सेटअप हो रहा है...",
     "welcome": {
-      "titleReturning": "वापस स्वागत है{name}!",
+      "titleReturning": "वापस आने पर स्वागत है{name}",
       "titleNew": "Coasty में आपका स्वागत है",
-      "descriptionReturning": "आपके अनुभव को बेहतर बनाने के लिए हम आपके बारे में थोड़ा और जानना चाहेंगे",
-      "descriptionNew": "आइए आपका खाता सेट करें ताकि हम आपके अनुभव को व्यक्तिगत बना सकें"
+      "eyebrowNew": "आइए परिचित हों",
+      "eyebrowReturning": "बस थोड़ा और",
+      "descriptionReturning": "बस कुछ और जानकारी और Coasty आपके काम करने के तरीके के अनुसार पूरी तरह से तैयार हो जाएगा।",
+      "descriptionNew": "Coasty असली कंप्यूटरों पर काम करता है — ब्राउज़ करता है, क्लिक करता है, टाइप करता है, डिलीवर करता है। आपकी शैली के अनुरूप बनाने के लिए कुछ त्वरित विवरण।",
+      "footerNote": "लगभग एक मिनट लगता है। आप बाद में सेटिंग्स में कुछ भी बदल सकते हैं।"
     },
-    "nameLabel": "हम आपको क्या बुलाएं?",
-    "namePlaceholder": "आपका नाम",
-    "companyLabel": "कंपनी",
+    "nameLabel": "हम आपको क्या पुकारें?",
+    "namePlaceholder": "बस आपका पहला नाम",
+    "companyLabel": "आप कहाँ काम करते हैं?",
     "optional": "(वैकल्पिक)",
-    "companyPlaceholder": "MacroHard",
+    "companyPlaceholder": "आपकी कंपनी या टीम",
     "websiteLabel": "वेबसाइट",
-    "websitePlaceholder": "xai.com",
+    "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "आपको सबसे अच्छा क्या वर्णित करता है?",
       "subtitle": "सभी लागू विकल्प चुनें — इससे हम आपके अनुभव को अनुकूलित कर सकते हैं"

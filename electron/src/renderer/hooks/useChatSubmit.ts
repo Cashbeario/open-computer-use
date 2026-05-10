@@ -11,6 +11,26 @@ export interface FileRef {
   isDirectory: boolean
 }
 
+/**
+ * Build the wire-format user message from the trimmed text plus any
+ * attached files/directories. The same string is used to (a) display
+ * in the chat thread via ``addUserMessage`` and (b) ship to the
+ * backend via ``sendChatMessage``, so it must be canonical — generating
+ * it twice from the same inputs would be a bug-prone divergence.
+ */
+export function buildUserMessage(input: string, files?: FileRef[]): string {
+  let userMessage = input.trim()
+  if (files && files.length > 0) {
+    const tags = files.map((f) =>
+      f.isDirectory
+        ? `<directory path="${f.path}" name="${f.name}">${f.name}</directory>`
+        : `<file path="${f.path}" name="${f.name}">${f.name}</file>`,
+    )
+    userMessage = userMessage + '\n' + tags.join('\n')
+  }
+  return userMessage
+}
+
 export function useChatSubmit() {
   const {
     messages, isStreaming, chatId, chatTitle,
@@ -86,15 +106,7 @@ export function useChatSubmit() {
     async (input: string, files?: FileRef[], opts?: { isRetry?: boolean }) => {
       if (!user || !machineId) return
 
-      let userMessage = input.trim()
-      if (files && files.length > 0) {
-        const tags = files.map((f) =>
-          f.isDirectory
-            ? `<directory path="${f.path}" name="${f.name}">${f.name}</directory>`
-            : `<file path="${f.path}" name="${f.name}">${f.name}</file>`,
-        )
-        userMessage = userMessage + '\n' + tags.join('\n')
-      }
+      const userMessage = buildUserMessage(input, files)
 
       const isRetry = !!opts?.isRetry
       if (!isRetry) {
@@ -214,27 +226,50 @@ export function useChatSubmit() {
     async (input: string, files?: FileRef[]) => {
       if (!canSend(input) || !user || !machineId) return
 
+      // ── Add the user's message to the chat thread IMMEDIATELY ─────────
+      //
+      // Why this happens BEFORE the busy pre-check (regression fix):
+      //
+      // The component (CompactPill / Overlay) clears its local `input`
+      // state synchronously on send. If we delayed addUserMessage until
+      // AFTER the busy check, then the busy-positive path would:
+      //   1. Stash the message into pendingInput (hook state)
+      //   2. Return without adding to the chat thread
+      //   3. The component re-renders with isMachineBusy=true, input=""
+      //   4. The yellow "Override & Run" button check
+      //      `isMachineBusy && input.trim()` would fail (input is empty)
+      //   5. Auto-dismiss useEffects would fire and discard the stash
+      //   6. User sees: input cleared, no message, no button — ghost send
+      //
+      // Adding to the chat thread first guarantees the user always sees
+      // what they sent, regardless of the busy decision below.  The
+      // busy path then sets `pendingInput.alreadyInChat=true` so the
+      // forceStopAndSend retry does NOT re-add it.
+      const userMessage = buildUserMessage(input, files)
+      addUserMessage(userMessage)
+
       // Pre-flight: is the machine running another task?
       const busy = await checkBusy()
       if (busy) {
-        // DO NOT send. Stash the input and let the UI render the yellow
-        // "Override & Run" button. The user's next click on that button
-        // calls ``forceStopAndSend`` which will pick up the stashed
-        // input. alreadyInChat=false because we never called
-        // addUserMessage — the retry will be a fresh first-time
-        // submission, not a re-run of a failed attempt.
+        // Stash and let the UI render the yellow "Override & Run"
+        // button. ``alreadyInChat=true`` because we just added the
+        // message above — the retry must skip re-adding to avoid
+        // duplicates in both the visible thread and the wire payload.
         setIsMachineBusy(true)
-        setPendingInput({ input, files, alreadyInChat: false })
+        setPendingInput({ input, files, alreadyInChat: true })
         return
       }
 
-      // Clear any stale busy/pending state, then submit normally.
+      // Not busy — clear any stale busy state and proceed. We pass
+      // ``isRetry: true`` because the user message is already in the
+      // chat store from the addUserMessage above; _doSubmit must not
+      // re-add it.
       setIsMachineBusy(false)
       setPendingInput(null)
-      await _doSubmit(input, files)
+      await _doSubmit(input, files, { isRetry: true })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [canSend, user, machineId, checkBusy, _doSubmit],
+    [canSend, user, machineId, addUserMessage, checkBusy, _doSubmit],
   )
 
   // Yellow-button click handler. Stops the running task on the machine,
@@ -317,5 +352,14 @@ export function useChatSubmit() {
     isStoppingMachine,
     forceStopAndSend,
     dismissBusyState,
+    // The text the user typed that is now stashed waiting for the
+    // user's "Override & Run" decision. Empty string when no stash —
+    // the UI can use this to (a) decide whether to render the yellow
+    // button at all and (b) show a preview of the queued message.
+    //
+    // We expose the derived string instead of the full pendingInput
+    // object so UI components don't have to know about ``alreadyInChat``
+    // (an internal hook concern).
+    pendingInputText: pendingInput?.input ?? '',
   }
 }

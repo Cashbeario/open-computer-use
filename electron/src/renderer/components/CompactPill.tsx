@@ -20,25 +20,36 @@ export function CompactPill() {
   const {
     isStreaming, canSend, handleSubmit, handleStop,
     isMachineBusy, isStoppingMachine, forceStopAndSend, dismissBusyState,
+    pendingInputText,
   } = useChatSubmit()
 
   const [input, setInput] = React.useState('')
 
-  // If the user clears the input while the busy state is set, dismiss it
-  // so the next non-empty input goes through the normal pre-check path
-  // rather than auto-firing forceStopAndSend with empty content.
+  // The yellow "Override & Run" surface stays active as long as EITHER
+  // the user is typing fresh content OR the hook has a stashed pending
+  // send (from a sync setInput('') after they clicked Send). Without the
+  // pendingInputText fallback, clearing the textbox synchronously on
+  // submit would immediately auto-dismiss the busy stash and the user
+  // would never see the yellow button.
   React.useEffect(() => {
-    if (isMachineBusy && !input.trim()) {
+    if (isMachineBusy && !input.trim() && !pendingInputText.trim()) {
       dismissBusyState()
     }
-  }, [input, isMachineBusy, dismissBusyState])
+  }, [input, isMachineBusy, pendingInputText, dismissBusyState])
 
   const onSubmit = () => {
     if (isMachineBusy) {
       // User clicked the yellow Override & Run button (or hit Enter
-      // while busy state was active). Pass the live input so any edits
-      // the user made after seeing the busy state are preserved.
-      forceStopAndSend(input)
+      // while busy state was active). If they typed something new,
+      // send that — otherwise let forceStopAndSend pick up the stashed
+      // pending input (the message they typed before the busy state
+      // was detected, which is also already in the chat thread thanks
+      // to the addUserMessage in handleSubmit).
+      if (input.trim()) {
+        forceStopAndSend(input)
+      } else {
+        forceStopAndSend()
+      }
       setInput('')
       toggleExpanded()
       return
@@ -75,13 +86,27 @@ export function CompactPill() {
       {/* Status dot */}
       <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot(connectionState)}`} />
 
-      {/* Inline input */}
+      {/* Inline input.
+          Placeholder communicates the three transport states the user
+          can reach: streaming a response (Working...), connected and
+          idle (Send a message...), or blocked because another task is
+          running on this machine (Another task running — click
+          Override & Run to stop it). The third state is the user-facing
+          surface for the busy-machine UX; without it the empty input
+          beside a yellow button is confusing — users don't know whether
+          their message was queued, lost, or pending. */}
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder={isStreaming ? 'Working...' : 'Send a message...'}
+        placeholder={
+          isStreaming
+            ? 'Working...'
+            : isMachineBusy
+              ? 'Another task running — click Override & Run to stop it'
+              : 'Send a message...'
+        }
         disabled={connectionState !== 'connected' || isStreaming}
         className="titlebar-no-drag flex-1 min-w-0 bg-transparent text-xs text-neutral-200 placeholder-neutral-500 outline-none disabled:opacity-50"
       />
@@ -95,15 +120,23 @@ export function CompactPill() {
           >
             Stop
           </button>
-        ) : isMachineBusy && input.trim() ? (
+        ) : isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
           // Yellow "Override & Run" — same colour family as the web app's
           // chat-input.tsx Override button (amber-600). Clicking it calls
           // forceStopAndSend which stops the running task on this machine
           // and submits the user's input. Disabled while the stop call is
           // in flight to prevent double-submit.
+          //
+          // Visibility uses ``input.trim() || pendingInputText.trim()``
+          // because the user's local input box was cleared synchronously
+          // on Send — the actual message they want to override-and-run
+          // now lives in the hook's stashed pendingInput. Without this
+          // fallback the button would never appear after a busy-positive
+          // pre-check.
           <button
             onClick={onSubmit}
             disabled={isStoppingMachine}
+            aria-label="Override and Run"
             title="Stop running task and start this one"
             className="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-medium disabled:opacity-50 transition-colors"
           >

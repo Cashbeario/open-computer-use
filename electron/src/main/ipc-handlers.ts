@@ -634,6 +634,11 @@ export function registerIpcHandlers(
       ownerChatId?: string | null
       error?: string
     }> => {
+      // Always log the entry so terminal output shows the IPC was hit.
+      // Without this, a "send button does nothing" report has no signal
+      // in the main-process log — the bug could be anywhere from the
+      // canSend guard to the IPC dispatch and we'd be guessing.
+      console.log(`[Electron] chat:check-machine-busy invoked for ${machineId}`)
       try {
         const token = await auth.getAccessToken()
         const res = await fetch(
@@ -657,6 +662,9 @@ export function registerIpcHandlers(
           return { success: false, busy: false, error: `HTTP ${res.status}` }
         }
         const data = await res.json()
+        console.log(
+          `[Electron] machine-status 200 for ${machineId}: busy=${!!data.busy}`,
+        )
         return {
           success: true,
           busy: !!data.busy,
@@ -729,6 +737,16 @@ export function registerIpcHandlers(
     machineId: string
     model?: string
   }) => {
+    // Trace each chat-send dispatch so a "send button does nothing"
+    // report can be triaged from the terminal log without DevTools.
+    // Length-only on the message preview to avoid leaking content.
+    const lastMessage = params.messages[params.messages.length - 1]
+    const preview = lastMessage
+      ? `${lastMessage.role}:${(lastMessage.content || '').slice(0, 60)}`
+      : '(no messages)'
+    console.log(
+      `[Electron] chat:send-message dispatched req=${params.requestId} chatId=${params.chatId} msgs=${params.messages.length} last="${preview}"`,
+    )
     // Clear the stopped flag so the WebSocket bridge accepts commands for this new task
     const bridge = getWsBridge()
     if (bridge) bridge.resumeTask()

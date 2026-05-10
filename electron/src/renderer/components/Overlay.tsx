@@ -601,7 +601,14 @@ export function Overlay() {
   const reconnect = useConnectionStore((s) => s.connect)
   const { mode, toggleExpanded } = useWindowStore()
   const { user, signOut } = useAuthStore()
-  const { messages, isStreaming, chatTitle, canSend, handleSubmit, handleStop, clearMessages } = useChatSubmit()
+  const {
+    messages, isStreaming, chatTitle, canSend, handleSubmit, handleStop, clearMessages,
+    // Yellow "Override & Run" surface — same source of truth used by
+    // CompactPill so the busy state survives switching between compact
+    // and expanded modes mid-flow.
+    isMachineBusy, isStoppingMachine, forceStopAndSend, dismissBusyState,
+    pendingInputText,
+  } = useChatSubmit()
   type FileRef = { path: string; name: string; ext: string; isDirectory: boolean }
   const loadChat = useChatStore((s) => s.loadChat)
   const { mode: approvalMode, setMode: setApprovalMode, pendingApprovals } = useApprovalStore()
@@ -773,6 +780,24 @@ export function Overlay() {
 
   const onSubmit = (e?: React.FormEvent) => {
     e?.preventDefault()
+    // ── Yellow "Override & Run" path ──────────────────────────────────
+    // If the machine is busy, this submit becomes a stop-and-send
+    // instead of a normal send. We pass the live input if the user
+    // typed something new since the busy state was set; otherwise let
+    // forceStopAndSend pick up the stashed pending input (already in
+    // the chat thread thanks to handleSubmit's pre-busy addUserMessage).
+    if (isMachineBusy) {
+      const files = attachedFiles.length > 0 ? attachedFiles : undefined
+      if (input.trim()) {
+        forceStopAndSend(input, files)
+      } else {
+        forceStopAndSend()
+      }
+      setInput(''); setAttachedFiles([])
+      if (!isExpanded) userToggleExpand()
+      if (page !== 'chat') setPage('chat')
+      return
+    }
     if (!canSend(input)) return
     handleSubmit(input, attachedFiles.length > 0 ? attachedFiles : undefined)
     setInput(''); setAttachedFiles([])
@@ -780,6 +805,18 @@ export function Overlay() {
     if (page !== 'chat') setPage('chat')
   }
   const onKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmit() } }
+
+  // Auto-dismiss the busy stash when the user explicitly clears BOTH
+  // the local input and the stashed pending text — otherwise the yellow
+  // button would linger forever after they decided not to override.
+  // We DON'T auto-dismiss while pendingInputText is non-empty (which is
+  // the case immediately after a busy-positive pre-check, since the
+  // hook's stash holds the user's typed message).
+  React.useEffect(() => {
+    if (isMachineBusy && !input.trim() && !pendingInputText.trim()) {
+      dismissBusyState()
+    }
+  }, [input, isMachineBusy, pendingInputText, dismissBusyState])
 
   const goToPage = (p: Page) => { if (!isExpanded) userToggleExpand(); setPage(p) }
 
@@ -861,6 +898,17 @@ export function Overlay() {
             <button onClick={stopTask} aria-label="Stop" title="Stop"
               className="stop-fab press-scale size-7 rounded-full flex items-center justify-center text-white ml-0.5 mr-0.5">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.75" /></svg>
+            </button>
+          ) : !isExpanded && isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
+            // Yellow "Override & Run" — visible whenever the machine is
+            // busy AND there's a queued message somewhere (live input or
+            // stashed pendingInputText). Without the pendingInputText
+            // fallback the button would never appear after a busy-
+            // positive pre-check (the local input is cleared sync on send).
+            <button onClick={() => onSubmit()} disabled={isStoppingMachine}
+              aria-label="Override and Run" title="Stop running task and start this one"
+              className="press-scale size-7 rounded-full flex items-center justify-center bg-amber-600 hover:bg-amber-500 text-white ml-0.5 mr-0.5 disabled:opacity-50">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>
             </button>
           ) : !isExpanded && input.trim() ? (
             <button onClick={() => onSubmit()} disabled={!canSend(input)} aria-label="Send" title="Send"
@@ -1040,6 +1088,37 @@ export function Overlay() {
               </svg>
             </a>
 
+            {/* Busy-state banner — appears above the input form whenever
+                the machine has another task running and the user has
+                content (or stashed content) waiting to be submitted.
+                Without this, the only signal that the machine is busy
+                is the colour change on the send button (amber → blue);
+                users who don't know what the colour means assumed
+                their messages were vanishing. The banner makes the
+                state and the resolution explicit. */}
+            {isMachineBusy && (input.trim() || pendingInputText.trim()) && (
+              <div
+                className="mb-2 flex items-start gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-[11px] text-amber-200/90"
+                role="status"
+                aria-live="polite"
+              >
+                <svg
+                  width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  className="flex-shrink-0 mt-[1px]"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <div className="flex-1 leading-relaxed">
+                  <strong className="font-semibold text-amber-100">Another task is running on this machine.</strong>{' '}
+                  Click <span className="font-semibold">Override &amp; Run</span> to stop it and run your message instead.
+                </div>
+              </div>
+            )}
+
             <form onSubmit={onSubmit}
               className="rounded-[22px] bg-neutral-900/70 p-2 transition-all duration-300 focus-within:bg-neutral-900/90"
               style={{
@@ -1078,6 +1157,17 @@ export function Overlay() {
                 {isStreaming ? (
                   <button type="button" onClick={stopTask} className="stop-fab size-8 rounded-full flex items-center justify-center text-white" aria-label="Stop">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.5" /></svg>
+                  </button>
+                ) : isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
+                  // Yellow "Override & Run" — same logic as the compact-
+                  // mode button. Shown whenever the machine is busy and
+                  // there's a queued message (live or stashed). Submit
+                  // routes through the form's onSubmit which detects
+                  // isMachineBusy and calls forceStopAndSend.
+                  <button type="submit" disabled={isStoppingMachine}
+                    className="size-8 rounded-full bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center disabled:opacity-50"
+                    aria-label="Override and Run" title="Stop running task and start this one">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>
                   </button>
                 ) : (
                   <button type="submit" disabled={!canSend(input)} className="send-fab size-8 rounded-full text-neutral-900 flex items-center justify-center disabled:cursor-not-allowed" aria-label="Send">

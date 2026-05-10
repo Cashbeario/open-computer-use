@@ -25,6 +25,9 @@
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.49.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.13.4",
     "@types/ws": "^8.5.14",
     "@vitejs/plugin-react": "^4.3.4",
@@ -34,6 +37,7 @@
     "electron-builder": "^26.8.1",
     "electron-updater": "^6.8.3",
     "electron-vite": "^5.0.0",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

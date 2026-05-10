@@ -32,12 +32,27 @@ export function useChatSubmit() {
   // again.
   const [isMachineBusy, setIsMachineBusy] = useState(false)
   const [isStoppingMachine, setIsStoppingMachine] = useState(false)
-  // Pending input is what the user typed before we discovered the machine
-  // was busy. Stored so `forceStopAndSend` can re-submit it without
-  // requiring the UI to keep the textarea state.
+  // Pending input is what the user typed before we discovered the
+  // machine was busy. Stored so ``forceStopAndSend`` can re-submit it
+  // without requiring the UI to keep the textarea state.
+  //
+  // ``alreadyInChat`` distinguishes the two ways busy state is reached:
+  //
+  //   * pre-check (handleSubmit detected busy via the machine-status
+  //     IPC BEFORE sending): the user's message was NEVER added to the
+  //     chat store. ``alreadyInChat=false``. forceStopAndSend will run
+  //     a normal _doSubmit which addUserMessages it.
+  //
+  //   * post-error (sendChatMessage already ran, backend rejected with
+  //     MACHINE_BUSY): the user's message IS in the chat store from
+  //     the failed run. ``alreadyInChat=true``. forceStopAndSend must
+  //     run _doSubmit in retry mode so it does NOT re-add the message
+  //     (otherwise the chat shows it twice and the wire payload sends
+  //     it twice in the messages array).
   const [pendingInput, setPendingInput] = useState<{
     input: string
     files?: FileRef[]
+    alreadyInChat: boolean
   } | null>(null)
 
   const canSend = (input: string) =>
@@ -60,8 +75,15 @@ export function useChatSubmit() {
 
   // Internal: actually run the chat submission. Used by both
   // handleSubmit (when not busy) and forceStopAndSend (after stop).
+  //
+  // ``isRetry``: when true, the user message is ALREADY in the chat
+  // store (from a prior failed attempt that hit MACHINE_BUSY) and the
+  // ``messages`` snapshot already includes it. Skip the re-add and
+  // build the wire payload directly from the snapshot — otherwise the
+  // chat UI would show a duplicate user message and the backend would
+  // see it twice in the messages array.
   const _doSubmit = useCallback(
-    async (input: string, files?: FileRef[]) => {
+    async (input: string, files?: FileRef[], opts?: { isRetry?: boolean }) => {
       if (!user || !machineId) return
 
       let userMessage = input.trim()
@@ -74,21 +96,44 @@ export function useChatSubmit() {
         userMessage = userMessage + '\n' + tags.join('\n')
       }
 
-      addUserMessage(userMessage)
+      const isRetry = !!opts?.isRetry
+      if (!isRetry) {
+        addUserMessage(userMessage)
+      }
       setStreaming(true)
+      // Stash the LIVE message + files so a post-error MACHINE_BUSY
+      // event can re-submit the same content via forceStopAndSend
+      // without making the user retype. Cleared on success or if the
+      // user dismisses the busy state.
+      //
+      // alreadyInChat=true: the user's message has been added to the
+      // chat store either by THIS call's addUserMessage (above) or by
+      // the prior failed run we're retrying. Either way it's there now.
+      setPendingInput({ input, files, alreadyInChat: true })
 
       const activeChatId = await ensureChat(userMessage)
 
-      // Snapshot messages BEFORE adding the user message so we don't
-      // double-add it. ``addUserMessage`` already pushed it into the
-      // store, so the wire payload comes from the local userMessage var.
-      const allMessages = [
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-        { role: 'user', content: userMessage },
-      ]
+      // Wire payload. On a fresh submission we manually append the new
+      // user message because the just-fired ``addUserMessage`` setState
+      // hasn't reached this scope's ``messages`` snapshot yet. On a
+      // retry the message is ALREADY in ``messages`` from the failed
+      // run, so we use it as-is.
+      const allMessages = isRetry
+        ? messages.map((m) => ({ role: m.role, content: m.content }))
+        : [
+            ...messages.map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content: userMessage },
+          ]
 
       const controller = new AbortController()
       setAbortController(controller)
+
+      // Track whether the current submission ended in a MACHINE_BUSY
+      // event. If it did, KEEP the stashed pendingInput so the yellow
+      // Override-and-Run button can re-submit the same content. If it
+      // didn't (success OR a different error), clear the stash so a
+      // future MACHINE_BUSY can't accidentally re-fire stale content.
+      let busyDetectedThisRun = false
 
       try {
         await sendChatMessage(
@@ -121,6 +166,19 @@ export function useChatSubmit() {
                 since: Date.now(),
               })
             },
+            onMachineBusy: (_data) => {
+              // Backend rejected this submission because the machine
+              // is already running another task. Instead of dropping a
+              // generic "Error: ..." line into the chat (the legacy
+              // behavior), flip the UI into the yellow "Override & Run"
+              // state. The user's intent and message are preserved in
+              // `pendingInput` (stamped at the top of _doSubmit), so
+              // they can click the yellow button to stop the running
+              // task and re-submit. Streaming flag clears too.
+              busyDetectedThisRun = true
+              setIsMachineBusy(true)
+              setStreaming(false)
+            },
             onError: (error) => {
               appendAssistantContent(`\n\nError: ${error}`)
               setStreaming(false)
@@ -128,6 +186,13 @@ export function useChatSubmit() {
           },
           controller.signal,
         )
+
+        // Clear the stash UNLESS busy was detected during this run.
+        // If busy fired, we keep the stash so the yellow Override-and-
+        // Run button has the user's content ready to re-submit.
+        if (!busyDetectedThisRun) {
+          setPendingInput(null)
+        }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           appendAssistantContent(`\n\nError: ${err.message}`)
@@ -154,9 +219,12 @@ export function useChatSubmit() {
       if (busy) {
         // DO NOT send. Stash the input and let the UI render the yellow
         // "Override & Run" button. The user's next click on that button
-        // calls ``forceStopAndSend`` which will pick up the stashed input.
+        // calls ``forceStopAndSend`` which will pick up the stashed
+        // input. alreadyInChat=false because we never called
+        // addUserMessage — the retry will be a fresh first-time
+        // submission, not a re-run of a failed attempt.
         setIsMachineBusy(true)
-        setPendingInput({ input, files })
+        setPendingInput({ input, files, alreadyInChat: false })
         return
       }
 
@@ -178,11 +246,24 @@ export function useChatSubmit() {
       if (isStoppingMachine || !machineId) return
       // Resolve which input to send. Caller-supplied wins (e.g. user
       // edited the textarea after the busy state was detected); falls
-      // back to the stashed pending input from the failed pre-check.
+      // back to the stashed pending input.
+      //
+      // ``isRetry`` decides whether _doSubmit re-adds the user message
+      // to the chat store. True iff the message is ALREADY in the store
+      // from a failed prior run (the post-error path); false iff this
+      // is the first time the user is actually sending it (the
+      // pre-check path). When the caller supplies an override input,
+      // it's a fresh submission so isRetry=false regardless.
       const target =
         overrideInput !== undefined
-          ? { input: overrideInput, files: overrideFiles }
+          ? { input: overrideInput, files: overrideFiles, isRetry: false }
           : pendingInput
+            ? {
+                input: pendingInput.input,
+                files: pendingInput.files,
+                isRetry: pendingInput.alreadyInChat,
+              }
+            : null
       if (!target || !target.input.trim()) {
         // Nothing to send — clear the busy state so the UI returns to
         // its normal empty-input look.
@@ -202,7 +283,7 @@ export function useChatSubmit() {
         }
         setIsMachineBusy(false)
         setPendingInput(null)
-        await _doSubmit(target.input, target.files)
+        await _doSubmit(target.input, target.files, { isRetry: target.isRetry })
       } catch (err: any) {
         console.error('[Electron] forceStopAndSend failed:', err?.message)
         // Don't clear busy state on failure — let the user retry.

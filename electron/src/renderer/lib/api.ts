@@ -18,6 +18,17 @@ export interface SSECallbacks {
   onFinish: (data: { finishReason: string; content: string; toolInvocations?: any[] }) => void
   onError: (error: string) => void
   onAwaitingHuman?: (data: { reason: string; machineId: string }) => void
+  // Fires when the backend's structured MACHINE_BUSY error arrives via
+  // SSE. Distinct from onError because the renderer wants to react by
+  // showing the yellow "Override & Run" button instead of treating it
+  // as a generic error to display in the chat. If this callback isn't
+  // provided, a MACHINE_BUSY event falls through to onError so legacy
+  // callers stay functional.
+  onMachineBusy?: (data: {
+    message: string
+    machineId?: string
+    ownerChatId?: string | null
+  }) => void
 }
 
 /**
@@ -49,9 +60,38 @@ export async function sendChatMessage(
         }
         case '3': {
           const errorData = JSON.parse(event.data)
+          // ── MACHINE_BUSY: structured payload from backend ─────────
+          // The chat route emits a JSON object with `code === "MACHINE_BUSY"`
+          // when the user submits to a machine that's already running
+          // another task. Detect it BEFORE coercing to a string so we
+          // can route it to the dedicated `onMachineBusy` callback,
+          // which the chat hook uses to set isMachineBusy=true and show
+          // the yellow "Override & Run" button. This is the
+          // architectural reliability path — the IPC pre-check is a
+          // best-effort optimization that may fail (OSS mode routing,
+          // stale build, network blip), but this post-error reactive
+          // path always works because it triggers off the SAME signal
+          // the user actually saw.
+          if (
+            errorData &&
+            typeof errorData === 'object' &&
+            errorData.code === 'MACHINE_BUSY'
+          ) {
+            if (callbacks.onMachineBusy) {
+              callbacks.onMachineBusy({
+                message: errorData.message || 'Machine is currently busy',
+                machineId: errorData.machineId,
+                ownerChatId: errorData.ownerChatId,
+              })
+              break
+            }
+            // No onMachineBusy callback wired up → fall through to the
+            // generic onError path below using the structured message.
+          }
+
           let msg = typeof errorData === 'string'
             ? errorData
-            : errorData.error || 'Unknown error'
+            : errorData.error || errorData.message || 'Unknown error'
           // The user is inside the Electron desktop app — any "desktop
           // app is not connected" phrasing from the backend is not
           // useful to surface verbatim (this app IS the desktop). Map

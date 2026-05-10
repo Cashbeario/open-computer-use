@@ -3,9 +3,8 @@
 /**
  * Building blocks for the redesigned landing sections.
  *
- *   • LandingSectionHeader — magazine-style chapter indicator (NN / total ─
- *     SECTION) above an h2, with optional subtitle. Replaces the inconsistent
- *     per-section header treatments.
+ *   • LandingSectionHeader — h2 + optional subtitle with consistent rhythm
+ *     across sections.
  *   • LandingProgressRail — slim, fixed-top progress bar with section dots.
  *     Replaces the 176px sticky left rail. Auto-fades in only while the user
  *     is inside the guided range, click any dot to jump.
@@ -20,26 +19,18 @@ import { cn } from "@/lib/utils"
 // ── SectionHeader ────────────────────────────────────────────────────────
 
 export function LandingSectionHeader({
-  index,
-  total,
-  eyebrow,
   title,
   subtitle,
   align = "center",
   className,
   isMobile = false,
 }: {
-  index: number // 1-based chapter number
-  total: number
-  eyebrow: string
   title: ReactNode
   subtitle?: ReactNode
   align?: "center" | "left"
   className?: string
   isMobile?: boolean
 }) {
-  const idx = String(index).padStart(2, "0")
-  const tot = String(total).padStart(2, "0")
   return (
     <motion.header
       initial={{ opacity: 0, y: 16 }}
@@ -52,22 +43,9 @@ export function LandingSectionHeader({
         className
       )}
     >
-      <div
-        className={cn(
-          "inline-flex items-center gap-2.5 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground/60",
-          align === "center" && "justify-center"
-        )}
-      >
-        <span className="tabular-nums text-foreground/45 dark:text-foreground/35">
-          {idx}
-          <span className="opacity-40"> / {tot}</span>
-        </span>
-        <span className="h-px w-7 bg-border/60" aria-hidden />
-        <span>{eyebrow}</span>
-      </div>
       <h2
         className={cn(
-          "mt-4 font-semibold tracking-tight text-foreground",
+          "font-semibold tracking-tight text-foreground",
           "text-[28px] leading-[1.1] sm:text-4xl lg:text-5xl"
         )}
       >

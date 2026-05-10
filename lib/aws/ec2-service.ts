@@ -632,6 +632,7 @@ export class AwsEc2Service {
   private getAgentSource(): string {
     return `#!/usr/bin/env python3
 import asyncio,base64,io,json,os,subprocess,tempfile,time
+import urllib.request,urllib.parse
 from typing import Any,Dict
 try:
  import mss;_HAS_MSS=True
@@ -656,10 +657,122 @@ VNC_PASSWORD=os.environ.get("VNC_PASSWORD","")
 PORT=int(os.environ.get("AGENT_PORT","8080"))
 HOST=os.environ.get("AGENT_HOST","0.0.0.0")
 _browser_instance=None
+# Country (ISO-3166 alpha-2) -> primary BCP 47 language tag for matched browser locale.
+# Used when geo lookup returns a country but no explicit COASTY_LANG override.
+_COUNTRY_LANG={"US":"en-US","GB":"en-GB","CA":"en-CA","AU":"en-AU","NZ":"en-NZ","IE":"en-IE","ZA":"en-ZA","IN":"en-IN","DE":"de-DE","FR":"fr-FR","ES":"es-ES","IT":"it-IT","NL":"nl-NL","SE":"sv-SE","NO":"nb-NO","DK":"da-DK","FI":"fi-FI","PL":"pl-PL","PT":"pt-PT","BR":"pt-BR","MX":"es-MX","AR":"es-AR","JP":"ja-JP","KR":"ko-KR","CN":"zh-CN","TW":"zh-TW","HK":"zh-HK","SG":"en-SG","RU":"ru-RU","TR":"tr-TR","SA":"ar-SA","AE":"ar-AE","IL":"he-IL","ID":"id-ID","TH":"th-TH","VN":"vi-VN","PH":"en-PH","MY":"en-MY"}
+_LOCALE=None
+def _resolve_locale():
+ # Returns {"tz":..., "lang":..., "accept":..., "country":...} matched to the egress IP.
+ # Uses HTTPS_PROXY/https_proxy when set so the geo reflects the proxy, not the EC2 host.
+ # Operator overrides: COASTY_TZ pins timezone, COASTY_LANG pins BCP 47 lang tag.
+ global _LOCALE
+ if _LOCALE is not None:return _LOCALE
+ tz=os.environ.get("COASTY_TZ","").strip()
+ lang=os.environ.get("COASTY_LANG","").strip()
+ country=""
+ if not(tz and lang):
+  try:
+   proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+   req=urllib.request.Request("https://ipinfo.io/json",headers={"User-Agent":"coasty/1"})
+   op=urllib.request.build_opener(urllib.request.ProxyHandler({"https":proxy,"http":proxy})) if proxy else urllib.request.build_opener()
+   resp=op.open(req,timeout=4);d=json.loads(resp.read().decode())
+   if not tz:tz=(d.get("timezone") or "").strip()
+   country=(d.get("country") or "").strip().upper()
+  except Exception as e:print(f"[locale] geo lookup failed: {e}",flush=True)
+ if not lang:lang=_COUNTRY_LANG.get(country,"en-US")
+ if not tz:tz="America/New_York"
+ base=lang.split("-")[0]
+ _LOCALE={"tz":tz,"lang":lang,"accept":lang+","+base+";q=0.9","country":country}
+ print(f"[locale] tz={tz} lang={lang} country={country or '?'} accept={_LOCALE['accept']}",flush=True)
+ return _LOCALE
+def _apply_tz():
+ # Sets TZ env + tzset so this Python process AND its child processes
+ # (geckodriver -> Firefox) inherit the matched timezone. Firefox reads
+ # TZ via libc tzset() and exposes it via Intl.DateTimeFormat resolvedOptions.
+ loc=_resolve_locale();os.environ["TZ"]=loc["tz"]
+ try:time.tzset()
+ except:pass
+ return loc
 def _xdo(*a):
  env={**os.environ,"DISPLAY":DISPLAY}
  r=subprocess.run(["xdotool"]+list(a),capture_output=True,text=True,env=env,timeout=10)
  return r.stdout.strip()
+# ===== Behavioral mimicry & stealth =====
+# Bigram dwell-time table approximated from CMU keystroke dynamics + KeyRecs
+# datasets — common digrams have shorter inter-keystroke intervals than rare
+# ones because the typing motor program is more practiced. Values in ms.
+import random as _rng
+# Bigram inter-keystroke intervals (ms) calibrated to Aalto 136M-keystroke
+# study: mean IKI ~238ms, sigma ~111ms, floor ~60ms. Common bimanual bigrams
+# get a 0.55-0.70 multiplier vs the mean (faster motor program); same-finger
+# bigrams 1.3-1.5x slower. Target sustained WPM ~45 (range 25-90).
+_BIGRAM_DELAY={"th":105,"he":110,"in":115,"er":115,"an":120,"re":120,"on":125,"at":125,"en":125,"nd":130,"ti":130,"es":130,"or":130,"te":135,"of":135,"ed":135,"is":135,"it":135,"al":135,"ar":140,"st":140,"to":140,"nt":140,"ng":140,"se":145,"ha":145,"as":145,"ou":150,"io":150,"le":150,"ve":155,"co":155,"me":155,"de":160,"hi":160,"ri":160,"ro":160,"ic":165,"ne":165,"ea":165,"ra":170,"ce":170,"li":150,"ch":175,"ll":160,"be":165,"ma":165,"si":170,"om":170,"ur":175,"ca":175,"el":175,"ta":170,"la":170,"ns":170}
+# Common Linux desktop resolutions (StatCounter 2024-2025). 1920x1080
+# dominates; weighted by repetition to sample the real distribution.
+_VP_POOL=[(1920,1080),(1920,1080),(1920,1080),(1920,1080),(1366,768),(1366,768),(1536,864),(1440,900),(1280,720),(1600,900),(2560,1440)]
+# Cached per-process so a single VM presents a stable identity across actions.
+_VIEWPORT=None
+# Real-Linux Firefox UA. Mozilla froze the UA architecture token years ago
+# so even ARM64 t4g Firefox reports "Linux x86_64" by default. Firefox 140
+# is the current ESR base (FF 128 ESR EOL'd 2025-09-16). FF doesn't emit
+# Sec-CH-UA, so the UA<->ClientHints mismatch trap doesn't apply.
+_UA_POOL=["Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0","Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0"]
+_UA=None
+def _viewport():
+ global _VIEWPORT
+ if _VIEWPORT is None:_VIEWPORT=_rng.choice(_VP_POOL)
+ return _VIEWPORT
+def _user_agent():
+ global _UA
+ if _UA is None:_UA=_rng.choice(_UA_POOL)
+ return _UA
+def _human_move(x,y,steps=14):
+ # Cubic Bezier curve from current pointer position to (x,y) with random
+ # perpendicular control points. Matches the variable-speed / curved
+ # trajectory real cursors trace; defeats naive "instant teleport" detectors.
+ # ~10-15% probability of overshoot+correction (real-human pattern).
+ import math
+ env={**os.environ,"DISPLAY":DISPLAY}
+ try:
+  r=subprocess.run(["xdotool","getmouselocation","--shell"],capture_output=True,text=True,env=env,timeout=2)
+  loc={k:int(v) for k,v in (l.split("=",1) for l in r.stdout.strip().split("\\n") if "=" in l and l.split("=",1)[0] in("X","Y"))}
+  sx,sy=loc.get("X",x),loc.get("Y",y)
+ except:sx,sy=x,y
+ dx,dy=x-sx,y-sy
+ d=math.hypot(dx,dy)
+ if d<3:_xdo("mousemove",str(x),str(y));return
+ # Perpendicular unit + jitter scaled to distance (Fitts-ish)
+ ux,uy=-dy/d,dx/d
+ j=min(d*0.15,35.0)
+ cx1=sx+dx*0.30+ux*_rng.uniform(-j,j);cy1=sy+dy*0.30+uy*_rng.uniform(-j,j)
+ cx2=sx+dx*0.70+ux*_rng.uniform(-j,j);cy2=sy+dy*0.70+uy*_rng.uniform(-j,j)
+ overshoot=(_rng.random()<0.12 and d>80)
+ ex=x+_rng.randint(6,18)*(1 if _rng.random()<0.5 else -1) if overshoot else x
+ ey=y+_rng.randint(4,14)*(1 if _rng.random()<0.5 else -1) if overshoot else y
+ for i in range(1,steps+1):
+  t=i/steps;te=t*t*(3-2*t)  # smoothstep ease-in-out
+  px=(1-te)**3*sx+3*(1-te)**2*te*cx1+3*(1-te)*te*te*cx2+te**3*ex
+  py=(1-te)**3*sy+3*(1-te)**2*te*cy1+3*(1-te)*te*te*cy2+te**3*ey
+  _xdo("mousemove",str(int(px)),str(int(py)))
+  time.sleep(_rng.uniform(0.008,0.020))
+ if overshoot:
+  time.sleep(_rng.uniform(0.04,0.09))
+  _xdo("mousemove",str(x),str(y))
+def _human_type_delay(prev,ch):
+ # Returns the time.sleep delay (seconds) AFTER pressing the current char.
+ # Aalto 136M-keystroke distribution: mean IKI ~238ms, sigma ~111ms,
+ # hard floor 60ms (faster = bot territory). Common bigrams are sampled
+ # from the precomputed table; unknown ones sample from a normal-ish
+ # range centered on the mean.
+ bg=(prev+ch).lower() if prev else ""
+ base=_BIGRAM_DELAY.get(bg,_rng.uniform(170,310))
+ d=base*_rng.uniform(0.85,1.18)
+ if ch.isupper() and prev and not prev.isupper():d+=_rng.uniform(60,130)
+ if ch in".,!?;:":d+=_rng.uniform(90,220)
+ if ch==" " and prev not in" \\t\\n":d+=_rng.uniform(20,70)
+ # Hard floor: real human typists never go below ~60ms IKI sustained
+ if d<60:d=60
+ return d/1000.0
 def _shot():
  env={**os.environ,"DISPLAY":DISPLAY};img=None
  if _HAS_MSS:
@@ -688,8 +801,70 @@ def _get_browser():
   except:_browser_instance=None
  if not _HAS_SEL:raise RuntimeError("selenium unavailable")
  import shutil
+ from urllib.parse import urlparse as _urlp
+ # Match TZ + Accept-Language to (proxy) egress IP BEFORE spawning geckodriver
+ # so Firefox inherits both via libc tzset and Firefox prefs respectively.
+ loc=_apply_tz()
+ vw,vh=_viewport()
+ ua=_user_agent()
  opts=FFOptions()
- opts.add_argument("--width=1280");opts.add_argument("--height=720")
+ opts.add_argument(f"--width={vw}");opts.add_argument(f"--height={vh}")
+ # ── Locale ────────────────────────────────────────────────────────────
+ opts.set_preference("intl.accept_languages",loc["accept"])
+ opts.set_preference("javascript.use_us_english_locale",False)
+ # ── Stealth: webdriver tell ──────────────────────────────────────────
+ # Hides navigator.webdriver. The classic check; still table-stakes.
+ opts.set_preference("dom.webdriver.enabled",False)
+ opts.set_preference("useAutomationExtension",False)
+ # Marionette is needed by geckodriver, can't disable that pref or driver breaks.
+ # ── Stealth: realistic UA (Linux x86_64 ~95% of Linux Firefox UAs) ───
+ opts.set_preference("general.useragent.override",ua)
+ # ── Stealth: WebRTC IP leak (don't disable WebRTC entirely — only ~2%
+ # of users do that, which is itself a tell). Restrict ICE candidates
+ # so STUN can't reveal the real public IP behind a proxy.
+ opts.set_preference("media.peerconnection.ice.no_host",True)
+ opts.set_preference("media.peerconnection.ice.default_address_only",True)
+ opts.set_preference("media.peerconnection.ice.proxy_only_if_behind_proxy",True)
+ # ── Stealth: telemetry / phone-home (rare on real users) ────────────
+ opts.set_preference("toolkit.telemetry.enabled",False)
+ opts.set_preference("toolkit.telemetry.unified",False)
+ opts.set_preference("toolkit.telemetry.archive.enabled",False)
+ opts.set_preference("datareporting.healthreport.uploadEnabled",False)
+ opts.set_preference("datareporting.policy.dataSubmissionEnabled",False)
+ opts.set_preference("app.shield.optoutstudies.enabled",False)
+ opts.set_preference("app.normandy.enabled",False)
+ opts.set_preference("browser.discovery.enabled",False)
+ # ── Stealth: geo prompt (real users rarely allow it for a fresh tab) ─
+ opts.set_preference("geo.enabled",False)
+ # ── Stealth: dom.battery (deprecated but some sites still probe) ────
+ opts.set_preference("dom.battery.enabled",False)
+ # NB: privacy.resistFingerprinting is INTENTIONALLY left off.
+ # It normalizes fingerprint, but creates its own RFP-cluster signature
+ # AND forces tz=UTC, undoing our proxy-matched timezone.
+ # ── Proxy via prefs (Firefox doesn't read HTTP_PROXY env on Linux) ──
+ proxy_url=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+ if proxy_url:
+  try:
+   pu=_urlp(proxy_url)
+   if pu.hostname and pu.port:
+    opts.set_preference("network.proxy.type",1)
+    opts.set_preference("network.proxy.http",pu.hostname)
+    opts.set_preference("network.proxy.http_port",pu.port)
+    opts.set_preference("network.proxy.ssl",pu.hostname)
+    opts.set_preference("network.proxy.ssl_port",pu.port)
+    opts.set_preference("network.proxy.share_proxy_settings",True)
+    # SOCKS support if scheme indicates it (auto-falls-through harmlessly otherwise)
+    if pu.scheme.startswith("socks"):
+     opts.set_preference("network.proxy.socks",pu.hostname)
+     opts.set_preference("network.proxy.socks_port",pu.port)
+     opts.set_preference("network.proxy.socks_version",5 if "5" in pu.scheme else 4)
+     # Critical: route DNS through the SOCKS proxy too (otherwise DNS leaks via EC2)
+     opts.set_preference("network.proxy.socks_remote_dns",True)
+    # Don't proxy localhost (agent talks to itself / Xvnc)
+    opts.set_preference("network.proxy.no_proxies_on","localhost,127.0.0.1")
+    print(f"[browser] proxy via {pu.hostname}:{pu.port} (auth: {'yes' if pu.username else 'no'})",flush=True)
+  except Exception as e:print(f"[browser] proxy parse failed: {e}",flush=True)
+ print(f"[browser] viewport={vw}x{vh} ua={ua[:60]}...",flush=True)
  gd=None
  for p in ["/usr/local/bin/geckodriver","/usr/bin/geckodriver"]:
   if os.path.exists(p):gd=p;break
@@ -698,8 +873,103 @@ def _get_browser():
   svc=FFService(executable_path=gd)
   _browser_instance=webdriver.Firefox(service=svc,options=opts)
  else:_browser_instance=webdriver.Firefox(options=opts)
- _browser_instance.set_window_size(1280,720)
+ _browser_instance.set_window_size(vw,vh)
  return _browser_instance
+# ===== Smart navigation: API bypass for hostile-WAF sites + block detection =====
+# Cloudflare's bot scoring weights datacenter ASN heavily; even with perfect
+# browser stealth, EC2 IPs hit the gauntlet. For sites with a clean public
+# API (Reddit, Hacker News, etc.) we route there instead of the browser.
+def _is_blocked(html,status=200):
+ # Detects common Cloudflare / DataDome / hostile-WAF block pages by markers.
+ # status >= 400 + known interstitial strings = blocked.
+ if status in(403,429,503):return True
+ if not html:return False
+ m=["Just a moment...","Attention Required! | Cloudflare","Access denied","cf-chl-","challenges.cloudflare","Please verify you are a human","Sorry, we just need to make sure","DDoS protection by"]
+ return any(x in html for x in m)
+def _reddit_fetch(url):
+ # Translates www.reddit.com/<path> -> www.reddit.com/<path>.json (or
+ # oauth.reddit.com if REDDIT_OAUTH_TOKEN set, granting 100 QPM vs 10 unauth).
+ # Reddit's JSON API is on a different request path that bypasses CF Turnstile.
+ # Returns (ok:bool, data:dict|list|None).
+ try:
+  pu=urllib.parse.urlparse(url)
+  host=(pu.netloc or "").lower()
+  if "reddit.com" not in host:return False,None
+  path=pu.path or "/"
+  if path.endswith("/"):path=path[:-1]
+  if not path.endswith(".json"):path+=".json"
+  json_url=f"https://www.reddit.com{path}"
+  if pu.query:json_url+="?"+pu.query
+  # Reddit asks for UA in form "platform:app-id:version (by /u/handle)"
+  ua=os.environ.get("COASTY_REDDIT_UA","linux:ai.coasty.agent:1.0 (by /u/coasty-agent)")
+  headers={"User-Agent":ua,"Accept":"application/json"}
+  token=os.environ.get("REDDIT_OAUTH_TOKEN","").strip()
+  if token:
+   headers["Authorization"]="Bearer "+token
+   json_url=json_url.replace("www.reddit.com","oauth.reddit.com")
+  proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+  req=urllib.request.Request(json_url,headers=headers)
+  op=urllib.request.build_opener(urllib.request.ProxyHandler({"https":proxy,"http":proxy})) if proxy else urllib.request.build_opener()
+  resp=op.open(req,timeout=10)
+  body=resp.read().decode("utf-8","replace")
+  if resp.status>=400:return False,None
+  return True,json.loads(body)
+ except Exception as e:
+  print(f"[reddit-api] fetch failed: {e}",flush=True);return False,None
+def _reddit_render(data,url):
+ # Render Reddit JSON listing or comment thread as readable HTML so the
+ # agent's existing browser_get_dom flow extracts content unchanged.
+ try:
+  import html as _h
+  esc=_h.escape
+  parts=['<!doctype html><html><head><title>Reddit</title><meta charset="utf-8"></head><body>']
+  parts.append(f'<h1>{esc(url)}</h1><p><em>(rendered from official Reddit API to bypass anti-bot)</em></p>')
+  def render_post(d):
+   title=esc(d.get("title","") or "")
+   author=esc(d.get("author","") or "?")
+   subr=esc(d.get("subreddit","") or "")
+   score=d.get("score",0);ncm=d.get("num_comments",0)
+   body=esc((d.get("selftext","") or d.get("body","") or "")[:3000])
+   pl=esc(d.get("permalink","") or "")
+   ext=esc(d.get("url_overridden_by_dest","") or "")
+   t=f"<article><h2>{title or '(comment)'}</h2><p>r/{subr} · u/{author} · {score} pts · {ncm} comments</p><div>{body}</div>"
+   if pl:t+=f'<p><a href="https://www.reddit.com{pl}">View thread</a></p>'
+   if ext and ext!=pl:t+=f'<p>Link: <a href="{ext}">{ext}</a></p>'
+   return t+"</article>"
+  if isinstance(data,list):
+   for item in data:
+    if isinstance(item,dict) and "data" in item:
+     for c in item.get("data",{}).get("children",[])[:40]:
+      parts.append(render_post(c.get("data",{})))
+  elif isinstance(data,dict) and "data" in data:
+   for c in data.get("data",{}).get("children",[])[:60]:
+    parts.append(render_post(c.get("data",{})))
+  parts.append("</body></html>")
+  return "".join(parts)
+ except Exception as e:
+  print(f"[reddit-api] render failed: {e}",flush=True);return None
+def _navigate_smart(b,url):
+ # Site-specific bypass router. Tries clean API path first; falls back to
+ # raw browser navigation; surfaces blocked status so the orchestrator can
+ # route to Electron / proxy / human.
+ # Returns dict to merge into _bn/_bo response (no 'success' key — caller adds).
+ if "reddit.com" in url and not url.startswith("data:"):
+  ok,data=_reddit_fetch(url)
+  if ok:
+   html=_reddit_render(data,url)
+   if html:
+    b.get("data:text/html;charset=utf-8;base64,"+base64.b64encode(html.encode()).decode())
+    print(f"[smart-nav] reddit-api OK for {url}",flush=True)
+    return{"url":url,"title":b.title,"source":"reddit-api"}
+  print(f"[smart-nav] reddit-api unavailable, falling back to browser for {url}",flush=True)
+ b.get(url)
+ try:
+  body=b.execute_script("return document.documentElement.outerHTML")
+  body=body[:8000] if body else ""
+ except:body=""
+ if _is_blocked(body):
+  return{"url":b.current_url,"title":b.title,"blocked":True,"error":"blocked by anti-bot (likely datacenter IP); set HTTPS_PROXY for residential routing or hand off to Electron"}
+ return{"url":b.current_url,"title":b.title}
 class Agent:
  def __init__(self):self._t=time.time();self._n=0
  async def serve(self,ws):
@@ -749,15 +1019,38 @@ class Agent:
   i=_shot()
   return{"success":True,"screenshot":i,"timestamp":time.time()} if i else{"success":False,"error":"screenshot failed"}
  def _cl(self,p):
-  x,y=int(p.get("x",0)),int(p.get("y",0));b={"left":"1","middle":"2","right":"3"}.get(p.get("button","left"),"1")
-  _xdo("mousemove",str(x),str(y),"click",b);return{"success":True,"action":"click","x":x,"y":y}
+  x,y=int(p.get("x",0)),int(p.get("y",0))
+  b={"left":"1","middle":"2","right":"3"}.get(p.get("button","left"),"1")
+  # Bezier curve mouse path (Fitts's-law-ish timing) before clicking, so
+  # behavioral detectors don't see instant teleport-then-click.
+  _human_move(x,y)
+  time.sleep(_rng.uniform(0.04,0.10))  # settle pause before click
+  _xdo("click",b)
+  return{"success":True,"action":"click","x":x,"y":y}
  def _dc(self,p):
-  x,y=int(p.get("x",0)),int(p.get("y",0));_xdo("mousemove",str(x),str(y),"click","--repeat","2","1");return{"success":True}
+  x,y=int(p.get("x",0)),int(p.get("y",0))
+  _human_move(x,y);time.sleep(_rng.uniform(0.04,0.09))
+  # Real human double-click inter-click gap ~80-180ms (well under OS
+  # double-click threshold ~500ms but still visibly two events).
+  _xdo("click","1");time.sleep(_rng.uniform(0.08,0.18));_xdo("click","1")
+  return{"success":True}
  def _rc(self,p):
-  x,y=int(p.get("x",0)),int(p.get("y",0));_xdo("mousemove",str(x),str(y),"click","3");return{"success":True}
+  x,y=int(p.get("x",0)),int(p.get("y",0))
+  _human_move(x,y);time.sleep(_rng.uniform(0.05,0.11))
+  _xdo("click","3")
+  return{"success":True}
  def _ty(self,p):
-  env={**os.environ,"DISPLAY":DISPLAY};subprocess.run(["xdotool","type","--delay",str(p.get("interval",50)),"--",p.get("text","")],env=env,timeout=30)
-  return{"success":True,"action":"type"}
+  text=p.get("text","");env={**os.environ,"DISPLAY":DISPLAY}
+  # Caller can opt out for paste-style fast typing
+  if p.get("interval")==0 or p.get("fast"):
+   subprocess.run(["xdotool","type","--delay","0","--",text],env=env,timeout=30)
+   return{"success":True,"action":"type","chars":len(text)}
+  prev=" "
+  for ch in text:
+   subprocess.run(["xdotool","type","--delay","0","--",ch],env=env,timeout=10)
+   time.sleep(_human_type_delay(prev,ch))
+   prev=ch
+  return{"success":True,"action":"type","chars":len(text)}
  def _kp(self,p):
   env={**os.environ,"DISPLAY":DISPLAY}
   for k in(p.get("keys") or[p.get("key","")]):subprocess.run(["xdotool","key","--",k],env=env,timeout=10)
@@ -854,10 +1147,15 @@ class Agent:
   b64=img_data.split(",",1)[1];img=Image.open(io.BytesIO(base64.b64decode(b64)))
   return{"success":True,"text":pytesseract.image_to_string(img),"screenshot":img_data}
  def _bo(self,p):
-  try:b=_get_browser();u=p.get("url","about:blank");b.get(u) if u!="about:blank" else None;return{"success":True}
+  try:
+   b=_get_browser();u=p.get("url","about:blank")
+   if u=="about:blank":return{"success":True}
+   res=_navigate_smart(b,u);return{"success":not res.get("blocked",False),**res}
   except Exception as e:return{"success":False,"error":str(e)}
  def _bn(self,p):
-  try:b=_get_browser();b.get(p.get("url",""));return{"success":True,"url":b.current_url,"title":b.title}
+  try:
+   b=_get_browser();res=_navigate_smart(b,p.get("url",""))
+   return{"success":not res.get("blocked",False),**res}
   except Exception as e:return{"success":False,"error":str(e)}
  def _bc(self,p):
   try:_get_browser().find_element(By.CSS_SELECTOR,p.get("selector","")).click();return{"success":True}
@@ -879,6 +1177,8 @@ class Agent:
   try:b=_get_browser();return{"success":True,"url":b.current_url,"title":b.title}
   except Exception as e:return{"success":False,"error":str(e)}
 async def main():
+ try:_apply_tz()
+ except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
  async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=None,ping_timeout=None,close_timeout=60,compression=None):
@@ -930,7 +1230,23 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \\
   xdg-utils \\
   fonts-liberation \\
   software-properties-common \\
+  locales \\
+  tzdata \\
   sudo
+
+# Pre-generate locales the AI agent may switch into at runtime based on
+# proxy egress IP geo. Without these, Firefox can't render its UI for the
+# requested locale and falls back to en_US — that fallback is observable
+# via document.fonts and Intl.Collator.compare and contradicts the spoofed
+# Accept-Language header. Generating a small set covers the common markets
+# without bloating the AMI.
+locale-gen \\
+  en_US.UTF-8 en_GB.UTF-8 en_CA.UTF-8 en_AU.UTF-8 \\
+  de_DE.UTF-8 fr_FR.UTF-8 es_ES.UTF-8 es_MX.UTF-8 \\
+  it_IT.UTF-8 nl_NL.UTF-8 pt_BR.UTF-8 pt_PT.UTF-8 \\
+  ja_JP.UTF-8 ko_KR.UTF-8 zh_CN.UTF-8 zh_TW.UTF-8 \\
+  ru_RU.UTF-8 tr_TR.UTF-8 ar_SA.UTF-8 he_IL.UTF-8 \\
+  pl_PL.UTF-8 sv_SE.UTF-8
 
 # Grant ubuntu user passwordless sudo (full admin access for AI agent)
 echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu-nopasswd
@@ -1376,6 +1692,7 @@ echo "Desktop setup complete at $(date)"
   private getWindowsAgentSource(): string {
     return `#!/usr/bin/env python3
 import asyncio,base64,io,json,os,subprocess,tempfile,time,sys
+import urllib.request
 from typing import Any,Dict
 try:
  import mss;_HAS_MSS=True
@@ -1401,6 +1718,96 @@ HOST=os.environ.get("AGENT_HOST","0.0.0.0")
 HOME_DIR=os.path.expanduser("~")
 DESKTOP_DIR=os.path.join(HOME_DIR,"Desktop")
 _browser_instance=None
+_COUNTRY_LANG={"US":"en-US","GB":"en-GB","CA":"en-CA","AU":"en-AU","NZ":"en-NZ","IE":"en-IE","ZA":"en-ZA","IN":"en-IN","DE":"de-DE","FR":"fr-FR","ES":"es-ES","IT":"it-IT","NL":"nl-NL","SE":"sv-SE","NO":"nb-NO","DK":"da-DK","FI":"fi-FI","PL":"pl-PL","PT":"pt-PT","BR":"pt-BR","MX":"es-MX","AR":"es-AR","JP":"ja-JP","KR":"ko-KR","CN":"zh-CN","TW":"zh-TW","HK":"zh-HK","SG":"en-SG","RU":"ru-RU","TR":"tr-TR","SA":"ar-SA","AE":"ar-AE","IL":"he-IL","ID":"id-ID","TH":"th-TH","VN":"vi-VN","PH":"en-PH","MY":"en-MY"}
+_LOCALE=None
+def _resolve_locale():
+ # Returns {"tz":..., "lang":..., "accept":..., "country":...} matched to the egress IP.
+ # Honors HTTPS_PROXY/https_proxy. Operator overrides: COASTY_TZ, COASTY_LANG.
+ global _LOCALE
+ if _LOCALE is not None:return _LOCALE
+ tz=os.environ.get("COASTY_TZ","").strip()
+ lang=os.environ.get("COASTY_LANG","").strip()
+ country=""
+ if not(tz and lang):
+  try:
+   proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+   req=urllib.request.Request("https://ipinfo.io/json",headers={"User-Agent":"coasty/1"})
+   op=urllib.request.build_opener(urllib.request.ProxyHandler({"https":proxy,"http":proxy})) if proxy else urllib.request.build_opener()
+   resp=op.open(req,timeout=4);d=json.loads(resp.read().decode())
+   if not tz:tz=(d.get("timezone") or "").strip()
+   country=(d.get("country") or "").strip().upper()
+  except Exception as e:print(f"[locale] geo lookup failed: {e}",flush=True)
+ if not lang:lang=_COUNTRY_LANG.get(country,"en-US")
+ if not tz:tz="America/New_York"
+ base=lang.split("-")[0]
+ _LOCALE={"tz":tz,"lang":lang,"accept":lang+","+base+";q=0.9","country":country}
+ print(f"[locale] tz={tz} lang={lang} country={country or '?'} accept={_LOCALE['accept']}",flush=True)
+ return _LOCALE
+def _apply_tz():
+ # Sets TZ env var; on Windows Chrome reads timezone via Win32 GetTimeZoneInformation
+ # (not TZ env), so this only matters for the Python process. The Chrome --lang flag
+ # and intl.accept_languages pref below cover the browser-visible signals.
+ loc=_resolve_locale();os.environ["TZ"]=loc["tz"]
+ try:time.tzset()
+ except:pass
+ return loc
+# ===== Behavioral mimicry & stealth (Windows / pyautogui) =====
+import random as _rng
+_BIGRAM_DELAY={"th":105,"he":110,"in":115,"er":115,"an":120,"re":120,"on":125,"at":125,"en":125,"nd":130,"ti":130,"es":130,"or":130,"te":135,"of":135,"ed":135,"is":135,"it":135,"al":135,"ar":140,"st":140,"to":140,"nt":140,"ng":140,"se":145,"ha":145,"as":145,"ou":150,"io":150,"le":150,"ve":155,"co":155,"me":155,"de":160,"hi":160,"ri":160,"ro":160,"ic":165,"ne":165,"ea":165,"ra":170,"ce":170,"li":150,"ch":175,"ll":160}
+# Common Windows desktop resolutions (StatCounter 2024-2025)
+_VP_POOL=[(1920,1080),(1920,1080),(1920,1080),(1920,1080),(1366,768),(1536,864),(1440,900),(2560,1440),(1600,900),(1280,720)]
+_VIEWPORT=None
+# Real Chrome on Windows UA distribution (Chrome 130+ stable channel as of late 2025)
+_UA_POOL=["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"]
+_UA=None
+def _viewport():
+ global _VIEWPORT
+ if _VIEWPORT is None:_VIEWPORT=_rng.choice(_VP_POOL)
+ return _VIEWPORT
+def _user_agent():
+ global _UA
+ if _UA is None:_UA=_rng.choice(_UA_POOL)
+ return _UA
+def _human_move(x,y,steps=14):
+ # pyautogui.moveTo with cubic Bezier path. pyautogui's tweens support
+ # easing but don't include curve perpendicular jitter, so we manually
+ # walk a Bezier with smoothstep ease-in-out + optional overshoot.
+ if not _HAS_PAG:return
+ import math
+ try:sx,sy=pyautogui.position()
+ except:sx,sy=x,y
+ dx,dy=x-sx,y-sy;d=math.hypot(dx,dy)
+ if d<3:
+  try:pyautogui.moveTo(x,y,duration=0)
+  except:pass
+  return
+ ux,uy=-dy/d,dx/d;j=min(d*0.15,35.0)
+ cx1=sx+dx*0.30+ux*_rng.uniform(-j,j);cy1=sy+dy*0.30+uy*_rng.uniform(-j,j)
+ cx2=sx+dx*0.70+ux*_rng.uniform(-j,j);cy2=sy+dy*0.70+uy*_rng.uniform(-j,j)
+ overshoot=(_rng.random()<0.12 and d>80)
+ ex=x+_rng.randint(6,18)*(1 if _rng.random()<0.5 else -1) if overshoot else x
+ ey=y+_rng.randint(4,14)*(1 if _rng.random()<0.5 else -1) if overshoot else y
+ for i in range(1,steps+1):
+  t=i/steps;te=t*t*(3-2*t)
+  px=(1-te)**3*sx+3*(1-te)**2*te*cx1+3*(1-te)*te*te*cx2+te**3*ex
+  py=(1-te)**3*sy+3*(1-te)**2*te*cy1+3*(1-te)*te*te*cy2+te**3*ey
+  try:pyautogui.moveTo(int(px),int(py),duration=0)
+  except:pass
+  time.sleep(_rng.uniform(0.008,0.020))
+ if overshoot:
+  time.sleep(_rng.uniform(0.04,0.09))
+  try:pyautogui.moveTo(x,y,duration=0)
+  except:pass
+def _human_type_delay(prev,ch):
+ # Aalto-calibrated bigram-aware inter-key delay. See Linux agent for refs.
+ bg=(prev+ch).lower() if prev else ""
+ base=_BIGRAM_DELAY.get(bg,_rng.uniform(170,310))
+ d=base*_rng.uniform(0.85,1.18)
+ if ch.isupper() and prev and not prev.isupper():d+=_rng.uniform(60,130)
+ if ch in".,!?;:":d+=_rng.uniform(90,220)
+ if ch==" " and prev not in" \\t\\n":d+=_rng.uniform(20,70)
+ if d<60:d=60
+ return d/1000.0
 def _shot():
  img=None
  if _HAS_MSS:
@@ -1432,11 +1839,57 @@ def _get_browser():
   except:_browser_instance=None
  if not _HAS_SEL:raise RuntimeError("selenium unavailable")
  import shutil
+ from urllib.parse import urlparse as _urlp
+ # Match browser-visible locale to (proxy) egress IP. On Windows, system tz
+ # is set out-of-band; Chrome here just needs --lang + Accept-Language.
+ loc=_apply_tz()
+ vw,vh=_viewport()
+ ua=_user_agent()
  opts=ChromeOptions()
- opts.add_argument("--window-size=1280,720")
+ # ── Window size ──────────────────────────────────────────────────────
+ opts.add_argument(f"--window-size={vw},{vh}")
  opts.add_argument("--no-sandbox")
  opts.add_argument("--disable-dev-shm-usage")
  opts.add_argument("--disable-gpu")
+ # ── Locale ────────────────────────────────────────────────────────────
+ opts.add_argument(f"--lang={loc['lang']}")
+ # ── Stealth: kill the WebDriver / automation tells ───────────────────
+ # The blink-features flag flips navigator.webdriver back to undefined,
+ # kills the automation infobar, and removes cdc_ window properties
+ # that anti-bot scripts grep for.
+ opts.add_argument("--disable-blink-features=AutomationControlled")
+ opts.add_experimental_option("excludeSwitches",["enable-automation"])
+ opts.add_experimental_option("useAutomationExtension",False)
+ # ── Stealth: realistic UA (Chrome on Windows, current stable channel) ─
+ opts.add_argument(f"--user-agent={ua}")
+ # ── Stealth: noise / tracking signals real users have off ────────────
+ opts.add_argument("--disable-features=Translate,TranslateUI,IsolateOrigins,site-per-process,InterestCohort")
+ opts.add_argument("--disable-default-apps")
+ opts.add_argument("--disable-extensions-file-access-check")
+ opts.add_argument("--disable-popup-blocking")
+ opts.add_argument("--no-first-run")
+ opts.add_argument("--no-default-browser-check")
+ # ── Prefs: locale + disable phone-home ───────────────────────────────
+ prefs={
+  "intl.accept_languages":loc["accept"],
+  "credentials_enable_service":False,
+  "profile.password_manager_enabled":False,
+  "profile.default_content_setting_values.geolocation":2,  # block geo prompt
+  "profile.default_content_setting_values.notifications":2,
+ }
+ opts.add_experimental_option("prefs",prefs)
+ # ── Proxy support (HTTPS_PROXY env -> --proxy-server) ────────────────
+ proxy_url=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+ if proxy_url:
+  try:
+   pu=_urlp(proxy_url)
+   if pu.hostname and pu.port:
+    scheme=pu.scheme if pu.scheme.startswith("socks") else "http"
+    opts.add_argument(f"--proxy-server={scheme}://{pu.hostname}:{pu.port}")
+    opts.add_argument("--proxy-bypass-list=<-loopback>;localhost;127.0.0.1")
+    print(f"[browser] proxy via {pu.hostname}:{pu.port}",flush=True)
+  except Exception as e:print(f"[browser] proxy parse failed: {e}",flush=True)
+ print(f"[browser] viewport={vw}x{vh} ua={ua[:60]}...",flush=True)
  chrome_path=_find_chrome()
  if chrome_path:opts.binary_location=chrome_path
  drv=None
@@ -1448,8 +1901,96 @@ def _get_browser():
   svc=ChromeService(executable_path=drv)
   _browser_instance=webdriver.Chrome(service=svc,options=opts)
  else:_browser_instance=webdriver.Chrome(options=opts)
- _browser_instance.set_window_size(1280,720)
+ _browser_instance.set_window_size(vw,vh)
+ # CDP-level shims to back up the --disable-blink-features flag (defense in
+ # depth). Override navigator.webdriver to undefined and patch a few
+ # well-known automation tells before any page script runs.
+ try:
+  _browser_instance.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument",{
+   "source":"Object.defineProperty(navigator,'webdriver',{get:()=>undefined});"
+            "window.chrome={runtime:{}};"
+  })
+ except Exception:pass
  return _browser_instance
+# ===== Smart navigation: API bypass for hostile-WAF sites + block detection =====
+import urllib.request as _urlreq, urllib.parse as _urlpars
+def _is_blocked(html,status=200):
+ if status in(403,429,503):return True
+ if not html:return False
+ m=["Just a moment...","Attention Required! | Cloudflare","Access denied","cf-chl-","challenges.cloudflare","Please verify you are a human","Sorry, we just need to make sure","DDoS protection by"]
+ return any(x in html for x in m)
+def _reddit_fetch(url):
+ try:
+  pu=_urlpars.urlparse(url)
+  if "reddit.com" not in (pu.netloc or "").lower():return False,None
+  path=pu.path or "/"
+  if path.endswith("/"):path=path[:-1]
+  if not path.endswith(".json"):path+=".json"
+  json_url=f"https://www.reddit.com{path}"
+  if pu.query:json_url+="?"+pu.query
+  ua=os.environ.get("COASTY_REDDIT_UA","windows:ai.coasty.agent:1.0 (by /u/coasty-agent)")
+  headers={"User-Agent":ua,"Accept":"application/json"}
+  token=os.environ.get("REDDIT_OAUTH_TOKEN","").strip()
+  if token:
+   headers["Authorization"]="Bearer "+token
+   json_url=json_url.replace("www.reddit.com","oauth.reddit.com")
+  proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
+  req=_urlreq.Request(json_url,headers=headers)
+  op=_urlreq.build_opener(_urlreq.ProxyHandler({"https":proxy,"http":proxy})) if proxy else _urlreq.build_opener()
+  resp=op.open(req,timeout=10)
+  body=resp.read().decode("utf-8","replace")
+  if resp.status>=400:return False,None
+  return True,json.loads(body)
+ except Exception as e:
+  print(f"[reddit-api] fetch failed: {e}",flush=True);return False,None
+def _reddit_render(data,url):
+ try:
+  import html as _h
+  esc=_h.escape
+  parts=['<!doctype html><html><head><title>Reddit</title><meta charset="utf-8"></head><body>']
+  parts.append(f'<h1>{esc(url)}</h1><p><em>(rendered from official Reddit API to bypass anti-bot)</em></p>')
+  def render_post(d):
+   title=esc(d.get("title","") or "")
+   author=esc(d.get("author","") or "?")
+   subr=esc(d.get("subreddit","") or "")
+   score=d.get("score",0);ncm=d.get("num_comments",0)
+   body=esc((d.get("selftext","") or d.get("body","") or "")[:3000])
+   pl=esc(d.get("permalink","") or "")
+   ext=esc(d.get("url_overridden_by_dest","") or "")
+   t=f"<article><h2>{title or '(comment)'}</h2><p>r/{subr} · u/{author} · {score} pts · {ncm} comments</p><div>{body}</div>"
+   if pl:t+=f'<p><a href="https://www.reddit.com{pl}">View thread</a></p>'
+   if ext and ext!=pl:t+=f'<p>Link: <a href="{ext}">{ext}</a></p>'
+   return t+"</article>"
+  if isinstance(data,list):
+   for item in data:
+    if isinstance(item,dict) and "data" in item:
+     for c in item.get("data",{}).get("children",[])[:40]:
+      parts.append(render_post(c.get("data",{})))
+  elif isinstance(data,dict) and "data" in data:
+   for c in data.get("data",{}).get("children",[])[:60]:
+    parts.append(render_post(c.get("data",{})))
+  parts.append("</body></html>")
+  return "".join(parts)
+ except Exception as e:
+  print(f"[reddit-api] render failed: {e}",flush=True);return None
+def _navigate_smart(b,url):
+ if "reddit.com" in url and not url.startswith("data:"):
+  ok,data=_reddit_fetch(url)
+  if ok:
+   html=_reddit_render(data,url)
+   if html:
+    b.get("data:text/html;charset=utf-8;base64,"+base64.b64encode(html.encode()).decode())
+    print(f"[smart-nav] reddit-api OK for {url}",flush=True)
+    return{"url":url,"title":b.title,"source":"reddit-api"}
+  print(f"[smart-nav] reddit-api unavailable, falling back to browser for {url}",flush=True)
+ b.get(url)
+ try:
+  body=b.execute_script("return document.documentElement.outerHTML")
+  body=body[:8000] if body else ""
+ except:body=""
+ if _is_blocked(body):
+  return{"url":b.current_url,"title":b.title,"blocked":True,"error":"blocked by anti-bot (likely datacenter IP); set HTTPS_PROXY for residential routing or hand off to Electron"}
+ return{"url":b.current_url,"title":b.title}
 class Agent:
  def __init__(self):self._t=time.time();self._n=0
  async def serve(self,ws):
@@ -1500,14 +2041,27 @@ class Agent:
   return{"success":True,"screenshot":i,"timestamp":time.time()} if i else{"success":False,"error":"screenshot failed"}
  def _cl(self,p):
   x,y=int(p.get("x",0)),int(p.get("y",0));b=p.get("button","left");c=int(p.get("clicks",1))
+  _human_move(x,y);time.sleep(_rng.uniform(0.04,0.10))
   pyautogui.click(x,y,clicks=c,button=b);return{"success":True,"action":"click","x":x,"y":y}
  def _dc(self,p):
-  x,y=int(p.get("x",0)),int(p.get("y",0));pyautogui.doubleClick(x,y);return{"success":True}
+  x,y=int(p.get("x",0)),int(p.get("y",0))
+  _human_move(x,y);time.sleep(_rng.uniform(0.04,0.09))
+  pyautogui.click(x,y);time.sleep(_rng.uniform(0.08,0.18));pyautogui.click(x,y)
+  return{"success":True}
  def _rc(self,p):
-  x,y=int(p.get("x",0)),int(p.get("y",0));pyautogui.rightClick(x,y);return{"success":True}
+  x,y=int(p.get("x",0)),int(p.get("y",0))
+  _human_move(x,y);time.sleep(_rng.uniform(0.05,0.11))
+  pyautogui.rightClick(x,y);return{"success":True}
  def _ty(self,p):
-  text=p.get("text","");interval=float(p.get("interval",50))/1000.0
-  pyautogui.write(text,interval=interval);return{"success":True,"action":"type"}
+  text=p.get("text","")
+  if p.get("interval")==0 or p.get("fast"):
+   pyautogui.write(text,interval=0);return{"success":True,"action":"type","chars":len(text)}
+  prev=" "
+  for ch in text:
+   try:pyautogui.write(ch,interval=0)
+   except Exception:pass
+   time.sleep(_human_type_delay(prev,ch));prev=ch
+  return{"success":True,"action":"type","chars":len(text)}
  def _kp(self,p):
   for k in(p.get("keys") or[p.get("key","")]):pyautogui.press(k)
   return{"success":True}
@@ -1617,10 +2171,15 @@ class Agent:
   b64=img_data.split(",",1)[1];img=Image.open(io.BytesIO(base64.b64decode(b64)))
   return{"success":True,"text":pytesseract.image_to_string(img),"screenshot":img_data}
  def _bo(self,p):
-  try:b=_get_browser();u=p.get("url","about:blank");b.get(u) if u!="about:blank" else None;return{"success":True}
+  try:
+   b=_get_browser();u=p.get("url","about:blank")
+   if u=="about:blank":return{"success":True}
+   res=_navigate_smart(b,u);return{"success":not res.get("blocked",False),**res}
   except Exception as e:return{"success":False,"error":str(e)}
  def _bn(self,p):
-  try:b=_get_browser();b.get(p.get("url",""));return{"success":True,"url":b.current_url,"title":b.title}
+  try:
+   b=_get_browser();res=_navigate_smart(b,p.get("url",""))
+   return{"success":not res.get("blocked",False),**res}
   except Exception as e:return{"success":False,"error":str(e)}
  def _bc(self,p):
   try:_get_browser().find_element(By.CSS_SELECTOR,p.get("selector","")).click();return{"success":True}
@@ -1642,6 +2201,8 @@ class Agent:
   try:b=_get_browser();return{"success":True,"url":b.current_url,"title":b.title}
   except Exception as e:return{"success":False,"error":str(e)}
 async def main():
+ try:_apply_tz()
+ except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
  async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=None,ping_timeout=None,close_timeout=60,compression=None):
@@ -1893,6 +2454,21 @@ echo "Golden AMI boot started at $(date)"
 
 # 1. Stop any services that may already be running (snapshot restore case)
 systemctl stop ai-agent.service vncserver@:1.service novnc.service keep-screen-alive.service memory-watchdog.service 2>/dev/null || true
+
+# 1b. Idempotent locale-gen for the major-market locales the AI agent may
+# switch into at runtime based on proxy egress IP geo. Skipped if already
+# generated by the golden AMI build. No-op cost ~50ms on warm AMIs; ~5s
+# cold. Without these, Firefox can't render in the matched locale and
+# falls back to en_US, contradicting the spoofed Accept-Language header.
+if command -v locale-gen >/dev/null 2>&1; then
+  needed="en_US.UTF-8 en_GB.UTF-8 en_CA.UTF-8 en_AU.UTF-8 de_DE.UTF-8 fr_FR.UTF-8 es_ES.UTF-8 es_MX.UTF-8 it_IT.UTF-8 nl_NL.UTF-8 pt_BR.UTF-8 pt_PT.UTF-8 ja_JP.UTF-8 ko_KR.UTF-8 zh_CN.UTF-8 zh_TW.UTF-8 ru_RU.UTF-8 tr_TR.UTF-8 ar_SA.UTF-8 he_IL.UTF-8 pl_PL.UTF-8 sv_SE.UTF-8"
+  installed=$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/utf8/UTF-8/g')
+  missing=""
+  for lc in $needed; do
+    if ! echo "$installed" | grep -qiF "$lc"; then missing="$missing $lc"; fi
+  done
+  if [ -n "$missing" ]; then locale-gen $missing 2>/dev/null || true; fi
+fi
 
 # 2. Set VNC password
 USER_HOME=/home/ubuntu

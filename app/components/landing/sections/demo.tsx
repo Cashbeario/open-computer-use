@@ -213,9 +213,6 @@ export function DemoSection({ isMobile }: { isMobile: boolean }) {
 
       <div className="max-w-6xl w-full mx-auto">
         <LandingSectionHeader
-          index={4}
-          total={6}
-          eyebrow="Demo"
           title={t("demo.title")}
           subtitle={t("demo.subtitle")}
           isMobile={isMobile}

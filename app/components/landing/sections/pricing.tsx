@@ -94,9 +94,6 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
       <LandingSectionTopGlow />
       <div className="max-w-6xl w-full mx-auto">
         <LandingSectionHeader
-          index={6}
-          total={6}
-          eyebrow="Pricing"
           title={t("pricing.title")}
           subtitle={t("pricing.subtitle")}
           isMobile={isMobile}

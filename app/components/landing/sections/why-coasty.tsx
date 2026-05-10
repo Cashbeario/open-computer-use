@@ -142,9 +142,6 @@ export function WhyCoastySection({ isMobile }: { isMobile: boolean }) {
 
       <div className="max-w-6xl w-full mx-auto">
         <LandingSectionHeader
-          index={3}
-          total={6}
-          eyebrow="Why Coasty"
           title={t("whyCoasty.title")}
           isMobile={isMobile}
         />

@@ -127,9 +127,6 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
 
       <div className="max-w-6xl w-full mx-auto">
         <LandingSectionHeader
-          index={2}
-          total={6}
-          eyebrow="Features"
           title={t("features.title")}
           isMobile={isMobile}
         />

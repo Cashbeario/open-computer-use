@@ -325,9 +325,6 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
       <LandingSectionTopGlow />
       <div className="max-w-5xl w-full mx-auto">
         <LandingSectionHeader
-          index={1}
-          total={6}
-          eyebrow="Benchmark"
           title={t("benchmark.title")}
           subtitle={t("benchmark.subtitle")}
           isMobile={isMobile}

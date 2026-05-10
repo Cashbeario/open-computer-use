@@ -17,11 +17,32 @@ export function CompactPill() {
   const connectionState = useConnectionStore((s) => s.state)
   const { toggleExpanded } = useWindowStore()
   const { signOut } = useAuthStore()
-  const { isStreaming, canSend, handleSubmit, handleStop } = useChatSubmit()
+  const {
+    isStreaming, canSend, handleSubmit, handleStop,
+    isMachineBusy, isStoppingMachine, forceStopAndSend, dismissBusyState,
+  } = useChatSubmit()
 
   const [input, setInput] = React.useState('')
 
+  // If the user clears the input while the busy state is set, dismiss it
+  // so the next non-empty input goes through the normal pre-check path
+  // rather than auto-firing forceStopAndSend with empty content.
+  React.useEffect(() => {
+    if (isMachineBusy && !input.trim()) {
+      dismissBusyState()
+    }
+  }, [input, isMachineBusy, dismissBusyState])
+
   const onSubmit = () => {
+    if (isMachineBusy) {
+      // User clicked the yellow Override & Run button (or hit Enter
+      // while busy state was active). Pass the live input so any edits
+      // the user made after seeing the busy state are preserved.
+      forceStopAndSend(input)
+      setInput('')
+      toggleExpanded()
+      return
+    }
     if (!canSend(input)) return
     handleSubmit(input)
     setInput('')
@@ -73,6 +94,20 @@ export function CompactPill() {
             className="px-2 py-1 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 text-[11px] font-medium hover:bg-red-600/30 transition-colors"
           >
             Stop
+          </button>
+        ) : isMachineBusy && input.trim() ? (
+          // Yellow "Override & Run" — same colour family as the web app's
+          // chat-input.tsx Override button (amber-600). Clicking it calls
+          // forceStopAndSend which stops the running task on this machine
+          // and submits the user's input. Disabled while the stop call is
+          // in flight to prevent double-submit.
+          <button
+            onClick={onSubmit}
+            disabled={isStoppingMachine}
+            title="Stop running task and start this one"
+            className="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-medium disabled:opacity-50 transition-colors"
+          >
+            {isStoppingMachine ? 'Switching…' : 'Override & Run'}
           </button>
         ) : input.trim() ? (
           <button

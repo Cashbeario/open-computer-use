@@ -223,6 +223,8 @@ describe('window.coasty API surface snapshot', () => {
     // Chat CRUD
     'createChat', 'listChats', 'getChatMessages', 'updateChat', 'deleteChat',
     'resumeHuman',
+    // Machine busy-state for the yellow "Override & Run" UI
+    'checkMachineBusy', 'stopMachine',
     // Credits
     'getCredits',
     // Chat streaming

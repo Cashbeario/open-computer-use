@@ -614,6 +614,104 @@ export function registerIpcHandlers(
     }
   })
 
+  // ── Machine busy-state queries (yellow "Override & Run" UI) ─────
+  //
+  // Both endpoints are routed through the main process for the same
+  // reason as chat streaming: the renderer at file:// can't directly
+  // fetch the backend without CORS issues, and the auth token lives
+  // in the main process for security.
+  //
+  // The renderer calls these BEFORE submitting a chat: if `busy=true`
+  // is returned, the UI shows a yellow "Override & Run" button instead
+  // of the normal Send button. Clicking it triggers `chat:stop-machine`
+  // followed by a normal send.
+
+  secureHandle(
+    'chat:check-machine-busy',
+    async (_event, machineId: string): Promise<{
+      success: boolean
+      busy?: boolean
+      ownerChatId?: string | null
+      error?: string
+    }> => {
+      try {
+        const token = await auth.getAccessToken()
+        const res = await fetch(
+          `${backendUrl}/api/chat/machine-status/${machineId}`,
+          {
+            method: 'GET',
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          },
+        )
+        if (!res.ok) {
+          // 4xx/5xx — be defensive: log and return busy=false so the
+          // user isn't permanently locked out by a transient backend
+          // hiccup. The actual /api/chat/ call will surface any real
+          // error if there is one.
+          const text = await res.text().catch(() => '')
+          console.warn(
+            `[Electron] machine-status ${res.status} for ${machineId}: ${text}`,
+          )
+          return { success: false, busy: false, error: `HTTP ${res.status}` }
+        }
+        const data = await res.json()
+        return {
+          success: true,
+          busy: !!data.busy,
+          ownerChatId: data.ownerChatId ?? null,
+        }
+      } catch (err: any) {
+        console.error('[Electron] check-machine-busy failed:', err.message)
+        // Network failure → fail open. The user's send will go through;
+        // if the machine really IS busy, the chat route will return
+        // the busy error event mid-stream and the user sees a chat
+        // message (the legacy fallback path).
+        return { success: false, busy: false, error: err.message }
+      }
+    },
+  )
+
+  secureHandle(
+    'chat:stop-machine',
+    async (_event, machineId: string): Promise<{
+      success: boolean
+      stopped?: boolean
+      released?: boolean
+      ownerChatId?: string | null
+      error?: string
+    }> => {
+      try {
+        const token = await auth.getAccessToken()
+        const res = await fetch(
+          `${backendUrl}/api/chat/stop-machine/${machineId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          },
+        )
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          return { success: false, error: text || `HTTP ${res.status}` }
+        }
+        const data = await res.json()
+        return {
+          success: true,
+          stopped: !!data.stopped,
+          released: !!data.released,
+          ownerChatId: data.ownerChatId ?? null,
+        }
+      } catch (err: any) {
+        console.error('[Electron] stop-machine failed:', err.message)
+        return { success: false, error: err.message }
+      }
+    },
+  )
+
   // ── Chat SSE Streaming (main process, no CORS) ───────────────────
   // The renderer cannot fetch() external URLs without CORS issues
   // (it loads from file://). All streaming goes through the main process
@@ -688,6 +786,17 @@ export function registerIpcHandlers(
           errorMessage = json.detail || json.error || errorMessage
         } catch { /* use default */ }
 
+        // The user is INSIDE the Electron desktop app right now, so any
+        // "the desktop app is not connected" wording from the backend is
+        // nonsensical — this app IS the desktop. Strip that phrasing and
+        // replace with a context-appropriate reconnect message. The web
+        // app still gets the original wording (it surfaces the same
+        // backend error elsewhere) — this rewrite is local to the
+        // Electron main process.
+        const looksLikeNotConnected =
+          response.status === 503 ||
+          /electron\s+desktop\s+app\s+is\s+not\s+connected/i.test(errorMessage)
+
         // Send error to renderer
         const sender = event.sender
         if (!sender.isDestroyed()) {
@@ -696,8 +805,8 @@ export function registerIpcHandlers(
             type: 'error',
             data: response.status === 402
               ? 'Insufficient credits. Please purchase more credits to continue.'
-              : response.status === 503
-                ? 'Electron desktop app is not connected. Please check your connection.'
+              : looksLikeNotConnected
+                ? 'Reconnecting — please try again in a moment.'
                 : errorMessage,
           })
         }

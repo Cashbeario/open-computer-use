@@ -41,6 +41,18 @@ contextBridge.exposeInMainWorld('coasty', {
   // Resume from human handoff
   resumeHuman: (machineId: string) => ipcRenderer.invoke('chat:resume-human', machineId),
 
+  // Machine busy-state for the yellow "Override & Run" UI.
+  // checkMachineBusy: returns { success, busy, ownerChatId } — used by
+  //   the chat input to decide whether to show the normal Send button
+  //   or the yellow Override-and-Run button.
+  // stopMachine: force-stops the running task, used when the user
+  //   clicks the yellow button. Resolves once the lock has released
+  //   (or after a 5 s grace period — see chat.py:/stop-machine).
+  checkMachineBusy: (machineId: string) =>
+    ipcRenderer.invoke('chat:check-machine-busy', machineId),
+  stopMachine: (machineId: string) =>
+    ipcRenderer.invoke('chat:stop-machine', machineId),
+
   // Credits / Billing
   getCredits: () => ipcRenderer.invoke('credits:get-balance'),
 
@@ -220,6 +232,20 @@ export interface CoastyAPI {
     Promise<{ success: boolean; error?: string }>
 
   resumeHuman: (machineId: string) => Promise<{ success: boolean; resumed?: boolean; error?: string }>
+
+  checkMachineBusy: (machineId: string) => Promise<{
+    success: boolean
+    busy?: boolean
+    ownerChatId?: string | null
+    error?: string
+  }>
+  stopMachine: (machineId: string) => Promise<{
+    success: boolean
+    stopped?: boolean
+    released?: boolean
+    ownerChatId?: string | null
+    error?: string
+  }>
 
   getCredits: () => Promise<{
     success: boolean

@@ -303,10 +303,17 @@ function AvatarMenu({
   user,
   onAction,
   onPinOpen,
+  chrome = "popover",
 }: {
   user: { id: string; display_name?: string | null; email?: string | null; profile_image?: string | null } | null | undefined
   onAction: () => void
   onPinOpen: (pin: boolean) => void
+  /** "popover" (desktop, default): self-contained card with border,
+   *  shadow, rounded corners, fixed 240px width.
+   *  "drawer" (mobile bottom sheet): full-width content, no card chrome
+   *  — the parent <DrawerContent> already provides the surface,
+   *  drag-handle pill, and rounded top edges. */
+  chrome?: "popover" | "drawer"
 }) {
   const t = useTranslations("sidebar")
   const openDialog = useAccountDialog((s) => s.open)
@@ -327,12 +334,37 @@ function AvatarMenu({
     { kind: "external", icon: IconVideo, label: t("talkToUs"), href: "https://cal.com/coasty/15min" },
   ]
 
-  const rowClass =
-    "w-full flex items-center gap-2.5 px-2 py-[7px] rounded-md text-left transition-colors duration-100 text-muted-foreground/75 hover:text-foreground hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]"
+  // Drawer rows are slightly taller for comfortable thumb tap targets;
+  // popover rows stay compact since they're mouse-hit. Same
+  // px/gap/colors otherwise so the menu reads identically across both.
+  const rowClass = cn(
+    "w-full flex items-center gap-2.5 px-2 rounded-md text-left transition-colors duration-100",
+    "text-muted-foreground/75 hover:text-foreground hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
+    chrome === "drawer" ? "py-2.5" : "py-[7px]",
+  )
+
+  // Outer chrome.
+  //   popover: card (border + shadow + rounded + bg + fixed width).
+  //   drawer:  bare; the <DrawerContent> provides the surface so this
+  //            component can grow to the sheet's full width and skip the
+  //            card decorations.
+  const outerClass = cn(
+    "overflow-hidden",
+    chrome === "popover"
+      ? "w-60 rounded-xl border border-border/60 bg-popover shadow-2xl dark:border-white/[0.06]"
+      : "w-full",
+  )
+
+  // Header padding tightens slightly on drawer so the avatar + name +
+  // email row doesn't read as a separate "card" on top of the sheet.
+  const headerClass = cn(
+    "flex items-center gap-3 border-b border-border/30 dark:border-white/[0.05]",
+    chrome === "drawer" ? "px-3 pt-2 pb-3" : "px-3.5 pt-3.5 pb-3",
+  )
 
   return (
-    <div className="w-60 rounded-xl overflow-hidden border border-border/60 bg-popover shadow-2xl dark:border-white/[0.06]">
-      <div className="px-3.5 pt-3.5 pb-3 flex items-center gap-3 border-b border-border/30 dark:border-white/[0.05]">
+    <div className={outerClass}>
+      <div className={headerClass}>
         <Avatar className="h-9 w-9 ring-1 ring-border/40">
           <AvatarImage src={user?.profile_image || undefined} />
           <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[11px] font-semibold">
@@ -1249,17 +1281,32 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
           beside it, exactly how the nav rows behave. */}
       <div className="mt-2.5 pt-2.5 flex items-center gap-1 border-t border-border/30 dark:border-white/[0.05]">
         {user ? (
-          <Popover
-            open={menuOpen}
-            onOpenChange={(o) => {
-              if (!o && menuPinned) return
-              setMenuOpen(o)
-            }}
-          >
-            <PopoverTrigger asChild>
+          // Visual surface is identical across both viewports — only
+          // the menu container changes:
+          //   • Desktop: <Popover side="right"> (240px card, pinned to
+          //     the trigger).
+          //   • Mobile:  <Drawer> bottom sheet. We can't use the
+          //     popover on a phone — the sidebar itself is already a
+          //     left-edge drawer covering most of the viewport, so a
+          //     `side="right"` 240px popover would render across the
+          //     dimmed page edge or off-screen. The bottom sheet is
+          //     the native phone pattern for "menu I tapped at the
+          //     bottom".
+          //
+          //   Pin behavior is preserved on both surfaces:
+          //   • Popover: `onInteractOutside.preventDefault()` while
+          //     `menuPinned`.
+          //   • Drawer: `dismissible={!menuPinned}` so drag-down and
+          //     scrim-tap do nothing while the feedback composer has
+          //     a draft in flight.
+          isMobile ? (
+            <>
               <button
                 type="button"
                 aria-label="Open account menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+                data-state={menuOpen ? "open" : "closed"}
                 className="flex items-center gap-2.5 flex-1 min-w-0 rounded-md px-1 py-1 -mx-1 transition-colors hover:bg-foreground/[0.03] data-[state=open]:bg-foreground/[0.04]"
               >
                 <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border/40">
@@ -1272,26 +1319,74 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
                   {displayName}
                 </span>
               </button>
-            </PopoverTrigger>
-            <PopoverContent
-              side="right"
-              align="end"
-              sideOffset={12}
-              onInteractOutside={(e) => { if (menuPinned) e.preventDefault() }}
-              onEscapeKeyDown={(e) => { if (menuPinned) e.preventDefault() }}
-              className="w-auto p-0 border-0 bg-transparent shadow-none"
+              <Drawer
+                open={menuOpen}
+                onOpenChange={setMenuOpen}
+                dismissible={!menuPinned}
+              >
+                <DrawerContent className="max-h-[82vh] focus:outline-none">
+                  <DrawerTitle className="sr-only">Account menu</DrawerTitle>
+                  <div className="flex-1 min-h-0 overflow-y-auto pb-2">
+                    <AvatarMenu
+                      chrome="drawer"
+                      user={user}
+                      onAction={() => {
+                        setMenuPinned(false)
+                        setMenuOpen(false)
+                        closeMobileIfNeeded()
+                      }}
+                      onPinOpen={setMenuPinned}
+                    />
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            </>
+          ) : (
+            <Popover
+              open={menuOpen}
+              onOpenChange={(o) => {
+                if (!o && menuPinned) return
+                setMenuOpen(o)
+              }}
             >
-              <AvatarMenu
-                user={user}
-                onAction={() => {
-                  setMenuPinned(false)
-                  setMenuOpen(false)
-                  closeMobileIfNeeded()
-                }}
-                onPinOpen={setMenuPinned}
-              />
-            </PopoverContent>
-          </Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open account menu"
+                  className="flex items-center gap-2.5 flex-1 min-w-0 rounded-md px-1 py-1 -mx-1 transition-colors hover:bg-foreground/[0.03] data-[state=open]:bg-foreground/[0.04]"
+                >
+                  <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border/40">
+                    <AvatarImage src={user?.profile_image || undefined} />
+                    <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[9px] font-semibold">
+                      {displayName[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-[12.5px] font-medium text-foreground/85 truncate flex-1 text-left">
+                    {displayName}
+                  </span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="right"
+                align="end"
+                sideOffset={12}
+                collisionPadding={16}
+                onInteractOutside={(e) => { if (menuPinned) e.preventDefault() }}
+                onEscapeKeyDown={(e) => { if (menuPinned) e.preventDefault() }}
+                className="w-auto p-0 border-0 bg-transparent shadow-none"
+              >
+                <AvatarMenu
+                  user={user}
+                  onAction={() => {
+                    setMenuPinned(false)
+                    setMenuOpen(false)
+                    closeMobileIfNeeded()
+                  }}
+                  onPinOpen={setMenuPinned}
+                />
+              </PopoverContent>
+            </Popover>
+          )
         ) : (
           <div className="flex-1" />
         )}

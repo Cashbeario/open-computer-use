@@ -49,7 +49,17 @@ export async function sendChatMessage(
         }
         case '3': {
           const errorData = JSON.parse(event.data)
-          callbacks.onError(typeof errorData === 'string' ? errorData : errorData.error || 'Unknown error')
+          let msg = typeof errorData === 'string'
+            ? errorData
+            : errorData.error || 'Unknown error'
+          // The user is inside the Electron desktop app — any "desktop
+          // app is not connected" phrasing from the backend is not
+          // useful to surface verbatim (this app IS the desktop). Map
+          // it to a context-appropriate reconnect hint instead.
+          if (/electron\s+desktop\s+app\s+is\s+not\s+connected/i.test(msg)) {
+            msg = 'Reconnecting — please try again in a moment.'
+          }
+          callbacks.onError(msg)
           break
         }
         case '9': {

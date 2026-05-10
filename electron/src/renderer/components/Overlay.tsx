@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { useConnectionStore } from '../stores/connection-store'
 import { useWindowStore } from '../stores/window-store'
 import { useAuthStore } from '../stores/auth-store'
-import { useChatSubmit } from '../hooks/useChatSubmit'
+import { useChatSubmit, type SubmitResult } from '../hooks/useChatSubmit'
 import { useChatStore } from '../stores/chat-store'
 import { MessageList } from './MessageList'
 import { ChatHistory } from './ChatHistory'
@@ -607,7 +607,7 @@ export function Overlay() {
     // CompactPill so the busy state survives switching between compact
     // and expanded modes mid-flow.
     isMachineBusy, isStoppingMachine, forceStopAndSend, dismissBusyState,
-    pendingInputText,
+    pendingInputText, pendingInputAlreadyInChat,
   } = useChatSubmit()
   type FileRef = { path: string; name: string; ext: string; isDirectory: boolean }
   const loadChat = useChatStore((s) => s.loadChat)
@@ -778,45 +778,68 @@ export function Overlay() {
   }
   const removeFile = (path: string) => setAttachedFiles((prev) => prev.filter((f) => f.path !== path))
 
-  const onSubmit = (e?: React.FormEvent) => {
+  const onSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    // ── Yellow "Override & Run" path ──────────────────────────────────
-    // If the machine is busy, this submit becomes a stop-and-send
-    // instead of a normal send. We pass the live input if the user
-    // typed something new since the busy state was set; otherwise let
-    // forceStopAndSend pick up the stashed pending input (already in
-    // the chat thread thanks to handleSubmit's pre-busy addUserMessage).
+    // ── Web-app-style submit handler ───────────────────────────────────
+    //
+    // The typed text stays in the textarea until the hook returns a
+    // definite outcome about whether the message was sent. Web parity
+    // (see app/components/chat-input/chat-input.tsx): never destroy
+    // user-typed content without confirmation.
+    //
+    // Always navigate to the chat panel and (if compact) expand the
+    // overlay so the user can see the chat thread / busy banner —
+    // whether they're sending or being prompted to override.
+    if (!isExpanded) userToggleExpand()
+    if (page !== 'chat') setPage('chat')
+
+    const files = attachedFiles.length > 0 ? attachedFiles : undefined
+
     if (isMachineBusy) {
-      const files = attachedFiles.length > 0 ? attachedFiles : undefined
+      // Yellow Override & Run path. If the user typed something new
+      // since busy was detected, send that; otherwise fall back to
+      // the hook's stashed pending input.
+      let result: SubmitResult
       if (input.trim()) {
-        forceStopAndSend(input, files)
+        result = await forceStopAndSend(input, files)
+      } else if (pendingInputText.trim()) {
+        result = await forceStopAndSend()
       } else {
-        forceStopAndSend()
+        // Empty input AND empty stash — nothing actionable. The
+        // auto-dismiss useEffect will clear isMachineBusy.
+        return
       }
-      setInput(''); setAttachedFiles([])
-      if (!isExpanded) userToggleExpand()
-      if (page !== 'chat') setPage('chat')
+      if (result === 'sent') {
+        setInput(''); setAttachedFiles([])
+      }
       return
     }
     if (!canSend(input)) return
-    handleSubmit(input, attachedFiles.length > 0 ? attachedFiles : undefined)
-    setInput(''); setAttachedFiles([])
-    if (!isExpanded) userToggleExpand()
-    if (page !== 'chat') setPage('chat')
+    const result = await handleSubmit(input, files)
+    if (result === 'sent') {
+      setInput(''); setAttachedFiles([])
+    }
+    // result === 'busy': leave input + attachments alone so the user
+    //   can edit and click Override & Run, or clear input to dismiss.
+    // result === 'rejected': also leave input alone — caller didn't
+    //   make progress, user's text shouldn't disappear.
   }
   const onKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmit() } }
 
-  // Auto-dismiss the busy stash when the user explicitly clears BOTH
-  // the local input and the stashed pending text — otherwise the yellow
-  // button would linger forever after they decided not to override.
-  // We DON'T auto-dismiss while pendingInputText is non-empty (which is
-  // the case immediately after a busy-positive pre-check, since the
-  // hook's stash holds the user's typed message).
+  // ── Busy-state auto-dismiss ──────────────────────────────────────────
+  // Same semantics as CompactPill: clearing the input cancels a
+  // pre-check busy stash (user changed their mind) but does NOT
+  // dismiss a post-error stash (the message is already visible in
+  // the chat thread and would be orphaned without the yellow button).
   React.useEffect(() => {
-    if (isMachineBusy && !input.trim() && !pendingInputText.trim()) {
+    if (
+      isMachineBusy
+      && !input.trim()
+      && !pendingInputAlreadyInChat
+    ) {
       dismissBusyState()
     }
-  }, [input, isMachineBusy, pendingInputText, dismissBusyState])
+  }, [input, isMachineBusy, pendingInputAlreadyInChat, dismissBusyState])
 
   const goToPage = (p: Page) => { if (!isExpanded) userToggleExpand(); setPage(p) }
 
@@ -899,12 +922,13 @@ export function Overlay() {
               className="stop-fab press-scale size-7 rounded-full flex items-center justify-center text-white ml-0.5 mr-0.5">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.75" /></svg>
             </button>
-          ) : !isExpanded && isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
-            // Yellow "Override & Run" — visible whenever the machine is
-            // busy AND there's a queued message somewhere (live input or
-            // stashed pendingInputText). Without the pendingInputText
-            // fallback the button would never appear after a busy-
-            // positive pre-check (the local input is cleared sync on send).
+          ) : !isExpanded && isMachineBusy && (input.trim() || pendingInputAlreadyInChat) ? (
+            // Yellow "Override & Run" — visible when the machine is busy
+            // AND there's queued content somewhere (live input or
+            // post-error stash). See CompactPill.tsx for the full
+            // explanation of why we use pendingInputAlreadyInChat (not
+            // pendingInputText) — it lets the auto-dismiss work
+            // correctly when the user clears the input to cancel.
             <button onClick={() => onSubmit()} disabled={isStoppingMachine}
               aria-label="Override and Run" title="Stop running task and start this one"
               className="press-scale size-7 rounded-full flex items-center justify-center bg-amber-600 hover:bg-amber-500 text-white ml-0.5 mr-0.5 disabled:opacity-50">
@@ -1096,7 +1120,7 @@ export function Overlay() {
                 users who don't know what the colour means assumed
                 their messages were vanishing. The banner makes the
                 state and the resolution explicit. */}
-            {isMachineBusy && (input.trim() || pendingInputText.trim()) && (
+            {isMachineBusy && (input.trim() || pendingInputAlreadyInChat) && (
               <div
                 className="mb-2 flex items-start gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-[11px] text-amber-200/90"
                 role="status"
@@ -1158,12 +1182,12 @@ export function Overlay() {
                   <button type="button" onClick={stopTask} className="stop-fab size-8 rounded-full flex items-center justify-center text-white" aria-label="Stop">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.5" /></svg>
                   </button>
-                ) : isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
-                  // Yellow "Override & Run" — same logic as the compact-
-                  // mode button. Shown whenever the machine is busy and
-                  // there's a queued message (live or stashed). Submit
-                  // routes through the form's onSubmit which detects
-                  // isMachineBusy and calls forceStopAndSend.
+                ) : isMachineBusy && (input.trim() || pendingInputAlreadyInChat) ? (
+                  // Yellow "Override & Run" — same gating as the compact-
+                  // mode button: live input OR a post-error stash that
+                  // needs retrying. Submit routes through the form's
+                  // onSubmit which detects isMachineBusy and calls
+                  // forceStopAndSend.
                   <button type="submit" disabled={isStoppingMachine}
                     className="size-8 rounded-full bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center disabled:opacity-50"
                     aria-label="Override and Run" title="Stop running task and start this one">

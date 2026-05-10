@@ -2,7 +2,7 @@ import React from 'react'
 import { useConnectionStore } from '../stores/connection-store'
 import { useWindowStore } from '../stores/window-store'
 import { useAuthStore } from '../stores/auth-store'
-import { useChatSubmit } from '../hooks/useChatSubmit'
+import { useChatSubmit, type SubmitResult } from '../hooks/useChatSubmit'
 
 function statusDot(state: string): string {
   switch (state) {
@@ -20,44 +20,83 @@ export function CompactPill() {
   const {
     isStreaming, canSend, handleSubmit, handleStop,
     isMachineBusy, isStoppingMachine, forceStopAndSend, dismissBusyState,
-    pendingInputText,
+    pendingInputText, pendingInputAlreadyInChat,
   } = useChatSubmit()
 
   const [input, setInput] = React.useState('')
 
-  // The yellow "Override & Run" surface stays active as long as EITHER
-  // the user is typing fresh content OR the hook has a stashed pending
-  // send (from a sync setInput('') after they clicked Send). Without the
-  // pendingInputText fallback, clearing the textbox synchronously on
-  // submit would immediately auto-dismiss the busy stash and the user
-  // would never see the yellow button.
+  // ── Busy-state auto-dismiss ──────────────────────────────────────────
+  //
+  // Two ways the busy state can be reached:
+  //
+  //   1. Pre-check busy (handleSubmit's machine-status IPC said yes).
+  //      The user's typed text is PRESERVED in the local ``input``
+  //      because we no longer clear it synchronously on submit (the
+  //      web-app-style flow waits for the hook's outcome). If they
+  //      then explicitly clear the input, they're saying "never mind"
+  //      — dismiss the yellow state. pendingInputAlreadyInChat=false
+  //      in this path, so the condition below permits the dismiss.
+  //
+  //   2. Post-error busy (the wire call DID run, addUserMessage ran
+  //      inside _doSubmit, then the backend rejected mid-flight with
+  //      MACHINE_BUSY). The local input was cleared by the 'sent'
+  //      branch of the onSubmit handler BEFORE the busy event came
+  //      back. ``input`` is empty here but the message is in the
+  //      chat thread waiting to be retried. We MUST NOT auto-dismiss
+  //      — that would orphan a visible chat message with no way to
+  //      resend. pendingInputAlreadyInChat=true blocks the dismiss.
   React.useEffect(() => {
-    if (isMachineBusy && !input.trim() && !pendingInputText.trim()) {
+    if (
+      isMachineBusy
+      && !input.trim()
+      && !pendingInputAlreadyInChat
+    ) {
       dismissBusyState()
     }
-  }, [input, isMachineBusy, pendingInputText, dismissBusyState])
+  }, [input, isMachineBusy, pendingInputAlreadyInChat, dismissBusyState])
 
-  const onSubmit = () => {
+  // ── Submit handler ───────────────────────────────────────────────────
+  //
+  // Matches the web app contract: the typed text stays in the input
+  // until the hook tells us what actually happened to it. Three
+  // outcomes:
+  //
+  //   'sent'     → message landed in chat thread + wire call fired.
+  //                Clear the input.
+  //   'busy'     → machine is running another task; yellow button is
+  //                now visible. KEEP the input so the user can edit
+  //                or confirm. The web app does this too — typed text
+  //                is never destroyed without confirmation.
+  //   'rejected' → empty input, force-stop failed, etc. KEEP the input.
+  //
+  // We always expand the overlay on click so the user can see the
+  // chat panel and (if busy) the banner explaining the situation.
+  const onSubmit = async () => {
     if (isMachineBusy) {
-      // User clicked the yellow Override & Run button (or hit Enter
-      // while busy state was active). If they typed something new,
-      // send that — otherwise let forceStopAndSend pick up the stashed
-      // pending input (the message they typed before the busy state
-      // was detected, which is also already in the chat thread thanks
-      // to the addUserMessage in handleSubmit).
+      // Yellow Override & Run path. If the user typed something new
+      // since busy was detected, send that; otherwise use the stash.
+      let result: SubmitResult
       if (input.trim()) {
-        forceStopAndSend(input)
+        result = await forceStopAndSend(input)
+      } else if (pendingInputText.trim()) {
+        result = await forceStopAndSend()
       } else {
-        forceStopAndSend()
+        // Both input and stash are empty — nothing actionable. The
+        // auto-dismiss useEffect will tidy isMachineBusy in this case.
+        return
       }
-      setInput('')
+      if (result === 'sent') {
+        setInput('')
+      }
       toggleExpanded()
       return
     }
     if (!canSend(input)) return
-    handleSubmit(input)
-    setInput('')
-    toggleExpanded() // expand to show the conversation
+    const result = await handleSubmit(input)
+    if (result === 'sent') {
+      setInput('')
+    }
+    toggleExpanded() // expand to show the conversation (or the yellow banner)
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,19 +159,31 @@ export function CompactPill() {
           >
             Stop
           </button>
-        ) : isMachineBusy && (input.trim() || pendingInputText.trim()) ? (
+        ) : isMachineBusy && (input.trim() || pendingInputAlreadyInChat) ? (
           // Yellow "Override & Run" — same colour family as the web app's
           // chat-input.tsx Override button (amber-600). Clicking it calls
           // forceStopAndSend which stops the running task on this machine
           // and submits the user's input. Disabled while the stop call is
           // in flight to prevent double-submit.
           //
-          // Visibility uses ``input.trim() || pendingInputText.trim()``
-          // because the user's local input box was cleared synchronously
-          // on Send — the actual message they want to override-and-run
-          // now lives in the hook's stashed pendingInput. Without this
-          // fallback the button would never appear after a busy-positive
-          // pre-check.
+          // Visibility logic:
+          //   * input.trim()              — pre-check path: text the user
+          //                                 typed is preserved (web-app
+          //                                 contract). Show the button so
+          //                                 they can confirm.
+          //   * pendingInputAlreadyInChat — post-error path: the original
+          //                                 input was cleared when the
+          //                                 'sent' branch ran, but the
+          //                                 message is in the chat thread
+          //                                 waiting to be retried. Show
+          //                                 the button so they can re-send
+          //                                 (forceStopAndSend with no
+          //                                 args picks up the stash).
+          //
+          // We do NOT use ``pendingInputText.trim()`` here because pre-
+          // check stash mirrors the input — gating on it would keep the
+          // button visible AFTER the user clears their input intending
+          // to dismiss, defeating the auto-dismiss useEffect above.
           <button
             onClick={onSubmit}
             disabled={isStoppingMachine}

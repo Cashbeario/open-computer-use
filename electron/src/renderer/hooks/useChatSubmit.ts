@@ -12,6 +12,36 @@ export interface FileRef {
 }
 
 /**
+ * Outcome of a submit attempt. Returned by ``handleSubmit`` and
+ * ``forceStopAndSend`` so the UI can decide whether to clear the
+ * input field, expand the chat, navigate, etc.
+ *
+ * ``'sent'``     — message landed in the chat thread + the wire call
+ *                  fired. Component SHOULD clear its input + reset
+ *                  any attached files.
+ *
+ * ``'busy'``     — machine has another task running. The user's text
+ *                  has been STASHED (pendingInput) and the yellow
+ *                  "Override & Run" UI is now active. Component MUST
+ *                  KEEP its input so the user can edit before
+ *                  confirming, or clear to dismiss.
+ *
+ * ``'rejected'`` — couldn't send for a non-busy reason (empty input,
+ *                  not connected, missing auth, force-stop failed).
+ *                  Component should leave input alone — no UI state
+ *                  change.
+ *
+ * This pattern is the web app's contract (see
+ * ``app/components/chat-input/chat-input.tsx``): typed text stays
+ * visible until the system has a definite answer about what happens
+ * to it. The Electron app previously cleared the input synchronously
+ * BEFORE the busy decision came back, causing the "message
+ * disappears" regression we fixed by handing the clear authority
+ * to the caller via this return value.
+ */
+export type SubmitResult = 'sent' | 'busy' | 'rejected'
+
+/**
  * Build the wire-format user message from the trimmed text plus any
  * attached files/directories. The same string is used to (a) display
  * in the chat thread via ``addUserMessage`` and (b) ship to the
@@ -223,62 +253,79 @@ export function useChatSubmit() {
   )
 
   const handleSubmit = useCallback(
-    async (input: string, files?: FileRef[]) => {
-      if (!canSend(input) || !user || !machineId) return
+    async (input: string, files?: FileRef[]): Promise<SubmitResult> => {
+      if (!canSend(input) || !user || !machineId) return 'rejected'
 
-      // ── Add the user's message to the chat thread IMMEDIATELY ─────────
+      // ── Web-app-style pre-flight busy gate ────────────────────────────
       //
-      // Why this happens BEFORE the busy pre-check (regression fix):
+      // Match the web app's contract (see
+      // ``app/components/chat-input/chat-input.tsx``): the user's typed
+      // text stays in the input box and is NOT added to the chat
+      // thread until we have a definitive answer about what happens to
+      // it. The two outcomes are:
       //
-      // The component (CompactPill / Overlay) clears its local `input`
-      // state synchronously on send. If we delayed addUserMessage until
-      // AFTER the busy check, then the busy-positive path would:
-      //   1. Stash the message into pendingInput (hook state)
-      //   2. Return without adding to the chat thread
-      //   3. The component re-renders with isMachineBusy=true, input=""
-      //   4. The yellow "Override & Run" button check
-      //      `isMachineBusy && input.trim()` would fail (input is empty)
-      //   5. Auto-dismiss useEffects would fire and discard the stash
-      //   6. User sees: input cleared, no message, no button — ghost send
+      //   busy=false → we send immediately: addUserMessage + _doSubmit.
+      //                Return 'sent' so the caller clears the input.
       //
-      // Adding to the chat thread first guarantees the user always sees
-      // what they sent, regardless of the busy decision below.  The
-      // busy path then sets `pendingInput.alreadyInChat=true` so the
-      // forceStopAndSend retry does NOT re-add it.
-      const userMessage = buildUserMessage(input, files)
-      addUserMessage(userMessage)
-
-      // Pre-flight: is the machine running another task?
+      //   busy=true  → we stash and surface the yellow Override & Run
+      //                button. The user's text stays visible in the
+      //                input (the caller does NOT clear on 'busy'),
+      //                they can edit before clicking Override or
+      //                clear to dismiss. ``alreadyInChat=false``
+      //                because we did NOT touch the chat thread —
+      //                forceStopAndSend will run a fresh _doSubmit
+      //                which addUserMessages it on confirmation.
+      //
+      // This was the original web-app design. An earlier iteration
+      // added the message BEFORE the busy check to work around a
+      // separate bug (components were clearing input synchronously
+      // BEFORE this function returned, so a busy outcome would have
+      // an empty input and the yellow button never appeared). The
+      // proper fix is the return value + caller-managed clear below,
+      // not a workaround that pollutes the chat thread with
+      // not-yet-confirmed messages.
       const busy = await checkBusy()
       if (busy) {
-        // Stash and let the UI render the yellow "Override & Run"
-        // button. ``alreadyInChat=true`` because we just added the
-        // message above — the retry must skip re-adding to avoid
-        // duplicates in both the visible thread and the wire payload.
         setIsMachineBusy(true)
-        setPendingInput({ input, files, alreadyInChat: true })
-        return
+        setPendingInput({ input, files, alreadyInChat: false })
+        return 'busy'
       }
 
-      // Not busy — clear any stale busy state and proceed. We pass
-      // ``isRetry: true`` because the user message is already in the
-      // chat store from the addUserMessage above; _doSubmit must not
-      // re-add it.
+      // Not busy — clear any stale busy state and let _doSubmit
+      // handle both adding the user message AND constructing the wire
+      // payload that includes it. We DON'T call addUserMessage here
+      // ourselves: _doSubmit owns this for a subtle reason — the
+      // wire payload construction needs to APPEND the new user
+      // message because the just-fired addUserMessage's setState
+      // hasn't yet reached _doSubmit's ``messages`` closure snapshot
+      // (React doesn't re-render between sync calls in the same
+      // microtask). _doSubmit's ``isRetry=false`` branch does both
+      // the addUserMessage AND the wire-side append in one place,
+      // keeping these two derivations from drifting apart.
       setIsMachineBusy(false)
       setPendingInput(null)
-      await _doSubmit(input, files, { isRetry: true })
+      await _doSubmit(input, files, { isRetry: false })
+      return 'sent'
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [canSend, user, machineId, addUserMessage, checkBusy, _doSubmit],
+    [canSend, user, machineId, checkBusy, _doSubmit],
   )
 
   // Yellow-button click handler. Stops the running task on the machine,
   // waits briefly for the lock to release, then re-submits the user's
   // pending input. Idempotent: if called twice in a row, the second call
   // is a no-op (``isStoppingMachine`` guards against re-entry).
+  //
+  // Returns a SubmitResult so the caller (CompactPill / Overlay) can
+  // decide whether to clear its input field, expand the chat, etc.
+  // Mirrors the contract of handleSubmit — the UI never assumes a send
+  // succeeded just because a click handler resolved.
   const forceStopAndSend = useCallback(
-    async (overrideInput?: string, overrideFiles?: FileRef[]) => {
-      if (isStoppingMachine || !machineId) return
+    async (
+      overrideInput?: string,
+      overrideFiles?: FileRef[],
+    ): Promise<SubmitResult> => {
+      if (isStoppingMachine || !machineId) return 'rejected'
       // Resolve which input to send. Caller-supplied wins (e.g. user
       // edited the textarea after the busy state was detected); falls
       // back to the stashed pending input.
@@ -301,10 +348,11 @@ export function useChatSubmit() {
             : null
       if (!target || !target.input.trim()) {
         // Nothing to send — clear the busy state so the UI returns to
-        // its normal empty-input look.
+        // its normal empty-input look. Caller treats this as 'rejected'
+        // (no input was consumed, nothing to clear from their textarea).
         setIsMachineBusy(false)
         setPendingInput(null)
-        return
+        return 'rejected'
       }
 
       setIsStoppingMachine(true)
@@ -319,9 +367,13 @@ export function useChatSubmit() {
         setIsMachineBusy(false)
         setPendingInput(null)
         await _doSubmit(target.input, target.files, { isRetry: target.isRetry })
+        return 'sent'
       } catch (err: any) {
         console.error('[Electron] forceStopAndSend failed:', err?.message)
-        // Don't clear busy state on failure — let the user retry.
+        // Don't clear busy state on failure — let the user retry. Tell
+        // the caller it was rejected so the input isn't wiped from
+        // under them.
+        return 'rejected'
       } finally {
         setIsStoppingMachine(false)
       }
@@ -356,10 +408,24 @@ export function useChatSubmit() {
     // user's "Override & Run" decision. Empty string when no stash —
     // the UI can use this to (a) decide whether to render the yellow
     // button at all and (b) show a preview of the queued message.
-    //
-    // We expose the derived string instead of the full pendingInput
-    // object so UI components don't have to know about ``alreadyInChat``
-    // (an internal hook concern).
     pendingInputText: pendingInput?.input ?? '',
+    // Whether the stashed message is ALREADY in the chat thread.
+    //
+    //   * false → pre-check stash (busy detected BEFORE the wire
+    //     call ran; nothing was added to the chat thread). The UI
+    //     can safely auto-dismiss when the user clears their input
+    //     — there's no orphan visible to recover.
+    //
+    //   * true  → post-error stash (the wire call DID run,
+    //     ``_doSubmit`` already called ``addUserMessage``, and the
+    //     backend rejected mid-flight with MACHINE_BUSY). The user's
+    //     message is visible in the chat thread. The UI MUST NOT
+    //     auto-dismiss when input is empty — that would orphan the
+    //     visible message with no way to retry.
+    //
+    // Defaults to false when there is no stash, so the UI's
+    // ``!pendingInputAlreadyInChat`` guard reads naturally: "no
+    // post-error stash → safe to auto-dismiss".
+    pendingInputAlreadyInChat: pendingInput?.alreadyInChat ?? false,
   }
 }

@@ -1,38 +1,45 @@
 /**
  * Anti-regression tests for the ORDERING invariants inside useChatSubmit.
  *
- * The render-level integration tests in ``send-flow-integration.test.tsx``
- * cover the user-facing outcome ("typing a message and clicking Send means
- * the user sees their message"). This file pins the in-hook contract that
- * makes that outcome possible — specifically:
+ * Pinned contract (web-app parity)
+ * --------------------------------
  *
- *   1. ``addUserMessage`` MUST be called before the busy pre-check,
- *      synchronously, so that even if the component clears its local
- *      input state synchronously on submit and the busy check returns
- *      true, the message is still in the chat thread.
+ *   handleSubmit decision tree:
  *
- *   2. The hook MUST NOT call ``addUserMessage`` a second time when
- *      the user clicks "Override & Run" after a busy-positive
- *      pre-check. That's the ``alreadyInChat=true`` + ``isRetry=true``
- *      contract — without it the message appears twice.
+ *     guard fails              → return 'rejected' (NO chat-thread mutation,
+ *                                NO IPC call)
  *
- *   3. ``buildUserMessage`` produces a canonical string that's
- *      identical whether called from ``handleSubmit`` (display) or
- *      ``_doSubmit`` (wire). The two must NEVER diverge — that would
- *      mean the chat thread shows one thing and the backend receives
- *      another, breaking trust on the user's part.
+ *     pre-check busy=true      → stash pendingInput
+ *                                  with alreadyInChat=false,
+ *                                NO addUserMessage,
+ *                                return 'busy'
  *
- * Why two test files
+ *     pre-check busy=false     → addUserMessage,
+ *                                _doSubmit(isRetry=true),
+ *                                return 'sent'
+ *
+ *   The "no addUserMessage on busy" invariant is the user-facing
+ *   anti-regression for the "message disappears" / "message appears
+ *   before confirmation" bugs we burned cycles on. The web app
+ *   never adds a message to the chat thread without a definite send;
+ *   the desktop app must match.
+ *
+ *   The "isRetry=true" handoff is the anti-regression for the
+ *   "message added twice" bug: handleSubmit owns the addUserMessage
+ *   on the happy path, so _doSubmit must skip its own add.
+ *
+ * Layering rationale
  * ------------------
- * Render-level tests need jsdom + react-testing-library and are slower
- * (~6s for the full suite). These pure-logic tests run in milliseconds
- * and form the inner anti-regression ring — if the ordering invariant
- * breaks, we want a sub-second failure pointing exactly at the layer
- * that broke, not a vague "something in CompactPill doesn't render".
+ * This file: pure-logic mirror, sub-second run, points exactly at
+ * which decision changed if a test fails.
+ *
+ * send-flow-integration.test.tsx: render-level integration, slower
+ * but proves the user sees the right thing under real React/jsdom
+ * semantics.
  */
 import { describe, it, expect } from 'vitest'
 import { buildUserMessage } from './useChatSubmit'
-import type { FileRef } from './useChatSubmit'
+import type { FileRef, SubmitResult } from './useChatSubmit'
 
 // ── buildUserMessage canonical-string invariants ─────────────────────────
 
@@ -45,13 +52,12 @@ describe('buildUserMessage — canonical user message string', () => {
     const files: FileRef[] = [
       { path: '/a/b.txt', name: 'b.txt', ext: 'txt', isDirectory: false },
     ]
-    const result = buildUserMessage('please read', files)
-    expect(result).toBe(
+    expect(buildUserMessage('please read', files)).toBe(
       'please read\n<file path="/a/b.txt" name="b.txt">b.txt</file>',
     )
   })
 
-  it('uses <directory> tag for directories, <file> for files', () => {
+  it('uses <directory> for directories, <file> for files', () => {
     const files: FileRef[] = [
       { path: '/repo/src', name: 'src', ext: '', isDirectory: true },
       { path: '/repo/README.md', name: 'README.md', ext: 'md', isDirectory: false },
@@ -61,7 +67,7 @@ describe('buildUserMessage — canonical user message string', () => {
     expect(result).toContain('<file path="/repo/README.md" name="README.md">README.md</file>')
   })
 
-  it('separates multiple file tags with newlines (single line each)', () => {
+  it('separates multiple file tags with newlines', () => {
     const files: FileRef[] = [
       { path: '/a', name: 'a', ext: '', isDirectory: false },
       { path: '/b', name: 'b', ext: '', isDirectory: false },
@@ -71,50 +77,63 @@ describe('buildUserMessage — canonical user message string', () => {
     expect(fileTags).toHaveLength(2)
   })
 
-  it('returns empty string for whitespace-only input + no files', () => {
+  it('empty string for whitespace-only input + no files', () => {
     expect(buildUserMessage('   ')).toBe('')
   })
 
-  it('canonical string is deterministic — same inputs produce same output', () => {
+  it('deterministic — same inputs → same output (display/wire parity)', () => {
     const files: FileRef[] = [
       { path: '/x.py', name: 'x.py', ext: 'py', isDirectory: false },
     ]
-    const a = buildUserMessage('do x', files)
-    const b = buildUserMessage('do x', files)
-    expect(a).toBe(b)
-    // ★ Critical invariant: handleSubmit's display copy and _doSubmit's
-    // wire copy MUST be byte-identical so the user's chat thread agrees
-    // with what the backend received. Drift here = trust bug.
+    expect(buildUserMessage('do x', files)).toBe(buildUserMessage('do x', files))
+    // ★ handleSubmit's display copy and _doSubmit's wire copy MUST
+    // be byte-identical so the user's chat thread agrees with what
+    // the backend received. Drift here = trust bug.
   })
 
   it('preserves special characters in file paths exactly', () => {
-    // Paths with quotes, spaces, ampersands, brackets — all need to
-    // round-trip through the tag without being mangled, otherwise the
-    // backend's regex parser sees a different path than the user.
     const files: FileRef[] = [
       { path: '/with spaces/and "quotes" & [brackets].txt', name: 'and "quotes" & [brackets].txt', ext: 'txt', isDirectory: false },
     ]
-    const result = buildUserMessage('read this', files)
-    expect(result).toContain('/with spaces/and "quotes" & [brackets].txt')
+    expect(buildUserMessage('read this', files)).toContain(
+      '/with spaces/and "quotes" & [brackets].txt',
+    )
   })
 })
 
-// ── Decision-mirror tests for the handleSubmit ordering ──────────────────
+// ── handleSubmit decision tree mirror ────────────────────────────────────
 
-/**
- * Mirror of the new ``handleSubmit`` decision tree. The real hook calls
- * ``addUserMessage(buildUserMessage(input, files))`` UNCONDITIONALLY
- * before consulting the busy check. We mirror that here as a pure
- * function so any future change to the hook's source can be diff-checked
- * against a known-good decision sequence.
- */
 type HandleSubmitStep =
   | { type: 'guard_failed' }
-  | { type: 'add_user_message'; content: string }
   | { type: 'check_busy' }
   | { type: 'set_busy_state'; alreadyInChat: boolean }
+  | { type: 'add_user_message'; content: string }
   | { type: 'do_submit'; isRetry: boolean }
 
+interface HandleSubmitOutcome {
+  steps: HandleSubmitStep[]
+  result: SubmitResult
+}
+
+/**
+ * Mirror of the handleSubmit decision tree.
+ *
+ * Invariants pinned:
+ *   - guard_failed → 'rejected', NO further steps (no chat mutation,
+ *     no IPC, no busy state).
+ *   - check_busy=true → set_busy_state(alreadyInChat=false), NO
+ *     add_user_message, return 'busy'.
+ *   - check_busy=false → do_submit(isRetry=false), return 'sent'.
+ *     ★ NOTE: handleSubmit does NOT call add_user_message directly
+ *     on the happy path. _doSubmit owns that — when called with
+ *     ``isRetry=false`` it (a) calls addUserMessage AND (b)
+ *     constructs the wire payload by appending the user message
+ *     to a snapshot of ``messages``. Both happen inside _doSubmit
+ *     so the two derivations stay in sync.
+ *
+ * Critically: add_user_message NEVER appears in the busy branch
+ * (web-app parity — the chat thread is reserved for confirmed sends).
+ */
 function simulateHandleSubmit(opts: {
   canSend: boolean
   hasUser: boolean
@@ -122,168 +141,420 @@ function simulateHandleSubmit(opts: {
   busyResult: boolean
   input: string
   files?: FileRef[]
-}): HandleSubmitStep[] {
+}): HandleSubmitOutcome {
   const steps: HandleSubmitStep[] = []
   if (!opts.canSend || !opts.hasUser || !opts.hasMachineId) {
     steps.push({ type: 'guard_failed' })
-    return steps
+    return { steps, result: 'rejected' }
   }
-  // ★ The canonical ordering: addUserMessage BEFORE busy check.
-  steps.push({
-    type: 'add_user_message',
-    content: buildUserMessage(opts.input, opts.files),
-  })
   steps.push({ type: 'check_busy' })
   if (opts.busyResult) {
-    steps.push({ type: 'set_busy_state', alreadyInChat: true })
-    return steps
+    steps.push({ type: 'set_busy_state', alreadyInChat: false })
+    return { steps, result: 'busy' }
   }
-  steps.push({ type: 'do_submit', isRetry: true })
-  return steps
+  // Happy path: hand off to _doSubmit. NOTE: add_user_message is NOT
+  // a step here — it lives inside _doSubmit's isRetry=false branch.
+  steps.push({ type: 'do_submit', isRetry: false })
+  return { steps, result: 'sent' }
 }
 
 describe('handleSubmit decision tree — ordering invariants', () => {
-  it('not-busy path: addUserMessage → checkBusy → doSubmit(isRetry=true)', () => {
-    const steps = simulateHandleSubmit({
+  it("not-busy: check_busy → do_submit(isRetry=false), result='sent'", () => {
+    // ★ handleSubmit no longer calls addUserMessage directly.
+    // _doSubmit's isRetry=false branch owns both the addUserMessage
+    // and the wire-payload append (kept together to prevent the two
+    // derivations from diverging).
+    const o = simulateHandleSubmit({
       canSend: true,
       hasUser: true,
       hasMachineId: true,
       busyResult: false,
       input: 'hello',
     })
-    expect(steps.map((s) => s.type)).toEqual([
-      'add_user_message',
+    expect(o.result).toBe('sent')
+    expect(o.steps.map((s) => s.type)).toEqual([
       'check_busy',
       'do_submit',
     ])
-    const submit = steps.find((s) => s.type === 'do_submit')
-    expect(submit && (submit as any).isRetry).toBe(true)
+    const submit = o.steps.find((s) => s.type === 'do_submit')
+    expect(submit && (submit as any).isRetry).toBe(false)
+    // ★ NO add_user_message at this layer — it's _doSubmit's job.
+    expect(o.steps.find((s) => s.type === 'add_user_message')).toBeUndefined()
   })
 
-  it('busy path: addUserMessage → checkBusy → set_busy_state(alreadyInChat=true)', () => {
-    // ★ THE REGRESSION TEST FOR THE DISAPPEARING-MESSAGE BUG ★
+  it("★ busy: check_busy → set_busy_state(alreadyInChat=false), NO add_user_message, result='busy'", () => {
+    // THE WEB-APP-PARITY INVARIANT.
     //
-    // Before the fix the busy path emitted:
-    //   ['check_busy', 'set_busy_state(alreadyInChat=false)']
-    // — addUserMessage was never reached. After the fix, addUserMessage
-    // ALWAYS runs first. If a future refactor moves addUserMessage back
-    // below the busy check, this test catches it before the user does.
-    const steps = simulateHandleSubmit({
+    // A busy pre-check MUST NOT mutate the chat thread. The user
+    // hasn't confirmed anything yet — they typed and hit send, and
+    // the system is asking "are you sure (override)?". Adding the
+    // message would pollute the thread with not-yet-confirmed sends.
+    //
+    // If a future refactor moves addUserMessage above the busy
+    // check, this test catches it.
+    const o = simulateHandleSubmit({
       canSend: true,
       hasUser: true,
       hasMachineId: true,
       busyResult: true,
       input: 'hello',
     })
-    expect(steps.map((s) => s.type)).toEqual([
-      'add_user_message',
+    expect(o.result).toBe('busy')
+    expect(o.steps.map((s) => s.type)).toEqual([
       'check_busy',
       'set_busy_state',
     ])
-    const busyStep = steps.find((s) => s.type === 'set_busy_state')
-    expect(busyStep && (busyStep as any).alreadyInChat).toBe(true)
+    // ★ NO add_user_message in the busy branch.
+    expect(o.steps.find((s) => s.type === 'add_user_message')).toBeUndefined()
+
+    const busyStep = o.steps.find((s) => s.type === 'set_busy_state')
+    // alreadyInChat=false because the chat thread is clean.
+    expect(busyStep && (busyStep as any).alreadyInChat).toBe(false)
   })
 
-  it('guard failure short-circuits BEFORE adding the message', () => {
-    // If canSend is false (e.g. WS disconnected), we MUST NOT add a
-    // ghost message to the chat thread that will never get a response.
-    // The ordering is: guard FIRST, then everything else.
-    const steps = simulateHandleSubmit({
+  it("guard failure: NO further steps, result='rejected'", () => {
+    const o = simulateHandleSubmit({
       canSend: false,
       hasUser: true,
       hasMachineId: true,
       busyResult: false,
       input: 'hello',
     })
-    expect(steps).toEqual([{ type: 'guard_failed' }])
-    expect(steps.find((s) => s.type === 'add_user_message')).toBeUndefined()
+    expect(o.result).toBe('rejected')
+    expect(o.steps).toEqual([{ type: 'guard_failed' }])
+    expect(o.steps.find((s) => s.type === 'add_user_message')).toBeUndefined()
+    expect(o.steps.find((s) => s.type === 'check_busy')).toBeUndefined()
   })
 
-  it('missing user short-circuits before add', () => {
-    const steps = simulateHandleSubmit({
-      canSend: true,
-      hasUser: false,
-      hasMachineId: true,
-      busyResult: false,
-      input: 'hello',
+  it('missing user → rejected', () => {
+    const o = simulateHandleSubmit({
+      canSend: true, hasUser: false, hasMachineId: true,
+      busyResult: false, input: 'hello',
     })
-    expect(steps).toEqual([{ type: 'guard_failed' }])
+    expect(o.result).toBe('rejected')
+    expect(o.steps).toEqual([{ type: 'guard_failed' }])
   })
 
-  it('missing machineId short-circuits before add', () => {
-    const steps = simulateHandleSubmit({
-      canSend: true,
-      hasUser: true,
-      hasMachineId: false,
-      busyResult: false,
-      input: 'hello',
+  it('missing machineId → rejected', () => {
+    const o = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: false,
+      busyResult: false, input: 'hello',
     })
-    expect(steps).toEqual([{ type: 'guard_failed' }])
+    expect(o.result).toBe('rejected')
+    expect(o.steps).toEqual([{ type: 'guard_failed' }])
   })
 
-  it('the message added to the chat thread matches what gets sent on the wire', () => {
-    // Two callers (display + wire) must call buildUserMessage with the
-    // SAME args so the strings are byte-identical. This test pins
-    // that — if a future change adds a transformation before
-    // addUserMessage but not before _doSubmit, the strings diverge
-    // and this test fails.
+  it('display copy and wire copy of the user message are byte-identical', () => {
+    // After the refactor, addUserMessage lives inside _doSubmit. We
+    // verify display/wire parity at the buildUserMessage level
+    // directly: the same inputs ALWAYS produce the same canonical
+    // string, so whichever caller invokes it gets the same result.
     const files: FileRef[] = [
       { path: '/x', name: 'x', ext: '', isDirectory: false },
     ]
-    const steps = simulateHandleSubmit({
-      canSend: true,
-      hasUser: true,
-      hasMachineId: true,
-      busyResult: false,
-      input: 'go',
-      files,
-    })
-    const addStep = steps.find((s) => s.type === 'add_user_message') as any
-    const expectedWireString = buildUserMessage('go', files)
-    expect(addStep.content).toBe(expectedWireString)
+    const displayCopy = buildUserMessage('go', files)
+    const wireCopy = buildUserMessage('go', files)
+    expect(displayCopy).toBe(wireCopy)
   })
 })
 
-// ── isRetry semantics: never double-add ─────────────────────────────────
+// ── forceStopAndSend decision tree mirror ────────────────────────────────
 
-describe('handleSubmit + _doSubmit: never adds the user message twice', () => {
-  // _doSubmit's own behaviour:
-  //   if (!isRetry) addUserMessage(...)
-  // handleSubmit always calls addUserMessage itself, then passes
-  // isRetry=true to _doSubmit. forceStopAndSend resolves isRetry from
-  // pendingInput.alreadyInChat (true after handleSubmit set the busy
-  // stash). End-to-end invariant: at most ONE addUserMessage call per
-  // user click.
-  function simulate_doSubmit(isRetry: boolean): { addCalled: boolean } {
-    return { addCalled: !isRetry }
+type ForceStopStep =
+  | { type: 'reentry_blocked' }
+  | { type: 'resolve_target'; useOverride: boolean; isRetry: boolean }
+  | { type: 'no_content_dismiss' }
+  | { type: 'call_stop_machine' }
+  | { type: 'do_submit'; isRetry: boolean }
+  | { type: 'stop_threw' }
+
+function simulateForceStopAndSend(opts: {
+  isStoppingMachine: boolean
+  hasMachineId: boolean
+  overrideInput?: string
+  pendingInput: { input: string; alreadyInChat: boolean } | null
+  stopThrows: boolean
+}): { steps: ForceStopStep[]; result: SubmitResult } {
+  const steps: ForceStopStep[] = []
+  if (opts.isStoppingMachine || !opts.hasMachineId) {
+    steps.push({ type: 'reentry_blocked' })
+    return { steps, result: 'rejected' }
+  }
+  const target =
+    opts.overrideInput !== undefined
+      ? { input: opts.overrideInput, isRetry: false, useOverride: true }
+      : opts.pendingInput
+        ? {
+            input: opts.pendingInput.input,
+            isRetry: opts.pendingInput.alreadyInChat,
+            useOverride: false,
+          }
+        : null
+  if (target) {
+    steps.push({
+      type: 'resolve_target',
+      useOverride: target.useOverride,
+      isRetry: target.isRetry,
+    })
+  }
+  if (!target || !target.input.trim()) {
+    steps.push({ type: 'no_content_dismiss' })
+    return { steps, result: 'rejected' }
+  }
+  steps.push({ type: 'call_stop_machine' })
+  if (opts.stopThrows) {
+    steps.push({ type: 'stop_threw' })
+    return { steps, result: 'rejected' }
+  }
+  steps.push({ type: 'do_submit', isRetry: target.isRetry })
+  return { steps, result: 'sent' }
+}
+
+describe('forceStopAndSend decision tree — ordering invariants', () => {
+  it('happy path: override absent + pre-check stash → isRetry=false', () => {
+    // Pre-check path stashed with alreadyInChat=false. forceStopAndSend
+    // calls _doSubmit with isRetry=false → _doSubmit will run its own
+    // addUserMessage. End-to-end: the message lands in chat exactly
+    // ONCE (here, in _doSubmit).
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: { input: 'queued', alreadyInChat: false },
+      stopThrows: false,
+    })
+    expect(o.result).toBe('sent')
+    const submit = o.steps.find((s) => s.type === 'do_submit') as any
+    expect(submit.isRetry).toBe(false)
+  })
+
+  it('post-error stash: override absent + alreadyInChat=true → isRetry=true', () => {
+    // Post-error path: message already in chat thread from _doSubmit.
+    // Re-run with isRetry=true so _doSubmit does NOT add again.
+    // End-to-end: message in chat thread exactly ONCE (preserved
+    // from original send).
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: { input: 'already shown', alreadyInChat: true },
+      stopThrows: false,
+    })
+    expect(o.result).toBe('sent')
+    const submit = o.steps.find((s) => s.type === 'do_submit') as any
+    expect(submit.isRetry).toBe(true)
+  })
+
+  it('override input wins: isRetry=false regardless of stash state', () => {
+    // User edited their textarea after the busy state was detected.
+    // forceStopAndSend uses the LIVE input. Since it's a fresh
+    // string, isRetry=false → _doSubmit addUserMessages it.
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: 'edited',
+      pendingInput: { input: 'original', alreadyInChat: true },
+      stopThrows: false,
+    })
+    const submit = o.steps.find((s) => s.type === 'do_submit') as any
+    expect(submit.isRetry).toBe(false)
+  })
+
+  it('empty input AND empty stash → no_content_dismiss, result=rejected', () => {
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: null,
+      stopThrows: false,
+    })
+    expect(o.result).toBe('rejected')
+    expect(o.steps.map((s) => s.type)).toContain('no_content_dismiss')
+    expect(o.steps.find((s) => s.type === 'call_stop_machine')).toBeUndefined()
+  })
+
+  it('whitespace-only override → no_content_dismiss', () => {
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: '   ',
+      pendingInput: null,
+      stopThrows: false,
+    })
+    expect(o.result).toBe('rejected')
+    expect(o.steps.find((s) => s.type === 'call_stop_machine')).toBeUndefined()
+  })
+
+  it('re-entry blocked when isStoppingMachine=true', () => {
+    // Double-click protection: while a force-stop is in flight, a
+    // second click is a no-op. Critically, no_content_dismiss does
+    // NOT fire — we don't want to clear the busy state out from
+    // under the in-flight call.
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: true,
+      hasMachineId: true,
+      overrideInput: 'click again',
+      pendingInput: null,
+      stopThrows: false,
+    })
+    expect(o.result).toBe('rejected')
+    expect(o.steps).toEqual([{ type: 'reentry_blocked' }])
+  })
+
+  it('stopMachine throws → result=rejected, busy state NOT cleared', () => {
+    // If we can't stop the running task, the user must be able to
+    // retry — leaving busy state in place + returning 'rejected'
+    // tells the caller NOT to clear the input.
+    const o = simulateForceStopAndSend({
+      isStoppingMachine: false,
+      hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: { input: 'queued', alreadyInChat: false },
+      stopThrows: true,
+    })
+    expect(o.result).toBe('rejected')
+    expect(o.steps.find((s) => s.type === 'stop_threw')).toBeDefined()
+    expect(o.steps.find((s) => s.type === 'do_submit')).toBeUndefined()
+  })
+})
+
+// ── End-to-end message-count invariants ──────────────────────────────────
+
+describe('end-to-end: total addUserMessage calls per user click', () => {
+  // The whole purpose of the isRetry/alreadyInChat dance is to
+  // ensure the user's message appears in the chat thread EXACTLY ONCE
+  // regardless of which path got us there. These tests simulate the
+  // full handleSubmit + forceStopAndSend flow and count the total.
+
+  function simulate_doSubmitAdds(isRetry: boolean): number {
+    return isRetry ? 0 : 1
   }
 
-  it('not-busy: handleSubmit adds, _doSubmit(isRetry=true) does not', () => {
-    let totalAdds = 0
-    // handleSubmit add
-    totalAdds++
-    // _doSubmit with isRetry=true
-    if (simulate_doSubmit(true).addCalled) totalAdds++
-    expect(totalAdds).toBe(1)
+  it('not busy: handleSubmit adds(0) + _doSubmit(isRetry=false) adds(1) = 1', () => {
+    // Post-refactor: handleSubmit never adds directly. _doSubmit's
+    // isRetry=false branch is the sole owner of the addUserMessage
+    // + wire-payload-append pair on the happy path.
+    const h = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: true,
+      busyResult: false, input: 'go',
+    })
+    const handleSubmitAdds = h.steps.filter((s) => s.type === 'add_user_message').length
+    expect(handleSubmitAdds).toBe(0)
+    const doSubmitStep = h.steps.find((s) => s.type === 'do_submit') as any
+    const doSubmitAdds = simulate_doSubmitAdds(doSubmitStep.isRetry)
+    expect(handleSubmitAdds + doSubmitAdds).toBe(1)
   })
 
-  it('busy → forceStopAndSend: handleSubmit adds, retry _doSubmit(isRetry=true) does not', () => {
-    let totalAdds = 0
-    // handleSubmit add (before the busy stash)
-    totalAdds++
-    // user clicks Override & Run
-    // forceStopAndSend reads pendingInput.alreadyInChat=true → isRetry=true
-    if (simulate_doSubmit(true).addCalled) totalAdds++
-    expect(totalAdds).toBe(1)
+  it('busy → Override (pre-check stash): handleSubmit adds(0) + _doSubmit(isRetry=false) adds(1) = 1', () => {
+    const h = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: true,
+      busyResult: true, input: 'go',
+    })
+    const handleSubmitAdds = h.steps.filter((s) => s.type === 'add_user_message').length
+    expect(handleSubmitAdds).toBe(0)
+
+    // User clicks Override & Run; stash is alreadyInChat=false.
+    const f = simulateForceStopAndSend({
+      isStoppingMachine: false, hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: { input: 'go', alreadyInChat: false },
+      stopThrows: false,
+    })
+    const submit = f.steps.find((s) => s.type === 'do_submit') as any
+    const doSubmitAdds = simulate_doSubmitAdds(submit.isRetry)
+    expect(handleSubmitAdds + doSubmitAdds).toBe(1)
   })
 
-  it('forceStopAndSend with override input from caller: alreadyInChat=false → isRetry=false → adds', () => {
-    // The override path means the caller supplied a fresh input that
-    // was NOT yet added to the chat (e.g. a different message than
-    // the one stashed). In that case _doSubmit DOES add it.
-    let totalAdds = 0
-    // No handleSubmit add here — the caller bypassed the stash.
-    if (simulate_doSubmit(false).addCalled) totalAdds++
-    expect(totalAdds).toBe(1)
+  it('post-error → Override: _doSubmit added(1 on first call) + retry _doSubmit(isRetry=true) adds(0) = 1', () => {
+    // Post-error path: pre-check said not busy, _doSubmit ran with
+    // isRetry=false (adds the message), then SSE returned
+    // MACHINE_BUSY. User clicks Override. The stash from _doSubmit
+    // has alreadyInChat=true, so forceStopAndSend's retry _doSubmit
+    // call gets isRetry=true and skips its own add.
+    //
+    // Total adds: 1 (the original _doSubmit call) + 0 (the retry) = 1.
+    const firstCallAdds = simulate_doSubmitAdds(false)  // isRetry=false on first
+    expect(firstCallAdds).toBe(1)
+
+    // User clicks Override; the stash has alreadyInChat=true.
+    const f = simulateForceStopAndSend({
+      isStoppingMachine: false, hasMachineId: true,
+      overrideInput: undefined,
+      pendingInput: { input: 'go', alreadyInChat: true },
+      stopThrows: false,
+    })
+    const submit = f.steps.find((s) => s.type === 'do_submit') as any
+    const retryAdds = simulate_doSubmitAdds(submit.isRetry)
+    expect(firstCallAdds + retryAdds).toBe(1)
+  })
+
+  it('busy → Override with edited input: pre-check stash bypassed, _doSubmit adds(1) = 1', () => {
+    // User typed "go", busy detected, then edited to "go now" and
+    // clicked Override. The override input wins → isRetry=false →
+    // _doSubmit adds. Net total = 1 (the edited version).
+    const h = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: true,
+      busyResult: true, input: 'go',
+    })
+    const handleSubmitAdds = h.steps.filter((s) => s.type === 'add_user_message').length
+    expect(handleSubmitAdds).toBe(0)
+
+    const f = simulateForceStopAndSend({
+      isStoppingMachine: false, hasMachineId: true,
+      overrideInput: 'go now',
+      pendingInput: { input: 'go', alreadyInChat: false },
+      stopThrows: false,
+    })
+    const submit = f.steps.find((s) => s.type === 'do_submit') as any
+    const doSubmitAdds = simulate_doSubmitAdds(submit.isRetry)
+    expect(handleSubmitAdds + doSubmitAdds).toBe(1)
+  })
+})
+
+// ── Web-app parity surface ───────────────────────────────────────────────
+
+describe('SubmitResult — caller contract', () => {
+  it('rejected guard outcomes never produce any side-effect step', () => {
+    // The 'rejected' return value is the caller's signal to LEAVE
+    // the input alone. The decision tree must not produce any
+    // chat-mutation or IPC step before returning 'rejected'.
+    const guardScenarios: Array<Partial<Parameters<typeof simulateHandleSubmit>[0]>> = [
+      { canSend: false, hasUser: true, hasMachineId: true },
+      { canSend: true, hasUser: false, hasMachineId: true },
+      { canSend: true, hasUser: true, hasMachineId: false },
+    ]
+    for (const partial of guardScenarios) {
+      const o = simulateHandleSubmit({
+        busyResult: false,
+        input: 'x',
+        canSend: partial.canSend ?? true,
+        hasUser: partial.hasUser ?? true,
+        hasMachineId: partial.hasMachineId ?? true,
+      })
+      expect(o.result).toBe('rejected')
+      expect(o.steps.length).toBe(1)
+      expect(o.steps[0].type).toBe('guard_failed')
+    }
+  })
+
+  it('busy outcome carries pendingInput.alreadyInChat=false (clean stash)', () => {
+    const o = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: true,
+      busyResult: true, input: 'x',
+    })
+    const busy = o.steps.find((s) => s.type === 'set_busy_state') as any
+    expect(busy.alreadyInChat).toBe(false)
+  })
+
+  it('sent outcome always passes isRetry=false to _doSubmit (handoff to _doSubmit for add+append)', () => {
+    const o = simulateHandleSubmit({
+      canSend: true, hasUser: true, hasMachineId: true,
+      busyResult: false, input: 'x',
+    })
+    const submit = o.steps.find((s) => s.type === 'do_submit') as any
+    expect(submit.isRetry).toBe(false)
+    // ★ _doSubmit's isRetry=false branch owns both addUserMessage
+    // AND the wire-payload-append for the new user message — kept
+    // in one place so they can't drift out of sync.
   })
 })

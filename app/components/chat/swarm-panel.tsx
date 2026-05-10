@@ -527,10 +527,10 @@ export function SwarmPanel({ isActive, swarmId, prompt, machineCount, persistent
               </div>
               <span className="text-sm text-muted-foreground">
                 {overallStatus === "planning"
-                  ? "Decomposing task into subtasks\u2026"
+                  ? "Decomposing task into subtasks…"
                   : overallStatus === "creating"
-                    ? persistent ? "Creating persistent machines\u2026" : "Creating temporary machines\u2026"
-                    : "Initializing\u2026"
+                    ? persistent ? "Creating persistent machines…" : "Creating temporary machines…"
+                    : "Initializing…"
                 }
               </span>
             </div>
@@ -562,7 +562,7 @@ export function SwarmPanel({ isActive, swarmId, prompt, machineCount, persistent
           <div className="flex-1 flex items-center justify-center gap-3 py-12">
             <CircleNotch className="size-6 animate-spin text-purple-500/70" />
             <span className="text-sm text-muted-foreground">
-              Aggregating results from all machines\u2026
+              Aggregating results from all machines…
             </span>
           </div>
         )}
@@ -624,7 +624,7 @@ export function SwarmPanel({ isActive, swarmId, prompt, machineCount, persistent
           <div className="shrink-0 flex items-center justify-center gap-2.5 px-4 py-3 border-t border-purple-500/15 bg-purple-50/40 dark:bg-purple-950/15">
             <CircleNotch className="size-4 animate-spin text-purple-500" />
             <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-              Aggregating results\u2026
+              Aggregating results…
             </span>
           </div>
         )}

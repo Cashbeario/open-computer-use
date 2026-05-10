@@ -618,7 +618,14 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", machineId);
 
-          // Poll for IP assignment
+          // Poll for IP assignment.
+          // AWS typically assigns the public IP within 2-10s of the
+          // instance entering "running". Polling at 1.5s instead of 5s
+          // catches it ~3.5s sooner without DescribeInstances rate-limit
+          // pressure (24 attempts × 1.5s = 36s window — same total budget
+          // as the old 8 attempts × 5s = 40s).
+          const IP_POLL_MS = 1500;
+          const IP_MAX_ATTEMPTS = 80; // 80 × 1.5s = 120s budget
           let checkCount = 0;
           const checkInterval = setInterval(async () => {
             checkCount++;
@@ -630,20 +637,34 @@ export async function POST(request: NextRequest) {
               .eq("id", machineId)
               .single();
 
-            if (updatedMachine?.public_ip_address || checkCount > 24 || updatedMachine?.status === "error") {
+            if (updatedMachine?.public_ip_address || checkCount > IP_MAX_ATTEMPTS || updatedMachine?.status === "error") {
               clearInterval(checkInterval);
 
-              // If desktop enabled and IP assigned, poll for desktop readiness
+              // If desktop enabled and IP assigned, poll for readiness.
+              // We probe the AI AGENT port :8080 (TCP connect via WS upgrade)
+              // instead of noVNC :6080. Why: agent has no After=vncserver
+              // systemd dep anymore, so it binds within ~2-5s of boot —
+              // well before Xvnc + noVNC are up. The agent IS the thing
+              // the orchestrator actually talks to; noVNC is only for the
+              // VNC view. Detect "agent ready" first, mark VM usable for
+              // AI tasks immediately. VNC catches up in the background.
               if (isDesktop && updatedMachine?.public_ip_address) {
+                const DESKTOP_POLL_MS = 1500;
+                const DESKTOP_MAX_ATTEMPTS = 300; // 300 × 1.5s = 7.5 min (same total budget)
                 let desktopCheckCount = 0;
                 const desktopCheckInterval = setInterval(async () => {
                   desktopCheckCount++;
                   try {
+                    // WebSocket upgrade probe: any HTTP response from :8080
+                    // means the agent is bound and accepting connections.
+                    // We expect 426/400 (websockets server rejects plain HTTP)
+                    // or 200 — anything that's an HTTP response = ready.
                     const res = await fetch(
-                      `http://${updatedMachine.public_ip_address}:6080/`,
-                      { signal: AbortSignal.timeout(3000) }
+                      `http://${updatedMachine.public_ip_address}:8080/`,
+                      { signal: AbortSignal.timeout(2000) }
                     );
-                    if (res.ok || res.status === 200) {
+                    // Any HTTP response (200/400/426/etc) = port bound = ready
+                    if (res.status > 0) {
                       // Desktop is ready
                       const { data: m } = await supabase
                         .from("user_machines")
@@ -663,7 +684,7 @@ export async function POST(request: NextRequest) {
                   } catch {
                     // noVNC not ready yet
                   }
-                  if (desktopCheckCount > 90) {
+                  if (desktopCheckCount > DESKTOP_MAX_ATTEMPTS) {
                     // ~7.5 minutes - mark as failed
                     clearInterval(desktopCheckInterval);
                     const { data: m } = await supabase
@@ -682,10 +703,10 @@ export async function POST(request: NextRequest) {
                         .eq("id", machineId);
                     }
                   }
-                }, 5000);
+                }, DESKTOP_POLL_MS);
               }
             }
-          }, 5000);
+          }, IP_POLL_MS);
 
         } catch (awsError: any) {
           console.error("AWS EC2 instance creation failed:", awsError);

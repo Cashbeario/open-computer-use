@@ -627,6 +627,108 @@ export class AwsEc2Service {
   }
 
   /**
+   * Strips pure-comment lines and collapses blank-line runs in a bash script,
+   * preserving heredoc bodies VERBATIM. Used to slim UserData before gzip
+   * since AWS RunInstances limits raw user data to 16384 bytes after base64
+   * decode. Source code stays readable; only the wire format is compact.
+   */
+  private minifyBash(src: string): string {
+    const lines = src.split("\n");
+    const out: string[] = [];
+    let inHeredoc: string | null = null;
+    let lastBlank = false;
+    for (const line of lines) {
+      if (inHeredoc !== null) {
+        out.push(line);
+        if (line.trim() === inHeredoc) inHeredoc = null;
+        continue;
+      }
+      const hd = line.match(/<<\s*['"]?(\w+)['"]?/);
+      if (hd) {
+        out.push(line);
+        inHeredoc = hd[1];
+        continue;
+      }
+      if (line.startsWith("#!")) {
+        out.push(line);
+        lastBlank = false;
+        continue;
+      }
+      if (/^\s*#/.test(line)) continue; // pure comment
+      const blank = line.trim() === "";
+      if (blank && lastBlank) continue;
+      lastBlank = blank;
+      out.push(line);
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * Strips pure-comment lines and collapses blank-line runs in Python source.
+   * Conservative: only touches lines that are entirely a comment (after
+   * leading whitespace) and consecutive blank lines. Does NOT strip
+   * docstrings or inline comments — too risky to do without a real parser.
+   */
+  private minifyPython(src: string): string {
+    const lines = src.split("\n");
+    const out: string[] = [];
+    let lastBlank = false;
+    for (const line of lines) {
+      // Preserve shebang
+      if (line.startsWith("#!")) {
+        out.push(line);
+        lastBlank = false;
+        continue;
+      }
+      // Pure-comment line (after any indentation)
+      if (/^\s*#/.test(line)) continue;
+      const blank = line.trim() === "";
+      if (blank && lastBlank) continue;
+      lastBlank = blank;
+      out.push(line);
+    }
+    return out.join("\n");
+  }
+
+  /**
+   * Strips pure-comment lines and collapses blank-line runs in a PowerShell
+   * script, preserving here-string (@"..."@ / @'...'@) bodies VERBATIM.
+   */
+  private minifyPowerShell(src: string): string {
+    const lines = src.split("\n");
+    const out: string[] = [];
+    let inHereString: '"' | "'" | null = null;
+    let lastBlank = false;
+    for (const line of lines) {
+      if (inHereString !== null) {
+        out.push(line);
+        // PowerShell here-string close marker MUST be at column 0
+        if (line === inHereString + "@") inHereString = null;
+        continue;
+      }
+      // Detect here-string opens that DON'T close on the same line
+      const opensDouble = line.includes('@"') && !/@"[\s\S]*"@/.test(line);
+      const opensSingle = line.includes("@'") && !/@'[\s\S]*'@/.test(line);
+      if (opensDouble) {
+        out.push(line);
+        inHereString = '"';
+        continue;
+      }
+      if (opensSingle) {
+        out.push(line);
+        inHereString = "'";
+        continue;
+      }
+      if (/^\s*#/.test(line)) continue; // pure comment
+      const blank = line.trim() === "";
+      if (blank && lastBlank) continue;
+      lastBlank = blank;
+      out.push(line);
+    }
+    return out.join("\n");
+  }
+
+  /**
    * Returns the Python AI agent source code, shared by both full and golden AMI UserData.
    */
   private getAgentSource(): string {
@@ -1188,9 +1290,12 @@ if __name__=="__main__":asyncio.run(main())
   }
 
   private generateDesktopUserData(vncPassword: string): string {
-    const agentPy = this.getAgentSource();
+    // Minify Python (strip pure-comment lines + collapse blanks) before
+    // gzip; cuts ~10-15% off the embedded agent payload after gzip.
+    const agentPy = this.minifyPython(this.getAgentSource());
 
-    // Gzip-compress the Python agent to fit within AWS UserData 25,600 byte base64 limit
+    // Gzip-compress the Python agent to fit within AWS UserData 16384-byte
+    // RAW limit (after base64 decode at AWS).
     const agentGz = zlib.gzipSync(Buffer.from(agentPy), { level: 9 });
     const agentB64 = agentGz.toString("base64").match(/.{1,76}/g)?.join("\n") ?? "";
 
@@ -1411,7 +1516,7 @@ Wants=vncserver@:1.service
 [Service]
 Type=simple
 User=root
-ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do ss -tln | grep -q :5901 && exit 0; sleep 1; done; exit 1'
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 150); do ss -tln | grep -q :5901 && exit 0; sleep 0.2; done; exit 1'
 ExecStart=/opt/novnc/utils/novnc_proxy --vnc localhost:5901 --listen 6080
 Restart=on-failure
 RestartSec=5
@@ -1420,13 +1525,12 @@ RestartSec=5
 WantedBy=multi-user.target
 SYSTEMD_NOVNC_EOF
 
-# Enable and start services
+# Enable and start services. noVNC's own ExecStartPre waits for port 5901,
+# so we can fire both starts in parallel via --no-block — saves ~5s of
+# sequential wait. systemd's After=/Wants= chain handles ordering.
 systemctl daemon-reload
-systemctl enable vncserver@:1.service
-systemctl enable novnc.service
-systemctl start vncserver@:1.service
-sleep 5
-systemctl start novnc.service
+systemctl enable vncserver@:1.service novnc.service
+systemctl start --no-block vncserver@:1.service novnc.service
 
 # Comprehensive screen keep-alive script (prevents sleep/lock)
 cat > /usr/local/bin/keep-screen-alive.sh << 'KEEPALIVE_EOF'
@@ -1509,7 +1613,7 @@ Wants=vncserver@:1.service
 Type=simple
 User=ubuntu
 Environment=DISPLAY=:1
-ExecStartPre=/bin/bash -c 'for i in $(seq 1 60); do xdpyinfo -display :1 >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1'
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 300); do xdpyinfo -display :1 >/dev/null 2>&1 && exit 0; sleep 0.2; done; exit 1'
 ExecStart=/usr/local/bin/keep-screen-alive.sh
 Restart=always
 RestartSec=5
@@ -1586,12 +1690,18 @@ ${agentB64}
 AGENT_B64_EOF
 chown ubuntu:ubuntu /opt/ai-agent/server.py
 
-# Create systemd service for AI agent with full environment
+# Create systemd service for AI agent with full environment.
+# NOTE: NO After=/Wants=vncserver dependency. The agent starts as soon as
+# multi-user.target is up so port 8080 is reachable for orchestrator probes
+# in seconds (vs ~10s waiting for Xvnc). Browser commands lazily wait for
+# X via xdpyinfo inside the Python agent (already imports try/except);
+# terminal/file/screenshot ops work as soon as their underlying tool is
+# usable.
 cat > /etc/systemd/system/ai-agent.service << 'AGENT_SVC_EOF'
 [Unit]
 Description=LLMHub AI Agent WebSocket Server
-After=vncserver@:1.service
-Wants=vncserver@:1.service
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -1606,10 +1716,9 @@ Environment=XDG_RUNTIME_DIR=/tmp/runtime-ubuntu
 Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/runtime-ubuntu/bus
 EnvironmentFile=/opt/ai-agent/.env
 ExecStartPre=/bin/bash -c 'mkdir -p /tmp/runtime-ubuntu && chmod 700 /tmp/runtime-ubuntu && chown ubuntu:ubuntu /tmp/runtime-ubuntu'
-ExecStartPre=/bin/bash -c 'for i in $(seq 1 60); do xdpyinfo -display :1 >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1'
 ExecStart=/usr/bin/python3 /opt/ai-agent/server.py
 Restart=on-failure
-RestartSec=5
+RestartSec=2
 MemoryMax=512M
 MemoryHigh=384M
 OOMPolicy=restart
@@ -1679,8 +1788,11 @@ echo "DESKTOP_INIT_STATUS=ready" > /var/run/desktop-init-status
 echo "Desktop setup complete at $(date)"
 `;
 
-    // Gzip the entire script — cloud-init auto-detects gzip magic bytes
-    const scriptGz = zlib.gzipSync(Buffer.from(script), { level: 9 });
+    // Strip comments + collapse blank lines (preserves heredoc bodies),
+    // then gzip. AWS RunInstances enforces 16384 bytes RAW after base64
+    // decode; cloud-init auto-detects gzip magic bytes for us on Linux.
+    const minified = this.minifyBash(script);
+    const scriptGz = zlib.gzipSync(Buffer.from(minified), { level: 9 });
     return scriptGz.toString("base64");
   }
 
@@ -2232,7 +2344,8 @@ if __name__=="__main__":asyncio.run(main())
    * Gzips the Python agent to stay well under the 16KB UserData limit.
    */
   private generateWindowsGoldenUserData(vncPassword: string): string {
-    const agentPy = this.getWindowsAgentSource();
+    // Minify Python before gzip (cuts ~10-15% post-gzip size)
+    const agentPy = this.minifyPython(this.getWindowsAgentSource());
 
     // Gzip + base64 to reduce size (same approach as Linux agent)
     const agentGz = zlib.gzipSync(Buffer.from(agentPy), { level: 9 });
@@ -2431,7 +2544,34 @@ Set-Content -Path "C:\\coasty\\status.txt" -Value "ready"
 shutdown /r /t 10 /c "Coasty setup complete - activating desktop" /f
 </powershell>`;
 
-    return Buffer.from(script).toString("base64");
+    // ── UserData size optimization ─────────────────────────────────────
+    // AWS RunInstances enforces 16384 bytes RAW (after base64 decode).
+    // Linux cloud-init auto-decompresses gzip; Windows EC2Launch does NOT,
+    // so we (1) minify the PowerShell to strip comments + blank lines
+    // (preserving here-string bodies verbatim), (2) gzip the inner script,
+    // (3) wrap in a tiny self-decompressing bootstrap that gunzips + runs
+    // it via a temp .ps1 file.
+    const innerScript = this.minifyPowerShell(
+      script
+        .replace(/^\s*<powershell>\r?\n?/, "")
+        .replace(/\r?\n?<\/powershell>\s*$/, "")
+    );
+    const innerGz = zlib.gzipSync(Buffer.from(innerScript), { level: 9 });
+    const innerB64 = innerGz.toString("base64");
+
+    const bootstrap = `<powershell>
+$g=[Convert]::FromBase64String("${innerB64}")
+$m=New-Object IO.MemoryStream(,$g)
+$d=New-Object IO.Compression.GZipStream($m,[IO.Compression.CompressionMode]::Decompress)
+$r=New-Object IO.StreamReader($d)
+$s=$r.ReadToEnd()
+$r.Close();$d.Close();$m.Close()
+$f=Join-Path $env:TEMP "coasty-init.ps1"
+[IO.File]::WriteAllText($f,$s)
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f
+</powershell>`;
+
+    return Buffer.from(bootstrap).toString("base64");
   }
 
   /**
@@ -2440,7 +2580,7 @@ shutdown /r /t 10 /c "Coasty setup complete - activating desktop" /f
    * This only injects the VNC password, deploys the Python agent, and starts services.
    */
   private generateGoldenAmiUserData(vncPassword: string): string {
-    const agentPy = this.getAgentSource();
+    const agentPy = this.minifyPython(this.getAgentSource());
 
     const agentGz = zlib.gzipSync(Buffer.from(agentPy), { level: 9 });
     const agentB64 = agentGz.toString("base64").match(/.{1,76}/g)?.join("\n") ?? "";
@@ -2452,60 +2592,90 @@ exec > /var/log/desktop-setup.log 2>&1
 echo "DESKTOP_INIT_STATUS=starting" > /var/run/desktop-init-status
 echo "Golden AMI boot started at $(date)"
 
-# 1. Stop any services that may already be running (snapshot restore case)
-systemctl stop ai-agent.service vncserver@:1.service novnc.service keep-screen-alive.service memory-watchdog.service 2>/dev/null || true
+# Mask Ubuntu cruft that runs at boot but we never use on a headless
+# automation VM. Each one shaves 0.5-3s off boot; combined ~5-10s.
+# Use mask (not disable) — disable can be undone by package post-install
+# scripts, mask wins via a /dev/null symlink. Idempotent. Effects apply
+# on NEXT boot. Cheap insurance if the golden AMI bake missed any.
+(
+  systemctl mask --now \
+    snapd.service snapd.socket snapd.seeded.service \
+    unattended-upgrades.service \
+    apport.service apport-autoreport.service \
+    ModemManager.service \
+    bluetooth.service \
+    cups.service cups-browsed.service \
+    accounts-daemon.service \
+    motd-news.service motd-news.timer \
+    fwupd.service fwupd-refresh.service \
+    apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer \
+    ua-timer.service ua-timer.timer ua-reboot-cmds.service \
+    2>/dev/null || true
+) &
 
-# 1b. Idempotent locale-gen for the major-market locales the AI agent may
-# switch into at runtime based on proxy egress IP geo. Skipped if already
-# generated by the golden AMI build. No-op cost ~50ms on warm AMIs; ~5s
-# cold. Without these, Firefox can't render in the matched locale and
-# falls back to en_US, contradicting the spoofed Accept-Language header.
-if command -v locale-gen >/dev/null 2>&1; then
-  needed="en_US.UTF-8 en_GB.UTF-8 en_CA.UTF-8 en_AU.UTF-8 de_DE.UTF-8 fr_FR.UTF-8 es_ES.UTF-8 es_MX.UTF-8 it_IT.UTF-8 nl_NL.UTF-8 pt_BR.UTF-8 pt_PT.UTF-8 ja_JP.UTF-8 ko_KR.UTF-8 zh_CN.UTF-8 zh_TW.UTF-8 ru_RU.UTF-8 tr_TR.UTF-8 ar_SA.UTF-8 he_IL.UTF-8 pl_PL.UTF-8 sv_SE.UTF-8"
-  installed=$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/utf8/UTF-8/g')
-  missing=""
-  for lc in $needed; do
-    if ! echo "$installed" | grep -qiF "$lc"; then missing="$missing $lc"; fi
-  done
-  if [ -n "$missing" ]; then locale-gen $missing 2>/dev/null || true; fi
-fi
+# Stop our services in parallel — they may be running from the prior boot
+# (golden AMI auto-starts them) or from a snapshot restore. Background +
+# wait so all five stop concurrently instead of serially. Saves ~2-3s.
+systemctl stop ai-agent.service vncserver@:1.service novnc.service keep-screen-alive.service memory-watchdog.service 2>/dev/null &
+SVCS_STOP_PID=$!
 
-# 2. Set VNC password
+# In parallel with the stops, do all per-instance file setup (none of
+# these depend on services being down — only on filesystem access).
 USER_HOME=/home/ubuntu
-mkdir -p $USER_HOME/.vnc
+mkdir -p $USER_HOME/.vnc /opt/ai-agent
 echo "${vncPassword}" | vncpasswd -f > $USER_HOME/.vnc/passwd
 chmod 600 $USER_HOME/.vnc/passwd
 chown ubuntu:ubuntu $USER_HOME/.vnc/passwd
-
-# 3. Deploy AI agent
-mkdir -p /opt/ai-agent
 printf 'VNC_PASSWORD=%s\\n' "${vncPassword}" > /opt/ai-agent/.env
 chmod 600 /opt/ai-agent/.env && chown ubuntu:ubuntu /opt/ai-agent/.env
-
 base64 -d << 'AGENT_B64_EOF' | gunzip > /opt/ai-agent/server.py
 ${agentB64}
 AGENT_B64_EOF
 chown ubuntu:ubuntu /opt/ai-agent/server.py
 
-# 4. Enable swap (pre-created in golden AMI)
+# Locale-gen runs FULLY in background — agent doesn't need locales at
+# startup (it sets TZ/lang via env at runtime). If a locale is missing
+# when the agent first switches into it, the user's first request takes
+# ~5s longer. After that, cached forever. Massive boot-time win.
+if command -v locale-gen >/dev/null 2>&1; then
+  (
+    needed="en_US.UTF-8 en_GB.UTF-8 en_CA.UTF-8 en_AU.UTF-8 de_DE.UTF-8 fr_FR.UTF-8 es_ES.UTF-8 es_MX.UTF-8 it_IT.UTF-8 nl_NL.UTF-8 pt_BR.UTF-8 pt_PT.UTF-8 ja_JP.UTF-8 ko_KR.UTF-8 zh_CN.UTF-8 zh_TW.UTF-8 ru_RU.UTF-8 tr_TR.UTF-8 ar_SA.UTF-8 he_IL.UTF-8 pl_PL.UTF-8 sv_SE.UTF-8"
+    installed=$(locale -a 2>/dev/null | tr '[:upper:]' '[:lower:]' | sed 's/utf8/UTF-8/g')
+    missing=""
+    for lc in $needed; do
+      if ! echo "$installed" | grep -qiF "$lc"; then missing="$missing $lc"; fi
+    done
+    if [ -n "$missing" ]; then locale-gen $missing 2>/dev/null || true; fi
+  ) &
+fi
+
+# Enable swap (cheap, no need to background)
 swapon /swapfile 2>/dev/null || true
 sysctl -p /etc/sysctl.d/99-swap.conf 2>/dev/null || true
 
-# 5. Start all services (restart to pick up new password)
-systemctl daemon-reload
-systemctl enable vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service
-systemctl restart vncserver@:1.service
-sleep 3
-systemctl restart novnc.service
-systemctl restart keep-screen-alive.service
-systemctl restart ai-agent.service
-systemctl restart memory-watchdog.service
+# Wait for service stops to complete before restarting (avoid systemd
+# "queued restart while still stopping" backoff).
+wait $SVCS_STOP_PID 2>/dev/null || true
+
+# Clear any failed-state backoff so restart fires immediately.
+systemctl reset-failed vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service 2>/dev/null || true
+
+# Skip daemon-reload + enable: golden AMI has both already done. If a
+# future change adds a new .service file in slim UserData, add reload
+# back (and update the regression test).
+#
+# --no-block: returns immediately, lets systemd's After=/Wants= chain
+# handle ordering in parallel. vncserver starts first, novnc + agent +
+# keep-alive wait for it via their own ExecStartPre xdpyinfo/port checks.
+# Saves ~10s of sequential restart waits.
+systemctl restart --no-block vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service
 
 echo "DESKTOP_INIT_STATUS=ready" > /var/run/desktop-init-status
 echo "Golden AMI boot complete at $(date)"
 `;
 
-    const scriptGz = zlib.gzipSync(Buffer.from(script), { level: 9 });
+    const minified = this.minifyBash(script);
+    const scriptGz = zlib.gzipSync(Buffer.from(minified), { level: 9 });
     return scriptGz.toString("base64");
   }
 

@@ -350,43 +350,57 @@ describe("Chinese (zh) locale — audit-triggered spot check", () => {
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4.  Backfill script — anti-drift guard.
+// 4.  Translation-quality guards on the 5 major non-Latin scripts.
+//
+// (The original backfill helper script was a one-shot tool and isn't
+// tracked in the repo. The committed JSON files in messages/*.json are
+// the source-of-truth; suites 2 + 3 above already prove every locale's
+// errorPages.notFound is complete. This block adds a deeper quality
+// check: ZH/JA/KO/AR/HE values must NOT be English fallthroughs — i.e.
+// they must contain at least one character in the locale's expected
+// script range. This catches a future locale-addition that forgets to
+// translate and silently ships English to non-Latin users.)
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe("backfill script — anti-drift guard", () => {
-  let script: string
+describe("translation quality — non-Latin locales contain native script", () => {
+  // For each (locale, expected-script-regex), spot-check 4 keys that
+  // any reasonable translation must localise. Avoids over-asserting on
+  // OK/FAIL which are loanwords in many languages.
+  const TRANSLATED_LOCALES = [
+    { locale: "zh", scriptRe: /[一-鿿]/, name: "CJK Unified Ideographs" },
+    { locale: "ja", scriptRe: /[぀-ゟ゠-ヿ一-鿿]/, name: "Hiragana/Katakana/Kanji" },
+    { locale: "ko", scriptRe: /[가-힯]/, name: "Hangul Syllables" },
+    { locale: "ar", scriptRe: /[؀-ۿ]/, name: "Arabic" },
+    { locale: "he", scriptRe: /[֐-׿]/, name: "Hebrew" },
+  ]
 
-  beforeAll(() => {
-    script = fs.readFileSync(
-      path.join(REPO_ROOT, "scripts", "backfill-i18n-not-found.py"),
-      "utf8",
-    )
-  })
+  for (const { locale, scriptRe, name } of TRANSLATED_LOCALES) {
+    describe(`${locale} (${name})`, () => {
+      let nf: any
+      beforeAll(() => {
+        nf = loadMessages(locale).errorPages.notFound
+      })
 
-  it("script exists and is non-trivial", () => {
-    expect(script.length).toBeGreaterThan(1000)
-  })
+      it("title is translated (contains native script)", () => {
+        expect(
+          nf.title.match(scriptRe),
+          `${locale}.title appears to be English fallthrough: ${JSON.stringify(nf.title)}`,
+        ).toBeTruthy()
+      })
 
-  it("idempotency guard: ensure_nested skips already-populated keys", () => {
-    // The function must NOT overwrite existing non-empty translations.
-    expect(script).toMatch(/if\s+leaf\s+in\s+cur\s+and\s+cur\[leaf\]\s+not\s+in\s+\(None,\s*""/)
-  })
+      it("description is translated", () => {
+        expect(nf.description.match(scriptRe)).toBeTruthy()
+      })
 
-  it("covers the 5 major non-Latin scripts (zh, ja, ko, ar, he)", () => {
-    expect(script).toMatch(/"zh":\s*\{/)
-    expect(script).toMatch(/"ja":\s*\{/)
-    expect(script).toMatch(/"ko":\s*\{/)
-    expect(script).toMatch(/"ar":\s*\{/)
-    expect(script).toMatch(/"he":\s*\{/)
-  })
+      it("primaryCta is translated", () => {
+        expect(nf.primaryCta.match(scriptRe)).toBeTruthy()
+      })
 
-  it("preserves Chinese translation for at least 18 keys", () => {
-    // Count the keys defined in the zh table specifically.
-    const zhMatch = script.match(/"zh":\s*\{([\s\S]*?)\n\s*\},\s*\n\s*#/)
-    expect(zhMatch).not.toBeNull()
-    const keys = zhMatch![1].match(/"[\w.]+"\s*:/g) ?? []
-    expect(keys.length).toBeGreaterThanOrEqual(18)
-  })
+      it("links.home is translated", () => {
+        expect(nf.links.home.match(scriptRe)).toBeTruthy()
+      })
+    })
+  }
 })
 
 // ═══════════════════════════════════════════════════════════════════════════

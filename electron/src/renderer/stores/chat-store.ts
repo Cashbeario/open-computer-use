@@ -158,9 +158,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const messages = [...state.messages]
       const last = messages[messages.length - 1]
 
-      if (last?.role === 'assistant') {
+      if (last?.role === 'assistant' && !last.id.startsWith('final_')) {
         const tools = [...(last.toolInvocations || []), invocation]
         messages[messages.length - 1] = { ...last, toolInvocations: tools }
+      } else {
+        // ── Tool-only assistant turn ────────────────────────────────────
+        // The assistant streamed NO text before this tool call (e.g. a
+        // pure ``cua_screenshot`` turn). Without creating an assistant
+        // message here, the tool invocation would be silently dropped
+        // because the last message is still ``user`` and the
+        // ``last?.role === 'assistant'`` guard above filters it out.
+        //
+        // The CUA executor regularly produces tool-only turns —
+        // think of an agent that decides "I need to see the screen
+        // first" and emits ``cua_screenshot`` with no preamble. The
+        // user must see the tool activity in the chat thread to
+        // understand what's happening.
+        messages.push({
+          id: `streaming_${Date.now()}`,
+          role: 'assistant',
+          content: '',
+          toolInvocations: [invocation],
+          createdAt: new Date().toISOString(),
+        })
       }
 
       return { messages }
@@ -197,6 +217,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
           content: content || last.content,
           toolInvocations: toolInvocations || last.toolInvocations,
         }
+      } else if (content || (toolInvocations && toolInvocations.length > 0)) {
+        // ── Finish-only assistant turn ─────────────────────────────────
+        // The backend ended the turn without any prior text / tool-call
+        // events but the finish payload DOES carry content or final tool
+        // invocations. Without this branch, that content is lost and the
+        // chat thread is missing the assistant's reply entirely.
+        //
+        // Real example: a backend race where the SSE stream closes
+        // before the 'a' tool-result events flushed, but the 'd' event
+        // includes the tool invocations in its payload.
+        messages.push({
+          id: `final_${Date.now()}`,
+          role: 'assistant',
+          content: content || '',
+          toolInvocations: toolInvocations || undefined,
+          createdAt: new Date().toISOString(),
+        })
       }
 
       return { messages, isStreaming: false, awaitingHuman: null }

@@ -875,6 +875,38 @@ def _human_type_delay(prev,ch):
  # Hard floor: real human typists never go below ~60ms IKI sustained
  if d<60:d=60
  return d/1000.0
+def _xclip_paste(text,env):
+ # Set the X11 clipboard via xclip, then synthesize Ctrl+V. Returns the
+ # selection name on success ("clipboard"), or None on failure so the
+ # caller can fall back to direct xdotool type. Failure modes:
+ #   * xclip not installed (FileNotFoundError)
+ #   * xclip can't open DISPLAY (CalledProcessError)
+ #   * keyboard synthesis fails (CalledProcessError)
+ # Empty text is a no-op and returns "clipboard" so the caller treats
+ # it as success (matches xdotool type "" behavior).
+ if not text:return "clipboard"
+ try:
+  # Encode as bytes so xclip receives raw UTF-8 without locale-dependent
+  # re-encoding. -selection clipboard is the modern Ctrl+V target;
+  # -selection primary is the middle-click target (not used here).
+  r=subprocess.run(["xclip","-selection","clipboard"],input=text.encode("utf-8"),env=env,timeout=5,capture_output=True)
+  if r.returncode!=0:return None
+  # Brief settle so the X server fully commits the clipboard selection
+  # before the paste event reads it. 10 ms is enough on every X server
+  # observed; without it, fast back-to-back paste calls race.
+  time.sleep(0.01)
+  # --clearmodifiers releases stuck Shift/Ctrl/etc. from prior actions
+  # so Ctrl+V isn't shadowed by a held Alt or similar.
+  r=subprocess.run(["xdotool","key","--clearmodifiers","ctrl+v"],env=env,timeout=5,capture_output=True)
+  if r.returncode!=0:return None
+  return "clipboard"
+ except FileNotFoundError:
+  # xclip not installed — caller falls back. We avoid logging here
+  # because typing is in the request hot-path; the fallback is the
+  # signal.
+  return None
+ except Exception:
+  return None
 def _shot():
  env={**os.environ,"DISPLAY":DISPLAY};img=None
  if _HAS_MSS:
@@ -1142,21 +1174,78 @@ class Agent:
   _xdo("click","3")
   return{"success":True}
  def _ty(self,p):
+  # ── Typing modes (2026-05-11 perf rewrite) ──
+  # The legacy default forked a new xdotool subprocess PER CHARACTER
+  # (~30 ms fork × N) AND slept 238 ms Aalto IKI between every char,
+  # producing ~3 s for 11 chars = ~3-4 WPM effective. Every additional
+  # blocker below has been removed:
+  #
+  #   instant   — xdotool --delay 0, ONE subprocess. ~30-50 ms total
+  #               regardless of length. Used by paste-style fills.
+  #   fast      — DEFAULT. xdotool --delay 1-3 ms, ONE subprocess.
+  #               Auto-promotes to clipboard for text >= 50 chars
+  #               (massive speedup for URLs/paragraphs). For 100 chars
+  #               via clipboard: ~50 ms. Via direct xdotool: ~150 ms.
+  #               Falls back to plain xdotool if xclip is missing.
+  #   clipboard — Explicit xclip + Ctrl+V. ~40 ms regardless of length.
+  #               Best for long text but mutates clipboard and some
+  #               apps (terminal, password fields) block Ctrl+V.
+  #   human     — Legacy Aalto-calibrated per-char loop. Preserved for
+  #               stealth-critical contexts.
+  #
+  # Back-compat: interval=0 / fast=true still map to instant mode so
+  # existing callers see identical wire behaviour to before this fix.
   text=p.get("text","");env={**os.environ,"DISPLAY":DISPLAY}
-  # Caller can opt out for paste-style fast typing
-  if p.get("interval")==0 or p.get("fast"):
-   subprocess.run(["xdotool","type","--delay","0","--",text],env=env,timeout=30)
-   return{"success":True,"action":"type","chars":len(text)}
+  if not text:return{"success":True,"action":"type","chars":0}
+  mode=(p.get("mode") or "").lower()
+  if not mode:
+   if p.get("interval")==0 or p.get("fast"):mode="instant"
+   else:mode="fast"
+  # Aliases: "paste" routes to clipboard.
+  if mode=="paste":mode="clipboard"
+  # ── instant ──
+  if mode=="instant":
+   to=max(15,int(2+len(text)/100))
+   subprocess.run(["xdotool","type","--delay","0","--",text],env=env,timeout=to)
+   return{"success":True,"action":"type","chars":len(text),"mode":mode}
+  # ── clipboard (explicit) ──
+  if mode=="clipboard":
+   r=_xclip_paste(text,env)
+   if r is not None:return{"success":True,"action":"type","chars":len(text),"mode":"clipboard","method":r}
+   # xclip missing or failed → fall through to fast (don't silently no-op)
+   mode="fast"
+  # ── fast (default) — auto-promote to clipboard for long text ──
+  if mode=="fast":
+   if len(text)>=50:
+    r=_xclip_paste(text,env)
+    if r is not None:return{"success":True,"action":"type","chars":len(text),"mode":"clipboard","auto_promoted":True,"method":r}
+    # xclip unavailable — fall through to direct xdotool
+   # Direct xdotool path: --delay floor 1ms, ceiling 3ms. xdotool's
+   # internal usleep is jittered per call so a sequence of types
+   # doesn't produce a perfectly-flat IKI fingerprint, but stays
+   # within the 80-300 WPM range that feels instant to a human user.
+   d=_rng.randint(1,3)
+   to=max(15,int(5+(len(text)*d*5)/1000))
+   subprocess.run(["xdotool","type","--delay",str(d),"--",text],env=env,timeout=to)
+   return{"success":True,"action":"type","chars":len(text),"mode":"fast","delay_ms":d}
+  # ── human (legacy stealth path) — preserved verbatim for opt-in use ──
   prev=" "
   for ch in text:
    subprocess.run(["xdotool","type","--delay","0","--",ch],env=env,timeout=10)
    time.sleep(_human_type_delay(prev,ch))
    prev=ch
-  return{"success":True,"action":"type","chars":len(text)}
+  return{"success":True,"action":"type","chars":len(text),"mode":"human"}
  def _kp(self,p):
+  # Batch multiple keys into ONE xdotool invocation. xdotool key accepts
+  # multiple key arguments and presses them sequentially in-process
+  # (with its own --delay between them). The legacy per-key subprocess
+  # loop paid ~30 ms fork × N keys; this version is 1 fork total.
   env={**os.environ,"DISPLAY":DISPLAY}
-  for k in(p.get("keys") or[p.get("key","")]):subprocess.run(["xdotool","key","--",k],env=env,timeout=10)
-  return{"success":True}
+  keys=[k for k in (p.get("keys") or [p.get("key","")]) if k]
+  if not keys:return{"success":True}
+  to=max(10,len(keys)*2)
+  subprocess.run(["xdotool","key","--clearmodifiers","--"]+keys,env=env,timeout=to)
+  return{"success":True,"keys":len(keys)}
  def _kc(self,p):_xdo("key","+".join(p.get("keys",[])));return{"success":True}
  def _tt(self,p):
   env={**os.environ,"DISPLAY":DISPLAY};subprocess.run(["xdotool","type","--",p.get("text","")],env=env,timeout=10);return{"success":True}
@@ -1328,6 +1417,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \\
   net-tools \\
   scrot \\
   xdotool \\
+  xclip \\
   wmctrl \\
   tesseract-ocr \\
   tesseract-ocr-eng \\
@@ -1697,11 +1787,39 @@ chown ubuntu:ubuntu /opt/ai-agent/server.py
 # X via xdpyinfo inside the Python agent (already imports try/except);
 # terminal/file/screenshot ops work as soon as their underlying tool is
 # usable.
+#
+# HARDENING (2026-05-11 audit follow-up): the 2026-05-10 13:02Z incident
+# saw two EC2 hosts die in lockstep with Errno 111 on :8080 — host up,
+# Python listener gone, never recovered. Root cause was almost certainly
+# systemd's default StartLimitBurst=5/10s tripping after a short crash
+# loop, leaving the unit in 'failed' state with no further restart.
+# The mitigations below address each failure mode explicitly:
+#   - StartLimitBurst=10 + StartLimitIntervalSec=60 lets us absorb 10
+#     crashes per minute before refusing further restarts.
+#   - Restart=always (not on-failure) catches clean exits too — a
+#     deadlocked asyncio loop that eventually returns 0 is still bad.
+#   - RuntimeMaxSec=14400 forces a preventive restart every 4 h to
+#     bound slow leaks (Selenium / Chrome / mss can all leak FDs).
+#   - MemoryMax=1G + MemoryHigh=768M doubles the prior 512M/384M caps;
+#     t4g.small has 2 GB and the old caps put the agent on the edge of
+#     OOM during burst workloads (Counter-Strike gameplay test agent).
+#   - ExecStopPost kills orphan chromium/chromedriver/pyautogui procs
+#     so a restart doesn't fight leftover Chrome profiles for the lock.
+#   - LimitNOFILE=65536 prevents file-descriptor exhaustion under load.
+#   - TasksMax=512 bounds child-process growth.
+#   - OOMPolicy=restart keeps the existing behavior on kernel OOM.
+# A separate tcp-listener-watchdog.service (defined below) provides
+# defense-in-depth against the "process alive but listener gone" case
+# that systemd alone can't detect.
 cat > /etc/systemd/system/ai-agent.service << 'AGENT_SVC_EOF'
 [Unit]
 Description=LLMHub AI Agent WebSocket Server
 After=network-online.target
 Wants=network-online.target
+# Be patient with restart bursts: default is 5 in 10s which is too
+# strict for an agent under heavy load. Allow 10 in 60s before giving up.
+StartLimitBurst=10
+StartLimitIntervalSec=60
 
 [Service]
 Type=simple
@@ -1714,14 +1832,33 @@ Environment=AGENT_HOST=0.0.0.0
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
 Environment=XDG_RUNTIME_DIR=/tmp/runtime-ubuntu
 Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/runtime-ubuntu/bus
+# Python: line-buffered stdout/stderr + fault handler for crash tracebacks
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONFAULTHANDLER=1
 EnvironmentFile=/opt/ai-agent/.env
 ExecStartPre=/bin/bash -c 'mkdir -p /tmp/runtime-ubuntu && chmod 700 /tmp/runtime-ubuntu && chown ubuntu:ubuntu /tmp/runtime-ubuntu'
 ExecStart=/usr/bin/python3 /opt/ai-agent/server.py
-Restart=on-failure
+# Always restart, not just on-failure — a clean exit from a deadlocked
+# event loop still leaves the agent dead and should trigger restart.
+Restart=always
 RestartSec=2
-MemoryMax=512M
-MemoryHigh=384M
+# Preventive periodic restart to bound slow leaks. 4 h is short enough
+# that any leak gets bounded but long enough to not interrupt user
+# work mid-session (typical CUA session is <30 min).
+RuntimeMaxSec=14400
+# Memory caps — doubled from the prior 512M/384M to give Python +
+# Selenium + Chrome more headroom on bursty workloads. t4g.small has
+# 2 GB total; 1 G for the agent + 1 G for OS/Chrome/Xvnc is safe.
+MemoryMax=1G
+MemoryHigh=768M
 OOMPolicy=restart
+# Resource limits to prevent FD / process exhaustion under load.
+LimitNOFILE=65536
+TasksMax=512
+# Clean up orphan browser processes on stop so a restart doesn't fight
+# leftover Chrome profiles for the user-data-dir lock. The agent itself
+# spawns chromium via Selenium and Selenium doesn't always reap.
+ExecStopPost=/bin/bash -c 'pkill -9 -f "chromium-browser" 2>/dev/null || true; pkill -9 -f "chromedriver" 2>/dev/null || true; pkill -9 -f "[c]hrome --type=" 2>/dev/null || true; rm -f /tmp/.X1-lock 2>/dev/null || true'
 
 [Install]
 WantedBy=multi-user.target
@@ -1736,7 +1873,10 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab
 echo 'vm.swappiness=10' >> /etc/sysctl.d/99-swap.conf
 sysctl -p /etc/sysctl.d/99-swap.conf
 
-# Memory watchdog - kills excess browser processes before OOM
+# Memory watchdog - kills excess browser processes before OOM and
+# recovers ai-agent.service from systemd's 'failed' state (which is the
+# terminal state after StartLimitBurst exhaustion — the exact failure
+# mode the 2026-05-11 audit found on the lockstep-dead VMs).
 cat > /usr/local/bin/memory-watchdog.sh << 'WATCHDOG_EOF'
 #!/bin/bash
 THRESHOLD_WARN=80
@@ -1752,6 +1892,19 @@ kill_excess_browser_procs() {
     local zombies=$(ps aux | grep -i "[d]efunct" | awk '{print $2}')
     for pid in $zombies; do kill -9 "$pid" 2>/dev/null; done
 }
+recover_failed_agent() {
+    # If ai-agent.service is in 'failed' state (typically after
+    # StartLimitBurst exhaustion), reset-failed and start it back up.
+    # This catches the 2026-05-10 13:02Z lockstep failure mode that
+    # left both VMs with the unit permanently dead.
+    local state=$(systemctl is-active ai-agent.service 2>/dev/null || true)
+    local sub=$(systemctl is-failed ai-agent.service 2>/dev/null || true)
+    if [ "$state" = "failed" ] || [ "$sub" = "failed" ]; then
+        logger -t memory-watchdog "RECOVERY: ai-agent.service in failed state — reset-failed + start"
+        systemctl reset-failed ai-agent.service 2>/dev/null || true
+        systemctl start ai-agent.service 2>/dev/null || true
+    fi
+}
 while true; do
     MEM_PCT=$(get_mem_pct)
     if [ "$MEM_PCT" -ge "$THRESHOLD_KILL" ]; then
@@ -1761,6 +1914,9 @@ while true; do
         logger -t memory-watchdog "WARNING: Memory at \${MEM_PCT}% - clearing caches"
         cleanup_browser_cache
     fi
+    # Check every loop iteration (every 30s) whether the agent unit
+    # has fallen into 'failed' state and resurrect it if so. Cheap.
+    recover_failed_agent
     sleep 30
 done
 WATCHDOG_EOF
@@ -1779,10 +1935,111 @@ RestartSec=10
 WantedBy=multi-user.target
 WATCHDOG_SVC_EOF
 
+# TCP-listener watchdog — catches the exact failure mode the 2026-05-11
+# audit found: host responding to ping, ai-agent.service shows "active",
+# but the Python listener on :8080 is gone (Errno 111 TCP refused).
+# systemd alone can't detect this — the process is alive, just not
+# listening. We probe localhost:8080 every 15s; 3 consecutive failures
+# trigger a clean restart of the agent. This is the load-bearing fix
+# for the 491-event lockstep failure on 2026-05-10 13:02Z.
+cat > /usr/local/bin/tcp-listener-watchdog.sh << 'TCPWD_EOF'
+#!/bin/bash
+# Watches ai-agent.service's TCP listener on $PORT. If the listener
+# disappears for $FAILURE_THRESHOLD consecutive probes, restart the
+# service. Resets the failed-state first so systemd's StartLimit doesn't
+# block the restart.
+set -u
+PORT="\${AGENT_PORT:-8080}"
+PROBE_INTERVAL=15        # seconds between probes
+FAILURE_THRESHOLD=3      # consecutive failures before restart
+CONNECT_TIMEOUT=3        # seconds for each probe
+RESTART_COOLDOWN=60      # seconds between restart attempts
+SERVICE="ai-agent.service"
+
+probe_listener() {
+    # /dev/tcp/host/port is bash built-in — no curl/nc dependency.
+    # Timeout via the 'timeout' coreutil; bash builtin alone can hang
+    # if the host is up but firewalled (rare but possible).
+    timeout "\$CONNECT_TIMEOUT" bash -c "</dev/tcp/127.0.0.1/\$PORT" 2>/dev/null
+}
+
+restart_agent() {
+    logger -t tcp-listener-watchdog "RESTART: listener gone on :\$PORT, restarting \$SERVICE"
+    # Clear any failed-state backoff so the restart fires immediately
+    # rather than being silently rejected by systemd's StartLimit.
+    systemctl reset-failed "\$SERVICE" 2>/dev/null || true
+    systemctl restart "\$SERVICE" 2>/dev/null || true
+}
+
+failures=0
+last_restart=0
+
+# Wait for the agent to come up initially before starting the watch
+# loop — avoid restart-storm during boot when the agent is still
+# starting up.
+for i in 1 2 3 4 5 6 7 8 9 10; do
+    if probe_listener; then
+        logger -t tcp-listener-watchdog "initial probe OK on :\$PORT"
+        break
+    fi
+    sleep 5
+done
+
+while true; do
+    if probe_listener; then
+        if [ "\$failures" -gt 0 ]; then
+            logger -t tcp-listener-watchdog "listener recovered after \$failures failed probes"
+        fi
+        failures=0
+    else
+        failures=\$((failures + 1))
+        logger -t tcp-listener-watchdog "probe failed on :\$PORT (failures=\$failures/\$FAILURE_THRESHOLD)"
+        if [ "\$failures" -ge "\$FAILURE_THRESHOLD" ]; then
+            now=\$(date +%s)
+            since=\$((now - last_restart))
+            if [ "\$since" -ge "\$RESTART_COOLDOWN" ]; then
+                restart_agent
+                last_restart=\$now
+                failures=0
+                # Give the restart time to take effect before probing again
+                sleep 10
+            else
+                logger -t tcp-listener-watchdog "in cooldown (\${since}s since last restart < \${RESTART_COOLDOWN}s); skipping"
+            fi
+        fi
+    fi
+    sleep "\$PROBE_INTERVAL"
+done
+TCPWD_EOF
+chmod 755 /usr/local/bin/tcp-listener-watchdog.sh
+
+cat > /etc/systemd/system/tcp-listener-watchdog.service << 'TCPWD_SVC_EOF'
+[Unit]
+Description=AI Agent TCP listener watchdog (defense-in-depth for :8080)
+# Start after the agent so the initial probe loop has a chance to
+# succeed; if the agent unit is dead at boot the watchdog will detect
+# and restart it just like at runtime.
+After=ai-agent.service network-online.target
+Wants=ai-agent.service network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/tcp-listener-watchdog.sh
+Restart=always
+RestartSec=10
+# Keep the watchdog itself trim — it's just a probe loop.
+MemoryMax=32M
+TasksMax=8
+
+[Install]
+WantedBy=multi-user.target
+TCPWD_SVC_EOF
+
 systemctl daemon-reload
-systemctl enable ai-agent.service memory-watchdog.service
+systemctl enable ai-agent.service memory-watchdog.service tcp-listener-watchdog.service
 systemctl start ai-agent.service
 systemctl start memory-watchdog.service
+systemctl start tcp-listener-watchdog.service
 
 echo "DESKTOP_INIT_STATUS=ready" > /var/run/desktop-init-status
 echo "Desktop setup complete at $(date)"
@@ -2165,18 +2422,44 @@ class Agent:
   _human_move(x,y);time.sleep(_rng.uniform(0.05,0.11))
   pyautogui.rightClick(x,y);return{"success":True}
  def _ty(self,p):
+  # Mirror of the Linux agent's mode-dispatch _ty. Windows has no
+  # subprocess fork cost (pyautogui calls Win32 SendInput directly), so
+  # the speed-up over the legacy default isn't as dramatic — but it's
+  # still material. Modes:
+  #   instant   — pyautogui.write(text, interval=0). ~5 ms regardless.
+  #   fast      — DEFAULT. interval jittered in 2-4 ms. ~95-200 WPM.
+  #   human     — Legacy Aalto-calibrated per-char loop, preserved.
+  # No clipboard mode here: pyautogui's hotkey/write path is already
+  # fast enough that adding pywin32 clipboard APIs isn't worth the
+  # dependency cost.
   text=p.get("text","")
-  if p.get("interval")==0 or p.get("fast"):
-   pyautogui.write(text,interval=0);return{"success":True,"action":"type","chars":len(text)}
+  if not text:return{"success":True,"action":"type","chars":0}
+  mode=(p.get("mode") or "").lower()
+  if not mode:
+   if p.get("interval")==0 or p.get("fast"):mode="instant"
+   else:mode="fast"
+  if mode=="instant":
+   pyautogui.write(text,interval=0)
+   return{"success":True,"action":"type","chars":len(text),"mode":mode}
+  if mode=="fast":
+   d=_rng.uniform(0.002,0.004)
+   pyautogui.write(text,interval=d)
+   return{"success":True,"action":"type","chars":len(text),"mode":mode,"delay_ms":int(d*1000)}
+  # human (legacy stealth path) — preserved verbatim
   prev=" "
   for ch in text:
    try:pyautogui.write(ch,interval=0)
    except Exception:pass
    time.sleep(_human_type_delay(prev,ch));prev=ch
-  return{"success":True,"action":"type","chars":len(text)}
+  return{"success":True,"action":"type","chars":len(text),"mode":"human"}
  def _kp(self,p):
-  for k in(p.get("keys") or[p.get("key","")]):pyautogui.press(k)
-  return{"success":True}
+  # pyautogui.press takes a list — single in-process call for multi-key
+  # sequences. Already efficient (no fork), but the explicit list form
+  # avoids the per-key dict lookup in pyautogui's KEYBOARD_KEYS map.
+  keys=[k for k in (p.get("keys") or [p.get("key","")]) if k]
+  if not keys:return{"success":True}
+  pyautogui.press(keys)
+  return{"success":True,"keys":len(keys)}
  def _kc(self,p):pyautogui.hotkey(*p.get("keys",[]));return{"success":True}
  def _scr(self,p):
   amt=int(p.get("amount",3));d=p.get("direction","down")
@@ -2616,7 +2899,7 @@ echo "Golden AMI boot started at $(date)"
 # Stop our services in parallel — they may be running from the prior boot
 # (golden AMI auto-starts them) or from a snapshot restore. Background +
 # wait so all five stop concurrently instead of serially. Saves ~2-3s.
-systemctl stop ai-agent.service vncserver@:1.service novnc.service keep-screen-alive.service memory-watchdog.service 2>/dev/null &
+systemctl stop ai-agent.service vncserver@:1.service novnc.service keep-screen-alive.service memory-watchdog.service tcp-listener-watchdog.service 2>/dev/null &
 SVCS_STOP_PID=$!
 
 # In parallel with the stops, do all per-instance file setup (none of
@@ -2658,7 +2941,7 @@ sysctl -p /etc/sysctl.d/99-swap.conf 2>/dev/null || true
 wait $SVCS_STOP_PID 2>/dev/null || true
 
 # Clear any failed-state backoff so restart fires immediately.
-systemctl reset-failed vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service 2>/dev/null || true
+systemctl reset-failed vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service tcp-listener-watchdog.service 2>/dev/null || true
 
 # Skip daemon-reload + enable: golden AMI has both already done. If a
 # future change adds a new .service file in slim UserData, add reload
@@ -2668,7 +2951,7 @@ systemctl reset-failed vncserver@:1.service novnc.service keep-screen-alive.serv
 # handle ordering in parallel. vncserver starts first, novnc + agent +
 # keep-alive wait for it via their own ExecStartPre xdpyinfo/port checks.
 # Saves ~10s of sequential restart waits.
-systemctl restart --no-block vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service
+systemctl restart --no-block vncserver@:1.service novnc.service keep-screen-alive.service ai-agent.service memory-watchdog.service tcp-listener-watchdog.service
 
 echo "DESKTOP_INIT_STATUS=ready" > /var/run/desktop-init-status
 echo "Golden AMI boot complete at $(date)"

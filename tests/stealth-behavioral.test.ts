@@ -165,13 +165,25 @@ describe("Linux behavioral — Bezier mouse + bigram typing", () => {
     }
   });
 
-  it("_ty uses _human_type_delay per-character (bigram-aware), not fixed --delay 50", () => {
+  it("_ty preserves human mode (bigram-aware per-char delay) for stealth-critical paths", () => {
+    // 2026-05-11 perf rewrite: default mode flipped to "fast" (one xdotool
+    // subprocess + 1-3 ms internal --delay), with auto-promote to xclip
+    // clipboard paste for text >= 50 chars. Human mode (Aalto-calibrated
+    // bigram delay per char) is PRESERVED as opt-in via `mode="human"`
+    // for stealth-critical contexts (Cloudflare challenge fields etc).
+    // This test guards that preservation.
     const tyIdx = LINUX_AGENT.indexOf(" def _ty(self,p):");
     expect(tyIdx).toBeGreaterThan(-1);
-    const body = LINUX_AGENT.slice(tyIdx, tyIdx + 600);
+    // Grab the whole _ty body up to the next ` def ` boundary
+    const tail = LINUX_AGENT.slice(tyIdx);
+    const nextDef = tail.match(/\n def\s+\w+\s*\(/);
+    const body = nextDef ? tail.slice(0, nextDef.index!) : tail;
+    // Human-mode branch must still call _human_type_delay
     expect(body).toMatch(/_human_type_delay\(prev,ch\)/);
-    // Must allow opt-out via interval=0 / fast=true for paste-style
-    expect(body).toMatch(/interval.*==0|p\.get\("fast"\)/);
+    // Stealth opt-out via interval=0 / fast=true still maps to instant
+    expect(body).toMatch(/interval["']\s*\)\s*==\s*0|p\.get\(\s*["']fast["']/);
+    // Default is fast (anti-regression)
+    expect(body).toMatch(/else\s*:\s*mode\s*=\s*["']fast["']/);
   });
 
   it("bigram delay table is calibrated to Aalto distribution (floor ~60ms, mean ~238ms)", () => {
@@ -308,11 +320,19 @@ describe("Windows Chrome — stealth + behavioral parity", () => {
     }
   });
 
-  it("_ty uses _human_type_delay per-character (no fixed pyautogui interval)", () => {
+  it("_ty preserves human mode (bigram-aware per-char delay) for stealth-critical paths", () => {
+    // Mirrors the Linux-agent test above. The Windows agent uses
+    // pyautogui (no subprocess fork) so the speed-up over the legacy
+    // default is "only" ~5x; the human mode is still preserved for
+    // opt-in stealth contexts.
     const tyIdx = WINDOWS_AGENT.indexOf(" def _ty(self,p):");
     expect(tyIdx).toBeGreaterThan(-1);
-    const body = WINDOWS_AGENT.slice(tyIdx, tyIdx + 600);
+    const tail = WINDOWS_AGENT.slice(tyIdx);
+    const nextDef = tail.match(/\n def\s+\w+\s*\(/);
+    const body = nextDef ? tail.slice(0, nextDef.index!) : tail;
     expect(body).toMatch(/_human_type_delay\(prev,ch\)/);
+    // Default is fast (anti-regression)
+    expect(body).toMatch(/else\s*:\s*mode\s*=\s*["']fast["']/);
   });
 });
 

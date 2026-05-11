@@ -153,7 +153,29 @@ export function useChatSubmit() {
       // the prior failed run we're retrying. Either way it's there now.
       setPendingInput({ input, files, alreadyInChat: true })
 
-      const activeChatId = await ensureChat(userMessage)
+      // Resolve the chat id. ``ensureChat`` is designed to always
+      // return SOMETHING truthy (a real Supabase UUID, an existing
+      // synced chatId, or a ``local_<timestamp>`` fallback) — but
+      // we guard defensively because the backend's
+      // ``if not chat_request.chat_id`` check rejects an empty string
+      // with a 400 "Missing required fields" that would otherwise
+      // surface as an opaque error in the chat thread.
+      //
+      // Surfacing this here as a console.warn + local fallback means
+      // that even if ``ensureChat`` somehow returns "" / undefined
+      // (e.g. a malformed createChat IPC response shape), we still
+      // dispatch the wire call instead of looping forever on
+      // "Missing required fields".
+      let activeChatId = await ensureChat(userMessage)
+      if (!activeChatId || typeof activeChatId !== 'string') {
+        console.warn(
+          '[useChatSubmit] ensureChat returned a falsy chat id, ' +
+          'falling back to a local id so the send can proceed. ' +
+          'This indicates a bug in createChat IPC or chat-store hydration.',
+          { received: activeChatId },
+        )
+        activeChatId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+      }
 
       // Wire payload. On a fresh submission we manually append the new
       // user message because the just-fired ``addUserMessage`` setState

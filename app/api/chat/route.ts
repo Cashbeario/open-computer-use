@@ -122,9 +122,42 @@ export async function POST(req: NextRequest) {
         );
       }
       
+      // ── Backend error passthrough ────────────────────────────────────
+      // Forward the backend's error body VERBATIM when it's already
+      // a JSON object containing an "error" or "detail" field.
+      // Re-wrapping it (the old behaviour) produced strings like:
+      //   { "error": "{\"error\":\"Missing required fields\"}" }
+      // …which the desktop client then displayed as the raw inner JSON
+      // because its parser extracts the outer ``.error`` field and
+      // shows it as-is. Passing the body through cleanly means the
+      // client gets `{ "error": "Missing required fields" }` and shows
+      // a readable message.
+      //
+      // If the backend returned non-JSON (or empty) we DO wrap so the
+      // client always sees a parseable ``{ error: <message> }``
+      // envelope.
+      let passthrough = false
+      try {
+        const parsed = JSON.parse(errorText)
+        if (parsed && typeof parsed === 'object' && (
+          typeof parsed.error === 'string' ||
+          typeof parsed.detail === 'string' ||
+          'error' in parsed || 'detail' in parsed
+        )) {
+          passthrough = true
+        }
+      } catch {
+        // Non-JSON body — fall through to the wrap branch.
+      }
+      if (passthrough) {
+        return new Response(errorText, {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return new Response(
         JSON.stringify({ error: errorText || 'Backend request failed' }),
-        { 
+        {
           status: response.status,
           headers: { 'Content-Type': 'application/json' }
         }

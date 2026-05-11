@@ -738,14 +738,32 @@ export function registerIpcHandlers(
     model?: string
   }) => {
     // Trace each chat-send dispatch so a "send button does nothing"
-    // report can be triaged from the terminal log without DevTools.
-    // Length-only on the message preview to avoid leaking content.
+    // / "Missing required fields" / unexpected-400 report can be
+    // triaged from the terminal log without DevTools.
+    //
+    // ★ Each field is logged with a ``!!=`` truthiness marker so a
+    // failure traceable to ``chat_id is empty`` / ``messages array
+    // empty`` / ``machine_id missing`` is identifiable at a glance:
+    //
+    //   chatId=<uuid> (ok) → not the cause
+    //   chatId= (EMPTY)   → backend's
+    //                       ``if not chat_request.chat_id`` rejected it
     const lastMessage = params.messages[params.messages.length - 1]
     const preview = lastMessage
       ? `${lastMessage.role}:${(lastMessage.content || '').slice(0, 60)}`
       : '(no messages)'
+    const chatIdMarker = params.chatId ? `${params.chatId}` : '(EMPTY)'
+    const userIdMarker = params.userId ? 'ok' : '(EMPTY)'
+    const machineIdMarker = params.machineId ? 'ok' : '(EMPTY)'
     console.log(
-      `[Electron] chat:send-message dispatched req=${params.requestId} chatId=${params.chatId} msgs=${params.messages.length} last="${preview}"`,
+      `[Electron] chat:send-message dispatched ` +
+        `req=${params.requestId} ` +
+        `chatId=${chatIdMarker} ` +
+        `userId=${userIdMarker} ` +
+        `machineId=${machineIdMarker} ` +
+        `model=${params.model || 'default'} ` +
+        `msgs=${params.messages.length} ` +
+        `last="${preview}"`,
     )
     // Clear the stopped flag so the WebSocket bridge accepts commands for this new task
     const bridge = getWsBridge()

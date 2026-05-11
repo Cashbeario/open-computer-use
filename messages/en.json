@@ -2372,8 +2372,30 @@
   },
   "errorPages": {
     "notFound": {
-      "title": "404 – Page not found",
-      "description": "Sorry, this page doesn't exist."
+      "title": "Page not found",
+      "description": "Our AI agent looked everywhere. Even under the couch. It's just not here.",
+      "metaTitle": "404 · Page not found",
+      "metaDescription": "We sent our best AI agent. It came back with nothing. Head back to Coasty, the #1 ranked computer-use AI agent for desktop and browser automation.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scan: the entire internet",
+        "step2": "scan: every open tab",
+        "step3": "scan: under the couch",
+        "result": "verdict: page does not exist"
+      },
+      "ok": "OK",
+      "fail": "FAIL",
+      "primaryCta": "Take me home",
+      "secondaryCta": "Hire an AI agent",
+      "navLabel": "Suggested pages",
+      "links": {
+        "home": "Home",
+        "computerUse": "Computer Use",
+        "pricing": "Pricing",
+        "download": "Download",
+        "blog": "Blog",
+        "guide": "Guide"
+      }
     },
     "error": {
       "title": "Something went wrong",

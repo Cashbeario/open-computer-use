@@ -5,8 +5,7 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
-import { USE_CASES, USE_CASE_COLORS } from "./data"
-import { cn } from "@/lib/utils"
+import { USE_CASES } from "./data"
 
 // Card stagger + CTA delay (ms) — kept here so the original framer-motion
 // rhythm is preserved while the actual animation runs as pure CSS via the
@@ -65,39 +64,39 @@ export default function UseCasesPage() {
                   }}
                 >
                   <Link href={`/use-cases/${uc.slug}`}>
-                    <div className="h-full rounded-xl overflow-hidden border border-border/30 bg-card hover:border-border/60 transition-all duration-300 flex flex-col group">
+                    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-border/40 bg-card/30 backdrop-blur-sm transition-colors duration-300 hover:border-border hover:bg-card/60">
                       {/* Visual hero: large stat + icon background */}
-                      <div className="relative px-5 pt-5 sm:px-6 sm:pt-6 pb-4 overflow-hidden">
-                        {/* Faded large icon watermark */}
-                        <Icon className="absolute -right-3 -top-3 size-24 text-foreground/[0.03] dark:text-foreground/[0.04] transition-all duration-500 group-hover:text-foreground/[0.06] group-hover:scale-110" strokeWidth={1} />
+                      <div className="relative overflow-hidden px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
+                        <Icon
+                          className="absolute -right-3 -top-3 size-24 text-foreground/[0.04] transition-all duration-500 group-hover:scale-110 group-hover:text-foreground/[0.07] dark:text-foreground/[0.05]"
+                          strokeWidth={1}
+                        />
                         <div className="relative">
-                          <span className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground/90">
+                          <span className="text-3xl font-semibold tracking-tight tabular-nums text-foreground sm:text-4xl">
                             {uc.heroStat}
                           </span>
-                          <p className="text-[11px] font-medium text-muted-foreground/40 mt-0.5 tracking-wide">
+                          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60">
                             {uc.heroStatLabel}
                           </p>
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="px-5 pb-5 sm:px-6 sm:pb-6 flex flex-col flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Icon className="size-3.5 text-muted-foreground/40" />
+                      <div className="flex flex-1 flex-col px-5 pb-5 sm:px-6 sm:pb-6">
+                        <div className="mb-2 flex items-center gap-2">
+                          <Icon className="size-3.5 text-muted-foreground/50" />
                           <h3 className="text-sm font-semibold text-foreground">
                             {uc.label}
                           </h3>
                         </div>
 
-                        <p className="text-[13px] text-muted-foreground/50 leading-relaxed flex-1">
+                        <p className="flex-1 text-[13px] leading-relaxed text-muted-foreground">
                           {uc.outcome}
                         </p>
 
-                        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border/20">
-                          <span className="text-[11px] font-medium text-muted-foreground/40 group-hover:text-foreground/60 transition-colors duration-200">
-                            See details
-                          </span>
-                          <ArrowRight className="size-3 text-muted-foreground/30 group-hover:text-foreground/60 group-hover:translate-x-0.5 transition-all duration-200" />
+                        <div className="mt-4 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/50 transition-colors duration-200 group-hover:text-foreground">
+                          <span>See details</span>
+                          <ArrowRight className="size-3 transition-transform duration-200 group-hover:translate-x-0.5" />
                         </div>
                       </div>
                     </div>
@@ -109,23 +108,22 @@ export default function UseCasesPage() {
         </div>
 
         {/* CTA */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10">
-          <div className="border-t border-border/30" />
+        <div className="mx-auto max-w-5xl px-7 sm:px-10">
           <div
-            className="mt-24 text-center public-fade-up"
+            className="public-fade-up text-center"
             style={{ ["--card-d" as string]: 400 }}
           >
-            <p className="text-muted-foreground/60 text-sm mb-6">
+            <p className="mb-6 text-sm text-muted-foreground">
               Ready to 10x your output?
             </p>
             <Link
               href="/auth"
-              className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+              className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-foreground px-7 text-[15px] font-medium text-background transition-colors hover:bg-foreground/85"
             >
               Try Coasty Free
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <p className="text-[11px] text-muted-foreground/30 mt-4">
+            <p className="mt-4 text-[11px] text-muted-foreground/50">
               No credit card required
             </p>
           </div>

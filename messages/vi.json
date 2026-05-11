@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 — Khong tim thay trang",
-      "description": "Xin loi, trang nay khong ton tai."
+      "description": "Xin loi, trang nay khong ton tai.",
+      "metaTitle": "404 · Không tìm thấy trang",
+      "metaDescription": "Chúng tôi đã gửi tác nhân AI tốt nhất. Anh ấy trở về tay trắng. Quay lại Coasty, tác nhân AI #1 cho tự động hóa máy tính và trình duyệt.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "quét: toàn bộ internet",
+        "step2": "quét: mọi tab đang mở",
+        "step3": "quét: dưới ghế sofa",
+        "result": "kết luận: trang không tồn tại"
+      },
+      "ok": "OK",
+      "fail": "LỖI",
+      "primaryCta": "Về trang chủ",
+      "secondaryCta": "Thuê tác nhân AI",
+      "navLabel": "Trang được đề xuất",
+      "links": {
+        "home": "Trang chủ",
+        "computerUse": "Sử dụng máy tính",
+        "pricing": "Giá",
+        "download": "Tải xuống",
+        "blog": "Blog",
+        "guide": "Hướng dẫn"
+      }
     },
     "error": {
       "title": "Da xay ra loi",

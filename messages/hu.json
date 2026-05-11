@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Az oldal nem talalhato",
-      "description": "Sajnaljuk, ez az oldal nem letezik."
+      "description": "Sajnaljuk, ez az oldal nem letezik.",
+      "metaTitle": "404 · Az oldal nem található",
+      "metaDescription": "Elküldtük a legjobb AI-ügynökünket. Üres kézzel tért vissza. Vissza a Coasty-hoz, a #1 AI-ügynökhöz asztali és böngésző automatizáláshoz.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "vizsgálat: az egész internet",
+        "step2": "vizsgálat: minden nyitott lap",
+        "step3": "vizsgálat: a kanapé alatt",
+        "result": "ítélet: az oldal nem létezik"
+      },
+      "ok": "OK",
+      "fail": "HIBA",
+      "primaryCta": "Vissza a főoldalra",
+      "secondaryCta": "Bérelj fel egy AI-ügynököt",
+      "navLabel": "Javasolt oldalak",
+      "links": {
+        "home": "Főoldal",
+        "computerUse": "Számítógép-használat",
+        "pricing": "Árak",
+        "download": "Letöltés",
+        "blog": "Blog",
+        "guide": "Útmutató"
+      }
     },
     "error": {
       "title": "Valami hiba tortent",

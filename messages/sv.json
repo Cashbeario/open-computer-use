@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Sidan hittades inte",
-      "description": "Tyvärr, denna sida finns inte."
+      "description": "Tyvärr, denna sida finns inte.",
+      "metaTitle": "404 · Sidan hittades inte",
+      "metaDescription": "Vi skickade vår bästa AI-agent. Den kom tillbaka tomhänt. Tillbaka till Coasty, den #1-rankade AI-agenten för dator- och webbläsarautomatisering.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "skanning: hela internet",
+        "step2": "skanning: varje öppen flik",
+        "step3": "skanning: under soffan",
+        "result": "verdikt: sidan finns inte"
+      },
+      "ok": "OK",
+      "fail": "MISSLYCKAD",
+      "primaryCta": "Tillbaka till startsidan",
+      "secondaryCta": "Anlita en AI-agent",
+      "navLabel": "Föreslagna sidor",
+      "links": {
+        "home": "Hem",
+        "computerUse": "Datoranvändning",
+        "pricing": "Priser",
+        "download": "Ladda ner",
+        "blog": "Blogg",
+        "guide": "Guide"
+      }
     },
     "error": {
       "title": "Något gick fel",

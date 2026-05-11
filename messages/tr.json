@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Sayfa bulunamadi",
-      "description": "Uzgunuz, bu sayfa mevcut degil."
+      "description": "Uzgunuz, bu sayfa mevcut degil.",
+      "metaTitle": "404 · Sayfa bulunamadı",
+      "metaDescription": "En iyi AI ajanımızı gönderdik. Elleri boş döndü. Coasty'ye geri dönün — masaüstü ve tarayıcı otomasyonunda 1 numaralı AI ajanı.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "tara: tüm internet",
+        "step2": "tara: tüm açık sekmeler",
+        "step3": "tara: koltuğun altı",
+        "result": "sonuç: sayfa mevcut değil"
+      },
+      "ok": "TAMAM",
+      "fail": "HATA",
+      "primaryCta": "Ana sayfaya dön",
+      "secondaryCta": "AI ajanı kirala",
+      "navLabel": "Önerilen sayfalar",
+      "links": {
+        "home": "Ana sayfa",
+        "computerUse": "Bilgisayar kullanımı",
+        "pricing": "Fiyatlandırma",
+        "download": "İndir",
+        "blog": "Blog",
+        "guide": "Kılavuz"
+      }
     },
     "error": {
       "title": "Bir seyler yanlis gitti",

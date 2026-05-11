@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 — ไม่พบหน้า",
-      "description": "ขออภัย หน้านี้ไม่มีอยู่"
+      "description": "ขออภัย หน้านี้ไม่มีอยู่",
+      "metaTitle": "404 · ไม่พบหน้า",
+      "metaDescription": "เราส่ง AI agent ที่ดีที่สุดของเรา เขากลับมามือเปล่า กลับไปที่ Coasty, AI agent อันดับ 1 สำหรับการทำงานอัตโนมัติบนเดสก์ท็อปและเบราว์เซอร์",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "สแกน: ทั้งอินเทอร์เน็ต",
+        "step2": "สแกน: ทุกแท็บที่เปิด",
+        "step3": "สแกน: ใต้โซฟา",
+        "result": "ผลลัพธ์: หน้าไม่มีอยู่จริง"
+      },
+      "ok": "OK",
+      "fail": "ล้มเหลว",
+      "primaryCta": "กลับหน้าแรก",
+      "secondaryCta": "จ้าง AI agent",
+      "navLabel": "หน้าที่แนะนำ",
+      "links": {
+        "home": "หน้าแรก",
+        "computerUse": "การใช้คอมพิวเตอร์",
+        "pricing": "ราคา",
+        "download": "ดาวน์โหลด",
+        "blog": "บล็อก",
+        "guide": "คู่มือ"
+      }
     },
     "error": {
       "title": "เกิดข้อผิดพลาด",

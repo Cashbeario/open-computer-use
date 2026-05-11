@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Halaman tidak ditemukan",
-      "description": "Maaf, halaman ini tidak ada."
+      "description": "Maaf, halaman ini tidak ada.",
+      "metaTitle": "404 · Halaman tidak ditemukan",
+      "metaDescription": "Kami mengirim agen AI terbaik. Ia kembali dengan tangan kosong. Kembali ke Coasty, agen AI #1 untuk otomatisasi desktop dan browser.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "pindai: seluruh internet",
+        "step2": "pindai: setiap tab yang terbuka",
+        "step3": "pindai: di bawah sofa",
+        "result": "kesimpulan: halaman tidak ada"
+      },
+      "ok": "OK",
+      "fail": "GAGAL",
+      "primaryCta": "Ke beranda",
+      "secondaryCta": "Sewa agen AI",
+      "navLabel": "Halaman yang disarankan",
+      "links": {
+        "home": "Beranda",
+        "computerUse": "Penggunaan komputer",
+        "pricing": "Harga",
+        "download": "Unduh",
+        "blog": "Blog",
+        "guide": "Panduan"
+      }
     },
     "error": {
       "title": "Terjadi kesalahan",

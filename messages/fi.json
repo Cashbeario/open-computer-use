@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Sivua ei löytynyt",
-      "description": "Valitettavasti tätä sivua ei ole olemassa."
+      "description": "Valitettavasti tätä sivua ei ole olemassa.",
+      "metaTitle": "404 · Sivua ei löytynyt",
+      "metaDescription": "Lähetimme parhaan AI-agenttimme. Hän palasi tyhjin käsin. Takaisin Coastyyn, #1-arvostettuun AI-agenttiin työpöydän ja selaimen automaatioon.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "skannaus: koko internet",
+        "step2": "skannaus: jokainen avoin välilehti",
+        "step3": "skannaus: sohvan alta",
+        "result": "tuomio: sivua ei ole olemassa"
+      },
+      "ok": "OK",
+      "fail": "EPÄONNISTUI",
+      "primaryCta": "Takaisin etusivulle",
+      "secondaryCta": "Palkkaa AI-agentti",
+      "navLabel": "Ehdotetut sivut",
+      "links": {
+        "home": "Etusivu",
+        "computerUse": "Tietokoneen käyttö",
+        "pricing": "Hinnat",
+        "download": "Lataa",
+        "blog": "Blogi",
+        "guide": "Opas"
+      }
     },
     "error": {
       "title": "Jokin meni pieleen",

@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Hindi nahanap ang pahina",
-      "description": "Paumanhin, hindi umiiral ang pahinang ito."
+      "description": "Paumanhin, hindi umiiral ang pahinang ito.",
+      "metaTitle": "404 · Hindi mahanap ang pahina",
+      "metaDescription": "Ipinadala namin ang aming pinakamahusay na AI agent. Bumalik siyang walang dala. Bumalik sa Coasty, ang #1 AI agent para sa desktop at browser automation.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scan: buong internet",
+        "step2": "scan: bawat bukas na tab",
+        "step3": "scan: sa ilalim ng sofa",
+        "result": "hatol: hindi umiiral ang pahina"
+      },
+      "ok": "OK",
+      "fail": "BIGO",
+      "primaryCta": "Bumalik sa home",
+      "secondaryCta": "Kumuha ng AI agent",
+      "navLabel": "Mga iminumungkahing pahina",
+      "links": {
+        "home": "Home",
+        "computerUse": "Paggamit ng computer",
+        "pricing": "Presyo",
+        "download": "I-download",
+        "blog": "Blog",
+        "guide": "Gabay"
+      }
     },
     "error": {
       "title": "May nangyaring mali",

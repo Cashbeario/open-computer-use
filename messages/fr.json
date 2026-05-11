@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Page introuvable",
-      "description": "Désolé, cette page n'existe pas."
+      "description": "Désolé, cette page n'existe pas.",
+      "metaTitle": "404 · Page introuvable",
+      "metaDescription": "Nous avons envoyé notre meilleur agent IA. Il est revenu bredouille. Retournez sur Coasty, l'agent IA n°1 pour l'automatisation du bureau et du navigateur.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scan : tout internet",
+        "step2": "scan : tous les onglets ouverts",
+        "step3": "scan : sous le canapé",
+        "result": "verdict : la page n'existe pas"
+      },
+      "ok": "OK",
+      "fail": "ÉCHEC",
+      "primaryCta": "Retour à l'accueil",
+      "secondaryCta": "Embaucher un agent IA",
+      "navLabel": "Pages suggérées",
+      "links": {
+        "home": "Accueil",
+        "computerUse": "Utilisation de l'ordinateur",
+        "pricing": "Tarifs",
+        "download": "Télécharger",
+        "blog": "Blog",
+        "guide": "Guide"
+      }
     },
     "error": {
       "title": "Une erreur est survenue",

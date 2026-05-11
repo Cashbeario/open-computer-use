@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – הדף לא נמצא",
-      "description": "מצטערים, דף זה אינו קיים."
+      "description": "מצטערים, דף זה אינו קיים.",
+      "metaTitle": "404 · הדף לא נמצא",
+      "metaDescription": "שלחנו את סוכן ה-AI הטוב ביותר שלנו. הוא חזר בידיים ריקות. חזרה ל-Coasty, סוכן ה-AI מספר 1 לאוטומציה של שולחן עבודה ודפדפן.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "סריקה: כל האינטרנט",
+        "step2": "סריקה: כל לשונית פתוחה",
+        "step3": "סריקה: מתחת לספה",
+        "result": "פסיקה: הדף לא קיים"
+      },
+      "ok": "אישור",
+      "fail": "כשל",
+      "primaryCta": "חזרה לדף הבית",
+      "secondaryCta": "שכרו סוכן AI",
+      "navLabel": "דפים מוצעים",
+      "links": {
+        "home": "דף הבית",
+        "computerUse": "שימוש במחשב",
+        "pricing": "תמחור",
+        "download": "הורדה",
+        "blog": "בלוג",
+        "guide": "מדריך"
+      }
     },
     "error": {
       "title": "משהו השתבש",

@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Pagina niet gevonden",
-      "description": "Sorry, deze pagina bestaat niet."
+      "description": "Sorry, deze pagina bestaat niet.",
+      "metaTitle": "404 · Pagina niet gevonden",
+      "metaDescription": "We stuurden onze beste AI-agent. Hij kwam met lege handen terug. Ga terug naar Coasty, de #1 AI-agent voor desktop- en browserautomatisering.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scan: het hele internet",
+        "step2": "scan: elk open tabblad",
+        "step3": "scan: onder de bank",
+        "result": "oordeel: pagina bestaat niet"
+      },
+      "ok": "OK",
+      "fail": "MISLUKT",
+      "primaryCta": "Naar de homepage",
+      "secondaryCta": "Huur een AI-agent in",
+      "navLabel": "Voorgestelde pagina's",
+      "links": {
+        "home": "Home",
+        "computerUse": "Computergebruik",
+        "pricing": "Prijzen",
+        "download": "Downloaden",
+        "blog": "Blog",
+        "guide": "Gids"
+      }
     },
     "error": {
       "title": "Er is iets misgegaan",

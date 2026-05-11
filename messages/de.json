@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Seite nicht gefunden",
-      "description": "Entschuldigung, diese Seite existiert nicht."
+      "description": "Entschuldigung, diese Seite existiert nicht.",
+      "metaTitle": "404 · Seite nicht gefunden",
+      "metaDescription": "Wir haben unseren besten KI-Agenten geschickt. Er kam mit leeren Händen zurück. Zurück zu Coasty, dem führenden KI-Agenten für Desktop- und Browser-Automatisierung.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "Scan: das gesamte Internet",
+        "step2": "Scan: jeden offenen Tab",
+        "step3": "Scan: unter dem Sofa",
+        "result": "Ergebnis: Seite existiert nicht"
+      },
+      "ok": "OK",
+      "fail": "FEHLER",
+      "primaryCta": "Zurück zur Startseite",
+      "secondaryCta": "KI-Agenten engagieren",
+      "navLabel": "Empfohlene Seiten",
+      "links": {
+        "home": "Startseite",
+        "computerUse": "Computer-Nutzung",
+        "pricing": "Preise",
+        "download": "Download",
+        "blog": "Blog",
+        "guide": "Anleitung"
+      }
     },
     "error": {
       "title": "Etwas ist schiefgelaufen",

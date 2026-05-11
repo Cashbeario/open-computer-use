@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Halaman tidak dijumpai",
-      "description": "Maaf, halaman ini tidak wujud."
+      "description": "Maaf, halaman ini tidak wujud.",
+      "metaTitle": "404 · Halaman tidak ditemui",
+      "metaDescription": "Kami menghantar agen AI terbaik kami. Dia kembali dengan tangan kosong. Kembali ke Coasty, agen AI #1 untuk automasi desktop dan pelayar.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "imbas: seluruh internet",
+        "step2": "imbas: setiap tab yang dibuka",
+        "step3": "imbas: di bawah sofa",
+        "result": "keputusan: halaman tidak wujud"
+      },
+      "ok": "OK",
+      "fail": "GAGAL",
+      "primaryCta": "Kembali ke laman utama",
+      "secondaryCta": "Upah agen AI",
+      "navLabel": "Halaman yang dicadangkan",
+      "links": {
+        "home": "Utama",
+        "computerUse": "Penggunaan komputer",
+        "pricing": "Harga",
+        "download": "Muat turun",
+        "blog": "Blog",
+        "guide": "Panduan"
+      }
     },
     "error": {
       "title": "Sesuatu telah berlaku",

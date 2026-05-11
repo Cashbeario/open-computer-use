@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Pagina non trovata",
-      "description": "Spiacenti, questa pagina non esiste."
+      "description": "Spiacenti, questa pagina non esiste.",
+      "metaTitle": "404 · Pagina non trovata",
+      "metaDescription": "Abbiamo inviato il nostro miglior agente IA. È tornato a mani vuote. Torna su Coasty, l'agente IA #1 per l'automazione di desktop e browser.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scansione: tutto internet",
+        "step2": "scansione: tutte le schede aperte",
+        "step3": "scansione: sotto il divano",
+        "result": "verdetto: la pagina non esiste"
+      },
+      "ok": "OK",
+      "fail": "ERRORE",
+      "primaryCta": "Torna alla home",
+      "secondaryCta": "Assumi un agente IA",
+      "navLabel": "Pagine suggerite",
+      "links": {
+        "home": "Home",
+        "computerUse": "Uso del computer",
+        "pricing": "Prezzi",
+        "download": "Scarica",
+        "blog": "Blog",
+        "guide": "Guida"
+      }
     },
     "error": {
       "title": "Qualcosa è andato storto",

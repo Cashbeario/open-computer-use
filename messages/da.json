@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Side ikke fundet",
-      "description": "Beklager, denne side findes ikke."
+      "description": "Beklager, denne side findes ikke.",
+      "metaTitle": "404 · Siden blev ikke fundet",
+      "metaDescription": "Vi sendte vores bedste AI-agent. Han kom tomhændet tilbage. Tilbage til Coasty, den #1-rangerede AI-agent til skrivebords- og browserautomatisering.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scan: hele internettet",
+        "step2": "scan: alle åbne faner",
+        "step3": "scan: under sofaen",
+        "result": "dom: siden findes ikke"
+      },
+      "ok": "OK",
+      "fail": "MISLYKKEDES",
+      "primaryCta": "Tilbage til forsiden",
+      "secondaryCta": "Ansæt en AI-agent",
+      "navLabel": "Foreslåede sider",
+      "links": {
+        "home": "Hjem",
+        "computerUse": "Computerbrug",
+        "pricing": "Priser",
+        "download": "Download",
+        "blog": "Blog",
+        "guide": "Vejledning"
+      }
     },
     "error": {
       "title": "Noget gik galt",

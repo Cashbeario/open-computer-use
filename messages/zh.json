@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – 页面未找到",
-      "description": "抱歉，此页面不存在。"
+      "description": "抱歉，此页面不存在。",
+      "metaTitle": "404 · 找不到该页面",
+      "metaDescription": "我们派出了最棒的 AI 智能体。它两手空空地回来了。返回 Coasty，桌面和浏览器自动化排名第一的 AI 智能体。",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "扫描:整个互联网",
+        "step2": "扫描:所有打开的标签页",
+        "step3": "扫描:沙发底下",
+        "result": "结论:页面不存在"
+      },
+      "ok": "正常",
+      "fail": "失败",
+      "primaryCta": "返回首页",
+      "secondaryCta": "雇用一名 AI 智能体",
+      "navLabel": "推荐页面",
+      "links": {
+        "home": "首页",
+        "computerUse": "计算机使用",
+        "pricing": "定价",
+        "download": "下载",
+        "blog": "博客",
+        "guide": "使用指南"
+      }
     },
     "error": {
       "title": "出了点问题",

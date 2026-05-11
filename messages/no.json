@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Siden ble ikke funnet",
-      "description": "Beklager, denne siden finnes ikke."
+      "description": "Beklager, denne siden finnes ikke.",
+      "metaTitle": "404 · Siden ble ikke funnet",
+      "metaDescription": "Vi sendte vår beste AI-agent. Den kom tomhendt tilbake. Tilbake til Coasty, den #1-rangerte AI-agenten for skrivebords- og nettleserautomatisering.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "skann: hele internett",
+        "step2": "skann: hver åpne fane",
+        "step3": "skann: under sofaen",
+        "result": "konklusjon: siden eksisterer ikke"
+      },
+      "ok": "OK",
+      "fail": "MISLYKKES",
+      "primaryCta": "Tilbake til forsiden",
+      "secondaryCta": "Lei en AI-agent",
+      "navLabel": "Foreslåtte sider",
+      "links": {
+        "home": "Hjem",
+        "computerUse": "Datamaskinbruk",
+        "pricing": "Priser",
+        "download": "Last ned",
+        "blog": "Blogg",
+        "guide": "Veiledning"
+      }
     },
     "error": {
       "title": "Noe gikk galt",

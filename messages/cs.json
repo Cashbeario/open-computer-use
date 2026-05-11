@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Stránka nenalezena",
-      "description": "Omlouváme se, tato stránka neexistuje."
+      "description": "Omlouváme se, tato stránka neexistuje.",
+      "metaTitle": "404 · Stránka nenalezena",
+      "metaDescription": "Poslali jsme našeho nejlepšího AI agenta. Vrátil se s prázdnou. Zpět na Coasty, AI agenta #1 pro automatizaci desktopu a prohlížeče.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "sken: celý internet",
+        "step2": "sken: každá otevřená karta",
+        "step3": "sken: pod gaučem",
+        "result": "verdikt: stránka neexistuje"
+      },
+      "ok": "OK",
+      "fail": "CHYBA",
+      "primaryCta": "Zpět na hlavní stránku",
+      "secondaryCta": "Najměte AI agenta",
+      "navLabel": "Doporučené stránky",
+      "links": {
+        "home": "Domů",
+        "computerUse": "Použití počítače",
+        "pricing": "Ceník",
+        "download": "Stáhnout",
+        "blog": "Blog",
+        "guide": "Průvodce"
+      }
     },
     "error": {
       "title": "Něco se pokazilo",

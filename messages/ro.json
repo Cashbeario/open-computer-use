@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 — Pagina nu a fost gasita",
-      "description": "Ne pare rau, aceasta pagina nu exista."
+      "description": "Ne pare rau, aceasta pagina nu exista.",
+      "metaTitle": "404 · Pagina nu a fost găsită",
+      "metaDescription": "Am trimis cel mai bun agent AI. S-a întors cu mâna goală. Înapoi la Coasty, agentul AI #1 pentru automatizarea desktopului și a browserului.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "scanare: tot internetul",
+        "step2": "scanare: fiecare tab deschis",
+        "step3": "scanare: sub canapea",
+        "result": "verdict: pagina nu există"
+      },
+      "ok": "OK",
+      "fail": "EȘEC",
+      "primaryCta": "Înapoi la pagina principală",
+      "secondaryCta": "Angajează un agent AI",
+      "navLabel": "Pagini sugerate",
+      "links": {
+        "home": "Acasă",
+        "computerUse": "Utilizare computer",
+        "pricing": "Prețuri",
+        "download": "Descarcă",
+        "blog": "Blog",
+        "guide": "Ghid"
+      }
     },
     "error": {
       "title": "Ceva nu a mers bine",

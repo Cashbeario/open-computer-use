@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – ページが見つかりません",
-      "description": "申し訳ありません、このページは存在しません。"
+      "description": "申し訳ありません、このページは存在しません。",
+      "metaTitle": "404 · ページが見つかりません",
+      "metaDescription": "最高のAIエージェントを送りましたが、何も見つかりませんでした。デスクトップとブラウザ自動化の#1 AIエージェント、Coastyに戻りましょう。",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "スキャン: インターネット全体",
+        "step2": "スキャン: すべての開いているタブ",
+        "step3": "スキャン: ソファの下",
+        "result": "結論: ページは存在しません"
+      },
+      "ok": "OK",
+      "fail": "失敗",
+      "primaryCta": "ホームに戻る",
+      "secondaryCta": "AIエージェントを雇う",
+      "navLabel": "おすすめのページ",
+      "links": {
+        "home": "ホーム",
+        "computerUse": "コンピューター操作",
+        "pricing": "料金",
+        "download": "ダウンロード",
+        "blog": "ブログ",
+        "guide": "ガイド"
+      }
     },
     "error": {
       "title": "問題が発生しました",

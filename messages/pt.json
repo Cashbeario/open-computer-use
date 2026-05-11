@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Página não encontrada",
-      "description": "Desculpe, esta página não existe."
+      "description": "Desculpe, esta página não existe.",
+      "metaTitle": "404 · Página não encontrada",
+      "metaDescription": "Enviamos nosso melhor agente de IA. Ele voltou de mãos vazias. Volte ao Coasty, o agente de IA #1 para automação de desktop e navegador.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "varredura: toda a internet",
+        "step2": "varredura: todas as abas abertas",
+        "step3": "varredura: embaixo do sofá",
+        "result": "veredicto: a página não existe"
+      },
+      "ok": "OK",
+      "fail": "FALHA",
+      "primaryCta": "Voltar para o início",
+      "secondaryCta": "Contratar um agente de IA",
+      "navLabel": "Páginas sugeridas",
+      "links": {
+        "home": "Início",
+        "computerUse": "Uso do computador",
+        "pricing": "Preços",
+        "download": "Baixar",
+        "blog": "Blog",
+        "guide": "Guia"
+      }
     },
     "error": {
       "title": "Algo deu errado",

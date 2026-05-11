@@ -2364,7 +2364,29 @@
   "errorPages": {
     "notFound": {
       "title": "404 – Strona nie znaleziona",
-      "description": "Przepraszamy, ta strona nie istnieje."
+      "description": "Przepraszamy, ta strona nie istnieje.",
+      "metaTitle": "404 · Nie znaleziono strony",
+      "metaDescription": "Wysłaliśmy naszego najlepszego agenta AI. Wrócił z pustymi rękami. Wróć do Coasty — agenta AI numer 1 do automatyzacji pulpitu i przeglądarki.",
+      "log": {
+        "command": "coasty open requested-page",
+        "step1": "skan: cały internet",
+        "step2": "skan: każda otwarta karta",
+        "step3": "skan: pod kanapą",
+        "result": "werdykt: strona nie istnieje"
+      },
+      "ok": "OK",
+      "fail": "BŁĄD",
+      "primaryCta": "Wróć do strony głównej",
+      "secondaryCta": "Wynajmij agenta AI",
+      "navLabel": "Sugerowane strony",
+      "links": {
+        "home": "Strona główna",
+        "computerUse": "Użycie komputera",
+        "pricing": "Cennik",
+        "download": "Pobierz",
+        "blog": "Blog",
+        "guide": "Przewodnik"
+      }
     },
     "error": {
       "title": "Coś poszło nie tak",

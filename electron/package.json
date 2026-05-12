@@ -6,6 +6,7 @@
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
+    "dev:clean": "node -e \"const{execSync}=require('child_process');try{if(process.platform==='win32'){execSync('taskkill /F /IM \\\"Coasty Desktop.exe\\\" /T 2>NUL || exit 0',{stdio:'inherit',shell:true});}else{execSync(\\\"pkill -f 'Coasty Desktop' || true\\\",{stdio:'inherit',shell:'/bin/bash'});}}catch(e){}\" && electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "package": "electron-vite build && electron-builder",

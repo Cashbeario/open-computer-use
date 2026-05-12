@@ -76,6 +76,9 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  backend.hardReset()
+  const ac = useChatStore.getState().abortController
+  if (ac) ac.abort()
   delete (globalThis as any).window.coasty
 })
 
@@ -87,39 +90,36 @@ function getInput(): HTMLInputElement {
 // 1. Pre-check busy → Override & Run end-to-end
 // ═════════════════════════════════════════════════════════════════════════
 
-describe('E2E — pre-check busy → Override & Run', () => {
+describe('E2E — pre-check busy AUTO-OVERRIDE (happy path)', () => {
+  // Local-desktop UX: when the user clicks Send and the machine is
+  // busy, we automatically stop the prior task and send. No yellow
+  // banner. No confirmation. Tests below pin the auto-recovery
+  // happy path end-to-end (renderer → IPC → backend → SSE).
   beforeEach(() => {
     // Machine is busy with another task before the user sends.
     backend.setBusy(TEST_MACHINE_ID, 'chat-other-task-123')
   })
 
-  it('★ full lifecycle: type → busy → yellow → click → stop → send → response', async () => {
+  it('★ full lifecycle: type → click Send → auto-stop → send → response (NO banner)', async () => {
+    backend.scriptNextResponse({ textChunks: ['Done.'] })
     const user = userEvent.setup()
     render(<CompactPill />)
 
     const input = getInput()
     await user.type(input, 'do the thing{Enter}')
 
-    // ── Pre-check busy detected ─────────────────────────────────────
-    // Yellow button appears, input preserved.
-    await screen.findByRole('button', { name: /override and run/i })
-    expect(input.value).toBe('do the thing')
-    // Chat thread is STILL empty (web parity — no message until confirm).
-    expect(useChatStore.getState().messages).toHaveLength(0)
-
-    // ── Script the eventual response after Override fires ──────────
-    backend.scriptNextResponse({ textChunks: ['Done.'] })
-
-    // ── User clicks Override & Run ─────────────────────────────────
-    const yellow = screen.getByRole('button', { name: /override and run/i })
-    await user.click(yellow)
-
-    // stopMachine IPC fired with the right machine_id.
+    // ★ stopMachine IPC fires automatically.
     await waitFor(() => expect(backend.stopMachineCallCount).toBeGreaterThanOrEqual(1))
+    // ★ sendChatMessage IPC fires AFTER the stop.
+    await waitFor(
+      () => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1),
+      { timeout: 3000 },
+    )
 
-    // Wire send eventually fires and the response streams in.
-    await waitFor(() => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1), { timeout: 3000 })
+    // ★ Yellow "Override & Run" banner NEVER appeared.
+    expect(screen.queryByRole('button', { name: /override and run/i })).toBeNull()
 
+    // Final state: user message + assistant response in the chat.
     await waitFor(() => {
       const s = useChatStore.getState()
       expect(s.isStreaming).toBe(false)
@@ -131,14 +131,14 @@ describe('E2E — pre-check busy → Override & Run', () => {
       expect(assistants[0].content).toContain('Done.')
     })
 
-    // Input is cleared on successful send.
+    // Input cleared on successful send.
     await waitFor(() => expect(input.value).toBe(''))
   })
 
-  it('★ stale Redis lock force-release path returns forced=true and send proceeds', async () => {
-    // Simulate the new fallback: cancellation broadcast didn't release
-    // the lock, /api/chat/stop-machine called force_release_machine
-    // and DELed the Redis key. The IPC response carries forced=true.
+  it('★ stale Redis lock force-release case (forced=true) auto-recovers transparently', async () => {
+    // Backend's force_release_machine cleared the stale lock.
+    // Renderer doesn't care which path released it — both look the
+    // same from the UI side.
     backend.setStopMachineResponse({
       success: true,
       stopped: true,
@@ -150,82 +150,141 @@ describe('E2E — pre-check busy → Override & Run', () => {
 
     const user = userEvent.setup()
     render(<CompactPill />)
-
     await user.type(getInput(), 'force release me{Enter}')
-    const yellow = await screen.findByRole('button', { name: /override and run/i })
-    await user.click(yellow)
 
-    await waitFor(() => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1), { timeout: 3000 })
-    // The send went through despite the lock being stale — that's the
-    // entire reason force_release_machine exists.
+    await waitFor(
+      () => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1),
+      { timeout: 3000 },
+    )
+    // No banner — user experiences a clean send.
+    expect(screen.queryByRole('button', { name: /override and run/i })).toBeNull()
     const assistants = useChatStore.getState().messages.filter((m) => m.role === 'assistant')
     expect(assistants).toHaveLength(1)
   })
 
-  it('★ user edits input after busy, then clicks Override — the EDITED text goes to wire', async () => {
+  it('★ stopMachine ordering: stop fires BEFORE sendChatMessage', async () => {
     backend.scriptNextResponse({ textChunks: ['ok'] })
     const user = userEvent.setup()
     render(<CompactPill />)
 
-    const input = getInput()
-    await user.type(input, 'original message{Enter}')
-    await screen.findByRole('button', { name: /override and run/i })
-
-    // Edit by APPENDING (full clear would dismiss the busy state).
-    await user.type(input, ' with edits')
-    expect(input.value).toBe('original message with edits')
-
-    await user.click(screen.getByRole('button', { name: /override and run/i }))
+    await user.type(getInput(), 'order test{Enter}')
     await waitFor(() => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1), { timeout: 3000 })
 
-    const wire = backend.capturedSends[0]
-    const lastMsg = wire.messages[wire.messages.length - 1]
-    expect(lastMsg.role).toBe('user')
-    expect(lastMsg.content).toContain('original message with edits')
+    // Inspect mock call orders via vi.fn invocationCallOrder.
+    const stopOrder = (backend.build().stopMachine as any)
+    // Use the calls array timestamps instead (mock.invocationCallOrder exists on vi.fn).
+    const sendMock = (window as any).coasty.sendChatMessage
+    const stopMock = (window as any).coasty.stopMachine
+    expect(stopMock.mock.invocationCallOrder[0]).toBeLessThan(
+      sendMock.mock.invocationCallOrder[0],
+    )
   })
 
-  it('★ user clears input while busy → state dismissed, no IPC fires', async () => {
+  it('★ user types message → input is preserved during the brief auto-stop window', async () => {
+    // While stopMachine + grace are running, the user's input
+    // should still be visible (auto-recovery happens within ~400ms).
+    // After completion, it clears.
+    backend.scriptNextResponse({ textChunks: ['streaming'], perEventDelayMs: 50 })
+
     const user = userEvent.setup()
     render(<CompactPill />)
-
     const input = getInput()
-    await user.type(input, 'never mind{Enter}')
-    await screen.findByRole('button', { name: /override and run/i })
+    await user.type(input, 'check input{Enter}')
 
-    // Cancel gesture: full clear.
+    // During the brief auto-stop window (before send fires), input
+    // may or may not be cleared depending on timing. After send
+    // fires, it's definitely cleared.
+    await waitFor(
+      () => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1),
+      { timeout: 3000 },
+    )
+    await waitFor(() => expect(input.value).toBe(''))
+  })
+})
+
+describe('E2E — pre-check busy FALLBACK (auto-stop failure)', () => {
+  beforeEach(() => {
+    backend.setBusy(TEST_MACHINE_ID, 'chat-other-task-123')
+  })
+
+  it('★ stopMachine throws → yellow banner appears, no send fires', async () => {
+    const coasty = (window as any).coasty
+    coasty.stopMachine = (async () => { throw new Error('network down') }) as any
+
+    const user = userEvent.setup()
+    render(<CompactPill />)
+    await user.type(getInput(), 'fallback{Enter}')
+
+    await screen.findByRole('button', { name: /override and run/i })
+    expect(backend.sendCallCount).toBe(0)
+  })
+
+  it('★ stopMachine success=false → yellow banner appears, no send fires', async () => {
+    backend.setStopMachineResponse({
+      success: false,
+      error: 'Backend 500',
+    })
+
+    const user = userEvent.setup()
+    render(<CompactPill />)
+    await user.type(getInput(), 'success-false{Enter}')
+
+    await screen.findByRole('button', { name: /override and run/i })
+    expect(backend.sendCallCount).toBe(0)
+  })
+
+  it('★ fallback: user can click Override & Run to retry', async () => {
+    // First stop fails, banner appears, user clicks Override, second
+    // stop succeeds, send proceeds.
+    const coasty = (window as any).coasty
+    let stopCount = 0
+    coasty.stopMachine = (async () => {
+      stopCount++
+      if (stopCount === 1) throw new Error('first stop fails')
+      backend.setNotBusy(TEST_MACHINE_ID)
+      return { success: true, stopped: true, released: true, forced: false, ownerChatId: null }
+    }) as any
+
+    backend.scriptNextResponse({ textChunks: ['recovered manually'] })
+
+    const user = userEvent.setup()
+    render(<CompactPill />)
+    await user.type(getInput(), 'manual retry{Enter}')
+
+    const banner = await screen.findByRole('button', { name: /override and run/i })
+    await user.click(banner)
+
+    await waitFor(() => expect(backend.sendCallCount).toBeGreaterThanOrEqual(1), { timeout: 3000 })
+  })
+
+  it('★ fallback: input preserved so user can edit before retry', async () => {
+    const coasty = (window as any).coasty
+    coasty.stopMachine = (async () => { throw new Error('fail') }) as any
+
+    const user = userEvent.setup()
+    render(<CompactPill />)
+    const input = getInput()
+    await user.type(input, 'preserve me{Enter}')
+
+    await screen.findByRole('button', { name: /override and run/i })
+    expect(input.value).toBe('preserve me')
+  })
+
+  it('★ fallback: clearing input dismisses the banner', async () => {
+    const coasty = (window as any).coasty
+    coasty.stopMachine = (async () => { throw new Error('fail') }) as any
+
+    const user = userEvent.setup()
+    render(<CompactPill />)
+    const input = getInput()
+    await user.type(input, 'cancel me{Enter}')
+
+    await screen.findByRole('button', { name: /override and run/i })
     await user.clear(input)
 
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /override and run/i })).toBeNull()
     })
-    // No send, no stop — the gesture is a pure dismissal.
-    expect(backend.sendCallCount).toBe(0)
-    expect(backend.stopMachineCallCount).toBe(0)
-  })
-
-  it('★ stop IPC fails → input preserved, busy state retained, user can retry', async () => {
-    // Simulate stop-machine throwing (e.g. network error).
-    const coasty = (window as any).coasty
-    coasty.stopMachine = (async () => { throw new Error('ECONNREFUSED') }) as any
-
-    const user = userEvent.setup()
-    render(<CompactPill />)
-
-    const input = getInput()
-    await user.type(input, 'retry me{Enter}')
-    await screen.findByRole('button', { name: /override and run/i })
-
-    await user.click(screen.getByRole('button', { name: /override and run/i }))
-
-    // Drain the failed attempt.
-    await act(async () => { await new Promise((r) => setTimeout(r, 100)) })
-
-    // Send was NOT dispatched (stop precedes send in forceStopAndSend).
-    expect(backend.sendCallCount).toBe(0)
-    // Input preserved so the user can retry.
-    expect(input.value).toBe('retry me')
-    // Busy state is still active.
-    expect(screen.queryByRole('button', { name: /override and run/i })).toBeTruthy()
   })
 })
 

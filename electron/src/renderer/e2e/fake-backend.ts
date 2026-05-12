@@ -174,6 +174,17 @@ export class FakeBackend {
     this.busyMachines.delete(machineId)
   }
 
+  /** Forcibly clear all SSE listeners + pending scripts. Used in
+   *  test teardown to make sure in-flight scripted events from one
+   *  test don't leak into the next test's chat-store (the fake's
+   *  ``fireScriptedEvents`` has delays that can outlast a test, and
+   *  React reconciliation across test boundaries doesn't unsubscribe
+   *  the lib/api.ts listener fast enough). */
+  hardReset(): void {
+    this.sseListeners.length = 0
+    this.pendingScript = null
+  }
+
   /** Configure the response stopMachine IPC should return on the next call.
    *
    *  Use this to simulate the new ``forced: true`` path that

@@ -273,31 +273,74 @@ const GLOW_HTML = `<!DOCTYPE html>
   var intensity = 1.0;
   window.setIntensity = function(v) { intensity = v; };
 
-  var hueRotor = 0;
   var particles = [];
-  // Tuned smaller + dimmer per user feedback. Each knob does one job:
-  //   SPAWN_PER_SEC ↓ — fewer particles in flight = less compounded brightness
-  //   radius range  ↓ — smaller blobs = visible halo stays closer to the pill
-  //   alphaPeak     ↓ — each particle peaks at ~half its previous brightness
-  var SPAWN_PER_SEC = 8;
+  // ── Mono-brand palette (Coasty cobalt/azure) ──────────────────────
+  //
+  // Previous version cycled through the FULL 360° colour wheel in
+  // 14–20° steps, producing a fireworks/carnival feel users found
+  // unprofessional. Mono palette keeps motion + depth but reads as a
+  // single coherent glow.
+  //
+  //   BRAND_HUE         — Tailwind brand-600 (#0079c7) ≈ HSL(203,100%,39%).
+  //                       All particles centre on this hue.
+  //   HUE_VARIANCE      — ±18° drift around the centre keeps things
+  //                       alive without crossing into "different
+  //                       colour" territory. The eye reads anything
+  //                       within ±20° as the same hue family.
+  //   Lightness variance — 50% → 70% per particle is the primary
+  //                       visual variation. Lighter particles read as
+  //                       highlights, darker as the body of the glow.
+  //                       This is what keeps mono from feeling flat.
+  //   Saturation variance — 72%–92% per particle for richness.
+  //
+  //   SPAWN_PER_SEC     — Slightly reduced from 8 → 6 because mono
+  //                       has less visual "noise" to mask density;
+  //                       fewer particles read as elegance.
+  var BRAND_HUE = 203;
+  var HUE_VARIANCE = 18;
+  var SPAWN_PER_SEC = 6;
   var spawnAccum = 0;
 
   function spawn() {
     var angle = Math.random() * Math.PI * 2;
-    var speed = 20 + Math.random() * 42;     // half-res px/sec (was 22+50)
-    var radius = 55 + Math.random() * 80;    // half-res blob radius (was 75+110)
-    var maxLife = 3.6 + Math.random() * 3.0; // 3.6–6.6s (was 4.0–7.5)
-    hueRotor = (hueRotor + 14 + Math.random() * 6) % 360;
-    var hueShift = (Math.random() - 0.5) * 50;
+    var speed = 20 + Math.random() * 42;     // half-res px/sec
+    var radius = 55 + Math.random() * 80;    // half-res blob radius
+    var maxLife = 3.6 + Math.random() * 3.0; // 3.6–6.6s
+
+    // Centre on brand hue with a tight ±18° band. No hueRotor —
+    // each particle samples independently, so there's no perceptible
+    // "rotation through the wheel".
+    var hueOffset = (Math.random() - 0.5) * 2 * HUE_VARIANCE;
+    var hue = (BRAND_HUE + hueOffset + 360) % 360;
+    // The outer ring of each particle drifts a couple more degrees
+    // so a single blob isn't perfectly monochromatic. Within ±8°
+    // it's invisible as a "different colour" but adds a subtle
+    // chromatic depth.
+    var hueShift = (Math.random() - 0.5) * 16;
+    var hue2 = (hue + hueShift + 360) % 360;
+
+    // Lightness is the workhorse of mono palettes — vary by 20+
+    // percentage points across particles for the depth that a
+    // colour-cycling palette would otherwise provide.
+    var lightnessCore = 55 + Math.random() * 18;   // 55–73%
+    var lightnessOuter = lightnessCore - 8;        // 47–65%
+
+    // Saturation variance adds richness; the brand at 100% sat
+    // would be too neon-saturated for an ambient glow.
+    var saturation = 72 + Math.random() * 20;      // 72–92%
+
     particles.push({
       x: originX,
       y: originY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       r: radius,
-      hue: hueRotor,
-      hue2: (hueRotor + hueShift + 360) % 360,
-      alphaPeak: 0.08 + Math.random() * 0.06, // dim halo (was 0.14+0.08)
+      hue: hue,
+      hue2: hue2,
+      sat: saturation,
+      lc: lightnessCore,
+      lo: lightnessOuter,
+      alphaPeak: 0.08 + Math.random() * 0.06,
       life: 0,
       maxLife: maxLife,
     });
@@ -319,11 +362,19 @@ const GLOW_HTML = `<!DOCTYPE html>
     var alpha = p.alphaPeak * envelope(t) * intensity;
     if (alpha <= 0.001) return;
     var grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-    grad.addColorStop(0,    'hsla(' + p.hue  + ',92%,68%,' + alpha.toFixed(3) + ')');
-    grad.addColorStop(0.25, 'hsla(' + p.hue  + ',88%,62%,' + (alpha * 0.7).toFixed(3) + ')');
-    grad.addColorStop(0.55, 'hsla(' + p.hue2 + ',82%,56%,' + (alpha * 0.32).toFixed(3) + ')');
-    grad.addColorStop(0.82, 'hsla(' + p.hue2 + ',74%,50%,' + (alpha * 0.08).toFixed(3) + ')');
-    grad.addColorStop(1,    'hsla(' + p.hue2 + ',65%,46%,0)');
+    // Per-particle saturation + lightness drive the depth — mono palettes
+    // need this variation, otherwise every particle looks identical and
+    // the halo flattens visually. The outer stops also drop saturation
+    // by a few points so the edge fades into a softer, more atmospheric
+    // version of the brand colour rather than a hard ring.
+    var sat = p.sat;
+    var lc = p.lc;
+    var lo = p.lo;
+    grad.addColorStop(0,    'hsla(' + p.hue  + ',' + sat + '%,' + (lc + 4) + '%,' + alpha.toFixed(3) + ')');
+    grad.addColorStop(0.25, 'hsla(' + p.hue  + ',' + sat + '%,' + lc + '%,' + (alpha * 0.7).toFixed(3) + ')');
+    grad.addColorStop(0.55, 'hsla(' + p.hue2 + ',' + (sat - 6) + '%,' + lo + '%,' + (alpha * 0.32).toFixed(3) + ')');
+    grad.addColorStop(0.82, 'hsla(' + p.hue2 + ',' + (sat - 12) + '%,' + (lo - 4) + '%,' + (alpha * 0.08).toFixed(3) + ')');
+    grad.addColorStop(1,    'hsla(' + p.hue2 + ',' + (sat - 18) + '%,' + (lo - 6) + '%,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
   }

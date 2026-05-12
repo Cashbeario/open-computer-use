@@ -20,24 +20,31 @@ export interface FileRef {
  *                  fired. Component SHOULD clear its input + reset
  *                  any attached files.
  *
- * ``'busy'``     — machine has another task running. The user's text
- *                  has been STASHED (pendingInput) and the yellow
- *                  "Override & Run" UI is now active. Component MUST
- *                  KEEP its input so the user can edit before
- *                  confirming, or clear to dismiss.
+ * ``'busy'``     — fallback path only. The machine had another task
+ *                  running AND the auto-stop attempt failed (e.g.
+ *                  stop-machine IPC threw). The user's text is
+ *                  STASHED so the manual yellow "Override & Run"
+ *                  banner can drive a retry. Component MUST KEEP
+ *                  the input so the user can confirm or clear to
+ *                  cancel. In the common case where auto-stop works
+ *                  this branch is never reached.
  *
  * ``'rejected'`` — couldn't send for a non-busy reason (empty input,
  *                  not connected, missing auth, force-stop failed).
  *                  Component should leave input alone — no UI state
  *                  change.
  *
- * This pattern is the web app's contract (see
- * ``app/components/chat-input/chat-input.tsx``): typed text stays
- * visible until the system has a definite answer about what happens
- * to it. The Electron app previously cleared the input synchronously
- * BEFORE the busy decision came back, causing the "message
- * disappears" regression we fixed by handing the clear authority
- * to the caller via this return value.
+ * Auto-override design (current behaviour, Coasty Desktop local mode)
+ * ------------------------------------------------------------------
+ * The user owns the local machine — clicking Send IS the
+ * authorization to stop whatever's running. We don't ask. The
+ * pre-check busy detection automatically stops the conflicting task
+ * and proceeds with the send in the same gesture, so the user
+ * experiences a single click and a slightly longer (~300 ms grace)
+ * wait. No banner, no confirmation. The yellow banner only appears
+ * if the auto-stop itself fails — the manual flow is the safety net
+ * for the rare case where the user actually needs to intervene
+ * (network error, repeated lock failure).
  */
 export type SubmitResult = 'sent' | 'busy' | 'rejected'
 
@@ -106,7 +113,14 @@ export function useChatSubmit() {
   } | null>(null)
 
   const canSend = (input: string) =>
-    input.trim().length > 0 && !isStreaming && connectionState === 'connected'
+    input.trim().length > 0
+    && !isStreaming
+    && !isStoppingMachine
+    && connectionState === 'connected'
+  // ``!isStoppingMachine`` rejects rapid double-clicks while the
+  // auto-override is mid-flight (stopMachine IPC + 300 ms grace).
+  // Without this gate, a user mashing Enter/Send during the brief
+  // recovery window would trigger N stopMachine calls and N sends.
 
   // Pre-flight busy check. Returns true if the machine is actively
   // running another task (different chat). On any error (network, IPC
@@ -278,44 +292,67 @@ export function useChatSubmit() {
     async (input: string, files?: FileRef[]): Promise<SubmitResult> => {
       if (!canSend(input) || !user || !machineId) return 'rejected'
 
-      // ── Web-app-style pre-flight busy gate ────────────────────────────
+      // ── Pre-flight busy detection + auto-override ─────────────────────
       //
-      // Match the web app's contract (see
-      // ``app/components/chat-input/chat-input.tsx``): the user's typed
-      // text stays in the input box and is NOT added to the chat
-      // thread until we have a definitive answer about what happens to
-      // it. The two outcomes are:
+      // The user is on a local desktop they own. Clicking Send IS the
+      // authorization to stop whatever the machine is doing and run
+      // the new task. We don't ask via a yellow "Override & Run"
+      // banner — that level of confirmation made sense in the web app
+      // where multiple tabs/devices share a machine, but on the local
+      // desktop it just adds friction.
       //
-      //   busy=false → we send immediately: addUserMessage + _doSubmit.
-      //                Return 'sent' so the caller clears the input.
+      // Flow:
+      //   busy=false → straight to _doSubmit (the common case).
       //
-      //   busy=true  → we stash and surface the yellow Override & Run
-      //                button. The user's text stays visible in the
-      //                input (the caller does NOT clear on 'busy'),
-      //                they can edit before clicking Override or
-      //                clear to dismiss. ``alreadyInChat=false``
-      //                because we did NOT touch the chat thread —
-      //                forceStopAndSend will run a fresh _doSubmit
-      //                which addUserMessages it on confirmation.
+      //   busy=true  → AUTO-STOP inline, then proceed. The user sees
+      //                a single ~300 ms delay between click and the
+      //                message appearing in the chat, no banner. The
+      //                300 ms grace gives the prior task's `finally`
+      //                (billing teardown, Redis lock release) time
+      //                to settle before we re-acquire.
       //
-      // This was the original web-app design. An earlier iteration
-      // added the message BEFORE the busy check to work around a
-      // separate bug (components were clearing input synchronously
-      // BEFORE this function returned, so a busy outcome would have
-      // an empty input and the yellow button never appeared). The
-      // proper fix is the return value + caller-managed clear below,
-      // not a workaround that pollutes the chat thread with
-      // not-yet-confirmed messages.
+      //   stop fails → fall back to the manual banner. The user's
+      //                input is preserved so they can click Override
+      //                & Run to retry, or clear the input to cancel.
+      //                This branch is the rare safety net for IPC
+      //                errors / repeated lock failure.
       const busy = await checkBusy()
       if (busy) {
-        setIsMachineBusy(true)
-        setPendingInput({ input, files, alreadyInChat: false })
-        return 'busy'
+        setIsStoppingMachine(true)
+        try {
+          const stopRes = await window.coasty.stopMachine(machineId)
+          // The backend's stop-machine endpoint either releases the
+          // lock cleanly (released=true) or force-deletes a stale
+          // Redis key (forced=true) — both are success. ``stopped=false
+          // / reason="Machine is not busy"`` also means we can proceed
+          // (the busy detection was a stale read). ``success=false``
+          // is the only path that warrants the manual banner.
+          if (stopRes && stopRes.success === false) {
+            setIsStoppingMachine(false)
+            setIsMachineBusy(true)
+            setPendingInput({ input, files, alreadyInChat: false })
+            return 'busy'
+          }
+          // 300 ms grace matches the web app + forceStopAndSend
+          // pattern. Without it the next sendChatMessage can race
+          // the prior session's release_machine and re-trip busy.
+          await new Promise((r) => setTimeout(r, 300))
+        } catch (err) {
+          // stop-machine IPC threw (network error, main process
+          // crashed, etc.). Surface the manual banner so the user
+          // can retry once the underlying issue clears.
+          setIsStoppingMachine(false)
+          setIsMachineBusy(true)
+          setPendingInput({ input, files, alreadyInChat: false })
+          return 'busy'
+        }
+        setIsStoppingMachine(false)
+        // Auto-stop succeeded — fall through to the normal send path.
       }
 
-      // Not busy — clear any stale busy state and let _doSubmit
-      // handle both adding the user message AND constructing the wire
-      // payload that includes it. We DON'T call addUserMessage here
+      // Not busy (or auto-recovered) — let _doSubmit handle both
+      // adding the user message AND constructing the wire payload
+      // that includes it. We DON'T call addUserMessage here
       // ourselves: _doSubmit owns this for a subtle reason — the
       // wire payload construction needs to APPEND the new user
       // message because the just-fired addUserMessage's setState

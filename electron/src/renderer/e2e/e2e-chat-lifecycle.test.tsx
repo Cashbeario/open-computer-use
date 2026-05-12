@@ -73,6 +73,13 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  // Clear fake-backend listeners so in-flight scripted SSE events
+  // can't bleed into the next test's chat-store (see
+  // e2e-stop-and-edge-cases.test.tsx afterEach for the full
+  // rationale).
+  backend.hardReset()
+  const ac = useChatStore.getState().abortController
+  if (ac) ac.abort()
   delete (globalThis as any).window.coasty
 })
 

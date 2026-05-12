@@ -238,7 +238,204 @@ describe('CompactPill — happy path (not busy)', () => {
 // 2. Busy pre-check — web-app-style behavior
 // ═════════════════════════════════════════════════════════════════════════
 
-describe('CompactPill — busy pre-check', () => {
+describe('CompactPill — busy pre-check AUTO-OVERRIDE (happy path)', () => {
+  // The local-desktop UX: when the user clicks Send and the machine
+  // is busy, the app AUTOMATICALLY stops the prior task and sends.
+  // No yellow banner. No confirmation. One click → message goes
+  // through (with a small ~300 ms grace).
+  //
+  // Tests below pin the auto-recovery happy path. Failure-mode
+  // fallbacks (stop IPC throws, success=false) are in the next
+  // describe block.
+  beforeEach(() => {
+    coasty.checkMachineBusy = vi.fn(async () => ({
+      success: true,
+      busy: true,
+      ownerChatId: 'chat-other-task',
+    }))
+    // Default: stop succeeds cleanly.
+    coasty.stopMachine = vi.fn(async () => ({
+      success: true,
+      stopped: true,
+      released: true,
+      forced: false,
+      ownerChatId: 'chat-other-task',
+    }))
+  })
+
+  // Helper: wait until the full auto-recovery flow has reached the
+  // _doSubmit step (sendChatMessage IPC fired). This is the only
+  // reliable "we got past the busy block AND past the 300ms grace"
+  // signal in these tests — ``isStreaming`` toggles to true ONLY
+  // inside _doSubmit (after the grace), so we can't gate on its
+  // post-finally false state because that final state matches the
+  // initial (un-started) state too.
+  async function waitForSendDispatched() {
+    await waitFor(
+      () => expect(coasty.sendChatMessage).toHaveBeenCalled(),
+      { timeout: 2000 },
+    )
+  }
+
+  it('★ busy → click Send → stopMachine fires automatically (no user click)', async () => {
+    const user = userEvent.setup()
+    renderCompactPill()
+
+    await user.type(getInput(), 'auto-stop me{Enter}')
+
+    await waitFor(() => expect(coasty.stopMachine).toHaveBeenCalledWith(TEST_MACHINE_ID))
+    // Drain the rest of the auto-recovery (300ms grace + _doSubmit
+    // + sendChatMessage) so the next test starts from a clean state.
+    await waitForSendDispatched()
+  })
+
+  it('★ busy → message lands in the chat thread after auto-stop completes', async () => {
+    const user = userEvent.setup()
+    renderCompactPill()
+
+    await user.type(getInput(), 'gets through{Enter}')
+    await waitForSendDispatched()
+    const um = await userMessages()
+    expect(um).toHaveLength(1)
+    expect(um[0].content).toContain('gets through')
+  })
+
+  it('★ busy → input is cleared on successful auto-recovery', async () => {
+    const user = userEvent.setup()
+    renderCompactPill()
+
+    const input = getInput()
+    await user.type(input, 'clear me{Enter}')
+    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled())
+    await waitFor(() => expect(input.value).toBe(''))
+  })
+
+  it('★ busy → NO yellow "Override & Run" button shown (auto-recovery handles it silently)', async () => {
+    const user = userEvent.setup()
+    renderCompactPill()
+
+    await user.type(getInput(), 'no banner needed{Enter}')
+
+    // Wait for full auto-recovery to finish.
+    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled())
+    await act(async () => { await new Promise((r) => setTimeout(r, 50)) })
+
+    // Yellow button NEVER appeared.
+    expect(screen.queryByRole('button', { name: /override and run/i })).toBeNull()
+  })
+
+  it('★ busy → sendChatMessage fires AFTER stopMachine (correct ordering)', async () => {
+    const callOrder: string[] = []
+    coasty.stopMachine = vi.fn(async () => {
+      callOrder.push('stop')
+      return { success: true, stopped: true, released: true, forced: false, ownerChatId: null }
+    })
+    const origSend = coasty.sendChatMessage
+    coasty.sendChatMessage = vi.fn(async (...args) => {
+      callOrder.push('send')
+      return await origSend(...args)
+    })
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    await user.type(getInput(), 'order check{Enter}')
+
+    await waitFor(() => expect(callOrder).toEqual(['stop', 'send']))
+  })
+
+  it('★ stale Redis lock case (forced=true) auto-recovers transparently', async () => {
+    coasty.stopMachine = vi.fn(async () => ({
+      success: true,
+      stopped: true,
+      released: true,
+      forced: true,  // backend force-deleted the stale lock
+      ownerChatId: 'dead-worker-chat',
+    }))
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    await user.type(getInput(), 'force release please{Enter}')
+
+    await waitForUserMessage('force release please')
+    // No banner, no manual click — the user just sees a clean send.
+    expect(screen.queryByRole('button', { name: /override and run/i })).toBeNull()
+  })
+
+  it('★ stopMachine returning stopped=false (already not busy) still proceeds with send', async () => {
+    // The pre-check IPC might have returned busy=true based on a
+    // stale read. By the time the user clicks Send + stop fires,
+    // the lock could already be released. stop-machine reports
+    // stopped=false but it's a no-op — we should still send.
+    coasty.stopMachine = vi.fn(async () => ({
+      success: true,
+      stopped: false,
+      reason: 'Machine is not busy',
+      ownerChatId: null,
+    }))
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    await user.type(getInput(), 'stale read{Enter}')
+
+    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled())
+    await waitForUserMessage('stale read')
+  })
+
+  it('★ multi-turn after auto-recovery: chat_id sticky across follow-up sends', async () => {
+    const user = userEvent.setup()
+    renderCompactPill()
+
+    // Turn 1: busy → auto-recover → send.
+    await user.type(getInput(), 'turn 1{Enter}')
+    await waitForUserMessage('turn 1')
+    const chatId1 = backend_capturedSends()[0]?.chatId
+    expect(chatId1).toBeTruthy()
+
+    // After recovery, machine is no longer busy.
+    coasty.checkMachineBusy = vi.fn(async () => ({
+      success: true, busy: false, ownerChatId: null,
+    }))
+
+    // Turn 2: normal send.
+    await user.type(getInput(), 'turn 2{Enter}')
+    await waitFor(async () => {
+      const um = await userMessages()
+      expect(um).toHaveLength(2)
+    })
+    const sends = backend_capturedSends()
+    expect(sends).toHaveLength(2)
+    expect(sends[1].chatId).toBe(chatId1)  // same chat
+  })
+
+  it('auto-recovery includes ~300ms grace between stop and send (lock release window)', async () => {
+    let stopAt = 0
+    let sendAt = 0
+    coasty.stopMachine = vi.fn(async () => {
+      stopAt = Date.now()
+      return { success: true, stopped: true, released: true, forced: false, ownerChatId: null }
+    })
+    const origSend = coasty.sendChatMessage
+    coasty.sendChatMessage = vi.fn(async (...args) => {
+      sendAt = Date.now()
+      return await origSend(...args)
+    })
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    await user.type(getInput(), 'check grace{Enter}')
+
+    await waitFor(() => expect(sendAt).toBeGreaterThan(0))
+    const gap = sendAt - stopAt
+    // 300ms target ± wide tolerance for test scheduling.
+    expect(gap).toBeGreaterThanOrEqual(250)
+    expect(gap).toBeLessThan(800)
+  })
+})
+
+describe('CompactPill — busy pre-check FALLBACK (auto-stop failure)', () => {
+  // The yellow banner now only surfaces when the auto-stop itself
+  // failed — IPC threw, or backend returned success=false. The user
+  // can then click Override & Run to retry the recovery manually.
   beforeEach(() => {
     coasty.checkMachineBusy = vi.fn(async () => ({
       success: true,
@@ -247,156 +444,82 @@ describe('CompactPill — busy pre-check', () => {
     }))
   })
 
-  it('★ does NOT add the message to the chat thread on busy pre-check', async () => {
-    // Web parity: the chat thread is reserved for confirmed sends.
-    // A pre-check busy is the system asking the user "are you sure?"
-    // — nothing has actually happened yet from the user's perspective,
-    // and the chat thread should reflect that.
-    const user = userEvent.setup()
-    renderCompactPill()
-
-    await user.type(getInput(), 'queued via busy{Enter}')
-
-    // Wait for the pre-check to resolve (the IPC mock is synchronous-ish).
-    await waitFor(() => expect(coasty.checkMachineBusy).toHaveBeenCalled())
-    // Drain any async state updates so the UI has fully rendered.
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 50))
+  it('★ stopMachine throws → yellow Override & Run banner appears as fallback', async () => {
+    coasty.stopMachine = vi.fn(async () => {
+      throw new Error('ECONNREFUSED')
     })
 
-    // ★ No message added to the chat thread.
-    expect((await userMessages())).toHaveLength(0)
-  })
-
-  it('★ KEEPS the typed text in the input on busy pre-check', async () => {
-    // Web parity: the input box is the user's draft, never destroyed
-    // without their explicit consent. On busy, the draft must remain
-    // so they can edit before clicking Override or clear to dismiss.
     const user = userEvent.setup()
     renderCompactPill()
+    await user.type(getInput(), 'fallback path{Enter}')
 
-    const input = getInput()
-    await user.type(input, 'keep me{Enter}')
-
-    await waitFor(() => expect(coasty.checkMachineBusy).toHaveBeenCalled())
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 50))
-    })
-
-    // ★ Input value is the SAME as what the user typed — not cleared.
-    expect(input.value).toBe('keep me')
-  })
-
-  it('★ renders the yellow Override & Run button after busy', async () => {
-    const user = userEvent.setup()
-    renderCompactPill()
-
-    await user.type(getInput(), 'wants to override{Enter}')
     await screen.findByRole('button', { name: /override and run/i })
-  })
-
-  it('does NOT call sendChatMessage on busy pre-check (no rogue send)', async () => {
-    // The whole point of pre-check: don't fire the wire call when
-    // we already know it will be rejected. This protects against the
-    // user being billed for a doomed dispatch.
-    const user = userEvent.setup()
-    renderCompactPill()
-
-    await user.type(getInput(), 'no rogue send{Enter}')
-    await waitFor(() => expect(coasty.checkMachineBusy).toHaveBeenCalled())
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 80))
-    })
+    // No wire call fired — stop failed, we didn't try to send.
     expect(coasty.sendChatMessage).not.toHaveBeenCalled()
   })
 
-  it('clicking the yellow button calls stopMachine then sends', async () => {
+  it('★ stopMachine throws → input is PRESERVED so user can retry', async () => {
+    coasty.stopMachine = vi.fn(async () => {
+      throw new Error('network down')
+    })
+
     const user = userEvent.setup()
     renderCompactPill()
-
-    await user.type(getInput(), 'override and send{Enter}')
-    const yellowBtn = await screen.findByRole('button', { name: /override and run/i })
-    await user.click(yellowBtn)
-
-    await waitFor(() => expect(coasty.stopMachine).toHaveBeenCalledWith(TEST_MACHINE_ID))
-    await waitFor(
-      () => expect(coasty.sendChatMessage).toHaveBeenCalled(),
-      { timeout: 2000 },
-    )
-  })
-
-  it('after Override & Run, the message lands in the chat thread', async () => {
-    // After confirmation, the message must materialize. This is the
-    // moment the chat thread is allowed to mutate — the user has now
-    // explicitly authorized the send.
-    const user = userEvent.setup()
-    renderCompactPill()
-
-    await user.type(getInput(), 'finally send{Enter}')
-    const yellowBtn = await screen.findByRole('button', { name: /override and run/i })
-    await user.click(yellowBtn)
-
-    await waitForUserMessage('finally send')
-    expect((await userMessages())).toHaveLength(1)
-  })
-
-  it('after Override & Run, the input is cleared (sent branch)', async () => {
-    const user = userEvent.setup()
-    renderCompactPill()
-
     const input = getInput()
-    await user.type(input, 'clear me on override{Enter}')
-    const yellowBtn = await screen.findByRole('button', { name: /override and run/i })
-    await user.click(yellowBtn)
+    await user.type(input, 'keep my text{Enter}')
 
-    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled())
-    await waitFor(() => expect(input.value).toBe(''))
-  })
-
-  it('Override & Run sends the LIVE input when user edited after busy', async () => {
-    // The yellow button uses whatever's currently in the input. If the
-    // user edited the original text before clicking Override, the
-    // edited version is what goes on the wire.
-    //
-    // Important UX detail: the user edits by APPENDING (or partial
-    // backspace), not by fully clearing. A full ``user.clear(input)``
-    // is the cancellation gesture — auto-dismiss fires and the busy
-    // state goes away. To preserve the busy state while editing, the
-    // input must remain non-empty throughout.
-    const user = userEvent.setup()
-    renderCompactPill()
-
-    const input = getInput()
-    await user.type(input, 'first try{Enter}')
     await screen.findByRole('button', { name: /override and run/i })
-
-    expect(input.value).toBe('first try')
-    // Edit by appending (cursor is at end after type). This keeps
-    // input non-empty so auto-dismiss doesn't fire.
-    await user.type(input, ' (edited)')
-    expect(input.value).toBe('first try (edited)')
-
-    const yellowBtn = screen.getByRole('button', { name: /override and run/i })
-    await user.click(yellowBtn)
-
-    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled())
-    const sendArgs = coasty.sendChatMessage.mock.calls[0][0]
-    const lastMsg = sendArgs.messages[sendArgs.messages.length - 1]
-    expect(lastMsg.role).toBe('user')
-    expect(lastMsg.content).toContain('first try (edited)')
+    // Input not cleared — the user can click Override or clear to cancel.
+    expect(input.value).toBe('keep my text')
   })
 
-  it('clearing the input dismisses the busy state (pre-check stash, user cancels)', async () => {
-    // Web parity: typing then clearing communicates "never mind".
-    // The yellow button should go away.
+  it('stopMachine returns success=false → yellow banner fallback', async () => {
+    coasty.stopMachine = vi.fn(async () => ({
+      success: false,
+      error: 'Backend stop-machine endpoint returned 500',
+    }))
+
     const user = userEvent.setup()
     renderCompactPill()
+    await user.type(getInput(), 'success-false fallback{Enter}')
 
-    const input = getInput()
-    await user.type(input, 'maybe{Enter}')
     await screen.findByRole('button', { name: /override and run/i })
+    expect(coasty.sendChatMessage).not.toHaveBeenCalled()
+  })
 
-    // User clears the input — cancellation gesture.
+  it('★ user clicks Override & Run in the fallback → retry happens', async () => {
+    // First attempt fails, banner appears. User clicks Override & Run.
+    // The second stopMachine call should succeed and the send should
+    // proceed.
+    let stopCallCount = 0
+    coasty.stopMachine = vi.fn(async () => {
+      stopCallCount++
+      if (stopCallCount === 1) throw new Error('first attempt fails')
+      return { success: true, stopped: true, released: true, forced: false, ownerChatId: null }
+    })
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    await user.type(getInput(), 'retry me{Enter}')
+
+    const banner = await screen.findByRole('button', { name: /override and run/i })
+    await user.click(banner)
+
+    await waitFor(() => expect(coasty.sendChatMessage).toHaveBeenCalled(), { timeout: 2000 })
+    await waitForUserMessage('retry me')
+  })
+
+  it('★ clearing the input dismisses the fallback banner', async () => {
+    coasty.stopMachine = vi.fn(async () => {
+      throw new Error('fail')
+    })
+
+    const user = userEvent.setup()
+    renderCompactPill()
+    const input = getInput()
+    await user.type(input, 'cancel{Enter}')
+
+    await screen.findByRole('button', { name: /override and run/i })
     await user.clear(input)
 
     await waitFor(() => {
@@ -404,25 +527,27 @@ describe('CompactPill — busy pre-check', () => {
     })
   })
 
-  it('placeholder text attribute communicates the busy state', async () => {
-    // Belt-and-braces UX: even if the user doesn't notice the
-    // button colour change, the placeholder explains what's
-    // happening. We assert at the ATTRIBUTE level (not visibility)
-    // because the placeholder is only shown when input is empty —
-    // and on the busy path the input is preserved (non-empty), so
-    // the user sees their text instead. The attribute being set
-    // correctly still matters: if they later clear the input, the
-    // moment-of-clearing snapshot would briefly show the busy text
-    // before auto-dismiss fires.
+  it('placeholder attribute reflects busy state during fallback', async () => {
+    coasty.stopMachine = vi.fn(async () => {
+      throw new Error('fail')
+    })
+
     const user = userEvent.setup()
     renderCompactPill()
-
     const input = getInput()
-    await user.type(input, 'placeholder test{Enter}')
+    await user.type(input, 'placeholder check{Enter}')
     await screen.findByRole('button', { name: /override and run/i })
     expect(input.placeholder).toMatch(/Another task running/i)
   })
 })
+
+// Helper used by the auto-recovery multi-turn test above — the
+// integration-test file doesn't have a real fake-backend (the e2e
+// suite does), so we read the mock's call args directly.
+function backend_capturedSends(): Array<{ chatId: string; messages: any[] }> {
+  const mock = (window as any).coasty.sendChatMessage
+  return mock.mock.calls.map((c: any[]) => c[0])
+}
 
 // ═════════════════════════════════════════════════════════════════════════
 // 3. Defensive — IPC failure modes
@@ -670,38 +795,36 @@ describe('CompactPill — post-error MACHINE_BUSY recovery', () => {
 // 6. Web parity — anti-regression invariants
 // ═════════════════════════════════════════════════════════════════════════
 
-describe('CompactPill — web-app parity invariants', () => {
-  it('typed text is never destroyed without an explicit user action', async () => {
-    // The strongest possible expression of the contract: from the
-    // moment the user types something, that text is theirs until
-    // EITHER they clear it themselves OR they confirm a send and
-    // the system reports 'sent'.
+describe('CompactPill — invariants', () => {
+  it('typed text is preserved on the FALLBACK busy path (when auto-stop fails)', async () => {
+    // Auto-override mode: in the HAPPY busy path the user's text is
+    // cleared after the auto-stop+send completes (just like a normal
+    // non-busy send). The text is only preserved if the auto-stop
+    // ITSELF fails — that's the rare fallback path where the user
+    // needs to manually retry via the yellow banner.
+    //
+    // This test pins the invariant for the fallback case: typed
+    // text is not destroyed when the system couldn't complete the
+    // user's action and is asking them to retry.
     coasty.checkMachineBusy = vi.fn(async () => ({
       success: true,
       busy: true,
       ownerChatId: 'chat-other',
     }))
+    coasty.stopMachine = vi.fn(async () => {
+      throw new Error('auto-stop failed')
+    })
 
     const user = userEvent.setup()
     renderCompactPill()
     const input = getInput()
 
-    // Type, send (busy detected), text preserved.
     await user.type(input, 'sacred text{Enter}')
     await screen.findByRole('button', { name: /override and run/i })
     expect(input.value).toBe('sacred text')
 
-    // 200ms pass — text still there.
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 200))
-    })
-    expect(input.value).toBe('sacred text')
-
-    // Even if we re-render (simulate React reconciliation), text
-    // persists.
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 50))
-    })
+    // Text persists across multiple async cycles.
+    await act(async () => { await new Promise((r) => setTimeout(r, 200)) })
     expect(input.value).toBe('sacred text')
   })
 

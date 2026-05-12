@@ -373,7 +373,7 @@ function WelcomeScreen({ user, showGuide, onTry, onDismiss, onEnable, connected 
              example commands that brighten on hover. The quotes carry
              the "this is a thing you can say" semantic. */}
         {/* Sample prompts removed — welcome screen is now greeting + tagline only.
-            The "Continue on your phone" CTA lives as a persistent compact pill
+            The "Control this PC from your phone" CTA lives as a persistent compact pill
             above the chat input, so it shows on every screen, not just here. */}
 
         {/* The Continue-on-phone CTA used to live here — it's now a
@@ -1073,16 +1073,22 @@ export function Overlay() {
               </div>
             )}
 
-            {/* Compact "Continue on phone" pill — persistent above the input.
+            {/* Compact "Control from phone" pill — persistent above the input.
                 Single line, smaller icon, micro shimmer + soft aura kept
-                from the welcome version but at half scale. */}
+                from the welcome version but at half scale.
+
+                Copy choice: the previous "Continue on your phone" framed
+                this as continuing a chat thread, which under-sells what
+                Coasty's mobile surface actually does (full remote control
+                of this machine — clicks, typing, screenshots, the whole
+                desktop). The new copy makes the value prop explicit. */}
             <a
               href="https://coasty.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="group press-scale shimmer-sweep flex items-center gap-2 px-2 py-1 mb-1.5 rounded-full bg-white/[0.025] hover:bg-white/[0.05] transition-colors self-center max-w-full"
               style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.05)' }}
-              title="Open coasty.ai on your phone"
+              title="Sign in on coasty.ai from your phone to control this computer remotely"
             >
               <span
                 className="relative flex-shrink-0 w-4 h-4 rounded-[5px] flex items-center justify-center bg-blue-500/15"
@@ -1098,7 +1104,7 @@ export function Overlay() {
                 </svg>
               </span>
               <span className="text-[10px] text-neutral-400 group-hover:text-neutral-100 tracking-tight transition-colors whitespace-nowrap">
-                Continue on your phone
+                Control this PC from your phone
               </span>
               <span className="text-[10px] font-medium text-neutral-300 group-hover:text-neutral-50 tracking-tight transition-colors whitespace-nowrap">
                 coasty.ai

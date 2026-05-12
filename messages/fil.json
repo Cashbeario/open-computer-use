@@ -839,6 +839,28 @@
       "ecommerce": "{company} pricing comparison",
       "social_media": "Mag-post tungkol sa {company}",
       "general_automation": "I-automate ang gawain sa {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Tapos na ang human handoff",
+      "yourTurn": "Iyong turno",
+      "connectToDesktop": "Kumonekta sa desktop",
+      "resuming": "Ipinagpapatuloy...",
+      "doneContinue": "Tapos na, magpatuloy"
+    },
+    "feedback": {
+      "promptRun": "Kumusta ang run na ito?",
+      "promptSwarm": "Kumusta ang swarm na ito?",
+      "reactionBad": "Pangit",
+      "reactionOkay": "Okay",
+      "reactionGood": "Mabuti",
+      "reactionAmazing": "Kahanga-hanga",
+      "tellUsMore": "Sabihin pa",
+      "commentPlaceholder": "Ano ang puwedeng pagandahin?",
+      "npsPrompt": "Irerekomenda mo ba ang Coasty?",
+      "npsNotLikely": "Hindi malamang",
+      "npsVeryLikely": "Malamang na malamang",
+      "thanks": "Salamat sa feedback",
+      "creditsLabel": "credits"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Kumonekta",
         "description": "Mga social link"
       }
+    },
+    "appearance": {
+      "theme": "Tema",
+      "language": "Wika",
+      "background": "Background",
+      "personalization": "Personalisasyon"
+    },
+    "comingSoon": {
+      "badge": "Malapit na",
+      "placeholder": "Darating ang seksyong ito sa hinaharap na update."
     }
   }
 }

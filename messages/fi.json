@@ -839,6 +839,28 @@
       "ecommerce": "{company} hintavertailu",
       "social_media": "Julkaise {company}:sta",
       "general_automation": "Automatisoi tehtävä {company}:ssa"
+    },
+    "awaitingHuman": {
+      "completed": "Ihmisluovutus valmis",
+      "yourTurn": "Sinun vuorosi",
+      "connectToDesktop": "Yhdistä työpöytään",
+      "resuming": "Jatketaan...",
+      "doneContinue": "Valmis, jatka"
+    },
+    "feedback": {
+      "promptRun": "Miten tämä ajo sujui?",
+      "promptSwarm": "Miten tämä parvi sujui?",
+      "reactionBad": "Huono",
+      "reactionOkay": "Ihan ok",
+      "reactionGood": "Hyvä",
+      "reactionAmazing": "Mahtava",
+      "tellUsMore": "Kerro lisää",
+      "commentPlaceholder": "Mitä voisi parantaa?",
+      "npsPrompt": "Suosittelisitko Coastya?",
+      "npsNotLikely": "Epätodennäköistä",
+      "npsVeryLikely": "Hyvin todennäköistä",
+      "thanks": "Kiitos palautteesta",
+      "creditsLabel": "krediittiä"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Yhteys",
         "description": "Sosiaaliset linkit"
       }
+    },
+    "appearance": {
+      "theme": "Teema",
+      "language": "Kieli",
+      "background": "Tausta",
+      "personalization": "Mukauttaminen"
+    },
+    "comingSoon": {
+      "badge": "Pian",
+      "placeholder": "Tämä osio tulee tulevassa päivityksessä."
     }
   }
 }

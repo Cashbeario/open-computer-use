@@ -839,6 +839,28 @@
       "ecommerce": "เปรียบเทียบราคา {company}",
       "social_media": "โพสต์เกี่ยวกับ {company}",
       "general_automation": "ทำงานอัตโนมัติบน {company}"
+    },
+    "awaitingHuman": {
+      "completed": "การส่งต่อโดยมนุษย์เสร็จสมบูรณ์",
+      "yourTurn": "ตาคุณแล้ว",
+      "connectToDesktop": "เชื่อมต่อกับเดสก์ท็อป",
+      "resuming": "กำลังดำเนินการต่อ...",
+      "doneContinue": "เสร็จแล้ว, ดำเนินการต่อ"
+    },
+    "feedback": {
+      "promptRun": "การทำงานนี้เป็นอย่างไร?",
+      "promptSwarm": "ฝูงนี้เป็นอย่างไร?",
+      "reactionBad": "แย่",
+      "reactionOkay": "พอใช้",
+      "reactionGood": "ดี",
+      "reactionAmazing": "เยี่ยม",
+      "tellUsMore": "บอกเราเพิ่มเติม",
+      "commentPlaceholder": "อะไรที่สามารถดีขึ้นได้?",
+      "npsPrompt": "คุณจะแนะนำ Coasty ไหม?",
+      "npsNotLikely": "ไม่น่าจะใช่",
+      "npsVeryLikely": "น่าจะใช่อย่างยิ่ง",
+      "thanks": "ขอบคุณสำหรับความคิดเห็น",
+      "creditsLabel": "เครดิต"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "เชื่อมต่อ",
         "description": "ลิงก์โซเชียล"
       }
+    },
+    "appearance": {
+      "theme": "ธีม",
+      "language": "ภาษา",
+      "background": "พื้นหลัง",
+      "personalization": "การปรับแต่ง"
+    },
+    "comingSoon": {
+      "badge": "เร็วๆ นี้",
+      "placeholder": "ส่วนนี้จะมีในการอัปเดตในอนาคต"
     }
   }
 }

@@ -839,6 +839,28 @@
       "ecommerce": "{company} 价格对比",
       "social_media": "发布关于 {company} 的内容",
       "general_automation": "在 {company} 上自动化任务"
+    },
+    "awaitingHuman": {
+      "completed": "人工接管已完成",
+      "yourTurn": "轮到您了",
+      "connectToDesktop": "连接到桌面",
+      "resuming": "正在恢复...",
+      "doneContinue": "完成,继续"
+    },
+    "feedback": {
+      "promptRun": "这次运行怎么样?",
+      "promptSwarm": "这次集群怎么样?",
+      "reactionBad": "差",
+      "reactionOkay": "一般",
+      "reactionGood": "好",
+      "reactionAmazing": "极好",
+      "tellUsMore": "告诉我们更多",
+      "commentPlaceholder": "哪里可以更好?",
+      "npsPrompt": "您会推荐 Coasty 吗?",
+      "npsNotLikely": "不太可能",
+      "npsVeryLikely": "非常可能",
+      "thanks": "感谢您的反馈",
+      "creditsLabel": "积分"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "社交",
         "description": "社交链接"
       }
+    },
+    "appearance": {
+      "theme": "主题",
+      "language": "语言",
+      "background": "背景",
+      "personalization": "个性化"
+    },
+    "comingSoon": {
+      "badge": "即将",
+      "placeholder": "此部分将在未来的更新中推出。"
     }
   }
 }

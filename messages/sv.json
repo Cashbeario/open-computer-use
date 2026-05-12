@@ -839,6 +839,28 @@
       "ecommerce": "{company} prisjamforelse",
       "social_media": "Publicera om {company}",
       "general_automation": "Automatisera uppgift pa {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Mänsklig överlämning slutförd",
+      "yourTurn": "Din tur",
+      "connectToDesktop": "Anslut till skrivbord",
+      "resuming": "Återupptar...",
+      "doneContinue": "Klar, fortsätt"
+    },
+    "feedback": {
+      "promptRun": "Hur var den här körningen?",
+      "promptSwarm": "Hur var denna svärm?",
+      "reactionBad": "Dåligt",
+      "reactionOkay": "Okej",
+      "reactionGood": "Bra",
+      "reactionAmazing": "Fantastiskt",
+      "tellUsMore": "Berätta mer",
+      "commentPlaceholder": "Vad kunde varit bättre?",
+      "npsPrompt": "Skulle du rekommendera Coasty?",
+      "npsNotLikely": "Inte troligt",
+      "npsVeryLikely": "Mycket troligt",
+      "thanks": "Tack för feedbacken",
+      "creditsLabel": "krediter"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Anslut",
         "description": "Sociala länkar"
       }
+    },
+    "appearance": {
+      "theme": "Tema",
+      "language": "Språk",
+      "background": "Bakgrund",
+      "personalization": "Anpassning"
+    },
+    "comingSoon": {
+      "badge": "Snart",
+      "placeholder": "Denna sektion kommer i en framtida uppdatering."
     }
   }
 }

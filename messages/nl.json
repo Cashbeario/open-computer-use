@@ -839,6 +839,28 @@
       "ecommerce": "{company} prijsvergelijking",
       "social_media": "Post over {company}",
       "general_automation": "Automatiseer taak op {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Menselijke overdracht voltooid",
+      "yourTurn": "Jouw beurt",
+      "connectToDesktop": "Verbinden met bureaublad",
+      "resuming": "Hervatten...",
+      "doneContinue": "Klaar, doorgaan"
+    },
+    "feedback": {
+      "promptRun": "Hoe was deze run?",
+      "promptSwarm": "Hoe was deze swarm?",
+      "reactionBad": "Slecht",
+      "reactionOkay": "Oké",
+      "reactionGood": "Goed",
+      "reactionAmazing": "Geweldig",
+      "tellUsMore": "Vertel meer",
+      "commentPlaceholder": "Wat kan beter?",
+      "npsPrompt": "Zou je Coasty aanbevelen?",
+      "npsNotLikely": "Niet waarschijnlijk",
+      "npsVeryLikely": "Zeer waarschijnlijk",
+      "thanks": "Bedankt voor de feedback",
+      "creditsLabel": "credits"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Verbinden",
         "description": "Sociale links"
       }
+    },
+    "appearance": {
+      "theme": "Thema",
+      "language": "Taal",
+      "background": "Achtergrond",
+      "personalization": "Personalisatie"
+    },
+    "comingSoon": {
+      "badge": "Binnenkort",
+      "placeholder": "Dit gedeelte komt in een toekomstige update."
     }
   }
 }

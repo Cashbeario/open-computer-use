@@ -839,6 +839,28 @@
       "ecommerce": "Порівняння цін {company}",
       "social_media": "Опублікувати про {company}",
       "general_automation": "Автоматизувати завдання на {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Передачу людині завершено",
+      "yourTurn": "Ваша черга",
+      "connectToDesktop": "Підключитися до робочого столу",
+      "resuming": "Відновлення...",
+      "doneContinue": "Готово, продовжити"
+    },
+    "feedback": {
+      "promptRun": "Як пройшов цей запуск?",
+      "promptSwarm": "Як пройшов цей рій?",
+      "reactionBad": "Погано",
+      "reactionOkay": "Нормально",
+      "reactionGood": "Добре",
+      "reactionAmazing": "Чудово",
+      "tellUsMore": "Розкажіть більше",
+      "commentPlaceholder": "Що можна покращити?",
+      "npsPrompt": "Чи порекомендували б ви Coasty?",
+      "npsNotLikely": "Малоймовірно",
+      "npsVeryLikely": "Дуже ймовірно",
+      "thanks": "Дякуємо за відгук",
+      "creditsLabel": "кредитів"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Соцмережі",
         "description": "Посилання на соцмережі"
       }
+    },
+    "appearance": {
+      "theme": "Тема",
+      "language": "Мова",
+      "background": "Тло",
+      "personalization": "Персоналізація"
+    },
+    "comingSoon": {
+      "badge": "Скоро",
+      "placeholder": "Цей розділ з'явиться в одному з майбутніх оновлень."
     }
   }
 }

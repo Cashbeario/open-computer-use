@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { CircleNotch, GitFork, Robot, Stop, CheckCircle, XCircle, Warning, DownloadSimple, FilePdf, Pause, Play, HandPalm } from "@phosphor-icons/react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -906,13 +907,17 @@ function MachineStatusIcon({ status }: { status: string }) {
 }
 
 function MachineStatusBadge({ status }: { status: string }) {
+  const tAwaiting = useTranslations("chat.awaitingHuman")
+  // Only `awaiting_human` is wired through i18n for now (it mirrors the
+  // banner label). The rest of these status labels are not yet in scope
+  // for localization — phase 1 only covers the awaiting-human surface.
   const variants: Record<string, { className: string; label: string }> = {
     pending: { className: "bg-muted text-muted-foreground", label: "Pending" },
     running: { className: "bg-blue-500/10 text-blue-600 dark:text-blue-400", label: "Running" },
     completed: { className: "bg-green-500/10 text-green-700 dark:text-green-400", label: "Done" },
     failed: { className: "bg-red-500/10 text-red-600 dark:text-red-400", label: "Failed" },
     cancelled: { className: "bg-amber-500/10 text-amber-600 dark:text-amber-400", label: "Cancelled" },
-    awaiting_human: { className: "bg-amber-500/10 text-amber-600 dark:text-amber-400", label: "Your turn" },
+    awaiting_human: { className: "bg-amber-500/10 text-amber-600 dark:text-amber-400", label: tAwaiting("yourTurn") },
   }
   const v = variants[status] || variants.pending
   return (

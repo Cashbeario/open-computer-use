@@ -853,6 +853,28 @@
       "ecommerce": "{company} pricing comparison",
       "social_media": "Post about {company}",
       "general_automation": "Automate task on {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Human handoff completed",
+      "yourTurn": "Your turn",
+      "connectToDesktop": "Connect to desktop",
+      "resuming": "Resuming...",
+      "doneContinue": "Done, Continue"
+    },
+    "feedback": {
+      "promptRun": "How was this run?",
+      "promptSwarm": "How was this swarm?",
+      "reactionBad": "Bad",
+      "reactionOkay": "Okay",
+      "reactionGood": "Good",
+      "reactionAmazing": "Amazing",
+      "tellUsMore": "Tell us more",
+      "commentPlaceholder": "What could be better?",
+      "npsPrompt": "Would you recommend Coasty?",
+      "npsNotLikely": "Not likely",
+      "npsVeryLikely": "Very likely",
+      "thanks": "Thanks for the feedback",
+      "creditsLabel": "credits"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Connect",
         "description": "Social links"
       }
+    },
+    "appearance": {
+      "theme": "Theme",
+      "language": "Language",
+      "background": "Background",
+      "personalization": "Personalization"
+    },
+    "comingSoon": {
+      "badge": "Soon",
+      "placeholder": "This section is coming in a future update."
     }
   }
 }

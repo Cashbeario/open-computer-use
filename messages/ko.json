@@ -839,6 +839,28 @@
       "ecommerce": "{company} 가격 비교",
       "social_media": "{company}에 대해 게시",
       "general_automation": "{company}에서 작업 자동화"
+    },
+    "awaitingHuman": {
+      "completed": "사람의 인계 완료",
+      "yourTurn": "당신 차례입니다",
+      "connectToDesktop": "데스크톱에 연결",
+      "resuming": "재개 중...",
+      "doneContinue": "완료, 계속"
+    },
+    "feedback": {
+      "promptRun": "이 실행은 어땠나요?",
+      "promptSwarm": "이 스웜은 어땠나요?",
+      "reactionBad": "나쁨",
+      "reactionOkay": "보통",
+      "reactionGood": "좋음",
+      "reactionAmazing": "훌륭함",
+      "tellUsMore": "더 알려주세요",
+      "commentPlaceholder": "무엇이 더 좋을 수 있을까요?",
+      "npsPrompt": "Coasty를 추천하시겠어요?",
+      "npsNotLikely": "가능성 낮음",
+      "npsVeryLikely": "가능성 높음",
+      "thanks": "피드백 감사합니다",
+      "creditsLabel": "크레딧"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "연결",
         "description": "소셜 링크"
       }
+    },
+    "appearance": {
+      "theme": "테마",
+      "language": "언어",
+      "background": "배경",
+      "personalization": "개인화"
+    },
+    "comingSoon": {
+      "badge": "곧",
+      "placeholder": "이 섹션은 향후 업데이트에서 제공될 예정입니다."
     }
   }
 }

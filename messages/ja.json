@@ -839,6 +839,28 @@
       "ecommerce": "{company}の価格比較",
       "social_media": "{company}について投稿",
       "general_automation": "{company}でタスクを自動化"
+    },
+    "awaitingHuman": {
+      "completed": "人による引き継ぎが完了しました",
+      "yourTurn": "あなたの番です",
+      "connectToDesktop": "デスクトップに接続",
+      "resuming": "再開中...",
+      "doneContinue": "完了、続行"
+    },
+    "feedback": {
+      "promptRun": "この実行はいかがでしたか?",
+      "promptSwarm": "このスワームはいかがでしたか?",
+      "reactionBad": "悪い",
+      "reactionOkay": "普通",
+      "reactionGood": "良い",
+      "reactionAmazing": "素晴らしい",
+      "tellUsMore": "もっと教えてください",
+      "commentPlaceholder": "何が改善できますか?",
+      "npsPrompt": "Coasty を勧めますか?",
+      "npsNotLikely": "可能性低い",
+      "npsVeryLikely": "可能性高い",
+      "thanks": "フィードバックありがとうございます",
+      "creditsLabel": "クレジット"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "ソーシャル",
         "description": "ソーシャルリンク"
       }
+    },
+    "appearance": {
+      "theme": "テーマ",
+      "language": "言語",
+      "background": "背景",
+      "personalization": "パーソナライズ"
+    },
+    "comingSoon": {
+      "badge": "近日",
+      "placeholder": "このセクションは今後のアップデートで追加されます。"
     }
   }
 }

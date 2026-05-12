@@ -839,6 +839,28 @@
       "ecommerce": "Perbandingan harga {company}",
       "social_media": "Siarkan tentang {company}",
       "general_automation": "Automasi tugasan di {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Penyerahan manusia selesai",
+      "yourTurn": "Giliran anda",
+      "connectToDesktop": "Sambung ke desktop",
+      "resuming": "Menyambung semula...",
+      "doneContinue": "Selesai, teruskan"
+    },
+    "feedback": {
+      "promptRun": "Bagaimana run ini?",
+      "promptSwarm": "Bagaimana swarm ini?",
+      "reactionBad": "Buruk",
+      "reactionOkay": "Okey",
+      "reactionGood": "Bagus",
+      "reactionAmazing": "Hebat",
+      "tellUsMore": "Beritahu lebih lanjut",
+      "commentPlaceholder": "Apa yang boleh lebih baik?",
+      "npsPrompt": "Adakah anda mengesyorkan Coasty?",
+      "npsNotLikely": "Tidak mungkin",
+      "npsVeryLikely": "Sangat mungkin",
+      "thanks": "Terima kasih atas maklum balas",
+      "creditsLabel": "kredit"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Sambung",
         "description": "Pautan sosial"
       }
+    },
+    "appearance": {
+      "theme": "Tema",
+      "language": "Bahasa",
+      "background": "Latar belakang",
+      "personalization": "Pemperibadian"
+    },
+    "comingSoon": {
+      "badge": "Tidak lama lagi",
+      "placeholder": "Bahagian ini akan hadir dalam kemas kini akan datang."
     }
   }
 }

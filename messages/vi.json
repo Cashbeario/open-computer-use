@@ -839,6 +839,28 @@
       "ecommerce": "So sanh gia {company}",
       "social_media": "Dang bai ve {company}",
       "general_automation": "Tu dong hoa tac vu tren {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Đã hoàn tất bàn giao cho người",
+      "yourTurn": "Đến lượt bạn",
+      "connectToDesktop": "Kết nối với máy tính",
+      "resuming": "Đang tiếp tục...",
+      "doneContinue": "Xong, tiếp tục"
+    },
+    "feedback": {
+      "promptRun": "Lần chạy này thế nào?",
+      "promptSwarm": "Bầy này thế nào?",
+      "reactionBad": "Tệ",
+      "reactionOkay": "Ổn",
+      "reactionGood": "Tốt",
+      "reactionAmazing": "Tuyệt vời",
+      "tellUsMore": "Cho chúng tôi biết thêm",
+      "commentPlaceholder": "Có thể tốt hơn ở đâu?",
+      "npsPrompt": "Bạn có giới thiệu Coasty không?",
+      "npsNotLikely": "Khó có khả năng",
+      "npsVeryLikely": "Rất có khả năng",
+      "thanks": "Cảm ơn phản hồi",
+      "creditsLabel": "tín dụng"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Kết nối",
         "description": "Liên kết mạng xã hội"
       }
+    },
+    "appearance": {
+      "theme": "Chủ đề",
+      "language": "Ngôn ngữ",
+      "background": "Nền",
+      "personalization": "Cá nhân hóa"
+    },
+    "comingSoon": {
+      "badge": "Sắp ra mắt",
+      "placeholder": "Phần này sẽ có trong bản cập nhật trong tương lai."
     }
   }
 }

@@ -839,6 +839,28 @@
       "ecommerce": "{company} मूल्य तुलना",
       "social_media": "{company} के बारे में पोस्ट करें",
       "general_automation": "{company} पर कार्य स्वचालित करें"
+    },
+    "awaitingHuman": {
+      "completed": "मानव हैंडऑफ़ पूरा हुआ",
+      "yourTurn": "आपकी बारी",
+      "connectToDesktop": "डेस्कटॉप से कनेक्ट करें",
+      "resuming": "फिर से शुरू हो रहा है...",
+      "doneContinue": "हो गया, जारी रखें"
+    },
+    "feedback": {
+      "promptRun": "यह रन कैसा था?",
+      "promptSwarm": "यह स्वार्म कैसा था?",
+      "reactionBad": "खराब",
+      "reactionOkay": "ठीक",
+      "reactionGood": "अच्छा",
+      "reactionAmazing": "कमाल का",
+      "tellUsMore": "और बताएं",
+      "commentPlaceholder": "क्या बेहतर हो सकता है?",
+      "npsPrompt": "क्या आप Coasty की सिफारिश करेंगे?",
+      "npsNotLikely": "संभावना नहीं",
+      "npsVeryLikely": "बहुत संभावना",
+      "thanks": "फीडबैक के लिए धन्यवाद",
+      "creditsLabel": "क्रेडिट"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "जुड़ें",
         "description": "सोशल लिंक"
       }
+    },
+    "appearance": {
+      "theme": "थीम",
+      "language": "भाषा",
+      "background": "पृष्ठभूमि",
+      "personalization": "निजीकरण"
+    },
+    "comingSoon": {
+      "badge": "जल्द",
+      "placeholder": "यह सेक्शन आगामी अपडेट में आ रहा है।"
     }
   }
 }

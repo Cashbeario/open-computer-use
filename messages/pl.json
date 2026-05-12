@@ -839,6 +839,28 @@
       "ecommerce": "Porownanie cen {company}",
       "social_media": "Opublikuj o {company}",
       "general_automation": "Zautomatyzuj zadanie na {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Przekazanie człowiekowi zakończone",
+      "yourTurn": "Twoja kolej",
+      "connectToDesktop": "Połącz z pulpitem",
+      "resuming": "Wznawianie...",
+      "doneContinue": "Gotowe, kontynuuj"
+    },
+    "feedback": {
+      "promptRun": "Jak ten przebieg?",
+      "promptSwarm": "Jak ten swarm?",
+      "reactionBad": "Złe",
+      "reactionOkay": "W porządku",
+      "reactionGood": "Dobre",
+      "reactionAmazing": "Niesamowite",
+      "tellUsMore": "Powiedz więcej",
+      "commentPlaceholder": "Co mogłoby być lepsze?",
+      "npsPrompt": "Czy poleciłbyś Coasty?",
+      "npsNotLikely": "Mało prawdopodobne",
+      "npsVeryLikely": "Bardzo prawdopodobne",
+      "thanks": "Dzięki za opinię",
+      "creditsLabel": "kredytów"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Połącz",
         "description": "Linki społecznościowe"
       }
+    },
+    "appearance": {
+      "theme": "Motyw",
+      "language": "Język",
+      "background": "Tło",
+      "personalization": "Personalizacja"
+    },
+    "comingSoon": {
+      "badge": "Wkrótce",
+      "placeholder": "Ta sekcja pojawi się w przyszłej aktualizacji."
     }
   }
 }

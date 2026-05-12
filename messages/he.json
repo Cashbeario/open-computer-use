@@ -839,6 +839,28 @@
       "ecommerce": "השוואת מחירים של {company}",
       "social_media": "פרסם על {company}",
       "general_automation": "אוטומציה של משימה ב-{company}"
+    },
+    "awaitingHuman": {
+      "completed": "העברה אנושית הושלמה",
+      "yourTurn": "תורך",
+      "connectToDesktop": "התחבר לשולחן העבודה",
+      "resuming": "ממשיך...",
+      "doneContinue": "סיימתי, המשך"
+    },
+    "feedback": {
+      "promptRun": "איך הייתה הריצה הזו?",
+      "promptSwarm": "איך היה הנחיל הזה?",
+      "reactionBad": "גרוע",
+      "reactionOkay": "בסדר",
+      "reactionGood": "טוב",
+      "reactionAmazing": "מדהים",
+      "tellUsMore": "ספרו לנו עוד",
+      "commentPlaceholder": "מה אפשר לשפר?",
+      "npsPrompt": "האם תמליצו על Coasty?",
+      "npsNotLikely": "לא סביר",
+      "npsVeryLikely": "סביר מאוד",
+      "thanks": "תודה על המשוב",
+      "creditsLabel": "קרדיטים"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "חיבור",
         "description": "קישורים חברתיים"
       }
+    },
+    "appearance": {
+      "theme": "ערכת נושא",
+      "language": "שפה",
+      "background": "רקע",
+      "personalization": "התאמה אישית"
+    },
+    "comingSoon": {
+      "badge": "בקרוב",
+      "placeholder": "סעיף זה יגיע בעדכון עתידי."
     }
   }
 }

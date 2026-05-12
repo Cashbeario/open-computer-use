@@ -49,29 +49,30 @@ import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 type SectionType = AccountSectionType
 
 function AppearanceSection() {
+  const t = useTranslations("accountDialog.appearance")
   return (
     <div className="space-y-10">
       {/* Theme */}
       <div className="space-y-4">
-        <h3 className="text-[13px] font-medium text-foreground/70">Theme</h3>
+        <h3 className="text-[13px] font-medium text-foreground/70">{t("theme")}</h3>
         <ThemeSelection />
       </div>
 
       {/* Language */}
       <div className="space-y-4">
-        <h3 className="text-[13px] font-medium text-foreground/70">Language</h3>
+        <h3 className="text-[13px] font-medium text-foreground/70">{t("language")}</h3>
         <LanguageSelection />
       </div>
 
       {/* Background */}
       <div className="space-y-4">
-        <h3 className="text-[13px] font-medium text-foreground/70">Background</h3>
+        <h3 className="text-[13px] font-medium text-foreground/70">{t("background")}</h3>
         <BackgroundSelection />
       </div>
 
       {/* Personalization */}
       <div className="space-y-4">
-        <h3 className="text-[13px] font-medium text-foreground/70">Personalization</h3>
+        <h3 className="text-[13px] font-medium text-foreground/70">{t("personalization")}</h3>
         <IntroPreference />
       </div>
     </div>
@@ -108,6 +109,7 @@ function SidebarNavItem({
   isActive: boolean
   onClick: () => void
 }) {
+  const t = useTranslations("accountDialog.comingSoon")
   const Icon = section.icon
   const isDisabled = !section.component
   return (
@@ -126,7 +128,7 @@ function SidebarNavItem({
       <span className={cn("text-[13px] leading-none", isActive ? "font-medium" : "font-normal")}>{section.label}</span>
       {isDisabled && (
         <span className="ml-auto text-[9px] font-medium text-muted-foreground/25">
-          Soon
+          {t("badge")}
         </span>
       )}
     </button>
@@ -134,6 +136,7 @@ function SidebarNavItem({
 }
 
 function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentType<any>; label: string }) {
+  const t = useTranslations("accountDialog.comingSoon")
   return (
     <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-foreground/[0.03] dark:bg-white/[0.04] mb-5">
@@ -141,7 +144,7 @@ function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentTyp
       </div>
       <p className="text-sm font-medium text-foreground/40 mb-1">{label}</p>
       <p className="text-[13px] text-muted-foreground/30 max-w-[240px] leading-relaxed">
-        This section is coming in a future update.
+        {t("placeholder")}
       </p>
     </div>
   )
@@ -434,7 +437,7 @@ export function AccountDialog() {
                                     <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{s.description}</div>
                                   </div>
                                   {isDisabled ? (
-                                    <span className="text-[10px] text-muted-foreground/25">Soon</span>
+                                    <span className="text-[10px] text-muted-foreground/25">{tDialog("comingSoon.badge")}</span>
                                   ) : (
                                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
                                   )}

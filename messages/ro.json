@@ -839,6 +839,28 @@
       "ecommerce": "Comparatie preturi {company}",
       "social_media": "Posteaza despre {company}",
       "general_automation": "Automatizeaza sarcina pe {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Predarea către om finalizată",
+      "yourTurn": "Rândul tău",
+      "connectToDesktop": "Conectare la desktop",
+      "resuming": "Se reia...",
+      "doneContinue": "Gata, continuă"
+    },
+    "feedback": {
+      "promptRun": "Cum a fost această execuție?",
+      "promptSwarm": "Cum a fost acest swarm?",
+      "reactionBad": "Rău",
+      "reactionOkay": "Bine",
+      "reactionGood": "Bun",
+      "reactionAmazing": "Uimitor",
+      "tellUsMore": "Spune-ne mai mult",
+      "commentPlaceholder": "Ce ar putea fi mai bine?",
+      "npsPrompt": "Ai recomanda Coasty?",
+      "npsNotLikely": "Puțin probabil",
+      "npsVeryLikely": "Foarte probabil",
+      "thanks": "Mulțumim pentru feedback",
+      "creditsLabel": "credite"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Conectează-te",
         "description": "Linkuri sociale"
       }
+    },
+    "appearance": {
+      "theme": "Temă",
+      "language": "Limbă",
+      "background": "Fundal",
+      "personalization": "Personalizare"
+    },
+    "comingSoon": {
+      "badge": "Curând",
+      "placeholder": "Această secțiune va veni într-o actualizare viitoare."
     }
   }
 }

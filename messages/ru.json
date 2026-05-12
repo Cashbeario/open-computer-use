@@ -839,6 +839,28 @@
       "ecommerce": "Сравнение цен {company}",
       "social_media": "Публикация о {company}",
       "general_automation": "Автоматизировать задачу на {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Передача человеку завершена",
+      "yourTurn": "Ваш ход",
+      "connectToDesktop": "Подключиться к рабочему столу",
+      "resuming": "Возобновление...",
+      "doneContinue": "Готово, продолжить"
+    },
+    "feedback": {
+      "promptRun": "Как прошёл этот запуск?",
+      "promptSwarm": "Как прошёл этот рой?",
+      "reactionBad": "Плохо",
+      "reactionOkay": "Нормально",
+      "reactionGood": "Хорошо",
+      "reactionAmazing": "Отлично",
+      "tellUsMore": "Расскажите подробнее",
+      "commentPlaceholder": "Что можно улучшить?",
+      "npsPrompt": "Порекомендуете Coasty?",
+      "npsNotLikely": "Маловероятно",
+      "npsVeryLikely": "Очень вероятно",
+      "thanks": "Спасибо за отзыв",
+      "creditsLabel": "кредитов"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Соцсети",
         "description": "Социальные ссылки"
       }
+    },
+    "appearance": {
+      "theme": "Тема",
+      "language": "Язык",
+      "background": "Фон",
+      "personalization": "Персонализация"
+    },
+    "comingSoon": {
+      "badge": "Скоро",
+      "placeholder": "Этот раздел появится в одном из будущих обновлений."
     }
   }
 }

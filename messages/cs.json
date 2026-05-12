@@ -839,6 +839,28 @@
       "ecommerce": "Cenové srovnání {company}",
       "social_media": "Publikovat o {company}",
       "general_automation": "Automatizovat úkol na {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Předání člověku dokončeno",
+      "yourTurn": "Jsi na řadě",
+      "connectToDesktop": "Připojit k ploše",
+      "resuming": "Pokračování...",
+      "doneContinue": "Hotovo, pokračovat"
+    },
+    "feedback": {
+      "promptRun": "Jaký byl tento běh?",
+      "promptSwarm": "Jaký byl tento swarm?",
+      "reactionBad": "Špatné",
+      "reactionOkay": "Ujde to",
+      "reactionGood": "Dobré",
+      "reactionAmazing": "Úžasné",
+      "tellUsMore": "Řekněte nám víc",
+      "commentPlaceholder": "Co by mohlo být lepší?",
+      "npsPrompt": "Doporučili byste Coasty?",
+      "npsNotLikely": "Nepravděpodobné",
+      "npsVeryLikely": "Velmi pravděpodobné",
+      "thanks": "Děkujeme za zpětnou vazbu",
+      "creditsLabel": "kreditů"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Připojit",
         "description": "Sociální odkazy"
       }
+    },
+    "appearance": {
+      "theme": "Motiv",
+      "language": "Jazyk",
+      "background": "Pozadí",
+      "personalization": "Přizpůsobení"
+    },
+    "comingSoon": {
+      "badge": "Brzy",
+      "placeholder": "Tato sekce přijde v budoucí aktualizaci."
     }
   }
 }

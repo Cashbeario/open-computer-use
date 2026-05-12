@@ -839,6 +839,28 @@
       "ecommerce": "Σύγκριση τιμών {company}",
       "social_media": "Δημοσίευση για {company}",
       "general_automation": "Αυτοματοποίηση εργασίας στο {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Η ανθρώπινη παράδοση ολοκληρώθηκε",
+      "yourTurn": "Η σειρά σας",
+      "connectToDesktop": "Σύνδεση με επιφάνεια εργασίας",
+      "resuming": "Συνέχιση...",
+      "doneContinue": "Έτοιμο, συνέχεια"
+    },
+    "feedback": {
+      "promptRun": "Πώς ήταν αυτή η εκτέλεση;",
+      "promptSwarm": "Πώς ήταν αυτό το σμήνος;",
+      "reactionBad": "Κακό",
+      "reactionOkay": "Εντάξει",
+      "reactionGood": "Καλό",
+      "reactionAmazing": "Καταπληκτικό",
+      "tellUsMore": "Πείτε μας περισσότερα",
+      "commentPlaceholder": "Τι θα μπορούσε να είναι καλύτερο;",
+      "npsPrompt": "Θα προτείνατε το Coasty;",
+      "npsNotLikely": "Όχι πιθανό",
+      "npsVeryLikely": "Πολύ πιθανό",
+      "thanks": "Ευχαριστούμε για τα σχόλια",
+      "creditsLabel": "μονάδες"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Σύνδεση",
         "description": "Σύνδεσμοι κοινωνικής δικτύωσης"
       }
+    },
+    "appearance": {
+      "theme": "Θέμα",
+      "language": "Γλώσσα",
+      "background": "Φόντο",
+      "personalization": "Εξατομίκευση"
+    },
+    "comingSoon": {
+      "badge": "Σύντομα",
+      "placeholder": "Αυτή η ενότητα έρχεται σε μελλοντική ενημέρωση."
     }
   }
 }

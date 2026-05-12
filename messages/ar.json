@@ -839,6 +839,28 @@
       "ecommerce": "مقارنة أسعار {company}",
       "social_media": "انشر عن {company}",
       "general_automation": "أتمتة مهمة على {company}"
+    },
+    "awaitingHuman": {
+      "completed": "تم تسليم العمل من الإنسان",
+      "yourTurn": "دورك",
+      "connectToDesktop": "الاتصال بسطح المكتب",
+      "resuming": "جارٍ الاستئناف...",
+      "doneContinue": "تم، متابعة"
+    },
+    "feedback": {
+      "promptRun": "كيف كان هذا التشغيل؟",
+      "promptSwarm": "كيف كان هذا السرب؟",
+      "reactionBad": "سيء",
+      "reactionOkay": "مقبول",
+      "reactionGood": "جيد",
+      "reactionAmazing": "ممتاز",
+      "tellUsMore": "أخبرنا المزيد",
+      "commentPlaceholder": "ما الذي يمكن تحسينه؟",
+      "npsPrompt": "هل توصي بـ Coasty؟",
+      "npsNotLikely": "غير محتمل",
+      "npsVeryLikely": "مرجح جدًا",
+      "thanks": "شكرًا على ملاحظاتك",
+      "creditsLabel": "رصيد"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "تواصل",
         "description": "روابط التواصل الاجتماعي"
       }
+    },
+    "appearance": {
+      "theme": "المظهر",
+      "language": "اللغة",
+      "background": "الخلفية",
+      "personalization": "التخصيص"
+    },
+    "comingSoon": {
+      "badge": "قريبًا",
+      "placeholder": "سيتم إضافة هذا القسم في تحديث مستقبلي."
     }
   }
 }

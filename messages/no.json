@@ -839,6 +839,28 @@
       "ecommerce": "{company} prissammenligning",
       "social_media": "Publiser om {company}",
       "general_automation": "Automatiser oppgave pa {company}"
+    },
+    "awaitingHuman": {
+      "completed": "Menneskelig overlevering fullført",
+      "yourTurn": "Din tur",
+      "connectToDesktop": "Koble til skrivebord",
+      "resuming": "Gjenopptar...",
+      "doneContinue": "Ferdig, fortsett"
+    },
+    "feedback": {
+      "promptRun": "Hvordan var denne kjøringen?",
+      "promptSwarm": "Hvordan var denne svermen?",
+      "reactionBad": "Dårlig",
+      "reactionOkay": "Greit",
+      "reactionGood": "Bra",
+      "reactionAmazing": "Fantastisk",
+      "tellUsMore": "Fortell mer",
+      "commentPlaceholder": "Hva kunne vært bedre?",
+      "npsPrompt": "Vil du anbefale Coasty?",
+      "npsNotLikely": "Lite sannsynlig",
+      "npsVeryLikely": "Veldig sannsynlig",
+      "thanks": "Takk for tilbakemeldingen",
+      "creditsLabel": "kreditter"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Koble til",
         "description": "Sosiale lenker"
       }
+    },
+    "appearance": {
+      "theme": "Tema",
+      "language": "Språk",
+      "background": "Bakgrunn",
+      "personalization": "Tilpasning"
+    },
+    "comingSoon": {
+      "badge": "Snart",
+      "placeholder": "Denne delen kommer i en fremtidig oppdatering."
     }
   }
 }

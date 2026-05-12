@@ -839,6 +839,28 @@
       "ecommerce": "{company} fiyat karsilastirmasi",
       "social_media": "{company} hakkinda paylas",
       "general_automation": "{company} uzerinde gorev otomatiklestir"
+    },
+    "awaitingHuman": {
+      "completed": "İnsan devri tamamlandı",
+      "yourTurn": "Sıra sizde",
+      "connectToDesktop": "Masaüstüne bağlan",
+      "resuming": "Devam ediliyor...",
+      "doneContinue": "Tamam, devam"
+    },
+    "feedback": {
+      "promptRun": "Bu çalışma nasıldı?",
+      "promptSwarm": "Bu sürü nasıldı?",
+      "reactionBad": "Kötü",
+      "reactionOkay": "Fena değil",
+      "reactionGood": "İyi",
+      "reactionAmazing": "Harika",
+      "tellUsMore": "Daha fazla anlat",
+      "commentPlaceholder": "Daha iyi ne olabilirdi?",
+      "npsPrompt": "Coasty'yi tavsiye eder misiniz?",
+      "npsNotLikely": "Olası değil",
+      "npsVeryLikely": "Çok olası",
+      "thanks": "Geri bildirim için teşekkürler",
+      "creditsLabel": "kredi"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Bağlan",
         "description": "Sosyal bağlantılar"
       }
+    },
+    "appearance": {
+      "theme": "Tema",
+      "language": "Dil",
+      "background": "Arka plan",
+      "personalization": "Kişiselleştirme"
+    },
+    "comingSoon": {
+      "badge": "Yakında",
+      "placeholder": "Bu bölüm gelecekteki bir güncellemede gelecek."
     }
   }
 }

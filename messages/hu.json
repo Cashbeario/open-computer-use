@@ -839,6 +839,28 @@
       "ecommerce": "{company} ár-összehasonlítás",
       "social_media": "Posztolás a {company}-ról",
       "general_automation": "Feladat automatizálása a {company} oldalon"
+    },
+    "awaitingHuman": {
+      "completed": "Emberi átadás befejeződött",
+      "yourTurn": "Te jössz",
+      "connectToDesktop": "Csatlakozás az asztalhoz",
+      "resuming": "Folytatás...",
+      "doneContinue": "Kész, folytatás"
+    },
+    "feedback": {
+      "promptRun": "Milyen volt ez a futtatás?",
+      "promptSwarm": "Milyen volt ez a swarm?",
+      "reactionBad": "Rossz",
+      "reactionOkay": "Rendben",
+      "reactionGood": "Jó",
+      "reactionAmazing": "Csodálatos",
+      "tellUsMore": "Mondj többet",
+      "commentPlaceholder": "Mit lehetne javítani?",
+      "npsPrompt": "Ajánlanád a Coastyt?",
+      "npsNotLikely": "Nem valószínű",
+      "npsVeryLikely": "Nagyon valószínű",
+      "thanks": "Köszi a visszajelzést",
+      "creditsLabel": "kredit"
     }
   },
   "chatMessages": {
@@ -3025,6 +3047,16 @@
         "label": "Csatlakozás",
         "description": "Közösségi linkek"
       }
+    },
+    "appearance": {
+      "theme": "Téma",
+      "language": "Nyelv",
+      "background": "Háttér",
+      "personalization": "Személyre szabás"
+    },
+    "comingSoon": {
+      "badge": "Hamarosan",
+      "placeholder": "Ez a szakasz egy jövőbeli frissítésben érkezik."
     }
   }
 }

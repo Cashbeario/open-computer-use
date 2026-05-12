@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Susun Atur"
+    "layout": "Susun Atur",
+    "sidebarStyle": "Gaya bar sisi",
+    "sidebarStyleHint": "Pilih lokasi navigasi",
+    "sidebarStyleDisabled": "Tersedia apabila Tata Letak ditetapkan kepada Bar Sisi",
+    "vertical": "Menegak",
+    "verticalBadge": "Lalai",
+    "verticalDescription": "Rel kiri klasik dengan label dan kredit di footer.",
+    "horizontal": "Mendatar",
+    "horizontalBadge": "Bergaya",
+    "horizontalDescription": "Bar atas tunggal dengan semua dalam satu baris. Lebih tinggi kanvas."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Bahasa",
       "background": "Latar belakang",
-      "personalization": "Pemperibadian"
+      "personalization": "Pemperibadian",
+      "intro": {
+        "title": "Intro sinematik",
+        "description": "Tunjukkan intro beranimasi semasa melawat halaman utama"
+      },
+      "interaction": {
+        "title": "Panggilan alat",
+        "description": "Tunjukkan butiran pelaksanaan alat dalam perbualan"
+      }
     },
     "comingSoon": {
       "badge": "Tidak lama lagi",
       "placeholder": "Bahagian ini akan hadir dalam kemas kini akan datang."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Tunjukkan apa yang mungkin…",
+    "tasks": [
+      "Kaji pesaing saya",
+      "Isi permohonan kerja",
+      "Tempah penerbangan ke Tokyo",
+      "Jejak uptime laman web saya",
+      "Jadualkan siaran media sosial",
+      "Analisis trend suku tahunan"
+    ],
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "skip": "Langkau",
+    "tagline": "Buat apa sahaja, seperti yang manusia mampu dengan komputer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Komputer anda",
+      "description": "Silikon di perkhidmatan anda. Memulakan armada anda."
+    },
+    "swarms": {
+      "title": "Kecerdasan swarm",
+      "description": "Banyak fikiran, satu misi. Mengumpul ejen anda."
+    },
+    "developers": {
+      "title": "API pembangun",
+      "description": "Memuatkan papan pemuka anda."
+    },
+    "secrets": {
+      "title": "Kelayakan",
+      "description": "Rahsia anda selamat dengan kami. Membuka peti besi."
+    },
+    "schedules": {
+      "title": "Jadual",
+      "description": "Sentiasa tepat pada masanya. Menyegerakkan automasi anda."
+    },
+    "history": {
+      "title": "Sejarah anda",
+      "description": "Rekod sunyi setiap perbualan, tugas, dan idea yang anda terokai."
+    },
+    "referral": {
+      "title": "Rujukan",
+      "description": "Kongsi Coasty. Dapatkan bersama."
     }
   }
 }

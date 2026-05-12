@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "レイアウト"
+    "layout": "レイアウト",
+    "sidebarStyle": "サイドバーのスタイル",
+    "sidebarStyleHint": "ナビゲーションの位置を選択",
+    "sidebarStyleDisabled": "レイアウトがサイドバーに設定されている場合に利用可能",
+    "vertical": "縦型",
+    "verticalBadge": "デフォルト",
+    "verticalDescription": "フッターにラベルとクレジットを表示するクラシックな左サイド。",
+    "horizontal": "横型",
+    "horizontalBadge": "スリーク",
+    "horizontalDescription": "すべてを1行に収めたシングル上部バー。キャンバスの高さが増加。"
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "テーマ",
       "language": "言語",
       "background": "背景",
-      "personalization": "パーソナライズ"
+      "personalization": "パーソナライズ",
+      "intro": {
+        "title": "シネマティックイントロ",
+        "description": "ホームページ訪問時にアニメーション・イントロを表示"
+      },
+      "interaction": {
+        "title": "ツールの呼び出し",
+        "description": "会話内でツール実行の詳細を表示"
+      }
     },
     "comingSoon": {
       "badge": "近日",
       "placeholder": "このセクションは今後のアップデートで追加されます。"
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "何ができるか見せて…",
+    "tasks": [
+      "競合企業を調査",
+      "求人応募を記入",
+      "東京行きの便を予約",
+      "ウェブサイトの稼働状況を追跡",
+      "SNS投稿をスケジュール",
+      "四半期トレンドを分析"
+    ],
+    "dontShowAgain": "次回から表示しない",
+    "skip": "スキップ",
+    "tagline": "人間がコンピュータでできることなら何でも"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "あなたのコンピュータ",
+      "description": "シリコンが奉仕します。あなたの艦隊を起動中。"
+    },
+    "swarms": {
+      "title": "スウォームインテリジェンス",
+      "description": "多くの知性、ひとつの使命。エージェントを集合中。"
+    },
+    "developers": {
+      "title": "開発者 API",
+      "description": "ダッシュボードを読み込み中。"
+    },
+    "secrets": {
+      "title": "認証情報",
+      "description": "あなたの秘密は安全に守ります。金庫を開錠中。"
+    },
+    "schedules": {
+      "title": "スケジュール",
+      "description": "いつでも時間通り。自動化を同期中。"
+    },
+    "history": {
+      "title": "あなたの履歴",
+      "description": "あなたが探求したすべての会話、タスク、アイデアの静かな記録。"
+    },
+    "referral": {
+      "title": "紹介",
+      "description": "Coasty を共有しよう。一緒に稼ごう。"
     }
   }
 }

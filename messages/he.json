@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "פריסה"
+    "layout": "פריסה",
+    "sidebarStyle": "סגנון סרגל צד",
+    "sidebarStyleHint": "בחר היכן ימוקם הניווט",
+    "sidebarStyleDisabled": "זמין כאשר הפריסה מוגדרת לסרגל צד",
+    "vertical": "אנכי",
+    "verticalBadge": "ברירת מחדל",
+    "verticalDescription": "סרגל שמאלי קלאסי עם תוויות וקרדיטים בכותרת התחתונה.",
+    "horizontal": "אופקי",
+    "horizontalBadge": "עדין",
+    "horizontalDescription": "סרגל עליון יחיד עם הכול בשורה אחת. גובה קנבס גדול יותר."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "ערכת נושא",
       "language": "שפה",
       "background": "רקע",
-      "personalization": "התאמה אישית"
+      "personalization": "התאמה אישית",
+      "intro": {
+        "title": "פתיח קולנועי",
+        "description": "הצג את הפתיח המונפש בעת ביקור בדף הבית"
+      },
+      "interaction": {
+        "title": "קריאות לכלים",
+        "description": "הצג פרטי הפעלת כלים בשיחות"
+      }
     },
     "comingSoon": {
       "badge": "בקרוב",
       "placeholder": "סעיף זה יגיע בעדכון עתידי."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "הראה לי מה אפשרי…",
+    "tasks": [
+      "חקור את המתחרים שלי",
+      "מלא טפסי הגשת מועמדות",
+      "הזמן טיסה לטוקיו",
+      "עקוב אחר זמן הפעולה של האתר שלי",
+      "תזמן פוסטים ברשתות חברתיות",
+      "נתח מגמות רבעוניות"
+    ],
+    "dontShowAgain": "אל תציג שוב",
+    "skip": "דלג",
+    "tagline": "עשה הכל, בדיוק כמו שבן אדם יכול לעשות עם מחשב"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "המחשבים שלך",
+      "description": "סיליקון לשירותך. מפעילים את הצי שלך."
+    },
+    "swarms": {
+      "title": "בינת נחיל",
+      "description": "מוחות רבים, משימה אחת. אוספים את הסוכנים שלך."
+    },
+    "developers": {
+      "title": "API למפתחים",
+      "description": "טוען את לוח הבקרה שלך."
+    },
+    "secrets": {
+      "title": "אישורים",
+      "description": "הסודות שלך בטוחים אצלנו. פותחים את הכספת."
+    },
+    "schedules": {
+      "title": "לוחות זמנים",
+      "description": "בדיוק בזמן, בכל פעם. מסנכרנים את האוטומציות שלך."
+    },
+    "history": {
+      "title": "ההיסטוריה שלך",
+      "description": "רישום שקט של כל שיחה, משימה ורעיון שחקרת."
+    },
+    "referral": {
+      "title": "הפניות",
+      "description": "שתף את Coasty. הרוויחו ביחד."
     }
   }
 }

@@ -1250,6 +1250,7 @@ function ActionButton({ icon: Icon, label, onClick }: { icon: React.ComponentTyp
 /* ═══ Main ═══ */
 export function SchedulesContent() {
   const t = useTranslations("schedulesPage")
+  const tLoader = useTranslations("pageLoaders.schedules")
   const router = useRouter()
   const { user } = useUser()
   const [schedules, setSchedules] = useState<ScheduleResponse[]>([])
@@ -1492,8 +1493,8 @@ export function SchedulesContent() {
   return (
     <PageLoader
       isLoading={loading}
-      title="Schedules"
-      description="Right on time, every time. Syncing your automations."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative bg-transparent">
       {/* Ambient background — soft blur orbs only; grid removed for calm */}

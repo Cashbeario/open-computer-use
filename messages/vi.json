@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Bo cuc"
+    "layout": "Bo cuc",
+    "sidebarStyle": "Kiểu thanh bên",
+    "sidebarStyleHint": "Chọn vị trí của điều hướng",
+    "sidebarStyleDisabled": "Khả dụng khi Bố cục được đặt thành Thanh bên",
+    "vertical": "Dọc",
+    "verticalBadge": "Mặc định",
+    "verticalDescription": "Thanh trái cổ điển với nhãn và tín dụng ở chân trang.",
+    "horizontal": "Ngang",
+    "horizontalBadge": "Mượt mà",
+    "horizontalDescription": "Một thanh trên cùng với mọi thứ trong một hàng. Chiều cao canvas nhiều hơn."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Chủ đề",
       "language": "Ngôn ngữ",
       "background": "Nền",
-      "personalization": "Cá nhân hóa"
+      "personalization": "Cá nhân hóa",
+      "intro": {
+        "title": "Giới thiệu điện ảnh",
+        "description": "Hiển thị giới thiệu hoạt hình khi truy cập trang chủ"
+      },
+      "interaction": {
+        "title": "Lệnh gọi công cụ",
+        "description": "Hiển thị chi tiết thực thi công cụ trong cuộc trò chuyện"
+      }
     },
     "comingSoon": {
       "badge": "Sắp ra mắt",
       "placeholder": "Phần này sẽ có trong bản cập nhật trong tương lai."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Cho tôi xem những gì có thể…",
+    "tasks": [
+      "Nghiên cứu đối thủ của tôi",
+      "Điền đơn xin việc",
+      "Đặt vé bay đến Tokyo",
+      "Theo dõi thời gian hoạt động website",
+      "Lên lịch đăng mạng xã hội",
+      "Phân tích xu hướng quý"
+    ],
+    "dontShowAgain": "Đừng hiển thị lại",
+    "skip": "Bỏ qua",
+    "tagline": "Làm bất cứ điều gì, như con người làm trên máy tính"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Máy tính của bạn",
+      "description": "Silicon sẵn sàng phục vụ. Đang khởi động đội máy."
+    },
+    "swarms": {
+      "title": "Trí tuệ bầy đàn",
+      "description": "Nhiều bộ óc, một sứ mệnh. Đang tập hợp các tác nhân."
+    },
+    "developers": {
+      "title": "API nhà phát triển",
+      "description": "Đang tải bảng điều khiển."
+    },
+    "secrets": {
+      "title": "Thông tin xác thực",
+      "description": "Bí mật của bạn an toàn với chúng tôi. Đang mở kho."
+    },
+    "schedules": {
+      "title": "Lịch trình",
+      "description": "Luôn đúng giờ. Đang đồng bộ tự động hóa."
+    },
+    "history": {
+      "title": "Lịch sử của bạn",
+      "description": "Một bản ghi yên tĩnh về mọi cuộc trò chuyện, nhiệm vụ và ý tưởng bạn đã khám phá."
+    },
+    "referral": {
+      "title": "Giới thiệu",
+      "description": "Chia sẻ Coasty. Cùng kiếm tiền."
     }
   }
 }

@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Duzlem"
+    "layout": "Duzlem",
+    "sidebarStyle": "Kenar çubuğu stili",
+    "sidebarStyleHint": "Gezinmenin yerini seçin",
+    "sidebarStyleDisabled": "Düzen Kenar Çubuğu olarak ayarlandığında kullanılabilir",
+    "vertical": "Dikey",
+    "verticalBadge": "Varsayılan",
+    "verticalDescription": "Altbilgide etiketler ve krediler bulunan klasik sol şerit.",
+    "horizontal": "Yatay",
+    "horizontalBadge": "Şık",
+    "horizontalDescription": "Tek bir üst çubukta her şey tek bir satırda. Daha fazla tuval yüksekliği."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Dil",
       "background": "Arka plan",
-      "personalization": "Kişiselleştirme"
+      "personalization": "Kişiselleştirme",
+      "intro": {
+        "title": "Sinematik giriş",
+        "description": "Ana sayfayı ziyaret ederken animasyonlu girişi göster"
+      },
+      "interaction": {
+        "title": "Araç çağrıları",
+        "description": "Sohbetlerde araç yürütme ayrıntılarını göster"
+      }
     },
     "comingSoon": {
       "badge": "Yakında",
       "placeholder": "Bu bölüm gelecekteki bir güncellemede gelecek."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Neyin mümkün olduğunu göster…",
+    "tasks": [
+      "Rakiplerimi araştır",
+      "İş başvurularını doldur",
+      "Tokyo'ya uçak bileti al",
+      "Sitemin çalışma süresini izle",
+      "Sosyal medya gönderilerini planla",
+      "Üç aylık trendleri analiz et"
+    ],
+    "dontShowAgain": "Bir daha gösterme",
+    "skip": "Atla",
+    "tagline": "İnsanın bilgisayarla yapabileceği her şeyi yap"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Bilgisayarlarınız",
+      "description": "Silikon hizmetinizde. Filonuzu çalıştırıyoruz."
+    },
+    "swarms": {
+      "title": "Sürü zekası",
+      "description": "Çok zihin, tek misyon. Ajanlarınızı topluyoruz."
+    },
+    "developers": {
+      "title": "Geliştirici API",
+      "description": "Panonuz yükleniyor."
+    },
+    "secrets": {
+      "title": "Kimlik bilgileri",
+      "description": "Sırlarınız bizimle güvende. Kasayı açıyoruz."
+    },
+    "schedules": {
+      "title": "Zamanlamalar",
+      "description": "Her zaman tam zamanında. Otomasyonlarınız senkronize ediliyor."
+    },
+    "history": {
+      "title": "Geçmişiniz",
+      "description": "Keşfettiğin her sohbet, görev ve fikrin sessiz kaydı."
+    },
+    "referral": {
+      "title": "Tavsiyeler",
+      "description": "Coasty'yi paylaş. Birlikte kazanın."
     }
   }
 }

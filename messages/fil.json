@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Estilo ng sidebar",
+    "sidebarStyleHint": "Piliin kung saan nakatira ang navigation",
+    "sidebarStyleDisabled": "Magagamit kapag ang Layout ay nakatakda sa Sidebar",
+    "vertical": "Vertical",
+    "verticalBadge": "Default",
+    "verticalDescription": "Klasikong kaliwang rail na may mga label at credits sa footer.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Sleek",
+    "horizontalDescription": "Iisang top bar na may lahat sa isang hilera. Mas mataas na canvas."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Wika",
       "background": "Background",
-      "personalization": "Personalisasyon"
+      "personalization": "Personalisasyon",
+      "intro": {
+        "title": "Cinematic intro",
+        "description": "Ipakita ang animated intro kapag bumibisita sa homepage"
+      },
+      "interaction": {
+        "title": "Mga tool invocation",
+        "description": "Ipakita ang detalye ng pagpapatakbo ng tool sa mga usapan"
+      }
     },
     "comingSoon": {
       "badge": "Malapit na",
       "placeholder": "Darating ang seksyong ito sa hinaharap na update."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Ipakita mo sa akin ang kayang gawin…",
+    "tasks": [
+      "Saliksikin ang aking mga kakompetensya",
+      "Punan ang mga job application",
+      "Mag-book ng flight papuntang Tokyo",
+      "Subaybayan ang uptime ng website ko",
+      "Mag-iskedyul ng social posts",
+      "Suriin ang quarterly trends"
+    ],
+    "dontShowAgain": "Huwag ipakitang muli",
+    "skip": "Laktawan",
+    "tagline": "Gawin ang kahit ano, tulad ng kayang gawin ng tao sa kompyuter"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Iyong mga computer",
+      "description": "Silicon sa serbisyo mo. Pinaaandar ang fleet mo."
+    },
+    "swarms": {
+      "title": "Swarm intelligence",
+      "description": "Maraming isip, isang misyon. Tinitipon ang mga agent mo."
+    },
+    "developers": {
+      "title": "Developer API",
+      "description": "Niloload ang dashboard mo."
+    },
+    "secrets": {
+      "title": "Credentials",
+      "description": "Ligtas ang mga sikreto mo sa amin. Binubuksan ang vault."
+    },
+    "schedules": {
+      "title": "Mga iskedyul",
+      "description": "Tama sa oras, palagi. Sinasync ang mga automation mo."
+    },
+    "history": {
+      "title": "Iyong kasaysayan",
+      "description": "Tahimik na talaan ng bawat usapan, gawain, at ideyang iyong sinaliksik."
+    },
+    "referral": {
+      "title": "Mga referral",
+      "description": "I-share ang Coasty. Sama-samang kumita."
     }
   }
 }

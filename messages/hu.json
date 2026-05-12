@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Elrendezés"
+    "layout": "Elrendezés",
+    "sidebarStyle": "Oldalsáv stílusa",
+    "sidebarStyleHint": "Válaszd ki, hol legyen a navigáció",
+    "sidebarStyleDisabled": "Elérhető, ha az elrendezés Oldalsávra van állítva",
+    "vertical": "Függőleges",
+    "verticalBadge": "Alapértelmezett",
+    "verticalDescription": "Klasszikus bal oldali sáv címkékkel és kreditekkel a láblécben.",
+    "horizontal": "Vízszintes",
+    "horizontalBadge": "Letisztult",
+    "horizontalDescription": "Egyetlen felső sáv mindennel egy sorban. Több vászonmagasság."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Téma",
       "language": "Nyelv",
       "background": "Háttér",
-      "personalization": "Személyre szabás"
+      "personalization": "Személyre szabás",
+      "intro": {
+        "title": "Filmes bevezető",
+        "description": "Animált bevezető megjelenítése a kezdőlap meglátogatásakor"
+      },
+      "interaction": {
+        "title": "Eszközhívások",
+        "description": "Eszközfuttatási részletek megjelenítése a beszélgetésekben"
+      }
     },
     "comingSoon": {
       "badge": "Hamarosan",
       "placeholder": "Ez a szakasz egy jövőbeli frissítésben érkezik."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Mutasd meg, mi a lehetséges…",
+    "tasks": [
+      "Kutasd a versenytársaimat",
+      "Töltsd ki az állásjelentkezéseket",
+      "Foglalj járatot Tokióba",
+      "Kövesd nyomon a weboldalam üzemidejét",
+      "Időzítsd a közösségi posztokat",
+      "Elemezd a negyedéves trendeket"
+    ],
+    "dontShowAgain": "Ne jelenjen meg újra",
+    "skip": "Kihagyás",
+    "tagline": "Csinálj bármit, ahogy egy ember a számítógépen"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "A számítógépeid",
+      "description": "Szilícium szolgálatodban. Felpörgetjük a flottádat."
+    },
+    "swarms": {
+      "title": "Rajintelligencia",
+      "description": "Sok elme, egy küldetés. Összegyűjtjük az ügynökeidet."
+    },
+    "developers": {
+      "title": "Fejlesztői API",
+      "description": "Műszerfalad betöltése."
+    },
+    "secrets": {
+      "title": "Hitelesítő adatok",
+      "description": "A titkaid biztonságban vannak nálunk. Nyitjuk a széfet."
+    },
+    "schedules": {
+      "title": "Időzítések",
+      "description": "Mindig pontosan. Szinkronizáljuk az automatizálásaidat."
+    },
+    "history": {
+      "title": "Az előzményeid",
+      "description": "Csendes feljegyzés minden beszélgetésről, feladatról és ötletről, amit feltártál."
+    },
+    "referral": {
+      "title": "Ajánlások",
+      "description": "Oszd meg a Coastyt. Keressetek együtt."
     }
   }
 }

@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Asettelu"
+    "layout": "Asettelu",
+    "sidebarStyle": "Sivupalkin tyyli",
+    "sidebarStyleHint": "Valitse, missä navigointi sijaitsee",
+    "sidebarStyleDisabled": "Käytettävissä, kun asettelu on asetettu sivupalkkiin",
+    "vertical": "Pysty",
+    "verticalBadge": "Oletus",
+    "verticalDescription": "Klassinen vasen palkki etiketeillä ja krediiteillä alatunnisteessa.",
+    "horizontal": "Vaaka",
+    "horizontalBadge": "Tyylikäs",
+    "horizontalDescription": "Yksi yläpalkki, kaikki yhdellä rivillä. Enemmän kankaan korkeutta."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Teema",
       "language": "Kieli",
       "background": "Tausta",
-      "personalization": "Mukauttaminen"
+      "personalization": "Mukauttaminen",
+      "intro": {
+        "title": "Elokuvallinen intro",
+        "description": "Näytä animoitu intro, kun käyt etusivulla"
+      },
+      "interaction": {
+        "title": "Työkalukutsut",
+        "description": "Näytä työkalujen suoritustiedot keskusteluissa"
+      }
     },
     "comingSoon": {
       "badge": "Pian",
       "placeholder": "Tämä osio tulee tulevassa päivityksessä."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Näytä, mikä on mahdollista…",
+    "tasks": [
+      "Tutki kilpailijoitani",
+      "Täytä työhakemuksia",
+      "Varaa lento Tokioon",
+      "Seuraa verkkosivustoni käytettävyyttä",
+      "Aikatauluta sosiaalisen median julkaisut",
+      "Analysoi neljännesvuosittaisia trendejä"
+    ],
+    "dontShowAgain": "Älä näytä uudelleen",
+    "skip": "Ohita",
+    "tagline": "Tee mitä tahansa, aivan kuten ihminen tietokoneella"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Tietokoneesi",
+      "description": "Pii palveluksessasi. Käynnistämme laivuettasi."
+    },
+    "swarms": {
+      "title": "Parvi-äly",
+      "description": "Monta mieltä, yksi tehtävä. Kokoamme agenttejasi."
+    },
+    "developers": {
+      "title": "Kehittäjä-API",
+      "description": "Ladataan koontinäyttöäsi."
+    },
+    "secrets": {
+      "title": "Tunnukset",
+      "description": "Salaisuutesi ovat turvassa kanssamme. Avataan holvi."
+    },
+    "schedules": {
+      "title": "Aikataulut",
+      "description": "Aina ajallaan. Synkronoidaan automaatioitasi."
+    },
+    "history": {
+      "title": "Historiasi",
+      "description": "Hiljainen kirjaus jokaisesta keskustelusta, tehtävästä ja ideasta, jota olet tutkinut."
+    },
+    "referral": {
+      "title": "Suositukset",
+      "description": "Jaa Coasty. Ansaitkaa yhdessä."
     }
   }
 }

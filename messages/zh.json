@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "布局"
+    "layout": "布局",
+    "sidebarStyle": "侧边栏样式",
+    "sidebarStyleHint": "选择导航的位置",
+    "sidebarStyleDisabled": "当布局设置为侧边栏时可用",
+    "vertical": "垂直",
+    "verticalBadge": "默认",
+    "verticalDescription": "经典左侧边栏,在页脚显示标签和积分。",
+    "horizontal": "水平",
+    "horizontalBadge": "简洁",
+    "horizontalDescription": "单一顶部栏,所有内容在一行。画布高度更大。"
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "主题",
       "language": "语言",
       "background": "背景",
-      "personalization": "个性化"
+      "personalization": "个性化",
+      "intro": {
+        "title": "电影感开场",
+        "description": "访问首页时显示动画开场"
+      },
+      "interaction": {
+        "title": "工具调用",
+        "description": "在对话中显示工具执行详情"
+      }
     },
     "comingSoon": {
       "badge": "即将",
       "placeholder": "此部分将在未来的更新中推出。"
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "让我看看能做什么…",
+    "tasks": [
+      "研究我的竞争对手",
+      "填写求职申请",
+      "预订飞往东京的航班",
+      "追踪我的网站正常运行时间",
+      "安排社交媒体帖子",
+      "分析季度趋势"
+    ],
+    "dontShowAgain": "不再显示",
+    "skip": "跳过",
+    "tagline": "做任何事,就像人类用电脑一样"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "您的电脑",
+      "description": "硅芯效劳。正在启动您的机群。"
+    },
+    "swarms": {
+      "title": "集群智能",
+      "description": "群智协同,使命如一。正在召集您的代理。"
+    },
+    "developers": {
+      "title": "开发者 API",
+      "description": "正在加载您的仪表板。"
+    },
+    "secrets": {
+      "title": "凭据",
+      "description": "您的秘密在我们这里安全无虞。正在打开保险库。"
+    },
+    "schedules": {
+      "title": "排程",
+      "description": "准时无误,从不缺席。正在同步您的自动化。"
+    },
+    "history": {
+      "title": "您的历史",
+      "description": "您探索过的每一次对话、任务和想法的静谧记录。"
+    },
+    "referral": {
+      "title": "推荐",
+      "description": "分享 Coasty,共同获益。"
     }
   }
 }

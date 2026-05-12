@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Sidofältsstil",
+    "sidebarStyleHint": "Välj var navigationen finns",
+    "sidebarStyleDisabled": "Tillgänglig när Layout är inställd på Sidofält",
+    "vertical": "Vertikal",
+    "verticalBadge": "Standard",
+    "verticalDescription": "Klassiskt vänsterspår med etiketter och krediter i sidfoten.",
+    "horizontal": "Horisontell",
+    "horizontalBadge": "Stilren",
+    "horizontalDescription": "En enkel topprad med allt på en rad. Mer arbetsytehöjd."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Språk",
       "background": "Bakgrund",
-      "personalization": "Anpassning"
+      "personalization": "Anpassning",
+      "intro": {
+        "title": "Filmisk intro",
+        "description": "Visa den animerade introt vid besök på startsidan"
+      },
+      "interaction": {
+        "title": "Verktygsanrop",
+        "description": "Visa verktygsutförandedetaljer i samtal"
+      }
     },
     "comingSoon": {
       "badge": "Snart",
       "placeholder": "Denna sektion kommer i en framtida uppdatering."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Visa mig vad som är möjligt…",
+    "tasks": [
+      "Undersök mina konkurrenter",
+      "Fyll i jobbansökningar",
+      "Boka en flygresa till Tokyo",
+      "Spåra min webbplats drifttid",
+      "Schemalägg sociala inlägg",
+      "Analysera kvartalstrender"
+    ],
+    "dontShowAgain": "Visa inte igen",
+    "skip": "Hoppa över",
+    "tagline": "Gör vad som helst, precis som en människa kan med en dator"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Dina datorer",
+      "description": "Kisel till din tjänst. Startar din flotta nu."
+    },
+    "swarms": {
+      "title": "Svärmintelligens",
+      "description": "Många sinnen, ett uppdrag. Samlar dina agenter nu."
+    },
+    "developers": {
+      "title": "Utvecklar-API",
+      "description": "Laddar din instrumentpanel."
+    },
+    "secrets": {
+      "title": "Inloggningsuppgifter",
+      "description": "Dina hemligheter är säkra hos oss. Låser upp valvet."
+    },
+    "schedules": {
+      "title": "Scheman",
+      "description": "Alltid i tid. Synkar dina automatiseringar."
+    },
+    "history": {
+      "title": "Din historik",
+      "description": "Ett stilla register över varje konversation, uppgift och idé du utforskat."
+    },
+    "referral": {
+      "title": "Hänvisningar",
+      "description": "Dela Coasty. Tjäna tillsammans."
     }
   }
 }

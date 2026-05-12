@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Estilo da barra lateral",
+    "sidebarStyleHint": "Escolha onde a navegação fica",
+    "sidebarStyleDisabled": "Disponível quando o Layout está definido como Barra lateral",
+    "vertical": "Vertical",
+    "verticalBadge": "Padrão",
+    "verticalDescription": "Trilho esquerdo clássico com rótulos e créditos no rodapé.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Elegante",
+    "horizontalDescription": "Barra superior única com tudo em uma linha. Mais altura de tela."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Idioma",
       "background": "Plano de fundo",
-      "personalization": "Personalização"
+      "personalization": "Personalização",
+      "intro": {
+        "title": "Introdução cinematográfica",
+        "description": "Mostrar a introdução animada ao visitar a página inicial"
+      },
+      "interaction": {
+        "title": "Chamadas de ferramentas",
+        "description": "Mostrar detalhes de execução de ferramentas nas conversas"
+      }
     },
     "comingSoon": {
       "badge": "Em breve",
       "placeholder": "Esta seção chegará em uma atualização futura."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Mostre-me o que é possível…",
+    "tasks": [
+      "Pesquise meus concorrentes",
+      "Preencha candidaturas a empregos",
+      "Reserve um voo para Tóquio",
+      "Acompanhe o uptime do meu site",
+      "Agende publicações nas redes",
+      "Analise tendências trimestrais"
+    ],
+    "dontShowAgain": "Não mostrar novamente",
+    "skip": "Pular",
+    "tagline": "Faça qualquer coisa, igualzinho a um humano em um computador"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Seus computadores",
+      "description": "Silício a seu serviço. Iniciando sua frota agora."
+    },
+    "swarms": {
+      "title": "Inteligência de enxame",
+      "description": "Muitas mentes, uma missão. Reunindo seus agentes."
+    },
+    "developers": {
+      "title": "API para desenvolvedores",
+      "description": "Carregando seu painel."
+    },
+    "secrets": {
+      "title": "Credenciais",
+      "description": "Seus segredos estão seguros conosco. Abrindo o cofre."
+    },
+    "schedules": {
+      "title": "Agendamentos",
+      "description": "Sempre na hora. Sincronizando suas automações."
+    },
+    "history": {
+      "title": "Seu histórico",
+      "description": "Um registro silencioso de cada conversa, tarefa e ideia que você explorou."
+    },
+    "referral": {
+      "title": "Indicações",
+      "description": "Compartilhe o Coasty. Ganhem juntos."
     }
   }
 }

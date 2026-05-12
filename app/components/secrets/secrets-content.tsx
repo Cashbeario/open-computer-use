@@ -270,6 +270,7 @@ function SecretCard({ secret, revealedPassword, isRevealing, onReveal, onEdit, o
 
 export function SecretsContent() {
   const t = useTranslations("secrets")
+  const tLoader = useTranslations("pageLoaders.secrets")
   const [secrets, setSecrets] = useState<UserSecret[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -367,8 +368,8 @@ export function SecretsContent() {
   return (
     <PageLoader
       isLoading={loading}
-      title="Credentials"
-      description="Your secrets are safe with us. Unlocking the vault."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative bg-transparent">
       {/* Ambient background — soft blur orbs only; grid removed for calm */}

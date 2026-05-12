@@ -47,6 +47,7 @@ import { AgentIconFilled } from "@/components/icons/agent"
 import { APP_DOMAIN } from "@/lib/config"
 import { createClient } from "@/lib/supabase/client"
 import { PageLoader } from "@/components/common/page-loader"
+import { useTranslations } from "next-intl"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -109,6 +110,7 @@ function extractStepsFromParts(parts: any[] | null): ExtractedStep[] {
 // ---------------------------------------------------------------------------
 
 export function HistoryContent() {
+  const tLoader = useTranslations("pageLoaders.history")
   const { chats, isLoading, isLoadingMore, hasMore, loadMore, refresh, deleteChat, updateChat } = useChats()
   const [search, setSearch] = useState("")
   const [refreshing, setRefreshing] = useState(false)
@@ -227,8 +229,8 @@ export function HistoryContent() {
   return (
     <PageLoader
       isLoading={isLoading}
-      title="Your History"
-      description="A quiet record of every conversation, task, and idea you've explored."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
       {/* Ambient background */}

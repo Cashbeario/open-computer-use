@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Rozvržení"
+    "layout": "Rozvržení",
+    "sidebarStyle": "Styl postranního panelu",
+    "sidebarStyleHint": "Vyberte umístění navigace",
+    "sidebarStyleDisabled": "Dostupné, když je rozvržení nastaveno na postranní panel",
+    "vertical": "Svislé",
+    "verticalBadge": "Výchozí",
+    "verticalDescription": "Klasická levá lišta se štítky a kredity v zápatí.",
+    "horizontal": "Vodorovné",
+    "horizontalBadge": "Elegantní",
+    "horizontalDescription": "Jeden horní pruh se vším v jednom řádku. Větší výška plátna."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Motiv",
       "language": "Jazyk",
       "background": "Pozadí",
-      "personalization": "Přizpůsobení"
+      "personalization": "Přizpůsobení",
+      "intro": {
+        "title": "Filmový úvod",
+        "description": "Zobrazit animovaný úvod při návštěvě domovské stránky"
+      },
+      "interaction": {
+        "title": "Volání nástrojů",
+        "description": "Zobrazit podrobnosti o spuštění nástrojů v konverzacích"
+      }
     },
     "comingSoon": {
       "badge": "Brzy",
       "placeholder": "Tato sekce přijde v budoucí aktualizaci."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Ukaž mi, co je možné…",
+    "tasks": [
+      "Prozkoumej mou konkurenci",
+      "Vyplň žádosti o zaměstnání",
+      "Rezervuj let do Tokia",
+      "Sleduj dostupnost mého webu",
+      "Naplánuj příspěvky na sociálních sítích",
+      "Analyzuj čtvrtletní trendy"
+    ],
+    "dontShowAgain": "Příště nezobrazovat",
+    "skip": "Přeskočit",
+    "tagline": "Udělej cokoli, stejně jako to dokáže člověk na počítači"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Vaše počítače",
+      "description": "Křemík ve vašich službách. Roztáčíme vaši flotilu."
+    },
+    "swarms": {
+      "title": "Inteligence roje",
+      "description": "Mnoho myslí, jedna mise. Sbíráme tvé agenty."
+    },
+    "developers": {
+      "title": "Vývojářské API",
+      "description": "Načítání tvého panelu."
+    },
+    "secrets": {
+      "title": "Přihlašovací údaje",
+      "description": "Vaše tajemství jsou u nás v bezpečí. Otevíráme trezor."
+    },
+    "schedules": {
+      "title": "Plány",
+      "description": "Vždy přesně načas. Synchronizujeme tvé automatizace."
+    },
+    "history": {
+      "title": "Vaše historie",
+      "description": "Tichý záznam každé konverzace, úkolu a nápadu, který jsi prozkoumal."
+    },
+    "referral": {
+      "title": "Doporučení",
+      "description": "Sdílej Coasty. Vydělávejte společně."
     }
   }
 }

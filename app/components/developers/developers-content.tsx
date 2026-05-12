@@ -31,6 +31,7 @@ import { PageLoader } from "@/components/common/page-loader"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { fetchClient } from "@/lib/fetch"
+import { useTranslations } from "next-intl"
 
 /* ═══════════════════════════════════════════════════════════════════
    Constants
@@ -1886,6 +1887,7 @@ const TABS: { id: TabId; label: string; icon: typeof Key }[] = [
 ]
 
 export function DevelopersContent() {
+  const tLoader = useTranslations("pageLoaders.developers")
   const [keys, setKeys] = useState<APIKey[]>([])
   const [stats, setStats] = useState<Stats>({
     keyCount: 0, totalRequests: 0, totalCredits: 0,
@@ -1984,7 +1986,7 @@ export function DevelopersContent() {
   const sparkCredits  = daily.slice(-7).map(d => d.credits)
 
   return (
-    <PageLoader isLoading={loading} title="Developer API" description="Loading your dashboard.">
+    <PageLoader isLoading={loading} title={tLoader("title")} description={tLoader("description")}>
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
 
       {/* Ambient orbs — match guide / schedules / machines */}

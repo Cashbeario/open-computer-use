@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Seitenleisten-Stil",
+    "sidebarStyleHint": "Wähle, wo die Navigation lebt",
+    "sidebarStyleDisabled": "Verfügbar, wenn Layout auf Seitenleiste eingestellt ist",
+    "vertical": "Vertikal",
+    "verticalBadge": "Standard",
+    "verticalDescription": "Klassische linke Leiste mit Beschriftungen und Credits im Footer.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Schlank",
+    "horizontalDescription": "Eine einzelne obere Leiste mit allem in einer Reihe. Mehr Canvas-Höhe."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Design",
       "language": "Sprache",
       "background": "Hintergrund",
-      "personalization": "Personalisierung"
+      "personalization": "Personalisierung",
+      "intro": {
+        "title": "Filmische Einführung",
+        "description": "Animierte Einführung auf der Startseite anzeigen"
+      },
+      "interaction": {
+        "title": "Tool-Aufrufe",
+        "description": "Tool-Ausführungsdetails in Unterhaltungen anzeigen"
+      }
     },
     "comingSoon": {
       "badge": "Bald",
       "placeholder": "Dieser Bereich kommt in einem zukünftigen Update."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Zeig mir, was möglich ist…",
+    "tasks": [
+      "Recherchiere meine Konkurrenten",
+      "Bewerbungen ausfüllen",
+      "Buche einen Flug nach Tokio",
+      "Verfolge die Verfügbarkeit meiner Website",
+      "Plane Social-Media-Beiträge",
+      "Analysiere Quartalstrends"
+    ],
+    "dontShowAgain": "Nicht mehr anzeigen",
+    "skip": "Überspringen",
+    "tagline": "Mach alles, was ein Mensch am Computer kann"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Deine Computer",
+      "description": "Silizium zu deinen Diensten. Wir bringen deine Flotte zum Laufen."
+    },
+    "swarms": {
+      "title": "Schwarmintelligenz",
+      "description": "Viele Köpfe, eine Mission. Wir versammeln deine Agenten."
+    },
+    "developers": {
+      "title": "Entwickler-API",
+      "description": "Lade dein Dashboard."
+    },
+    "secrets": {
+      "title": "Anmeldedaten",
+      "description": "Deine Geheimnisse sind bei uns sicher. Wir öffnen den Tresor."
+    },
+    "schedules": {
+      "title": "Zeitpläne",
+      "description": "Pünktlich auf die Minute. Wir synchronisieren deine Automatisierungen."
+    },
+    "history": {
+      "title": "Dein Verlauf",
+      "description": "Eine stille Aufzeichnung jeder Unterhaltung, Aufgabe und Idee, die du erkundet hast."
+    },
+    "referral": {
+      "title": "Empfehlungen",
+      "description": "Teile Coasty. Verdient zusammen."
     }
   }
 }

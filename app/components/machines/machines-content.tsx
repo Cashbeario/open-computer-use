@@ -35,6 +35,7 @@ interface MachinesData {
 export function MachinesContent() {
   const router = useRouter();
   const t = useTranslations("machines");
+  const tLoader = useTranslations("pageLoaders.machines");
   const [loading, setLoading] = useState(true);
   const [machines, setMachines] = useState<UserMachine[]>([]);
   const [limits, setLimits] = useState<MachinesData["limits"]>({
@@ -233,8 +234,8 @@ export function MachinesContent() {
   return (
     <PageLoader
       isLoading={loading}
-      title="Your Computers"
-      description="Silicon at your service. Spinning up your fleet now."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
       {/* Ambient background */}

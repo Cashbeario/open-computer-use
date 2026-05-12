@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Uklad"
+    "layout": "Uklad",
+    "sidebarStyle": "Styl paska bocznego",
+    "sidebarStyleHint": "Wybierz, gdzie znajduje się nawigacja",
+    "sidebarStyleDisabled": "Dostępne, gdy układ jest ustawiony na Pasek boczny",
+    "vertical": "Pionowo",
+    "verticalBadge": "Domyślne",
+    "verticalDescription": "Klasyczny lewy pasek z etykietami i kredytami w stopce.",
+    "horizontal": "Poziomo",
+    "horizontalBadge": "Smukły",
+    "horizontalDescription": "Pojedynczy górny pasek ze wszystkim w jednym wierszu. Więcej wysokości obszaru roboczego."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Motyw",
       "language": "Język",
       "background": "Tło",
-      "personalization": "Personalizacja"
+      "personalization": "Personalizacja",
+      "intro": {
+        "title": "Filmowe intro",
+        "description": "Pokazuj animowane intro przy odwiedzinach strony głównej"
+      },
+      "interaction": {
+        "title": "Wywołania narzędzi",
+        "description": "Pokaż szczegóły wykonania narzędzi w rozmowach"
+      }
     },
     "comingSoon": {
       "badge": "Wkrótce",
       "placeholder": "Ta sekcja pojawi się w przyszłej aktualizacji."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Pokaż mi, co jest możliwe…",
+    "tasks": [
+      "Zbadaj moją konkurencję",
+      "Wypełnij podania o pracę",
+      "Zarezerwuj lot do Tokio",
+      "Monitoruj dostępność mojej strony",
+      "Zaplanuj posty w mediach społecznościowych",
+      "Analizuj trendy kwartalne"
+    ],
+    "dontShowAgain": "Nie pokazuj ponownie",
+    "skip": "Pomiń",
+    "tagline": "Zrób wszystko, tak jak człowiek może zrobić na komputerze"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Twoje komputery",
+      "description": "Krzem na twoje usługi. Uruchamiamy twoją flotę."
+    },
+    "swarms": {
+      "title": "Inteligencja roju",
+      "description": "Wiele umysłów, jedna misja. Zbieramy twoich agentów."
+    },
+    "developers": {
+      "title": "API dla programistów",
+      "description": "Ładuję twój panel."
+    },
+    "secrets": {
+      "title": "Poświadczenia",
+      "description": "Twoje sekrety są u nas bezpieczne. Otwieramy sejf."
+    },
+    "schedules": {
+      "title": "Harmonogramy",
+      "description": "Zawsze punktualnie. Synchronizuję twoje automatyzacje."
+    },
+    "history": {
+      "title": "Twoja historia",
+      "description": "Cichy zapis każdej rozmowy, zadania i pomysłu, który zgłębiłeś."
+    },
+    "referral": {
+      "title": "Polecenia",
+      "description": "Udostępnij Coasty. Zarabiajcie razem."
     }
   }
 }

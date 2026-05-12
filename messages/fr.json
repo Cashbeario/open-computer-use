@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Mise en page"
+    "layout": "Mise en page",
+    "sidebarStyle": "Style de la barre latérale",
+    "sidebarStyleHint": "Choisissez où vit la navigation",
+    "sidebarStyleDisabled": "Disponible lorsque la disposition est définie sur Barre latérale",
+    "vertical": "Vertical",
+    "verticalBadge": "Par défaut",
+    "verticalDescription": "Barre gauche classique avec libellés et crédits dans le pied de page.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Élégant",
+    "horizontalDescription": "Une seule barre supérieure avec tout sur une ligne. Plus de hauteur de canvas."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Thème",
       "language": "Langue",
       "background": "Arrière-plan",
-      "personalization": "Personnalisation"
+      "personalization": "Personnalisation",
+      "intro": {
+        "title": "Intro cinématographique",
+        "description": "Afficher l'intro animée sur la page d'accueil"
+      },
+      "interaction": {
+        "title": "Appels d'outils",
+        "description": "Afficher les détails d'exécution des outils dans les conversations"
+      }
     },
     "comingSoon": {
       "badge": "Bientôt",
       "placeholder": "Cette section arrivera dans une future mise à jour."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Montre-moi ce qui est possible…",
+    "tasks": [
+      "Recherche mes concurrents",
+      "Remplir des candidatures",
+      "Réserver un vol pour Tokyo",
+      "Surveille la disponibilité de mon site",
+      "Planifier des publications sur les réseaux",
+      "Analyser les tendances trimestrielles"
+    ],
+    "dontShowAgain": "Ne plus afficher",
+    "skip": "Passer",
+    "tagline": "Fais tout ce qu'un humain peut faire avec un ordinateur"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Tes ordinateurs",
+      "description": "Le silicium à ton service. On démarre ta flotte."
+    },
+    "swarms": {
+      "title": "Intelligence en essaim",
+      "description": "De nombreux esprits, une seule mission. On rassemble tes agents."
+    },
+    "developers": {
+      "title": "API développeur",
+      "description": "Chargement de votre tableau de bord."
+    },
+    "secrets": {
+      "title": "Identifiants",
+      "description": "Tes secrets sont en sécurité avec nous. On ouvre le coffre."
+    },
+    "schedules": {
+      "title": "Planifications",
+      "description": "À l'heure, à chaque fois. Synchronisation de tes automatisations."
+    },
+    "history": {
+      "title": "Ton historique",
+      "description": "Un calme registre de chaque conversation, tâche et idée que tu as explorée."
+    },
+    "referral": {
+      "title": "Parrainages",
+      "description": "Partage Coasty. Gagnez ensemble."
     }
   }
 }

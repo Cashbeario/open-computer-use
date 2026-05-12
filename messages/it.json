@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Stile barra laterale",
+    "sidebarStyleHint": "Scegli dove vive la navigazione",
+    "sidebarStyleDisabled": "Disponibile quando il layout è impostato su Barra laterale",
+    "vertical": "Verticale",
+    "verticalBadge": "Predefinito",
+    "verticalDescription": "Barra sinistra classica con etichette e crediti nel footer.",
+    "horizontal": "Orizzontale",
+    "horizontalBadge": "Elegante",
+    "horizontalDescription": "Una singola barra superiore con tutto in una riga. Più altezza per il canvas."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Lingua",
       "background": "Sfondo",
-      "personalization": "Personalizzazione"
+      "personalization": "Personalizzazione",
+      "intro": {
+        "title": "Intro cinematica",
+        "description": "Mostra l'intro animata visitando la home page"
+      },
+      "interaction": {
+        "title": "Invocazioni degli strumenti",
+        "description": "Mostra i dettagli di esecuzione degli strumenti nelle conversazioni"
+      }
     },
     "comingSoon": {
       "badge": "Presto",
       "placeholder": "Questa sezione arriverà in un futuro aggiornamento."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Mostrami cosa è possibile…",
+    "tasks": [
+      "Ricerca i miei concorrenti",
+      "Compila domande di lavoro",
+      "Prenota un volo per Tokyo",
+      "Monitora l'uptime del mio sito",
+      "Programma post sui social",
+      "Analizza le tendenze trimestrali"
+    ],
+    "dontShowAgain": "Non mostrare di nuovo",
+    "skip": "Salta",
+    "tagline": "Fai qualsiasi cosa, proprio come un essere umano con un computer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "I tuoi computer",
+      "description": "Silicio al tuo servizio. Stiamo accendendo la tua flotta."
+    },
+    "swarms": {
+      "title": "Intelligenza di sciame",
+      "description": "Molte menti, una missione. Stiamo radunando i tuoi agenti."
+    },
+    "developers": {
+      "title": "API per sviluppatori",
+      "description": "Caricamento della dashboard."
+    },
+    "secrets": {
+      "title": "Credenziali",
+      "description": "I tuoi segreti sono al sicuro con noi. Apriamo il caveau."
+    },
+    "schedules": {
+      "title": "Pianificazioni",
+      "description": "Sempre puntuali. Sincronizziamo le tue automazioni."
+    },
+    "history": {
+      "title": "La tua cronologia",
+      "description": "Un registro silenzioso di ogni conversazione, attività e idea che hai esplorato."
+    },
+    "referral": {
+      "title": "Referral",
+      "description": "Condividi Coasty. Guadagniamo insieme."
     }
   }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { motion, useReducedMotion } from "motion/react"
+import { useTranslations } from "next-intl"
 import { useState, useEffect, useRef, useCallback, memo } from "react"
 import { ArrowUp } from "lucide-react"
 
@@ -37,16 +38,9 @@ const VIDEO_IDS = [
 // Copy
 // ─────────────────────────────────────────────────────────────────────────────
 
-const INITIAL_TEXT = "Show me what\u2019s possible\u2026"
-
-const TASKS = [
-  "Research my competitors",
-  "Fill out job applications",
-  "Book a flight to Tokyo",
-  "Track my website uptime",
-  "Schedule social posts",
-  "Analyze quarterly trends",
-]
+// INITIAL_TEXT and TASKS now sourced from the cinematicIntro namespace
+// via useTranslations inside the component, so the typed prompts render
+// in the user's locale. Length and indexing semantics are unchanged.
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Animation constants
@@ -155,6 +149,10 @@ export function CinematicIntro({
   onSettled: () => void
   onComplete: () => void
 }) {
+  const t = useTranslations("cinematicIntro")
+  const INITIAL_TEXT = t("initialText")
+  const TASKS = t.raw("tasks") as string[]
+
   const [phase, setPhase] = useState<Phase>("cycling")
   const [taskIdx, setTaskIdx] = useState(-1) // -1 = initial prompt
   const [step, setStep] = useState<CycleStep>("typing")
@@ -316,14 +314,14 @@ export function CinematicIntro({
             onClick={dismissForever}
             className="hidden sm:block rounded-full px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground/50 transition-colors duration-200 hover:text-muted-foreground/80"
           >
-            Don&apos;t show again
+            {t("dontShowAgain")}
           </button>
           <button
             type="button"
             onClick={skip}
             className="rounded-full border border-border/40 bg-foreground/[0.04] px-3 py-1.5 text-[10px] sm:px-3.5 sm:text-[11px] font-medium tracking-wide text-muted-foreground/70 backdrop-blur-sm transition-colors duration-200 hover:bg-foreground/[0.08] hover:text-foreground/90"
           >
-            Skip
+            {t("skip")}
           </button>
         </motion.div>
       )}
@@ -416,7 +414,7 @@ export function CinematicIntro({
             }}
             className="max-w-2xl px-5 sm:px-8 text-center text-[clamp(22px,5vw,44px)] font-semibold leading-[1.15] tracking-[-0.02em] sm:tracking-[-0.03em] text-shine text-foreground"
           >
-            Do anything, just as a human can do with a computer
+            {t("tagline")}
           </motion.h1>
         </div>
       )}
@@ -555,6 +553,7 @@ export function TaglineIntro({
   onSettled: () => void
   onComplete: () => void
 }) {
+  const t = useTranslations("cinematicIntro")
   const [phase, setPhase] = useState<"tagline" | "done">("tagline")
   const reducedMotion = useReducedMotion()
 
@@ -610,7 +609,7 @@ export function TaglineIntro({
           }}
           className="max-w-2xl px-5 sm:px-8 text-center text-[clamp(22px,5vw,44px)] font-semibold leading-[1.15] tracking-[-0.02em] sm:tracking-[-0.03em] text-shine text-foreground"
         >
-          Do anything, just as a human can do with a computer
+          {t("tagline")}
         </motion.h1>
       </div>
     </motion.div>

@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "التخطيط"
+    "layout": "التخطيط",
+    "sidebarStyle": "نمط الشريط الجانبي",
+    "sidebarStyleHint": "اختر مكان وجود التنقل",
+    "sidebarStyleDisabled": "متاح عند تعيين التخطيط إلى الشريط الجانبي",
+    "vertical": "عمودي",
+    "verticalBadge": "افتراضي",
+    "verticalDescription": "شريط جانبي كلاسيكي مع التسميات والأرصدة في التذييل.",
+    "horizontal": "أفقي",
+    "horizontalBadge": "أنيق",
+    "horizontalDescription": "شريط علوي واحد مع كل شيء في صف واحد. ارتفاع لوحة أكبر."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "المظهر",
       "language": "اللغة",
       "background": "الخلفية",
-      "personalization": "التخصيص"
+      "personalization": "التخصيص",
+      "intro": {
+        "title": "مقدمة سينمائية",
+        "description": "عرض المقدمة المتحركة عند زيارة الصفحة الرئيسية"
+      },
+      "interaction": {
+        "title": "استدعاءات الأدوات",
+        "description": "عرض تفاصيل تنفيذ الأدوات في المحادثات"
+      }
     },
     "comingSoon": {
       "badge": "قريبًا",
       "placeholder": "سيتم إضافة هذا القسم في تحديث مستقبلي."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "أرني ما هو ممكن…",
+    "tasks": [
+      "ابحث عن منافسي",
+      "املأ طلبات الوظائف",
+      "احجز رحلة إلى طوكيو",
+      "تتبع وقت تشغيل موقعي",
+      "جدول منشورات وسائل التواصل",
+      "حلل اتجاهات ربعية"
+    ],
+    "dontShowAgain": "لا تعرض مرة أخرى",
+    "skip": "تخطى",
+    "tagline": "افعل أي شيء، تمامًا كما يفعل الإنسان بالكمبيوتر"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "حواسيبك",
+      "description": "السيليكون في خدمتك. نقوم بتشغيل أسطولك الآن."
+    },
+    "swarms": {
+      "title": "ذكاء السرب",
+      "description": "عقول كثيرة، مهمة واحدة. نجمع وكلاءك الآن."
+    },
+    "developers": {
+      "title": "واجهة برمجة المطورين",
+      "description": "جارٍ تحميل لوحة التحكم."
+    },
+    "secrets": {
+      "title": "بيانات الاعتماد",
+      "description": "أسرارك في أمان معنا. نفتح الخزنة."
+    },
+    "schedules": {
+      "title": "الجداول",
+      "description": "في الوقت المحدد، في كل مرة. نزامن أتمتاتك."
+    },
+    "history": {
+      "title": "سجلك",
+      "description": "سجل هادئ لكل محادثة ومهمة وفكرة استكشفتها."
+    },
+    "referral": {
+      "title": "الإحالات",
+      "description": "شارك Coasty. اربحوا معًا."
     }
   }
 }

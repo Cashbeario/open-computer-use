@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Diseño"
+    "layout": "Diseño",
+    "sidebarStyle": "Estilo de barra lateral",
+    "sidebarStyleHint": "Elige dónde vive la navegación",
+    "sidebarStyleDisabled": "Disponible cuando el diseño está configurado como barra lateral",
+    "vertical": "Vertical",
+    "verticalBadge": "Predeterminado",
+    "verticalDescription": "Carril izquierdo clásico con etiquetas y créditos en el pie.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Elegante",
+    "horizontalDescription": "Una sola barra superior con todo en una fila. Más altura de lienzo."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Idioma",
       "background": "Fondo",
-      "personalization": "Personalización"
+      "personalization": "Personalización",
+      "intro": {
+        "title": "Introducción cinematográfica",
+        "description": "Mostrar la introducción animada al visitar la página de inicio"
+      },
+      "interaction": {
+        "title": "Invocaciones de herramientas",
+        "description": "Mostrar detalles de ejecución de herramientas en las conversaciones"
+      }
     },
     "comingSoon": {
       "badge": "Pronto",
       "placeholder": "Esta sección llegará en una futura actualización."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Muéstrame lo que es posible…",
+    "tasks": [
+      "Investiga a mis competidores",
+      "Completa solicitudes de empleo",
+      "Reserva un vuelo a Tokio",
+      "Monitorea el uptime de mi sitio web",
+      "Programa publicaciones sociales",
+      "Analiza tendencias trimestrales"
+    ],
+    "dontShowAgain": "No mostrar de nuevo",
+    "skip": "Omitir",
+    "tagline": "Haz cualquier cosa, igual que un humano con una computadora"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Tus computadoras",
+      "description": "Silicio a tu servicio. Iniciando tu flota ahora."
+    },
+    "swarms": {
+      "title": "Inteligencia de enjambre",
+      "description": "Muchas mentes, una misión. Reuniendo a tus agentes."
+    },
+    "developers": {
+      "title": "API para desarrolladores",
+      "description": "Cargando tu panel."
+    },
+    "secrets": {
+      "title": "Credenciales",
+      "description": "Tus secretos están a salvo con nosotros. Abriendo la bóveda."
+    },
+    "schedules": {
+      "title": "Programaciones",
+      "description": "Puntual, siempre. Sincronizando tus automatizaciones."
+    },
+    "history": {
+      "title": "Tu historial",
+      "description": "Un registro silencioso de cada conversación, tarea e idea que has explorado."
+    },
+    "referral": {
+      "title": "Referidos",
+      "description": "Comparte Coasty. Ganen juntos."
     }
   }
 }

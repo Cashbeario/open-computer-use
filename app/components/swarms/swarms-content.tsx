@@ -43,6 +43,7 @@ import { APP_DOMAIN } from "@/lib/config"
 import { EXPORT_SANS_STACK, EXPORT_MONO_STACK } from "@/lib/fonts"
 import { SwarmTree, type SwarmEvent } from "./swarm-tree"
 import { PageLoader } from "@/components/common/page-loader"
+import { useTranslations } from "next-intl"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -71,6 +72,7 @@ interface SwarmRun {
 // ---------------------------------------------------------------------------
 
 export function SwarmsContent() {
+  const tLoader = useTranslations("pageLoaders.swarms")
   const [swarms, setSwarms] = useState<SwarmRun[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -154,8 +156,8 @@ export function SwarmsContent() {
   return (
     <PageLoader
       isLoading={loading}
-      title="Swarm Intelligence"
-      description="Many minds, one mission. Rounding up your agents now."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
     <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
       {/* Ambient background */}

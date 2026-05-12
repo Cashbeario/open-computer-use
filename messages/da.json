@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Sidepanelstil",
+    "sidebarStyleHint": "Vælg hvor navigationen er placeret",
+    "sidebarStyleDisabled": "Tilgængelig, når Layout er sat til Sidepanel",
+    "vertical": "Lodret",
+    "verticalBadge": "Standard",
+    "verticalDescription": "Klassisk venstre skinne med etiketter og kreditter i sidefoden.",
+    "horizontal": "Vandret",
+    "horizontalBadge": "Elegant",
+    "horizontalDescription": "Enkelt øverste bjælke med alt på én række. Mere lærredshøjde."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Sprog",
       "background": "Baggrund",
-      "personalization": "Personlig tilpasning"
+      "personalization": "Personlig tilpasning",
+      "intro": {
+        "title": "Filmisk intro",
+        "description": "Vis den animerede intro ved besøg på hjemmesiden"
+      },
+      "interaction": {
+        "title": "Værktøjskald",
+        "description": "Vis værktøjsudførelsesdetaljer i samtaler"
+      }
     },
     "comingSoon": {
       "badge": "Snart",
       "placeholder": "Denne sektion kommer i en fremtidig opdatering."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Vis mig hvad der er muligt…",
+    "tasks": [
+      "Undersøg mine konkurrenter",
+      "Udfyld jobansøgninger",
+      "Bestil en flyrejse til Tokyo",
+      "Spor mit websteds oppetid",
+      "Planlæg opslag på sociale medier",
+      "Analysér kvartalsvise tendenser"
+    ],
+    "dontShowAgain": "Vis ikke igen",
+    "skip": "Spring over",
+    "tagline": "Gør hvad som helst, ligesom et menneske kan med en computer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Dine computere",
+      "description": "Silicium til din tjeneste. Starter din flåde nu."
+    },
+    "swarms": {
+      "title": "Sværmintelligens",
+      "description": "Mange sind, én mission. Samler dine agenter nu."
+    },
+    "developers": {
+      "title": "Udvikler-API",
+      "description": "Indlæser dit dashboard."
+    },
+    "secrets": {
+      "title": "Loginoplysninger",
+      "description": "Dine hemmeligheder er sikre hos os. Åbner hvælvet."
+    },
+    "schedules": {
+      "title": "Tidsplaner",
+      "description": "Til tiden, hver gang. Synkroniserer dine automatiseringer."
+    },
+    "history": {
+      "title": "Din historik",
+      "description": "Et stille register over hver samtale, opgave og idé du har udforsket."
+    },
+    "referral": {
+      "title": "Henvisninger",
+      "description": "Del Coasty. Tjen sammen."
     }
   }
 }

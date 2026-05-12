@@ -303,6 +303,7 @@ function ReferralLinkCard({
 
 export function ReferralContent() {
   const t = useTranslations("referralPage")
+  const tLoader = useTranslations("pageLoaders.referral")
   const router = useRouter()
   const { user, isLoading } = useUser()
   const [isCopied, setIsCopied] = useState(false)
@@ -403,8 +404,8 @@ export function ReferralContent() {
   return (
     <PageLoader
       isLoading={isLoading}
-      title="Referrals"
-      description="Share Coasty. Earn together."
+      title={tLoader("title")}
+      description={tLoader("description")}
     >
       <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
         {/* Ambient orbs — same as machines / developers */}

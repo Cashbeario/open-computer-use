@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Aspect"
+    "layout": "Aspect",
+    "sidebarStyle": "Stil bară laterală",
+    "sidebarStyleHint": "Alege unde stă navigarea",
+    "sidebarStyleDisabled": "Disponibil când Aspectul este setat la Bară laterală",
+    "vertical": "Vertical",
+    "verticalBadge": "Implicit",
+    "verticalDescription": "Bară clasică din stânga cu etichete și credite în subsol.",
+    "horizontal": "Orizontal",
+    "horizontalBadge": "Elegant",
+    "horizontalDescription": "O singură bară superioară cu totul pe un rând. Mai multă înălțime pentru pânză."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Temă",
       "language": "Limbă",
       "background": "Fundal",
-      "personalization": "Personalizare"
+      "personalization": "Personalizare",
+      "intro": {
+        "title": "Intro cinematic",
+        "description": "Afișează intro-ul animat la vizitarea paginii principale"
+      },
+      "interaction": {
+        "title": "Invocări de instrumente",
+        "description": "Afișează detaliile execuției instrumentelor în conversații"
+      }
     },
     "comingSoon": {
       "badge": "Curând",
       "placeholder": "Această secțiune va veni într-o actualizare viitoare."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Arată-mi ce este posibil…",
+    "tasks": [
+      "Cercetează concurenții mei",
+      "Completează cereri de angajare",
+      "Rezervă un zbor spre Tokyo",
+      "Urmărește uptime-ul site-ului meu",
+      "Programează postări pe rețele sociale",
+      "Analizează tendințe trimestriale"
+    ],
+    "dontShowAgain": "Nu mai afișa",
+    "skip": "Sări peste",
+    "tagline": "Fă orice, exact ca un om cu un computer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Computerele tale",
+      "description": "Siliciu la dispoziție. Pornim flota ta."
+    },
+    "swarms": {
+      "title": "Inteligență de roi",
+      "description": "Multe minți, o misiune. Ne adunăm agenții."
+    },
+    "developers": {
+      "title": "API pentru dezvoltatori",
+      "description": "Se încarcă tabloul tău de bord."
+    },
+    "secrets": {
+      "title": "Acreditări",
+      "description": "Secretele tale sunt în siguranță. Deblocăm seiful."
+    },
+    "schedules": {
+      "title": "Programări",
+      "description": "Mereu la timp. Sincronizăm automatizările tale."
+    },
+    "history": {
+      "title": "Istoricul tău",
+      "description": "O înregistrare tăcută a fiecărei conversații, sarcini și idei pe care le-ai explorat."
+    },
+    "referral": {
+      "title": "Recomandări",
+      "description": "Recomandă Coasty. Câștigați împreună."
     }
   }
 }

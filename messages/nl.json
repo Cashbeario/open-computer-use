@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Zijbalkstijl",
+    "sidebarStyleHint": "Kies waar de navigatie zich bevindt",
+    "sidebarStyleDisabled": "Beschikbaar wanneer Layout is ingesteld op Zijbalk",
+    "vertical": "Verticaal",
+    "verticalBadge": "Standaard",
+    "verticalDescription": "Klassieke linkerbalk met labels en credits in de footer.",
+    "horizontal": "Horizontaal",
+    "horizontalBadge": "Strak",
+    "horizontalDescription": "Eén bovenbalk met alles op één rij. Meer canvashoogte."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Thema",
       "language": "Taal",
       "background": "Achtergrond",
-      "personalization": "Personalisatie"
+      "personalization": "Personalisatie",
+      "intro": {
+        "title": "Cinematische intro",
+        "description": "Toon de geanimeerde intro bij bezoek aan de homepage"
+      },
+      "interaction": {
+        "title": "Tool-aanroepen",
+        "description": "Toon tool-uitvoeringsdetails in gesprekken"
+      }
     },
     "comingSoon": {
       "badge": "Binnenkort",
       "placeholder": "Dit gedeelte komt in een toekomstige update."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Laat zien wat mogelijk is…",
+    "tasks": [
+      "Onderzoek mijn concurrenten",
+      "Vul sollicitaties in",
+      "Boek een vlucht naar Tokio",
+      "Volg de uptime van mijn website",
+      "Plan social media-berichten",
+      "Analyseer kwartaaltrends"
+    ],
+    "dontShowAgain": "Niet meer tonen",
+    "skip": "Overslaan",
+    "tagline": "Doe alles, net zoals een mens met een computer kan"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Jouw computers",
+      "description": "Silicium tot je dienst. We starten je vloot op."
+    },
+    "swarms": {
+      "title": "Zwermintelligentie",
+      "description": "Vele geesten, één missie. We verzamelen je agenten."
+    },
+    "developers": {
+      "title": "Ontwikkelaars-API",
+      "description": "Je dashboard wordt geladen."
+    },
+    "secrets": {
+      "title": "Inloggegevens",
+      "description": "Je geheimen zijn veilig bij ons. We openen de kluis."
+    },
+    "schedules": {
+      "title": "Schema's",
+      "description": "Altijd op tijd. We synchroniseren je automatiseringen."
+    },
+    "history": {
+      "title": "Jouw geschiedenis",
+      "description": "Een stille opname van elk gesprek, elke taak en elk idee dat je hebt verkend."
+    },
+    "referral": {
+      "title": "Verwijzingen",
+      "description": "Deel Coasty. Verdien samen."
     }
   }
 }

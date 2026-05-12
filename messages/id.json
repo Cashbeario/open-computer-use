@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Tata Letak"
+    "layout": "Tata Letak",
+    "sidebarStyle": "Gaya bilah sisi",
+    "sidebarStyleHint": "Pilih lokasi navigasi",
+    "sidebarStyleDisabled": "Tersedia saat Tata Letak diatur ke Bilah Sisi",
+    "vertical": "Vertikal",
+    "verticalBadge": "Default",
+    "verticalDescription": "Bilah kiri klasik dengan label dan kredit di footer.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Ramping",
+    "horizontalDescription": "Bilah atas tunggal dengan semua dalam satu baris. Tinggi kanvas lebih banyak."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Bahasa",
       "background": "Latar belakang",
-      "personalization": "Personalisasi"
+      "personalization": "Personalisasi",
+      "intro": {
+        "title": "Intro sinematik",
+        "description": "Tampilkan intro animasi saat mengunjungi beranda"
+      },
+      "interaction": {
+        "title": "Pemanggilan alat",
+        "description": "Tampilkan detail eksekusi alat dalam percakapan"
+      }
     },
     "comingSoon": {
       "badge": "Segera",
       "placeholder": "Bagian ini akan hadir di pembaruan mendatang."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Tunjukkan apa yang mungkin…",
+    "tasks": [
+      "Riset kompetitorku",
+      "Isi lamaran kerja",
+      "Pesan tiket pesawat ke Tokyo",
+      "Pantau uptime situs webku",
+      "Jadwalkan postingan media sosial",
+      "Analisis tren kuartalan"
+    ],
+    "dontShowAgain": "Jangan tampilkan lagi",
+    "skip": "Lewati",
+    "tagline": "Lakukan apa pun, seperti yang bisa dilakukan manusia dengan komputer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Komputer Anda",
+      "description": "Silikon siap melayani. Menyalakan armada Anda."
+    },
+    "swarms": {
+      "title": "Kecerdasan swarm",
+      "description": "Banyak pikiran, satu misi. Mengumpulkan agen Anda."
+    },
+    "developers": {
+      "title": "API pengembang",
+      "description": "Memuat dasbor Anda."
+    },
+    "secrets": {
+      "title": "Kredensial",
+      "description": "Rahasiamu aman bersama kami. Membuka brankas."
+    },
+    "schedules": {
+      "title": "Jadwal",
+      "description": "Selalu tepat waktu. Menyinkronkan otomatisasi Anda."
+    },
+    "history": {
+      "title": "Riwayat Anda",
+      "description": "Catatan tenang dari setiap percakapan, tugas, dan ide yang Anda jelajahi."
+    },
+    "referral": {
+      "title": "Referal",
+      "description": "Bagikan Coasty. Dapatkan bersama."
     }
   }
 }

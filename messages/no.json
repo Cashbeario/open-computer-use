@@ -1196,7 +1196,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Oppsett"
+    "layout": "Oppsett",
+    "sidebarStyle": "Sidepanelstil",
+    "sidebarStyleHint": "Velg hvor navigasjonen er",
+    "sidebarStyleDisabled": "Tilgjengelig når Oppsett er satt til Sidepanel",
+    "vertical": "Vertikal",
+    "verticalBadge": "Standard",
+    "verticalDescription": "Klassisk venstre skinne med etiketter og kreditter i bunnteksten.",
+    "horizontal": "Horisontal",
+    "horizontalBadge": "Elegant",
+    "horizontalDescription": "Enkel topplinje med alt på én rad. Mer lerretshøyde."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Tema",
       "language": "Språk",
       "background": "Bakgrunn",
-      "personalization": "Tilpasning"
+      "personalization": "Tilpasning",
+      "intro": {
+        "title": "Filmisk intro",
+        "description": "Vis den animerte introen ved besøk på hjemmesiden"
+      },
+      "interaction": {
+        "title": "Verktøykall",
+        "description": "Vis verktøyutførelsesdetaljer i samtaler"
+      }
     },
     "comingSoon": {
       "badge": "Snart",
       "placeholder": "Denne delen kommer i en fremtidig oppdatering."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Vis meg hva som er mulig…",
+    "tasks": [
+      "Undersøk mine konkurrenter",
+      "Fyll ut jobbsøknader",
+      "Bestill flyreise til Tokyo",
+      "Spor oppetiden til nettstedet mitt",
+      "Planlegg sosiale innlegg",
+      "Analyser kvartalsvise trender"
+    ],
+    "dontShowAgain": "Ikke vis igjen",
+    "skip": "Hopp over",
+    "tagline": "Gjør hva som helst, akkurat som et menneske kan med en datamaskin"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Dine datamaskiner",
+      "description": "Silisium til din tjeneste. Starter flåten din nå."
+    },
+    "swarms": {
+      "title": "Svermintelligens",
+      "description": "Mange sinn, ett oppdrag. Samler agentene dine."
+    },
+    "developers": {
+      "title": "Utvikler-API",
+      "description": "Laster dashbordet ditt."
+    },
+    "secrets": {
+      "title": "Påloggingsinfo",
+      "description": "Hemmelighetene dine er trygge hos oss. Åpner hvelvet."
+    },
+    "schedules": {
+      "title": "Tidsplaner",
+      "description": "Alltid i tide. Synkroniserer automatiseringene dine."
+    },
+    "history": {
+      "title": "Din historikk",
+      "description": "En stille oversikt over hver samtale, oppgave og idé du har utforsket."
+    },
+    "referral": {
+      "title": "Henvisninger",
+      "description": "Del Coasty. Tjen sammen."
     }
   }
 }

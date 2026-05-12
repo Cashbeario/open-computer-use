@@ -1210,7 +1210,16 @@
     }
   },
   "layoutSettings": {
-    "layout": "Layout"
+    "layout": "Layout",
+    "sidebarStyle": "Sidebar style",
+    "sidebarStyleHint": "Choose where the navigation lives",
+    "sidebarStyleDisabled": "Available when Layout is set to Sidebar",
+    "vertical": "Vertical",
+    "verticalBadge": "Default",
+    "verticalDescription": "Classic left rail with labels and credits in the footer.",
+    "horizontal": "Horizontal",
+    "horizontalBadge": "Sleek",
+    "horizontalDescription": "Single top bar with everything in one row. More canvas height."
   },
   "suggestions": {
     "summary": {
@@ -3052,11 +3061,63 @@
       "theme": "Theme",
       "language": "Language",
       "background": "Background",
-      "personalization": "Personalization"
+      "personalization": "Personalization",
+      "intro": {
+        "title": "Cinematic intro",
+        "description": "Show the animated intro when visiting the homepage"
+      },
+      "interaction": {
+        "title": "Tool invocations",
+        "description": "Show tool execution details in conversations"
+      }
     },
     "comingSoon": {
       "badge": "Soon",
       "placeholder": "This section is coming in a future update."
+    }
+  },
+  "cinematicIntro": {
+    "initialText": "Show me what's possible…",
+    "tasks": [
+      "Research my competitors",
+      "Fill out job applications",
+      "Book a flight to Tokyo",
+      "Track my website uptime",
+      "Schedule social posts",
+      "Analyze quarterly trends"
+    ],
+    "dontShowAgain": "Don't show again",
+    "skip": "Skip",
+    "tagline": "Do anything, just as a human can do with a computer"
+  },
+  "pageLoaders": {
+    "machines": {
+      "title": "Your Computers",
+      "description": "Silicon at your service. Spinning up your fleet now."
+    },
+    "swarms": {
+      "title": "Swarm Intelligence",
+      "description": "Many minds, one mission. Rounding up your agents now."
+    },
+    "developers": {
+      "title": "Developer API",
+      "description": "Loading your dashboard."
+    },
+    "secrets": {
+      "title": "Credentials",
+      "description": "Your secrets are safe with us. Unlocking the vault."
+    },
+    "schedules": {
+      "title": "Schedules",
+      "description": "Right on time, every time. Syncing your automations."
+    },
+    "history": {
+      "title": "Your History",
+      "description": "A quiet record of every conversation, task, and idea you've explored."
+    },
+    "referral": {
+      "title": "Referrals",
+      "description": "Share Coasty. Earn together."
     }
   }
 }

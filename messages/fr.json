@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Paramètres",
       "developer": "Développeur",
-      "more": "Plus"
+      "more": "Plus",
+      "resources": "Ressources"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Réseaux",
         "description": "Liens sociaux"
+      },
+      "guide": {
+        "label": "Guide",
+        "description": "Apprends à utiliser Coasty"
+      },
+      "referral": {
+        "label": "Parrainage",
+        "description": "Invite des amis et gagne des crédits"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Parrainages",
       "description": "Partage Coasty. Gagnez ensemble."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Vos données, votre contrôle",
+    "heroDescription": "Nous ne stockons que ce qui est nécessaire à l'exécution de vos sessions. Tout le trafic est chiffré en transit, et vous pouvez étendre le chiffrement au repos aux catégories ci-dessous. Vos données ne sont jamais utilisées pour entraîner des modèles d'IA.",
+    "trustTransit": "TLS 1.3 en transit",
+    "trustAtRest": "AES-256-GCM au repos",
+    "trustNoTraining": "Aucun entraînement sur vos données"
   }
 }

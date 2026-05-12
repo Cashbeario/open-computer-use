@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Impostazioni",
       "developer": "Sviluppatore",
-      "more": "Altro"
+      "more": "Altro",
+      "resources": "Risorse"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Connetti",
         "description": "Collegamenti social"
+      },
+      "guide": {
+        "label": "Guida",
+        "description": "Scopri come usare Coasty"
+      },
+      "referral": {
+        "label": "Referral",
+        "description": "Invita amici e guadagna crediti"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Referral",
       "description": "Condividi Coasty. Guadagniamo insieme."
     }
+  },
+  "dataSection": {
+    "heroTitle": "I tuoi dati, il tuo controllo",
+    "heroDescription": "Memorizziamo solo ciò che serve per eseguire le tue sessioni. Tutto il traffico è cifrato in transito e puoi estendere la cifratura a riposo alle categorie qui sotto. I tuoi dati non vengono mai utilizzati per addestrare modelli di IA.",
+    "trustTransit": "TLS 1.3 in transito",
+    "trustAtRest": "AES-256-GCM a riposo",
+    "trustNoTraining": "Nessun addestramento sui tuoi dati"
   }
 }

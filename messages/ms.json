@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Tetapan",
       "developer": "Pembangun",
-      "more": "Lagi"
+      "more": "Lagi",
+      "resources": "Sumber"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Sambung",
         "description": "Pautan sosial"
+      },
+      "guide": {
+        "label": "Panduan",
+        "description": "Pelajari cara menggunakan Coasty"
+      },
+      "referral": {
+        "label": "Rujukan",
+        "description": "Jemput kawan dan dapatkan kredit"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Rujukan",
       "description": "Kongsi Coasty. Dapatkan bersama."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Data anda, kawalan anda",
+    "heroDescription": "Kami hanya menyimpan apa yang diperlukan untuk menjalankan sesi anda. Semua trafik disulitkan semasa penghantaran, dan anda boleh meluaskan penyulitan semasa tersimpan kepada kategori di bawah. Data anda tidak pernah digunakan untuk melatih model AI.",
+    "trustTransit": "TLS 1.3 semasa transit",
+    "trustAtRest": "AES-256-GCM semasa tersimpan",
+    "trustNoTraining": "Tiada latihan pada data anda"
   }
 }

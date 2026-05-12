@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Ustawienia",
       "developer": "Deweloper",
-      "more": "Więcej"
+      "more": "Więcej",
+      "resources": "Zasoby"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Połącz",
         "description": "Linki społecznościowe"
+      },
+      "guide": {
+        "label": "Przewodnik",
+        "description": "Naucz się korzystać z Coasty"
+      },
+      "referral": {
+        "label": "Polecenie",
+        "description": "Zapraszaj znajomych i zdobywaj kredyty"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Polecenia",
       "description": "Udostępnij Coasty. Zarabiajcie razem."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Twoje dane, twoja kontrola",
+    "heroDescription": "Przechowujemy tylko to, co niezbędne do uruchomienia twoich sesji. Cały ruch jest szyfrowany w trakcie przesyłania, a szyfrowanie w spoczynku możesz rozszerzyć na kategorie poniżej. Twoje dane nigdy nie są wykorzystywane do trenowania modeli AI.",
+    "trustTransit": "TLS 1.3 podczas przesyłania",
+    "trustAtRest": "AES-256-GCM w spoczynku",
+    "trustNoTraining": "Brak trenowania na twoich danych"
   }
 }

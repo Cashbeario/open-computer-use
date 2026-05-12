@@ -426,15 +426,42 @@ export function registerIpcHandlers(
         return { success: true, messages: body.messages ?? [] }
       }
 
-      const supabase = await auth.getSupabaseClient()
-      const { data: messages, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('chat_id', chatId)
-        .order('created_at', { ascending: true })
-
-      if (error) throw error
-      return { success: true, messages: messages || [] }
+      // Normal mode — route through the FastAPI backend rather than direct
+      // Supabase. The backend route at /api/chats/:id/messages decrypts any
+      // AES-256-GCM-wrapped `frontendScreenshot` values inside messages.parts
+      // for users who opted in to `users.encryption_prefs.messages`. The
+      // ENCRYPTION_KEY lives ONLY on the backend — pulling rows directly here
+      // would surface ciphertext that Electron can't decrypt without shipping
+      // the master key into the client, which is a security regression we
+      // refuse to make.
+      //
+      // Backward compatibility: for users who never opted in, the backend
+      // route returns plaintext records unchanged. So this change is a no-op
+      // for the majority case, and a fix for the opt-in case.
+      const token = await auth.getAccessToken()
+      if (!token) {
+        return { success: false, error: 'Not authenticated' }
+      }
+      const res = await fetch(
+        `${backendUrl}/api/chats/${encodeURIComponent(chatId)}/messages`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'User-Agent': 'coasty-electron/1.0',
+          },
+        },
+      )
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        return {
+          success: false,
+          error: `backend ${res.status}: ${text.slice(0, 200)}`,
+        }
+      }
+      const body: any = await res.json().catch(() => ({}))
+      return { success: true, messages: body.messages ?? [] }
     } catch (error: any) {
       console.error('[Chats] Get messages failed:', error.message)
       return { success: false, error: error.message }

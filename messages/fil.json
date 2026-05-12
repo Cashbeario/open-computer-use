@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Mga Setting",
       "developer": "Developer",
-      "more": "Higit pa"
+      "more": "Higit pa",
+      "resources": "Mga resource"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Kumonekta",
         "description": "Mga social link"
+      },
+      "guide": {
+        "label": "Gabay",
+        "description": "Matuto kung paano gamitin ang Coasty"
+      },
+      "referral": {
+        "label": "Referral",
+        "description": "Mag-imbita ng kaibigan at kumita ng credits"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Mga referral",
       "description": "I-share ang Coasty. Sama-samang kumita."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Iyong data, iyong kontrol",
+    "heroDescription": "Iniimbak lang namin ang kailangan para patakbuhin ang iyong mga session. Lahat ng traffic ay naka-encrypt habang dinadala, at maaari mong palawigin ang encryption habang nakaimbak sa mga kategorya sa ibaba. Hindi kailanman ginagamit ang data mo upang sanayin ang mga AI model.",
+    "trustTransit": "TLS 1.3 sa transit",
+    "trustAtRest": "AES-256-GCM nakaimbak",
+    "trustNoTraining": "Walang training sa data mo"
   }
 }

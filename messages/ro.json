@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Setări",
       "developer": "Dezvoltator",
-      "more": "Mai multe"
+      "more": "Mai multe",
+      "resources": "Resurse"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Conectează-te",
         "description": "Linkuri sociale"
+      },
+      "guide": {
+        "label": "Ghid",
+        "description": "Învață cum să folosești Coasty"
+      },
+      "referral": {
+        "label": "Recomandare",
+        "description": "Invită prieteni și câștigă credite"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Recomandări",
       "description": "Recomandă Coasty. Câștigați împreună."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Datele tale, controlul tău",
+    "heroDescription": "Stocăm doar ce este necesar pentru a rula sesiunile tale. Tot traficul este criptat în tranzit, iar tu poți extinde criptarea în repaus la categoriile de mai jos. Datele tale nu sunt folosite niciodată pentru a antrena modele de IA.",
+    "trustTransit": "TLS 1.3 în tranzit",
+    "trustAtRest": "AES-256-GCM în repaus",
+    "trustNoTraining": "Fără antrenament pe datele tale"
   }
 }

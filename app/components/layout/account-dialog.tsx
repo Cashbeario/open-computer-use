@@ -6,9 +6,7 @@ import {
   User,
   CreditCard,
   Shield,
-  Bell,
   Paintbrush,
-  Key,
   Database,
   MessageSquare,
   Info,
@@ -19,6 +17,8 @@ import {
   X,
   Globe,
   Brain,
+  BookOpen,
+  Gift,
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { CombinedAccount } from "@/app/components/layout/settings/general/combined-account"
 import { PrivacySection } from "@/app/components/layout/settings/general/privacy-section"
+import { DataSection } from "@/app/components/layout/settings/general/data-section"
 import { PublicChatsSection } from "@/app/components/layout/settings/general/public-chats-section"
 import { MemorySection } from "@/app/components/layout/settings/general/memory-section"
 import { BillingSection } from "@/app/components/layout/settings/billing/billing-section"
@@ -79,6 +80,9 @@ function AppearanceSection() {
   )
 }
 
+// Sections with `href` are quick-link items: clicking them closes the
+// dialog and navigates to the page rather than rendering a sub-view
+// inside the dialog. They never become the dialog's active section.
 const sections = [
   { id: "account" as SectionType, label: "General", icon: User, description: "Profile and account", component: CombinedAccount },
   { id: "memory" as SectionType, label: "Memory", icon: Brain, description: "Context applied to every agent run", component: MemorySection },
@@ -86,9 +90,9 @@ const sections = [
   { id: "billing" as SectionType, label: "Billing", icon: CreditCard, description: "Plans and credits", component: BillingSection },
   { id: "public-chats" as SectionType, label: "Public Chats", icon: Globe, description: "Manage chats shared via public link", component: PublicChatsSection },
   { id: "privacy" as SectionType, label: "Privacy", icon: Shield, description: "Security and data privacy", component: PrivacySection },
-  { id: "notifications" as SectionType, label: "Notifications", icon: Bell, description: "Notification preferences", component: null },
-  { id: "api-keys" as SectionType, label: "API Keys", icon: Key, description: "Manage your API keys", component: null },
-  { id: "data" as SectionType, label: "Data", icon: Database, description: "Export and manage your data", component: null },
+  { id: "guide" as SectionType, label: "Guide", icon: BookOpen, description: "Learn how to use Coasty", component: "redirect" as const, href: "/guide" },
+  { id: "referral" as SectionType, label: "Referral", icon: Gift, description: "Invite friends and earn credits", component: "redirect" as const, href: "/referral" },
+  { id: "data" as SectionType, label: "Data", icon: Database, description: "Export and manage your data", component: DataSection },
   { id: "feedback" as SectionType, label: "Feedback", icon: MessageSquare, description: "Send us your feedback", component: "feedback" as const },
   { id: "about" as SectionType, label: "About", icon: Info, description: "About Coasty", component: "about" as const },
   { id: "social" as SectionType, label: "Connect", icon: Share2, description: "Social links", component: "social" as const },
@@ -96,7 +100,7 @@ const sections = [
 
 const navGroups = [
   { label: "Settings", ids: ["account", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
-  { label: "Developer", ids: ["notifications", "api-keys", "data"] as SectionType[] },
+  { label: "Resources", ids: ["guide", "referral", "data"] as SectionType[] },
   { label: "More", ids: ["feedback", "about", "social"] as SectionType[] },
 ]
 
@@ -126,11 +130,15 @@ function SidebarNavItem({
     >
       <Icon className={cn("h-[14px] w-[14px] shrink-0", isActive ? "text-foreground/80" : "text-muted-foreground/40")} strokeWidth={isActive ? 2 : 1.75} />
       <span className={cn("text-[13px] leading-none", isActive ? "font-medium" : "font-normal")}>{section.label}</span>
+      {/* "Soon" badge for disabled (component: null) sections — commented out
+          while we wait to show coming-soon features in the popup. Re-enable
+          when notifications/api-keys/etc. are wired up.
       {isDisabled && (
         <span className="ml-auto text-[9px] font-medium text-muted-foreground/25">
           {t("badge")}
         </span>
       )}
+      */}
     </button>
   )
 }
@@ -150,7 +158,11 @@ function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentTyp
   )
 }
 
-const validSections: SectionType[] = ["account", "billing", "privacy", "notifications", "appearance", "api-keys", "data", "feedback", "about", "social", "public-chats"]
+// Sections that are valid URL-sync targets. Guide and Referral are
+// excluded on purpose — they are quick-link redirects, not section
+// states the dialog can settle on, so landing on /account?section=guide
+// falls back to "account" while the link still works from the sidebar.
+const validSections: SectionType[] = ["account", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
 
 export function AccountDialog() {
   const { isOpen, section, close, setSection, _syncFromUrl } = useAccountDialog()
@@ -175,8 +187,8 @@ export function AccountDialog() {
     billing: { label: tDialog("sections.billing.label"), description: tDialog("sections.billing.description") },
     "public-chats": { label: tDialog("sections.publicChats.label"), description: tDialog("sections.publicChats.description") },
     privacy: { label: tDialog("sections.privacy.label"), description: tDialog("sections.privacy.description") },
-    notifications: { label: tDialog("sections.notifications.label"), description: tDialog("sections.notifications.description") },
-    "api-keys": { label: tDialog("sections.apiKeys.label"), description: tDialog("sections.apiKeys.description") },
+    guide: { label: tDialog("sections.guide.label"), description: tDialog("sections.guide.description") },
+    referral: { label: tDialog("sections.referral.label"), description: tDialog("sections.referral.description") },
     data: { label: tDialog("sections.data.label"), description: tDialog("sections.data.description") },
     feedback: { label: tDialog("sections.feedback.label"), description: tDialog("sections.feedback.description") },
     about: { label: tDialog("sections.about.label"), description: tDialog("sections.about.description") },
@@ -192,7 +204,7 @@ export function AccountDialog() {
   // as the mobile-view group headings.
   const NAV_GROUP_LABELS: Record<string, string> = {
     Settings: tDialog("navGroups.settings"),
-    Developer: tDialog("navGroups.developer"),
+    Resources: tDialog("navGroups.resources"),
     More: tDialog("navGroups.more"),
   }
   const localizedNavGroups = navGroups.map((g) => ({
@@ -206,10 +218,19 @@ export function AccountDialog() {
 
   const handleSectionChange = useCallback(
     (sectionId: SectionType) => {
+      // Quick-link sections (Guide, Referral) navigate to their full
+      // page instead of rendering inline. Close the dialog first so the
+      // popover state is cleaned up, then push the route.
+      const target = sections.find((s) => s.id === sectionId)
+      if (target && "href" in target && target.href) {
+        close()
+        router.push(target.href)
+        return
+      }
       setSection(sectionId)
       setMobileView("content")
     },
-    [setSection]
+    [setSection, close, router]
   )
 
   // Wrapper around store close that also handles real Next.js navigation
@@ -436,9 +457,15 @@ export function AccountDialog() {
                                     <div className="text-[13px] font-medium leading-tight">{s.label}</div>
                                     <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{s.description}</div>
                                   </div>
+                                  {/* "Soon" badge for disabled sections is commented out for
+                                      now — re-enable when coming-soon features land.
                                   {isDisabled ? (
                                     <span className="text-[10px] text-muted-foreground/25">{tDialog("comingSoon.badge")}</span>
                                   ) : (
+                                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
+                                  )}
+                                  */}
+                                  {!isDisabled && (
                                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
                                   )}
                                 </button>

@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Instellingen",
       "developer": "Ontwikkelaar",
-      "more": "Meer"
+      "more": "Meer",
+      "resources": "Bronnen"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Verbinden",
         "description": "Sociale links"
+      },
+      "guide": {
+        "label": "Gids",
+        "description": "Leer hoe je Coasty gebruikt"
+      },
+      "referral": {
+        "label": "Verwijzing",
+        "description": "Nodig vrienden uit en verdien credits"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Verwijzingen",
       "description": "Deel Coasty. Verdien samen."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Jouw data, jouw controle",
+    "heroDescription": "We bewaren alleen wat nodig is om je sessies uit te voeren. Al het verkeer is versleuteld tijdens verzending, en je kunt versleuteling in rust uitbreiden naar onderstaande categorieën. Jouw data wordt nooit gebruikt om AI-modellen te trainen.",
+    "trustTransit": "TLS 1.3 tijdens transport",
+    "trustAtRest": "AES-256-GCM in rust",
+    "trustNoTraining": "Geen training op jouw data"
   }
 }

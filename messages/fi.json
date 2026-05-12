@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Asetukset",
       "developer": "Kehittäjä",
-      "more": "Lisää"
+      "more": "Lisää",
+      "resources": "Resurssit"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Yhteys",
         "description": "Sosiaaliset linkit"
+      },
+      "guide": {
+        "label": "Opas",
+        "description": "Opettele käyttämään Coastya"
+      },
+      "referral": {
+        "label": "Suosittelu",
+        "description": "Kutsu kavereita ja ansaitse krediittejä"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Suositukset",
       "description": "Jaa Coasty. Ansaitkaa yhdessä."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Sinun datasi, sinun hallintasi",
+    "heroDescription": "Tallennamme vain sen, mitä istuntojesi suorittaminen edellyttää. Kaikki liikenne salataan siirron aikana, ja voit laajentaa lepotilan salauksen alla oleviin luokkiin. Tietojasi ei käytetä koskaan tekoälymallien kouluttamiseen.",
+    "trustTransit": "TLS 1.3 siirrossa",
+    "trustAtRest": "AES-256-GCM lepotilassa",
+    "trustNoTraining": "Ei koulutusta datallasi"
   }
 }

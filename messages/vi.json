@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Cài đặt",
       "developer": "Nhà phát triển",
-      "more": "Khác"
+      "more": "Khác",
+      "resources": "Tài nguyên"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Kết nối",
         "description": "Liên kết mạng xã hội"
+      },
+      "guide": {
+        "label": "Hướng dẫn",
+        "description": "Tìm hiểu cách sử dụng Coasty"
+      },
+      "referral": {
+        "label": "Giới thiệu",
+        "description": "Mời bạn bè và nhận tín dụng"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Giới thiệu",
       "description": "Chia sẻ Coasty. Cùng kiếm tiền."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Dữ liệu của bạn, quyền kiểm soát của bạn",
+    "heroDescription": "Chúng tôi chỉ lưu những gì cần để chạy phiên làm việc của bạn. Mọi lưu lượng được mã hóa khi truyền tải, và bạn có thể mở rộng mã hóa khi lưu trữ cho các danh mục bên dưới. Dữ liệu của bạn không bao giờ được dùng để huấn luyện mô hình AI.",
+    "trustTransit": "TLS 1.3 khi truyền",
+    "trustAtRest": "AES-256-GCM khi lưu trữ",
+    "trustNoTraining": "Không huấn luyện trên dữ liệu của bạn"
   }
 }

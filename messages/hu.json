@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Beállítások",
       "developer": "Fejlesztő",
-      "more": "Több"
+      "more": "Több",
+      "resources": "Erőforrások"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Csatlakozás",
         "description": "Közösségi linkek"
+      },
+      "guide": {
+        "label": "Útmutató",
+        "description": "Tanuld meg, hogyan használd a Coastyt"
+      },
+      "referral": {
+        "label": "Ajánlás",
+        "description": "Hívj meg barátokat és szerezz kreditet"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Ajánlások",
       "description": "Oszd meg a Coastyt. Keressetek együtt."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Az adataid, a te irányításod",
+    "heroDescription": "Csak azt tároljuk, ami a munkameneteid futtatásához szükséges. Minden forgalom titkosított az átvitel során, és kiterjesztheted a nyugalmi titkosítást az alábbi kategóriákra. Az adataidat soha nem használjuk MI-modellek tanításához.",
+    "trustTransit": "TLS 1.3 átvitel közben",
+    "trustAtRest": "AES-256-GCM nyugalomban",
+    "trustNoTraining": "Nincs tréning az adataidon"
   }
 }

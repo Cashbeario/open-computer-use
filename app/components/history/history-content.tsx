@@ -45,7 +45,9 @@ import { useChats } from "@/lib/chat-store/chats/provider"
 import type { Chats } from "@/lib/chat-store/types"
 import { AgentIconFilled } from "@/components/icons/agent"
 import { APP_DOMAIN } from "@/lib/config"
-import { createClient } from "@/lib/supabase/client"
+// Note: messages are now fetched via the /api/chats/[chatId]/messages
+// server route (so encrypted frontendScreenshot values get decrypted
+// server-side) — direct Supabase client access is no longer needed here.
 import { PageLoader } from "@/components/common/page-loader"
 import { useTranslations } from "next-intl"
 
@@ -539,22 +541,36 @@ function ChatCard({
 
   const hasMessages = chat.last_message_preview != null
 
-  // Fetch messages on first expand
+  // Fetch messages on first expand. Routed through the server endpoint
+  // (rather than direct Supabase) so encrypted `frontendScreenshot` values
+  // get decrypted server-side before reaching the browser — the
+  // ENCRYPTION_KEY must never ship to the client.
   useEffect(() => {
     if (isExpanded && !messagesFetched) {
       setMessagesLoading(true)
-      const supabase = createClient()
-      if (supabase) {
-        supabase
-          .from("messages")
-          .select("id, role, content, created_at, model, experimental_attachments, parts")
-          .eq("chat_id", chat.id)
-          .order("created_at", { ascending: true })
-          .then(({ data }: { data: ChatMessage[] | null }) => {
-            setMessages(data || [])
-            setMessagesFetched(true)
+      let cancelled = false
+      ;(async () => {
+        try {
+          const res = await fetch(`/api/chats/${chat.id}/messages`, {
+            cache: "no-store",
+            credentials: "include",
           })
-          .finally(() => setMessagesLoading(false))
+          if (!res.ok || cancelled) return
+          const { messages: rows } = (await res.json()) as {
+            messages: ChatMessage[]
+          }
+          if (!cancelled) setMessages(rows || [])
+        } catch (e) {
+          if (!cancelled) console.warn("history-content messages fetch failed:", e)
+        } finally {
+          if (!cancelled) {
+            setMessagesFetched(true)
+            setMessagesLoading(false)
+          }
+        }
+      })()
+      return () => {
+        cancelled = true
       }
     }
   }, [isExpanded, messagesFetched, chat.id])

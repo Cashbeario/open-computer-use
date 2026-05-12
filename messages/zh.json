@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "设置",
       "developer": "开发者",
-      "more": "更多"
+      "more": "更多",
+      "resources": "资源"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "社交",
         "description": "社交链接"
+      },
+      "guide": {
+        "label": "指南",
+        "description": "了解如何使用 Coasty"
+      },
+      "referral": {
+        "label": "推荐",
+        "description": "邀请朋友赚取积分"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "推荐",
       "description": "分享 Coasty,共同获益。"
     }
+  },
+  "dataSection": {
+    "heroTitle": "您的数据,您的掌控",
+    "heroDescription": "我们仅存储运行您的会话所需的数据。所有流量在传输过程中均经过加密,您可以将静态加密扩展到以下类别。您的数据绝不会用于训练 AI 模型。",
+    "trustTransit": "传输中使用 TLS 1.3",
+    "trustAtRest": "静态采用 AES-256-GCM",
+    "trustNoTraining": "不用您的数据训练模型"
   }
 }

@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "הגדרות",
       "developer": "מפתח",
-      "more": "עוד"
+      "more": "עוד",
+      "resources": "משאבים"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "חיבור",
         "description": "קישורים חברתיים"
+      },
+      "guide": {
+        "label": "מדריך",
+        "description": "למד כיצד להשתמש ב-Coasty"
+      },
+      "referral": {
+        "label": "הפניה",
+        "description": "הזמן חברים והרווח קרדיטים"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "הפניות",
       "description": "שתף את Coasty. הרוויחו ביחד."
     }
+  },
+  "dataSection": {
+    "heroTitle": "הנתונים שלך, השליטה שלך",
+    "heroDescription": "אנחנו שומרים רק את מה שנחוץ להפעלת הסשנים שלך. כל התעבורה מוצפנת בזמן ההעברה, ואתה יכול להרחיב את ההצפנה במנוחה לקטגוריות שלהלן. הנתונים שלך לעולם לא משמשים לאימון מודלי בינה מלאכותית.",
+    "trustTransit": "TLS 1.3 בהעברה",
+    "trustAtRest": "AES-256-GCM במנוחה",
+    "trustNoTraining": "ללא אימון על הנתונים שלך"
   }
 }

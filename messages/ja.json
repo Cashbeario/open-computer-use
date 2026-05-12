@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "設定",
       "developer": "開発者",
-      "more": "その他"
+      "more": "その他",
+      "resources": "リソース"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "ソーシャル",
         "description": "ソーシャルリンク"
+      },
+      "guide": {
+        "label": "ガイド",
+        "description": "Coasty の使い方を学ぶ"
+      },
+      "referral": {
+        "label": "紹介",
+        "description": "友達を招待してクレジットを獲得"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "紹介",
       "description": "Coasty を共有しよう。一緒に稼ごう。"
     }
+  },
+  "dataSection": {
+    "heroTitle": "あなたのデータ、あなたの管理",
+    "heroDescription": "セッションの実行に必要なものだけを保存します。すべての通信は転送中に暗号化され、以下のカテゴリで保存時の暗号化を拡張できます。お客様のデータが AI モデルのトレーニングに使用されることはありません。",
+    "trustTransit": "通信時に TLS 1.3",
+    "trustAtRest": "保存時に AES-256-GCM",
+    "trustNoTraining": "お客様のデータでの学習なし"
   }
 }

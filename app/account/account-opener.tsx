@@ -4,7 +4,9 @@ import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useAccountDialog, type AccountSectionType } from "@/lib/account-dialog-store"
 
-const validSections: AccountSectionType[] = ["account", "billing", "privacy", "notifications", "appearance", "api-keys", "data", "feedback", "about", "social"]
+// Mirrors validSections in account-dialog.tsx — Guide and Referral are
+// intentionally excluded since they redirect rather than render inline.
+const validSections: AccountSectionType[] = ["account", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "memory", "public-chats"]
 
 export function AccountOpener() {
   const searchParams = useSearchParams()

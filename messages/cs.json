@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Nastavení",
       "developer": "Vývojář",
-      "more": "Další"
+      "more": "Další",
+      "resources": "Zdroje"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Připojit",
         "description": "Sociální odkazy"
+      },
+      "guide": {
+        "label": "Průvodce",
+        "description": "Naučte se používat Coasty"
+      },
+      "referral": {
+        "label": "Doporučení",
+        "description": "Pozvi přátele a získej kredity"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Doporučení",
       "description": "Sdílej Coasty. Vydělávejte společně."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Vaše data, vaše kontrola",
+    "heroDescription": "Ukládáme jen to, co je potřeba ke spuštění vašich relací. Veškerá komunikace je šifrována během přenosu a šifrování v klidu můžete rozšířit na níže uvedené kategorie. Vaše data nikdy nepoužíváme k trénování modelů AI.",
+    "trustTransit": "TLS 1.3 při přenosu",
+    "trustAtRest": "AES-256-GCM v klidu",
+    "trustNoTraining": "Žádné trénování na vašich datech"
   }
 }

@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Einstellungen",
       "developer": "Entwickler",
-      "more": "Mehr"
+      "more": "Mehr",
+      "resources": "Ressourcen"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Verbinden",
         "description": "Soziale Links"
+      },
+      "guide": {
+        "label": "Anleitung",
+        "description": "Erfahre, wie du Coasty nutzt"
+      },
+      "referral": {
+        "label": "Empfehlung",
+        "description": "Lade Freunde ein und verdiene Credits"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Empfehlungen",
       "description": "Teile Coasty. Verdient zusammen."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Deine Daten, deine Kontrolle",
+    "heroDescription": "Wir speichern nur, was zum Ausführen deiner Sitzungen nötig ist. Der gesamte Datenverkehr ist während der Übertragung verschlüsselt, und du kannst die Verschlüsselung im Ruhezustand auf die folgenden Kategorien erweitern. Deine Daten werden niemals zum Training von KI-Modellen verwendet.",
+    "trustTransit": "TLS 1.3 bei der Übertragung",
+    "trustAtRest": "AES-256-GCM im Ruhezustand",
+    "trustNoTraining": "Kein Training mit deinen Daten"
   }
 }

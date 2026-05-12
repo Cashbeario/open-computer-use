@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Pengaturan",
       "developer": "Pengembang",
-      "more": "Lainnya"
+      "more": "Lainnya",
+      "resources": "Sumber daya"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Hubungkan",
         "description": "Tautan sosial"
+      },
+      "guide": {
+        "label": "Panduan",
+        "description": "Pelajari cara menggunakan Coasty"
+      },
+      "referral": {
+        "label": "Referal",
+        "description": "Undang teman dan dapatkan kredit"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Referal",
       "description": "Bagikan Coasty. Dapatkan bersama."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Data Anda, kendali Anda",
+    "heroDescription": "Kami hanya menyimpan apa yang diperlukan untuk menjalankan sesi Anda. Semua lalu lintas dienkripsi selama transmisi, dan Anda dapat memperluas enkripsi saat tersimpan ke kategori di bawah. Data Anda tidak pernah digunakan untuk melatih model AI.",
+    "trustTransit": "TLS 1.3 saat transit",
+    "trustAtRest": "AES-256-GCM saat tersimpan",
+    "trustNoTraining": "Tidak ada pelatihan dengan data Anda"
   }
 }

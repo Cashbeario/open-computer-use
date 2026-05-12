@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "Inställningar",
       "developer": "Utvecklare",
-      "more": "Mer"
+      "more": "Mer",
+      "resources": "Resurser"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "Anslut",
         "description": "Sociala länkar"
+      },
+      "guide": {
+        "label": "Guide",
+        "description": "Lär dig att använda Coasty"
+      },
+      "referral": {
+        "label": "Hänvisning",
+        "description": "Bjud in vänner och tjäna krediter"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "Hänvisningar",
       "description": "Dela Coasty. Tjäna tillsammans."
     }
+  },
+  "dataSection": {
+    "heroTitle": "Din data, din kontroll",
+    "heroDescription": "Vi lagrar bara det som behövs för att köra dina sessioner. All trafik krypteras vid överföring, och du kan utöka kryptering i vila till kategorierna nedan. Dina data används aldrig för att träna AI-modeller.",
+    "trustTransit": "TLS 1.3 vid överföring",
+    "trustAtRest": "AES-256-GCM i vila",
+    "trustNoTraining": "Ingen träning på dina data"
   }
 }

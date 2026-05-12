@@ -3009,7 +3009,8 @@
     "navGroups": {
       "settings": "الإعدادات",
       "developer": "المطور",
-      "more": "المزيد"
+      "more": "المزيد",
+      "resources": "الموارد"
     },
     "sections": {
       "account": {
@@ -3055,6 +3056,14 @@
       "social": {
         "label": "تواصل",
         "description": "روابط التواصل الاجتماعي"
+      },
+      "guide": {
+        "label": "الدليل",
+        "description": "تعرف على كيفية استخدام Coasty"
+      },
+      "referral": {
+        "label": "الإحالة",
+        "description": "ادعُ الأصدقاء واكسب أرصدة"
       }
     },
     "appearance": {
@@ -3119,5 +3128,12 @@
       "title": "الإحالات",
       "description": "شارك Coasty. اربحوا معًا."
     }
+  },
+  "dataSection": {
+    "heroTitle": "بياناتك، تحكمك",
+    "heroDescription": "نخزن فقط ما يلزم لتشغيل جلساتك. كل البيانات مشفرة أثناء النقل، ويمكنك توسيع التشفير في حالة السكون ليشمل الفئات أدناه. لا تُستخدم بياناتك أبدًا لتدريب نماذج الذكاء الاصطناعي.",
+    "trustTransit": "TLS 1.3 أثناء النقل",
+    "trustAtRest": "AES-256-GCM في حالة السكون",
+    "trustNoTraining": "لا تدريب على بياناتك"
   }
 }

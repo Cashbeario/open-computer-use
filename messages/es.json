@@ -2919,5 +2919,58 @@
     "watchSession": "Ver sesión",
     "steps": "{count} pasos",
     "tryCoasty": "Probar Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memoria",
+    "sidebarDescription": "Contexto aplicado a cada tarea del agente",
+    "dialog": {
+      "title": "Memoria",
+      "description": "Una breve nota que Coasty aplica siempre que trabaja para ti.",
+      "openFull": "Abrir completo",
+      "visualMemoryLabel": "Memoria",
+      "visualSynced": "Sincronizado",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Programaciones",
+      "visualContextSwarm": "Enjambre"
+    },
+    "section": {
+      "title": "Memoria",
+      "tag": "opcional · personal",
+      "description": "Una breve nota sobre ti que viaja con cada tarea del agente — chat, tareas programadas, máquinas en enjambre y agentes delegados."
+    },
+    "presetsLabel": "Prueba",
+    "presets": {
+      "useFirstName": "Usar mi nombre",
+      "useFirstNameSentence": "Diríjete a mí por mi nombre.",
+      "beTerse": "Sé conciso",
+      "beTerseSentence": "Prefiere respuestas concisas y directas. Sin relleno.",
+      "imDeveloper": "Soy desarrollador",
+      "imDeveloperSentence": "Soy ingeniero de software; me siento cómodo con el código.",
+      "noEmojis": "Sin emojis",
+      "noEmojisSentence": "Evita los emojis en las respuestas.",
+      "metricUnits": "Unidades métricas",
+      "metricUnitsSentence": "Usa unidades métricas (metros, kilogramos, °C).",
+      "citeSources": "Citar fuentes",
+      "citeSourcesSentence": "Cita las fuentes al hacer afirmaciones fácticas."
+    },
+    "placeholder": "Ejemplo:\nDiríjete a mí por mi nombre.\nPrefiere respuestas concisas.\nTrabajo con TypeScript y Python.\nNunca elimines archivos sin confirmar.",
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "unsavedChanges": "Cambios sin guardar",
+    "empty": "Vacío",
+    "savedRelative": "Guardado · {time}",
+    "errorLoad": "No se pudo cargar tu memoria.",
+    "errorSave": "No se pudo guardar tu memoria.",
+    "willBeShortened": "se acortará",
+    "clear": "Borrar",
+    "footerNote": "Coasty tendrá en cuenta estas preferencias siempre que trabaje para ti.",
+    "time": {
+      "justNow": "justo ahora",
+      "secondsAgo": "hace {n} s",
+      "minutesAgo": "hace {n} min",
+      "hoursAgo": "hace {n} h",
+      "daysAgo": "hace {n} d"
+    }
   }
 }

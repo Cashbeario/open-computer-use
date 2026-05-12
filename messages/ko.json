@@ -2919,5 +2919,58 @@
     "watchSession": "세션 보기",
     "steps": "{count}단계",
     "tryCoasty": "Coasty 사용해보기"
+  },
+  "memory": {
+    "sidebarLabel": "메모리",
+    "sidebarDescription": "모든 에이전트 실행에 적용되는 컨텍스트",
+    "dialog": {
+      "title": "메모리",
+      "description": "Coasty가 사용자를 위해 작동할 때마다 적용하는 짧은 메모.",
+      "openFull": "전체 열기",
+      "visualMemoryLabel": "메모리",
+      "visualSynced": "동기화됨",
+      "visualContextChat": "채팅",
+      "visualContextSchedules": "예약",
+      "visualContextSwarm": "스웜"
+    },
+    "section": {
+      "title": "메모리",
+      "tag": "선택 · 개인",
+      "description": "모든 에이전트 실행에 함께 가는, 사용자에 대한 짧은 메모 — 채팅, 예약된 작업, 스웜 머신, 위임된 에이전트."
+    },
+    "presetsLabel": "시도",
+    "presets": {
+      "useFirstName": "이름 사용",
+      "useFirstNameSentence": "내 이름으로 불러주세요.",
+      "beTerse": "간결하게",
+      "beTerseSentence": "간결하고 직접적인 답변을 선호합니다. 군더더기 없이.",
+      "imDeveloper": "저는 개발자입니다",
+      "imDeveloperSentence": "저는 소프트웨어 엔지니어이고, 코드에 익숙합니다.",
+      "noEmojis": "이모지 없이",
+      "noEmojisSentence": "답변에서 이모지를 사용하지 마세요.",
+      "metricUnits": "미터법",
+      "metricUnitsSentence": "미터법(미터, 킬로그램, °C)을 사용하세요.",
+      "citeSources": "출처 인용",
+      "citeSourcesSentence": "사실을 진술할 때 출처를 인용하세요."
+    },
+    "placeholder": "예시:\n제 이름으로 불러주세요.\n간결한 답변을 선호합니다.\nTypeScript와 Python으로 일합니다.\n확인 없이 파일을 삭제하지 마세요.",
+    "loading": "불러오는 중…",
+    "saving": "저장 중…",
+    "saved": "저장됨",
+    "unsavedChanges": "저장되지 않은 변경 사항",
+    "empty": "비어 있음",
+    "savedRelative": "저장됨 · {time}",
+    "errorLoad": "메모리를 불러올 수 없습니다.",
+    "errorSave": "메모리를 저장할 수 없습니다.",
+    "willBeShortened": "단축됩니다",
+    "clear": "지우기",
+    "footerNote": "Coasty는 사용자를 위해 작동할 때 이러한 환경 설정을 고려합니다.",
+    "time": {
+      "justNow": "방금",
+      "secondsAgo": "{n}초 전",
+      "minutesAgo": "{n}분 전",
+      "hoursAgo": "{n}시간 전",
+      "daysAgo": "{n}일 전"
+    }
   }
 }

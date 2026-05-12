@@ -2919,5 +2919,58 @@
     "watchSession": "Se økt",
     "steps": "{count} trinn",
     "tryCoasty": "Prøv Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Minne",
+    "sidebarDescription": "Kontekst anvendt på hver agentkjøring",
+    "dialog": {
+      "title": "Minne",
+      "description": "En kort notat som Coasty bruker hver gang den arbeider for deg.",
+      "openFull": "Åpne fullt",
+      "visualMemoryLabel": "Minne",
+      "visualSynced": "Synkronisert",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Planer",
+      "visualContextSwarm": "Sverm"
+    },
+    "section": {
+      "title": "Minne",
+      "tag": "valgfritt · personlig",
+      "description": "Et kort notat om deg som følger med hver agentkjøring — chat, planlagte oppgaver, svermmaskiner, delegerte agenter."
+    },
+    "presetsLabel": "Prøv",
+    "presets": {
+      "useFirstName": "Bruk fornavn",
+      "useFirstNameSentence": "Tiltal meg ved fornavnet mitt.",
+      "beTerse": "Vær konsis",
+      "beTerseSentence": "Foretrekk konsise, direkte svar. Ingen fyll.",
+      "imDeveloper": "Jeg er utvikler",
+      "imDeveloperSentence": "Jeg er programvareingeniør; komfortabel med kode.",
+      "noEmojis": "Ingen emojier",
+      "noEmojisSentence": "Unngå emojier i svar.",
+      "metricUnits": "Metriske enheter",
+      "metricUnitsSentence": "Bruk metriske enheter (meter, kilogram, °C).",
+      "citeSources": "Siter kilder",
+      "citeSourcesSentence": "Siter kilder ved faktiske påstander."
+    },
+    "placeholder": "Eksempel:\nTiltal meg ved fornavnet mitt.\nForetrekk konsise svar.\nJeg jobber med TypeScript og Python.\nSlett aldri filer uten bekreftelse.",
+    "loading": "Laster…",
+    "saving": "Lagrer…",
+    "saved": "Lagret",
+    "unsavedChanges": "Ulagrede endringer",
+    "empty": "Tomt",
+    "savedRelative": "Lagret · {time}",
+    "errorLoad": "Kunne ikke laste inn minnet ditt.",
+    "errorSave": "Kunne ikke lagre minnet ditt.",
+    "willBeShortened": "vil bli forkortet",
+    "clear": "Tøm",
+    "footerNote": "Coasty tar hensyn til disse preferansene når den arbeider for deg.",
+    "time": {
+      "justNow": "akkurat nå",
+      "secondsAgo": "{n}s siden",
+      "minutesAgo": "{n}m siden",
+      "hoursAgo": "{n}t siden",
+      "daysAgo": "{n}d siden"
+    }
   }
 }

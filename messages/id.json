@@ -2919,5 +2919,58 @@
     "watchSession": "Tonton sesi",
     "steps": "{count} langkah",
     "tryCoasty": "Coba Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memori",
+    "sidebarDescription": "Konteks yang diterapkan pada setiap eksekusi agen",
+    "dialog": {
+      "title": "Memori",
+      "description": "Catatan singkat yang Coasty terapkan setiap kali bekerja untuk Anda.",
+      "openFull": "Buka penuh",
+      "visualMemoryLabel": "Memori",
+      "visualSynced": "Tersinkron",
+      "visualContextChat": "Obrolan",
+      "visualContextSchedules": "Jadwal",
+      "visualContextSwarm": "Kawanan"
+    },
+    "section": {
+      "title": "Memori",
+      "tag": "opsional · pribadi",
+      "description": "Catatan singkat tentang Anda yang menyertai setiap eksekusi agen — obrolan, tugas terjadwal, mesin kawanan, agen yang didelegasikan."
+    },
+    "presetsLabel": "Coba",
+    "presets": {
+      "useFirstName": "Pakai nama depan",
+      "useFirstNameSentence": "Panggil saya dengan nama depan.",
+      "beTerse": "Singkat",
+      "beTerseSentence": "Utamakan jawaban singkat dan langsung. Tanpa basa-basi.",
+      "imDeveloper": "Saya pengembang",
+      "imDeveloperSentence": "Saya insinyur perangkat lunak; nyaman dengan kode.",
+      "noEmojis": "Tanpa emoji",
+      "noEmojisSentence": "Hindari emoji dalam tanggapan.",
+      "metricUnits": "Satuan metrik",
+      "metricUnitsSentence": "Gunakan satuan metrik (meter, kilogram, °C).",
+      "citeSources": "Sebutkan sumber",
+      "citeSourcesSentence": "Sebutkan sumber saat menyatakan fakta."
+    },
+    "placeholder": "Contoh:\nPanggil saya dengan nama depan.\nUtamakan jawaban singkat.\nSaya bekerja dengan TypeScript dan Python.\nJangan pernah menghapus berkas tanpa konfirmasi.",
+    "loading": "Memuat…",
+    "saving": "Menyimpan…",
+    "saved": "Tersimpan",
+    "unsavedChanges": "Perubahan belum disimpan",
+    "empty": "Kosong",
+    "savedRelative": "Tersimpan · {time}",
+    "errorLoad": "Tidak dapat memuat memori Anda.",
+    "errorSave": "Tidak dapat menyimpan memori Anda.",
+    "willBeShortened": "akan dipersingkat",
+    "clear": "Hapus",
+    "footerNote": "Coasty akan mempertimbangkan preferensi ini saat bekerja untuk Anda.",
+    "time": {
+      "justNow": "baru saja",
+      "secondsAgo": "{n} dtk lalu",
+      "minutesAgo": "{n} mnt lalu",
+      "hoursAgo": "{n} jam lalu",
+      "daysAgo": "{n} hari lalu"
+    }
   }
 }

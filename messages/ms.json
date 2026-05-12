@@ -2919,5 +2919,58 @@
     "watchSession": "Tonton sesi",
     "steps": "{count} langkah",
     "tryCoasty": "Cuba Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memori",
+    "sidebarDescription": "Konteks digunakan untuk setiap larian ejen",
+    "dialog": {
+      "title": "Memori",
+      "description": "Nota ringkas yang Coasty gunakan setiap kali ia bekerja untuk anda.",
+      "openFull": "Buka penuh",
+      "visualMemoryLabel": "Memori",
+      "visualSynced": "Disegerakkan",
+      "visualContextChat": "Sembang",
+      "visualContextSchedules": "Jadual",
+      "visualContextSwarm": "Kumpulan"
+    },
+    "section": {
+      "title": "Memori",
+      "tag": "pilihan · peribadi",
+      "description": "Nota ringkas tentang anda yang menyertai setiap larian ejen — sembang, tugas berjadual, mesin kumpulan, ejen yang diwakilkan."
+    },
+    "presetsLabel": "Cuba",
+    "presets": {
+      "useFirstName": "Gunakan nama pertama",
+      "useFirstNameSentence": "Panggil saya dengan nama pertama.",
+      "beTerse": "Ringkas",
+      "beTerseSentence": "Utamakan jawapan ringkas dan terus terang. Tanpa pengisi.",
+      "imDeveloper": "Saya pembangun",
+      "imDeveloperSentence": "Saya jurutera perisian; selesa dengan kod.",
+      "noEmojis": "Tiada emoji",
+      "noEmojisSentence": "Elakkan emoji dalam jawapan.",
+      "metricUnits": "Unit metrik",
+      "metricUnitsSentence": "Gunakan unit metrik (meter, kilogram, °C).",
+      "citeSources": "Sebut sumber",
+      "citeSourcesSentence": "Sebut sumber apabila membuat dakwaan fakta."
+    },
+    "placeholder": "Contoh:\nPanggil saya dengan nama pertama.\nUtamakan jawapan ringkas.\nSaya bekerja dengan TypeScript dan Python.\nJangan padam fail tanpa pengesahan.",
+    "loading": "Memuatkan…",
+    "saving": "Menyimpan…",
+    "saved": "Disimpan",
+    "unsavedChanges": "Perubahan belum disimpan",
+    "empty": "Kosong",
+    "savedRelative": "Disimpan · {time}",
+    "errorLoad": "Tidak dapat memuatkan memori anda.",
+    "errorSave": "Tidak dapat menyimpan memori anda.",
+    "willBeShortened": "akan dipendekkan",
+    "clear": "Kosongkan",
+    "footerNote": "Coasty akan mengambil kira keutamaan ini apabila ia bekerja untuk anda.",
+    "time": {
+      "justNow": "baru sahaja",
+      "secondsAgo": "{n} saat lalu",
+      "minutesAgo": "{n} min lalu",
+      "hoursAgo": "{n} jam lalu",
+      "daysAgo": "{n} hari lalu"
+    }
   }
 }

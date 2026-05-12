@@ -2919,5 +2919,58 @@
     "watchSession": "Oturumu izle",
     "steps": "{count} adım",
     "tryCoasty": "Coasty'yi dene"
+  },
+  "memory": {
+    "sidebarLabel": "Hafıza",
+    "sidebarDescription": "Her ajan çalıştırmasında uygulanan bağlam",
+    "dialog": {
+      "title": "Hafıza",
+      "description": "Coasty'nin sizin için çalıştığı her seferinde uyguladığı kısa bir not.",
+      "openFull": "Tam aç",
+      "visualMemoryLabel": "Hafıza",
+      "visualSynced": "Senkronize",
+      "visualContextChat": "Sohbet",
+      "visualContextSchedules": "Zamanlamalar",
+      "visualContextSwarm": "Sürü"
+    },
+    "section": {
+      "title": "Hafıza",
+      "tag": "isteğe bağlı · kişisel",
+      "description": "Her ajan çalıştırmasında yanınızda olan, sizin hakkınızda kısa bir not — sohbet, planlı görevler, sürü makineleri, devredilmiş ajanlar."
+    },
+    "presetsLabel": "Dene",
+    "presets": {
+      "useFirstName": "Adımı kullan",
+      "useFirstNameSentence": "Bana adımla hitap et.",
+      "beTerse": "Kısa ol",
+      "beTerseSentence": "Kısa ve doğrudan yanıtları tercih et. Dolgu yok.",
+      "imDeveloper": "Geliştiriciyim",
+      "imDeveloperSentence": "Yazılım mühendisiyim; kodla rahatım.",
+      "noEmojis": "Emoji yok",
+      "noEmojisSentence": "Yanıtlarda emoji kullanma.",
+      "metricUnits": "Metrik birimler",
+      "metricUnitsSentence": "Metrik birimler kullan (metre, kilogram, °C).",
+      "citeSources": "Kaynakları belirt",
+      "citeSourcesSentence": "Olgusal iddialarda bulunurken kaynakları belirt."
+    },
+    "placeholder": "Örnek:\nBana adımla hitap et.\nKısa yanıtları tercih et.\nTypeScript ve Python kullanıyorum.\nDosyaları onaylamadan asla silme.",
+    "loading": "Yükleniyor…",
+    "saving": "Kaydediliyor…",
+    "saved": "Kaydedildi",
+    "unsavedChanges": "Kaydedilmemiş değişiklikler",
+    "empty": "Boş",
+    "savedRelative": "Kaydedildi · {time}",
+    "errorLoad": "Hafızanız yüklenemedi.",
+    "errorSave": "Hafızanız kaydedilemedi.",
+    "willBeShortened": "kısaltılacak",
+    "clear": "Temizle",
+    "footerNote": "Coasty sizin için çalıştığında bu tercihleri dikkate alacaktır.",
+    "time": {
+      "justNow": "az önce",
+      "secondsAgo": "{n} sn önce",
+      "minutesAgo": "{n} dk önce",
+      "hoursAgo": "{n} sa önce",
+      "daysAgo": "{n} g önce"
+    }
   }
 }

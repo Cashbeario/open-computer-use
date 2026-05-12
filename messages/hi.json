@@ -2919,5 +2919,58 @@
     "watchSession": "सत्र देखें",
     "steps": "{count} चरण",
     "tryCoasty": "Coasty आज़माएं"
+  },
+  "memory": {
+    "sidebarLabel": "मेमोरी",
+    "sidebarDescription": "हर एजेंट रन पर लागू होने वाला संदर्भ",
+    "dialog": {
+      "title": "मेमोरी",
+      "description": "एक छोटा नोट जिसे Coasty हर बार आपके लिए काम करते समय लागू करता है।",
+      "openFull": "पूर्ण खोलें",
+      "visualMemoryLabel": "मेमोरी",
+      "visualSynced": "सिंक हो गया",
+      "visualContextChat": "चैट",
+      "visualContextSchedules": "शेड्यूल",
+      "visualContextSwarm": "स्वार्म"
+    },
+    "section": {
+      "title": "मेमोरी",
+      "tag": "वैकल्पिक · व्यक्तिगत",
+      "description": "आपके बारे में एक छोटा नोट जो हर एजेंट रन के साथ जाता है — चैट, शेड्यूल किए गए कार्य, स्वार्म मशीनें, सौंपे गए एजेंट।"
+    },
+    "presetsLabel": "आज़माएँ",
+    "presets": {
+      "useFirstName": "मेरा नाम उपयोग करें",
+      "useFirstNameSentence": "मुझे मेरे पहले नाम से संबोधित करें।",
+      "beTerse": "संक्षिप्त रहें",
+      "beTerseSentence": "संक्षिप्त, सीधे जवाब को प्राथमिकता दें। कोई भराई नहीं।",
+      "imDeveloper": "मैं डेवलपर हूँ",
+      "imDeveloperSentence": "मैं सॉफ़्टवेयर इंजीनियर हूँ; कोड के साथ सहज हूँ।",
+      "noEmojis": "इमोजी नहीं",
+      "noEmojisSentence": "जवाबों में इमोजी से बचें।",
+      "metricUnits": "मीट्रिक इकाइयाँ",
+      "metricUnitsSentence": "मीट्रिक इकाइयाँ (मीटर, किलोग्राम, °C) का उपयोग करें।",
+      "citeSources": "स्रोत बताएँ",
+      "citeSourcesSentence": "तथ्यात्मक दावे करते समय स्रोत बताएँ।"
+    },
+    "placeholder": "उदाहरण:\nमुझे मेरे पहले नाम से संबोधित करें।\nसंक्षिप्त जवाब को प्राथमिकता दें।\nमैं TypeScript और Python में काम करता हूँ।\nपुष्टि के बिना कभी फ़ाइलें न हटाएँ।",
+    "loading": "लोड हो रहा है…",
+    "saving": "सहेजा जा रहा है…",
+    "saved": "सहेजा गया",
+    "unsavedChanges": "बिना सहेजे गए बदलाव",
+    "empty": "खाली",
+    "savedRelative": "सहेजा गया · {time}",
+    "errorLoad": "आपकी मेमोरी लोड नहीं हो सकी।",
+    "errorSave": "आपकी मेमोरी सहेजी नहीं जा सकी।",
+    "willBeShortened": "छोटा कर दिया जाएगा",
+    "clear": "साफ़ करें",
+    "footerNote": "Coasty आपके लिए काम करते समय इन प्राथमिकताओं को ध्यान में रखेगा।",
+    "time": {
+      "justNow": "अभी",
+      "secondsAgo": "{n} सेकंड पहले",
+      "minutesAgo": "{n} मिनट पहले",
+      "hoursAgo": "{n} घंटे पहले",
+      "daysAgo": "{n} दिन पहले"
+    }
   }
 }

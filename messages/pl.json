@@ -2919,5 +2919,58 @@
     "watchSession": "Obejrzyj sesję",
     "steps": "{count} kroków",
     "tryCoasty": "Wypróbuj Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Pamięć",
+    "sidebarDescription": "Kontekst stosowany w każdym uruchomieniu agenta",
+    "dialog": {
+      "title": "Pamięć",
+      "description": "Krótka notatka, którą Coasty stosuje za każdym razem, gdy dla Ciebie pracuje.",
+      "openFull": "Otwórz pełny",
+      "visualMemoryLabel": "Pamięć",
+      "visualSynced": "Zsynchronizowano",
+      "visualContextChat": "Czat",
+      "visualContextSchedules": "Harmonogramy",
+      "visualContextSwarm": "Rój"
+    },
+    "section": {
+      "title": "Pamięć",
+      "tag": "opcjonalne · osobiste",
+      "description": "Krótka notatka o Tobie, która towarzyszy każdemu uruchomieniu agenta — czat, zaplanowane zadania, maszyny w roju, delegowani agenci."
+    },
+    "presetsLabel": "Wypróbuj",
+    "presets": {
+      "useFirstName": "Użyj imienia",
+      "useFirstNameSentence": "Zwracaj się do mnie po imieniu.",
+      "beTerse": "Bądź zwięzły",
+      "beTerseSentence": "Preferuj zwięzłe, bezpośrednie odpowiedzi. Bez wypełniaczy.",
+      "imDeveloper": "Jestem programistą",
+      "imDeveloperSentence": "Jestem inżynierem oprogramowania; swobodnie posługuję się kodem.",
+      "noEmojis": "Bez emoji",
+      "noEmojisSentence": "Unikaj emoji w odpowiedziach.",
+      "metricUnits": "Jednostki metryczne",
+      "metricUnitsSentence": "Używaj jednostek metrycznych (metry, kilogramy, °C).",
+      "citeSources": "Cytuj źródła",
+      "citeSourcesSentence": "Cytuj źródła, gdy podajesz fakty."
+    },
+    "placeholder": "Przykład:\nZwracaj się do mnie po imieniu.\nPreferuj zwięzłe odpowiedzi.\nPracuję w TypeScript i Pythonie.\nNigdy nie usuwaj plików bez potwierdzenia.",
+    "loading": "Ładowanie…",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano",
+    "unsavedChanges": "Niezapisane zmiany",
+    "empty": "Puste",
+    "savedRelative": "Zapisano · {time}",
+    "errorLoad": "Nie udało się załadować pamięci.",
+    "errorSave": "Nie udało się zapisać pamięci.",
+    "willBeShortened": "zostanie skrócone",
+    "clear": "Wyczyść",
+    "footerNote": "Coasty weźmie pod uwagę te preferencje za każdym razem, gdy będzie dla Ciebie pracował.",
+    "time": {
+      "justNow": "przed chwilą",
+      "secondsAgo": "{n} s temu",
+      "minutesAgo": "{n} min temu",
+      "hoursAgo": "{n} godz. temu",
+      "daysAgo": "{n} dni temu"
+    }
   }
 }

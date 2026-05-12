@@ -2919,5 +2919,58 @@
     "watchSession": "Sessie bekijken",
     "steps": "{count} stappen",
     "tryCoasty": "Probeer Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Geheugen",
+    "sidebarDescription": "Context toegepast op elke agent-uitvoering",
+    "dialog": {
+      "title": "Geheugen",
+      "description": "Een korte notitie die Coasty gebruikt telkens wanneer het voor je werkt.",
+      "openFull": "Volledig openen",
+      "visualMemoryLabel": "Geheugen",
+      "visualSynced": "Gesynchroniseerd",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Planningen",
+      "visualContextSwarm": "Zwerm"
+    },
+    "section": {
+      "title": "Geheugen",
+      "tag": "optioneel · persoonlijk",
+      "description": "Een korte notitie over jou die meegaat met elke agent-uitvoering — chat, geplande taken, zwerm-machines, gedelegeerde agents."
+    },
+    "presetsLabel": "Probeer",
+    "presets": {
+      "useFirstName": "Gebruik mijn voornaam",
+      "useFirstNameSentence": "Spreek me aan met mijn voornaam.",
+      "beTerse": "Wees beknopt",
+      "beTerseSentence": "Geef de voorkeur aan beknopte, directe antwoorden. Geen opvulling.",
+      "imDeveloper": "Ik ben ontwikkelaar",
+      "imDeveloperSentence": "Ik ben software-engineer; vertrouwd met code.",
+      "noEmojis": "Geen emoji's",
+      "noEmojisSentence": "Vermijd emoji's in antwoorden.",
+      "metricUnits": "Metrische eenheden",
+      "metricUnitsSentence": "Gebruik metrische eenheden (meters, kilogrammen, °C).",
+      "citeSources": "Vermeld bronnen",
+      "citeSourcesSentence": "Vermeld bronnen bij feitelijke uitspraken."
+    },
+    "placeholder": "Voorbeeld:\nSpreek me aan met mijn voornaam.\nGeef de voorkeur aan beknopte antwoorden.\nIk werk met TypeScript en Python.\nVerwijder nooit bestanden zonder bevestiging.",
+    "loading": "Laden…",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen",
+    "empty": "Leeg",
+    "savedRelative": "Opgeslagen · {time}",
+    "errorLoad": "Kon je geheugen niet laden.",
+    "errorSave": "Kon je geheugen niet opslaan.",
+    "willBeShortened": "wordt ingekort",
+    "clear": "Wissen",
+    "footerNote": "Coasty houdt rekening met deze voorkeuren wanneer het voor je werkt.",
+    "time": {
+      "justNow": "zojuist",
+      "secondsAgo": "{n} s geleden",
+      "minutesAgo": "{n} min geleden",
+      "hoursAgo": "{n} u geleden",
+      "daysAgo": "{n} d geleden"
+    }
   }
 }

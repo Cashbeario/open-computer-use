@@ -2919,5 +2919,58 @@
     "watchSession": "Смотреть сессию",
     "steps": "{count} шагов",
     "tryCoasty": "Попробовать Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Память",
+    "sidebarDescription": "Контекст, применяемый к каждому запуску агента",
+    "dialog": {
+      "title": "Память",
+      "description": "Краткая заметка, которую Coasty применяет при каждой работе для вас.",
+      "openFull": "Открыть полностью",
+      "visualMemoryLabel": "Память",
+      "visualSynced": "Синхронизировано",
+      "visualContextChat": "Чат",
+      "visualContextSchedules": "Расписания",
+      "visualContextSwarm": "Рой"
+    },
+    "section": {
+      "title": "Память",
+      "tag": "необязательно · личное",
+      "description": "Краткая заметка о вас, которая сопровождает каждый запуск агента — чат, запланированные задачи, машины роя, делегированные агенты."
+    },
+    "presetsLabel": "Попробуйте",
+    "presets": {
+      "useFirstName": "Использовать имя",
+      "useFirstNameSentence": "Обращайся ко мне по имени.",
+      "beTerse": "Будь краток",
+      "beTerseSentence": "Предпочитай краткие и прямые ответы. Без воды.",
+      "imDeveloper": "Я разработчик",
+      "imDeveloperSentence": "Я инженер-программист; работаю с кодом.",
+      "noEmojis": "Без эмодзи",
+      "noEmojisSentence": "Избегай эмодзи в ответах.",
+      "metricUnits": "Метрические единицы",
+      "metricUnitsSentence": "Используй метрические единицы (метры, килограммы, °C).",
+      "citeSources": "Указывай источники",
+      "citeSourcesSentence": "Указывай источники при изложении фактов."
+    },
+    "placeholder": "Пример:\nОбращайся ко мне по имени.\nПредпочитай краткие ответы.\nЯ работаю с TypeScript и Python.\nНикогда не удаляй файлы без подтверждения.",
+    "loading": "Загрузка…",
+    "saving": "Сохранение…",
+    "saved": "Сохранено",
+    "unsavedChanges": "Несохранённые изменения",
+    "empty": "Пусто",
+    "savedRelative": "Сохранено · {time}",
+    "errorLoad": "Не удалось загрузить вашу память.",
+    "errorSave": "Не удалось сохранить вашу память.",
+    "willBeShortened": "будет сокращено",
+    "clear": "Очистить",
+    "footerNote": "Coasty будет учитывать эти предпочтения, когда работает для вас.",
+    "time": {
+      "justNow": "только что",
+      "secondsAgo": "{n} с назад",
+      "minutesAgo": "{n} мин назад",
+      "hoursAgo": "{n} ч назад",
+      "daysAgo": "{n} дн назад"
+    }
   }
 }

@@ -2919,5 +2919,58 @@
     "watchSession": "شاهد الجلسة",
     "steps": "{count} خطوة",
     "tryCoasty": "جرب Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "الذاكرة",
+    "sidebarDescription": "السياق المطبق على كل تشغيل للوكيل",
+    "dialog": {
+      "title": "الذاكرة",
+      "description": "ملاحظة قصيرة تطبقها Coasty في كل مرة تعمل من أجلك.",
+      "openFull": "فتح كامل",
+      "visualMemoryLabel": "الذاكرة",
+      "visualSynced": "تمت المزامنة",
+      "visualContextChat": "دردشة",
+      "visualContextSchedules": "الجداول",
+      "visualContextSwarm": "السرب"
+    },
+    "section": {
+      "title": "الذاكرة",
+      "tag": "اختياري · شخصي",
+      "description": "ملاحظة قصيرة عنك ترافق كل تشغيل للوكيل — الدردشة، المهام المجدولة، آلات السرب، الوكلاء المفوّضون."
+    },
+    "presetsLabel": "جرّب",
+    "presets": {
+      "useFirstName": "استخدام اسمي الأول",
+      "useFirstNameSentence": "خاطبني باسمي الأول.",
+      "beTerse": "كن موجزًا",
+      "beTerseSentence": "فضّل ردودًا موجزة ومباشرة. بدون حشو.",
+      "imDeveloper": "أنا مطور",
+      "imDeveloperSentence": "أنا مهندس برمجيات؛ معتاد على البرمجة.",
+      "noEmojis": "بدون رموز تعبيرية",
+      "noEmojisSentence": "تجنب استخدام الرموز التعبيرية في الردود.",
+      "metricUnits": "وحدات مترية",
+      "metricUnitsSentence": "استخدم الوحدات المترية (أمتار، كيلوغرامات، °م).",
+      "citeSources": "اذكر المصادر",
+      "citeSourcesSentence": "اذكر المصادر عند تقديم ادعاءات وقائعية."
+    },
+    "placeholder": "مثال:\nخاطبني باسمي الأول.\nفضّل ردودًا موجزة.\nأعمل بـ TypeScript و Python.\nلا تحذف الملفات أبدًا دون تأكيد.",
+    "loading": "جارٍ التحميل…",
+    "saving": "جارٍ الحفظ…",
+    "saved": "تم الحفظ",
+    "unsavedChanges": "تغييرات غير محفوظة",
+    "empty": "فارغ",
+    "savedRelative": "تم الحفظ · {time}",
+    "errorLoad": "تعذر تحميل ذاكرتك.",
+    "errorSave": "تعذر حفظ ذاكرتك.",
+    "willBeShortened": "سيتم اختصاره",
+    "clear": "مسح",
+    "footerNote": "ستأخذ Coasty هذه التفضيلات في الاعتبار عندما تعمل من أجلك.",
+    "time": {
+      "justNow": "الآن",
+      "secondsAgo": "منذ {n} ث",
+      "minutesAgo": "منذ {n} د",
+      "hoursAgo": "منذ {n} س",
+      "daysAgo": "منذ {n} ي"
+    }
   }
 }

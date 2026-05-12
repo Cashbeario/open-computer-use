@@ -2919,5 +2919,58 @@
     "watchSession": "セッションを見る",
     "steps": "{count}ステップ",
     "tryCoasty": "Coastyを試す"
+  },
+  "memory": {
+    "sidebarLabel": "メモリ",
+    "sidebarDescription": "すべてのエージェント実行に適用されるコンテキスト",
+    "dialog": {
+      "title": "メモリ",
+      "description": "Coasty があなたのために働くたびに適用する短いメモ。",
+      "openFull": "全画面で開く",
+      "visualMemoryLabel": "メモリ",
+      "visualSynced": "同期済み",
+      "visualContextChat": "チャット",
+      "visualContextSchedules": "スケジュール",
+      "visualContextSwarm": "スウォーム"
+    },
+    "section": {
+      "title": "メモリ",
+      "tag": "任意 · 個人",
+      "description": "すべてのエージェント実行に伴う、あなたについての短いメモ — チャット、定期タスク、スウォームマシン、委任エージェント。"
+    },
+    "presetsLabel": "試す",
+    "presets": {
+      "useFirstName": "名前で呼ぶ",
+      "useFirstNameSentence": "私を下の名前で呼んでください。",
+      "beTerse": "簡潔に",
+      "beTerseSentence": "簡潔で直接的な返答を好みます。余計な言葉はなしで。",
+      "imDeveloper": "開発者です",
+      "imDeveloperSentence": "私はソフトウェアエンジニアで、コードに慣れています。",
+      "noEmojis": "絵文字なし",
+      "noEmojisSentence": "返答で絵文字を使わないでください。",
+      "metricUnits": "メートル法",
+      "metricUnitsSentence": "メートル法（メートル、キログラム、°C）を使用してください。",
+      "citeSources": "出典を示す",
+      "citeSourcesSentence": "事実を述べる際は出典を示してください。"
+    },
+    "placeholder": "例：\n下の名前で呼んでください。\n簡潔な返答を好みます。\nTypeScript と Python で開発しています。\n確認なしにファイルを削除しないでください。",
+    "loading": "読み込み中…",
+    "saving": "保存中…",
+    "saved": "保存済み",
+    "unsavedChanges": "未保存の変更",
+    "empty": "空",
+    "savedRelative": "保存済み · {time}",
+    "errorLoad": "メモリを読み込めませんでした。",
+    "errorSave": "メモリを保存できませんでした。",
+    "willBeShortened": "短縮されます",
+    "clear": "クリア",
+    "footerNote": "Coasty はあなたのために働くたびに、これらの設定を考慮します。",
+    "time": {
+      "justNow": "たった今",
+      "secondsAgo": "{n} 秒前",
+      "minutesAgo": "{n} 分前",
+      "hoursAgo": "{n} 時間前",
+      "daysAgo": "{n} 日前"
+    }
   }
 }

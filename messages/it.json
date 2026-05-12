@@ -2919,5 +2919,58 @@
     "watchSession": "Guarda la sessione",
     "steps": "{count} passaggi",
     "tryCoasty": "Prova Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memoria",
+    "sidebarDescription": "Contesto applicato a ogni esecuzione dell'agente",
+    "dialog": {
+      "title": "Memoria",
+      "description": "Una breve nota che Coasty applica ogni volta che lavora per te.",
+      "openFull": "Apri completo",
+      "visualMemoryLabel": "Memoria",
+      "visualSynced": "Sincronizzato",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Pianificazioni",
+      "visualContextSwarm": "Sciame"
+    },
+    "section": {
+      "title": "Memoria",
+      "tag": "opzionale · personale",
+      "description": "Una breve nota su di te che accompagna ogni esecuzione dell'agente — chat, attività pianificate, macchine in sciame, agenti delegati."
+    },
+    "presetsLabel": "Prova",
+    "presets": {
+      "useFirstName": "Usa il mio nome",
+      "useFirstNameSentence": "Chiamami per nome.",
+      "beTerse": "Sii conciso",
+      "beTerseSentence": "Preferisci risposte concise e dirette. Senza riempitivi.",
+      "imDeveloper": "Sono uno sviluppatore",
+      "imDeveloperSentence": "Sono un ingegnere del software; a mio agio con il codice.",
+      "noEmojis": "Niente emoji",
+      "noEmojisSentence": "Evita le emoji nelle risposte.",
+      "metricUnits": "Unità metriche",
+      "metricUnitsSentence": "Usa unità metriche (metri, chilogrammi, °C).",
+      "citeSources": "Cita le fonti",
+      "citeSourcesSentence": "Cita le fonti quando affermi dei fatti."
+    },
+    "placeholder": "Esempio:\nChiamami per nome.\nPreferisci risposte concise.\nLavoro con TypeScript e Python.\nNon eliminare mai file senza conferma.",
+    "loading": "Caricamento…",
+    "saving": "Salvataggio…",
+    "saved": "Salvato",
+    "unsavedChanges": "Modifiche non salvate",
+    "empty": "Vuoto",
+    "savedRelative": "Salvato · {time}",
+    "errorLoad": "Impossibile caricare la tua memoria.",
+    "errorSave": "Impossibile salvare la tua memoria.",
+    "willBeShortened": "sarà accorciato",
+    "clear": "Cancella",
+    "footerNote": "Coasty terrà conto di queste preferenze ogni volta che lavora per te.",
+    "time": {
+      "justNow": "adesso",
+      "secondsAgo": "{n} s fa",
+      "minutesAgo": "{n} min fa",
+      "hoursAgo": "{n} h fa",
+      "daysAgo": "{n} g fa"
+    }
   }
 }

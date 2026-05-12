@@ -2919,5 +2919,58 @@
     "watchSession": "Munkamenet megtekintése",
     "steps": "{count} lépés",
     "tryCoasty": "Coasty kipróbálása"
+  },
+  "memory": {
+    "sidebarLabel": "Memória",
+    "sidebarDescription": "Minden ügynökfutásra alkalmazott kontextus",
+    "dialog": {
+      "title": "Memória",
+      "description": "Rövid feljegyzés, amelyet a Coasty minden alkalommal alkalmaz, amikor érted dolgozik.",
+      "openFull": "Teljes megnyitás",
+      "visualMemoryLabel": "Memória",
+      "visualSynced": "Szinkronizálva",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Ütemezések",
+      "visualContextSwarm": "Raj"
+    },
+    "section": {
+      "title": "Memória",
+      "tag": "opcionális · személyes",
+      "description": "Rövid feljegyzés rólad, amely minden ügynökfutást elkísér — chat, ütemezett feladatok, rajgépek, delegált ügynökök."
+    },
+    "presetsLabel": "Próbáld ki",
+    "presets": {
+      "useFirstName": "Keresztnév használata",
+      "useFirstNameSentence": "Szólíts a keresztnevemen.",
+      "beTerse": "Légy tömör",
+      "beTerseSentence": "Részesítsd előnyben a tömör, közvetlen válaszokat. Töltelék nélkül.",
+      "imDeveloper": "Fejlesztő vagyok",
+      "imDeveloperSentence": "Szoftvermérnök vagyok; otthon vagyok a kódban.",
+      "noEmojis": "Nincs emoji",
+      "noEmojisSentence": "Kerüld az emojikat a válaszokban.",
+      "metricUnits": "Metrikus egységek",
+      "metricUnitsSentence": "Használj metrikus egységeket (méter, kilogramm, °C).",
+      "citeSources": "Forrásmegjelölés",
+      "citeSourcesSentence": "Adj meg forrást a tényállítások mellé."
+    },
+    "placeholder": "Példa:\nSzólíts a keresztnevemen.\nRészesítsd előnyben a tömör válaszokat.\nTypeScriptben és Pythonban dolgozom.\nSoha ne törölj fájlt megerősítés nélkül.",
+    "loading": "Betöltés…",
+    "saving": "Mentés…",
+    "saved": "Mentve",
+    "unsavedChanges": "Mentetlen módosítások",
+    "empty": "Üres",
+    "savedRelative": "Mentve · {time}",
+    "errorLoad": "Nem sikerült betölteni a memóriát.",
+    "errorSave": "Nem sikerült menteni a memóriát.",
+    "willBeShortened": "rövidítésre kerül",
+    "clear": "Törlés",
+    "footerNote": "A Coasty figyelembe veszi ezeket a beállításokat, amikor érted dolgozik.",
+    "time": {
+      "justNow": "épp most",
+      "secondsAgo": "{n} mp",
+      "minutesAgo": "{n} p",
+      "hoursAgo": "{n} ó",
+      "daysAgo": "{n} n"
+    }
   }
 }

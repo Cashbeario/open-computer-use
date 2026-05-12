@@ -2919,5 +2919,58 @@
     "watchSession": "Titta på session",
     "steps": "{count} steg",
     "tryCoasty": "Testa Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Minne",
+    "sidebarDescription": "Kontext som tillämpas på varje agentkörning",
+    "dialog": {
+      "title": "Minne",
+      "description": "En kort notering som Coasty tillämpar varje gång den arbetar för dig.",
+      "openFull": "Öppna fullt",
+      "visualMemoryLabel": "Minne",
+      "visualSynced": "Synkad",
+      "visualContextChat": "Chatt",
+      "visualContextSchedules": "Scheman",
+      "visualContextSwarm": "Svärm"
+    },
+    "section": {
+      "title": "Minne",
+      "tag": "valfritt · personligt",
+      "description": "En kort notering om dig som följer med varje agentkörning — chatt, schemalagda uppgifter, svärmmaskiner, delegerade agenter."
+    },
+    "presetsLabel": "Prova",
+    "presets": {
+      "useFirstName": "Använd förnamn",
+      "useFirstNameSentence": "Tilltala mig med mitt förnamn.",
+      "beTerse": "Var kortfattad",
+      "beTerseSentence": "Föredra kortfattade, direkta svar. Ingen utfyllnad.",
+      "imDeveloper": "Jag är utvecklare",
+      "imDeveloperSentence": "Jag är mjukvaruingenjör; bekväm med kod.",
+      "noEmojis": "Inga emojis",
+      "noEmojisSentence": "Undvik emojis i svar.",
+      "metricUnits": "Metriska enheter",
+      "metricUnitsSentence": "Använd metriska enheter (meter, kilogram, °C).",
+      "citeSources": "Citera källor",
+      "citeSourcesSentence": "Citera källor när du gör faktapåståenden."
+    },
+    "placeholder": "Exempel:\nTilltala mig med mitt förnamn.\nFöredra kortfattade svar.\nJag arbetar med TypeScript och Python.\nRadera aldrig filer utan bekräftelse.",
+    "loading": "Laddar…",
+    "saving": "Sparar…",
+    "saved": "Sparat",
+    "unsavedChanges": "Osparade ändringar",
+    "empty": "Tomt",
+    "savedRelative": "Sparat · {time}",
+    "errorLoad": "Kunde inte ladda ditt minne.",
+    "errorSave": "Kunde inte spara ditt minne.",
+    "willBeShortened": "kommer att förkortas",
+    "clear": "Rensa",
+    "footerNote": "Coasty tar hänsyn till dessa inställningar när den arbetar för dig.",
+    "time": {
+      "justNow": "just nu",
+      "secondsAgo": "{n}s sedan",
+      "minutesAgo": "{n}m sedan",
+      "hoursAgo": "{n}t sedan",
+      "daysAgo": "{n}d sedan"
+    }
   }
 }

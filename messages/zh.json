@@ -2919,5 +2919,58 @@
     "watchSession": "观看会话",
     "steps": "{count} 个步骤",
     "tryCoasty": "试用 Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "记忆",
+    "sidebarDescription": "应用于每次代理运行的上下文",
+    "dialog": {
+      "title": "记忆",
+      "description": "Coasty 每次为您工作时都会应用的简短笔记。",
+      "openFull": "全屏打开",
+      "visualMemoryLabel": "记忆",
+      "visualSynced": "已同步",
+      "visualContextChat": "聊天",
+      "visualContextSchedules": "计划",
+      "visualContextSwarm": "群组"
+    },
+    "section": {
+      "title": "记忆",
+      "tag": "可选 · 个人",
+      "description": "关于您的简短笔记，会随每次代理运行而生效 — 聊天、计划任务、群组机器、委派代理。"
+    },
+    "presetsLabel": "试试",
+    "presets": {
+      "useFirstName": "使用名字",
+      "useFirstNameSentence": "请用我的名字称呼我。",
+      "beTerse": "简洁回答",
+      "beTerseSentence": "优先简洁、直接的回答。不要赘述。",
+      "imDeveloper": "我是开发者",
+      "imDeveloperSentence": "我是软件工程师,熟悉代码。",
+      "noEmojis": "不使用表情符号",
+      "noEmojisSentence": "回答中避免使用表情符号。",
+      "metricUnits": "公制单位",
+      "metricUnitsSentence": "使用公制单位（米、千克、°C）。",
+      "citeSources": "标注来源",
+      "citeSourcesSentence": "陈述事实时请标注来源。"
+    },
+    "placeholder": "示例：\n请用我的名字称呼我。\n优先简洁的回答。\n我使用 TypeScript 和 Python。\n未经确认绝不删除文件。",
+    "loading": "加载中…",
+    "saving": "保存中…",
+    "saved": "已保存",
+    "unsavedChanges": "未保存的更改",
+    "empty": "空",
+    "savedRelative": "已保存 · {time}",
+    "errorLoad": "无法加载您的记忆。",
+    "errorSave": "无法保存您的记忆。",
+    "willBeShortened": "将被缩短",
+    "clear": "清除",
+    "footerNote": "Coasty 在为您工作时会考虑这些偏好设置。",
+    "time": {
+      "justNow": "刚刚",
+      "secondsAgo": "{n} 秒前",
+      "minutesAgo": "{n} 分钟前",
+      "hoursAgo": "{n} 小时前",
+      "daysAgo": "{n} 天前"
+    }
   }
 }

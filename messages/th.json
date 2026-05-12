@@ -2919,5 +2919,58 @@
     "watchSession": "ดูเซสชัน",
     "steps": "{count} ขั้นตอน",
     "tryCoasty": "ลองใช้ Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "ความจำ",
+    "sidebarDescription": "บริบทที่ใช้กับการเรียกใช้เอเจนต์ทุกครั้ง",
+    "dialog": {
+      "title": "ความจำ",
+      "description": "บันทึกสั้นๆ ที่ Coasty นำไปใช้ทุกครั้งที่ทำงานให้คุณ",
+      "openFull": "เปิดเต็ม",
+      "visualMemoryLabel": "ความจำ",
+      "visualSynced": "ซิงค์แล้ว",
+      "visualContextChat": "แชท",
+      "visualContextSchedules": "กำหนดการ",
+      "visualContextSwarm": "ฝูง"
+    },
+    "section": {
+      "title": "ความจำ",
+      "tag": "ไม่บังคับ · ส่วนตัว",
+      "description": "บันทึกสั้นๆ เกี่ยวกับคุณที่ติดไปกับการเรียกใช้เอเจนต์ทุกครั้ง — แชท งานที่กำหนดเวลา เครื่องในฝูง เอเจนต์ที่มอบหมาย"
+    },
+    "presetsLabel": "ลอง",
+    "presets": {
+      "useFirstName": "ใช้ชื่อ",
+      "useFirstNameSentence": "เรียกฉันด้วยชื่อจริงของฉัน",
+      "beTerse": "กระชับ",
+      "beTerseSentence": "ขอคำตอบที่กระชับและตรงประเด็น ไม่ต้องมีคำเติม",
+      "imDeveloper": "ฉันเป็นนักพัฒนา",
+      "imDeveloperSentence": "ฉันเป็นวิศวกรซอฟต์แวร์ คุ้นเคยกับโค้ด",
+      "noEmojis": "ไม่ใช้อิโมจิ",
+      "noEmojisSentence": "หลีกเลี่ยงอิโมจิในคำตอบ",
+      "metricUnits": "หน่วยเมตริก",
+      "metricUnitsSentence": "ใช้หน่วยเมตริก (เมตร กิโลกรัม °C)",
+      "citeSources": "อ้างอิงแหล่งที่มา",
+      "citeSourcesSentence": "อ้างอิงแหล่งที่มาเมื่อนำเสนอข้อเท็จจริง"
+    },
+    "placeholder": "ตัวอย่าง:\nเรียกฉันด้วยชื่อจริงของฉัน\nขอคำตอบที่กระชับ\nฉันทำงานกับ TypeScript และ Python\nอย่าลบไฟล์โดยไม่ยืนยัน",
+    "loading": "กำลังโหลด…",
+    "saving": "กำลังบันทึก…",
+    "saved": "บันทึกแล้ว",
+    "unsavedChanges": "การเปลี่ยนแปลงที่ยังไม่บันทึก",
+    "empty": "ว่างเปล่า",
+    "savedRelative": "บันทึก · {time}",
+    "errorLoad": "ไม่สามารถโหลดความจำของคุณ",
+    "errorSave": "ไม่สามารถบันทึกความจำของคุณ",
+    "willBeShortened": "จะถูกย่อ",
+    "clear": "ล้าง",
+    "footerNote": "Coasty จะคำนึงถึงการตั้งค่าเหล่านี้เมื่อทำงานให้คุณ",
+    "time": {
+      "justNow": "เมื่อสักครู่",
+      "secondsAgo": "{n} วินาทีที่แล้ว",
+      "minutesAgo": "{n} นาทีที่แล้ว",
+      "hoursAgo": "{n} ชม. ที่แล้ว",
+      "daysAgo": "{n} วันที่แล้ว"
+    }
   }
 }

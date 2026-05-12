@@ -2919,5 +2919,58 @@
     "watchSession": "Se session",
     "steps": "{count} trin",
     "tryCoasty": "Prøv Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Hukommelse",
+    "sidebarDescription": "Kontekst anvendt på hvert agent-kørsel",
+    "dialog": {
+      "title": "Hukommelse",
+      "description": "En kort note som Coasty anvender hver gang den arbejder for dig.",
+      "openFull": "Åbn fuld",
+      "visualMemoryLabel": "Hukommelse",
+      "visualSynced": "Synkroniseret",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Tidsplaner",
+      "visualContextSwarm": "Sværm"
+    },
+    "section": {
+      "title": "Hukommelse",
+      "tag": "valgfrit · personligt",
+      "description": "En kort note om dig der følger med hver agent-kørsel — chat, planlagte opgaver, sværmmaskiner, delegerede agenter."
+    },
+    "presetsLabel": "Prøv",
+    "presets": {
+      "useFirstName": "Brug fornavn",
+      "useFirstNameSentence": "Tiltal mig med mit fornavn.",
+      "beTerse": "Vær kortfattet",
+      "beTerseSentence": "Foretræk kortfattede, direkte svar. Ingen fyld.",
+      "imDeveloper": "Jeg er udvikler",
+      "imDeveloperSentence": "Jeg er softwareingeniør; fortrolig med kode.",
+      "noEmojis": "Ingen emojis",
+      "noEmojisSentence": "Undgå emojis i svar.",
+      "metricUnits": "Metriske enheder",
+      "metricUnitsSentence": "Brug metriske enheder (meter, kilogram, °C).",
+      "citeSources": "Citér kilder",
+      "citeSourcesSentence": "Citér kilder ved faktuelle påstande."
+    },
+    "placeholder": "Eksempel:\nTiltal mig med mit fornavn.\nForetræk kortfattede svar.\nJeg arbejder med TypeScript og Python.\nSlet aldrig filer uden bekræftelse.",
+    "loading": "Indlæser…",
+    "saving": "Gemmer…",
+    "saved": "Gemt",
+    "unsavedChanges": "Ikke-gemte ændringer",
+    "empty": "Tom",
+    "savedRelative": "Gemt · {time}",
+    "errorLoad": "Kunne ikke indlæse din hukommelse.",
+    "errorSave": "Kunne ikke gemme din hukommelse.",
+    "willBeShortened": "vil blive forkortet",
+    "clear": "Ryd",
+    "footerNote": "Coasty vil tage disse præferencer i betragtning når den arbejder for dig.",
+    "time": {
+      "justNow": "lige nu",
+      "secondsAgo": "{n}s siden",
+      "minutesAgo": "{n}m siden",
+      "hoursAgo": "{n}t siden",
+      "daysAgo": "{n}d siden"
+    }
   }
 }

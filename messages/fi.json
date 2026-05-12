@@ -2919,5 +2919,58 @@
     "watchSession": "Katso istunto",
     "steps": "{count} vaihetta",
     "tryCoasty": "Kokeile Coastya"
+  },
+  "memory": {
+    "sidebarLabel": "Muisti",
+    "sidebarDescription": "Konteksti, jota sovelletaan jokaiseen agentin ajoon",
+    "dialog": {
+      "title": "Muisti",
+      "description": "Lyhyt muistiinpano, jota Coasty soveltaa joka kerta kun se työskentelee puolestasi.",
+      "openFull": "Avaa täysi",
+      "visualMemoryLabel": "Muisti",
+      "visualSynced": "Synkronoitu",
+      "visualContextChat": "Keskustelu",
+      "visualContextSchedules": "Aikataulut",
+      "visualContextSwarm": "Parvi"
+    },
+    "section": {
+      "title": "Muisti",
+      "tag": "valinnainen · henkilökohtainen",
+      "description": "Lyhyt muistiinpano sinusta, joka kulkee jokaisessa agentin ajossa — keskustelu, ajastetut tehtävät, parvikoneet, delegoidut agentit."
+    },
+    "presetsLabel": "Kokeile",
+    "presets": {
+      "useFirstName": "Käytä etunimeä",
+      "useFirstNameSentence": "Puhuttele minua etunimellä.",
+      "beTerse": "Ole ytimekäs",
+      "beTerseSentence": "Suosi ytimekkäitä, suoria vastauksia. Ei täytettä.",
+      "imDeveloper": "Olen kehittäjä",
+      "imDeveloperSentence": "Olen ohjelmistoinsinööri; sujuva koodin kanssa.",
+      "noEmojis": "Ei emojeita",
+      "noEmojisSentence": "Vältä emojeita vastauksissa.",
+      "metricUnits": "Metriset yksiköt",
+      "metricUnitsSentence": "Käytä metrisiä yksiköitä (metri, kilogramma, °C).",
+      "citeSources": "Mainitse lähteet",
+      "citeSourcesSentence": "Mainitse lähteet faktaväitteissä."
+    },
+    "placeholder": "Esimerkki:\nPuhuttele minua etunimellä.\nSuosi ytimekkäitä vastauksia.\nTyöskentelen TypeScriptin ja Pythonin parissa.\nÄlä koskaan poista tiedostoja ilman vahvistusta.",
+    "loading": "Ladataan…",
+    "saving": "Tallennetaan…",
+    "saved": "Tallennettu",
+    "unsavedChanges": "Tallentamattomia muutoksia",
+    "empty": "Tyhjä",
+    "savedRelative": "Tallennettu · {time}",
+    "errorLoad": "Muistiasi ei voitu ladata.",
+    "errorSave": "Muistiasi ei voitu tallentaa.",
+    "willBeShortened": "lyhennetään",
+    "clear": "Tyhjennä",
+    "footerNote": "Coasty ottaa nämä asetukset huomioon, kun se työskentelee puolestasi.",
+    "time": {
+      "justNow": "juuri nyt",
+      "secondsAgo": "{n} s sitten",
+      "minutesAgo": "{n} min sitten",
+      "hoursAgo": "{n} t sitten",
+      "daysAgo": "{n} pv sitten"
+    }
   }
 }

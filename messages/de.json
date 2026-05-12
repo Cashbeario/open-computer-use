@@ -2919,5 +2919,58 @@
     "watchSession": "Sitzung ansehen",
     "steps": "{count} Schritte",
     "tryCoasty": "Coasty testen"
+  },
+  "memory": {
+    "sidebarLabel": "Erinnerungen",
+    "sidebarDescription": "Kontext, der bei jedem Agentenlauf angewendet wird",
+    "dialog": {
+      "title": "Erinnerungen",
+      "description": "Eine kurze Notiz, die Coasty bei jeder Arbeit für dich berücksichtigt.",
+      "openFull": "Vollständig öffnen",
+      "visualMemoryLabel": "Erinnerungen",
+      "visualSynced": "Synchronisiert",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Zeitpläne",
+      "visualContextSwarm": "Schwarm"
+    },
+    "section": {
+      "title": "Erinnerungen",
+      "tag": "optional · persönlich",
+      "description": "Eine kurze Notiz über dich, die bei jedem Agentenlauf mitläuft — Chat, geplante Aufgaben, Schwarm-Maschinen, delegierte Agenten."
+    },
+    "presetsLabel": "Probiere",
+    "presets": {
+      "useFirstName": "Vornamen verwenden",
+      "useFirstNameSentence": "Sprich mich mit meinem Vornamen an.",
+      "beTerse": "Sei knapp",
+      "beTerseSentence": "Bevorzuge knappe, direkte Antworten. Kein Füllmaterial.",
+      "imDeveloper": "Ich bin Entwickler",
+      "imDeveloperSentence": "Ich bin Softwareentwickler; vertraut mit Code.",
+      "noEmojis": "Keine Emojis",
+      "noEmojisSentence": "Vermeide Emojis in Antworten.",
+      "metricUnits": "Metrische Einheiten",
+      "metricUnitsSentence": "Verwende metrische Einheiten (Meter, Kilogramm, °C).",
+      "citeSources": "Quellen angeben",
+      "citeSourcesSentence": "Gib Quellen an, wenn du Fakten behauptest."
+    },
+    "placeholder": "Beispiel:\nSprich mich mit meinem Vornamen an.\nBevorzuge knappe Antworten.\nIch arbeite mit TypeScript und Python.\nLösche Dateien niemals ohne Bestätigung.",
+    "loading": "Wird geladen…",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert",
+    "unsavedChanges": "Nicht gespeicherte Änderungen",
+    "empty": "Leer",
+    "savedRelative": "Gespeichert · {time}",
+    "errorLoad": "Erinnerungen konnten nicht geladen werden.",
+    "errorSave": "Erinnerungen konnten nicht gespeichert werden.",
+    "willBeShortened": "wird gekürzt",
+    "clear": "Löschen",
+    "footerNote": "Coasty wird diese Präferenzen bei jeder Arbeit für dich berücksichtigen.",
+    "time": {
+      "justNow": "gerade eben",
+      "secondsAgo": "vor {n} Sek.",
+      "minutesAgo": "vor {n} Min.",
+      "hoursAgo": "vor {n} Std.",
+      "daysAgo": "vor {n} T."
+    }
   }
 }

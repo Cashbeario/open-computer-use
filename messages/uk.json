@@ -2919,5 +2919,58 @@
     "watchSession": "Дивитися сесію",
     "steps": "{count} кроків",
     "tryCoasty": "Спробувати Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Пам'ять",
+    "sidebarDescription": "Контекст, що застосовується до кожного запуску агента",
+    "dialog": {
+      "title": "Пам'ять",
+      "description": "Коротка нотатка, яку Coasty застосовує щоразу, коли працює для вас.",
+      "openFull": "Відкрити повністю",
+      "visualMemoryLabel": "Пам'ять",
+      "visualSynced": "Синхронізовано",
+      "visualContextChat": "Чат",
+      "visualContextSchedules": "Розклади",
+      "visualContextSwarm": "Рій"
+    },
+    "section": {
+      "title": "Пам'ять",
+      "tag": "необов'язково · особисте",
+      "description": "Коротка нотатка про вас, яка супроводжує кожен запуск агента — чат, заплановані завдання, машини рою, делеговані агенти."
+    },
+    "presetsLabel": "Спробуйте",
+    "presets": {
+      "useFirstName": "Звертатись на ім'я",
+      "useFirstNameSentence": "Звертайся до мене на ім'я.",
+      "beTerse": "Будь стислим",
+      "beTerseSentence": "Надавай перевагу стислим, прямим відповідям. Без води.",
+      "imDeveloper": "Я розробник",
+      "imDeveloperSentence": "Я інженер-програміст; вільно орієнтуюсь у коді.",
+      "noEmojis": "Без емодзі",
+      "noEmojisSentence": "Уникай емодзі у відповідях.",
+      "metricUnits": "Метричні одиниці",
+      "metricUnitsSentence": "Використовуй метричні одиниці (метри, кілограми, °C).",
+      "citeSources": "Цитуй джерела",
+      "citeSourcesSentence": "Посилайся на джерела при викладі фактів."
+    },
+    "placeholder": "Приклад:\nЗвертайся до мене на ім'я.\nНадавай перевагу стислим відповідям.\nЯ працюю з TypeScript і Python.\nНіколи не видаляй файли без підтвердження.",
+    "loading": "Завантаження…",
+    "saving": "Збереження…",
+    "saved": "Збережено",
+    "unsavedChanges": "Незбережені зміни",
+    "empty": "Порожньо",
+    "savedRelative": "Збережено · {time}",
+    "errorLoad": "Не вдалося завантажити вашу пам'ять.",
+    "errorSave": "Не вдалося зберегти вашу пам'ять.",
+    "willBeShortened": "буде скорочено",
+    "clear": "Очистити",
+    "footerNote": "Coasty враховуватиме ці налаштування, коли працює для вас.",
+    "time": {
+      "justNow": "щойно",
+      "secondsAgo": "{n} с тому",
+      "minutesAgo": "{n} хв тому",
+      "hoursAgo": "{n} год тому",
+      "daysAgo": "{n} дн тому"
+    }
   }
 }

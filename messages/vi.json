@@ -2919,5 +2919,58 @@
     "watchSession": "Xem phiên",
     "steps": "{count} bước",
     "tryCoasty": "Thử Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Bộ nhớ",
+    "sidebarDescription": "Ngữ cảnh áp dụng cho mỗi lần chạy tác nhân",
+    "dialog": {
+      "title": "Bộ nhớ",
+      "description": "Ghi chú ngắn Coasty áp dụng mỗi khi làm việc cho bạn.",
+      "openFull": "Mở toàn bộ",
+      "visualMemoryLabel": "Bộ nhớ",
+      "visualSynced": "Đã đồng bộ",
+      "visualContextChat": "Trò chuyện",
+      "visualContextSchedules": "Lịch",
+      "visualContextSwarm": "Bầy"
+    },
+    "section": {
+      "title": "Bộ nhớ",
+      "tag": "tùy chọn · cá nhân",
+      "description": "Ghi chú ngắn về bạn đi cùng mỗi lần chạy tác nhân — trò chuyện, tác vụ theo lịch, máy bầy, tác nhân được ủy quyền."
+    },
+    "presetsLabel": "Thử",
+    "presets": {
+      "useFirstName": "Dùng tên gọi",
+      "useFirstNameSentence": "Hãy gọi tôi bằng tên.",
+      "beTerse": "Ngắn gọn",
+      "beTerseSentence": "Ưu tiên câu trả lời ngắn gọn, trực tiếp. Không lan man.",
+      "imDeveloper": "Tôi là nhà phát triển",
+      "imDeveloperSentence": "Tôi là kỹ sư phần mềm; quen thuộc với mã.",
+      "noEmojis": "Không emoji",
+      "noEmojisSentence": "Tránh dùng emoji trong câu trả lời.",
+      "metricUnits": "Đơn vị mét",
+      "metricUnitsSentence": "Dùng đơn vị mét (mét, kg, °C).",
+      "citeSources": "Trích nguồn",
+      "citeSourcesSentence": "Trích dẫn nguồn khi nêu sự thật."
+    },
+    "placeholder": "Ví dụ:\nHãy gọi tôi bằng tên.\nƯu tiên câu trả lời ngắn gọn.\nTôi làm việc với TypeScript và Python.\nKhông bao giờ xóa tệp mà không xác nhận.",
+    "loading": "Đang tải…",
+    "saving": "Đang lưu…",
+    "saved": "Đã lưu",
+    "unsavedChanges": "Thay đổi chưa lưu",
+    "empty": "Trống",
+    "savedRelative": "Đã lưu · {time}",
+    "errorLoad": "Không thể tải bộ nhớ của bạn.",
+    "errorSave": "Không thể lưu bộ nhớ của bạn.",
+    "willBeShortened": "sẽ được rút gọn",
+    "clear": "Xóa",
+    "footerNote": "Coasty sẽ xem xét các tùy chọn này khi làm việc cho bạn.",
+    "time": {
+      "justNow": "vừa xong",
+      "secondsAgo": "{n} giây trước",
+      "minutesAgo": "{n} phút trước",
+      "hoursAgo": "{n} giờ trước",
+      "daysAgo": "{n} ngày trước"
+    }
   }
 }

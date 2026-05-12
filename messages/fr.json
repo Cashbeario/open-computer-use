@@ -2919,5 +2919,58 @@
     "watchSession": "Voir la session",
     "steps": "{count} étapes",
     "tryCoasty": "Essayer Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Mémoire",
+    "sidebarDescription": "Contexte appliqué à chaque tâche d'agent",
+    "dialog": {
+      "title": "Mémoire",
+      "description": "Une note que Coasty applique chaque fois qu'il travaille pour vous.",
+      "openFull": "Ouvrir en grand",
+      "visualMemoryLabel": "Mémoire",
+      "visualSynced": "Synchronisé",
+      "visualContextChat": "Discussion",
+      "visualContextSchedules": "Planifications",
+      "visualContextSwarm": "Essaim"
+    },
+    "section": {
+      "title": "Mémoire",
+      "tag": "optionnel · personnel",
+      "description": "Une note vous concernant qui accompagne chaque tâche d'agent — discussion, tâches planifiées, machines en essaim, agents délégués."
+    },
+    "presetsLabel": "Essayer",
+    "presets": {
+      "useFirstName": "Utiliser mon prénom",
+      "useFirstNameSentence": "Adresse-toi à moi par mon prénom.",
+      "beTerse": "Sois concis",
+      "beTerseSentence": "Préfère des réponses concises et directes. Sans remplissage.",
+      "imDeveloper": "Je suis développeur",
+      "imDeveloperSentence": "Je suis ingénieur logiciel ; à l'aise avec le code.",
+      "noEmojis": "Pas d'emojis",
+      "noEmojisSentence": "Évite les emojis dans les réponses.",
+      "metricUnits": "Unités métriques",
+      "metricUnitsSentence": "Utilise les unités métriques (mètres, kilogrammes, °C).",
+      "citeSources": "Citer les sources",
+      "citeSourcesSentence": "Cite les sources lors d'affirmations factuelles."
+    },
+    "placeholder": "Exemple :\nAdresse-toi à moi par mon prénom.\nPréfère des réponses concises.\nJe travaille en TypeScript et Python.\nNe supprime jamais de fichiers sans confirmer.",
+    "loading": "Chargement…",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "unsavedChanges": "Modifications non enregistrées",
+    "empty": "Vide",
+    "savedRelative": "Enregistré · {time}",
+    "errorLoad": "Impossible de charger votre mémoire.",
+    "errorSave": "Impossible d'enregistrer votre mémoire.",
+    "willBeShortened": "sera raccourci",
+    "clear": "Effacer",
+    "footerNote": "Coasty prendra ces préférences en compte chaque fois qu'il travaille pour vous.",
+    "time": {
+      "justNow": "à l'instant",
+      "secondsAgo": "il y a {n} s",
+      "minutesAgo": "il y a {n} min",
+      "hoursAgo": "il y a {n} h",
+      "daysAgo": "il y a {n} j"
+    }
   }
 }

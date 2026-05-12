@@ -2919,5 +2919,58 @@
     "watchSession": "Urmărește sesiunea",
     "steps": "{count} pași",
     "tryCoasty": "Încearcă Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memorie",
+    "sidebarDescription": "Context aplicat la fiecare execuție a agentului",
+    "dialog": {
+      "title": "Memorie",
+      "description": "O notă scurtă pe care Coasty o aplică ori de câte ori lucrează pentru tine.",
+      "openFull": "Deschide complet",
+      "visualMemoryLabel": "Memorie",
+      "visualSynced": "Sincronizat",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Programări",
+      "visualContextSwarm": "Roi"
+    },
+    "section": {
+      "title": "Memorie",
+      "tag": "opțional · personal",
+      "description": "O notă scurtă despre tine care însoțește fiecare execuție a agentului — chat, sarcini programate, mașini în roi, agenți delegați."
+    },
+    "presetsLabel": "Încearcă",
+    "presets": {
+      "useFirstName": "Folosește prenumele",
+      "useFirstNameSentence": "Adresează-mi-te pe prenume.",
+      "beTerse": "Fii concis",
+      "beTerseSentence": "Preferă răspunsuri concise și directe. Fără umplutură.",
+      "imDeveloper": "Sunt dezvoltator",
+      "imDeveloperSentence": "Sunt inginer software; mă descurc cu codul.",
+      "noEmojis": "Fără emoji",
+      "noEmojisSentence": "Evită emoji-urile în răspunsuri.",
+      "metricUnits": "Unități metrice",
+      "metricUnitsSentence": "Folosește unități metrice (metri, kilograme, °C).",
+      "citeSources": "Citează sursele",
+      "citeSourcesSentence": "Citează sursele când faci afirmații factuale."
+    },
+    "placeholder": "Exemplu:\nAdresează-mi-te pe prenume.\nPreferă răspunsuri concise.\nLucrez cu TypeScript și Python.\nNu șterge fișiere fără confirmare.",
+    "loading": "Se încarcă…",
+    "saving": "Se salvează…",
+    "saved": "Salvat",
+    "unsavedChanges": "Modificări nesalvate",
+    "empty": "Gol",
+    "savedRelative": "Salvat · {time}",
+    "errorLoad": "Nu s-a putut încărca memoria ta.",
+    "errorSave": "Nu s-a putut salva memoria ta.",
+    "willBeShortened": "va fi scurtat",
+    "clear": "Șterge",
+    "footerNote": "Coasty va lua în considerare aceste preferințe când lucrează pentru tine.",
+    "time": {
+      "justNow": "chiar acum",
+      "secondsAgo": "acum {n} s",
+      "minutesAgo": "acum {n} min",
+      "hoursAgo": "acum {n} h",
+      "daysAgo": "acum {n} z"
+    }
   }
 }

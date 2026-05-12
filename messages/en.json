@@ -746,13 +746,16 @@
       "offTooltip": "Enable swarm mode to run your prompt across multiple machines simultaneously",
       "decreaseMachines": "Decrease machine count",
       "increaseMachines": "Increase machine count",
-      "machineLimit": "Up to {max} swarm machines on your plan. Need more? Contact founders@coasty.ai"
+      "machineLimit": "Up to {max} swarm machines on your plan. Need more? Contact founders@coasty.ai",
+      "label": "Multi-Run",
+      "upgradeCta": "Swarm mode"
     },
     "desktop": {
       "connectLabel": "Connect to desktop",
       "screenLabel": "{name}'s screen",
       "screenDefault": "Desktop",
-      "watchTooltip": "Watch your agent work on a separate screen. Just don't touch anything or it gets stage fright!"
+      "watchTooltip": "Watch your agent work on a separate screen. Just don't touch anything or it gets stage fright!",
+      "watchLabel": "Desktop"
     },
     "buttons": {
       "stop": "Stop",
@@ -986,7 +989,9 @@
     "inMinutes": "in {count}m",
     "inHours": "in {count}h",
     "today": "today",
-    "yesterday": "yesterday"
+    "yesterday": "yesterday",
+    "talkToUsDesc": "Book a 15-min call",
+    "inviteEarnDesc": "Get free credits"
   },
   "appHeader": {
     "login": "Login",
@@ -2914,5 +2919,58 @@
     "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
     "executing": "Executing...",
     "executeCommand": "Execute Command"
+  },
+  "memory": {
+    "sidebarLabel": "Memory",
+    "sidebarDescription": "Context applied to every agent run",
+    "dialog": {
+      "title": "Memory",
+      "description": "A short note Coasty applies whenever it works for you.",
+      "openFull": "Open full",
+      "visualMemoryLabel": "Memory",
+      "visualSynced": "Synced",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Schedules",
+      "visualContextSwarm": "Swarm"
+    },
+    "section": {
+      "title": "Memory",
+      "tag": "optional · personal",
+      "description": "A short note about you that travels with every agent run — chat, scheduled tasks, swarm machines, delegated agents."
+    },
+    "presetsLabel": "Try",
+    "presets": {
+      "useFirstName": "Use first name",
+      "useFirstNameSentence": "Address me by my first name.",
+      "beTerse": "Be terse",
+      "beTerseSentence": "Prefer terse, direct responses. No filler.",
+      "imDeveloper": "I'm a developer",
+      "imDeveloperSentence": "I'm a software engineer; comfortable with code.",
+      "noEmojis": "No emojis",
+      "noEmojisSentence": "Avoid emojis in responses.",
+      "metricUnits": "Metric units",
+      "metricUnitsSentence": "Use metric units (meters, kilograms, °C).",
+      "citeSources": "Cite sources",
+      "citeSourcesSentence": "Cite sources when stating factual claims."
+    },
+    "placeholder": "Example:\nAddress me by my first name.\nPrefer terse responses.\nI work in TypeScript and Python.\nNever delete files without confirming.",
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "unsavedChanges": "Unsaved changes",
+    "empty": "Empty",
+    "savedRelative": "Saved · {time}",
+    "errorLoad": "Could not load your memory.",
+    "errorSave": "Could not save your memory.",
+    "willBeShortened": "will be shortened",
+    "clear": "Clear",
+    "footerNote": "Coasty will take these preferences into account whenever it works for you.",
+    "time": {
+      "justNow": "just now",
+      "secondsAgo": "{n}s ago",
+      "minutesAgo": "{n}m ago",
+      "hoursAgo": "{n}h ago",
+      "daysAgo": "{n}d ago"
+    }
   }
 }

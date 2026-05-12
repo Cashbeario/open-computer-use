@@ -2919,5 +2919,58 @@
     "watchSession": "Panoorin ang session",
     "steps": "{count} hakbang",
     "tryCoasty": "Subukan ang Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Memorya",
+    "sidebarDescription": "Konteksto na inilalapat sa bawat takbo ng ahente",
+    "dialog": {
+      "title": "Memorya",
+      "description": "Isang maikling tala na inilalapat ng Coasty sa tuwing kumikilos ito para sa iyo.",
+      "openFull": "Buksan nang buo",
+      "visualMemoryLabel": "Memorya",
+      "visualSynced": "Naka-sync",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Mga Iskedyul",
+      "visualContextSwarm": "Swarm"
+    },
+    "section": {
+      "title": "Memorya",
+      "tag": "opsyonal · personal",
+      "description": "Maikling tala tungkol sa iyo na sumasama sa bawat takbo ng ahente — chat, naka-iskedyul na gawain, swarm machines, na-delegate na ahente."
+    },
+    "presetsLabel": "Subukan",
+    "presets": {
+      "useFirstName": "Gamitin ang pangalan",
+      "useFirstNameSentence": "Tawagin mo ako sa pangalan ko.",
+      "beTerse": "Maging maikli",
+      "beTerseSentence": "Mas gusto ang maikli at deretsong sagot. Walang puno-pero.",
+      "imDeveloper": "Developer ako",
+      "imDeveloperSentence": "Software engineer ako; pamilyar sa code.",
+      "noEmojis": "Walang emoji",
+      "noEmojisSentence": "Iwasan ang emoji sa mga sagot.",
+      "metricUnits": "Metric units",
+      "metricUnitsSentence": "Gumamit ng metric units (metro, kilo, °C).",
+      "citeSources": "Banggitin ang pinagmulan",
+      "citeSourcesSentence": "Banggitin ang pinagmulan kapag nagbibigay ng katotohanan."
+    },
+    "placeholder": "Halimbawa:\nTawagin mo ako sa pangalan ko.\nMas gusto ang maikling sagot.\nGumagamit ako ng TypeScript at Python.\nHuwag magtanggal ng file nang walang kumpirmasyon.",
+    "loading": "Naglo-load…",
+    "saving": "Sine-save…",
+    "saved": "Na-save",
+    "unsavedChanges": "Hindi naka-save na mga pagbabago",
+    "empty": "Walang laman",
+    "savedRelative": "Na-save · {time}",
+    "errorLoad": "Hindi ma-load ang iyong memorya.",
+    "errorSave": "Hindi ma-save ang iyong memorya.",
+    "willBeShortened": "papaikliin",
+    "clear": "I-clear",
+    "footerNote": "Isasaalang-alang ng Coasty ang mga kagustuhang ito kapag gumagana ito para sa iyo.",
+    "time": {
+      "justNow": "kanina lang",
+      "secondsAgo": "{n}s nakalipas",
+      "minutesAgo": "{n}m nakalipas",
+      "hoursAgo": "{n}h nakalipas",
+      "daysAgo": "{n}d nakalipas"
+    }
   }
 }

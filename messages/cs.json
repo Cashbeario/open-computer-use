@@ -2919,5 +2919,58 @@
     "watchSession": "Sledovat relaci",
     "steps": "{count} kroků",
     "tryCoasty": "Vyzkoušet Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "Paměť",
+    "sidebarDescription": "Kontext aplikovaný na každý běh agenta",
+    "dialog": {
+      "title": "Paměť",
+      "description": "Krátká poznámka, kterou Coasty aplikuje vždy, když pro vás pracuje.",
+      "openFull": "Otevřít celé",
+      "visualMemoryLabel": "Paměť",
+      "visualSynced": "Synchronizováno",
+      "visualContextChat": "Chat",
+      "visualContextSchedules": "Plány",
+      "visualContextSwarm": "Roj"
+    },
+    "section": {
+      "title": "Paměť",
+      "tag": "volitelné · osobní",
+      "description": "Krátká poznámka o vás, která doprovází každý běh agenta — chat, naplánované úkoly, stroje v roji, delegovaní agenti."
+    },
+    "presetsLabel": "Vyzkoušejte",
+    "presets": {
+      "useFirstName": "Použít křestní jméno",
+      "useFirstNameSentence": "Oslovuj mě křestním jménem.",
+      "beTerse": "Buď stručný",
+      "beTerseSentence": "Preferuj stručné, přímé odpovědi. Bez výplně.",
+      "imDeveloper": "Jsem vývojář",
+      "imDeveloperSentence": "Jsem softwarový inženýr; pohodlně pracuji s kódem.",
+      "noEmojis": "Bez emoji",
+      "noEmojisSentence": "Vyhýbej se emoji v odpovědích.",
+      "metricUnits": "Metrické jednotky",
+      "metricUnitsSentence": "Používej metrické jednotky (metry, kilogramy, °C).",
+      "citeSources": "Uváděj zdroje",
+      "citeSourcesSentence": "Uváděj zdroje při faktických tvrzeních."
+    },
+    "placeholder": "Příklad:\nOslovuj mě křestním jménem.\nPreferuj stručné odpovědi.\nPracuji s TypeScriptem a Pythonem.\nNikdy nemaž soubory bez potvrzení.",
+    "loading": "Načítání…",
+    "saving": "Ukládání…",
+    "saved": "Uloženo",
+    "unsavedChanges": "Neuložené změny",
+    "empty": "Prázdné",
+    "savedRelative": "Uloženo · {time}",
+    "errorLoad": "Paměť se nepodařilo načíst.",
+    "errorSave": "Paměť se nepodařilo uložit.",
+    "willBeShortened": "bude zkráceno",
+    "clear": "Vymazat",
+    "footerNote": "Coasty bude tyto preference brát v úvahu, když pro vás pracuje.",
+    "time": {
+      "justNow": "právě teď",
+      "secondsAgo": "před {n} s",
+      "minutesAgo": "před {n} min",
+      "hoursAgo": "před {n} h",
+      "daysAgo": "před {n} dny"
+    }
   }
 }

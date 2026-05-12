@@ -2919,5 +2919,58 @@
     "watchSession": "צפו בפגישה",
     "steps": "{count} צעדים",
     "tryCoasty": "נסו את Coasty"
+  },
+  "memory": {
+    "sidebarLabel": "זיכרון",
+    "sidebarDescription": "הקשר המוחל על כל הרצת סוכן",
+    "dialog": {
+      "title": "זיכרון",
+      "description": "פתק קצר ש-Coasty מחיל בכל פעם שהוא עובד עבורך.",
+      "openFull": "פתח מלא",
+      "visualMemoryLabel": "זיכרון",
+      "visualSynced": "מסונכרן",
+      "visualContextChat": "צ'אט",
+      "visualContextSchedules": "תזמונים",
+      "visualContextSwarm": "נחיל"
+    },
+    "section": {
+      "title": "זיכרון",
+      "tag": "אופציונלי · אישי",
+      "description": "פתק קצר עליך שמלווה כל הרצת סוכן — צ'אט, משימות מתוזמנות, מכונות נחיל, סוכנים מואצלים."
+    },
+    "presetsLabel": "נסה",
+    "presets": {
+      "useFirstName": "השתמש בשם פרטי",
+      "useFirstNameSentence": "פנה אליי בשמי הפרטי.",
+      "beTerse": "היה תמציתי",
+      "beTerseSentence": "העדף תשובות תמציתיות וישירות. בלי מילוי.",
+      "imDeveloper": "אני מפתח",
+      "imDeveloperSentence": "אני מהנדס תוכנה; שולט בקוד.",
+      "noEmojis": "בלי אימוג'ים",
+      "noEmojisSentence": "הימנע מאימוג'ים בתשובות.",
+      "metricUnits": "יחידות מטריות",
+      "metricUnitsSentence": "השתמש ביחידות מטריות (מטרים, קילוגרמים, °C).",
+      "citeSources": "צטט מקורות",
+      "citeSourcesSentence": "צטט מקורות בעת מתן טענות עובדתיות."
+    },
+    "placeholder": "דוגמה:\nפנה אליי בשמי הפרטי.\nהעדף תשובות תמציתיות.\nאני עובד עם TypeScript ו-Python.\nלעולם אל תמחק קבצים ללא אישור.",
+    "loading": "טוען…",
+    "saving": "שומר…",
+    "saved": "נשמר",
+    "unsavedChanges": "שינויים לא שמורים",
+    "empty": "ריק",
+    "savedRelative": "נשמר · {time}",
+    "errorLoad": "לא ניתן היה לטעון את הזיכרון שלך.",
+    "errorSave": "לא ניתן היה לשמור את הזיכרון שלך.",
+    "willBeShortened": "יקוצר",
+    "clear": "נקה",
+    "footerNote": "Coasty יתחשב בהעדפות אלה בכל פעם שיעבוד עבורך.",
+    "time": {
+      "justNow": "ממש עכשיו",
+      "secondsAgo": "לפני {n} שנ׳",
+      "minutesAgo": "לפני {n} דק׳",
+      "hoursAgo": "לפני {n} שע׳",
+      "daysAgo": "לפני {n} ימים"
+    }
   }
 }

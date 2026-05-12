@@ -12,7 +12,9 @@ import {
   IconShieldLock,
   IconKey,
   IconStack2,
+  IconBrain,
 } from "@tabler/icons-react"
+import { MemoryDialog } from "@/app/components/layout/settings/general/memory-dialog"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import {
@@ -725,16 +727,22 @@ function SectionHeader({ label, expanded }: { label: string; expanded: boolean }
 //  Collapsed mode gets ResourcesFlyout — a click-popover with the
 //  same three destinations in a compact shell.
 // ═══════════════════════════════════════════════════════════════════
+// A resource row can either navigate to a route OR trigger an action
+// (open a dialog/popover). Exactly one of `href` and `onAction` is set;
+// when `onAction` is provided we render a button instead of a Link, and
+// the row's `active` state typically defaults to false (no URL to match).
 type ResourceItem = {
   id: string
   icon: ReactNode
   label: string
   count?: number
-  href: string
   active: boolean
   dot?: boolean
   onNavigate: () => void
-}
+} & (
+  | { href: string; onAction?: never }
+  | { href?: never; onAction: () => void }
+)
 
 const RESOURCES_STORAGE_KEY = "coasty:sidebar:resources-open"
 
@@ -849,15 +857,10 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                          bg-gradient-to-b from-transparent via-foreground/15 to-transparent
                          dark:via-white/[0.09]"
             />
-            {items.map((item, i) => (
-              <Link
-                key={item.id}
-                id={item.id}
-                href={item.href}
-                onClick={item.onNavigate}
-                className="block shv-row"
-                style={{ animationDelay: `${i * 30}ms`, animationDuration: "280ms" }}
-              >
+            {items.map((item, i) => {
+              // Identical inner row — only the wrapper differs between
+              // navigation rows (Link) and action rows (button).
+              const inner = (
                 <span
                   className={cn(
                     "group/item relative flex w-full items-center gap-2.5 pl-3 pr-2 h-[28px] rounded-md",
@@ -877,7 +880,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                       <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
                     )}
                   </span>
-                  <span className="flex-1 truncate text-[12px] font-medium tracking-[-0.01em]">
+                  <span className="flex-1 truncate text-[12px] font-medium tracking-[-0.01em] text-left">
                     {item.label}
                   </span>
                   {typeof item.count === "number" && item.count > 0 && (
@@ -891,8 +894,47 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                     </span>
                   )}
                 </span>
-              </Link>
-            ))}
+              )
+
+              // Key, className and style are identical between the
+              // navigation row and the action row; we pass key inline
+              // (not via spread) so the linter can see it.
+              const rowClass = "block w-full shv-row"
+              const rowStyle = {
+                animationDelay: `${i * 30}ms`,
+                animationDuration: "280ms",
+              }
+
+              if (item.onAction) {
+                return (
+                  <button
+                    key={item.id}
+                    id={item.id}
+                    type="button"
+                    className={rowClass}
+                    style={rowStyle}
+                    onClick={() => {
+                      item.onAction()
+                      item.onNavigate()
+                    }}
+                  >
+                    {inner}
+                  </button>
+                )
+              }
+              return (
+                <Link
+                  key={item.id}
+                  id={item.id}
+                  href={item.href}
+                  className={rowClass}
+                  style={rowStyle}
+                  onClick={item.onNavigate}
+                >
+                  {inner}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -962,17 +1004,8 @@ function ResourcesFlyout({
         </div>
         <div className="h-px bg-border/40 dark:bg-white/[0.05] mx-1 mb-1" />
         <div className="space-y-[1px]">
-          {items.map((item, i) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              onClick={() => {
-                item.onNavigate()
-                setOpen(false)
-              }}
-              className="block shv-row"
-              style={{ animationDelay: `${i * 25}ms`, animationDuration: "240ms" }}
-            >
+          {items.map((item, i) => {
+            const inner = (
               <span
                 className={cn(
                   "group/row relative flex w-full items-center gap-2.5 px-2 h-[30px] rounded-md",
@@ -988,7 +1021,7 @@ function ResourcesFlyout({
                     <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-popover dark:bg-emerald-400" />
                   )}
                 </span>
-                <span className="flex-1 truncate text-[12px] font-medium tracking-[-0.01em]">
+                <span className="flex-1 truncate text-[12px] font-medium tracking-[-0.01em] text-left">
                   {item.label}
                 </span>
                 {typeof item.count === "number" && item.count > 0 && (
@@ -1002,8 +1035,46 @@ function ResourcesFlyout({
                   </span>
                 )}
               </span>
-            </Link>
-          ))}
+            )
+
+            const rowClass = "block w-full shv-row"
+            const rowStyle = {
+              animationDelay: `${i * 25}ms`,
+              animationDuration: "240ms",
+            }
+
+            if (item.onAction) {
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={rowClass}
+                  style={rowStyle}
+                  onClick={() => {
+                    item.onAction()
+                    item.onNavigate()
+                    setOpen(false)
+                  }}
+                >
+                  {inner}
+                </button>
+              )
+            }
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={rowClass}
+                style={rowStyle}
+                onClick={() => {
+                  item.onNavigate()
+                  setOpen(false)
+                }}
+              >
+                {inner}
+              </Link>
+            )
+          })}
         </div>
       </PopoverContent>
     </Popover>
@@ -1028,10 +1099,17 @@ export const SidebarNavSection = memo(function SidebarNavSection({
   handleNavigation: (fn: () => void) => void
 }) {
   const t = useTranslations("sidebar")
+  const tMemory = useTranslations("memory")
   const router = useRouter()
   const pathname = usePathname()
   const { chats: allChats } = useChats()
   const { stats: machineStats } = useSidebarMachines(user)
+
+  // Memory quick-edit popup state. Opened from the "Memory" entry in
+  // the Resources group (both expanded inline and collapsed flyout
+  // modes). The dialog component is mounted unconditionally so its
+  // mount/unmount lifecycle doesn't fight Radix's portal cleanup.
+  const [memoryDialogOpen, setMemoryDialogOpen] = useState<boolean>(false)
 
   // Lazy-fetch popup data — only fetched on first hover. Schedules and
   // secrets previews are handled inside the Resources dropdown itself,
@@ -1154,6 +1232,24 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               active: isItemActive("/secrets"),
               onNavigate: closeMobileIfNeeded,
             },
+            // Memory — quick-edit popup. Unlike the other resources
+            // it has no dedicated route here; clicking opens a sleek
+            // dialog with the same editor used in Account → Memory.
+            // The full settings page is one click away via the
+            // dialog's footer link.
+            {
+              id: "sidebar-memory-action",
+              icon: <IconBrain size={16} stroke={1.5} />,
+              // Localized via the dedicated memory namespace so the
+              // sidebar label switches with the user's language.
+              label: tMemory("sidebarLabel"),
+              // No route to highlight; the dialog itself is the
+              // affordance. `active` stays false so the rail's caret
+              // bar doesn't appear here.
+              active: false,
+              onAction: () => setMemoryDialogOpen(true),
+              onNavigate: closeMobileIfNeeded,
+            },
           ]
           const anyResourceActive = resourceItems.some((r) => r.active)
           return expanded ? (
@@ -1182,6 +1278,10 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           }}
         />
       </div>
+
+      {/* Memory quick-edit popup — mounted unconditionally so its open
+          animation always plays from a stable DOM root. */}
+      <MemoryDialog open={memoryDialogOpen} onOpenChange={setMemoryDialogOpen} />
     </>
   )
 })

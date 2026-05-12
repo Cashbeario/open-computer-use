@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { useAccountDialog, type AccountSectionType } from "@/lib/account-dialog-store"
 import { LayoutApp } from "@/app/components/layout/layout-app"
 
-const validSections: AccountSectionType[] = ["account", "billing", "privacy", "notifications", "appearance", "api-keys", "data", "feedback", "about", "social"]
+const validSections: AccountSectionType[] = ["account", "billing", "privacy", "notifications", "appearance", "api-keys", "data", "feedback", "about", "social", "memory"]
 
 function AccountOpener() {
   const searchParams = useSearchParams()

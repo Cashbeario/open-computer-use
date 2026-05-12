@@ -18,6 +18,7 @@ import {
   ChevronRight,
   X,
   Globe,
+  Brain,
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -26,6 +27,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { CombinedAccount } from "@/app/components/layout/settings/general/combined-account"
 import { PrivacySection } from "@/app/components/layout/settings/general/privacy-section"
 import { PublicChatsSection } from "@/app/components/layout/settings/general/public-chats-section"
+import { MemorySection } from "@/app/components/layout/settings/general/memory-section"
 import { BillingSection } from "@/app/components/layout/settings/billing/billing-section"
 import { ThemeSelection } from "@/app/components/layout/settings/appearance/theme-selection"
 import { BackgroundSelection } from "@/app/components/layout/settings/appearance/background-selection"
@@ -38,6 +40,7 @@ import { useUser } from "@/lib/user-store/provider"
 import XIcon from "@/components/icons/x"
 import { GithubLogoIcon } from "@phosphor-icons/react"
 import { useAccountDialog, type AccountSectionType } from "@/lib/account-dialog-store"
+import { useTranslations } from "next-intl"
 
 import { Dialog } from "@/components/ui/dialog"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
@@ -77,6 +80,7 @@ function AppearanceSection() {
 
 const sections = [
   { id: "account" as SectionType, label: "General", icon: User, description: "Profile and account", component: CombinedAccount },
+  { id: "memory" as SectionType, label: "Memory", icon: Brain, description: "Context applied to every agent run", component: MemorySection },
   { id: "appearance" as SectionType, label: "Appearance", icon: Paintbrush, description: "Theme, language, and background", component: AppearanceSection },
   { id: "billing" as SectionType, label: "Billing", icon: CreditCard, description: "Plans and credits", component: BillingSection },
   { id: "public-chats" as SectionType, label: "Public Chats", icon: Globe, description: "Manage chats shared via public link", component: PublicChatsSection },
@@ -90,7 +94,7 @@ const sections = [
 ]
 
 const navGroups = [
-  { label: "Settings", ids: ["account", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
+  { label: "Settings", ids: ["account", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
   { label: "Developer", ids: ["notifications", "api-keys", "data"] as SectionType[] },
   { label: "More", ids: ["feedback", "about", "social"] as SectionType[] },
 ]
@@ -150,9 +154,24 @@ export function AccountDialog() {
   const { user, isLoading } = useUser()
   const [mobileView, setMobileView] = useState<"menu" | "content">("content")
   const router = useRouter()
+  const tMemory = useTranslations("memory")
+
+  // Localize only the entries that have proper translation namespaces;
+  // the other sidebar labels stay as-is until they get their own
+  // localized namespaces. This avoids forcing a giant scope-creep into
+  // the account-dialog while still respecting the user's language.
+  const localizedSections = sections.map((s) =>
+    s.id === "memory"
+      ? {
+          ...s,
+          label: tMemory("section.title"),
+          description: tMemory("sidebarDescription"),
+        }
+      : s,
+  )
 
   const activeSection = section
-  const activeConfig = sections.find((s) => s.id === activeSection)
+  const activeConfig = localizedSections.find((s) => s.id === activeSection)
   const ActiveComponent = activeConfig?.component
 
   const handleSectionChange = useCallback(
@@ -329,7 +348,7 @@ export function AccountDialog() {
                 {/* Nav groups */}
                 <div className="flex-1 px-2.5 pb-3 space-y-4 overflow-y-auto">
                   {navGroups.map((group) => {
-                    const groupSections = sections.filter((s) => group.ids.includes(s.id))
+                    const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
                     return (
                       <div key={group.label}>
                         <p className="text-[10px] font-medium tracking-[0.05em] uppercase text-muted-foreground/30 px-2 mb-1">
@@ -362,7 +381,7 @@ export function AccountDialog() {
                       </button>
                     </div>
                     {navGroups.map((group) => {
-                      const groupSections = sections.filter((s) => group.ids.includes(s.id))
+                      const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
                       return (
                         <div key={group.label}>
                           <p className="text-[10px] font-medium tracking-[0.05em] uppercase text-muted-foreground/35 mb-2 px-0.5">

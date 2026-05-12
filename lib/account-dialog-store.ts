@@ -14,6 +14,7 @@ export type AccountSectionType =
   | "about"
   | "social"
   | "public-chats"
+  | "memory"
 
 interface AccountDialogStore {
   isOpen: boolean

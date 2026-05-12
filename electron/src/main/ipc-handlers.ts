@@ -915,32 +915,85 @@ export function registerIpcHandlers(
   })
 
   secureHandle('chat:abort', async (_event, requestId: string) => {
+    // ── Ordered, battle-tested stop sequence ──────────────────────────
+    //
+    // Three signals converge to halt the task. Ordering matters
+    // because each one closes a different leak window:
+    //
+    //   1. ``bridge.stopTask()`` — FIRST, synchronously.
+    //      Flips ``taskStopped=true`` on the bridge so every queued
+    //      and incoming command is rejected immediately, even
+    //      before any network round-trip. This is the fastest gate
+    //      (zero-RTT) and is what prevents the user's "commands still
+    //      execute after stop" complaint.
+    //
+    //   2. ``controller.abort()`` on the SSE stream.
+    //      Terminates the renderer's fetch to the backend chat route
+    //      so we stop receiving streaming text/tool events that would
+    //      otherwise paint into the chat thread post-stop.
+    //
+    //   3. ``POST /api/chat/stop-machine/{id}`` — AWAITED with a
+    //      bounded 3s timeout.
+    //      This is the path that sets the backend's cancellation_event
+    //      via the dedicated HTTP endpoint. The WS ``task_stop`` from
+    //      bridge.stopTask() is faster (no auth round-trip, no Redis
+    //      pubsub), but if vm_control is blocked in agent.predict() or
+    //      code_agent's inner loop nobody is reading the WS recv at
+    //      that moment and the task_stop message sits in the buffer
+    //      until the next dispatch — which can be 30+ seconds. The
+    //      HTTP call goes through a separate request handler that
+    //      unconditionally sets the cancellation event.
+    //
+    //      Previously this was fire-and-forget. That meant the IPC
+    //      returned 'success' before the backend had even acknowledged
+    //      the stop, so the renderer thought it was clean while the
+    //      backend kept dispatching commands. We now AWAIT (with
+    //      timeout) so the IPC returns only after the backend has
+    //      either acknowledged the stop or the timeout elapsed.
+
+    // Signal #1: bridge stop (synchronous, fastest).
+    const bridge = getWsBridge()
+    if (bridge) bridge.stopTask()
+
+    // Signal #2: kill the SSE stream.
     const controller = chatAbortControllers.get(requestId)
     if (controller) {
       controller.abort()
       chatAbortControllers.delete(requestId)
     }
-    // Tell the WebSocket bridge to stop the task — this sends task_stop to
-    // the backend and rejects any further commands that arrive on the bridge.
-    const bridge = getWsBridge()
-    if (bridge) bridge.stopTask()
 
-    // ALSO hit the dedicated HTTP stop endpoint. The WebSocket task_stop
-    // only arrives if vm_control is mid-recv on this machine — if the
-    // executor is blocked inside agent.predict() or code_agent, no one is
-    // reading the socket and the message sits in the buffer. The HTTP call
-    // goes to a separate request handler that unconditionally sets the
-    // cancellation event.
+    // Signal #3: HTTP stop-machine, AWAITED with a bounded timeout.
     try {
       const machineId = auth.getMachineId()
       const token = await auth.getAccessToken()
       if (machineId && token) {
-        await fetch(`${backendUrl}/api/chat/stop-machine/${machineId}`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).catch((err) => {
-          console.error('[chat:abort] stop-machine HTTP call failed:', err?.message || err)
-        })
+        // 3-second cap so a misbehaving backend can't hang the IPC
+        // (and therefore the Stop click) indefinitely. The bridge.stopTask
+        // and SSE abort above are already the user's primary stops; the
+        // HTTP call is the belt-and-braces for the agent-predict-stuck
+        // case and a 3s budget is enough to either succeed or move on.
+        const stopAbortCtl = new AbortController()
+        const stopTimer = setTimeout(() => stopAbortCtl.abort(), 3000)
+        try {
+          await fetch(`${backendUrl}/api/chat/stop-machine/${machineId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            signal: stopAbortCtl.signal,
+          })
+          console.log(`[chat:abort] stop-machine acknowledged for ${machineId}`)
+        } catch (err: any) {
+          if (err?.name === 'AbortError') {
+            console.warn(
+              `[chat:abort] stop-machine HTTP timed out after 3s — bridge ` +
+              `task_stop is the fallback signal; backend will receive cancel ` +
+              `when vm_control's WS recv unblocks`,
+            )
+          } else {
+            console.error('[chat:abort] stop-machine HTTP call failed:', err?.message || err)
+          }
+        } finally {
+          clearTimeout(stopTimer)
+        }
       }
     } catch (err: any) {
       console.error('[chat:abort] stop-machine error:', err?.message || err)

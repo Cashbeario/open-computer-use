@@ -198,9 +198,37 @@ export class WebSocketBridge {
       console.log(`[WS Bridge] ${command} → ${paramPreview}`)
     }
 
-    const next = this.commandQueue.then(() =>
-      this.executor.executeCommand(command, parameters),
-    )
+    // ── Last-mile stop gate (commands queued before stop) ──────────────
+    //
+    // The ``taskStopped`` flag is also checked at message ingress
+    // (line 358), but that only catches commands that ARRIVE after the
+    // flag was set. Anything already queued onto ``commandQueue`` would
+    // execute without this check.
+    //
+    // Real-world race: user clicks Stop, ``stopTask`` flips the flag,
+    // ``task_stop`` goes to the backend. Meanwhile the backend has
+    // already pipelined 1-3 commands into the WS that landed BEFORE
+    // the flag flipped, so they passed the ingress check and chained
+    // onto the queue. Without this gate they execute (clicks, types,
+    // screenshots) AFTER the user thought they'd stopped the task.
+    //
+    // The gate fires when THIS link in the chain unblocks — i.e. at
+    // the moment the command would actually run. If ``taskStopped``
+    // is true by then, we skip the executor and return a synthetic
+    // "task was stopped" result. The next chain link still runs (it
+    // hits the same gate too), so the queue drains cleanly without
+    // executing anything.
+    const next = this.commandQueue.then(() => {
+      if (this.taskStopped) {
+        console.log(`[WS Bridge] Queue-drained (task stopped): ${command}`)
+        return {
+          success: false,
+          error: 'Task was stopped by user',
+          stoppedByUser: true,
+        }
+      }
+      return this.executor.executeCommand(command, parameters)
+    })
     // Don't break the chain on rejected promises — every chain link
     // must always resolve so subsequent commands still get to run.
     this.commandQueue = next.catch(() => undefined)

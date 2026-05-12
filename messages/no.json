@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n}t siden",
       "daysAgo": "{n}d siden"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Innstillinger",
+    "navGroups": {
+      "settings": "Innstillinger",
+      "developer": "Utvikler",
+      "more": "Mer"
+    },
+    "sections": {
+      "account": {
+        "label": "Generelt",
+        "description": "Profil og konto"
+      },
+      "appearance": {
+        "label": "Utseende",
+        "description": "Tema, språk og bakgrunn"
+      },
+      "billing": {
+        "label": "Fakturering",
+        "description": "Abonnementer og kreditter"
+      },
+      "publicChats": {
+        "label": "Offentlige chatter",
+        "description": "Administrer chatter delt via offentlig lenke"
+      },
+      "privacy": {
+        "label": "Personvern",
+        "description": "Sikkerhet og datapersonvern"
+      },
+      "notifications": {
+        "label": "Varsler",
+        "description": "Varselinnstillinger"
+      },
+      "apiKeys": {
+        "label": "API-nøkler",
+        "description": "Administrer API-nøklene dine"
+      },
+      "data": {
+        "label": "Data",
+        "description": "Eksporter og administrer dataene dine"
+      },
+      "feedback": {
+        "label": "Tilbakemelding",
+        "description": "Send oss din tilbakemelding"
+      },
+      "about": {
+        "label": "Om",
+        "description": "Om Coasty"
+      },
+      "social": {
+        "label": "Koble til",
+        "description": "Sosiale lenker"
+      }
+    }
   }
 }

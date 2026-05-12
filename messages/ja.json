@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} 時間前",
       "daysAgo": "{n} 日前"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "設定",
+    "navGroups": {
+      "settings": "設定",
+      "developer": "開発者",
+      "more": "その他"
+    },
+    "sections": {
+      "account": {
+        "label": "一般",
+        "description": "プロフィールとアカウント"
+      },
+      "appearance": {
+        "label": "外観",
+        "description": "テーマ、言語、背景"
+      },
+      "billing": {
+        "label": "請求",
+        "description": "プランとクレジット"
+      },
+      "publicChats": {
+        "label": "公開チャット",
+        "description": "公開リンクで共有されたチャットを管理"
+      },
+      "privacy": {
+        "label": "プライバシー",
+        "description": "セキュリティとデータプライバシー"
+      },
+      "notifications": {
+        "label": "通知",
+        "description": "通知設定"
+      },
+      "apiKeys": {
+        "label": "API キー",
+        "description": "API キーを管理"
+      },
+      "data": {
+        "label": "データ",
+        "description": "データをエクスポートして管理"
+      },
+      "feedback": {
+        "label": "フィードバック",
+        "description": "フィードバックを送信"
+      },
+      "about": {
+        "label": "情報",
+        "description": "Coasty について"
+      },
+      "social": {
+        "label": "ソーシャル",
+        "description": "ソーシャルリンク"
+      }
+    }
   }
 }

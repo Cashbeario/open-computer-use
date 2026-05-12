@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} u geleden",
       "daysAgo": "{n} d geleden"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Instellingen",
+    "navGroups": {
+      "settings": "Instellingen",
+      "developer": "Ontwikkelaar",
+      "more": "Meer"
+    },
+    "sections": {
+      "account": {
+        "label": "Algemeen",
+        "description": "Profiel en account"
+      },
+      "appearance": {
+        "label": "Weergave",
+        "description": "Thema, taal en achtergrond"
+      },
+      "billing": {
+        "label": "Facturering",
+        "description": "Abonnementen en tegoeden"
+      },
+      "publicChats": {
+        "label": "Openbare chats",
+        "description": "Beheer chats gedeeld via openbare link"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "description": "Beveiliging en gegevensprivacy"
+      },
+      "notifications": {
+        "label": "Meldingen",
+        "description": "Meldingsvoorkeuren"
+      },
+      "apiKeys": {
+        "label": "API-sleutels",
+        "description": "Beheer je API-sleutels"
+      },
+      "data": {
+        "label": "Gegevens",
+        "description": "Gegevens exporteren en beheren"
+      },
+      "feedback": {
+        "label": "Feedback",
+        "description": "Stuur ons je feedback"
+      },
+      "about": {
+        "label": "Over",
+        "description": "Over Coasty"
+      },
+      "social": {
+        "label": "Verbinden",
+        "description": "Sociale links"
+      }
+    }
   }
 }

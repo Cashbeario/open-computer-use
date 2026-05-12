@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} 小时前",
       "daysAgo": "{n} 天前"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "设置",
+    "navGroups": {
+      "settings": "设置",
+      "developer": "开发者",
+      "more": "更多"
+    },
+    "sections": {
+      "account": {
+        "label": "通用",
+        "description": "个人资料和账户"
+      },
+      "appearance": {
+        "label": "外观",
+        "description": "主题、语言和背景"
+      },
+      "billing": {
+        "label": "账单",
+        "description": "套餐和积分"
+      },
+      "publicChats": {
+        "label": "公开聊天",
+        "description": "管理通过公开链接共享的聊天"
+      },
+      "privacy": {
+        "label": "隐私",
+        "description": "安全和数据隐私"
+      },
+      "notifications": {
+        "label": "通知",
+        "description": "通知偏好设置"
+      },
+      "apiKeys": {
+        "label": "API 密钥",
+        "description": "管理您的 API 密钥"
+      },
+      "data": {
+        "label": "数据",
+        "description": "导出和管理您的数据"
+      },
+      "feedback": {
+        "label": "反馈",
+        "description": "向我们发送反馈"
+      },
+      "about": {
+        "label": "关于",
+        "description": "关于 Coasty"
+      },
+      "social": {
+        "label": "社交",
+        "description": "社交链接"
+      }
+    }
   }
 }

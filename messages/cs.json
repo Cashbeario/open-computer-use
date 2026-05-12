@@ -2972,5 +2972,59 @@
       "hoursAgo": "před {n} h",
       "daysAgo": "před {n} dny"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Nastavení",
+    "navGroups": {
+      "settings": "Nastavení",
+      "developer": "Vývojář",
+      "more": "Další"
+    },
+    "sections": {
+      "account": {
+        "label": "Obecné",
+        "description": "Profil a účet"
+      },
+      "appearance": {
+        "label": "Vzhled",
+        "description": "Motiv, jazyk a pozadí"
+      },
+      "billing": {
+        "label": "Fakturace",
+        "description": "Plány a kredity"
+      },
+      "publicChats": {
+        "label": "Veřejné chaty",
+        "description": "Správa chatů sdílených veřejným odkazem"
+      },
+      "privacy": {
+        "label": "Soukromí",
+        "description": "Zabezpečení a ochrana dat"
+      },
+      "notifications": {
+        "label": "Oznámení",
+        "description": "Předvolby oznámení"
+      },
+      "apiKeys": {
+        "label": "API klíče",
+        "description": "Správa vašich API klíčů"
+      },
+      "data": {
+        "label": "Data",
+        "description": "Export a správa vašich dat"
+      },
+      "feedback": {
+        "label": "Zpětná vazba",
+        "description": "Pošlete nám zpětnou vazbu"
+      },
+      "about": {
+        "label": "O aplikaci",
+        "description": "O Coasty"
+      },
+      "social": {
+        "label": "Připojit",
+        "description": "Sociální odkazy"
+      }
+    }
   }
 }

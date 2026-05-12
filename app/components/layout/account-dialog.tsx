@@ -155,20 +155,47 @@ export function AccountDialog() {
   const [mobileView, setMobileView] = useState<"menu" | "content">("content")
   const router = useRouter()
   const tMemory = useTranslations("memory")
+  const tDialog = useTranslations("accountDialog")
 
-  // Localize only the entries that have proper translation namespaces;
-  // the other sidebar labels stay as-is until they get their own
-  // localized namespaces. This avoids forcing a giant scope-creep into
-  // the account-dialog while still respecting the user's language.
-  const localizedSections = sections.map((s) =>
-    s.id === "memory"
-      ? {
-          ...s,
-          label: tMemory("section.title"),
-          description: tMemory("sidebarDescription"),
-        }
-      : s,
-  )
+  // Translation keys for each sidebar section. Memory routes to its own
+  // namespace (it owns rich preset/editor strings); every other section
+  // resolves from accountDialog.sections.{key}.{label,description}. The
+  // map is intentionally explicit so the audit script can detect any
+  // section id that hasn't been wired here yet.
+  const SECTION_I18N: Record<
+    SectionType,
+    { label: string; description: string } | null
+  > = {
+    account: { label: tDialog("sections.account.label"), description: tDialog("sections.account.description") },
+    memory: { label: tMemory("section.title"), description: tMemory("sidebarDescription") },
+    appearance: { label: tDialog("sections.appearance.label"), description: tDialog("sections.appearance.description") },
+    billing: { label: tDialog("sections.billing.label"), description: tDialog("sections.billing.description") },
+    "public-chats": { label: tDialog("sections.publicChats.label"), description: tDialog("sections.publicChats.description") },
+    privacy: { label: tDialog("sections.privacy.label"), description: tDialog("sections.privacy.description") },
+    notifications: { label: tDialog("sections.notifications.label"), description: tDialog("sections.notifications.description") },
+    "api-keys": { label: tDialog("sections.apiKeys.label"), description: tDialog("sections.apiKeys.description") },
+    data: { label: tDialog("sections.data.label"), description: tDialog("sections.data.description") },
+    feedback: { label: tDialog("sections.feedback.label"), description: tDialog("sections.feedback.description") },
+    about: { label: tDialog("sections.about.label"), description: tDialog("sections.about.description") },
+    social: { label: tDialog("sections.social.label"), description: tDialog("sections.social.description") },
+  }
+
+  const localizedSections = sections.map((s) => {
+    const i18n = SECTION_I18N[s.id]
+    return i18n ? { ...s, label: i18n.label, description: i18n.description } : s
+  })
+
+  // Localize the three sidebar groups too. The same labels also serve
+  // as the mobile-view group headings.
+  const NAV_GROUP_LABELS: Record<string, string> = {
+    Settings: tDialog("navGroups.settings"),
+    Developer: tDialog("navGroups.developer"),
+    More: tDialog("navGroups.more"),
+  }
+  const localizedNavGroups = navGroups.map((g) => ({
+    ...g,
+    label: NAV_GROUP_LABELS[g.label] ?? g.label,
+  }))
 
   const activeSection = section
   const activeConfig = localizedSections.find((s) => s.id === activeSection)
@@ -319,7 +346,7 @@ export function AccountDialog() {
           }}
         >
           <VisuallyHidden.Root>
-            <DialogPrimitive.Title>Settings</DialogPrimitive.Title>
+            <DialogPrimitive.Title>{tDialog("settingsHeading")}</DialogPrimitive.Title>
           </VisuallyHidden.Root>
 
           {isLoading ? (
@@ -347,7 +374,7 @@ export function AccountDialog() {
 
                 {/* Nav groups */}
                 <div className="flex-1 px-2.5 pb-3 space-y-4 overflow-y-auto">
-                  {navGroups.map((group) => {
+                  {localizedNavGroups.map((group) => {
                     const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
                     return (
                       <div key={group.label}>
@@ -375,12 +402,12 @@ export function AccountDialog() {
                 {mobileView === "menu" ? (
                   <div className="flex-1 overflow-y-auto px-4 py-5 space-y-5">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-[15px] font-semibold">Settings</h2>
+                      <h2 className="text-[15px] font-semibold">{tDialog("settingsHeading")}</h2>
                       <button onClick={handleClose} className="p-1.5 -mr-1 rounded-md hover:bg-foreground/[0.04] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    {navGroups.map((group) => {
+                    {localizedNavGroups.map((group) => {
                       const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
                       return (
                         <div key={group.label}>

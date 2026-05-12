@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} ó",
       "daysAgo": "{n} n"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Beállítások",
+    "navGroups": {
+      "settings": "Beállítások",
+      "developer": "Fejlesztő",
+      "more": "Több"
+    },
+    "sections": {
+      "account": {
+        "label": "Általános",
+        "description": "Profil és fiók"
+      },
+      "appearance": {
+        "label": "Megjelenés",
+        "description": "Téma, nyelv és háttér"
+      },
+      "billing": {
+        "label": "Számlázás",
+        "description": "Csomagok és kreditek"
+      },
+      "publicChats": {
+        "label": "Nyilvános csevegések",
+        "description": "Nyilvános linken megosztott csevegések kezelése"
+      },
+      "privacy": {
+        "label": "Adatvédelem",
+        "description": "Biztonság és adatvédelem"
+      },
+      "notifications": {
+        "label": "Értesítések",
+        "description": "Értesítési beállítások"
+      },
+      "apiKeys": {
+        "label": "API-kulcsok",
+        "description": "API-kulcsok kezelése"
+      },
+      "data": {
+        "label": "Adatok",
+        "description": "Adatok exportálása és kezelése"
+      },
+      "feedback": {
+        "label": "Visszajelzés",
+        "description": "Küldj nekünk visszajelzést"
+      },
+      "about": {
+        "label": "Névjegy",
+        "description": "A Coasty névjegye"
+      },
+      "social": {
+        "label": "Csatlakozás",
+        "description": "Közösségi linkek"
+      }
+    }
   }
 }

@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} jam lalu",
       "daysAgo": "{n} hari lalu"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Tetapan",
+    "navGroups": {
+      "settings": "Tetapan",
+      "developer": "Pembangun",
+      "more": "Lagi"
+    },
+    "sections": {
+      "account": {
+        "label": "Umum",
+        "description": "Profil dan akaun"
+      },
+      "appearance": {
+        "label": "Penampilan",
+        "description": "Tema, bahasa dan latar belakang"
+      },
+      "billing": {
+        "label": "Pengebilan",
+        "description": "Pelan dan kredit"
+      },
+      "publicChats": {
+        "label": "Sembang Awam",
+        "description": "Urus sembang yang dikongsi melalui pautan awam"
+      },
+      "privacy": {
+        "label": "Privasi",
+        "description": "Keselamatan dan privasi data"
+      },
+      "notifications": {
+        "label": "Pemberitahuan",
+        "description": "Keutamaan pemberitahuan"
+      },
+      "apiKeys": {
+        "label": "Kunci API",
+        "description": "Urus kunci API anda"
+      },
+      "data": {
+        "label": "Data",
+        "description": "Eksport dan urus data anda"
+      },
+      "feedback": {
+        "label": "Maklum Balas",
+        "description": "Hantar maklum balas kepada kami"
+      },
+      "about": {
+        "label": "Tentang",
+        "description": "Tentang Coasty"
+      },
+      "social": {
+        "label": "Sambung",
+        "description": "Pautan sosial"
+      }
+    }
   }
 }

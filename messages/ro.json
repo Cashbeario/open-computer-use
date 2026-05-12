@@ -2972,5 +2972,59 @@
       "hoursAgo": "acum {n} h",
       "daysAgo": "acum {n} z"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Setări",
+    "navGroups": {
+      "settings": "Setări",
+      "developer": "Dezvoltator",
+      "more": "Mai multe"
+    },
+    "sections": {
+      "account": {
+        "label": "General",
+        "description": "Profil și cont"
+      },
+      "appearance": {
+        "label": "Aspect",
+        "description": "Temă, limbă și fundal"
+      },
+      "billing": {
+        "label": "Facturare",
+        "description": "Planuri și credite"
+      },
+      "publicChats": {
+        "label": "Discuții publice",
+        "description": "Gestionează discuțiile partajate prin link public"
+      },
+      "privacy": {
+        "label": "Confidențialitate",
+        "description": "Securitate și confidențialitatea datelor"
+      },
+      "notifications": {
+        "label": "Notificări",
+        "description": "Preferințe pentru notificări"
+      },
+      "apiKeys": {
+        "label": "Chei API",
+        "description": "Gestionează cheile tale API"
+      },
+      "data": {
+        "label": "Date",
+        "description": "Exportă și gestionează datele tale"
+      },
+      "feedback": {
+        "label": "Feedback",
+        "description": "Trimite-ne feedback-ul tău"
+      },
+      "about": {
+        "label": "Despre",
+        "description": "Despre Coasty"
+      },
+      "social": {
+        "label": "Conectează-te",
+        "description": "Linkuri sociale"
+      }
+    }
   }
 }

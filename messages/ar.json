@@ -2972,5 +2972,59 @@
       "hoursAgo": "منذ {n} س",
       "daysAgo": "منذ {n} ي"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "الإعدادات",
+    "navGroups": {
+      "settings": "الإعدادات",
+      "developer": "المطور",
+      "more": "المزيد"
+    },
+    "sections": {
+      "account": {
+        "label": "عام",
+        "description": "الملف الشخصي والحساب"
+      },
+      "appearance": {
+        "label": "المظهر",
+        "description": "السمة واللغة والخلفية"
+      },
+      "billing": {
+        "label": "الفوترة",
+        "description": "الخطط والأرصدة"
+      },
+      "publicChats": {
+        "label": "المحادثات العامة",
+        "description": "إدارة المحادثات المشتركة عبر رابط عام"
+      },
+      "privacy": {
+        "label": "الخصوصية",
+        "description": "الأمان وخصوصية البيانات"
+      },
+      "notifications": {
+        "label": "الإشعارات",
+        "description": "تفضيلات الإشعارات"
+      },
+      "apiKeys": {
+        "label": "مفاتيح API",
+        "description": "إدارة مفاتيح API الخاصة بك"
+      },
+      "data": {
+        "label": "البيانات",
+        "description": "تصدير وإدارة بياناتك"
+      },
+      "feedback": {
+        "label": "ملاحظات",
+        "description": "أرسل لنا ملاحظاتك"
+      },
+      "about": {
+        "label": "حول",
+        "description": "حول Coasty"
+      },
+      "social": {
+        "label": "تواصل",
+        "description": "روابط التواصل الاجتماعي"
+      }
+    }
   }
 }

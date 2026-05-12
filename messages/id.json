@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} jam lalu",
       "daysAgo": "{n} hari lalu"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Pengaturan",
+    "navGroups": {
+      "settings": "Pengaturan",
+      "developer": "Pengembang",
+      "more": "Lainnya"
+    },
+    "sections": {
+      "account": {
+        "label": "Umum",
+        "description": "Profil dan akun"
+      },
+      "appearance": {
+        "label": "Tampilan",
+        "description": "Tema, bahasa, dan latar belakang"
+      },
+      "billing": {
+        "label": "Penagihan",
+        "description": "Paket dan kredit"
+      },
+      "publicChats": {
+        "label": "Obrolan Publik",
+        "description": "Kelola obrolan yang dibagikan melalui tautan publik"
+      },
+      "privacy": {
+        "label": "Privasi",
+        "description": "Keamanan dan privasi data"
+      },
+      "notifications": {
+        "label": "Notifikasi",
+        "description": "Preferensi notifikasi"
+      },
+      "apiKeys": {
+        "label": "Kunci API",
+        "description": "Kelola kunci API Anda"
+      },
+      "data": {
+        "label": "Data",
+        "description": "Ekspor dan kelola data Anda"
+      },
+      "feedback": {
+        "label": "Umpan Balik",
+        "description": "Kirim umpan balik kepada kami"
+      },
+      "about": {
+        "label": "Tentang",
+        "description": "Tentang Coasty"
+      },
+      "social": {
+        "label": "Hubungkan",
+        "description": "Tautan sosial"
+      }
+    }
   }
 }

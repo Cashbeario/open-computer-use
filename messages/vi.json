@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} giờ trước",
       "daysAgo": "{n} ngày trước"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Cài đặt",
+    "navGroups": {
+      "settings": "Cài đặt",
+      "developer": "Nhà phát triển",
+      "more": "Khác"
+    },
+    "sections": {
+      "account": {
+        "label": "Chung",
+        "description": "Hồ sơ và tài khoản"
+      },
+      "appearance": {
+        "label": "Giao diện",
+        "description": "Chủ đề, ngôn ngữ và nền"
+      },
+      "billing": {
+        "label": "Thanh toán",
+        "description": "Gói và tín dụng"
+      },
+      "publicChats": {
+        "label": "Cuộc trò chuyện công khai",
+        "description": "Quản lý cuộc trò chuyện chia sẻ qua liên kết công khai"
+      },
+      "privacy": {
+        "label": "Quyền riêng tư",
+        "description": "Bảo mật và quyền riêng tư dữ liệu"
+      },
+      "notifications": {
+        "label": "Thông báo",
+        "description": "Tùy chọn thông báo"
+      },
+      "apiKeys": {
+        "label": "Khóa API",
+        "description": "Quản lý khóa API của bạn"
+      },
+      "data": {
+        "label": "Dữ liệu",
+        "description": "Xuất và quản lý dữ liệu của bạn"
+      },
+      "feedback": {
+        "label": "Phản hồi",
+        "description": "Gửi phản hồi cho chúng tôi"
+      },
+      "about": {
+        "label": "Giới thiệu",
+        "description": "Giới thiệu về Coasty"
+      },
+      "social": {
+        "label": "Kết nối",
+        "description": "Liên kết mạng xã hội"
+      }
+    }
   }
 }

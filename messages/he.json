@@ -2972,5 +2972,59 @@
       "hoursAgo": "לפני {n} שע׳",
       "daysAgo": "לפני {n} ימים"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "הגדרות",
+    "navGroups": {
+      "settings": "הגדרות",
+      "developer": "מפתח",
+      "more": "עוד"
+    },
+    "sections": {
+      "account": {
+        "label": "כללי",
+        "description": "פרופיל וחשבון"
+      },
+      "appearance": {
+        "label": "מראה",
+        "description": "ערכת נושא, שפה ורקע"
+      },
+      "billing": {
+        "label": "חיוב",
+        "description": "תוכניות וקרדיטים"
+      },
+      "publicChats": {
+        "label": "צ'אטים ציבוריים",
+        "description": "ניהול צ'אטים ששותפו דרך קישור ציבורי"
+      },
+      "privacy": {
+        "label": "פרטיות",
+        "description": "אבטחה ופרטיות נתונים"
+      },
+      "notifications": {
+        "label": "התראות",
+        "description": "העדפות התראות"
+      },
+      "apiKeys": {
+        "label": "מפתחות API",
+        "description": "ניהול מפתחות ה-API שלך"
+      },
+      "data": {
+        "label": "נתונים",
+        "description": "ייצוא וניהול הנתונים שלך"
+      },
+      "feedback": {
+        "label": "משוב",
+        "description": "שלח לנו משוב"
+      },
+      "about": {
+        "label": "אודות",
+        "description": "אודות Coasty"
+      },
+      "social": {
+        "label": "חיבור",
+        "description": "קישורים חברתיים"
+      }
+    }
   }
 }

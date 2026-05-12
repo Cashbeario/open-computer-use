@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} ชม. ที่แล้ว",
       "daysAgo": "{n} วันที่แล้ว"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "การตั้งค่า",
+    "navGroups": {
+      "settings": "การตั้งค่า",
+      "developer": "นักพัฒนา",
+      "more": "เพิ่มเติม"
+    },
+    "sections": {
+      "account": {
+        "label": "ทั่วไป",
+        "description": "โปรไฟล์และบัญชี"
+      },
+      "appearance": {
+        "label": "ลักษณะ",
+        "description": "ธีม ภาษา และพื้นหลัง"
+      },
+      "billing": {
+        "label": "การเรียกเก็บเงิน",
+        "description": "แผนและเครดิต"
+      },
+      "publicChats": {
+        "label": "แชทสาธารณะ",
+        "description": "จัดการแชทที่แชร์ผ่านลิงก์สาธารณะ"
+      },
+      "privacy": {
+        "label": "ความเป็นส่วนตัว",
+        "description": "ความปลอดภัยและความเป็นส่วนตัวของข้อมูล"
+      },
+      "notifications": {
+        "label": "การแจ้งเตือน",
+        "description": "การตั้งค่าการแจ้งเตือน"
+      },
+      "apiKeys": {
+        "label": "คีย์ API",
+        "description": "จัดการคีย์ API ของคุณ"
+      },
+      "data": {
+        "label": "ข้อมูล",
+        "description": "ส่งออกและจัดการข้อมูลของคุณ"
+      },
+      "feedback": {
+        "label": "ความคิดเห็น",
+        "description": "ส่งความคิดเห็นให้เรา"
+      },
+      "about": {
+        "label": "เกี่ยวกับ",
+        "description": "เกี่ยวกับ Coasty"
+      },
+      "social": {
+        "label": "เชื่อมต่อ",
+        "description": "ลิงก์โซเชียล"
+      }
+    }
   }
 }

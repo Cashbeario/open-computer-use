@@ -2972,5 +2972,59 @@
       "hoursAgo": "πριν {n} ώ",
       "daysAgo": "πριν {n} ημ"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Ρυθμίσεις",
+    "navGroups": {
+      "settings": "Ρυθμίσεις",
+      "developer": "Προγραμματιστής",
+      "more": "Περισσότερα"
+    },
+    "sections": {
+      "account": {
+        "label": "Γενικά",
+        "description": "Προφίλ και λογαριασμός"
+      },
+      "appearance": {
+        "label": "Εμφάνιση",
+        "description": "Θέμα, γλώσσα και φόντο"
+      },
+      "billing": {
+        "label": "Χρέωση",
+        "description": "Πακέτα και πιστώσεις"
+      },
+      "publicChats": {
+        "label": "Δημόσιες συνομιλίες",
+        "description": "Διαχειριστείτε συνομιλίες που έχουν μοιραστεί μέσω δημόσιου συνδέσμου"
+      },
+      "privacy": {
+        "label": "Απόρρητο",
+        "description": "Ασφάλεια και απόρρητο δεδομένων"
+      },
+      "notifications": {
+        "label": "Ειδοποιήσεις",
+        "description": "Προτιμήσεις ειδοποιήσεων"
+      },
+      "apiKeys": {
+        "label": "Κλειδιά API",
+        "description": "Διαχειριστείτε τα κλειδιά API σας"
+      },
+      "data": {
+        "label": "Δεδομένα",
+        "description": "Εξάγετε και διαχειριστείτε τα δεδομένα σας"
+      },
+      "feedback": {
+        "label": "Σχόλια",
+        "description": "Στείλτε μας τα σχόλιά σας"
+      },
+      "about": {
+        "label": "Σχετικά",
+        "description": "Σχετικά με την Coasty"
+      },
+      "social": {
+        "label": "Σύνδεση",
+        "description": "Σύνδεσμοι κοινωνικής δικτύωσης"
+      }
+    }
   }
 }

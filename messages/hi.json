@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} घंटे पहले",
       "daysAgo": "{n} दिन पहले"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "सेटिंग्स",
+    "navGroups": {
+      "settings": "सेटिंग्स",
+      "developer": "डेवलपर",
+      "more": "अधिक"
+    },
+    "sections": {
+      "account": {
+        "label": "सामान्य",
+        "description": "प्रोफ़ाइल और खाता"
+      },
+      "appearance": {
+        "label": "दिखावट",
+        "description": "थीम, भाषा और पृष्ठभूमि"
+      },
+      "billing": {
+        "label": "बिलिंग",
+        "description": "योजनाएँ और क्रेडिट"
+      },
+      "publicChats": {
+        "label": "सार्वजनिक चैट",
+        "description": "सार्वजनिक लिंक के माध्यम से साझा की गई चैट प्रबंधित करें"
+      },
+      "privacy": {
+        "label": "गोपनीयता",
+        "description": "सुरक्षा और डेटा गोपनीयता"
+      },
+      "notifications": {
+        "label": "सूचनाएँ",
+        "description": "सूचना प्राथमिकताएँ"
+      },
+      "apiKeys": {
+        "label": "API कुंजियाँ",
+        "description": "अपनी API कुंजियाँ प्रबंधित करें"
+      },
+      "data": {
+        "label": "डेटा",
+        "description": "अपना डेटा निर्यात और प्रबंधित करें"
+      },
+      "feedback": {
+        "label": "प्रतिक्रिया",
+        "description": "हमें अपनी प्रतिक्रिया भेजें"
+      },
+      "about": {
+        "label": "बारे में",
+        "description": "Coasty के बारे में"
+      },
+      "social": {
+        "label": "जुड़ें",
+        "description": "सोशल लिंक"
+      }
+    }
   }
 }

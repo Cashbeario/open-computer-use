@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n}시간 전",
       "daysAgo": "{n}일 전"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "설정",
+    "navGroups": {
+      "settings": "설정",
+      "developer": "개발자",
+      "more": "더보기"
+    },
+    "sections": {
+      "account": {
+        "label": "일반",
+        "description": "프로필 및 계정"
+      },
+      "appearance": {
+        "label": "모양",
+        "description": "테마, 언어 및 배경"
+      },
+      "billing": {
+        "label": "결제",
+        "description": "요금제 및 크레딧"
+      },
+      "publicChats": {
+        "label": "공개 채팅",
+        "description": "공개 링크로 공유된 채팅 관리"
+      },
+      "privacy": {
+        "label": "개인 정보",
+        "description": "보안 및 데이터 개인 정보"
+      },
+      "notifications": {
+        "label": "알림",
+        "description": "알림 환경 설정"
+      },
+      "apiKeys": {
+        "label": "API 키",
+        "description": "API 키 관리"
+      },
+      "data": {
+        "label": "데이터",
+        "description": "데이터 내보내기 및 관리"
+      },
+      "feedback": {
+        "label": "피드백",
+        "description": "피드백 보내기"
+      },
+      "about": {
+        "label": "정보",
+        "description": "Coasty 정보"
+      },
+      "social": {
+        "label": "연결",
+        "description": "소셜 링크"
+      }
+    }
   }
 }

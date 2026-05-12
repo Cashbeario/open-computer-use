@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n}h nakalipas",
       "daysAgo": "{n}d nakalipas"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Mga Setting",
+    "navGroups": {
+      "settings": "Mga Setting",
+      "developer": "Developer",
+      "more": "Higit pa"
+    },
+    "sections": {
+      "account": {
+        "label": "Pangkalahatan",
+        "description": "Profile at account"
+      },
+      "appearance": {
+        "label": "Hitsura",
+        "description": "Tema, wika, at background"
+      },
+      "billing": {
+        "label": "Pagsingil",
+        "description": "Mga plano at credits"
+      },
+      "publicChats": {
+        "label": "Mga Pampublikong Chat",
+        "description": "Pamahalaan ang mga chat na ibinahagi sa pampublikong link"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "description": "Seguridad at privacy ng data"
+      },
+      "notifications": {
+        "label": "Mga Abiso",
+        "description": "Mga kagustuhan sa abiso"
+      },
+      "apiKeys": {
+        "label": "Mga API Key",
+        "description": "Pamahalaan ang iyong mga API key"
+      },
+      "data": {
+        "label": "Data",
+        "description": "I-export at pamahalaan ang iyong data"
+      },
+      "feedback": {
+        "label": "Feedback",
+        "description": "Padalhan kami ng iyong feedback"
+      },
+      "about": {
+        "label": "Tungkol",
+        "description": "Tungkol sa Coasty"
+      },
+      "social": {
+        "label": "Kumonekta",
+        "description": "Mga social link"
+      }
+    }
   }
 }

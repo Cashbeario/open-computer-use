@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} h fa",
       "daysAgo": "{n} g fa"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Impostazioni",
+    "navGroups": {
+      "settings": "Impostazioni",
+      "developer": "Sviluppatore",
+      "more": "Altro"
+    },
+    "sections": {
+      "account": {
+        "label": "Generale",
+        "description": "Profilo e account"
+      },
+      "appearance": {
+        "label": "Aspetto",
+        "description": "Tema, lingua e sfondo"
+      },
+      "billing": {
+        "label": "Fatturazione",
+        "description": "Piani e crediti"
+      },
+      "publicChats": {
+        "label": "Chat pubbliche",
+        "description": "Gestisci le chat condivise tramite link pubblico"
+      },
+      "privacy": {
+        "label": "Privacy",
+        "description": "Sicurezza e privacy dei dati"
+      },
+      "notifications": {
+        "label": "Notifiche",
+        "description": "Preferenze di notifica"
+      },
+      "apiKeys": {
+        "label": "Chiavi API",
+        "description": "Gestisci le tue chiavi API"
+      },
+      "data": {
+        "label": "Dati",
+        "description": "Esporta e gestisci i tuoi dati"
+      },
+      "feedback": {
+        "label": "Feedback",
+        "description": "Inviaci il tuo feedback"
+      },
+      "about": {
+        "label": "Informazioni",
+        "description": "Informazioni su Coasty"
+      },
+      "social": {
+        "label": "Connetti",
+        "description": "Collegamenti social"
+      }
+    }
   }
 }

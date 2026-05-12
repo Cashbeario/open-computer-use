@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} sa önce",
       "daysAgo": "{n} g önce"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Ayarlar",
+    "navGroups": {
+      "settings": "Ayarlar",
+      "developer": "Geliştirici",
+      "more": "Daha fazla"
+    },
+    "sections": {
+      "account": {
+        "label": "Genel",
+        "description": "Profil ve hesap"
+      },
+      "appearance": {
+        "label": "Görünüm",
+        "description": "Tema, dil ve arka plan"
+      },
+      "billing": {
+        "label": "Faturalama",
+        "description": "Planlar ve krediler"
+      },
+      "publicChats": {
+        "label": "Genel sohbetler",
+        "description": "Genel bağlantıyla paylaşılan sohbetleri yönet"
+      },
+      "privacy": {
+        "label": "Gizlilik",
+        "description": "Güvenlik ve veri gizliliği"
+      },
+      "notifications": {
+        "label": "Bildirimler",
+        "description": "Bildirim tercihleri"
+      },
+      "apiKeys": {
+        "label": "API anahtarları",
+        "description": "API anahtarlarını yönet"
+      },
+      "data": {
+        "label": "Veriler",
+        "description": "Verilerini dışa aktar ve yönet"
+      },
+      "feedback": {
+        "label": "Geri bildirim",
+        "description": "Bize geri bildirimini gönder"
+      },
+      "about": {
+        "label": "Hakkında",
+        "description": "Coasty hakkında"
+      },
+      "social": {
+        "label": "Bağlan",
+        "description": "Sosyal bağlantılar"
+      }
+    }
   }
 }

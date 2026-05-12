@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} ч назад",
       "daysAgo": "{n} дн назад"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Настройки",
+    "navGroups": {
+      "settings": "Настройки",
+      "developer": "Разработчик",
+      "more": "Ещё"
+    },
+    "sections": {
+      "account": {
+        "label": "Общие",
+        "description": "Профиль и учётная запись"
+      },
+      "appearance": {
+        "label": "Внешний вид",
+        "description": "Тема, язык и фон"
+      },
+      "billing": {
+        "label": "Оплата",
+        "description": "Тарифы и кредиты"
+      },
+      "publicChats": {
+        "label": "Публичные чаты",
+        "description": "Управление чатами, доступными по публичной ссылке"
+      },
+      "privacy": {
+        "label": "Конфиденциальность",
+        "description": "Безопасность и конфиденциальность данных"
+      },
+      "notifications": {
+        "label": "Уведомления",
+        "description": "Настройки уведомлений"
+      },
+      "apiKeys": {
+        "label": "Ключи API",
+        "description": "Управление ключами API"
+      },
+      "data": {
+        "label": "Данные",
+        "description": "Экспорт и управление вашими данными"
+      },
+      "feedback": {
+        "label": "Отзыв",
+        "description": "Отправьте нам отзыв"
+      },
+      "about": {
+        "label": "О сервисе",
+        "description": "О Coasty"
+      },
+      "social": {
+        "label": "Соцсети",
+        "description": "Социальные ссылки"
+      }
+    }
   }
 }

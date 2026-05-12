@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} t sitten",
       "daysAgo": "{n} pv sitten"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Asetukset",
+    "navGroups": {
+      "settings": "Asetukset",
+      "developer": "Kehittäjä",
+      "more": "Lisää"
+    },
+    "sections": {
+      "account": {
+        "label": "Yleinen",
+        "description": "Profiili ja tili"
+      },
+      "appearance": {
+        "label": "Ulkoasu",
+        "description": "Teema, kieli ja tausta"
+      },
+      "billing": {
+        "label": "Laskutus",
+        "description": "Tilaukset ja luotot"
+      },
+      "publicChats": {
+        "label": "Julkiset keskustelut",
+        "description": "Hallitse julkisen linkin kautta jaettuja keskusteluja"
+      },
+      "privacy": {
+        "label": "Yksityisyys",
+        "description": "Tietoturva ja tietosuoja"
+      },
+      "notifications": {
+        "label": "Ilmoitukset",
+        "description": "Ilmoitusasetukset"
+      },
+      "apiKeys": {
+        "label": "API-avaimet",
+        "description": "Hallitse API-avaimiasi"
+      },
+      "data": {
+        "label": "Tiedot",
+        "description": "Vie ja hallitse tietojasi"
+      },
+      "feedback": {
+        "label": "Palaute",
+        "description": "Lähetä meille palautetta"
+      },
+      "about": {
+        "label": "Tietoja",
+        "description": "Tietoja Coastysta"
+      },
+      "social": {
+        "label": "Yhteys",
+        "description": "Sosiaaliset linkit"
+      }
+    }
   }
 }

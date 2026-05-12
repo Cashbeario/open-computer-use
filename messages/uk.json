@@ -2972,5 +2972,59 @@
       "hoursAgo": "{n} год тому",
       "daysAgo": "{n} дн тому"
     }
+  },
+  "accountDialog": {
+    "settingsHeading": "Налаштування",
+    "navGroups": {
+      "settings": "Налаштування",
+      "developer": "Розробник",
+      "more": "Ще"
+    },
+    "sections": {
+      "account": {
+        "label": "Загальні",
+        "description": "Профіль і обліковий запис"
+      },
+      "appearance": {
+        "label": "Вигляд",
+        "description": "Тема, мова та фон"
+      },
+      "billing": {
+        "label": "Оплата",
+        "description": "Плани та кредити"
+      },
+      "publicChats": {
+        "label": "Публічні чати",
+        "description": "Керування чатами, поширеними за публічним посиланням"
+      },
+      "privacy": {
+        "label": "Конфіденційність",
+        "description": "Безпека та конфіденційність даних"
+      },
+      "notifications": {
+        "label": "Сповіщення",
+        "description": "Налаштування сповіщень"
+      },
+      "apiKeys": {
+        "label": "API-ключі",
+        "description": "Керування вашими API-ключами"
+      },
+      "data": {
+        "label": "Дані",
+        "description": "Експорт і керування вашими даними"
+      },
+      "feedback": {
+        "label": "Відгуки",
+        "description": "Надішліть нам свій відгук"
+      },
+      "about": {
+        "label": "Про сервіс",
+        "description": "Про Coasty"
+      },
+      "social": {
+        "label": "Соцмережі",
+        "description": "Посилання на соцмережі"
+      }
+    }
   }
 }

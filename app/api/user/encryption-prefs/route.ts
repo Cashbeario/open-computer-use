@@ -225,12 +225,21 @@ async function invalidateBackendCache(userId: string): Promise<void> {
     // Backend mounts the `internal` router at root (prefix=""), so the
     // endpoint sits at /internal/* — not under /api/. Matches the existing
     // /internal/memstats path in app/api/routes/internal.py.
+    //
+    // Headers follow the canonical proxy pattern enforced by
+    // tests/lib/proxy-headers-audit.test.ts: every backend fetch from a
+    // Next.js route forwards BOTH X-Internal-Key AND X-User-ID so the
+    // backend's CSRFMiddleware skip path fires. The endpoint also reads
+    // user_id from the body (used for cache invalidation, not auth) — both
+    // identify the same user, the header satisfies the middleware contract
+    // and the body satisfies the route handler.
     await fetch(
       `${PYTHON_BACKEND_URL}/internal/encryption-prefs/invalidate`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-User-ID": userId,
           ...(INTERNAL_API_KEY && { "X-Internal-Key": INTERNAL_API_KEY }),
         },
         body: JSON.stringify({ user_id: userId }),

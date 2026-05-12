@@ -219,18 +219,43 @@ export function AccountDialog() {
   const handleSectionChange = useCallback(
     (sectionId: SectionType) => {
       // Quick-link sections (Guide, Referral) navigate to their full
-      // page instead of rendering inline. Close the dialog first so the
-      // popover state is cleaned up, then push the route.
+      // page instead of rendering inline.
+      //
+      // IMPORTANT: we deliberately don't call the store's close() here —
+      // close() schedules window.history.back() when the dialog was
+      // opened in overlay mode (_didPushState), which races with the
+      // router.push() that follows. The back() pops /guide off the
+      // history stack, popstate fires on /account, and the popstate
+      // handler reopens the dialog. From the user's POV: click Guide →
+      // dialog flashes closed → dialog reopens, never reaches /guide.
+      //
+      // Instead, clear the store state synchronously (no history.back)
+      // and let router.push do the only URL mutation. Mobile view is
+      // reset so reopening the dialog later starts on the menu.
       const target = sections.find((s) => s.id === sectionId)
       if (target && "href" in target && target.href) {
-        close()
-        router.push(target.href)
+        useAccountDialog.setState({
+          isOpen: false,
+          _previousPath: null,
+          _didPushState: false,
+        })
+        // Radix sometimes leaves pointerEvents disabled on body when a
+        // dialog unmounts mid-interaction — restore it so the destination
+        // page is clickable.
+        document.body.style.pointerEvents = ""
+        setMobileView("menu")
+        // Use replace, not push, so the /account?section=… entry is not
+        // left in history. Otherwise the browser back button from /guide
+        // would pop back to /account?section=…, which the URL-sync logic
+        // would interpret as "open the dialog again" — the opposite of
+        // what the user just asked for.
+        router.replace(target.href)
         return
       }
       setSection(sectionId)
       setMobileView("content")
     },
-    [setSection, close, router]
+    [setSection, router]
   )
 
   // Wrapper around store close that also handles real Next.js navigation

@@ -365,6 +365,12 @@ body.coasty-signing-out [data-sonner-toast] {
   --spacing-app-header: 56px;
   --spacing-input-area: 134px;
 
+  /* Custom breakpoint sized to land just below 13" MacBook Air width
+     (1440 logical px) so the hero gutter cards mount on small Macs.
+     Tailwind's stock 2xl is 1536, which excludes every laptop smaller
+     than the 16" MBP. Used as `mac:` (e.g. mac:block). */
+  --breakpoint-mac: 90rem;
+
   @keyframes loading-dots {
     0%,
     100% {

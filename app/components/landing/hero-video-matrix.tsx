@@ -86,7 +86,7 @@ function StatCell({
           "bg-clip-text text-transparent",
           "bg-gradient-to-b from-foreground to-foreground/85",
           "dark:from-white dark:to-white/80",
-          isMobile ? "text-[1.55rem]" : "text-[1.85rem] lg:text-[2rem]",
+          isMobile ? "text-[1.7rem]" : "text-[1.85rem] lg:text-[2rem]",
         )}
       >
         {display}
@@ -95,7 +95,7 @@ function StatCell({
         className={cn(
           "font-mono uppercase leading-tight text-foreground/55 dark:text-white/55",
           isMobile
-            ? "mt-3 text-[8.5px] tracking-[0.22em]"
+            ? "mt-2.5 text-[8px] tracking-[0.2em]"
             : "mt-3 text-[9px] tracking-[0.24em]",
         )}
       >
@@ -105,7 +105,7 @@ function StatCell({
         className={cn(
           "font-light leading-[1.35] text-foreground/35 dark:text-white/35 normal-case",
           isMobile
-            ? "mt-1.5 max-w-[130px] text-[10px]"
+            ? "mt-1.5 max-w-[120px] text-[9.5px]"
             : "mt-2 max-w-[150px] text-[11px]",
         )}
       >
@@ -734,51 +734,47 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               transition={{ duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative mx-auto",
-                isMobile ? "mt-7 max-w-[340px]" : "mt-9 max-w-[620px]",
+                isMobile ? "mt-6 max-w-[320px]" : "mt-9 max-w-[620px]",
               )}
               aria-label="Resources saved per workflow"
             >
 
-              {/* No panel chrome, no top rule — the cone of light
-                  behind defines the moment, and the tapered cell
-                  dividers carry all the structure the row needs.
-                  Apple / Linear "no chrome" at its most literal. */}
+              {/* No panel chrome anywhere — the tapered hairline cell
+                  dividers carry all the structure the row needs. On
+                  mobile the 2x2 grid uses a cross-pattern of dividers
+                  (vertical between columns, horizontal between rows)
+                  for the same editorial spec-sheet feel as desktop. */}
               <div className="relative">
                 <div
                   className={cn(
                     "relative grid",
-                    // Mobile: 2x2 of glass pills with breathing-room gap.
-                    // Desktop: 4-up no-chrome row, dividers carry the rhythm.
-                    isMobile ? "grid-cols-2 gap-2.5" : "grid-cols-4",
+                    isMobile ? "grid-cols-2" : "grid-cols-4",
                   )}
                 >
                   {RESOURCE_STAT_KEYS.map((key, i) => {
-                    // Tapered vertical divider — desktop ONLY. On mobile each
-                    // cell gets the outlined-glass-pill treatment instead, so
-                    // dividers between pills would be redundant chrome.
+                    // Desktop: tapered vertical divider before every cell
+                    // except the first. Mobile (2x2): vertical before
+                    // right-column cells, horizontal above bottom-row cells.
                     const hasLeftDivider = !isMobile && i > 0
+                    const mobileLeftDivider = isMobile && i % 2 === 1
+                    const mobileTopDivider = isMobile && i >= 2
                     return (
                       <div
                         key={key}
                         className={cn(
                           "relative",
-                          // Mobile — outlined glass pill (same vocabulary as
-                          // the book-a-demo CTA). A hairline ring at /20, a
-                          // barely-tinted plate at /[0.03], and a 2px backdrop
-                          // blur lift each stat off the cone behind it. Reads
-                          // on any background — bright cone, dim tail, or the
-                          // page bg as the hero un-sticks.
-                          isMobile &&
-                            "rounded-2xl border border-foreground/20 dark:border-white/20 bg-foreground/[0.03] dark:bg-white/[0.04] backdrop-blur-[2px]",
-                          // Padding — denser on mobile inside each pill;
-                          // generous breathing room desktop where space
-                          // alone separates cells.
-                          isMobile ? "px-3 py-5" : "px-4 py-8",
-                          // Desktop divider — eased to a whisper: deep insets,
-                          // low opacity so it reads as a hint of structure
-                          // rather than a rule.
+                          // Padding — tighter on mobile so the 2x2 grid
+                          // breathes without crushing the sublabel wrap.
+                          isMobile ? "px-2 py-4" : "px-4 py-8",
+                          // Desktop divider — eased to a whisper.
                           hasLeftDivider &&
                             "before:content-[''] before:absolute before:left-0 before:top-7 before:bottom-7 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.09] dark:before:via-white/[0.11] before:to-transparent",
+                          // Mobile vertical hairline between the two columns.
+                          mobileLeftDivider &&
+                            "before:content-[''] before:absolute before:left-0 before:top-4 before:bottom-4 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.10] dark:before:via-white/[0.12] before:to-transparent",
+                          // Mobile horizontal hairline above the bottom row.
+                          mobileTopDivider &&
+                            "after:content-[''] after:absolute after:top-0 after:left-4 after:right-4 after:h-px after:bg-gradient-to-r after:from-transparent after:via-foreground/[0.10] dark:after:via-white/[0.12] after:to-transparent",
                         )}
                       >
                         <StatCell

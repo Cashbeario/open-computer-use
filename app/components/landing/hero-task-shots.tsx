@@ -208,7 +208,7 @@ export function HeroTaskShots({ isMobile, currentSection }: HeroTaskShotsProps) 
       // wins. Wrapper is pointer-events-none so clicks pass through
       // to section content; individual cards re-enable pointer-events
       // for hover.
-      className="pointer-events-none fixed inset-0 z-40 hidden 2xl:block"
+      className="pointer-events-none fixed inset-0 z-40 hidden mac:block"
     >
       {SHOTS.map((s, i) => {
         const isFeatured = i === featuredIndex

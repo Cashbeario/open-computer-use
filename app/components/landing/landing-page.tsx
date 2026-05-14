@@ -76,7 +76,7 @@ export function LandingPage() {
   // mid-band, currentSection is null and no card is featured.
   useEffect(() => {
     if (typeof window === "undefined") return
-    if (window.innerWidth < 1536) return // matches HeroTaskShots `2xl:block` gate
+    if (window.innerWidth < 1440) return // matches HeroTaskShots `mac:block` gate (90rem)
 
     const inView = new Set<TriggerSection>()
     const elements: { id: TriggerSection; el: HTMLElement }[] = []
@@ -203,19 +203,20 @@ export function LandingPage() {
             "pb-16 sm:pb-20 lg:pb-24",
             // Only animate / apply the reflow on viewports wide enough
             // to host the featured card (the cards themselves are
-            // gated at 2xl). The arbitrary-value padding utilities
-            // below are also `2xl:` prefixed so below 1536px no
-            // padding is applied — section content stays centred.
-            "2xl:transition-[padding] 2xl:duration-[550ms] 2xl:ease-[cubic-bezier(0.16,1,0.3,1)]",
+            // gated at the custom `mac` breakpoint = 1440px). The
+            // arbitrary-value padding utilities below are also `mac:`
+            // prefixed so below that width no padding is applied —
+            // section content stays centred.
+            "mac:transition-[padding] mac:duration-[550ms] mac:ease-[cubic-bezier(0.16,1,0.3,1)]",
             // Featured-LEFT: section gets the big reserve on the
             // left (clears the featured card) AND a smaller
             // reserve on the right (clears the OPPOSITE side's
             // dim gutter cards still rendered at their `)(`
             // positions). Mirrored for featured-right.
             featuredSide === "left" &&
-              "2xl:pl-[var(--reserve-featured)] 2xl:pr-[var(--reserve-opposite)]",
+              "mac:pl-[var(--reserve-featured)] mac:pr-[var(--reserve-opposite)]",
             featuredSide === "right" &&
-              "2xl:pr-[var(--reserve-featured)] 2xl:pl-[var(--reserve-opposite)]",
+              "mac:pr-[var(--reserve-featured)] mac:pl-[var(--reserve-opposite)]",
           )}
           // data-narrow is set whenever any card is featured. Sections
           // inside the group key narrow-mode classes off this attribute

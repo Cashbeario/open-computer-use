@@ -140,6 +140,40 @@ const HEARTBEAT_INTERVAL_MS = 30000
 // entire user session.
 const HEARTBEAT_PONG_TIMEOUT_MS = 75000
 
+// ─────────────────────────────────────────────────────────────────────
+// Command-queue backpressure thresholds
+// ─────────────────────────────────────────────────────────────────────
+//
+// The bridge serializes every inbound command through ``commandQueue``
+// (see WHY at line ~169). Because a single overlay-hiding command can
+// easily take ~300 ms (50 ms hide + action + 250 ms fade-in), a chatty
+// backend that pipelines commands faster than the local machine can
+// drain them will silently grow the queue. From the user's perspective
+// the agent feels "laggy" but no error surfaces — the queue just grows
+// unbounded and command results trickle back seconds late.
+//
+// We surface this BEFORE the user feels it. When in-flight depth reaches
+// WARN, the bridge sends a one-shot ``command_queue_backpressure``
+// telemetry frame so the backend can throttle or coalesce. When the
+// queue drains back to RECOVER (50% of WARN), we send a one-shot
+// "recovered" frame so the backend knows it's safe to resume normal
+// pacing. The hysteresis gap (WARN minus RECOVER) prevents flap when
+// depth oscillates around the threshold.
+//
+// COMMAND_QUEUE_BACKPRESSURE_WARN = 8. Eight queued commands at ~300 ms
+// each = ~2.4 s of latency. That's the threshold where a UI delay
+// crosses from "snappy" to "the agent feels stuck", and where a human
+// user would notice and complain. Set lower and we'd cry wolf on every
+// modest burst; set higher and we'd miss the early signal.
+//
+// COMMAND_QUEUE_BACKPRESSURE_RECOVER = 4. Half of WARN gives the
+// queue room to oscillate (typical burst→drain swings of ±3) without
+// re-firing the warning. Recovery at 4 also means the backend has at
+// least ~1.2 s of headroom before another warning could fire, which
+// is enough time for a remote rate-limit decision to take effect.
+const COMMAND_QUEUE_BACKPRESSURE_WARN = 8
+const COMMAND_QUEUE_BACKPRESSURE_RECOVER = 4
+
 export class WebSocketBridge {
   private ws: WebSocket | null = null
   private executor: LocalExecutor
@@ -188,6 +222,19 @@ export class WebSocketBridge {
    * strict in-order, one-at-a-time execution. Errors don't break the chain.
    */
   private commandQueue: Promise<unknown> = Promise.resolve()
+  /**
+   * Current depth of the serial command queue — incremented at enqueue,
+   * decremented when a chain link resolves OR rejects. Used to drive the
+   * backpressure telemetry frame. See COMMAND_QUEUE_BACKPRESSURE_* for
+   * threshold rationale.
+   */
+  private commandQueueDepth = 0
+  /**
+   * Latched while we're above the WARN threshold so we don't spam the
+   * backend with a warning frame on every increment. Cleared when depth
+   * drops below RECOVER, at which point we emit a one-shot recovery frame.
+   */
+  private backpressureActive = false
 
   private getToken: (() => Promise<string | null>) | null = null
 
@@ -239,7 +286,31 @@ export class WebSocketBridge {
       console.log(`[WS Bridge] ${command} → ${paramPreview}`)
     }
 
+    // ── Backpressure accounting (enqueue side) ─────────────────────────
+    //
+    // Increment up-front: every call to executeSerially appends exactly
+    // one link to the promise chain, and every link consumes a slot
+    // regardless of whether it ends up running the executor or hitting
+    // the stop-gate no-op below. The decrement happens in BOTH
+    // resolution paths of the telemetry `.then` (success + error), so
+    // depth stays consistent across the full lifecycle. The matching
+    // emitBackpressure(...) call below this comment may fire a one-shot
+    // warning frame when we cross the WARN threshold.
+    this.commandQueueDepth++
+    if (
+      this.commandQueueDepth >= COMMAND_QUEUE_BACKPRESSURE_WARN &&
+      !this.backpressureActive
+    ) {
+      this.backpressureActive = true
+      this.emitBackpressure('warning')
+    }
+
     // ── Last-mile stop gate (commands queued before stop) ──────────────
+    //
+    // Stop-race fix verified 2026-05-14: this in-queue gate is the
+    // authoritative one. The ingress check in the 'message' handler
+    // only catches commands that ARRIVE after taskStopped flips; this
+    // gate catches commands that were already enqueued before the flip.
     //
     // The ``taskStopped`` flag is also checked at message ingress
     // (line 358), but that only catches commands that ARRIVE after the
@@ -299,6 +370,10 @@ export class WebSocketBridge {
             },
           })
         }
+        // Backpressure accounting — drain side. The Promise contract
+        // guarantees onFulfilled XOR onRejected fires (never both), so
+        // the depth is decremented exactly once per executeSerially call.
+        this.onCommandDrained()
       },
       (err) => {
         const ms = Date.now() - start
@@ -312,9 +387,64 @@ export class WebSocketBridge {
           command,
           context: { durationMs: ms },
         })
+        // Decrement on the error path too — see comment in the
+        // onFulfilled handler above.
+        this.onCommandDrained()
       },
     )
     return next
+  }
+
+  /**
+   * Drain-side accounting for the command queue. Decrements depth and,
+   * if we've fallen back below the RECOVER threshold while a warning
+   * was active, sends a one-shot "recovered" frame to the backend.
+   *
+   * Kept as a method (not inlined) so the resolve/reject branches of
+   * the executeSerially telemetry handler stay readable and the
+   * threshold logic lives in exactly one place.
+   */
+  private onCommandDrained(): void {
+    this.commandQueueDepth = Math.max(0, this.commandQueueDepth - 1)
+    if (
+      this.commandQueueDepth <= COMMAND_QUEUE_BACKPRESSURE_RECOVER &&
+      this.backpressureActive
+    ) {
+      this.backpressureActive = false
+      this.emitBackpressure('recovered')
+    }
+  }
+
+  /**
+   * Send a single ``command_queue_backpressure`` telemetry frame.
+   * The backend uses these signals to throttle (on 'warning') or
+   * resume normal pacing (on 'recovered'). We send at most one of
+   * each per warn→recover cycle thanks to the ``backpressureActive``
+   * latch — never spam.
+   *
+   * The ``ws.send`` call can throw (broken socket, serialization edge
+   * case). Telemetry is best-effort: a failure here MUST NOT propagate
+   * upstream because the caller — ``executeSerially`` / ``onCommandDrained``
+   * — has bookkeeping (depth decrement, telemetry logging) that must
+   * complete regardless of whether the backpressure frame reached the
+   * backend. Without this guard a thrown send would (a) leak a queue
+   * slot when emitted on the enqueue side, and (b) skip the success
+   * log + decrement on the drain side. Swallow + log; the latch state
+   * remains correct because we already updated it before calling here.
+   */
+  private emitBackpressure(state: 'warning' | 'recovered'): void {
+    try {
+      this.send({
+        type: 'command_queue_backpressure',
+        depth: this.commandQueueDepth,
+        threshold: COMMAND_QUEUE_BACKPRESSURE_WARN,
+        state,
+      })
+    } catch (err: any) {
+      console.error(
+        `[WS Bridge] Failed to emit backpressure ${state} frame: ${err?.message || err}`,
+      )
+    }
   }
 
   getState(): ConnectionState {
@@ -553,6 +683,95 @@ export class WebSocketBridge {
             this.onFatalAuth?.('auth-rejected')
           } catch (err) {
             console.error('[WS Bridge] onFatalAuth callback threw:', err)
+          }
+        } else if (message.type === 'reauth_required') {
+          // ── Server-pushed token refresh ────────────────────────────
+          //
+          // The backend tracks JWT exp internally and pushes this frame
+          // ~5 min before expiry. If we miss the ``deadline_ms``, the
+          // server closes the socket with code 4001 and our normal
+          // reconnect chain takes over — but at that point the user
+          // sees a "disconnected" flicker. Reacting to this push lets
+          // us swap the token in-place with zero visible state change.
+          //
+          // The deadline is informational: getToken() reads a cached
+          // Supabase session (sync I/O wrapped in a promise) and
+          // resolves in <10 ms in practice, so we don't add explicit
+          // timing logic. If something pathological blocks getToken,
+          // the missed-deadline socket close is the safety net.
+          const deadline = typeof message.deadline_ms === 'number' ? message.deadline_ms : null
+          console.log(
+            `[WS Bridge] Server requested reauth ` +
+            `(deadline=${deadline ? new Date(deadline).toISOString() : 'none'})`,
+          )
+          if (!this.getToken) {
+            // Provider not wired (early-boot edge case). Send back the
+            // current token as best-effort; backend will either accept
+            // it (if still valid) or close with 4001 and we reconnect.
+            console.warn('[WS Bridge] reauth_required but no token provider wired — sending current token')
+            const reauthMsg: Record<string, unknown> = {
+              type: 'reauth',
+              token: this.token,
+            }
+            if (looksLikeCoastyApiKey(this.token)) {
+              reauthMsg.apiKey = this.token
+              reauthMsg.source = 'electron-oss'
+            }
+            this.send(reauthMsg)
+          } else {
+            let freshToken: string | null = null
+            try {
+              freshToken = await this.getToken()
+            } catch (err: any) {
+              console.error('[WS Bridge] getToken threw during reauth:', err?.message || err)
+              reportError('ws_bridge', {
+                error: err,
+                message: `reauth getToken threw: ${err?.message || String(err)}`,
+              })
+            }
+            if (!freshToken) {
+              // No fresh token — let the server close us on the deadline
+              // and let the reconnect chain (which calls getToken again
+              // on the next 'open') handle recovery. Closing here would
+              // race the server's 4001 close and emit a redundant error.
+              console.error('[WS Bridge] reauth_required: getToken returned null — awaiting server close')
+              reportError('auth', {
+                severity: 'warn',
+                message: 'reauth_required: token provider returned null',
+              })
+            } else {
+              this.token = freshToken
+              const reauthMsg: Record<string, unknown> = {
+                type: 'reauth',
+                token: this.token,
+              }
+              // OSS-mode parity with the initial ``auth`` message:
+              // when the token is an API key, attach the explicit
+              // apiKey + source breadcrumbs so the backend's reauth
+              // path takes the same branch as the initial auth.
+              if (looksLikeCoastyApiKey(this.token)) {
+                reauthMsg.apiKey = this.token
+                reauthMsg.source = 'electron-oss'
+              }
+              this.send(reauthMsg)
+            }
+          }
+        } else if (message.type === 'reauth_ack') {
+          // Server-acknowledged reauth. On success, keep going — the
+          // socket stays open and the refreshed credentials are in
+          // effect server-side. On failure, log the reason and wait
+          // for the server to close us; our close handler triggers the
+          // normal reconnect path (where the next 'open' calls
+          // getToken again and re-auths from scratch).
+          if (message.success) {
+            console.log('[WS Bridge] reauth_ack: server accepted refreshed token')
+          } else {
+            console.error(`[WS Bridge] reauth_ack: server rejected refresh — ${message.reason || '<no reason>'}`)
+            reportError('auth', {
+              severity: 'warn',
+              message: `reauth rejected by server: ${message.reason || '<no reason>'}`,
+              context: { reason: message.reason },
+            })
           }
         }
       } catch (e) {

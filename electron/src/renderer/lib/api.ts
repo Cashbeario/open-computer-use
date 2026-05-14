@@ -10,6 +10,51 @@
  * and forwards events to the renderer via IPC.
  */
 
+/**
+ * Discriminated timeout failure. We export a named class (rather than
+ * relying on the message string) so call sites can branch on
+ * ``err instanceof TimeoutError`` and fall back to graceful-degradation
+ * paths (e.g. local fallback chat id) without misclassifying genuine
+ * IPC errors as timeouts.
+ *
+ * The chat-store has its own near-identical helper that predates this
+ * one. We don't refactor that here — the store's withTimeout throws
+ * plain ``Error`` and any churn to its signature would ripple into
+ * five+ IPC call sites whose existing catch branches don't care about
+ * the error class. New code should use THIS helper because the typed
+ * error makes the timeout vs. other-failure distinction explicit at
+ * the catch site.
+ */
+export class TimeoutError extends Error {
+  constructor(operation: string, ms: number) {
+    super(`${operation} timed out after ${ms}ms`)
+    this.name = 'TimeoutError'
+  }
+}
+
+/**
+ * Race a promise against a timer. On timeout, rejects with a
+ * ``TimeoutError`` whose ``operation`` is the supplied label.
+ *
+ * The timer is cleared in ``.finally`` on both the resolve and reject
+ * paths so a fast-completing inner promise doesn't leave a zombie
+ * setTimeout that keeps the event loop awake (relevant for tests using
+ * fake timers and for long-lived renderer sessions).
+ */
+export function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  operation: string,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new TimeoutError(operation, ms)), ms)
+  })
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer !== undefined) clearTimeout(timer)
+  })
+}
+
 export interface SSECallbacks {
   onText: (text: string) => void
   onToolCall: (data: { toolCallId: string; toolName: string; args: any }) => void

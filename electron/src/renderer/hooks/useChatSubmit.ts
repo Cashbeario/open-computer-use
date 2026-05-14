@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useChatStore } from '../stores/chat-store'
 import { useAuthStore } from '../stores/auth-store'
 import { useConnectionStore } from '../stores/connection-store'
-import { sendChatMessage } from '../lib/api'
+import { sendChatMessage, withTimeout } from '../lib/api'
 
 export interface FileRef {
   path: string
@@ -180,7 +180,32 @@ export function useChatSubmit() {
       // (e.g. a malformed createChat IPC response shape), we still
       // dispatch the wire call instead of looping forever on
       // "Missing required fields".
-      let activeChatId = await ensureChat(userMessage)
+      //
+      // 5s renderer-side timeout. ``ensureChat`` already wraps its
+      // createChat IPC with a 30s timeout (see chat-store.ts), but
+      // 30s is the dead-link budget for a background hydration call,
+      // not the user-facing Send button. If the main process is
+      // wedged (backend slow, supabase outage, IPC deadlock) the
+      // user clicking Send must NOT see a 30s frozen overlay before
+      // anything happens. 5s is generous for a healthy Supabase
+      // round-trip (typical <500ms) yet short enough that a hang
+      // routes to the local fallback id within a beat of the user's
+      // click. The fallback is safe because the backend's chat
+      // upsert is idempotent on the chat_id — if ensureChat
+      // EVENTUALLY succeeded after we timed out, that real Supabase
+      // chat row will simply never be referenced (orphaned + tidy);
+      // and any subsequent message in this session that supplies
+      // the same local_<ts> id will upsert into the same row.
+      let activeChatId: string | undefined | null
+      try {
+        activeChatId = await withTimeout(ensureChat(userMessage), 5000, 'ensureChat')
+      } catch (err) {
+        console.warn(
+          '[useChatSubmit] ensureChat threw or timed out, using local fallback id',
+          err,
+        )
+        activeChatId = undefined
+      }
       if (!activeChatId || typeof activeChatId !== 'string') {
         console.warn(
           '[useChatSubmit] ensureChat returned a falsy chat id, ' +

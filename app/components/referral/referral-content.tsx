@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Textarea } from "@/components/ui/textarea"
 import { useUser } from "@/lib/user-store/provider"
@@ -29,6 +30,7 @@ import {
   TelegramLogo,
   RedditLogo,
   EnvelopeSimple,
+  BookOpen,
 } from "@phosphor-icons/react"
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -408,7 +410,9 @@ export function ReferralContent() {
       description={tLoader("description")}
     >
       <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
-        {/* Ambient orbs — same as machines / developers */}
+        {/* Ambient background — matches /history and /machines. Two soft
+            radial blooms plus a faint grid so the page reads as part of
+            the same surface family. */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div
             className="absolute -top-[30%] -right-[15%] h-[60%] w-[50%] rounded-full opacity-[0.02] dark:opacity-[0.04] blur-[120px]"
@@ -418,31 +422,54 @@ export function ReferralContent() {
             className="absolute -bottom-[20%] -left-[10%] h-[50%] w-[40%] rounded-full opacity-[0.015] dark:opacity-[0.035] blur-[100px]"
             style={{ background: "radial-gradient(circle, currentColor, transparent 70%)" }}
           />
+          <div
+            className="absolute inset-0 opacity-[0.012] dark:opacity-[0.025]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(128,128,128,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,.3) 1px, transparent 1px)",
+              backgroundSize: "80px 80px",
+            }}
+          />
         </div>
 
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl space-y-6 relative z-10">
-          {/* ── Header ── */}
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl space-y-6 relative z-10">
+          {/* ── Header — mirrors /history: a single page title with an
+                inline count badge, short subtitle, and a Guide link.
+                The primary action (Copy link) sits on the right at md+. ── */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: EASE }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
           >
             <div className="min-w-0">
-              <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/45 mb-1.5">
+              <h1 className="text-2xl sm:text-3xl font-medium tracking-tight flex items-center gap-2.5">
                 Referrals
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">
-                {t("shareTitle")}{" "}
-                <span className="text-muted-foreground/70">{t("earnTitle")}</span>
+                {stats && stats.totalReferrals > 0 && (
+                  <span className="text-sm font-normal text-muted-foreground ml-1">
+                    ({stats.totalReferrals})
+                  </span>
+                )}
               </h1>
-              <p className="text-muted-foreground text-sm mt-1.5 max-w-xl">
-                {t("shareDescription")}
-              </p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <p className="text-muted-foreground text-sm">
+                  {t("shareDescription")}
+                </p>
+                <Link
+                  href="/guide"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.05] px-2.5 py-1 text-xs font-medium text-foreground/70 hover:text-foreground hover:border-border hover:bg-foreground/[0.08] transition-all"
+                >
+                  <BookOpen size={14} weight="duotone" />
+                  Guide
+                </Link>
+              </div>
             </div>
             <button
               onClick={handleCopy}
-              className="hidden sm:inline-flex h-9 items-center justify-center rounded-xl px-4 text-[12.5px] font-medium gap-1.5 transition-all bg-foreground text-background hover:bg-foreground/90 shadow-sm shrink-0"
+              className={cn(
+                "hidden sm:inline-flex h-9 items-center justify-center rounded-xl px-4 text-[12.5px] font-medium gap-1.5 transition-all shrink-0 shadow-sm",
+                "bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98]"
+              )}
             >
               {isCopied ? <Check className="h-3.5 w-3.5" strokeWidth={2.4} /> : <Copy className="h-3.5 w-3.5" />}
               {isCopied ? "Copied" : "Copy link"}

@@ -350,3 +350,126 @@ describe("middleware: auth gating for protected routes", () => {
     expect(matcher).toContain("api")
   })
 })
+
+// ---------------------------------------------------------------------------
+// Bot-scanner probe paths — must short-circuit to 404 before auth/locale work
+// ---------------------------------------------------------------------------
+// Background: production access logs showed 187 hits/24h on /.env* family
+// returning HTTP 200 (Next.js renders not-found.tsx → 200 with a not-found
+// body), plus 29 hits/24h on /wp-admin/*. A 200 signals "live target" to mass
+// scanners and keeps the site on automated retry lists. The fix is a
+// middleware short-circuit that returns a real 404 for known probe shapes
+// BEFORE running Supabase session refresh or locale routing.
+describe("middleware: bot-scanner probe paths return 404", () => {
+  // Probe paths that MUST return 404. Each tuple is [path, description].
+  const PROBE_PATHS: Array<[string, string]> = [
+    ["/.env", "root .env"],
+    ["/.env.local", ".env.local"],
+    ["/.env.production", ".env.production"],
+    ["/.envrc", ".envrc (direnv config)"],
+    ["/backend/.env", "nested .env"],
+    ["/api-docs/../.env", "traversal-style .env"],
+    ["/wp-admin/setup-config.php", "WordPress admin"],
+    ["/wp-login.php", "WordPress login"],
+    ["/wp-content/plugins/foo/readme.txt", "WordPress plugin"],
+    ["/wp-includes/wlwmanifest.xml", "WordPress includes"],
+    ["/xmlrpc.php", "WordPress xmlrpc"],
+    ["/.git/config", ".git config"],
+    ["/.git/HEAD", ".git HEAD"],
+    ["/cgi-bin/test.cgi", "cgi-bin probe"],
+    ["/cgi-bin", "cgi-bin no slash"],
+    ["/actuator/env", "Spring actuator env"],
+    ["/actuator/health", "Spring actuator health"],
+    ["/actuator", "actuator no slash"],
+    ["/phpmyadmin/index.php", "phpmyadmin lowercase"],
+    ["/phpMyAdmin/", "phpMyAdmin mixed case"],
+    ["/adminer.php", "adminer.php"],
+    ["/adminer/", "adminer/"],
+  ]
+
+  for (const [path, label] of PROBE_PATHS) {
+    it(`returns 404 for ${label} (${path})`, async () => {
+      mockState.user = null
+      const req = makeRequest(`https://example.com${path}`)
+      const res = await middleware(req)
+      expect(res.status).toBe(404)
+    })
+  }
+
+  it("sets Cache-Control: no-store on the 404 so CDNs don't hide future probes from our access log", async () => {
+    const req = makeRequest("https://example.com/.env")
+    const res = await middleware(req)
+    expect(res.status).toBe(404)
+    expect(res.headers.get("Cache-Control")).toMatch(/no-store/)
+  })
+
+  it("sets X-Robots-Tag: noindex on the 404", async () => {
+    const req = makeRequest("https://example.com/wp-admin/")
+    const res = await middleware(req)
+    expect(res.status).toBe(404)
+    expect(res.headers.get("X-Robots-Tag")).toMatch(/noindex/)
+  })
+
+  it("does NOT redirect to /auth for a scanner probe even when unauthenticated and the path looks protected", async () => {
+    // Without the short-circuit, /wp-admin would fall through to updateSession,
+    // which would NOT redirect (wp-admin isn't a protected route), but the
+    // Next.js app would render not-found.tsx as a 200. We want a real 404 and
+    // no Supabase work at all.
+    mockState.user = null
+    const req = makeRequest("https://example.com/wp-admin/setup-config.php")
+    const res = await middleware(req)
+    expect(res.status).toBe(404)
+    // No locale cookie should be set on a 404 to a scanner.
+    const setCookie = res.headers.get("set-cookie") ?? ""
+    expect(setCookie).not.toContain("NEXT_LOCALE")
+  })
+
+  it("scanner short-circuit runs BEFORE Supabase — no DB query on probe traffic", async () => {
+    // throwOnUserQuery would normally cause a 5xx if updateSession were invoked
+    // and reached the onboarding lookup. The scanner short-circuit must run
+    // before any of that, so a probe returns a clean 404 even when the DB is
+    // broken.
+    mockState.user = { id: "u1" }
+    mockState.throwOnUserQuery = true
+    const req = makeRequest("https://example.com/.git/config")
+    const res = await middleware(req)
+    expect(res.status).toBe(404)
+  })
+
+  // --- Negative cases: legitimate paths must NOT be blocked. ---
+  const LEGITIMATE_PATHS = [
+    "/",
+    "/account",
+    "/agent-swarms",
+    "/api-docs",
+    "/auth",
+    "/blog",
+    "/blog/some-post-about-wp-stuff",
+    "/credits",
+    "/developers",
+    "/pricing",
+    "/help-actuator-docs",
+    "/.well-known/security.txt",
+    "/sitemap.xml",
+    "/c/some-chat-id",
+  ]
+
+  for (const path of LEGITIMATE_PATHS) {
+    it(`does NOT 404 the legitimate path ${path}`, async () => {
+      mockState.user = { id: "u1" }
+      mockState.onboarded = true
+      const req = makeRequest(`https://example.com${path}`, {
+        cookies: { coasty_onb: "1" },
+      })
+      const res = await middleware(req)
+      // The scanner short-circuit must not match. The status might be a
+      // redirect (e.g. /c/* for protected routes) or 200 — but never the
+      // deliberate 404 from the scanner guard.
+      // Use header presence as the disambiguator: the scanner 404 sets
+      // X-Robots-Tag: noindex (and that's the only path that sets it in
+      // middleware), so its absence proves the short-circuit didn't fire.
+      const xrt = res.headers.get("X-Robots-Tag")
+      expect(xrt).toBeNull()
+    })
+  }
+})

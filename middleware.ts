@@ -11,6 +11,24 @@ import { locales, defaultLocale, type Locale } from "./i18n/config"
 // (each test gets a fresh log).
 let _modeLogged = false
 
+// Bot-scanner probe paths. Returning 200 (the Next.js default for unknown
+// pages, which renders not-found.tsx) signals "live target" to mass scanners
+// and keeps us on automated retry lists. Short-circuiting these with a real
+// 404 before locale routing / Supabase session refresh removes us from those
+// lists and saves the per-request auth round-trip. Patterns cover:
+//   .env(.*)         leaked-secret probes (/.env, /.env.local, /backend/.env)
+//   wp-<anything>    WordPress (/wp-admin, /wp-login.php, /wp-content/...)
+//   .git/            exposed-repo probes (/.git/config, /.git/HEAD)
+//   cgi-bin/         classic CGI shell probes
+//   actuator/        Spring Boot endpoints (/actuator/env, /actuator/health)
+//   phpmyadmin       DB admin probes (case-insensitive: /phpMyAdmin/)
+//   adminer          DB admin probes (/adminer.php)
+//   xmlrpc.php       WordPress pingback abuse
+// Patterns anchor to `^` or `/` so they match path segments only — they
+// won't accidentally hit a route like `/help-actuator-docs`.
+const SCANNER_PROBE_RE =
+  /(?:^|\/)(?:\.env[\w.-]*|wp-[\w.-]+|\.git(?:\/|$)|cgi-bin(?:\/|$)|actuator(?:\/|$)|phpmyadmin|adminer|xmlrpc\.php)/i
+
 function detectLocaleFromHeader(request: NextRequest): Locale {
   const acceptLanguage = request.headers.get("accept-language")
   if (!acceptLanguage) return defaultLocale
@@ -59,6 +77,24 @@ export async function middleware(request: NextRequest) {
   let response: NextResponse
 
   try {
+    // Bot-scanner short-circuit — must run BEFORE updateSession so we don't
+    // pay the Supabase auth round-trip on probe traffic, and BEFORE locale
+    // routing so we don't leak signal via Set-Cookie / Content-Language on a
+    // 404 to a scanner. The finally block still logs the response for
+    // security monitoring (see SCANNER_PROBE_RE comment above).
+    if (SCANNER_PROBE_RE.test(path)) {
+      response = new NextResponse(null, {
+        status: 404,
+        headers: {
+          // Belt-and-suspenders against any CDN/proxy that might cache and
+          // hide future probes from our access log.
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
+        },
+      })
+      return response
+    }
+
     response = await updateSession(request)
 
     // Support ?hl=xx parameter for search engine crawlers (hreflang support)

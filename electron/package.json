@@ -1,6 +1,6 @@
 {
   "name": "coasty-desktop",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Coasty Desktop - AI agent for your local machine",
   "author": "Coasty <founders@coasty.ai>",
   "main": "./out/main/index.js",

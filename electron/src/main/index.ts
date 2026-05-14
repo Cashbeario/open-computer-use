@@ -93,7 +93,22 @@ let auth: ElectronAuth | null = null
 let wsBridge: WebSocketBridge | null = null
 let approvalManager: ApprovalManager | null = null
 
-const BACKEND_URL = process.env.COASTY_BACKEND_URL || 'http://localhost:8001'
+// ``process.env.COASTY_BACKEND_URL`` is REPLACED at build time by the Rollup
+// ``define`` in electron.vite.config.ts — production builds bake the URL
+// from the dev's .env into the bundle so packaged installers ship with a
+// useful default. That bake-time substitution means a runtime env-var
+// override has no effect.
+//
+// ``COASTY_TEST_BACKEND_URL`` is NOT in the define list, so it remains a
+// genuine runtime lookup. Playwright e2e tests use it to point the app at
+// a fake-backend on a random port without rebuilding. Order:
+//   1. Runtime test override   (COASTY_TEST_BACKEND_URL)
+//   2. Build-time baked URL    (COASTY_BACKEND_URL, replaced by Rollup)
+//   3. Local-dev default       (localhost:8001)
+const BACKEND_URL =
+  process.env.COASTY_TEST_BACKEND_URL
+  || process.env.COASTY_BACKEND_URL
+  || 'http://localhost:8001'
 
 // ── URL security: outbound + navigation guards ───────────────────────────
 //

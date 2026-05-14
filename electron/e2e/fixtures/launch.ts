@@ -75,9 +75,22 @@ export async function launchApp(opts: LaunchOptions = {}): Promise<LaunchedApp> 
     COASTY_TEST_MODE: '1',
     // Make logging slightly less chatty so test output is readable.
     ELECTRON_ENABLE_LOGGING: '1',
-    ...(opts.backendUrl ? { COASTY_BACKEND_URL: opts.backendUrl } : {}),
+    // ``COASTY_BACKEND_URL`` is REPLACED at build time by the Rollup
+    // define, so setting it here at runtime has NO effect on the
+    // already-built bundle. ``COASTY_TEST_BACKEND_URL`` is the matching
+    // test-only env var that the source code checks BEFORE the baked
+    // URL — see the comment in src/main/index.ts.
+    ...(opts.backendUrl ? { COASTY_TEST_BACKEND_URL: opts.backendUrl } : {}),
     ...(opts.env ?? {}),
   }
+  // ★ CRITICAL: ELECTRON_RUN_AS_NODE=1 must NOT leak from the parent
+  // shell. When set, electron.exe parses argv as Node.js and rejects
+  // Chromium flags that Playwright passes (--remote-debugging-port,
+  // --inspect), failing with ``electron.exe: bad option:
+  // --remote-debugging-port=0`` before our app even starts. This env
+  // var is commonly set in dev shells (electron-builder uses it for
+  // node-like spawns) and silently breaks every e2e run if leaked.
+  delete env.ELECTRON_RUN_AS_NODE
 
   const args = [
     MAIN_ENTRY,

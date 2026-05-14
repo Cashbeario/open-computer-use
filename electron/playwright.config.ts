@@ -1,24 +1,30 @@
-/**
- * Playwright config for real-Electron end-to-end tests.
- *
- * Lives OUTSIDE Vitest's universe by design:
- *   - Vitest covers fast, mocked unit/integration tests under ``src/**``.
- *     Those tests never launch a real Electron process; they import modules
- *     into a Node runtime with ``electron`` itself mocked.
- *   - Playwright covers the opposite: launch the actual built ``out/main/
- *     index.js`` Electron process, exercise real IPC, real windows, real fs,
- *     real WS bridge against an in-process fake backend.
- *
- * The two test trees do NOT overlap — Vitest's include glob is
- * ``src/**/*.test.{ts,tsx}`` and Playwright's testDir is ``e2e/`` (top-level
- * sibling to ``src/``). Run them separately:
- *   - ``npm test``        → Vitest (~2000+ unit/integration tests)
- *   - ``npm run test:e2e``→ Playwright (real-Electron runtime tests)
- *
- * Prerequisite for Playwright runs: ``npm run build`` must have produced
- * ``out/main/index.js``. The global-setup in fixtures/launch.ts verifies
- * this and fails fast with a clear message if the build is stale.
- */
+//
+// Playwright config for real-Electron end-to-end tests.
+//
+// Lives OUTSIDE Vitest's universe by design:
+//   - Vitest covers fast, mocked unit/integration tests under src/.
+//     Those tests never launch a real Electron process; they import modules
+//     into a Node runtime with `electron` itself mocked.
+//   - Playwright covers the opposite: launch the actual built
+//     out/main/index.js Electron process, exercise real IPC, real windows,
+//     real fs, real WS bridge against an in-process fake backend.
+//
+// The two test trees do NOT overlap — Vitest's include glob matches
+// `*.test.ts(x)` under src/, and Playwright's testDir is e2e/ (top-level
+// sibling to src/). Run them separately:
+//   - `npm test`        → Vitest (unit/integration)
+//   - `npm run test:e2e`→ Playwright (real-Electron runtime tests)
+//
+// NOTE: this file MUST NOT use a /** ... */ JSDoc block. Glob patterns
+// (e.g. src/<asterisk><asterisk>/<asterisk>.test.ts) contain a literal
+// `*/` sequence that prematurely terminates JSDoc blocks — the file
+// then fails to parse with a BABEL_PARSE_ERROR when Playwright loads
+// the config. Keep the comment-style as line-leading `//` instead.
+//
+// Prerequisite for Playwright runs: `npm run build` must have produced
+// out/main/index.js. The global-setup in fixtures/launch.ts verifies
+// this and fails fast with a clear message if the build is stale.
+//
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({

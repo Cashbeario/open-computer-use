@@ -120,10 +120,13 @@ test('listDirectory enumerates entries', async () => {
   fs.writeFileSync(path.join(scratchDir, 'b.txt'), 'b')
   fs.mkdirSync(path.join(scratchDir, 'sub'))
 
+  // file-ops.ts returns ``{ success, items: [...], path, count }`` —
+  // ``items`` not ``entries``. Each item carries ``name``, ``type``,
+  // and ``path``.
   const result = (await callFileOp('listDirectory', { path: scratchDir })) as {
-    entries?: Array<{ name: string }>
+    items?: Array<{ name: string; type: 'file' | 'directory' }>
   }
-  const names = (result.entries ?? []).map((e) => e.name).sort()
+  const names = (result.items ?? []).map((e) => e.name).sort()
   expect(names).toContain('a.txt')
   expect(names).toContain('b.txt')
   expect(names).toContain('sub')

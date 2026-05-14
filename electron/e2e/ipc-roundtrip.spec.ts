@@ -135,7 +135,9 @@ test('permissions:check returns the platform-appropriate shape', async () => {
 test('approval:get-mode returns one of the documented enum values', async () => {
   const page = await launched!.app.firstWindow()
   const mode = await page.evaluate(() => (window as any).coasty.getApprovalMode())
-  expect(['smart_approve', 'always_approve', 'always_ask', 'deny_all']).toContain(mode)
+  // The authoritative enum lives in approval-manager.ts and is asserted
+  // in approval-manager.test.ts. Default is ``full_control``.
+  expect(['full_control', 'smart_approve', 'approve_all', 'off']).toContain(mode)
 })
 
 test('displays:list returns at least one display with the documented shape', async () => {

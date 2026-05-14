@@ -162,6 +162,31 @@ contextBridge.exposeInMainWorld('coasty', {
     return () => ipcRenderer.removeListener('connection-state-changed', handler)
   },
 
+  /**
+   * Forced sign-out event from the auth layer.
+   *
+   * The main process emits this when ``ElectronAuth`` declares the
+   * session permanently dead — refresh failed, scheduled refresh
+   * failed, network error during refresh, WS bridge auth_rejected,
+   * etc. The renderer's auth-store subscribes to this in its
+   * ``init()`` and immediately calls ``signOut()`` so the UI returns
+   * to the AuthScreen.
+   *
+   * Why this matters: previously every refresh-failure path silently
+   * cleared the in-memory session but the renderer thought it was
+   * still authenticated, so every downstream IPC call 401'd and the
+   * user saw a chain of cryptic "not authenticated" errors. Now any
+   * auth failure is a single, clean trip to the sign-in screen.
+   *
+   * The ``reason`` is one of the ``SessionDeadReason`` literals so
+   * the renderer can show a contextual toast / log telemetry.
+   */
+  onSessionDied: (callback: (data: { reason: string }) => void) => {
+    const handler = (_event: any, data: { reason: string }) => callback(data)
+    ipcRenderer.on('auth:session-died', handler)
+    return () => ipcRenderer.removeListener('auth:session-died', handler)
+  },
+
   // Renderer-side error reporting — funnels into the main-process
   // error-reporter so renderer crashes get the same enrichment + persistence
   // + backend forwarding as main-process errors.
@@ -335,6 +360,7 @@ export interface CoastyAPI {
   getAppVersion: () => Promise<string>
 
   onConnectionStateChanged: (callback: (state: string) => void) => () => void
+  onSessionDied: (callback: (data: { reason: string }) => void) => () => void
 
   reportRendererError: (payload: {
     message: string

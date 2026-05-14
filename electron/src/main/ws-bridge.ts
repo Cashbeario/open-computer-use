@@ -106,6 +106,40 @@ function getSystemInfo(): Record<string, string> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Reconnect + heartbeat-watchdog tuning
+// ─────────────────────────────────────────────────────────────────────
+//
+// Production-grade fault tolerance: every retry surface MUST have a
+// budget. The pre-hardening version of this bridge retried forever
+// with 15s caps, which meant a user whose backend was unreachable
+// would sit on a "connecting" pill indefinitely without any cue to
+// either re-sign-in or check their network. The user's directive
+// "if there are any issues just sign the user out simple as that"
+// is implemented by exhausting these budgets → calling the fatal
+// callback → renderer signs out.
+//
+// MAX_RECONNECT_ATTEMPTS = 15. At the capped 15s interval the budget
+// is roughly ``15 × ~10s_avg = ~2.5 min`` of attempted reconnects
+// before we surrender. Long enough to ride out a router reboot or a
+// brief backend deploy; short enough that a permanently-broken setup
+// surfaces fast instead of leaving the user staring at a hung pill.
+const MAX_RECONNECT_ATTEMPTS = 15
+// HEARTBEAT_INTERVAL_MS — how often we send ``{type:'heartbeat'}``.
+const HEARTBEAT_INTERVAL_MS = 30000
+// HEARTBEAT_PONG_TIMEOUT_MS — if NO message of any kind arrives from
+// the backend within this window, the connection is presumed dead
+// even if the OS thinks the socket is still open (the typical TCP
+// half-close scenario: WiFi → cellular handoff, laptop sleep/wake,
+// VPN drop). We force-close the socket which fires our ``close``
+// handler and triggers the bounded-reconnect chain.
+//
+// 75 s = 2.5 × heartbeat interval. Captures a missed-pong AND a
+// missed follow-up before declaring death. The previous version had
+// NO watchdog at all, so a dead socket could look alive for the
+// entire user session.
+const HEARTBEAT_PONG_TIMEOUT_MS = 75000
+
 export class WebSocketBridge {
   private ws: WebSocket | null = null
   private executor: LocalExecutor
@@ -115,9 +149,16 @@ export class WebSocketBridge {
   private userId: string
   private reconnectAttempts = 0
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null
+  private pongWatchdog: ReturnType<typeof setTimeout> | null = null
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private state: ConnectionState = 'disconnected'
   private intentionalClose = false
+  /** Fired when the bridge has given up on the current credential
+   *  set — either too many reconnect failures OR backend reported
+   *  ``auth_failed``. The main process wires this to
+   *  ``auth.signalSessionDead`` which routes the renderer to the
+   *  AuthScreen. Set via setFatalAuthCallback() from index.ts. */
+  private onFatalAuth: ((reason: 'auth-rejected' | 'reconnect-exhausted') => void) | null = null
   private approvalManager: ApprovalManager
   // Remote approval tracking: approval_id → { resolve }
   private pendingRemoteApprovals = new Map<string, { resolve: (result: { approved: boolean; reason?: string }) => void }>()
@@ -373,6 +414,9 @@ export class WebSocketBridge {
     })
 
     this.ws.on('message', async (data: WebSocket.RawData) => {
+      // Any inbound message is proof the connection is alive; reset
+      // the pong watchdog regardless of message type.
+      this.resetPongWatchdog()
       try {
         const message = JSON.parse(data.toString())
 
@@ -497,6 +541,19 @@ export class WebSocketBridge {
             message: `Backend rejected JWT: ${message.reason || '<no reason>'}`,
             context: { reason: message.reason },
           })
+          // Trigger the auth layer's signalSessionDead via the
+          // registered callback. Without this, the renderer would
+          // also auto-sign-out via App.tsx's connectionState
+          // watcher — but firing here ALSO ensures the main-process
+          // ElectronAuth tears down the session (clears the
+          // .session file, kills the refresh timer, latches
+          // sessionDeadFired) so the bridge can't loop on stale
+          // creds even if the renderer's watcher is slow to react.
+          try {
+            this.onFatalAuth?.('auth-rejected')
+          } catch (err) {
+            console.error('[WS Bridge] onFatalAuth callback threw:', err)
+          }
         }
       } catch (e) {
         console.error('[WS Bridge] Error processing message:', e)
@@ -618,9 +675,13 @@ export class WebSocketBridge {
   }
 
   private startHeartbeat(): void {
+    // Avoid stacking timers if startHeartbeat is called twice
+    // (auth_success arriving twice during reconnect, for instance).
+    this.stopHeartbeat()
     this.heartbeatInterval = setInterval(() => {
       this.send({ type: 'heartbeat' })
-    }, 30000)
+    }, HEARTBEAT_INTERVAL_MS)
+    this.armPongWatchdog()
   }
 
   private stopHeartbeat(): void {
@@ -628,6 +689,67 @@ export class WebSocketBridge {
       clearInterval(this.heartbeatInterval)
       this.heartbeatInterval = null
     }
+    this.disarmPongWatchdog()
+  }
+
+  /**
+   * Arm the pong watchdog. If no message arrives from the backend
+   * within ``HEARTBEAT_PONG_TIMEOUT_MS``, the socket is presumed
+   * dead and we force-close it. The close handler then schedules a
+   * normal reconnect.
+   *
+   * Production failure modes this catches:
+   *   - Laptop sleep/wake → TCP half-close (socket looks open, no data)
+   *   - WiFi → LTE handoff that drops the connection silently
+   *   - VPN reset
+   *   - Backend container OOM-killed without sending close frame
+   *
+   * Without this watchdog the bridge would happily report "connected"
+   * for hours while commands silently piled up unfulfilled.
+   */
+  private armPongWatchdog(): void {
+    this.disarmPongWatchdog()
+    this.pongWatchdog = setTimeout(() => {
+      console.warn(
+        `[WS Bridge] No message from backend in ${HEARTBEAT_PONG_TIMEOUT_MS}ms ` +
+        `— presuming connection dead, force-closing socket`,
+      )
+      // Force-close. The 'close' event handler will schedule a
+      // reconnect (subject to MAX_RECONNECT_ATTEMPTS).
+      try {
+        this.ws?.terminate?.()
+      } catch { /* terminate may not exist on all WS impls */ }
+      try {
+        this.ws?.close()
+      } catch { /* already closed */ }
+    }, HEARTBEAT_PONG_TIMEOUT_MS)
+  }
+
+  private disarmPongWatchdog(): void {
+    if (this.pongWatchdog) {
+      clearTimeout(this.pongWatchdog)
+      this.pongWatchdog = null
+    }
+  }
+
+  /**
+   * Reset the pong watchdog. Called from the message handler on
+   * EVERY incoming message — proof the connection is alive. Cheap
+   * to call (just clearTimeout + setTimeout).
+   */
+  private resetPongWatchdog(): void {
+    if (this.pongWatchdog) {
+      this.armPongWatchdog()
+    }
+  }
+
+  /**
+   * Register the callback that fires when this bridge has given
+   * up on the current credentials — used to drive the auth layer
+   * into ``signalSessionDead`` so the renderer signs out.
+   */
+  setFatalAuthCallback(fn: (reason: 'auth-rejected' | 'reconnect-exhausted') => void): void {
+    this.onFatalAuth = fn
   }
 
   private clearReconnectTimer(): void {
@@ -638,10 +760,41 @@ export class WebSocketBridge {
   }
 
   private scheduleReconnect(): void {
+    // ── Reconnect budget ──────────────────────────────────────────
+    //
+    // Production fault tolerance means retries have a budget.
+    // Without one, a broken setup (revoked token, dead backend,
+    // network permanently misconfigured) would loop forever and
+    // leave the user staring at "connecting" with no actionable
+    // feedback. The budget here exhausts after MAX_RECONNECT_ATTEMPTS
+    // failed attempts (~2.5 min at the 15s cap), at which point we
+    // fire the fatal-auth callback so the renderer signs out and
+    // the user gets a fresh sign-in chance.
+    if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      console.error(
+        `[WS Bridge] Reconnect budget exhausted (${MAX_RECONNECT_ATTEMPTS} attempts) ` +
+        `— declaring connection fatally broken and signing out`,
+      )
+      this.intentionalClose = true  // don't re-enter scheduleReconnect from a future close event
+      this.setState('auth_error')   // App.tsx watches this and signs out
+      reportError('ws_bridge', {
+        message: `WS reconnect budget exhausted after ${MAX_RECONNECT_ATTEMPTS} attempts`,
+      })
+      try {
+        this.onFatalAuth?.('reconnect-exhausted')
+      } catch (err) {
+        console.error('[WS Bridge] onFatalAuth callback threw:', err)
+      }
+      return
+    }
+
     // Cap backoff at 15s so the overlay reconnects quickly when the backend comes up
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 15000)
     this.reconnectAttempts++
-    console.log(`[WS Bridge] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`)
+    console.log(
+      `[WS Bridge] Reconnecting in ${delay}ms ` +
+      `(attempt ${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
+    )
 
     this.reconnectTimer = setTimeout(() => {
       this.connect()

@@ -439,6 +439,46 @@ app.whenReady().then(async () => {
     }
   })
 
+  // ── Session-death → forced sign-out ─────────────────────────────────
+  //
+  // When the auth layer declares the session dead (refresh failed,
+  // network error during refresh, scheduled refresh failed, WS bridge
+  // reported auth_failed, etc.), we broadcast a single
+  // ``auth:session-died`` IPC event to the renderer. The renderer's
+  // auth-store auto-signs-out and routes the UI to the AuthScreen.
+  //
+  // Why this is here and not in ipc-handlers: the auth layer must
+  // fire-and-forget — it shouldn't depend on whether the renderer
+  // window exists yet, on the IPC layer being initialized, etc.
+  // index.ts owns the lifecycle of both processes, so this is the
+  // right place to bridge them.
+  //
+  // We also tear down the WS bridge synchronously so it doesn't keep
+  // reconnecting with a token that just got nuked. The bridge's own
+  // auth_error path would catch this on the next reconnect, but
+  // doing it here makes the user-perceived response instant: click
+  // (or refresh failure) → bridge gone → no spurious connection
+  // attempts during the brief window before the renderer reacts.
+  auth.onSessionDead((reason) => {
+    console.warn(`[App] Session declared dead (${reason}) — tearing down bridge + signalling renderer`)
+    try {
+      wsBridge?.disconnect()
+    } catch (err) {
+      console.error('[App] Bridge teardown during session-death failed:', err)
+    }
+    wsBridge = null
+    // Broadcast to the renderer if it's alive. The renderer's
+    // auth-store init() subscribes to this; on receipt it calls
+    // ``signOut()`` which routes the UI to the AuthScreen.
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      try {
+        mainWindow.webContents.send('auth:session-died', { reason })
+      } catch (err) {
+        console.error('[App] Failed to broadcast session-died:', err)
+      }
+    }
+  })
+
   // Register IPC handlers
   registerIpcHandlers(auth, () => wsBridge, (bridge) => { wsBridge = bridge }, BACKEND_URL, approvalManager, () => mainWindow)
 

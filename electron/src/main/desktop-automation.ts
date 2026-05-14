@@ -245,6 +245,30 @@ const KEY_TO_LIBNUT: Record<string, string> = {
 // F-keys f1-f24 pass through verbatim
 for (let i = 1; i <= 24; i++) KEY_TO_LIBNUT[`f${i}`] = `f${i}`
 
+// Additional darwin-friendly aliases the agent commonly emits. These are
+// already accepted via fall-through (e.g. `q`, `w`, `,` match the alphanumeric
+// or punctuation regex below) — listing them here serves as documentation of
+// the macOS chord set we explicitly support and gives `expandChordKeys` a
+// guaranteed match on synonyms like `return_key` or `space_bar`.
+KEY_TO_LIBNUT.spacebar = 'space'
+KEY_TO_LIBNUT.space_bar = 'space'
+KEY_TO_LIBNUT.return_key = 'enter'
+KEY_TO_LIBNUT.kp_return = 'enter'
+// Left/right modifier variants — some agents emit these explicitly. libnut
+// treats both halves as the same modifier so we collapse them here.
+KEY_TO_LIBNUT.command_l = 'cmd'; KEY_TO_LIBNUT.command_r = 'cmd'
+KEY_TO_LIBNUT.cmd_l = 'cmd'; KEY_TO_LIBNUT.cmd_r = 'cmd'
+KEY_TO_LIBNUT.option_l = 'alt'; KEY_TO_LIBNUT.option_r = 'alt'
+KEY_TO_LIBNUT.alt_l = 'alt'; KEY_TO_LIBNUT.alt_r = 'alt'
+KEY_TO_LIBNUT.shift_l = 'shift'; KEY_TO_LIBNUT.shift_r = 'shift'
+KEY_TO_LIBNUT.control_l = 'control'; KEY_TO_LIBNUT.control_r = 'control'
+KEY_TO_LIBNUT.ctrl_l = 'control'; KEY_TO_LIBNUT.ctrl_r = 'control'
+// Arrow-key synonyms
+KEY_TO_LIBNUT.arrowup = 'up'; KEY_TO_LIBNUT.arrow_up = 'up'
+KEY_TO_LIBNUT.arrowdown = 'down'; KEY_TO_LIBNUT.arrow_down = 'down'
+KEY_TO_LIBNUT.arrowleft = 'left'; KEY_TO_LIBNUT.arrow_left = 'left'
+KEY_TO_LIBNUT.arrowright = 'right'; KEY_TO_LIBNUT.arrow_right = 'right'
+
 /** Translate a Coasty key name to libnut's vocabulary. Single ASCII chars
  *  pass through (libnut accepts lowercase a-z / 0-9 / common punctuation
  *  literally). Throws on unknown names. */
@@ -258,9 +282,76 @@ function toLibnutKey(key: string): string {
   throw new Error(`Unsupported key for automation: "${key}"`)
 }
 
+/**
+ * Normalize a chord input into a flat list of single-token keys.
+ *
+ * ─── Why this exists (the 2026-05-14 macOS Spotlight bug) ────────────────
+ * The backend agent's system prompt (cua_remote_env.py) literally instructs
+ * the model to emit `agent.hotkey("ctrl+c")` — a SINGLE +-separated string.
+ * The action-bridge regex in cua_action_bridge.py (`pyautogui.hotkey(...)`)
+ * passes that through unsplit, so the WS command arrives as:
+ *
+ *     { command: 'key_combo', parameters: { keys: ["command+space"] } }
+ *
+ * Without normalization, `toLibnutKey("command+space")` throws
+ * `Unsupported key for automation: "command+space"` and the agent gets
+ * the production error from the 2026-05-14 incident. By splitting on `+`
+ * here we accept both forms equivalently:
+ *
+ *     ["command", "space"]   ← already split
+ *     ["command+space"]      ← single combined token (the bug form)
+ *     ["command + space"]    ← combined with whitespace around the +
+ *     "command+space"        ← bare string (not even an array)
+ *     ["cmd+shift+a"]        ← multi-modifier chord
+ *     [["cmd","shift"], "a"] ← nested arrays (defensive)
+ *
+ * ─── Safety: why splitting on `+` is safe ────────────────────────────────
+ * libnut's vocabulary has NO key literally named `+` — to emit the `+`
+ * character you actually press `shift+=`, and `=` IS in the punctuation
+ * pass-through set. A standalone `"+"` token (length 1) is preserved as-is
+ * because the length-1 short-circuit below skips splitting; only multi-char
+ * strings containing a `+` get split. So no legitimate key name is lost.
+ *
+ * Single-char punctuation like `"+"`, `"="`, `","` is also preserved because
+ * a single char can't be a chord. This matters for shortcuts like cmd+, —
+ * the model could plausibly emit `["cmd", ","]` or `["cmd+,"]`; both work.
+ */
+export function expandChordKeys(input: unknown): string[] {
+  const out: string[] = []
+  const visit = (val: unknown): void => {
+    if (val == null) return
+    if (Array.isArray(val)) { for (const v of val) visit(v); return }
+    if (typeof val !== 'string') return
+    if (val.length === 0) return
+    // Length-1 strings are atomic: even "+" survives as a key token rather
+    // than being treated as a chord separator.
+    if (val.length === 1) { out.push(val); return }
+    // Multi-char: split on '+' (with optional surrounding whitespace) only.
+    // Bare whitespace is NOT a delimiter because some agents emit multi-word
+    // key names like "page up" verbatim — splitting those would produce
+    // unknown tokens (`page`, `up`) where `pageup` / `page_up` would have
+    // resolved correctly. The agents most commonly pass `+` chords; that's
+    // what we split.
+    const parts = val.split(/\s*\+\s*/).map(s => s.trim()).filter(s => s.length > 0)
+    if (parts.length === 0) {
+      // Input was nothing but separators — pass through; downstream
+      // toLibnutKey() will produce a more descriptive "Unsupported key"
+      // error including the original token.
+      out.push(val)
+      return
+    }
+    for (const p of parts) out.push(p)
+  }
+  visit(input)
+  return out
+}
+
 const MODIFIER_NAMES = new Set([
-  'ctrl', 'control', 'alt', 'option', 'shift',
-  'cmd', 'command', 'meta', 'win', 'super', 'fn',
+  'ctrl', 'control', 'control_l', 'control_r', 'ctrl_l', 'ctrl_r',
+  'alt', 'option', 'alt_l', 'alt_r', 'option_l', 'option_r',
+  'shift', 'shift_l', 'shift_r',
+  'cmd', 'command', 'cmd_l', 'cmd_r', 'command_l', 'command_r',
+  'meta', 'win', 'super', 'fn',
 ])
 
 function isModifier(key: string): boolean {
@@ -422,13 +513,30 @@ export async function desktopType(params: { text: string }): Promise<any> {
   }
 }
 
-export async function desktopKeyPress(params: { keys: string[] }): Promise<any> {
+export async function desktopKeyPress(params: { keys: string[] | string }): Promise<any> {
   try {
     const denied = requireAccessibility()
     if (denied) return denied
 
-    const keys = Array.isArray(params.keys) ? params.keys : []
+    // Normalize: accept either an array, a single +-separated string, or a
+    // mix. See expandChordKeys() docstring for the input shapes we tolerate.
+    const keys = expandChordKeys(params?.keys)
     if (keys.length === 0) return { success: false, error: 'No keys specified' }
+
+    // Semantic note: for desktopKeyPress, the historical contract is
+    // "press each key SEQUENTIALLY" (typing word-by-word). If the input
+    // looked like a chord (single multi-key token with `+`), the user
+    // almost certainly meant a chord, not a sequence — auto-detect and
+    // re-route to desktopKeyCombo for that case so an agent that mistakenly
+    // sends "ctrl+c" to key_press still copies, instead of typing
+    // "ctrl" then "c" as discrete presses.
+    const looksLikeChord =
+      (typeof params?.keys === 'string' && /\+/.test(params.keys)) ||
+      (Array.isArray(params?.keys) &&
+        params.keys.some((k) => typeof k === 'string' && /\+/.test(k)))
+    if (looksLikeChord && keys.length >= 2) {
+      return desktopKeyCombo({ keys })
+    }
 
     const libnut = lib()
     for (const k of keys) {
@@ -443,12 +551,21 @@ export async function desktopKeyPress(params: { keys: string[] }): Promise<any> 
   }
 }
 
-export async function desktopKeyCombo(params: { keys: string[] }): Promise<any> {
+export async function desktopKeyCombo(params: { keys: string[] | string }): Promise<any> {
   try {
     const denied = requireAccessibility()
     if (denied) return denied
 
-    const keys = Array.isArray(params.keys) ? params.keys : []
+    // Normalize: accept either an array of separate keys (['ctrl', 'c']),
+    // a single +-separated string ('ctrl+c'), or an array with combined
+    // tokens (['ctrl+c'], ['cmd+shift+a']). See expandChordKeys() docstring.
+    //
+    // This is the fix for the 2026-05-14 macOS production incident where
+    // the backend agent emitted `agent.hotkey("command+space")` for
+    // Spotlight, the action-bridge passed it through as
+    // `keys: ["command+space"]`, and toLibnutKey threw
+    // `Unsupported key: "command+space"`.
+    const keys = expandChordKeys(params?.keys)
     if (keys.length === 0) return { success: false, error: 'No keys specified' }
     if (keys.length === 1) return desktopKeyPress({ keys })
 

@@ -15,6 +15,40 @@ import {
 } from './oss-mode'
 
 /**
+ * Get an access token from the auth layer, OR declare the session
+ * dead if we should have one but don't.
+ *
+ * The contract: any IPC handler the renderer only invokes WHEN
+ * AUTHENTICATED (chat send, machine status checks, history fetch,
+ * etc.) should call this instead of ``auth.getAccessToken()``
+ * directly. When the auth layer is in a "session was here but is
+ * gone" state, this helper triggers the centralised
+ * ``declareDead`` path which signs the user out cleanly. Without
+ * it, those handlers would either return a generic "Not
+ * authenticated" error to the renderer OR (worse, for the handlers
+ * that conditionally include the Bearer header) silently send
+ * requests without auth that would 401 at the backend — neither
+ * of which results in a clean sign-out.
+ *
+ * Cold start / never-authenticated cases are NOT death events:
+ * ``auth.getUserId()`` returns null there, so we don't fire
+ * declareDead. The latch inside declareDead also coalesces
+ * cascading calls (e.g. five chat IPCs all 401ing in parallel
+ * → one renderer sign-out, not five).
+ */
+async function getTokenOrDeclareDead(auth: ElectronAuth): Promise<string | null> {
+  const token = await auth.getAccessToken()
+  if (!token && auth.getUserId()) {
+    // We have a user ID but no token — session was just declared
+    // dead by performRefresh / scheduled refresh, or the token
+    // expired and refresh hadn't kicked in yet. Either way, the
+    // user can't make IPC calls; sign them out.
+    auth.declareDead('token-missing')
+  }
+  return token
+}
+
+/**
  * Standard header set for all OSS-mode coasty.ai calls. Centralised so the
  * X-API-Key + X-Coasty-Source pair is identical across every handler — the
  * backend keys off `X-Coasty-Source: electron-oss` to route into the OSS
@@ -258,6 +292,19 @@ export function registerIpcHandlers(
       // Let the bridge fetch fresh tokens on reconnect (e.g. after sleep/hibernate)
       // so it doesn't try to authenticate with an expired JWT.
       bridge.setTokenProvider(() => auth.getAccessToken())
+      // ── Fatal-auth wiring ──────────────────────────────────────
+      // When the bridge gives up on the current creds (backend
+      // rejected the JWT OR reconnect budget exhausted), route the
+      // failure into the auth layer so the renderer auto-signs-out
+      // and the on-disk session is cleared. This is the cleanest
+      // way to honour the user's "if there are issues, sign out"
+      // directive — every retry surface eventually ends here.
+      bridge.setFatalAuthCallback((reason) => {
+        const mappedReason = reason === 'auth-rejected'
+          ? 'bridge-auth-rejected'
+          : 'refresh-network-error'  // reconnect-exhausted maps to a network-like failure
+        auth.declareDead(mappedReason)
+      })
       setWsBridge(bridge)
       bridge.connect()
 

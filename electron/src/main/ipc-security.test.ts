@@ -73,6 +73,7 @@ vi.mock('./ws-bridge', () => {
       disconnect = vi.fn(() => { this.state = 'disconnected' })
       getState = vi.fn(() => this.state)
       setTokenProvider = vi.fn()
+      setFatalAuthCallback = vi.fn()
       setTaskActive = vi.fn()
       resumeTask = vi.fn()
       stopTask = vi.fn()

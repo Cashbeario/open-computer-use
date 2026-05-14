@@ -61,6 +61,17 @@ function AppInner() {
     return initConnection()
   }, [])
 
+  // Subscribe to the main process's ``auth:session-died`` event.
+  // When the auth layer declares the session permanently dead
+  // (refresh failed, network error during refresh, scheduled refresh
+  // failed, bridge auth_rejected, ...), this listener fires and the
+  // auth-store auto-signs-out → UI returns to AuthScreen. Zero retry
+  // loops, zero zombie state, zero "the app keeps saying not
+  // authenticated" UX.
+  React.useEffect(() => {
+    return useAuthStore.getState().initSessionDeathListener()
+  }, [])
+
   // Subscribe to window mode changes from main process
   React.useEffect(() => {
     return initWindow()

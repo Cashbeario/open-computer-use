@@ -251,6 +251,8 @@ describe('window.coasty API surface snapshot', () => {
     'relaunch', 'quit', 'getAppVersion',
     // Connection state event
     'onConnectionStateChanged',
+    // Forced sign-out from auth layer (refresh failed, ws auth_rejected, etc.)
+    'onSessionDied',
     // Renderer-side error reporter (forwards to main-process error reporter)
     'reportRendererError',
   ].sort()

@@ -18,7 +18,12 @@
     "package:linux:portable": "electron-vite build && electron-builder --linux tar.gz",
     "package:linux:docker": "electron-vite build && docker run --rm -e ELECTRON_CACHE=/root/.cache/electron -e ELECTRON_BUILDER_CACHE=/root/.cache/electron-builder -v \"%cd%:/project\" -v \"%USERPROFILE%/.cache/electron:/root/.cache/electron\" -v \"%USERPROFILE%/.cache/electron-builder:/root/.cache/electron-builder\" electronuserland/builder:wine /bin/bash -c \"cd /project && npm install --omit=optional && npx electron-builder --linux\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
+    "test:e2e:debug": "playwright test --config=playwright.config.ts --debug",
+    "test:e2e:build": "electron-vite build && playwright test --config=playwright.config.ts",
+    "test:smoke": "node ./scripts/smoke-packaged.mjs"
   },
   "dependencies": {
     "@nut-tree-fork/libnut": "^4.2.6",
@@ -26,6 +31,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@supabase/supabase-js": "^2.49.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -3,7 +3,6 @@ import { hideForScreenshot, showAfterScreenshot, contentProtectionReliable } fro
 import { hideRainbowForScreenshot, showRainbowAfterScreenshot } from './rainbow-border'
 import { captureScreenNative } from './native-screenshot'
 import { getActiveDisplay } from './display-manager'
-import { checkAllPermissions } from './permissions'
 
 const JPEG_QUALITY = 70
 
@@ -72,6 +71,13 @@ export type CaptureScreenshotResult =
       code: ScreenshotErrorCode    // machine-readable, branch on this in backend
       action?: 'open_screen_recording_settings' // hint to the backend / frontend
       origin?: string              // which code path produced this (for log triage)
+      // These two fields mirror the desktop-automation accessibility flow
+      // (see desktop-automation.ts `requireAccessibility`) so that
+      // local-executor.ts's existing `result?.permissionDenied` dispatch
+      // path also fires the `permission:denied` IPC event for screenshot
+      // failures. The renderer's PermissionToast listens for that event.
+      permissionDenied?: true
+      permissionType?: 'screen-recording'
     }
 
 /**
@@ -142,6 +148,15 @@ function failure(
     origin,
   }
   if (action) result.action = action
+  // Permission-denied failures are routed to the renderer's
+  // PermissionToast via local-executor.ts's existing IPC dispatch
+  // (which keys on `result.permissionDenied`). Wire those fields up
+  // here so screenshot uses the SAME plumbing as accessibility denials
+  // from desktop-automation.ts — no separate UI dispatch code needed.
+  if (code === 'permission_denied') {
+    result.permissionDenied = true
+    result.permissionType = 'screen-recording'
+  }
   // Diagnostic logging — every failure leaves an operator-greppable trail.
   // Origin tag tells which code path produced the error, code tells
   // which user-facing surface should fire. Tests rely on this format.
@@ -152,48 +167,22 @@ function failure(
 }
 
 export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
-  // ── Layer B: Pre-check Screen Recording permission on macOS ───────────
+  // ── No pre-flight permission check ────────────────────────────────────
   //
-  // Without this check, a revoked-permission state would fall through to
-  // either:
-  //   (a) the native Swift helper which exits non-zero and gets swallowed
-  //       to `null`, then desktopCapturer rejects with a non-Error value
-  //       whose `.message` is undefined — producing the
-  //       `Screenshot failed: undefined` bug surfaced on 2026-05-14;
-  //   (b) the desktopCapturer "Empty screenshot" branch which DOES produce
-  //       a useful message but only catches the all-black-bitmap path.
+  // The earlier (Bug #1) fix added a `checkAllPermissions()` pre-flight
+  // before the real capture. That gave us a structured `permission_denied`
+  // code for the 2026-05-14 "undefined" symptom — but it ALSO introduced a
+  // second failure path: any false negative in the permission check (the
+  // bitmap fallback can be wrong, see permissions.ts) would block a
+  // capture that would have otherwise succeeded. Nitish hit exactly that:
+  // permission was granted, but the pre-check returned `denied`, so every
+  // screenshot failed with no recourse.
   //
-  // The proactive check gives us a guaranteed structured error with
-  // `code: "permission_denied"` and `action: "open_screen_recording_settings"`
-  // that the backend can surface as a one-click "Open System Settings"
-  // prompt. Skipped on non-darwin where permissions are always granted.
-  //
-  // The permission check itself can throw on edge cases (Electron API
-  // surface changes between versions, mock state in tests). We catch
-  // here so a buggy check never blocks a working capture path.
-  if (process.platform === 'darwin') {
-    try {
-      const perms = await checkAllPermissions()
-      if (perms.screenRecording === 'denied') {
-        return failure(
-          'macOS Screen Recording permission is denied. Open System Settings → Privacy & Security → Screen Recording, enable Coasty, then quit and reopen the app.',
-          'permission_denied',
-          'pre-check',
-          'open_screen_recording_settings',
-        )
-      }
-    } catch (permErr) {
-      // Permission check itself failed — log but DON'T block the capture
-      // attempt. If TCC really is denied, the downstream paths will
-      // surface the right error; if the check is just buggy, we still
-      // get a working screenshot.
-      console.warn(
-        '[Screenshot] Permission pre-check threw — continuing to capture',
-        formatScreenshotError(permErr),
-      )
-    }
-  }
-
+  // New contract: the REAL capture is the source of truth. If macOS won't
+  // let us capture, `desktopCapturer.getSources()` rejects OR returns an
+  // empty thumbnail — both of which we already detect downstream and map
+  // to `permission_denied` with `action: open_screen_recording_settings`.
+  // No double-check, no double-failure.
   const display = getActiveDisplay()
   const { width, height } = display.size
 

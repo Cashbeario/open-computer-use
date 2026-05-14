@@ -193,6 +193,27 @@ export class LocalExecutor {
   }
 
   /**
+   * Dispatch the `permission:denied` IPC event to the renderer so the
+   * PermissionToast component can show its in-app prompt.
+   *
+   * Centralised here so EVERY command path (desktop automation,
+   * screenshot, and any future capability) routes through the same
+   * dispatcher with the same shape — previously only commands wrapped
+   * in `withOverlayHidden` fired the event, which meant screenshot
+   * failures silently dropped on the floor and Nitish never saw the
+   * "Granted? Restart" toast on screenshot-only denials.
+   */
+  private dispatchPermissionDenied(result: any): void {
+    if (!result?.permissionDenied) return
+    const win = BrowserWindow.getAllWindows()[0]
+    if (!win || win.isDestroyed()) return
+    win.webContents.send('permission:denied', {
+      type: result.permissionType,
+      message: result.error,
+    })
+  }
+
+  /**
    * Wrap a handler so the overlay becomes invisible and click-through before
    * the action, then fades back in after. Uses opacity + setIgnoreMouseEvents
    * instead of win.hide()/show() for a seamless, glitch-free experience.
@@ -202,19 +223,7 @@ export class LocalExecutor {
       await hideForDesktopAction()
       try {
         const result = await handler(params)
-
-        // If a desktop action was denied due to missing macOS permissions,
-        // notify the renderer so it can show an in-app prompt to the user.
-        if (result?.permissionDenied) {
-          const win = BrowserWindow.getAllWindows()[0]
-          if (win && !win.isDestroyed()) {
-            win.webContents.send('permission:denied', {
-              type: result.permissionType,
-              message: result.error,
-            })
-          }
-        }
-
+        this.dispatchPermissionDenied(result)
         return result
       } finally {
         showAfterDesktopAction()
@@ -226,7 +235,17 @@ export class LocalExecutor {
     // ========================
     // DESKTOP / SCREENSHOT
     // ========================
-    this.handlers.set('screenshot', () => captureScreenshot())
+    // Screenshot is NOT wrapped in withOverlayHidden because the
+    // overlay-hide / native-helper / desktopCapturer sequence inside
+    // captureScreenshot() already handles its own window visibility.
+    // We still need to dispatch permission:denied if the capture failed
+    // because the user revoked Screen Recording — so the toast fires
+    // and Nitish can hit "Restart" without leaving the app.
+    this.handlers.set('screenshot', async () => {
+      const result = await captureScreenshot()
+      this.dispatchPermissionDenied(result)
+      return result
+    })
 
     // Desktop mouse — hide overlay so clicks don't hit it
     this.handlers.set('click', this.withOverlayHidden((p) => desktopClick(p)))

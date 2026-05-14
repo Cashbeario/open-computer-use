@@ -1,37 +1,34 @@
 /**
- * Tests for the screenshot capture error-handling fix (2026-05-14).
+ * Tests for the screenshot capture error-handling fix.
  *
- * Production incident:
- *   23 events of literal string `Screenshot failed: undefined` on
- *   machine f228bc16-... (Darwin 23.2.0) within 30 min, plus 5
- *   user-visible failures and 18 silent retries. Root cause: the catch
- *   block in `captureScreenshot()` interpolated `error.message` directly,
- *   and on macOS without Screen Recording permission the desktopCapturer
- *   rejection had no `.message` property → user saw `undefined`.
+ * History:
+ *   2026-05-14: 23 events of literal `Screenshot failed: undefined` on
+ *               a single macOS client. Fix #1 = defensive error
+ *               formatting + structured error codes + permission
+ *               pre-check.
  *
- * Fix surface verified here:
- *   1. `formatScreenshotError(unknown): string` — defensive formatter
- *      that NEVER produces "undefined" or "null" regardless of what was
- *      thrown.
- *   2. `captureScreenshot()` returns a structured `{success, error, code,
- *      action?, origin}` shape on failure, with stable error codes the
- *      backend can branch on.
- *   3. macOS Screen Recording permission is pre-checked via
- *      `permissions.checkAllPermissions()` BEFORE attempting capture, so
- *      revoked-permission state is caught at the earliest possible point
- *      with the actionable `open_screen_recording_settings` hint.
- *   4. Every failure path logs `[Screenshot] FAILURE origin=X code=Y
- *      msg=Z` so operator triage is trivial.
+ *   2026-05-15: Nitish's "I granted it but it still asks" report. The
+ *               pre-check itself was failing (bitmap false-negative).
+ *               Fix #2 = remove pre-check; rely on the REAL capture
+ *               (desktopCapturer.getSources rejection / empty thumbnail
+ *               on darwin) as the source of truth for permission
+ *               denial. The fields `permissionDenied: true` and
+ *               `permissionType: 'screen-recording'` are now attached
+ *               to permission-denied failures so the local-executor's
+ *               existing `result?.permissionDenied` dispatch fires the
+ *               `permission:denied` IPC event for screenshot too.
  *
  * Test categories:
  *   A. Pure unit tests for `formatScreenshotError` (no Electron deps)
- *   B. Permission pre-check behaviour on darwin vs non-darwin
+ *   B. No pre-check — captureScreenshot does NOT call checkAllPermissions
  *   C. desktopCapturer failure shapes (the actual incident reproducer)
  *   D. Empty/black thumbnail handling
  *   E. Native helper path (success + fallback)
- *   F. Success response shape
+ *   F. Success response shape + overlay invariant
  *   G. Diagnostic logging contract (anti-drift)
- *   H. End-to-end: 2026-05-14 incident replay
+ *   H. permissionDenied/permissionType fields on permission_denied failures
+ *   I. End-to-end: 2026-05-14 incident replay
+ *   J. Source-level anti-drift guards
  *
  * Run: `cd electron && npx vitest run src/main/screenshot-error-handling.test.ts`
  */
@@ -350,30 +347,40 @@ describe('formatScreenshotError — never produces "undefined" or "null"', () =>
 })
 
 // ═════════════════════════════════════════════════════════════════════════
-// B.  Permission pre-check — wires checkAllPermissions into captureScreenshot
+// B.  No pre-flight permission check (2026-05-15 Nitish fix)
 // ═════════════════════════════════════════════════════════════════════════
+//
+// Before this fix, captureScreenshot() called checkAllPermissions() before
+// attempting any capture. That gave us a clean `permission_denied` code on
+// true denials — but also introduced a second failure mode: any false
+// negative in the permission check (the bitmap fallback can mis-classify
+// a dark-themed desktop) would block a capture that would otherwise have
+// succeeded. Nitish hit exactly that pattern: permission was granted, but
+// the pre-check returned denied, so every screenshot failed.
+//
+// New contract: the REAL capture is the source of truth. If macOS won't
+// let us capture, `desktopCapturer.getSources()` rejects (which we map to
+// permission_denied on darwin) OR returns an empty thumbnail (which we
+// map to empty_capture with the same actionable hint on darwin).
 
-describe('captureScreenshot — macOS permission pre-check', () => {
+describe('captureScreenshot — no pre-flight permission check', () => {
   beforeEach(() => setPlatform('darwin'))
   afterEach(() => setPlatform('win32'))
 
-  it('darwin + permission DENIED → returns structured failure WITHOUT attempting capture', async () => {
-    h.state.screenRecording = 'denied'
+  it('does NOT call checkAllPermissions before capture', async () => {
+    h.state.screenRecording = 'granted'
+    h.state.nativeReturn = { base64: 'abc', resolution: '1920x1080' }
+    // Track checkAllPermissions invocation count
+    const perms = await import('./permissions')
+    const spy = perms.checkAllPermissions as any
+    spy.mockClear?.()
 
-    const r = await captureScreenshot()
+    await captureScreenshot()
 
-    expect(r.success).toBe(false)
-    if (r.success) return
-    expect(r.code).toBe('permission_denied')
-    expect(r.action).toBe('open_screen_recording_settings')
-    expect(r.origin).toBe('pre-check')
-    expect(r.error).toMatch(/Screen Recording permission/i)
-    // Capture was not attempted
-    expect(h.state.sourcesCallCount).toBe(0)
-    expect(h.state.nativeCallCount).toBe(0)
+    expect(spy).not.toHaveBeenCalled()
   })
 
-  it('darwin + permission GRANTED → proceeds to capture', async () => {
+  it('darwin + permission GRANTED → proceeds to capture (no pre-check)', async () => {
     h.state.screenRecording = 'granted'
     h.state.nativeReturn = { base64: 'abc', resolution: '1920x1080' }
 
@@ -385,42 +392,79 @@ describe('captureScreenshot — macOS permission pre-check', () => {
     expect(h.state.nativeCallCount).toBe(1)
   })
 
-  it('darwin + permission check THROWS → logs warning + continues capture', async () => {
-    h.state.permissionsThrowError = new Error('isTrustedAccessibilityClient blew up')
+  it('darwin + native helper succeeds → never touches desktopCapturer', async () => {
+    // Even though permission denial would have triggered the pre-check
+    // before, with no pre-check the native helper's success is enough.
+    h.state.screenRecording = 'denied' // pre-check would have blocked
     h.state.nativeReturn = { base64: 'abc', resolution: '1920x1080' }
 
     const r = await captureScreenshot()
-
-    // Successful capture even though pre-check threw
     expect(r.success).toBe(true)
-    expect(
-      h.state.warnLog.some((l) =>
-        l.includes('Permission pre-check threw — continuing to capture'),
-      ),
-    ).toBe(true)
+    expect(h.state.sourcesCallCount).toBe(0) // never fell back
   })
 
-  it('non-darwin (win32) → skips permission pre-check entirely', async () => {
+  it('darwin + native helper fails + getSources rejects → permission_denied via real capture', async () => {
+    // This is the canonical denial path now: native helper returns null
+    // (Swift exits non-zero), then desktopCapturer.getSources rejects,
+    // and the rejection is escalated to permission_denied on darwin.
+    h.state.screenRecording = 'denied'
+    h.state.nativeReturn = null
+    h.state.sourcesRejectWith = new Error('TCC denied')
+
+    const r = await captureScreenshot()
+    expect(r.success).toBe(false)
+    if (r.success) return
+    expect(r.code).toBe('permission_denied')
+    expect(r.action).toBe('open_screen_recording_settings')
+    // Origin is the REAL capture's getSources call, not "pre-check"
+    expect(r.origin).toBe('desktopCapturer.getSources')
+  })
+
+  it('darwin + native helper fails + empty thumbnail → empty_capture with action hint', async () => {
+    // Other canonical denial signature: getSources resolves but the
+    // thumbnail is 0×0 (macOS sometimes does this when TCC denies the
+    // capture, instead of throwing).
+    h.state.screenRecording = 'denied'
+    h.state.nativeReturn = null
+    h.state.sources = [makeSource({ width: 0, height: 0 })]
+
+    const r = await captureScreenshot()
+    expect(r.success).toBe(false)
+    if (r.success) return
+    expect(r.code).toBe('empty_capture')
+    expect(r.action).toBe('open_screen_recording_settings')
+  })
+
+  it('non-darwin (win32) → proceeds straight to desktopCapturer', async () => {
     setPlatform('win32')
-    h.state.screenRecording = 'denied' // would block on darwin
     h.state.sources = [makeSource()]
 
     const r = await captureScreenshot()
-
     expect(r.success).toBe(true)
     if (!r.success) return
     expect(r.capturePath).toBe('desktopCapturer')
-    // The native helper is never called on win32
-    expect(h.state.nativeCallCount).toBe(0)
+    expect(h.state.nativeCallCount).toBe(0) // native is darwin-only
   })
 
-  it('non-darwin (linux) → skips permission pre-check entirely', async () => {
+  it('non-darwin (linux) → proceeds straight to desktopCapturer', async () => {
     setPlatform('linux')
-    h.state.screenRecording = 'denied'
     h.state.sources = [makeSource()]
 
     const r = await captureScreenshot()
     expect(r.success).toBe(true)
+  })
+
+  it('non-darwin + getSources rejects → no_sources (NOT permission_denied)', async () => {
+    // Only darwin escalates getSources rejection to permission_denied.
+    // On other platforms, the rejection is just a generic capture failure.
+    setPlatform('linux')
+    h.state.sourcesRejectWith = new Error('boom')
+
+    const r = await captureScreenshot()
+    expect(r.success).toBe(false)
+    if (r.success) return
+    expect(r.code).toBe('no_sources')
+    expect(r.action).toBeUndefined()
   })
 })
 
@@ -741,32 +785,36 @@ describe('2026-05-14 incident replay (Nitish MBP-2 / Darwin 23.2.0)', () => {
   beforeEach(() => setPlatform('darwin'))
   afterEach(() => setPlatform('win32'))
 
-  it('darwin permission DENIED at pre-check → user gets actionable error, NOT "undefined"', async () => {
-    h.state.screenRecording = 'denied'
+  it('darwin permission DENIED at real capture → user gets actionable error, NOT "undefined"', async () => {
+    // Permission denial now flows through the real capture path:
+    // native helper returns null (TCC blocks Swift too), then
+    // desktopCapturer.getSources rejects, and we map that to
+    // permission_denied on darwin.
+    h.state.nativeReturn = null
+    h.state.sourcesRejectWith = new Error('TCC denied')
 
     const r = await captureScreenshot()
 
     expect(r.success).toBe(false)
     if (r.success) return
 
-    // The literal regression guard for the incident:
+    // The literal regression guard for the 2026-05-14 incident:
     expect(r.error).not.toContain('undefined')
     expect(r.error).not.toContain('null')
 
     // Backend can render a one-click "Open System Settings" prompt:
     expect(r.code).toBe('permission_denied')
     expect(r.action).toBe('open_screen_recording_settings')
-    expect(r.error).toMatch(/Screen Recording permission/i)
-    expect(r.error).toMatch(/System Settings/i)
+    // The renderer's PermissionToast picks up these two fields via the
+    // local-executor IPC dispatcher (added 2026-05-15):
+    expect(r.permissionDenied).toBe(true)
+    expect(r.permissionType).toBe('screen-recording')
   })
 
-  it('darwin race: pre-check PASSES, getSources rejects with non-Error → still no "undefined"', async () => {
-    // Race scenario: user grants permission, app sees granted on
-    // pre-check, then user revokes between the pre-check and the
-    // getSources call. The rejection arrives with a non-Error value
-    // (Electron 33+ behaviour observed in production logs).
-    h.state.screenRecording = 'granted'
-    h.state.nativeReturn = null // native helper falls through
+  it('darwin getSources rejects with non-Error → still no "undefined"', async () => {
+    // The literal incident shape: rejection arrives with a non-Error
+    // value whose .message is undefined.
+    h.state.nativeReturn = null
     h.state.sourcesRejectWith = { someInternalField: 'not-an-Error' }
 
     const r = await captureScreenshot()
@@ -780,7 +828,8 @@ describe('2026-05-14 incident replay (Nitish MBP-2 / Darwin 23.2.0)', () => {
   })
 
   it('three back-to-back retries produce three IDENTICAL structured responses (no flakiness)', async () => {
-    h.state.screenRecording = 'denied'
+    h.state.nativeReturn = null
+    h.state.sourcesRejectWith = new Error('TCC denied')
 
     const r1 = await captureScreenshot()
     const r2 = await captureScreenshot()
@@ -841,15 +890,37 @@ describe('source-level anti-drift guards', () => {
     expect(src).toMatch(/export type ScreenshotErrorCode/)
   })
 
-  it('imports checkAllPermissions from ./permissions', () => {
-    expect(src).toMatch(
+  it('does NOT import checkAllPermissions (no pre-flight check, 2026-05-15 fix)', () => {
+    // Regression guard: a re-added pre-check would re-introduce the
+    // double-failure mode that affected Nitish. The whole point of the
+    // 2026-05-15 refactor is letting the real capture be the source of
+    // truth.
+    expect(src).not.toMatch(
       /import\s+\{[^}]*checkAllPermissions[^}]*\}\s+from\s+['"]\.\/permissions['"]/,
     )
+    expect(src).not.toContain('await checkAllPermissions(')
   })
 
-  it('pre-check branch returns code: "permission_denied" on darwin', () => {
+  it('captureScreenshot does NOT have a "pre-check" origin tag (no pre-flight)', () => {
+    // The old failure origin was 'pre-check'. Removing the pre-check
+    // means no failure should be tagged that way any more — every
+    // permission-denied result now flows from the real capture path
+    // ('desktopCapturer.getSources' or 'desktopCapturer.thumbnail').
+    expect(src).not.toContain("'pre-check'")
+  })
+
+  it('permission_denied error code + action hint still produced (just from real capture)', () => {
     expect(src).toContain('permission_denied')
     expect(src).toContain('open_screen_recording_settings')
+  })
+
+  it('permission_denied failures attach permissionDenied + permissionType for IPC dispatch', () => {
+    // The local-executor.ts permission:denied IPC dispatcher keys on
+    // `result.permissionDenied`. Source-level check that the failure
+    // helper wires those fields when the code is permission_denied.
+    expect(src).toMatch(/code\s*===\s*['"]permission_denied['"]/)
+    expect(src).toMatch(/permissionDenied\s*=\s*true/)
+    expect(src).toMatch(/permissionType\s*=\s*['"]screen-recording['"]/)
   })
 
   it('failure helper is centralised (one place that builds the failure shape)', () => {

@@ -19,6 +19,7 @@ import { getDisplayList, getActiveDisplayId, setActiveDisplayId, getActiveDispla
 import { performFullShutdown } from './app-shutdown'
 import { launchAtLogin } from './launch-at-login'
 import { errorReporter, reportError } from './error-reporter'
+import { isTestMode } from './test-mode'
 
 // ── Top-level error capture ───────────────────────────────────────────────
 // Install BEFORE any other module imports so even import-time crashes are
@@ -613,7 +614,11 @@ app.whenReady().then(async () => {
   // default-on persistence as a malware fingerprint). Existing users keep
   // their auto-launch state on upgrade because launch-at-login seeds the
   // preference from `getLoginItemSettings()` on first read.
-  if (app.isPackaged) {
+  // Skip the auto-updater entirely under ``COASTY_TEST_MODE`` — Playwright /
+  // smoke runs MUST NOT fire real HTTP requests to ``updates.coasty.ai`` (it
+  // creates flaky tests from transient network blips AND it pollutes the
+  // update server's analytics with fake clients).
+  if (app.isPackaged && !isTestMode()) {
     launchAtLogin.applyOnStartup()
     initAutoUpdater()
   }
@@ -632,7 +637,13 @@ app.whenReady().then(async () => {
   // Pre-compile the native screenshot helper (macOS only) so it's ready
   // before the first screenshot request. Compilation takes ~2-3s the first
   // time; the binary is cached to disk across app restarts.
-  warmupNativeScreenshot()
+  //
+  // Skipped under test mode — the Swift compile spawns a child process the
+  // test harness has no reason to wait on, and screenshots are stubbed in
+  // tests anyway.
+  if (!isTestMode()) {
+    warmupNativeScreenshot()
+  }
 
 })
 

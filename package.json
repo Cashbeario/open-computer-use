@@ -14,7 +14,10 @@
     "test:frontend": "vitest run",
     "test:backend": "node scripts/run-all-tests.mjs backend",
     "test:electron": "node scripts/run-all-tests.mjs electron",
-    "test:all": "node scripts/run-all-tests.mjs"
+    "test:e2e": "node scripts/run-all-tests.mjs e2e",
+    "test:smoke": "node scripts/run-all-tests.mjs smoke",
+    "test:all": "node scripts/run-all-tests.mjs",
+    "test:all:fast": "node scripts/run-all-tests.mjs --no-e2e"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^4.0.61",

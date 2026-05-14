@@ -20,6 +20,30 @@ import { getActiveDisplay } from './display-manager'
 import { execFile } from 'child_process'
 import { BrowserWindow } from 'electron'
 import { tryInterceptShellCommand, checkUnsupportedShellCommand } from './shell-intercept'
+import { isTestMode } from './test-mode'
+
+// ─── Test-only globals ──────────────────────────────────────────────────
+// Real-Electron Playwright tests can't ``import('./file-ops')`` inside
+// ``app.evaluate`` because electron-vite bundles main into a single
+// ``out/main/index.js`` — no individual module files survive at runtime.
+//
+// To let those tests exercise real fs / shell behaviour on each OS without
+// going through the full WebSocket-bridge command path, we expose the file-
+// ops and terminal handlers on a global gated by ``COASTY_TEST_MODE``.
+// Production users never set that env var, so the global stays absent in
+// real installs.
+if (isTestMode()) {
+  ;(globalThis as Record<string, unknown>).__coastyTestExports__ = {
+    fileOps: {
+      readFile, writeFile, editFile, appendFile, deleteFile, fileExists,
+      listDirectory, deleteDirectory,
+    },
+    terminal: {
+      executeTerminal, connectTerminal, readTerminal, closeTerminal,
+      typeTerminal, clearTerminal,
+    },
+  }
+}
 
 type CommandHandler = (params: any) => Promise<any>
 

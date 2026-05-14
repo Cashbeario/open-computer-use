@@ -213,6 +213,17 @@ export function useChatSubmit() {
       // future MACHINE_BUSY can't accidentally re-fire stale content.
       let busyDetectedThisRun = false
 
+      // Ownership guard for the `finally` block. The user can stop
+      // this task and start a NEW one before our `await sendChatMessage`
+      // unwinds — in that case the new request's `setAbortController`
+      // has already overwritten the store. Clearing `isStreaming` /
+      // `abortController` in our finally would wipe the new request's
+      // state, leaving the user staring at a frozen overlay until
+      // they submit again. The guard below makes our cleanup a no-op
+      // unless the store's controller is STILL ours.
+      const isStillOurRun = () =>
+        useChatStore.getState().abortController === controller
+
       try {
         await sendChatMessage(
           {
@@ -252,14 +263,16 @@ export function useChatSubmit() {
               // state. The user's intent and message are preserved in
               // `pendingInput` (stamped at the top of _doSubmit), so
               // they can click the yellow button to stop the running
-              // task and re-submit. Streaming flag clears too.
+              // task and re-submit. Streaming flag clears too — but
+              // only if THIS run still owns the store (avoid wiping
+              // a subsequent submit's state).
               busyDetectedThisRun = true
               setIsMachineBusy(true)
-              setStreaming(false)
+              if (isStillOurRun()) setStreaming(false)
             },
             onError: (error) => {
               appendAssistantContent(`\n\nError: ${error}`)
-              setStreaming(false)
+              if (isStillOurRun()) setStreaming(false)
             },
           },
           controller.signal,
@@ -276,8 +289,12 @@ export function useChatSubmit() {
           appendAssistantContent(`\n\nError: ${err.message}`)
         }
       } finally {
-        setStreaming(false)
-        setAbortController(null)
+        // Ownership guard — see `isStillOurRun` above. If a newer run
+        // has taken over the store, leave its state alone.
+        if (isStillOurRun()) {
+          setStreaming(false)
+          setAbortController(null)
+        }
       }
     },
     [
@@ -363,7 +380,20 @@ export function useChatSubmit() {
       // keeping these two derivations from drifting apart.
       setIsMachineBusy(false)
       setPendingInput(null)
-      await _doSubmit(input, files, { isRetry: false })
+      // Fire-and-forget: the user's message and streaming flag are
+      // committed to the store SYNCHRONOUSLY at the top of _doSubmit
+      // (addUserMessage + setStreaming(true)), so by the time this
+      // line returns the chat thread already shows the user's bubble
+      // and the working indicator. We MUST NOT await the stream — the
+      // stream lasts as long as the agent runs (often minutes) and
+      // awaiting it would keep the typed text trapped in the input
+      // field for the entire run, which is the chat-input-not-
+      // clearing bug. Errors inside _doSubmit are caught internally
+      // and surfaced into the chat thread; the .catch() here is a
+      // belt-and-braces against truly-unexpected throws.
+      _doSubmit(input, files, { isRetry: false }).catch((err) => {
+        console.error('[useChatSubmit] _doSubmit threw unexpectedly:', err)
+      })
       return 'sent'
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -425,7 +455,18 @@ export function useChatSubmit() {
         }
         setIsMachineBusy(false)
         setPendingInput(null)
-        await _doSubmit(target.input, target.files, { isRetry: target.isRetry })
+        // Fire-and-forget — same reasoning as handleSubmit. The user's
+        // message is added to the chat thread synchronously inside
+        // _doSubmit; awaiting the full stream here would keep the
+        // input field locked for the duration of the agent run.
+        _doSubmit(target.input, target.files, { isRetry: target.isRetry }).catch(
+          (err) => {
+            console.error(
+              '[useChatSubmit] _doSubmit (forceStopAndSend) threw unexpectedly:',
+              err,
+            )
+          },
+        )
         return 'sent'
       } catch (err: any) {
         console.error('[Electron] forceStopAndSend failed:', err?.message)
@@ -447,6 +488,41 @@ export function useChatSubmit() {
     setPendingInput(null)
   }, [])
 
+  // ── Stop handler ─────────────────────────────────────────────────────
+  //
+  // Two-phase stop:
+  //   1. SYNC — abort the renderer's AbortController so the streaming
+  //      indicator clears immediately and any in-flight SSE callbacks
+  //      stop painting into the chat. This is what the user sees.
+  //
+  //   2. AWAITED — directly call `chat:stop-machine` on the backend
+  //      so the machine lock is definitively released BEFORE the user
+  //      can submit a new task. Without this, the user could click
+  //      Stop → New Chat → Send fast enough that the new send hits a
+  //      backend still holding the lock for the old task. Symptom: the
+  //      first new submit appears to do nothing (commands get rejected
+  //      with "task stopped" on the bridge until the prior task_end
+  //      fires), and only the second submit actually starts.
+  //
+  // The signal listener in api.ts ALSO fires `window.coasty.abortChat`
+  // which itself calls `/api/chat/stop-machine` — but it's fire-and-
+  // forget and the renderer never awaits it. Calling stopMachine again
+  // here is harmless (the backend's endpoint is idempotent) and gives
+  // us the awaitable handle we need to guarantee ordering for the
+  // user's next gesture.
+  const handleStop = useCallback(async () => {
+    stopStreaming()
+    if (!machineId) return
+    try {
+      await window.coasty.stopMachine(machineId)
+    } catch (err: any) {
+      console.warn(
+        '[useChatSubmit] post-stop stopMachine failed (continuing):',
+        err?.message ?? err,
+      )
+    }
+  }, [stopStreaming, machineId])
+
   return {
     messages,
     isStreaming,
@@ -455,7 +531,7 @@ export function useChatSubmit() {
     connectionState,
     canSend,
     handleSubmit,
-    handleStop: stopStreaming,
+    handleStop,
     clearMessages,
     loadChatList,
     // Yellow "Override & Run" surface

@@ -9,13 +9,34 @@
 // Works on Windows, macOS, and Linux without bash or PowerShell dependency.
 //
 // Usage:
-//   node scripts/run-all-tests.mjs            # all surfaces, sequential
-//   node scripts/run-all-tests.mjs --parallel # all surfaces, parallel
-//   node scripts/run-all-tests.mjs frontend   # only frontend
-//   node scripts/run-all-tests.mjs backend    # only backend
-//   node scripts/run-all-tests.mjs electron   # only electron
+//   node scripts/run-all-tests.mjs            # EVERYTHING: frontend + backend
+//                                             #   + electron (vitest) + electron
+//                                             #   e2e (Playwright) + typecheck
+//   node scripts/run-all-tests.mjs --no-e2e   # all unit surfaces, skip e2e
+//                                             #   (fast iteration path)
+//   node scripts/run-all-tests.mjs --parallel # all unit surfaces in parallel;
+//                                             #   e2e still runs sequentially
+//   node scripts/run-all-tests.mjs frontend   # only frontend (vitest)
+//   node scripts/run-all-tests.mjs backend    # only backend (pytest)
+//   node scripts/run-all-tests.mjs electron   # only electron (vitest)
+//   node scripts/run-all-tests.mjs e2e        # only electron real-runtime Playwright
+//   node scripts/run-all-tests.mjs smoke      # only packaged-app smoke test
 //   node scripts/run-all-tests.mjs typecheck  # only TypeScript type check
 //   node scripts/run-all-tests.mjs discover   # list all test files (no run)
+//
+// Flags (any combination):
+//   --parallel    run unit surfaces in parallel
+//   --with-e2e    append e2e to a single-surface filter (e.g. ``electron --with-e2e``)
+//   --no-e2e      skip e2e when filter=all (fast path)
+//
+// Env vars:
+//   SKIP_E2E_BUILD=1   reuse existing ``electron/out/`` instead of rebuilding
+//
+// Excluded by design:
+//   - tests/post_deploy/**   (live-environment smoke; run only against a
+//                             deployed instance via tests/post_deploy/run.sh)
+//   - electron smoke test    (needs ``npm run package`` first — too slow
+//                             to auto-trigger; invoke ``test:smoke`` explicitly)
 // =============================================================================
 
 import { execSync, spawn } from "child_process"
@@ -29,6 +50,14 @@ const isWin = process.platform === "win32"
 
 const argv = process.argv.slice(2)
 const parallel = argv.includes("--parallel")
+// ``--with-e2e`` is kept as an explicit opt-in for callers that pin to it.
+// Under the new defaults it's redundant for filter=all (e2e is already in
+// the matrix) but it remains the right knob if you want e2e appended onto
+// a single-surface run like ``electron --with-e2e``.
+const withE2E = argv.includes("--with-e2e")
+// ``--no-e2e`` is the fast-iteration escape hatch. Skips the ~30s electron
+// build + ~3min Playwright matrix and runs only the unit suites.
+const skipE2E = argv.includes("--no-e2e")
 const filter = argv.find((a) => !a.startsWith("--")) || "all"
 
 const results = []
@@ -237,6 +266,26 @@ const wantFrontend = filter === "all" || filter === "frontend"
 const wantBackend = filter === "all" || filter === "backend"
 const wantElectron = filter === "all" || filter === "electron"
 const wantTypecheck = filter === "all" || filter === "typecheck"
+// ``e2e`` runs the Playwright real-Electron specs in electron/e2e/. The
+// suite needs a built ``electron/out/main/index.js`` first — handled below
+// by ensureElectronBuild().
+//
+// Defaults:
+//   filter=all           → e2e included (unless ``--no-e2e``)
+//   filter=e2e           → only e2e
+//   filter=<other>       → e2e off unless ``--with-e2e`` is also passed
+//
+// We include e2e by default in ``test:all`` because "all" should mean all —
+// otherwise users have to learn that there's a hidden release-gating suite
+// they're missing.
+const wantE2E =
+  filter === "e2e" ||
+  (filter === "all" && !skipE2E) ||
+  (filter !== "all" && withE2E)
+// ``smoke`` boots the packaged unpacked binary under electron/dist/. Unlike
+// e2e, this is NOT auto-built — the user must have already run
+// ``npm run package`` because building installers takes minutes.
+const wantSmoke = filter === "smoke"
 
 if (parallel && filter === "all") {
   banner("RUNNING ALL SUITES IN PARALLEL")
@@ -278,6 +327,54 @@ if (parallel && filter === "all") {
     banner("TYPE CHECKING")
     run("TypeScript Type Check", "npx tsc --noEmit", ROOT)
   }
+}
+
+// ── Electron e2e (real-runtime Playwright) ───────────────────────────────────
+//
+// Independent of the parallel/sequential split above — e2e is always
+// sequential (Playwright workers=1 in playwright.config.ts) and must run
+// AFTER the build step that produces electron/out/main/index.js.
+//
+// Auto-build is opt-out via SKIP_E2E_BUILD=1 (useful when you've already
+// built and just want fast re-runs of the spec layer).
+
+function ensureElectronBuild() {
+  const mainEntry = join(ROOT, "electron", "out", "main", "index.js")
+  if (existsSync(mainEntry) && process.env.SKIP_E2E_BUILD === "1") {
+    console.log(`${GRAY}  SKIP_E2E_BUILD=1 set — using existing build at ${relative(ROOT, mainEntry)}${RESET}`)
+    return
+  }
+  if (existsSync(mainEntry)) {
+    console.log(`${GRAY}  Existing build found — rebuilding for fresh e2e state.${RESET}\n` +
+                `${GRAY}  (set SKIP_E2E_BUILD=1 to skip)${RESET}`)
+  }
+  run("Electron Build (for e2e)", "npm run build", join(ROOT, "electron"))
+}
+
+if (wantE2E) {
+  banner("ELECTRON E2E TESTS (Playwright + real Electron)")
+  ensureElectronBuild()
+  // Only continue if the build succeeded — otherwise Playwright fails with
+  // an unhelpful "Cannot find module out/main/index.js" error from inside
+  // Electron itself.
+  if (!failed) {
+    run(
+      "Electron E2E (real-runtime)",
+      "npx playwright test --config=playwright.config.ts",
+      join(ROOT, "electron"),
+    )
+  } else {
+    console.log(`${YELLOW}  Skipping e2e — build failed above.${RESET}`)
+  }
+}
+
+if (wantSmoke) {
+  banner("ELECTRON SMOKE TEST (packaged binary)")
+  run(
+    "Electron Smoke (packaged)",
+    "node ./scripts/smoke-packaged.mjs",
+    join(ROOT, "electron"),
+  )
 }
 
 // ── Summary ──────────────────────────────────────────────────────────────────

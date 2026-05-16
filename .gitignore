@@ -178,3 +178,4 @@ temp/*
 
 # OSWorld showcase artifacts — pushed to the dedicated coasty-ai/coasty-osworld
 results/
+logs/

@@ -587,7 +587,13 @@ export default function PricingPage() {
     {
       icon: featureIcons[1],
       title: t("features.swarmMode.name"),
-      subtitle: (p: Plan) => p.swarm === 0 ? t("features.swarmMode.sequential") : t("features.swarmMode.parallel", { count: p.swarm }),
+      // Singular grammar fix for the "1 concurrent agent" case (unlimited).
+      subtitle: (p: Plan) =>
+        p.swarm === 0
+          ? t("features.swarmMode.sequential")
+          : p.swarm === 1
+            ? "1 concurrent agent"
+            : t("features.swarmMode.parallel", { count: p.swarm }),
       highlight: { label: t("features.swarmMode.badge"), ...featureHighlights[1]! },
     },
     {

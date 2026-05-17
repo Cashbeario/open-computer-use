@@ -130,14 +130,16 @@ export function CostSection({ isMobile }: { isMobile: boolean }) {
             href="/auth"
             className={cn(
               "group inline-flex items-center justify-center gap-2",
-              "rounded-full border border-foreground bg-foreground text-background",
-              "font-medium transition-all duration-300",
-              "hover:bg-background hover:text-foreground",
+              "rounded-full bg-foreground text-background",
+              "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)]",
+              "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)]",
+              "font-medium transition-[box-shadow,transform] duration-300",
+              "hover:scale-[1.012] active:scale-[0.985]",
               isMobile ? "px-5 py-2.5 text-sm w-full max-w-xs" : "px-5 py-2.5 text-sm whitespace-nowrap"
             )}
           >
             <span>Try Coasty Free</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={1.75} />
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={2} />
           </Link>
         </motion.div>
       </div>

@@ -141,10 +141,19 @@ export async function POST(req: NextRequest) {
   }
 
   // Persistent swarms are capped at plan's max_machines (they become persistent machines).
-  // Temporary swarms get 3x the limit.
-  const swarmMaxMachines = isPersistent
-    ? planMaxMachines
-    : Math.min(planMaxMachines * 3, 10); // hard cap at 10
+  // Temporary swarms get 3x the limit, hard-capped at 10.
+  //
+  // EXCEPTION: the "unlimited" tier ships with unlimited credits but only
+  // 1 concurrent agent — without this cap a single user could spin up 6
+  // (= 2 * 3) machines and burn massive compute per hour at flat $249/mo,
+  // breaking plan economics.  The cap is also reflected in lib/pricing/tiers.ts
+  // (unlimited.swarmAgentsLimit = 1) and shown in the marketing UI as
+  // "1 concurrent agent".
+  const swarmMaxMachines = planTier === "unlimited"
+    ? 1
+    : isPersistent
+      ? planMaxMachines
+      : Math.min(planMaxMachines * 3, 10);
 
   const requestedCount = Math.min(
     body.machineCount || swarmMaxMachines,

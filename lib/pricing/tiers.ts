@@ -187,7 +187,12 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     pricePerCreditUSD: null,
     apiTier: "professional",
     machinesIncluded: 2,
-    swarmAgentsLimit: 6,
+    // Unlimited gives unlimited CREDITS but only 1 concurrent agent — this
+    // is the abuse-prevention valve.  With unlimited credits AND 6 parallel
+    // agents, a user could burn massive compute in a single hour.  Capping
+    // concurrency to 1 (enforced in app/api/swarm/route.ts too) keeps the
+    // plan economics sane.
+    swarmAgentsLimit: 1,
     scheduleLimit: 10,
     visibleInPricingGrid: true,
     highlighted: false,

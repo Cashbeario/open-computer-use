@@ -105,9 +105,10 @@ describe("unlimited tier — tierAtLeast ordering", () => {
 
 // ─── 3. Resource limits ────────────────────────────────────────────────────
 
-describe("unlimited tier — resource limits mirror Plus", () => {
-  // Per Phase 4 design: Unlimited matches Plus on all enforced limits
-  // (2 machines, 6 swarm, 10 schedules) — credits is the only differentiator.
+describe("unlimited tier — resource limits", () => {
+  // Per Phase 4 design (revised): Unlimited mirrors Plus on machines + schedule
+  // limit, but caps concurrent agents at 1 to prevent runaway compute on the
+  // flat-rate plan.  See lib/pricing/tiers.ts comment + app/api/swarm/route.ts.
 
   it("schedule limit is 10 (matches Plus)", () => {
     expect(SCHEDULE_LIMITS.unlimited).toBe(10)
@@ -118,14 +119,29 @@ describe("unlimited tier — resource limits mirror Plus", () => {
     expect(getScheduleLimit("unlimited")).toBe(10)
   })
 
-  it("the SubscriptionTier entry matches Plus on machine/swarm/schedule counts", () => {
+  it("machinesIncluded matches Plus (2 always-on VMs)", () => {
     const u = getTier("unlimited")
     const plus = getTier("plus")
-    expect(u).toBeDefined()
-    expect(plus).toBeDefined()
     expect(u!.machinesIncluded).toBe(plus!.machinesIncluded)
-    expect(u!.swarmAgentsLimit).toBe(plus!.swarmAgentsLimit)
+    expect(u!.machinesIncluded).toBe(2)
+  })
+
+  it("scheduleLimit matches Plus", () => {
+    const u = getTier("unlimited")
+    const plus = getTier("plus")
     expect(u!.scheduleLimit).toBe(plus!.scheduleLimit)
+  })
+
+  it("swarmAgentsLimit is capped at 1 — abuse-prevention valve", () => {
+    // Critical: unlimited credits + unlimited concurrency would let a
+    // single user burn 100k credits/hour at $0 marginal cost.  The 1-agent
+    // cap is what makes the $249 flat rate sustainable.
+    const u = getTier("unlimited")
+    expect(u!.swarmAgentsLimit).toBe(1)
+    // Distinct from Plus on purpose — Plus has 6 (parallel-execution
+    // is part of what Plus sells), Unlimited does not.
+    const plus = getTier("plus")
+    expect(u!.swarmAgentsLimit).toBeLessThan(plus!.swarmAgentsLimit)
   })
 })
 

@@ -205,7 +205,7 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
                   {/* hairline separator between vignette and copy */}
                   <span
                     aria-hidden
-                    className="my-4 block h-px w-full bg-gradient-to-r from-transparent via-foreground/8 to-transparent"
+                    className="my-4 block h-px w-full bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent"
                   />
 
                   {/* title + description */}

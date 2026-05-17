@@ -351,7 +351,7 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
           {/* Bottom hairline echo */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/8 to-transparent"
+            className="pointer-events-none absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent"
           />
 
           {/* Eyebrow strip above chart — context for what the leaderboard is */}

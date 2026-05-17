@@ -244,9 +244,9 @@ export function LandingFooter() {
       {/* ── Giant Coasty wordmark ── */}
       <div className="relative w-full select-none overflow-x-clip px-7 pb-8 sm:px-10">
         <div className="relative flex w-full items-end justify-center overflow-visible">
-          {/* Ambient glow */}
+          {/* Ambient glow — neutral foreground wash, not a tinted gradient. */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="h-[50%] w-[65%] rounded-full bg-gradient-to-r from-blue-500/[0.04] via-purple-500/[0.05] to-blue-500/[0.04] blur-[100px] dark:from-blue-400/[0.025] dark:via-purple-400/[0.035] dark:to-blue-400/[0.025]" />
+            <div className="h-[50%] w-[65%] rounded-full bg-foreground/[0.04] blur-[100px] dark:bg-foreground/[0.025]" />
           </div>
           <h2
             className="relative bg-gradient-to-b from-foreground/[0.14] via-foreground/[0.06] to-transparent bg-clip-text text-[20vw] font-black leading-none tracking-[-0.04em] text-transparent sm:text-[18vw] md:text-[15vw] lg:text-[13vw]"

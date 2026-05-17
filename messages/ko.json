@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "무제한",
           "machines": "2대 상시 운영",
-          "feature": "최고의 가치 · 한도 없음"
+          "feature": "동시 1 에이전트"
         }
       },
       "perMonth": "{price}/월",

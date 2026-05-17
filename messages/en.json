@@ -1972,7 +1972,7 @@
         "unlimited": {
           "credits": "Unlimited",
           "machines": "2 always-on",
-          "feature": "Best value · No caps"
+          "feature": "1 concurrent agent"
         }
       },
       "perMonth": "{price}/mo",

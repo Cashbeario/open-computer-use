@@ -234,12 +234,12 @@ function HeroCard({
       {/* Top sheen hairline */}
       <div
         aria-hidden
-        className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-foreground/25 to-transparent"
+        className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
       />
       {/* Bottom hairline echo */}
       <div
         aria-hidden
-        className="absolute inset-x-12 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
+        className="absolute inset-x-12 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent"
       />
       {/* Mouse-tracking spotlight */}
       {!isMobile && (
@@ -275,7 +275,7 @@ function HeroCard({
               className="absolute inset-0 bg-foreground/20 origin-left scale-x-0 group-hover/card:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
             />
           </div>
-          <p className="eyebrow text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground/60">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">
             {category}
           </p>
           <h3
@@ -289,7 +289,7 @@ function HeroCard({
           {/* Positioning sub-line — anti-claim that frames the description */}
           <p
             className={cn(
-              "display-serif italic mt-3 text-foreground/55",
+              "mt-3 font-light italic tracking-[-0.005em] text-foreground/50",
               isMobile ? "text-base" : "text-base sm:text-lg"
             )}
           >
@@ -525,12 +525,12 @@ function StandardCard({
       {/* Top sheen */}
       <div
         aria-hidden
-        className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
+        className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
       />
       {/* Bottom echo */}
       <div
         aria-hidden
-        className="absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/8 to-transparent"
+        className="absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent"
       />
       {!isMobile && (
         <div
@@ -558,7 +558,7 @@ function StandardCard({
             className="absolute inset-0 bg-foreground/20 origin-left scale-x-0 group-hover/card:scale-x-100 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
           />
         </div>
-        <p className="eyebrow text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground/60">
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/60">
           {category}
         </p>
         <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">

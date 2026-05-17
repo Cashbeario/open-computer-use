@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Безліміт",
           "machines": "2 завжди активні",
-          "feature": "Найкраща · Без обмежень"
+          "feature": "1 одночасний агент"
         }
       },
       "perMonth": "{price}/mis.",

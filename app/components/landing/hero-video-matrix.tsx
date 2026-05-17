@@ -807,10 +807,10 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
                   "bg-foreground text-background",
-                  "shadow-[0_1px_0_0_rgba(255,255,255,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.30)]",
-                  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_8px_24px_-10px_rgba(0,0,0,0.50)]",
+                  "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)]",
+                  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)]",
                   "transition-[box-shadow,transform] duration-300",
-                  "hover:scale-[1.015] active:scale-[0.985]",
+                  "hover:scale-[1.012] active:scale-[0.985]",
                   isMobile
                     ? "px-6 py-3 text-sm"
                     : "px-7 py-3 text-[14.5px]"
@@ -836,12 +836,12 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                   //     coloured backgrounds, lifting the button off them.
                   //   • Text is at full foreground opacity so contrast is
                   //     guaranteed in both modes.
-                  "border border-foreground/20 dark:border-white/20",
+                  "border border-foreground/15 dark:border-white/15",
                   "text-foreground dark:text-white",
-                  "bg-foreground/[0.03] dark:bg-white/[0.04]",
+                  "bg-foreground/[0.025] dark:bg-white/[0.03]",
                   "backdrop-blur-[2px]",
-                  "hover:bg-foreground/[0.07] hover:border-foreground/35",
-                  "dark:hover:bg-white/[0.08] dark:hover:border-white/35",
+                  "hover:bg-foreground/[0.05] hover:border-foreground/25",
+                  "dark:hover:bg-white/[0.06] dark:hover:border-white/25",
                   "transition-[background,border-color,transform] duration-300",
                   "active:scale-[0.985]",
                   isMobile

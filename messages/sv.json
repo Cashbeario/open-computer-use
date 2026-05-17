@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Obegränsat",
           "machines": "2 alltid på",
-          "feature": "Bästa värdet · Inga tak"
+          "feature": "1 samtidig agent"
         }
       },
       "perMonth": "{price}/man",

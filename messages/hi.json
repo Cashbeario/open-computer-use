@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "असीमित",
           "machines": "2 हमेशा चालू",
-          "feature": "सर्वोत्तम · कोई सीमा नहीं"
+          "feature": "1 समवर्ती एजेंट"
         }
       },
       "perMonth": "{price}/माह",

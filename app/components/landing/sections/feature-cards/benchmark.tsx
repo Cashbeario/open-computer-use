@@ -34,13 +34,13 @@ export function BenchmarkVignette({ isMobile }: { isMobile: boolean }) {
   return (
     <>
       <div className="mb-3 flex items-center gap-2">
-        <span className="eyebrow inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.22em] text-muted-foreground/55">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground/55">
           <span className="tabular-nums text-foreground/40">05</span>
           <span className="h-px w-5 bg-border/60" aria-hidden />
           <span>LEADERSHIP</span>
         </span>
         <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-foreground/12 bg-foreground/[0.025] px-2 py-[3px] font-mono text-[8.5px] uppercase tracking-[0.18em] text-foreground/55">
-          <Trophy className="size-2.5 text-amber-500/80" strokeWidth={1.8} />
+          <Trophy className="size-2.5 text-foreground/65" strokeWidth={1.8} />
           <span>OSWORLD</span>
           <span className="text-foreground/25">·</span>
           <span className="text-foreground/75">#1</span>
@@ -167,7 +167,7 @@ export function BenchmarkVignette({ isMobile }: { isMobile: boolean }) {
 
       {/* stat strip */}
       <div className="mt-3 flex items-center gap-2.5 text-[9px] font-mono uppercase tracking-[0.18em] text-foreground/40">
-        <span className="inline-block size-1 rounded-full bg-amber-500/70" />
+        <span className="inline-block size-1 rounded-full bg-foreground/50" />
         <span className="tabular-nums text-foreground/60">+9.4 PTS OVER #2</span>
         <span className="ml-auto text-foreground/35">verified</span>
       </div>

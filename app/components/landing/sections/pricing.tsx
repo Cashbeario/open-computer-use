@@ -101,20 +101,29 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
 
         <div
           className={cn(
-            "relative grid gap-3 sm:gap-4",
+            "relative grid gap-3 sm:gap-4 mx-auto",
+            // Layout adapts to PLAN_DATA.length so the grid stays legible
+            // whether we ship 2, 3, 4, or 5 cards.  See lib/pricing/tiers.ts
+            // PURCHASABLE_TIERS — toggle a tier's `purchasable` to add/remove.
             isMobile
-              ? "grid-cols-1 max-w-md mx-auto"
-              : cn(
-                  "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
-                  // Narrow mode (parent has data-narrow because a video
-                  // card is featured): drop from 5-col to 2-col so each
-                  // pricing card stays ~340px and the price + feature
-                  // list stay legible. Without this override the cards
-                  // collapse to ~145px and the price text crashes into
-                  // the feature checks.
-                  "group-data-[narrow]/feat:grid-cols-1 group-data-[narrow]/feat:lg:grid-cols-2 group-data-[narrow]/feat:xl:grid-cols-2",
-                  "group-data-[narrow]/feat:max-w-2xl group-data-[narrow]/feat:mx-auto",
-                ),
+              ? "grid-cols-1 max-w-md"
+              : PLAN_DATA.length <= 2
+                ? "grid-cols-1 sm:grid-cols-2 max-w-3xl"
+                : PLAN_DATA.length === 3
+                  ? "grid-cols-1 sm:grid-cols-3 max-w-4xl"
+                  : PLAN_DATA.length === 4
+                    ? "grid-cols-2 lg:grid-cols-4 max-w-5xl"
+                    : cn(
+                        "grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+                        // Narrow mode (parent has data-narrow because a video
+                        // card is featured): drop from 5-col to 2-col so each
+                        // pricing card stays ~340px and the price + feature
+                        // list stay legible. Without this override the cards
+                        // collapse to ~145px and the price text crashes into
+                        // the feature checks.
+                        "group-data-[narrow]/feat:grid-cols-1 group-data-[narrow]/feat:lg:grid-cols-2 group-data-[narrow]/feat:xl:grid-cols-2",
+                        "group-data-[narrow]/feat:max-w-2xl group-data-[narrow]/feat:mx-auto",
+                      ),
           )}
         >
           {PLAN_DATA.map((plan, planIdx) => {

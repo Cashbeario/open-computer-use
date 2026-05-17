@@ -66,6 +66,16 @@ export interface SubscriptionTier {
   visibleInPricingGrid: boolean;
   /** Whether the tier is the "popular / highlighted" callout */
   highlighted: boolean;
+  /** Whether the tier is CURRENTLY live for purchase.  Toggle to false to
+   * remove the tier from every customer-facing surface (landing, /pricing,
+   * settings billing, SEO structured data, /api/pricing snapshot,
+   * checkout-route validation) without deleting the tier definition — so
+   * it can be re-enabled later by flipping back to true.
+   *
+   * Existing subscribers on a tier with purchasable=false KEEP their
+   * subscription — the webhook, balance, and renewal flows still treat
+   * the tier as valid.  Only NEW signups are blocked. */
+  purchasable: boolean;
   /** Stripe price id env-var name (resolved server-side at checkout time) */
   stripePriceEnvVar?:
     | "STRIPE_PRICE_LITE"
@@ -98,6 +108,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 3,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: false, // HIDDEN: signup default, never shown as a "for-sale" plan
     updatedAt: PRICING_UPDATED_AT,
   },
   {
@@ -112,6 +123,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 3,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: false, // HIDDEN — flip to true to re-list on landing/pricing/checkout
     stripePriceEnvVar: "STRIPE_PRICE_LITE",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -127,6 +139,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 3,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: true, // ✅ LIVE — entry-level paid plan
     stripePriceEnvVar: "STRIPE_PRICE_STARTER",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -142,6 +155,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 10,
     visibleInPricingGrid: true,
     highlighted: true,
+    purchasable: false, // HIDDEN — kept in code for future re-launch
     stripePriceEnvVar: "STRIPE_PRICE_PLUS",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -157,6 +171,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 10,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: false, // HIDDEN — kept in code for future re-launch
     stripePriceEnvVar: "STRIPE_PRICE_PRO",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -176,6 +191,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 10,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: true, // ✅ LIVE — flagship plan
     stripePriceEnvVar: "STRIPE_PRICE_UNLIMITED",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -191,6 +207,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 50,
     visibleInPricingGrid: true,
     highlighted: false,
+    purchasable: false, // contact-sales — not a self-serve purchase
     updatedAt: PRICING_UPDATED_AT,
   },
 ];
@@ -296,10 +313,45 @@ export const getTier = (id: SubscriptionTierId): SubscriptionTier | undefined =>
 export const getBoostPackage = (id: BoostPackageId): BoostPackage | undefined =>
   BOOST_PACKAGES.find((p) => p.id === id);
 
-/** Tier objects that should appear on the public pricing grid, in display order. */
+/** Tier objects shown on the public pricing grid AND currently live for
+ * purchase.  Consumers (landing, /pricing, SEO offers, /api/pricing
+ * snapshot) all read from this filter, so toggling `purchasable: false`
+ * on a tier removes it from every customer-facing surface in one place. */
 export const VISIBLE_TIERS: readonly SubscriptionTier[] = SUBSCRIPTION_TIERS.filter(
-  (t) => t.visibleInPricingGrid,
+  (t) => t.visibleInPricingGrid && t.purchasable,
 );
+
+/** Explicit alias for the "live for purchase" set.  Functionally equal to
+ * VISIBLE_TIERS today; named separately so call sites that care about the
+ * purchasability semantic (rather than the marketing-grid semantic) read
+ * cleanly.  If we ever introduce a tier that is `purchasable: false` but
+ * still wants to appear in the grid (coming-soon teaser), update the
+ * VISIBLE_TIERS filter to drop the `&& t.purchasable` clause and have
+ * each surface choose which set it wants. */
+export const PURCHASABLE_TIERS: readonly SubscriptionTier[] = SUBSCRIPTION_TIERS.filter(
+  (t) => t.purchasable,
+);
+
+/** Marketing tier ids (free | lite | starter | plus | pro | unlimited |
+ * enterprise) that are currently live for purchase. */
+export const PURCHASABLE_TIER_IDS: ReadonlySet<SubscriptionTierId> = new Set(
+  PURCHASABLE_TIERS.map((t) => t.id),
+);
+
+/** DB tier names (subscription_plans.tier column values) currently live
+ * for purchase.  Used by the checkout route to reject requests for
+ * decommissioned plans.
+ *
+ * The set must be maintained MANUALLY in sync with PURCHASABLE_TIERS
+ * because the DB tier vocabulary differs from marketing ids in a few
+ * places (the historical billing-section maps marketing "plus" →
+ * DB "professional" and marketing "pro" → DB "enterprise"; "starter"
+ * and "unlimited" match cleanly).  When re-enabling a marketing tier,
+ * add its DB-equivalent name here too. */
+export const PURCHASABLE_DB_TIERS: ReadonlySet<string> = new Set([
+  "starter",
+  "unlimited",
+]);
 
 // ─── Public agent-facing snapshot ──────────────────────────────────────────
 //

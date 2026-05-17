@@ -555,7 +555,13 @@ function FeatureVisual({ featureIndex, plan, t }: { featureIndex: number; plan: 
 
 export default function PricingPage() {
   const t = useTranslations("pricingPage")
-  const [selectedPlan, setSelectedPlan] = useState(3)
+  // Default to the flagship "unlimited" tab if it's purchasable, otherwise
+  // the last visible plan.  `planData` is filtered upstream via VISIBLE_TIERS
+  // (which respects `purchasable`), so this index is always safe.
+  const [selectedPlan, setSelectedPlan] = useState(() => {
+    const idx = planData.findIndex((p) => p.id === "unlimited")
+    return idx >= 0 ? idx : Math.max(0, planData.length - 1)
+  })
   const [activeFeature, setActiveFeature] = useState(0)
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
 

@@ -65,14 +65,20 @@ const billingAnimations = `
 
 /* ─── plans data ─── */
 
-const planKeys: readonly { key: string; name: string; price: string; popular?: boolean; featured?: boolean }[] = [
-  { key: "free", name: "Free", price: "$0" },
-  { key: "lite", name: "Lite", price: "$9" },
-  { key: "starter", name: "Starter", price: "$19" },
-  { key: "plus", name: "Plus", price: "$50", popular: true },
-  { key: "pro", name: "Pro", price: "$100" },
-  { key: "unlimited", name: "Unlimited", price: "$249", featured: true },
+// Master list — every entry stays in code so re-enabling a plan is a
+// single `purchasable: true` flip.  The render filters to purchasable
+// entries only; the source of truth for which plans are live is
+// lib/pricing/tiers.ts (PURCHASABLE_DB_TIERS).
+const ALL_PLAN_KEYS: readonly { key: string; name: string; price: string; popular?: boolean; featured?: boolean; purchasable: boolean }[] = [
+  { key: "free", name: "Free", price: "$0", purchasable: false },
+  { key: "lite", name: "Lite", price: "$9", purchasable: false },
+  { key: "starter", name: "Starter", price: "$19", purchasable: true },
+  { key: "plus", name: "Plus", price: "$50", popular: true, purchasable: false },
+  { key: "pro", name: "Pro", price: "$100", purchasable: false },
+  { key: "unlimited", name: "Unlimited", price: "$249", featured: true, purchasable: true },
 ]
+
+const planKeys = ALL_PLAN_KEYS.filter((p) => p.purchasable)
 
 const faqKeys = ["howCharged", "runOut", "rollOver"] as const
 
@@ -202,7 +208,17 @@ export function BillingTab({ inApp }: { inApp: boolean }) {
 
         <motion.div
           variants={stagger}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
+          className={`grid gap-3 mx-auto ${
+            planKeys.length <= 2
+              ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
+              : planKeys.length === 3
+                ? "grid-cols-1 sm:grid-cols-3"
+                : planKeys.length === 4
+                  ? "grid-cols-2 sm:grid-cols-4"
+                  : planKeys.length === 5
+                    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
+          }`}
         >
           {planKeys.map((plan, i) => (
             <motion.div

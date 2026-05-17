@@ -809,45 +809,21 @@ function shouldShowThinking(items: TopLevelItem[]): boolean {
 }
 
 function ThinkingPulse() {
-  // CSS-driven (no framer-motion in the electron renderer). Keyframes
-  // are defined in styles/globals.css under "CUA 'thinking' pulse" so
-  // they auto-respect the prefers-reduced-motion fallback there.
+  // Muted "Thinking" label with the .shimmer-text glow sweep — the same
+  // self-contained text effect used elsewhere as a loader placeholder.
+  // The timeline rail to the left already serves as the visual border,
+  // so no extra chrome is added here: just the shimmering word at the
+  // same pl-6 indent as every other item in the timeline.
   return (
     <div
       role="status"
       aria-live="polite"
       aria-label="Agent is working"
-      className="relative pl-6 pt-2 pb-1 thinking-pulse-enter"
+      className="pl-6 thinking-pulse-enter"
     >
-      {/* Soft halo — radiates outward in counterphase to the core dot. */}
-      <span
-        aria-hidden="true"
-        className="thinking-halo absolute -left-[3px] top-[6px] w-[13px] h-[13px] rounded-full bg-white/15 blur-[1px]"
-      />
-      {/* Core dot — sits centered over the dotted timeline line. */}
-      <span
-        aria-hidden="true"
-        className="thinking-dot absolute left-0 top-[9px] w-[7px] h-[7px] rounded-full bg-neutral-300/70"
-      />
-      <div className="flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-neutral-400/80">
-        <span>Thinking</span>
-        {/* Three-dot wave — universal "in progress" affordance.
-            Staggered animation-delay gives a gentle ripple. */}
-        <span className="flex items-end gap-[3px] pb-[1px]">
-          <span
-            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
-            style={{ animationDelay: '0ms' }}
-          />
-          <span
-            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
-            style={{ animationDelay: '180ms' }}
-          />
-          <span
-            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
-            style={{ animationDelay: '360ms' }}
-          />
-        </span>
-      </div>
+      <span className="shimmer-text text-[13.5px] font-medium tracking-tight">
+        Thinking
+      </span>
     </div>
   )
 }
@@ -898,16 +874,47 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="relative">
-        {/* Timeline — dotted line, fades at ends */}
+        {/* ── Timeline rail ──────────────────────────────────────
+            A single 1px column at left-[2.5px] hosts two coupled
+            layers that read as one object:
+              1. Static soft gradient line (replaces the old dotted
+                 pattern — reads as ink, not as a graph axis).
+                 Draws itself top→down on first mount via the
+                 .cua-line-draw class (scaleY 0→1 over 800ms).
+              2. A travelling light caret — a 60px soft glow that
+                 drifts top→bottom on a 4s loop, fading in/out at
+                 the edges so it materializes rather than blinks.
+                 Only rendered while isStreaming. */}
+        {/* overflow-hidden clips the travelling caret to the rail's
+            vertical bounds — without it the caret would bleed above
+            and below the message bubble during its drift cycle. */}
         <div
-          className="absolute left-[2.5px] top-0 bottom-0 w-px opacity-[0.30]"
-          style={{
-            maskImage: 'linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)',
-            backgroundImage: 'repeating-linear-gradient(to bottom, currentColor 0px, currentColor 2px, transparent 2px, transparent 7px)',
-          }}
+          className="absolute left-[2.5px] top-0 bottom-0 w-px overflow-hidden"
           aria-hidden="true"
-        />
+        >
+          {/* Static gradient line — vertical fade at both ends bakes
+              the old mask treatment into the gradient itself. */}
+          <div
+            className="cua-line-draw absolute inset-0 opacity-[0.28]"
+            style={{
+              backgroundImage:
+                'linear-gradient(to bottom, transparent 0%, currentColor 10%, currentColor 90%, transparent 100%)',
+            }}
+          />
+          {/* Travelling light caret — only mounted while streaming.
+              The drift @keyframes ramps opacity at the entry and exit
+              of each cycle, so the caret naturally materializes at the
+              top of the line and dissolves past the bottom. */}
+          {isStreaming === true && (
+            <div
+              className="cua-caret-drift absolute left-0 w-px h-[60px] opacity-[0.65]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to bottom, transparent 0%, currentColor 50%, transparent 100%)',
+              }}
+            />
+          )}
+        </div>
         {/* Generous vertical rhythm — 20px between every item. Each
             point gets clear breathing room so the timeline reads as
             distinct beats rather than a paragraph of activity. Per-item

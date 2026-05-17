@@ -807,54 +807,25 @@ function shouldShowThinking(items: TopLevelItem[]): ThinkingVisibility {
 }
 
 function ThinkingPulse() {
+  // Muted "Thinking" label with the .text-shine glow sweep — the same
+  // self-contained text effect used for page-loader titles. The timeline
+  // rail to the left already serves as the visual border, so no extra
+  // chrome is added here: just the shimmering word at the same pl-6
+  // indent as every other item in the timeline.
   return (
     <motion.div
       initial={{ opacity: 0, y: 3 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -2 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       role="status"
       aria-live="polite"
       aria-label="Agent is working"
-      className="relative pl-6 pt-2 pb-1"
+      className="pl-6"
     >
-      {/* Soft halo — radiates outward in counterphase to the core dot so
-          the marker reads as alive without painting an aggressive ring. */}
-      <motion.span
-        aria-hidden="true"
-        className="absolute -left-[3px] top-[6px] size-[13px] rounded-full bg-foreground/15 blur-[1px]"
-        animate={{ scale: [0.7, 1.35, 0.7], opacity: [0.35, 0, 0.35] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-      />
-      {/* Core dot — sits centered over the dotted timeline line at
-          left-[2.5px]. Breathes scale + opacity to feel like a heartbeat. */}
-      <motion.span
-        aria-hidden="true"
-        className="absolute left-0 top-[9px] size-[7px] rounded-full bg-foreground/70"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.55, 0.95, 0.55] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-foreground/55">
-        <span>Thinking</span>
-        {/* Three-dot wave — universal "in progress" affordance. Staggered
-            y-translate + opacity gives a gentle ripple rather than a
-            jittery flicker. */}
-        <span className="flex items-end gap-[3px] pb-[1px]">
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              className="size-[3px] rounded-full bg-foreground/45"
-              animate={{ y: [0, -2, 0], opacity: [0.4, 1, 0.4] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                delay: i * 0.18,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </span>
-      </div>
+      <span className="text-shine text-[13.5px] font-medium tracking-tight text-muted-foreground">
+        Thinking
+      </span>
     </motion.div>
   )
 }
@@ -952,16 +923,56 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="relative">
-        {/* Timeline — dotted line, fades at ends */}
+        {/* ── Timeline rail ──────────────────────────────────────
+            A single 1px column at left-[2.5px] hosts two coupled
+            layers that read as one object:
+              1. Static soft gradient line (replaces the old dotted
+                 pattern — reads as ink, not as a graph axis).
+                 Draws itself top→down on first mount via the
+                 .cua-line-draw class (scaleY 0→1 over 800ms).
+              2. A travelling light caret — a 60px soft glow that
+                 drifts top→bottom on a 4s loop, fading in/out at
+                 the edges so it materializes rather than blinks.
+                 Only renders while isStreaming; AnimatePresence
+                 fades the whole layer in/out at state boundaries
+                 so it never snaps. */}
+        {/* overflow-hidden clips the travelling caret to the rail's
+            vertical bounds — without it the caret would bleed above
+            and below the message bubble during its drift cycle. */}
         <div
-          className="absolute left-[2.5px] top-0 bottom-0 w-px opacity-[0.22] dark:opacity-[0.30]"
-          style={{
-            maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)",
-            backgroundImage: "repeating-linear-gradient(to bottom, currentColor 0px, currentColor 2px, transparent 2px, transparent 7px)",
-          }}
+          className="absolute left-[2.5px] top-0 bottom-0 w-px overflow-hidden"
           aria-hidden="true"
-        />
+        >
+          {/* Static gradient line — vertical fade at both ends bakes
+              the old mask treatment into the gradient itself. */}
+          <div
+            className="cua-line-draw absolute inset-0 opacity-[0.20] dark:opacity-[0.28]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to bottom, transparent 0%, currentColor 10%, currentColor 90%, transparent 100%)",
+            }}
+          />
+          {/* Travelling light caret — only mounted while streaming.
+              The 60px height + soft top/bottom fade make it tail
+              like a comet. Opacity ramps inside the @keyframes
+              itself so we don't need a separate animation here. */}
+          <AnimatePresence>
+            {isStreaming === true && (
+              <motion.div
+                key="cua-caret"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="cua-caret-drift absolute left-0 w-px h-[60px] opacity-[0.55] dark:opacity-[0.65]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to bottom, transparent 0%, currentColor 50%, transparent 100%)",
+                }}
+              />
+            )}
+          </AnimatePresence>
+        </div>
         {/* Generous vertical rhythm — 20px between every item. Each
             point gets clear breathing room so the timeline reads as
             distinct beats rather than a paragraph of activity. Per-item

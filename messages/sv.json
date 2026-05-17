@@ -20,7 +20,7 @@
     "useCases": "Anvandningsfall",
     "blog": "Blogg",
     "agentSwarms": "Agentsvarm",
-    "products": "Products",
+    "products": "Produkter",
     "discover": "Discover",
     "compare": "Jamfor",
     "demos": "Demos",
@@ -57,14 +57,14 @@
       "emailCampaigns": "{stat} personliga e-postmeddelanden per kampanj"
     },
     "productItems": {
-      "computerUse": "Computer Use",
-      "agentSwarms": "Agent Swarms",
-      "compare": "Compare"
+      "computerUse": "Datoranvändning",
+      "agentSwarms": "Agentsvärmar",
+      "compare": "Jämför"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "{stat} OSWorld benchmark-poäng",
+      "agentSwarms": "{stat} agenter parallellt",
+      "compare": "{stat} konkurrenter analyserade"
     },
     "blogItems": {
       "allPosts": "Alla inlagg",
@@ -267,7 +267,7 @@
     },
     "coasty": {
       "title": "Coasty AI-agent",
-      "subtitle": "#1 computer-use agent"
+      "subtitle": "#1 datoranvändande agent"
     },
     "rows": {
       "timePerTask": "Tid per uppgift",
@@ -493,16 +493,16 @@
     "demoCaption": "Kör AI-agenter på din dator eller styr den från mobilen, var du än är.",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "Kör lokalt på din PC",
+        "desc": "Ladda ner skrivbordsappen och låt AI styra din dator direkt — ingen moln-VM behövs."
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "Styr din PC från mobilen",
+        "desc": "Starta en uppgift från mobilen och se AI-agenten arbeta på din dator i realtid."
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "Moln eller lokalt — du väljer",
+        "desc": "Använd moln-VM:ar för isolerade uppgifter, eller kör lokalt för full åtkomst till dina appar och filer."
       }
     },
     "viewTitles": {
@@ -740,7 +740,7 @@
       "decreaseMachines": "Minska antal maskiner",
       "increaseMachines": "Oka antal maskiner",
       "machineLimit": "Upp till {max} svarmmaskiner pa din plan. Behover mer? Kontakta founders@coasty.ai",
-      "label": "Multi-Run",
+      "label": "Multi-körning",
       "upgradeCta": "Svarmlage"
     },
     "desktop": {
@@ -773,7 +773,7 @@
       "vmInfo": "VM: {name}",
       "dropHeading": "Slapp filer har",
       "dropDescription": "Filer laddas upp till VM:ens skrivbordsmapp",
-      "dropPath": "Path: /home/desktop/Desktop/"
+      "dropPath": "Sökväg: /home/desktop/Desktop/"
     },
     "authPrompt": {
       "heading": "Logga in for att prova fler funktioner gratis",
@@ -1504,7 +1504,7 @@
     },
     "features": {
       "computerAgent": {
-        "name": "Coasty Computer Agent",
+        "name": "Coasty datoragent",
         "description": "Full webblasare, skrivbord och terminal",
         "badge": "Karna"
       },
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 AI-agent för datoranvändning | AI-anställd för skrivbords- och webbläsarautomation",
+      "title": "Coasty - #1 AI-agent för datoranvändning | $249/mo Obegränsad (Billigast på marknaden)",
       "titleTemplate": "{title} | Coasty - AI-agent för datoranvändning",
-      "description": "Coasty är den #1-rankade AI-agenten för datoranvändning — 82% på OSWorld benchmark. Styr ett helt skrivbord som en människa: öppnar webbläsare, klickar, skriver, fyller i formulär, skickar e-post, hanterar kalkylblad. Äkta VM-isolering per session. Från $19/mo.",
-      "ogTitle": "Coasty - #1 AI-agent för datoranvändning | 82% OSWorld Benchmark",
-      "ogDescription": "AI-anställd som styr ett skrivbord som en människa. #1 på OSWorld benchmark (82%). Webbläsarautomation, skrivbordskontroll, CAPTCHA-lösning, VM-isolering. Från $19/mo.",
-      "twitterDescription": "AI-anställd som styr ett skrivbord som en människa. Öppnar webbläsare, klickar, skriver, fyller i formulär, skickar e-post. Äkta VM-isolering. $19/mo jämfört med $3,000/mo mänsklig virtuell assistent."
+      "description": "Coasty är den #1-rankade AI-agenten för datoranvändning — 82% på OSWorld benchmark — och den enda Obegränsade datoranvändningsplanen med fast pris på $249/mo (billigare än Devin Team $500+ACU, OpenAI Operator $200 med hastighetsbegränsning och kreditbegränsade konkurrenter). Styr ett helt skrivbord som en människa: webbläsare, formulär, e-post, kalkylblad. VM-isolering. Från $19/mo Starter eller $249/mo Obegränsad.",
+      "ogTitle": "Coasty — 82% OSWorld + $249/mo Obegränsad (Billigaste datoranvändningsagenten)",
+      "ogDescription": "#1 på OSWorld (82%). $249/mo fast Obegränsad — billigare än Devin Team ($500+ACU) med högre benchmark. Webbläsar-, skrivbords- och terminalautomation. VM-isolering per session. Plattformsoberoende native + REST API + MCP-server.",
+      "twitterDescription": "AI-agent som kör ett riktigt skrivbord. 82% OSWorld (#1). $249/mo Obegränsad — billigaste planen med fast pris i kategorin. Starter från $19/mo. VM-isolering + 26-tool MCP-server."
     },
     "compare": {
       "title": "Jämför Coasty - AI-agentalternativ och konkurrentjämförelse",
@@ -2373,10 +2373,10 @@
       "ogDescription": "Den bästa datoranvändningsagenten rankad #1 på OSWorld. Automatisera alla skrivbords-, webbläsar- eller terminaluppgifter med AI."
     },
     "pricing": {
-      "title": "Priser — Coasty AI-agentplaner och priser",
-      "description": "Coasty-priser från $19/mo. Ersätt virtuella assistenter för $3,000/mo med en AI-anställd. Gratis plan tillgänglig. Kreditbaserad användning utan dolda avgifter.",
-      "ogTitle": "Coasty-priser — AI-agentplaner",
-      "ogDescription": "AI-anställd från $19/mo. Ersätt dyra VA:s med autonom AI. Gratis plan tillgänglig."
+      "title": "Priser — $19/mo Starter eller $249/mo Obegränsad (Billigast på marknaden)",
+      "description": "Coasty-priser: Starter $19/mo (200 krediter) eller Obegränsad $249/mo (den billigaste Obegränsade datoranvändningsplanen med fast pris på marknaden — billigare än Devin Team $500+ACU, Genspark Pro $249 kreditbegränsad och Manus Extended $200 begränsad). Ersätter mänskliga virtuella assistenter för $3,000+/mo. Inga dolda avgifter.",
+      "ogTitle": "Coasty-priser — $19/mo Starter, $249/mo Obegränsad",
+      "ogDescription": "$249/mo fast Obegränsad — den billigaste obegränsade datoranvändningsplanen på marknaden. Eller $19/mo Starter för individer. Sparar $36,000/år jämfört med mänskliga VA:s."
     },
     "faq": {
       "q1": "Vad är Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Hur jämförs Coasty med Anthropic Computer Use?",
       "a2": "Medan Anthropic Computer Use tillhandahåller ett rått API för datorkontroll, är Coasty en produktionsklar plattform med hanterad VM-infrastruktur, inbyggd CAPTCHA-lösning, skrivbordsapp för Mac och Windows, stöd för flera modeller och den högsta OSWorld benchmark-poängen (82%). Coasty ger den kompletta lösningen — inte bara API:et.",
       "q3": "Vad kostar Coasty?",
-      "a3": "Coasty börjar på $19/month för Starter-planen med en gratis plan tillgänglig. Jämför med $3,000+ per månad för en mänsklig virtuell assistent. Coasty arbetar 24/7 utan pauser, ingen utbildning behövs och omedelbar skalbarhet.",
+      "a3": "Coasty har två aktiva planer: Starter på $19/mo (200 krediter, 1 maskin, perfekt för individer) och Obegränsad på $249/mo utan kreditbegränsningar. $249 Obegränsad-planen är den billigaste Obegränsade datoranvändningsplanen med fast pris som finns — billigare än Devin Team ($500/mo + ACU-överskridning), OpenAI Operator ChatGPT Pro ($200/mo med hastighetsbegränsning), Genspark Pro ($249,99 kreditbegränsad till 125k krediter) och Manus Extended ($200 begränsad till 40k krediter). Båda ersätter en mänsklig virtuell assistent för $3,000+/mo; Obegränsad sparar $33,000+/år jämfört med en mänsklig VA med 92% kostnadsminskning.",
       "q4": "Är Coasty säkert att använda?",
       "a4": "Ja. Varje Coasty-session körs i sin egen isolerade, sandlådebaserade virtuella maskin. Dina data är säkra, din maskin förblir orörd och inget läcker mellan sessioner. Detta är äkta VM-nivåisolering, inte bara containrar i en delad pool.",
       "q5": "Vad är OSWorld benchmark?",
@@ -2401,11 +2401,11 @@
       "a10": "Ja. Coasty har en inbyggd CAPTCHA-lösningspipeline, så den blockeras inte som konkurrerande AI-agenter. Detta är avgörande för verklig automation där CAPTCHA:s är vanliga på webbplatser."
     },
     "structuredData": {
-      "appDescription": "Den #1-rankade AI-agenten för datoranvändning. Coasty styr ett helt skrivbord som en människa — öppnar webbläsare, klickar, skriver, fyller i formulär, skickar e-post och hanterar kalkylblad autonomt. 82% på OSWorld benchmark. Äkta VM-nivåisolering. Inbyggd CAPTCHA-lösning. Från $19/month.",
-      "orgDescription": "Coasty bygger den #1-rankade AI-agenten för datoranvändning. Vår plattform erbjuder autonom skrivbordskontroll, webbläsarautomation och orkestering av flera agenter med äkta VM-nivåisolering.",
-      "productDescription": "AI-datoranvändningsagent som styr ett skrivbord som en människa. #1 på OSWorld benchmark (82%). Autonom webbläsarautomation, skrivbordskontroll, e-postsändning, formulärifyllning och kalkylbladshantering med äkta VM-nivåisolering.",
-      "websiteDescription": "#1 AI-agentplattform för datoranvändning. 82% OSWorld benchmark. Autonom webbläsar-, skrivbords- och terminalautomation med VM-isolering. Från $19/mo.",
-      "softwareDescription": "AI-datoranvändningsagent som styr ett helt skrivbord som en människa. #1 på OSWorld benchmark med 82% slutförandegrad över 369 verkliga uppgifter. Autonom webbläsarautomation, skrivbordskontroll, terminaloperationer, e-postsändning, formulärifyllning och kalkylbladshantering.",
+      "appDescription": "Den #1-rankade AI-agenten för datoranvändning och den billigaste Obegränsade datoranvändningsplanen med fast pris på marknaden för $249/mo. Coasty styr ett helt skrivbord som en människa — öppnar webbläsare, klickar, skriver, fyller i formulär, skickar e-post och hanterar kalkylblad autonomt. 82% på OSWorld benchmark över 369 verkliga uppgifter. Äkta VM-nivåisolering per session. Inbyggd CAPTCHA-lösning. Planer: $19/mo Starter eller $249/mo Obegränsad.",
+      "orgDescription": "Coasty bygger den #1-rankade AI-agenten för datoranvändning (82% OSWorld) och levererar den enda Obegränsade datoranvändningsplanen med fast pris på $249/mo — billigare än Devin Team, OpenAI Operator och kreditbegränsade konkurrenter i samma prisklass. Vår plattform erbjuder autonom skrivbordskontroll, webbläsarautomation och orkestering av flera agenter med äkta VM-nivåisolering.",
+      "productDescription": "AI-datoranvändningsagent som styr ett skrivbord som en människa. #1 på OSWorld benchmark (82%). $249/mo Obegränsad-planen är den billigaste Obegränsade datoranvändningsplanen med fast pris som finns. Autonom webbläsarautomation, skrivbordskontroll, e-postsändning, formulärifyllning och kalkylbladshantering med äkta VM-nivåisolering.",
+      "websiteDescription": "#1 AI-agentplattform för datoranvändning — 82% OSWorld benchmark och den billigaste Obegränsade planen med fast pris på $249/mo. Autonom webbläsar-, skrivbords- och terminalautomation med VM-isolering. Från $19/mo Starter eller $249/mo Obegränsad.",
+      "softwareDescription": "AI-datoranvändningsagent som styr ett helt skrivbord som en människa. #1 på OSWorld benchmark med 82% slutförandegrad över 369 verkliga uppgifter. $249/mo Obegränsad-planen är den billigaste Obegränsade datoranvändningsplanen med fast pris på marknaden. Autonom webbläsarautomation, skrivbordskontroll, terminaloperationer, e-postsändning, formulärifyllning och kalkylbladshantering.",
       "breadcrumbs": {
         "home": "Hem",
         "caseStudies": "AI-agent fallstudier",
@@ -2449,7 +2449,7 @@
     }
   },
   "schedulesPage": {
-    "title": "Workforce",
+    "title": "Arbetsstyrka",
     "subtitle": "Din AI-arbetsstyrka — tilldela uppgifter och låt dem sköta resten",
     "guide": "Guide",
     "teamsTab": "Team",
@@ -2789,66 +2789,66 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "Rumsnamn krävs",
+      "taskCreated": "Uppgift skapad",
+      "taskFailed": "Kunde inte skapa uppgift",
+      "assignTask": "Tilldela ny uppgift",
+      "assignTaskDesc": "Starta en ny uppgift med din AI-assistent.",
+      "taskName": "Uppgiftsnamn",
+      "taskNamePlaceholder": "Ange uppgiftsnamn",
+      "cancel": "Avbryt",
+      "creating": "Skapar...",
+      "createTask": "Skapa uppgift"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "Ange en inbjudningskod",
+      "joinSuccess": "Du gick med i projektet!",
+      "joinFailed": "Kunde inte gå med i projektet",
+      "invalidCode": "Ogiltig inbjudningskod eller projekt hittades inte",
+      "title": "Gå med i projekt",
+      "description": "Ange en inbjudningskod för att gå med i ett befintligt projekt.",
+      "inviteCode": "Inbjudningskod",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "Be din teamledare om projektets inbjudningskod",
+      "cancel": "Avbryt",
+      "joining": "Går med...",
+      "joinButton": "Gå med i projekt"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
+      "title": "Rumsdeltagare",
+      "copyCode": "Kopiera kod",
+      "copyLink": "Kopiera länk",
+      "codeCopied": "Inbjudningskod kopierad!",
+      "codeFailed": "Kunde inte kopiera inbjudningskod",
+      "linkCopied": "Inbjudningslänk kopierad!",
+      "linkFailed": "Kunde inte kopiera inbjudningslänk",
       "online": "Online",
       "offline": "Offline",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "Rumsnamn krävs",
+      "created": "Projekt skapat!",
+      "failed": "Kunde inte skapa rum",
+      "title": "Skapa nytt projekt",
+      "description": "Starta ett nytt projekt för att bygga din produkt med AI.",
+      "projectName": "Projektnamn",
+      "projectNamePlaceholder": "Ange projektnamn",
+      "teamSize": "Teamstorlek",
+      "cancel": "Avbryt",
+      "creating": "Skapar...",
+      "createButton": "Skapa projekt"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "Nyheter",
+    "title": "Nyheter i Coasty",
+    "updateCount": "{count} uppdateringar",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "Uppdatering",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "Håll utkik efter fler uppdateringar",
+    "tagline": "Din AI-medarbetare som samarbetar med alla"
   },
   "feedbackForm": {
     "ratings": {
@@ -2857,62 +2857,62 @@
       "good": "Good",
       "amazing": "Amazing"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "Logga in för att skicka feedback",
+    "alreadySubmitted": "Du har redan skickat feedback för detta",
+    "thankYou": "Tack för din feedback!",
+    "creditsEarned": "+{credits} krediter intjänade",
+    "helpImprove": "Din input hjälper oss att förbättra Coasty.",
+    "howsExperience": "Hur är din upplevelse?",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "Berätta mer",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "Vad fungerar bra? Vad kan bli bättre?",
+    "cancel": "Avbryt",
+    "sending": "Skickar...",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "Välj en arbetsstation",
+    "enterCron": "Ange ett cron-uttryck",
+    "hireFailed": "Kunde inte anställa medarbetare",
+    "removeFailed": "Kunde inte ta bort medarbetare",
+    "editEmployee": "Redigera medarbetare",
+    "configureEmployee": "Konfigurera medarbetare",
+    "editDescription": "Uppdatera schema, arbetsstation eller instruktioner",
+    "configureDescription": "Sätt upp en AI-medarbetare för denna chatt",
+    "loading": "Laddar konfiguration...",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "Medarbetarens namn"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "Ta bort chatt?",
+    "description": "Detta tar bort \"{chatTitle}\"",
+    "cancel": "Avbryt",
+    "delete": "Ta bort"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "Betalning genomförd! Dina krediter har lagts till.",
+    "canceled": "Betalningen avbröts. Inga avgifter togs ut."
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "Allmänna inställningar",
     "generalDescription": "Konfigurera grundläggande datorinställningar",
     "displayName": "Visningsnamn",
     "defaultName": "Min dator",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "Spara ändringar",
+    "security": "Säkerhet",
+    "securityDescription": "Säkerhets- och åtkomstinställningar",
+    "sshAuth": "SSH-autentisering",
+    "username": "Användarnamn:",
+    "keyPair": "Nyckelpar:",
+    "sshKeyDownloaded": "SSH-nyckel nedladdad",
+    "sshKeyFailed": "Kunde inte ladda ner SSH-nyckel",
+    "downloadSshKey": "Ladda ner SSH-nyckel",
+    "vncPassword": "VNC-lösenord",
     "vncPasswordHint": "Detta lösenord krävs för att ansluta till datorn"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "Hej, jag har använt Coasty och det är riktigt coolt. Det är en AI som faktiskt kan använda en dator åt dig. Surfar, klickar, skriver, allt. Testa med min länk så får vi båda gratis krediter!",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "Kolla in det här AI-verktyget",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "just nu",
+      "minutesAgo": "{minutes}m sedan",
+      "hoursAgo": "{hours}t sedan",
+      "daysAgo": "{days}d sedan",
+      "monthsAgo": "{months}mån sedan"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "Hänvisningslänk kopierad!",
+    "headline": "Goda vänner delar memes. Riktiga vänner delar AI-agenter.",
+    "subheadline": "Ni får båda {credits} gratis krediter när din vän går med.",
+    "yourLink": "Din hänvisningslänk",
+    "shareDirectly": "Dela direkt",
+    "yourReferrals": "Dina hänvisningar",
+    "referralCount": "{count} hänvisning(ar)",
+    "creditsEarned": "{credits} krediter intjänade",
+    "invitedYou": "Bjöd in dig",
+    "joinedViaLink": "Gick med via din länk",
+    "noInvites": "Inga användare inbjudna ännu",
+    "noInvitesHint": "Dela din länk så får ni båda 50 krediter"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "Gör offentlig",
+    "title": "Ditt samtal är nu offentligt!",
+    "description": "Alla med länken kan nu se detta samtal och det kan komma att visas i community-flöden, utvalda sidor eller sökresultat i framtiden.",
+    "viewPage": "Visa sida",
+    "shareOn": "Dela på"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "AI-kontrollpanel",
+    "subtitle": "Beskriv vad du vill att AI:n ska göra",
+    "quickCommands": "Snabbkommandon",
+    "noActions": "Inga åtgärder utförda ännu",
+    "success": "Lyckades",
+    "failed": "Misslyckades",
+    "placeholder": "Tala om för AI:n vad den ska göra... (Ctrl+Enter för att skicka)",
+    "executing": "Kör...",
+    "executeCommand": "Kör kommando"
   },
   "discover": {
     "badge": "Community",

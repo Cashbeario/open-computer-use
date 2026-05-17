@@ -20,7 +20,7 @@
     "useCases": "Truong hop su dung",
     "blog": "Blog",
     "agentSwarms": "Bay tac tu",
-    "products": "Products",
+    "products": "Sản phẩm",
     "discover": "Discover",
     "compare": "So sanh",
     "demos": "Demo",
@@ -62,16 +62,16 @@
       "compare": "Compare"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "Điểm benchmark OSWorld {stat}",
+      "agentSwarms": "{stat} tác tử song song",
+      "compare": "{stat} đối thủ được phân tích"
     },
     "blogItems": {
       "allPosts": "Tat ca bai viet",
       "computerUse": "Su dung may tinh",
       "compare": "So sanh",
       "dataEntry": "Nhap du lieu",
-      "webScraping": "Web Scraping",
+      "webScraping": "Thu thập dữ liệu web",
       "jobApplications": "Ung tuyen viec lam",
       "demosResults": "Demo & Ket qua",
       "guide": "Huong dan",
@@ -493,16 +493,16 @@
     "demoCaption": "Chạy tác tử AI trên máy tính hoặc điều khiển từ điện thoại, ở bất cứ đâu.",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "Chạy cục bộ trên PC của bạn",
+        "desc": "Tải ứng dụng desktop và để AI điều khiển máy tính của bạn trực tiếp — không cần VM trên đám mây."
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "Điều khiển PC từ điện thoại của bạn",
+        "desc": "Khởi tạo tác vụ từ điện thoại và theo dõi tác tử AI làm việc trên máy tính của bạn theo thời gian thực."
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "Đám mây hay cục bộ — tùy bạn chọn",
+        "desc": "Dùng VM đám mây cho các tác vụ cách ly, hoặc chạy cục bộ để truy cập toàn bộ ứng dụng và tệp của bạn."
       }
     },
     "viewTitles": {
@@ -647,7 +647,7 @@
     "referralSources": {
       "twitter": "Twitter / X",
       "linkedin": "LinkedIn",
-      "google": "Google Search",
+      "google": "Tìm kiếm Google",
       "youtube": "YouTube",
       "friend": "Ban be / Dong nghiep",
       "producthunt": "Product Hunt",
@@ -773,7 +773,7 @@
       "vmInfo": "VM: {name}",
       "dropHeading": "Tha tep vao day",
       "dropDescription": "Tep se duoc tai len thu muc Desktop cua VM",
-      "dropPath": "Path: /home/desktop/Desktop/"
+      "dropPath": "Đường dẫn: /home/desktop/Desktop/"
     },
     "authPrompt": {
       "heading": "Dang nhap de thu them tinh nang mien phi",
@@ -1133,7 +1133,7 @@
     "new": "moi",
     "description": "Them API key cua ban de mo khoa quyen truy cap mo hinh.",
     "securityNote": "Key cua ban duoc luu tru an toan voi ma hoa dau cuoi.",
-    "apiKeyLabel": "{provider} API Key",
+    "apiKeyLabel": "Khóa API {provider}",
     "getApiKey": "Lay API key",
     "delete": "Xoa",
     "save": "Luu",
@@ -1844,7 +1844,7 @@
       "subtitle": "Cong ty AI cua ban, chay tu dong",
       "description": "Nhan vien, doi nhom, kich hoat — chay 24/7.",
       "myCompany": "Cong ty cua toi",
-      "contentOps": "Content Ops",
+      "contentOps": "Vận hành nội dung",
       "support": "Ho tro",
       "writer": "Bien tap",
       "seo": "SEO",
@@ -1892,7 +1892,7 @@
       "templates": "Bat dau tu mau",
       "templateItems": {
         "contentOps": {
-          "name": "Content Ops",
+          "name": "Vận hành nội dung",
           "plan": "Starter",
           "count": "3"
         },
@@ -2028,7 +2028,7 @@
         "yourApps": "Ung dung da cai cua ban",
         "yourSessions": "Phien dang nhap cua ban"
       },
-      "downloadCta": "Download Desktop App"
+      "downloadCta": "Tải ứng dụng desktop"
     }
   },
   "comparePage": {
@@ -2036,7 +2036,7 @@
     "heroTitle": "Coasty va doi thu canh tranh",
     "heroDescription": "Xem AI agent su dung may tinh so 1 (82% OSWorld) so sanh voi cac lua chon thay the nhu the nao. Phan tich tinh nang chi tiet voi du lieu thuc.",
     "categories": {
-      "aiAgent": "AI Agent",
+      "aiAgent": "Tác tử AI",
       "infrastructure": "Ha tang",
       "rpa": "RPA",
       "human": "Con nguoi"
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Nhân viên AI cho tự động hóa máy tính và trình duyệt",
+      "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Không giới hạn $249/mo (Rẻ nhất thị trường)",
       "titleTemplate": "{title} | Coasty - Trợ lý AI sử dụng máy tính",
-      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark. Điều khiển toàn bộ máy tính như con người: mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email, quản lý bảng tính. Cách ly VM cho mỗi phiên. Bắt đầu từ $19/mo.",
-      "ogTitle": "Coasty - Trợ lý AI sử dụng máy tính số 1 | 82% OSWorld Benchmark",
-      "ogDescription": "Nhân viên AI điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Tự động hóa trình duyệt, điều khiển máy tính, giải CAPTCHA, cách ly VM. Bắt đầu từ $19/mo.",
-      "twitterDescription": "Nhân viên AI điều khiển máy tính như con người. Mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email. Cách ly VM thực sự. $19/mo so với $3,000/mo trợ lý ảo."
+      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark — và là gói Không giới hạn trọn gói duy nhất trên thị trường với $249/mo (rẻ hơn Devin Team $500+ACU, OpenAI Operator $200 bị giới hạn tốc độ, và các đối thủ bị giới hạn tín dụng). Điều khiển toàn bộ máy tính như con người: trình duyệt, biểu mẫu, email, bảng tính. Cách ly cấp VM. Từ $19/mo Starter hoặc $249/mo Không giới hạn.",
+      "ogTitle": "Coasty — 82% OSWorld + Không giới hạn $249/mo (Trợ lý sử dụng máy tính rẻ nhất)",
+      "ogDescription": "Số 1 trên OSWorld (82%). Không giới hạn trọn gói $249/mo — rẻ hơn Devin Team ($500+ACU) ở điểm benchmark cao hơn. Tự động hóa trình duyệt, máy tính, terminal. Cách ly VM mỗi phiên. Ứng dụng native đa nền tảng + REST API + MCP server.",
+      "twitterDescription": "Trợ lý AI vận hành máy tính thật. 82% OSWorld (số 1). Không giới hạn $249/mo — gói trọn gói rẻ nhất trong danh mục. Starter từ $19/mo. Cách ly VM + MCP server 26 công cụ."
     },
     "compare": {
       "title": "So sánh Coasty - Các giải pháp thay thế trợ lý AI và so sánh đối thủ",
@@ -2373,10 +2373,10 @@
       "ogDescription": "Trợ lý sử dụng máy tính tốt nhất xếp hạng số 1 trên OSWorld. Tự động hóa mọi tác vụ máy tính, trình duyệt hoặc terminal bằng AI."
     },
     "pricing": {
-      "title": "Bảng giá — Gói và giá trợ lý AI Coasty",
-      "description": "Gói giá Coasty bắt đầu từ $19/mo. Thay thế trợ lý ảo $3,000/mo bằng nhân viên AI. Có gói miễn phí. Sử dụng theo tín dụng, không phí ẩn.",
-      "ogTitle": "Bảng giá Coasty — Gói trợ lý AI",
-      "ogDescription": "Nhân viên AI bắt đầu từ $19/mo. Thay thế VA đắt đỏ bằng AI tự động. Có gói miễn phí."
+      "title": "Bảng giá — $19/mo Starter hoặc $249/mo Không giới hạn (Rẻ nhất thị trường)",
+      "description": "Bảng giá Coasty: Starter $19/mo (200 tín dụng) hoặc Không giới hạn $249/mo (gói Không giới hạn trọn gói rẻ nhất trên thị trường — rẻ hơn Devin Team $500+ACU, Genspark Pro $249 bị giới hạn tín dụng, và Manus Extended $200 bị giới hạn). Thay thế trợ lý ảo con người $3,000+/mo. Không có phí ẩn.",
+      "ogTitle": "Bảng giá Coasty — $19/mo Starter, $249/mo Không giới hạn",
+      "ogDescription": "Không giới hạn trọn gói $249/mo — gói sử dụng máy tính không giới hạn rẻ nhất trên thị trường. Hoặc Starter $19/mo cho cá nhân. Tiết kiệm $36k/năm so với VA con người."
     },
     "faq": {
       "q1": "Coasty là gì?",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty so với Anthropic Computer Use như thế nào?",
       "a2": "Trong khi Anthropic Computer Use cung cấp API thô để điều khiển máy tính, Coasty là nền tảng sẵn sàng sản xuất với hạ tầng VM được quản lý, giải CAPTCHA tích hợp, ứng dụng máy tính cho Mac và Windows, hỗ trợ nhiều mô hình và điểm OSWorld benchmark cao nhất (82%). Coasty cung cấp giải pháp hoàn chỉnh — không chỉ API.",
       "q3": "Coasty giá bao nhiêu?",
-      "a3": "Coasty bắt đầu từ $19/month cho gói Starter với gói miễn phí có sẵn. So với $3,000+ mỗi tháng cho trợ lý ảo. Coasty hoạt động 24/7 không nghỉ, không cần đào tạo và mở rộng ngay lập tức.",
+      "a3": "Coasty có hai gói đang hoạt động: Starter ở mức $19/month (200 tín dụng, 1 máy, lý tưởng cho cá nhân) và Không giới hạn ở mức $249/month không giới hạn tín dụng. Gói Không giới hạn $249 là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có — rẻ hơn Devin Team ($500/month + phụ phí ACU), OpenAI Operator ChatGPT Pro ($200/month bị giới hạn tốc độ), Genspark Pro ($249.99 giới hạn tín dụng tại 125k tín dụng) và Manus Extended ($200 giới hạn tại 40k tín dụng). Cả hai gói đều thay thế một trợ lý ảo con người trị giá $3,000+/month; gói Không giới hạn tiết kiệm $33,000+/năm so với VA con người, giảm 92% chi phí.",
       "q4": "Coasty có an toàn không?",
       "a4": "Có. Mọi phiên Coasty chạy trong VM cách ly, sandbox riêng. Dữ liệu của bạn an toàn, máy của bạn không bị ảnh hưởng và không có gì rò rỉ giữa các phiên. Đây là cách ly VM thực sự, không chỉ container trong pool chung.",
       "q5": "OSWorld benchmark là gì?",
@@ -2401,11 +2401,11 @@
       "a10": "Có. Coasty có hệ thống giải CAPTCHA tích hợp, nên không bị chặn như các trợ lý AI cạnh tranh. Điều này rất quan trọng cho tự động hóa thực tế khi CAPTCHA phổ biến trên các trang web."
     },
     "structuredData": {
-      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark. Cách ly VM thực sự. Giải CAPTCHA tích hợp. Bắt đầu từ $19/month.",
-      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly VM thực sự.",
-      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính với cách ly VM thực sự.",
-      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1. 82% OSWorld benchmark. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Bắt đầu từ $19/mo.",
-      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
+      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1 và gói Không giới hạn trọn gói rẻ nhất trên thị trường với $249/month. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark qua 369 tác vụ thực tế. Cách ly cấp VM thực sự mỗi phiên. Giải CAPTCHA tích hợp. Gói: $19/mo Starter hoặc $249/mo Không giới hạn.",
+      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) và phát hành gói Không giới hạn trọn gói duy nhất ở mức $249/month — rẻ hơn Devin Team, OpenAI Operator và các đối thủ bị giới hạn tín dụng ở cùng phân khúc giá. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly cấp VM thực sự.",
+      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Gói Không giới hạn $249/mo là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có. Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính tự động với cách ly cấp VM thực sự.",
+      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1 — 82% OSWorld benchmark và gói Không giới hạn trọn gói rẻ nhất ở mức $249/month. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Từ $19/mo Starter hoặc $249/mo Không giới hạn.",
+      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Gói Không giới hạn $249/month là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
       "breadcrumbs": {
         "home": "Trang chủ",
         "caseStudies": "Nghiên cứu tình huống trợ lý AI",
@@ -2571,7 +2571,7 @@
       "teamCreatedPartial": "Đã tạo nhóm với {count} nhân viên ({failedCount} thất bại: {names})",
       "teamCreated": "Đã tạo nhóm {name} với {count} nhân viên"
     },
-    "credentialInstructions": "[AVAILABLE CREDENTIALS]\nThe following service credentials have been configured and are available for use:\n{list}\nUse these credentials when you need to log in to these services to complete your tasks.",
+    "credentialInstructions": "[THÔNG TIN ĐĂNG NHẬP CÓ SẴN]\nCác thông tin đăng nhập sau đã được cấu hình và sẵn sàng để sử dụng:\n{list}\nHãy dùng các thông tin này khi bạn cần đăng nhập vào các dịch vụ tương ứng để hoàn thành tác vụ.",
     "templates": {
       "contentOps": {
         "name": "Vận hành nội dung",
@@ -2789,130 +2789,130 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "Tiêu đề phòng là bắt buộc",
+      "taskCreated": "Tạo tác vụ thành công",
+      "taskFailed": "Không thể tạo tác vụ",
+      "assignTask": "Giao tác vụ mới",
+      "assignTaskDesc": "Bắt đầu một tác vụ mới với trợ lý AI của bạn.",
+      "taskName": "Tên tác vụ",
+      "taskNamePlaceholder": "Nhập tên tác vụ",
+      "cancel": "Hủy",
+      "creating": "Đang tạo...",
+      "createTask": "Tạo tác vụ"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "Vui lòng nhập mã mời",
+      "joinSuccess": "Tham gia dự án thành công!",
+      "joinFailed": "Không thể tham gia dự án",
+      "invalidCode": "Mã mời không hợp lệ hoặc không tìm thấy dự án",
+      "title": "Tham gia dự án",
+      "description": "Nhập mã mời để tham gia một dự án có sẵn.",
+      "inviteCode": "Mã mời",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "Hỏi trưởng nhóm của bạn để lấy mã mời dự án",
+      "cancel": "Hủy",
+      "joining": "Đang tham gia...",
+      "joinButton": "Tham gia dự án"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
-      "online": "Online",
-      "offline": "Offline",
+      "title": "Thành viên phòng",
+      "copyCode": "Sao chép mã",
+      "copyLink": "Sao chép liên kết",
+      "codeCopied": "Đã sao chép mã mời!",
+      "codeFailed": "Không thể sao chép mã mời",
+      "linkCopied": "Đã sao chép liên kết mời!",
+      "linkFailed": "Không thể sao chép liên kết mời",
+      "online": "Trực tuyến",
+      "offline": "Ngoại tuyến",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "Tiêu đề phòng là bắt buộc",
+      "created": "Tạo dự án thành công!",
+      "failed": "Không thể tạo phòng",
+      "title": "Tạo dự án mới",
+      "description": "Bắt đầu một dự án mới để xây dựng sản phẩm của bạn với AI.",
+      "projectName": "Tên dự án",
+      "projectNamePlaceholder": "Nhập tên dự án",
+      "teamSize": "Quy mô nhóm",
+      "cancel": "Hủy",
+      "creating": "Đang tạo...",
+      "createButton": "Tạo dự án"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "Có gì mới",
+    "title": "Có gì mới trong Coasty",
+    "updateCount": "{count} cập nhật",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "Cập nhật",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "Đón chờ thêm nhiều cập nhật khác",
+    "tagline": "Nhân viên AI của bạn, cộng tác với tất cả mọi người"
   },
   "feedbackForm": {
     "ratings": {
       "bad": "Bad",
       "okay": "Okay",
       "good": "Good",
-      "amazing": "Amazing"
+      "amazing": "Tuyệt vời"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "Vui lòng đăng nhập để gửi phản hồi",
+    "alreadySubmitted": "Bạn đã gửi phản hồi cho mục này rồi",
+    "thankYou": "Cảm ơn phản hồi của bạn!",
+    "creditsEarned": "+{credits} tín dụng đã nhận",
+    "helpImprove": "Phản hồi của bạn giúp chúng tôi cải thiện Coasty.",
+    "howsExperience": "Trải nghiệm của bạn thế nào?",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "Chia sẻ thêm với chúng tôi",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "Điều gì đang hoạt động tốt? Điều gì có thể cải thiện?",
+    "cancel": "Hủy",
+    "sending": "Đang gửi...",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "Vui lòng chọn một máy trạm",
+    "enterCron": "Vui lòng nhập biểu thức cron",
+    "hireFailed": "Không thể tuyển nhân viên",
+    "removeFailed": "Không thể xóa nhân viên",
+    "editEmployee": "Chỉnh sửa nhân viên",
+    "configureEmployee": "Cấu hình nhân viên",
+    "editDescription": "Cập nhật lịch chạy, máy trạm hoặc hướng dẫn",
+    "configureDescription": "Thiết lập một nhân viên AI cho cuộc trò chuyện này",
+    "loading": "Đang tải cấu hình...",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "Tên nhân viên"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "Xóa cuộc trò chuyện?",
+    "description": "Thao tác này sẽ xóa \"{chatTitle}\"",
+    "cancel": "Hủy",
+    "delete": "Xóa"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "Thanh toán thành công! Tín dụng đã được cộng vào tài khoản của bạn.",
+    "canceled": "Thanh toán đã bị hủy. Không có khoản phí nào được tính."
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "Cài đặt chung",
     "generalDescription": "Cấu hình cài đặt máy tính cơ bản",
     "displayName": "Tên hiển thị",
     "defaultName": "Máy tính của tôi",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "Lưu thay đổi",
+    "security": "Bảo mật",
+    "securityDescription": "Cài đặt bảo mật và truy cập",
+    "sshAuth": "Xác thực SSH",
+    "username": "Tên đăng nhập:",
+    "keyPair": "Cặp khóa:",
+    "sshKeyDownloaded": "Đã tải khóa SSH",
+    "sshKeyFailed": "Không thể tải khóa SSH",
+    "downloadSshKey": "Tải khóa SSH",
+    "vncPassword": "Mật khẩu VNC",
     "vncPasswordHint": "Mật khẩu này được yêu cầu để kết nối với máy tính"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "Này, mình đang dùng Coasty và thấy nó khá hay. Đây là một AI có thể thực sự sử dụng máy tính giúp bạn. Như duyệt web, nhấp chuột, gõ phím, đủ thứ. Thử với liên kết của mình và cả hai cùng nhận tín dụng miễn phí nhé!",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "Xem thử công cụ AI này",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "vừa xong",
+      "minutesAgo": "{minutes} phút trước",
+      "hoursAgo": "{hours} giờ trước",
+      "daysAgo": "{days} ngày trước",
+      "monthsAgo": "{months} tháng trước"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "Đã sao chép liên kết giới thiệu!",
+    "headline": "Bạn tốt chia sẻ meme. Bạn thân chia sẻ tác tử AI.",
+    "subheadline": "Cả hai cùng nhận {credits} tín dụng miễn phí khi bạn của bạn tham gia.",
+    "yourLink": "Liên kết giới thiệu của bạn",
+    "shareDirectly": "Chia sẻ trực tiếp",
+    "yourReferrals": "Người bạn đã giới thiệu",
+    "referralCount": "{count} lượt giới thiệu",
+    "creditsEarned": "{credits} tín dụng đã nhận",
+    "invitedYou": "Đã mời bạn",
+    "joinedViaLink": "Tham gia qua liên kết của bạn",
+    "noInvites": "Chưa mời người dùng nào",
+    "noInvitesHint": "Chia sẻ liên kết và cả hai cùng nhận 50 tín dụng"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "Công khai",
+    "title": "Cuộc trò chuyện của bạn hiện đã công khai!",
+    "description": "Bất kỳ ai có liên kết đều có thể xem cuộc trò chuyện này và nó có thể xuất hiện trong bảng tin cộng đồng, trang nổi bật hoặc kết quả tìm kiếm trong tương lai.",
+    "viewPage": "Xem trang",
+    "shareOn": "Chia sẻ trên"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "Bảng điều khiển AI",
+    "subtitle": "Mô tả điều bạn muốn AI thực hiện",
+    "quickCommands": "Lệnh nhanh",
+    "noActions": "Chưa có hành động nào được thực hiện",
+    "success": "Thành công",
+    "failed": "Thất bại",
+    "placeholder": "Cho AI biết cần làm gì... (Ctrl+Enter để gửi)",
+    "executing": "Đang thực thi...",
+    "executeCommand": "Thực thi lệnh"
   },
   "discover": {
     "badge": "Cộng đồng",

@@ -20,7 +20,7 @@
     "useCases": "שימושים",
     "blog": "בלוג",
     "agentSwarms": "נחילי סוכנים",
-    "products": "Products",
+    "products": "מוצרים",
     "discover": "Discover",
     "compare": "השוואה",
     "demos": "הדגמות",
@@ -62,9 +62,9 @@
       "compare": "Compare"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "{stat} ציון benchmark של OSWorld",
+      "agentSwarms": "{stat} סוכנים במקביל",
+      "compare": "{stat} מתחרים נותחו"
     },
     "blogItems": {
       "allPosts": "כל הפוסטים",
@@ -493,16 +493,16 @@
     "demoCaption": "הפעילו סוכני AI על המחשב שלכם או שלטו בו מהטלפון, מכל מקום.",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "הרץ מקומית על המחשב שלך",
+        "desc": "הורד את אפליקציית שולחן העבודה ותן ל-AI לשלוט במחשב שלך ישירות — ללא צורך ב-VM בענן."
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "שלוט במחשב שלך מהטלפון",
+        "desc": "התחל משימה מהטלפון שלך וצפה בסוכן ה-AI עובד על המחשב שלך בזמן אמת."
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "ענן או מקומי — הבחירה שלך",
+        "desc": "השתמש ב-VMs בענן למשימות מבודדות, או עבור למקומי לגישה מלאה לאפליקציות ולקבצים שלך."
       }
     },
     "viewTitles": {
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - סוכן AI #1 לשימוש במחשב | עובד AI לאוטומציית שולחן עבודה ודפדפן",
+      "title": "Coasty - סוכן AI #1 לשימוש במחשב | תוכנית Unlimited ב-$249/חודש (הזולה ביותר בשוק)",
       "titleTemplate": "{title} | Coasty - סוכן AI לשימוש במחשב",
-      "description": "Coasty הוא סוכן ה-AI #1 לשימוש במחשב — 82% במבחן OSWorld. הוא שולט בשולחן עבודה מלא כמו אדם: פותח דפדפנים, לוחץ, מקליד, ממלא טפסים, שולח מיילים, מנהל גיליונות אלקטרוניים. בידוד אמיתי ברמת VM לכל הפעלה. החל מ-$20/חודש.",
-      "ogTitle": "Coasty - סוכן AI #1 לשימוש במחשב | 82% במבחן OSWorld",
-      "ogDescription": "עובד AI ששולט בשולחן עבודה כמו אדם. #1 במבחן OSWorld (82%). אוטומציית דפדפן, שליטה בשולחן עבודה, פתרון CAPTCHA, בידוד VM. החל מ-$20/חודש.",
-      "twitterDescription": "עובד AI ששולט בשולחן עבודה כמו אדם. פותח דפדפנים, לוחץ, מקליד, ממלא טפסים, שולח מיילים. בידוד VM אמיתי. $20/חודש לעומת $3,000/חודש עוזר אנושי."
+      "description": "Coasty הוא סוכן ה-AI #1 לשימוש במחשב — 82% במבחן OSWorld — ותוכנית Unlimited היחידה במחיר קבוע של $249/חודש לשימוש במחשב (זולה יותר מ-Devin Team $500+ACU, OpenAI Operator $200 עם הגבלת קצב, ומתחרים עם תקרת קרדיטים). שולט בשולחן עבודה מלא כמו אדם: דפדפנים, טפסים, מיילים, גיליונות אלקטרוניים. בידוד ברמת VM. החל מ-$19/חודש לתוכנית Starter או $249/חודש לתוכנית Unlimited.",
+      "ogTitle": "Coasty — 82% במבחן OSWorld + תוכנית Unlimited ב-$249/חודש (סוכן שימוש במחשב הזול ביותר)",
+      "ogDescription": "#1 במבחן OSWorld (82%). $249/חודש לתוכנית Unlimited במחיר קבוע — זולה יותר מ-Devin Team ($500+ACU) ועם ציון גבוה יותר במבחן. אוטומציית דפדפן, שולחן עבודה וטרמינל. בידוד VM לכל הפעלה. אפליקציה מקורית חוצת פלטפורמות + REST API + שרת MCP.",
+      "twitterDescription": "סוכן AI שמפעיל שולחן עבודה אמיתי. 82% OSWorld (#1). $249/חודש לתוכנית Unlimited — התוכנית במחיר קבוע הזולה ביותר בקטגוריה. Starter החל מ-$19/חודש. בידוד VM + שרת MCP עם 26 כלים."
     },
     "compare": {
       "title": "השוואת Coasty - חלופות סוכני AI והשוואת מתחרים",
@@ -2373,10 +2373,10 @@
       "ogDescription": "סוכן שימוש במחשב הטוב ביותר, #1 ב-OSWorld. אוטומטו כל משימת שולחן עבודה, דפדפן או טרמינל עם AI."
     },
     "pricing": {
-      "title": "תמחור — תוכניות ומחירים של Coasty סוכן AI",
-      "description": "תוכניות תמחור של Coasty החל מ-$20/חודש. החליפו עוזרים וירטואליים ב-$3,000/חודש בעובד AI. שכבה חינמית זמינה. שימוש מבוסס קרדיטים ללא עלויות נסתרות.",
-      "ogTitle": "תמחור Coasty — תוכניות סוכן AI",
-      "ogDescription": "עובד AI החל מ-$20/חודש. החליפו עוזרים וירטואליים יקרים ב-AI אוטונומי. שכבה חינמית זמינה."
+      "title": "תמחור — Starter ב-$19/חודש או Unlimited ב-$249/חודש (הזולה ביותר בשוק)",
+      "description": "תמחור Coasty: Starter ב-$19/חודש (200 קרדיטים) או Unlimited ב-$249/חודש (תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב — זולה יותר מ-Devin Team $500+ACU, Genspark Pro $249 עם תקרת קרדיטים, ו-Manus Extended $200 עם תקרה). מחליפה עוזרים וירטואליים אנושיים בעלות $3,000+/חודש. ללא עלויות נסתרות.",
+      "ogTitle": "תמחור Coasty — Starter $19/חודש, Unlimited $249/חודש",
+      "ogDescription": "$249/חודש לתוכנית Unlimited במחיר קבוע — תוכנית ה-Unlimited הזולה ביותר בשוק לשימוש במחשב. או $19/חודש ל-Starter ליחידים. חיסכון של $36k בשנה לעומת עוזר אנושי."
     },
     "faq": {
       "q1": "מה זה Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "איך Coasty משתווה ל-Anthropic Computer Use?",
       "a2": "בעוד ש-Anthropic Computer Use מספק API גולמי לשליטה במחשב, Coasty היא פלטפורמה מוכנה לייצור עם תשתית VM מנוהלת, פתרון CAPTCHA מובנה, אפליקציית שולחן עבודה ל-Mac ו-Windows, תמיכה במספר מודלים והציון הגבוה ביותר במבחן OSWorld (82%). Coasty מספק את הפתרון המלא — לא רק את ה-API.",
       "q3": "כמה עולה Coasty?",
-      "a3": "Coasty מתחיל ב-$20/חודש עם תוכנית Starter ושכבה חינמית זמינה. זאת בהשוואה ליותר מ-$3,000/חודש לעוזר וירטואלי אנושי. Coasty עובד 24/7 ללא הפסקות, ללא הכשרה ועם יכולת הרחבה מיידית.",
+      "a3": "ל-Coasty שתי תוכניות פעילות: Starter ב-$19/חודש (200 קרדיטים, מכונה אחת, אידיאלי ליחידים) ו-Unlimited ב-$249/חודש ללא תקרת קרדיטים. תוכנית Unlimited ב-$249 היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר לשימוש במחשב הזמינה — זולה יותר מ-Devin Team ($500/חודש + תוספת ACU), OpenAI Operator ChatGPT Pro ($200/חודש עם הגבלת קצב), Genspark Pro ($249.99 עם תקרה של 125k קרדיטים) ו-Manus Extended ($200 עם תקרה של 40k קרדיטים). שתי התוכניות מחליפות עוזר וירטואלי אנושי שעולה $3,000+/חודש; Unlimited חוסכת מעל $33,000 בשנה לעומת עוזר אנושי — הפחתת עלויות של 92%.",
       "q4": "האם Coasty בטוח לשימוש?",
       "a4": "כן. כל הפעלה של Coasty רצה במכונה וירטואלית מבודדת ומוגנת משלה. הנתונים שלכם נשארים בטוחים, המחשב שלכם נשאר ללא שינוי ושום דבר לא דולף בין ההפעלות. זהו בידוד אמיתי ברמת VM, לא רק מיכלים בסביבה משותפת.",
       "q5": "מה זה מבחן OSWorld?",
@@ -2401,11 +2401,11 @@
       "a10": "כן. ל-Coasty יש צינור מובנה לפתרון CAPTCHA, כך שהוא לא נחסם כמו סוכני AI מתחרים. זה קריטי לאוטומציה בעולם האמיתי שבו CAPTCHA נפוצים באתרי אינטרנט."
     },
     "structuredData": {
-      "appDescription": "סוכן ה-AI #1 לשימוש במחשב. Coasty שולט בשולחן עבודה מלא כמו אדם — פותח דפדפנים, לוחץ, מקליד, ממלא טפסים, שולח מיילים ומנהל גיליונות אלקטרוניים באופן אוטונומי. 82% במבחן OSWorld. בידוד אמיתי ברמת VM. פתרון CAPTCHA מובנה. החל מ-$20/חודש.",
-      "orgDescription": "Coasty בונה את סוכן ה-AI #1 לשימוש במחשב. הפלטפורמה שלנו מספקת שליטה אוטונומית בשולחן עבודה, אוטומציית דפדפן ותזמור מרובה סוכנים עם בידוד אמיתי ברמת VM.",
-      "productDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה כמו אדם. #1 במבחן OSWorld (82%). אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים עם בידוד אמיתי ברמת VM.",
-      "websiteDescription": "פלטפורמת סוכן AI #1 לשימוש במחשב. 82% במבחן OSWorld. אוטומציית דפדפן, שולחן עבודה וטרמינל אוטונומית עם בידוד VM. החל מ-$20/חודש.",
-      "softwareDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה מלא כמו אדם. #1 במבחן OSWorld עם שיעור השלמה של 82% ב-369 משימות מהעולם האמיתי. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, פעולות טרמינל, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים.",
+      "appDescription": "סוכן ה-AI #1 לשימוש במחשב ותוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב ב-$249/חודש. Coasty שולט בשולחן עבודה מלא כמו אדם — פותח דפדפנים, לוחץ, מקליד, ממלא טפסים, שולח מיילים ומנהל גיליונות אלקטרוניים באופן אוטונומי. 82% במבחן OSWorld על 369 משימות מהעולם האמיתי. בידוד אמיתי ברמת VM לכל הפעלה. פתרון CAPTCHA מובנה. תוכניות: $19/חודש ל-Starter או $249/חודש ל-Unlimited.",
+      "orgDescription": "Coasty בונה את סוכן ה-AI #1 לשימוש במחשב (82% OSWorld) ומשיקה את תוכנית ה-Unlimited היחידה במחיר קבוע של $249/חודש — זולה יותר מ-Devin Team, OpenAI Operator ומתחרים עם תקרת קרדיטים באותה רמת מחיר. הפלטפורמה שלנו מספקת שליטה אוטונומית בשולחן עבודה, אוטומציית דפדפן ותזמור מרובה סוכנים עם בידוד אמיתי ברמת VM.",
+      "productDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה כמו אדם. #1 במבחן OSWorld (82%). תוכנית Unlimited ב-$249/חודש היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר לשימוש במחשב הזמינה. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים עם בידוד אמיתי ברמת VM.",
+      "websiteDescription": "פלטפורמת סוכן AI #1 לשימוש במחשב — 82% במבחן OSWorld ותוכנית ה-Unlimited במחיר קבוע הזולה ביותר ב-$249/חודש. אוטומציית דפדפן, שולחן עבודה וטרמינל אוטונומית עם בידוד VM. החל מ-$19/חודש ל-Starter או $249/חודש ל-Unlimited.",
+      "softwareDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה מלא כמו אדם. #1 במבחן OSWorld עם שיעור השלמה של 82% ב-369 משימות מהעולם האמיתי. תוכנית Unlimited ב-$249/חודש היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, פעולות טרמינל, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים.",
       "breadcrumbs": {
         "home": "דף הבית",
         "caseStudies": "מקרי בוחן של סוכן AI",
@@ -2571,7 +2571,7 @@
       "teamCreatedPartial": "צוות נוצר עם {count} עובדים ({failedCount} נכשלו: {names})",
       "teamCreated": "צוות {name} נוצר עם {count} עובדים"
     },
-    "credentialInstructions": "[AVAILABLE CREDENTIALS]\nThe following service credentials have been configured and are available for use:\n{list}\nUse these credentials when you need to log in to these services to complete your tasks.",
+    "credentialInstructions": "[AVAILABLE CREDENTIALS]\nהאישורים הבאים לשירותים הוגדרו וזמינים לשימוש:\n{list}\nהשתמש באישורים אלה כאשר אתה צריך להתחבר לשירותים אלה כדי להשלים את המשימות שלך.",
     "templates": {
       "contentOps": {
         "name": "תפעול תוכן",
@@ -2789,130 +2789,130 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "נדרשת כותרת לחדר",
+      "taskCreated": "המשימה נוצרה בהצלחה",
+      "taskFailed": "יצירת המשימה נכשלה",
+      "assignTask": "הקצה משימה חדשה",
+      "assignTaskDesc": "התחל משימה חדשה עם עוזר ה-AI שלך.",
+      "taskName": "שם המשימה",
+      "taskNamePlaceholder": "הכנס שם משימה",
+      "cancel": "ביטול",
+      "creating": "יוצר...",
+      "createTask": "צור משימה"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "אנא הכנס קוד הזמנה",
+      "joinSuccess": "הצטרפת לפרויקט בהצלחה!",
+      "joinFailed": "ההצטרפות לפרויקט נכשלה",
+      "invalidCode": "קוד הזמנה לא תקין או שהפרויקט לא נמצא",
+      "title": "הצטרף לפרויקט",
+      "description": "הכנס קוד הזמנה כדי להצטרף לפרויקט קיים.",
+      "inviteCode": "קוד הזמנה",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "בקש מראש הצוות את קוד ההזמנה לפרויקט",
+      "cancel": "ביטול",
+      "joining": "מצטרף...",
+      "joinButton": "הצטרף לפרויקט"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
-      "online": "Online",
-      "offline": "Offline",
+      "title": "משתתפי החדר",
+      "copyCode": "העתק קוד",
+      "copyLink": "העתק קישור",
+      "codeCopied": "קוד ההזמנה הועתק!",
+      "codeFailed": "העתקת קוד ההזמנה נכשלה",
+      "linkCopied": "קישור ההזמנה הועתק!",
+      "linkFailed": "העתקת קישור ההזמנה נכשלה",
+      "online": "מחובר",
+      "offline": "לא מחובר",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "נדרשת כותרת לחדר",
+      "created": "הפרויקט נוצר בהצלחה!",
+      "failed": "יצירת החדר נכשלה",
+      "title": "צור פרויקט חדש",
+      "description": "התחל פרויקט חדש לבנות את המוצר שלך עם AI.",
+      "projectName": "שם הפרויקט",
+      "projectNamePlaceholder": "הכנס שם פרויקט",
+      "teamSize": "גודל הצוות",
+      "cancel": "ביטול",
+      "creating": "יוצר...",
+      "createButton": "צור פרויקט"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "חדש",
+    "title": "מה חדש ב-Coasty",
+    "updateCount": "{count} עדכונים",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "עדכון",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "הישאר מעודכן לעדכונים נוספים",
+    "tagline": "עובד ה-AI שלך שמשתף פעולה עם כולם"
   },
   "feedbackForm": {
     "ratings": {
       "bad": "Bad",
       "okay": "Okay",
       "good": "Good",
-      "amazing": "Amazing"
+      "amazing": "מדהים"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "אנא התחבר כדי לשלוח משוב",
+    "alreadySubmitted": "כבר שלחת משוב על זה",
+    "thankYou": "תודה על המשוב שלך!",
+    "creditsEarned": "+{credits} קרדיטים שהרווחת",
+    "helpImprove": "המשוב שלך עוזר לנו לשפר את Coasty.",
+    "howsExperience": "איך החוויה שלך?",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "ספר לנו עוד",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "מה עובד טוב? מה אפשר לשפר?",
+    "cancel": "ביטול",
+    "sending": "שולח...",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "אנא בחר תחנת עבודה",
+    "enterCron": "אנא הכנס ביטוי cron",
+    "hireFailed": "גיוס העובד נכשל",
+    "removeFailed": "הסרת העובד נכשלה",
+    "editEmployee": "ערוך עובד",
+    "configureEmployee": "הגדר עובד",
+    "editDescription": "עדכן לוח זמנים, תחנת עבודה או הנחיות",
+    "configureDescription": "הגדר עובד AI עבור צ'אט זה",
+    "loading": "טוען הגדרות...",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "שם העובד"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "למחוק את הצ'אט?",
+    "description": "פעולה זו תמחק את \"{chatTitle}\"",
+    "cancel": "ביטול",
+    "delete": "מחק"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "התשלום הצליח! הקרדיטים שלך נוספו.",
+    "canceled": "התשלום בוטל. לא בוצעו חיובים."
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "הגדרות כלליות",
     "generalDescription": "הגדר הגדרות מחשב בסיסיות",
     "displayName": "שם תצוגה",
     "defaultName": "המחשב שלי",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "שמור שינויים",
+    "security": "אבטחה",
+    "securityDescription": "הגדרות אבטחה וגישה",
+    "sshAuth": "אימות SSH",
+    "username": "שם משתמש:",
+    "keyPair": "צמד מפתחות:",
+    "sshKeyDownloaded": "מפתח SSH הורד",
+    "sshKeyFailed": "הורדת מפתח SSH נכשלה",
+    "downloadSshKey": "הורד מפתח SSH",
+    "vncPassword": "סיסמת VNC",
     "vncPasswordHint": "סיסמה זו נדרשת לחיבור למחשב"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "היי, השתמשתי ב-Coasty והוא די מגניב. זה AI שיכול ממש להשתמש במחשב בשבילך. גלישה, לחיצות, הקלדה, הכול. נסה את זה עם הקישור שלי ושנינו נקבל קרדיטים בחינם!",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "תראה את כלי ה-AI הזה",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "ממש עכשיו",
+      "minutesAgo": "לפני {minutes} דק'",
+      "hoursAgo": "לפני {hours} שע'",
+      "daysAgo": "לפני {days} ימים",
+      "monthsAgo": "לפני {months} חוד'"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "קישור ההפניה הועתק!",
+    "headline": "חברים טובים משתפים ממים. חברים מעולים משתפים סוכני AI.",
+    "subheadline": "שניכם מקבלים {credits} קרדיטים בחינם כשהחבר שלך מצטרף.",
+    "yourLink": "קישור ההפניה שלך",
+    "shareDirectly": "שתף ישירות",
+    "yourReferrals": "ההפניות שלך",
+    "referralCount": "{count} הפניות",
+    "creditsEarned": "{credits} קרדיטים שהרווחת",
+    "invitedYou": "הזמין אותך",
+    "joinedViaLink": "הצטרף דרך הקישור שלך",
+    "noInvites": "טרם הזמנת משתמשים",
+    "noInvitesHint": "שתף את הקישור שלך ושניכם תרוויחו 50 קרדיטים"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "הפוך לציבורי",
+    "title": "השיחה שלך כעת ציבורית!",
+    "description": "כל מי שיש לו את הקישור יכול כעת לצפות בשיחה זו והיא עשויה להופיע בעדכוני קהילה, דפים מומלצים, או תוצאות חיפוש בעתיד.",
+    "viewPage": "צפה בדף",
+    "shareOn": "שתף ב"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "לוח בקרת AI",
+    "subtitle": "תאר מה אתה רוצה שה-AI יעשה",
+    "quickCommands": "פקודות מהירות",
+    "noActions": "טרם בוצעו פעולות",
+    "success": "הצלחה",
+    "failed": "נכשל",
+    "placeholder": "אמור ל-AI מה לעשות... (Ctrl+Enter לשליחה)",
+    "executing": "מבצע...",
+    "executeCommand": "בצע פקודה"
   },
   "discover": {
     "badge": "קהילה",

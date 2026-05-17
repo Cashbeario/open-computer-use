@@ -6,7 +6,7 @@
     "learnMore": "詳しく見る",
     "watchSession": "セッションを見る",
     "compareAllPlans": "すべてのプランと機能を比較",
-    "allRightsReserved": "All rights reserved.",
+    "allRightsReserved": "無断複写・転載を禁じます。",
     "privacy": "プライバシー",
     "terms": "利用規約",
     "recommended": "おすすめ",
@@ -20,7 +20,7 @@
     "useCases": "ユースケース",
     "blog": "ブログ",
     "agentSwarms": "エージェントスウォーム",
-    "products": "Products",
+    "products": "プロダクト",
     "discover": "Discover",
     "compare": "比較",
     "demos": "デモ",
@@ -57,14 +57,14 @@
       "emailCampaigns": "{stat} 通のパーソナライズメールをキャンペーンごとに送信"
     },
     "productItems": {
-      "computerUse": "Computer Use",
-      "agentSwarms": "Agent Swarms",
-      "compare": "Compare"
+      "computerUse": "コンピュータ操作",
+      "agentSwarms": "エージェントスウォーム",
+      "compare": "比較"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "{stat} OSWorldベンチマークスコア",
+      "agentSwarms": "{stat} エージェント並列実行",
+      "compare": "{stat} 社の競合を分析"
     },
     "blogItems": {
       "allPosts": "すべての記事",
@@ -493,16 +493,16 @@
     "demoCaption": "PCでAIエージェントを実行、スマホからどこでも操作できます。",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "お使いのPCでローカル実行",
+        "desc": "デスクトップアプリをダウンロードして、AIに直接コンピュータを操作させましょう。クラウドVMは不要です。"
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "スマホからPCを操作",
+        "desc": "スマホからタスクを開始し、AIエージェントがコンピュータで作業する様子をリアルタイムで確認できます。"
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "クラウドでもローカルでも — お好みのままに",
+        "desc": "隔離されたタスクにはクラウドVMを、自分のアプリやファイルにフルアクセスしたい場合はローカルを選択できます。"
       }
     },
     "viewTitles": {
@@ -647,7 +647,7 @@
     "referralSources": {
       "twitter": "Twitter / X",
       "linkedin": "LinkedIn",
-      "google": "Google Search",
+      "google": "Google検索",
       "youtube": "YouTube",
       "friend": "友人 / 同僚",
       "producthunt": "Product Hunt",
@@ -740,7 +740,7 @@
       "decreaseMachines": "マシン数を減らす",
       "increaseMachines": "マシン数を増やす",
       "machineLimit": "プランで最大{max}台のスウォームマシン。もっと必要ですか？founders@coasty.aiまでご連絡ください",
-      "label": "Multi-Run",
+      "label": "マルチ実行",
       "upgradeCta": "スウォームモード"
     },
     "desktop": {
@@ -1504,7 +1504,7 @@
     },
     "features": {
       "computerAgent": {
-        "name": "Coasty Computer Agent",
+        "name": "Coasty コンピュータエージェント",
         "description": "フルブラウザ、デスクトップ、ターミナル",
         "badge": "コア"
       },
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty — コンピュータ操作AIエージェント第1位 | デスクトップ＆ブラウザ自動化のAI従業員",
+      "title": "Coasty — コンピュータ操作AIエージェント第1位 | $249/月で無制限（業界最安値）",
       "titleTemplate": "{title} | Coasty — AI コンピュータ操作エージェント",
-      "description": "Coastyはコンピュータ操作AIエージェント第1位 — OSWorldベンチマークで82%。人間のようにデスクトップを操作：ブラウザを開き、クリック、入力、フォーム記入、メール送信、スプレッドシート管理。セッションごとの完全なVM分離。$20/月から。",
-      "ogTitle": "Coasty — コンピュータ操作AIエージェント第1位 | OSWorld 82%",
-      "ogDescription": "人間のようにデスクトップを操作するAI従業員。OSWorldベンチマーク第1位（82%）。ブラウザ自動化、デスクトップ制御、CAPTCHA解決、VM分離。$20/月から。",
-      "twitterDescription": "人間のようにデスクトップを操作するAI従業員。ブラウザを開き、クリック、入力、フォーム記入、メール送信。完全なVM分離。人間の仮想アシスタント$3,000/月に対し$20/月。"
+      "description": "Coastyはコンピュータ操作AIエージェント第1位 — OSWorldベンチマークで82% — そして月額$249の定額無制限プランは、コンピュータ操作プラン唯一の無制限定額制（Devin Teamの$500+ACU、レート制限付きOpenAI Operatorの$200、クレジット上限付き競合よりも安価）。人間のようにデスクトップを操作：ブラウザ、フォーム、メール、スプレッドシート。VMレベルの分離。スターター$19/月、または無制限$249/月から。",
+      "ogTitle": "Coasty — OSWorld 82% + $249/月で無制限（コンピュータ操作エージェント業界最安値）",
+      "ogDescription": "OSWorld第1位（82%）。$249/月の定額無制限 — より高いベンチマークでDevin Team（$500+ACU）よりも安価。ブラウザ、デスクトップ、ターミナルの自動化。セッションごとのVM分離。クロスプラットフォームネイティブ + REST API + MCPサーバー。",
+      "twitterDescription": "実際のデスクトップを操作するAIエージェント。OSWorld 82%（第1位）。$249/月で無制限 — このカテゴリで最安値の定額プラン。スターター$19/月から。VM分離 + 26ツールのMCPサーバー。"
     },
     "compare": {
       "title": "Coasty比較 — AIエージェントの代替案と競合比較",
@@ -2373,10 +2373,10 @@
       "ogDescription": "OSWorld第1位の最高のコンピュータ操作エージェント。AIでデスクトップ、ブラウザ、ターミナルのあらゆるタスクを自動化。"
     },
     "pricing": {
-      "title": "料金 — Coasty AIエージェントのプラン＆価格",
-      "description": "Coastyの料金プランは$20/月から。$3,000/月の仮想アシスタントをAI従業員に置き換え。無料プランあり。隠れた費用なしのクレジットベース課金。",
-      "ogTitle": "Coasty料金 — AIエージェントプラン",
-      "ogDescription": "$20/月からのAI従業員。高額な仮想アシスタントを自律型AIに置き換え。無料プランあり。"
+      "title": "料金 — スターター$19/月、または無制限$249/月（業界最安値）",
+      "description": "Coastyの料金：スターター$19/月（200クレジット）または無制限$249/月（業界最安値の定額無制限コンピュータ操作プラン — Devin Teamの$500+ACU、クレジット上限付きGenspark Proの$249、上限付きManus Extendedの$200よりも安価）。月額$3,000以上の人間の仮想アシスタントを置き換え。隠れた費用なし。",
+      "ogTitle": "Coasty料金 — スターター$19/月、無制限$249/月",
+      "ogDescription": "$249/月の定額無制限 — 業界最安値の無制限コンピュータ操作プラン。または個人向けスターター$19/月。人間のVAと比較して年間$36,000の節約。"
     },
     "faq": {
       "q1": "Coastyとは何ですか？",
@@ -2384,7 +2384,7 @@
       "q2": "CoastyはAnthropic Computer Useとどう違いますか？",
       "a2": "Anthropic Computer Useがコンピュータ制御の生のAPIを提供するのに対し、Coastyはマネージドなvmインフラ、組み込みのCAPTCHA解決、MacとWindows用のデスクトップアプリ、マルチモデルサポート、最高のOSWorldベンチマークスコア（82%）を備えた本番環境対応プラットフォームです。CoastyはAPIだけでなく、完全なソリューションを提供します。",
       "q3": "Coastyの料金はいくらですか？",
-      "a3": "Coastyはスタータープランが$20/月から、無料プランも利用可能です。人間の仮想アシスタントは$3,000以上/月かかります。Coastyは休憩なし、トレーニング不要、即座にスケール可能で24時間365日稼働します。",
+      "a3": "Coastyには現在2つのプランがあります：スターター$19/月（200クレジット、1台、個人向け）と無制限$249/月（クレジット上限なし）。$249の無制限プランは、入手可能な定額無制限コンピュータ操作プランで最安値 — Devin Team（$500/月+ACU超過料金）、OpenAI Operator ChatGPT Pro（$200/月でレート制限あり）、Genspark Pro（$249.99で125kクレジット上限）、Manus Extended（$200で40kクレジット上限）よりも安価です。どちらも月額$3,000以上の人間の仮想アシスタントを置き換え。無制限プランは人間のVAと比較して年間$33,000以上、92%のコスト削減を実現します。",
       "q4": "Coastyは安全に使えますか？",
       "a4": "はい。Coastyの各セッションは独自の分離されたサンドボックス仮想マシンで実行されます。お客様のデータは安全で、お客様のマシンは影響を受けず、セッション間でデータが漏洩しません。これは共有プールのコンテナではなく、本当のVMレベルの分離です。",
       "q5": "OSWorldベンチマークとは何ですか？",
@@ -2401,11 +2401,11 @@
       "a10": "はい。Coastyには組み込みのCAPTCHA解決パイプラインがあり、競合するAIエージェントのようにブロックされません。CAPTCHAがWebサイトで一般的な実世界の自動化には、これが不可欠です。"
     },
     "structuredData": {
-      "appDescription": "コンピュータ操作AIエージェント第1位。Coastyは人間のようにデスクトップを操作 — ブラウザを開き、クリック、入力、フォーム記入、メール送信、スプレッドシート管理を自律的に実行。OSWorldベンチマーク82%。真のVMレベル分離。組み込みCAPTCHA解決。$20/月から。",
-      "orgDescription": "Coastyは第1位のコンピュータ操作AIエージェントを開発しています。当社のプラットフォームは、自律的なデスクトップ制御、ブラウザ自動化、真のVMレベル分離によるマルチエージェントオーケストレーションを提供します。",
-      "productDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。OSWorldベンチマーク第1位（82%）。自律的なブラウザ自動化、デスクトップ制御、メール送信、フォーム記入、スプレッドシート管理を真のVMレベル分離で実現。",
-      "websiteDescription": "コンピュータ操作AIエージェントプラットフォーム第1位。OSWorldベンチマーク82%。VM分離による自律的なブラウザ、デスクトップ、ターミナル自動化。$20/月から。",
-      "softwareDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。369の実世界タスクで82%の完了率を達成しOSWorldベンチマーク第1位。自律的なブラウザ自動化、デスクトップ制御、ターミナル操作、メール送信、フォーム記入、スプレッドシート管理。",
+      "appDescription": "コンピュータ操作AIエージェント第1位、そして月額$249の業界最安値の定額無制限コンピュータ操作プラン。Coastyは人間のようにデスクトップを操作 — ブラウザを開き、クリック、入力、フォーム記入、メール送信、スプレッドシート管理を自律的に実行。369の実世界タスクにわたるOSWorldベンチマークで82%。セッションごとの真のVMレベル分離。組み込みCAPTCHA解決。プラン：スターター$19/月、または無制限$249/月。",
+      "orgDescription": "Coastyは第1位のコンピュータ操作AIエージェント（OSWorld 82%）を開発し、月額$249の唯一の定額無制限コンピュータ操作プラン — 同価格帯のDevin Team、OpenAI Operator、クレジット上限付き競合よりも安価 — を提供しています。当社のプラットフォームは、自律的なデスクトップ制御、ブラウザ自動化、真のVMレベル分離によるマルチエージェントオーケストレーションを実現します。",
+      "productDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。OSWorldベンチマーク第1位（82%）。$249/月の無制限プランは、入手可能な最安値の定額無制限コンピュータ操作プラン。自律的なブラウザ自動化、デスクトップ制御、メール送信、フォーム記入、スプレッドシート管理を真のVMレベル分離で実現。",
+      "websiteDescription": "コンピュータ操作AIエージェントプラットフォーム第1位 — OSWorldベンチマーク82%、月額$249の業界最安値の定額無制限プラン。VM分離による自律的なブラウザ、デスクトップ、ターミナル自動化。スターター$19/月、または無制限$249/月から。",
+      "softwareDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。369の実世界タスクで82%の完了率を達成しOSWorldベンチマーク第1位。$249/月の無制限プランは、市場で最安値の定額無制限コンピュータ操作プラン。自律的なブラウザ自動化、デスクトップ制御、ターミナル操作、メール送信、フォーム記入、スプレッドシート管理。",
       "breadcrumbs": {
         "home": "ホーム",
         "caseStudies": "AIエージェントケーススタディ",
@@ -2780,7 +2780,7 @@
     },
     "frequencies": {
       "daily": "daily",
-      "weekly": "weekly",
+      "weekly": "毎週",
       "every_30_minutes": "30分ごと",
       "every_6_hours": "6時間ごと",
       "every_12_hours": "12時間ごと"
@@ -2789,130 +2789,130 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "ルームのタイトルは必須です",
+      "taskCreated": "タスクを作成しました",
+      "taskFailed": "タスクの作成に失敗しました",
+      "assignTask": "新しいタスクを割り当てる",
+      "assignTaskDesc": "AIアシスタントで新しいタスクを開始します。",
+      "taskName": "タスク名",
+      "taskNamePlaceholder": "タスク名を入力",
+      "cancel": "キャンセル",
+      "creating": "作成中...",
+      "createTask": "タスクを作成"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "招待コードを入力してください",
+      "joinSuccess": "プロジェクトに参加しました!",
+      "joinFailed": "プロジェクトへの参加に失敗しました",
+      "invalidCode": "招待コードが無効か、プロジェクトが見つかりません",
+      "title": "プロジェクトに参加",
+      "description": "既存のプロジェクトに参加するには招待コードを入力してください。",
+      "inviteCode": "招待コード",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "チームリーダーにプロジェクトの招待コードを尋ねてください",
+      "cancel": "キャンセル",
+      "joining": "参加中...",
+      "joinButton": "プロジェクトに参加"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
-      "online": "Online",
-      "offline": "Offline",
+      "title": "ルーム参加者",
+      "copyCode": "コードをコピー",
+      "copyLink": "リンクをコピー",
+      "codeCopied": "招待コードをコピーしました!",
+      "codeFailed": "招待コードのコピーに失敗しました",
+      "linkCopied": "招待リンクをコピーしました!",
+      "linkFailed": "招待リンクのコピーに失敗しました",
+      "online": "オンライン",
+      "offline": "オフライン",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "ルームのタイトルは必須です",
+      "created": "プロジェクトを作成しました!",
+      "failed": "ルームの作成に失敗しました",
+      "title": "新しいプロジェクトを作成",
+      "description": "AIで製品を構築するための新しいプロジェクトを開始します。",
+      "projectName": "プロジェクト名",
+      "projectNamePlaceholder": "プロジェクト名を入力",
+      "teamSize": "チームサイズ",
+      "cancel": "キャンセル",
+      "creating": "作成中...",
+      "createButton": "プロジェクトを作成"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "最新情報",
+    "title": "Coastyの最新情報",
+    "updateCount": "{count} 件のアップデート",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "アップデート",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "今後のアップデートにご期待ください",
+    "tagline": "みんなと協力するあなたのAI社員"
   },
   "feedbackForm": {
     "ratings": {
       "bad": "Bad",
       "okay": "Okay",
       "good": "Good",
-      "amazing": "Amazing"
+      "amazing": "最高"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "フィードバックを送信するにはログインしてください",
+    "alreadySubmitted": "この件にはすでにフィードバックを送信済みです",
+    "thankYou": "フィードバックをありがとうございます!",
+    "creditsEarned": "+{credits} クレジット獲得",
+    "helpImprove": "あなたの声がCoastyの改善に役立ちます。",
+    "howsExperience": "ご利用の感想はいかがですか?",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "詳しく教えてください",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "良かった点は?改善できる点は?",
+    "cancel": "キャンセル",
+    "sending": "送信中...",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "ワークステーションを選択してください",
+    "enterCron": "cron式を入力してください",
+    "hireFailed": "社員の雇用に失敗しました",
+    "removeFailed": "社員の削除に失敗しました",
+    "editEmployee": "社員を編集",
+    "configureEmployee": "社員を設定",
+    "editDescription": "スケジュール、ワークステーション、指示を更新",
+    "configureDescription": "このチャット用にAI社員をセットアップ",
+    "loading": "構成を読み込み中...",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "社員名"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "チャットを削除しますか?",
+    "description": "「{chatTitle}」を削除します",
+    "cancel": "キャンセル",
+    "delete": "削除"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "決済が完了しました!クレジットが追加されました。",
+    "canceled": "決済はキャンセルされました。請求は発生していません。"
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "一般設定",
     "generalDescription": "基本的なコンピュータ設定を構成する",
     "displayName": "表示名",
     "defaultName": "マイコンピュータ",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "変更を保存",
+    "security": "セキュリティ",
+    "securityDescription": "セキュリティとアクセスの設定",
+    "sshAuth": "SSH認証",
+    "username": "ユーザー名:",
+    "keyPair": "キーペア:",
+    "sshKeyDownloaded": "SSHキーをダウンロードしました",
+    "sshKeyFailed": "SSHキーのダウンロードに失敗しました",
+    "downloadSshKey": "SSHキーをダウンロード",
+    "vncPassword": "VNCパスワード",
     "vncPasswordHint": "このパスワードはコンピュータに接続するために必要です"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "ねえ、Coastyを使ってるんだけど、これすごくいいよ。実際にコンピュータを操作してくれるAIで、ブラウジング、クリック、入力、全部やってくれる。私のリンクから試してみて、お互い無料クレジットがもらえるよ!",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "このAIツール、見てみて",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "たった今",
+      "minutesAgo": "{minutes}分前",
+      "hoursAgo": "{hours}時間前",
+      "daysAgo": "{days}日前",
+      "monthsAgo": "{months}か月前"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "紹介リンクをコピーしました!",
+    "headline": "良い友達はミームを共有する。最高の友達はAIエージェントを共有する。",
+    "subheadline": "友達が参加すると、お二人とも{credits}の無料クレジットがもらえます。",
+    "yourLink": "あなたの紹介リンク",
+    "shareDirectly": "直接共有",
+    "yourReferrals": "あなたの紹介",
+    "referralCount": "{count} 件の紹介",
+    "creditsEarned": "{credits} クレジット獲得",
+    "invitedYou": "あなたを招待しました",
+    "joinedViaLink": "あなたのリンクから参加",
+    "noInvites": "まだ招待したユーザーはいません",
+    "noInvitesHint": "リンクを共有すると、お二人とも50クレジット獲得できます"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "公開する",
+    "title": "会話が公開されました!",
+    "description": "リンクを知っている人なら誰でもこの会話を閲覧でき、将来コミュニティフィード、注目ページ、検索結果に表示される可能性があります。",
+    "viewPage": "ページを表示",
+    "shareOn": "共有先"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "AIコントロールパネル",
+    "subtitle": "AIに実行させたい内容を記述してください",
+    "quickCommands": "クイックコマンド",
+    "noActions": "まだ実行されたアクションはありません",
+    "success": "成功",
+    "failed": "失敗",
+    "placeholder": "AIに何をさせたいか入力... (Ctrl+Enterで送信)",
+    "executing": "実行中...",
+    "executeCommand": "コマンドを実行"
   },
   "discover": {
     "badge": "コミュニティ",

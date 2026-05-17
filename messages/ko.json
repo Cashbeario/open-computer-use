@@ -6,7 +6,7 @@
     "learnMore": "자세히 알아보기",
     "watchSession": "세션 보기",
     "compareAllPlans": "모든 요금제 및 기능 비교",
-    "allRightsReserved": "All rights reserved.",
+    "allRightsReserved": "모든 권리 보유.",
     "privacy": "개인정보처리방침",
     "terms": "이용약관",
     "recommended": "추천",
@@ -20,7 +20,7 @@
     "useCases": "활용 사례",
     "blog": "블로그",
     "agentSwarms": "에이전트 스웜",
-    "products": "Products",
+    "products": "제품",
     "discover": "Discover",
     "compare": "비교",
     "demos": "데모",
@@ -57,14 +57,14 @@
       "emailCampaigns": "캠페인당 {stat}개 맞춤형 이메일"
     },
     "productItems": {
-      "computerUse": "Computer Use",
-      "agentSwarms": "Agent Swarms",
-      "compare": "Compare"
+      "computerUse": "컴퓨터 사용",
+      "agentSwarms": "에이전트 스웜",
+      "compare": "비교"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "OSWorld 벤치마크 점수 {stat}",
+      "agentSwarms": "{stat}개 에이전트 병렬 실행",
+      "compare": "{stat}개 경쟁사 분석"
     },
     "blogItems": {
       "allPosts": "전체 게시물",
@@ -493,16 +493,16 @@
     "demoCaption": "PC에서 AI 에이전트를 실행하거나 어디서든 휴대폰으로 제어하세요.",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "내 PC에서 로컬로 실행",
+        "desc": "데스크톱 앱을 다운로드하고 AI가 컴퓨터를 직접 제어하도록 하세요 — 클라우드 VM 없이도 가능합니다."
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "휴대폰으로 PC 제어",
+        "desc": "휴대폰에서 작업을 시작하고 AI 에이전트가 컴퓨터에서 작업하는 모습을 실시간으로 확인하세요."
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "클라우드 또는 로컬 — 당신의 선택",
+        "desc": "격리된 작업에는 클라우드 VM을, 앱과 파일에 전체 접근하려면 로컬을 사용하세요."
       }
     },
     "viewTitles": {
@@ -773,7 +773,7 @@
       "vmInfo": "VM: {name}",
       "dropHeading": "여기에 파일을 놓으세요",
       "dropDescription": "파일이 VM의 데스크톱 폴더에 업로드됩니다",
-      "dropPath": "Path: /home/desktop/Desktop/"
+      "dropPath": "경로: /home/desktop/Desktop/"
     },
     "authPrompt": {
       "heading": "로그인하여 더 많은 기능을 무료로 사용해 보세요",
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty — 컴퓨터 사용 AI 에이전트 1위 | 데스크톱 및 브라우저 자동화 AI 직원",
+      "title": "Coasty — 컴퓨터 사용 AI 에이전트 1위 | $249/월 무제한(업계 최저가)",
       "titleTemplate": "{title} | Coasty — AI 컴퓨터 사용 에이전트",
-      "description": "Coasty는 컴퓨터 사용 AI 에이전트 1위 — OSWorld 벤치마크 82%. 사람처럼 데스크톱을 조작합니다: 브라우저 열기, 클릭, 입력, 양식 작성, 이메일 전송, 스프레드시트 관리. 세션별 완전한 VM 격리. $20/월부터.",
-      "ogTitle": "Coasty — 컴퓨터 사용 AI 에이전트 1위 | OSWorld 82%",
-      "ogDescription": "사람처럼 데스크톱을 조작하는 AI 직원. OSWorld 벤치마크 1위(82%). 브라우저 자동화, 데스크톱 제어, CAPTCHA 해결, VM 격리. $20/월부터.",
-      "twitterDescription": "사람처럼 데스크톱을 조작하는 AI 직원. 브라우저 열기, 클릭, 입력, 양식 작성, 이메일 전송. 완전한 VM 격리. 인간 가상 비서 $3,000/월 대비 $20/월."
+      "description": "Coasty는 컴퓨터 사용 AI 에이전트 1위 — OSWorld 벤치마크 82% — 그리고 월 $249의 정액 무제한 컴퓨터 사용 플랜은 시장에서 유일한 무제한 정액제(Devin Team $500+ACU, 속도 제한이 있는 OpenAI Operator $200, 크레딧 상한이 있는 경쟁사보다 저렴). 사람처럼 전체 데스크톱을 조작: 브라우저, 양식, 이메일, 스프레드시트. VM 수준 격리. 스타터 $19/월 또는 무제한 $249/월부터.",
+      "ogTitle": "Coasty — OSWorld 82% + $249/월 무제한(컴퓨터 사용 에이전트 최저가)",
+      "ogDescription": "OSWorld 1위(82%). $249/월 정액 무제한 — 더 높은 벤치마크에서 Devin Team($500+ACU)보다 저렴. 브라우저, 데스크톱, 터미널 자동화. 세션별 VM 격리. 크로스플랫폼 네이티브 + REST API + MCP 서버.",
+      "twitterDescription": "실제 데스크톱을 조작하는 AI 에이전트. OSWorld 82%(1위). $249/월 무제한 — 카테고리 내 최저가 정액 플랜. 스타터 $19/월부터. VM 격리 + 26개 도구 MCP 서버."
     },
     "compare": {
       "title": "Coasty 비교 — AI 에이전트 대안 및 경쟁사 비교",
@@ -2373,10 +2373,10 @@
       "ogDescription": "OSWorld 1위 최고의 컴퓨터 사용 에이전트. AI로 데스크톱, 브라우저, 터미널의 모든 작업을 자동화하세요."
     },
     "pricing": {
-      "title": "요금제 — Coasty AI 에이전트 플랜 및 가격",
-      "description": "Coasty 요금제 $20/월부터. $3,000/월 가상 비서를 AI 직원으로 대체하세요. 무료 플랜 제공. 숨은 수수료 없는 크레딧 기반 과금.",
-      "ogTitle": "Coasty 요금제 — AI 에이전트 플랜",
-      "ogDescription": "$20/월부터 시작하는 AI 직원. 비싼 가상 비서를 자율 AI로 대체하세요. 무료 플랜 제공."
+      "title": "요금제 — 스타터 $19/월 또는 무제한 $249/월(업계 최저가)",
+      "description": "Coasty 요금제: 스타터 $19/월(200 크레딧) 또는 무제한 $249/월(시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜 — Devin Team $500+ACU, 크레딧 상한이 있는 Genspark Pro $249, 상한이 있는 Manus Extended $200보다 저렴). 월 $3,000 이상의 인간 가상 비서를 대체. 숨은 수수료 없음.",
+      "ogTitle": "Coasty 요금제 — 스타터 $19/월, 무제한 $249/월",
+      "ogDescription": "$249/월 정액 무제한 — 시장에서 가장 저렴한 무제한 컴퓨터 사용 플랜. 또는 개인용 스타터 $19/월. 인간 VA 대비 연간 $36,000 절약."
     },
     "faq": {
       "q1": "Coasty란 무엇인가요?",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty는 Anthropic Computer Use와 어떻게 다른가요?",
       "a2": "Anthropic Computer Use가 컴퓨터 제어를 위한 원시 API를 제공하는 반면, Coasty는 관리형 VM 인프라, 내장 CAPTCHA 해결, Mac 및 Windows용 데스크톱 앱, 멀티모델 지원, 최고의 OSWorld 벤치마크 점수(82%)를 갖춘 프로덕션 준비 플랫폼입니다. Coasty는 API만이 아닌 완전한 솔루션을 제공합니다.",
       "q3": "Coasty 비용은 얼마인가요?",
-      "a3": "Coasty는 스타터 플랜 $20/월부터 시작하며 무료 플랜도 제공됩니다. 인간 가상 비서는 $3,000 이상/월입니다. Coasty는 휴식 없이, 교육 없이, 즉각적인 확장이 가능하며 24시간 연중무휴로 작동합니다.",
+      "a3": "Coasty는 현재 두 가지 플랜을 제공합니다: 스타터 $19/월(200 크레딧, 머신 1대, 개인에게 적합)과 크레딧 상한이 없는 무제한 $249/월. $249 무제한 플랜은 이용 가능한 정액 무제한 컴퓨터 사용 플랜 중 가장 저렴합니다 — Devin Team($500/월 + ACU 초과 요금), OpenAI Operator ChatGPT Pro($200/월 속도 제한), Genspark Pro($249.99, 125k 크레딧 상한), Manus Extended($200, 40k 크레딧 상한)보다 저렴합니다. 두 플랜 모두 월 $3,000 이상의 인간 가상 비서를 대체하며, 무제한 플랜은 인간 VA 대비 연간 $33,000 이상 절감, 92%의 비용 절감을 제공합니다.",
       "q4": "Coasty는 안전한가요?",
       "a4": "네. 모든 Coasty 세션은 자체 격리된 샌드박스 가상 머신에서 실행됩니다. 데이터는 안전하고, 머신은 영향받지 않으며, 세션 간에 데이터가 유출되지 않습니다. 이것은 공유 풀의 컨테이너가 아닌 진정한 VM 수준 격리입니다.",
       "q5": "OSWorld 벤치마크란 무엇인가요?",
@@ -2401,11 +2401,11 @@
       "a10": "네. Coasty에는 내장 CAPTCHA 해결 파이프라인이 있어 경쟁 AI 에이전트처럼 차단되지 않습니다. 웹사이트에서 CAPTCHA가 흔한 실제 자동화에 이것은 필수적입니다."
     },
     "structuredData": {
-      "appDescription": "컴퓨터 사용 AI 에이전트 1위. Coasty는 사람처럼 데스크톱을 조작 — 브라우저 열기, 클릭, 입력, 양식 작성, 이메일 전송, 스프레드시트 관리를 자율적으로 수행. OSWorld 벤치마크 82%. 진정한 VM 수준 격리. 내장 CAPTCHA 해결. $20/월부터.",
-      "orgDescription": "Coasty는 1위 컴퓨터 사용 AI 에이전트를 개발합니다. 당사 플랫폼은 자율적인 데스크톱 제어, 브라우저 자동화, 진정한 VM 수준 격리를 통한 멀티 에이전트 오케스트레이션을 제공합니다.",
-      "productDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. OSWorld 벤치마크 1위(82%). 자율 브라우저 자동화, 데스크톱 제어, 이메일 전송, 양식 작성, 스프레드시트 관리를 진정한 VM 수준 격리로 제공.",
-      "websiteDescription": "컴퓨터 사용 AI 에이전트 플랫폼 1위. OSWorld 벤치마크 82%. VM 격리를 통한 자율 브라우저, 데스크톱, 터미널 자동화. $20/월부터.",
-      "softwareDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. 369개의 실제 작업에서 82% 완료율로 OSWorld 벤치마크 1위. 자율 브라우저 자동화, 데스크톱 제어, 터미널 작업, 이메일 전송, 양식 작성, 스프레드시트 관리.",
+      "appDescription": "컴퓨터 사용 AI 에이전트 1위이자 월 $249의 시장 최저가 정액 무제한 컴퓨터 사용 플랜. Coasty는 사람처럼 데스크톱을 조작 — 브라우저 열기, 클릭, 입력, 양식 작성, 이메일 전송, 스프레드시트 관리를 자율적으로 수행. 369개의 실제 작업에 걸쳐 OSWorld 벤치마크 82%. 세션별 진정한 VM 수준 격리. 내장 CAPTCHA 해결. 플랜: 스타터 $19/월 또는 무제한 $249/월.",
+      "orgDescription": "Coasty는 1위 컴퓨터 사용 AI 에이전트(OSWorld 82%)를 개발하고, 월 $249의 유일한 정액 무제한 컴퓨터 사용 플랜 — 동일 가격대의 Devin Team, OpenAI Operator, 크레딧 상한 경쟁사보다 저렴 — 을 출시합니다. 당사 플랫폼은 자율적인 데스크톱 제어, 브라우저 자동화, 진정한 VM 수준 격리를 통한 멀티 에이전트 오케스트레이션을 제공합니다.",
+      "productDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. OSWorld 벤치마크 1위(82%). $249/월 무제한 플랜은 이용 가능한 가장 저렴한 정액 무제한 컴퓨터 사용 플랜. 자율 브라우저 자동화, 데스크톱 제어, 이메일 전송, 양식 작성, 스프레드시트 관리를 진정한 VM 수준 격리로 제공.",
+      "websiteDescription": "컴퓨터 사용 AI 에이전트 플랫폼 1위 — OSWorld 벤치마크 82%, 월 $249의 시장 최저가 정액 무제한 플랜. VM 격리를 통한 자율 브라우저, 데스크톱, 터미널 자동화. 스타터 $19/월 또는 무제한 $249/월부터.",
+      "softwareDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. 369개의 실제 작업에서 82% 완료율로 OSWorld 벤치마크 1위. $249/월 무제한 플랜은 시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜. 자율 브라우저 자동화, 데스크톱 제어, 터미널 작업, 이메일 전송, 양식 작성, 스프레드시트 관리.",
       "breadcrumbs": {
         "home": "홈",
         "caseStudies": "AI 에이전트 사례 연구",
@@ -2780,7 +2780,7 @@
     },
     "frequencies": {
       "daily": "daily",
-      "weekly": "weekly",
+      "weekly": "매주",
       "every_30_minutes": "30분마다",
       "every_6_hours": "6시간마다",
       "every_12_hours": "12시간마다"
@@ -2789,130 +2789,130 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "방 제목은 필수입니다",
+      "taskCreated": "작업이 성공적으로 생성되었습니다",
+      "taskFailed": "작업 생성에 실패했습니다",
+      "assignTask": "새 작업 할당",
+      "assignTaskDesc": "AI 어시스턴트와 새 작업을 시작하세요.",
+      "taskName": "작업 이름",
+      "taskNamePlaceholder": "작업 이름 입력",
+      "cancel": "취소",
+      "creating": "생성 중...",
+      "createTask": "작업 생성"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "초대 코드를 입력해 주세요",
+      "joinSuccess": "프로젝트에 참여했습니다!",
+      "joinFailed": "프로젝트 참여에 실패했습니다",
+      "invalidCode": "잘못된 초대 코드이거나 프로젝트를 찾을 수 없습니다",
+      "title": "프로젝트 참여",
+      "description": "기존 프로젝트에 참여하려면 초대 코드를 입력하세요.",
+      "inviteCode": "초대 코드",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "팀 리더에게 프로젝트 초대 코드를 요청하세요",
+      "cancel": "취소",
+      "joining": "참여 중...",
+      "joinButton": "프로젝트 참여"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
-      "online": "Online",
-      "offline": "Offline",
+      "title": "방 참가자",
+      "copyCode": "코드 복사",
+      "copyLink": "링크 복사",
+      "codeCopied": "초대 코드가 복사되었습니다!",
+      "codeFailed": "초대 코드 복사에 실패했습니다",
+      "linkCopied": "초대 링크가 복사되었습니다!",
+      "linkFailed": "초대 링크 복사에 실패했습니다",
+      "online": "온라인",
+      "offline": "오프라인",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "방 제목은 필수입니다",
+      "created": "프로젝트가 성공적으로 생성되었습니다!",
+      "failed": "방 생성에 실패했습니다",
+      "title": "새 프로젝트 만들기",
+      "description": "AI로 제품을 만드는 새 프로젝트를 시작하세요.",
+      "projectName": "프로젝트 이름",
+      "projectNamePlaceholder": "프로젝트 이름 입력",
+      "teamSize": "팀 규모",
+      "cancel": "취소",
+      "creating": "생성 중...",
+      "createButton": "프로젝트 생성"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "새로운 소식",
+    "title": "Coasty의 새로운 소식",
+    "updateCount": "{count}개 업데이트",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "업데이트",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "더 많은 업데이트를 기대해 주세요",
+    "tagline": "모두와 협업하는 AI 직원"
   },
   "feedbackForm": {
     "ratings": {
       "bad": "Bad",
       "okay": "Okay",
       "good": "Good",
-      "amazing": "Amazing"
+      "amazing": "최고"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "피드백을 제출하려면 로그인해 주세요",
+    "alreadySubmitted": "이미 이 항목에 대한 피드백을 제출하셨습니다",
+    "thankYou": "피드백을 보내주셔서 감사합니다!",
+    "creditsEarned": "+{credits} 크레딧 획득",
+    "helpImprove": "여러분의 의견이 Coasty를 더 좋게 만듭니다.",
+    "howsExperience": "사용 경험은 어떠신가요?",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "더 자세히 알려주세요",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "어떤 점이 좋으셨나요? 어떤 점이 개선되어야 할까요?",
+    "cancel": "취소",
+    "sending": "전송 중...",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "워크스테이션을 선택해 주세요",
+    "enterCron": "cron 표현식을 입력해 주세요",
+    "hireFailed": "직원 고용에 실패했습니다",
+    "removeFailed": "직원 제거에 실패했습니다",
+    "editEmployee": "직원 편집",
+    "configureEmployee": "직원 구성",
+    "editDescription": "일정, 워크스테이션 또는 지침을 업데이트",
+    "configureDescription": "이 채팅에 AI 직원을 설정",
+    "loading": "구성을 불러오는 중...",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "직원 이름"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "채팅을 삭제하시겠습니까?",
+    "description": "\"{chatTitle}\"이(가) 삭제됩니다",
+    "cancel": "취소",
+    "delete": "삭제"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "결제가 완료되었습니다! 크레딧이 추가되었습니다.",
+    "canceled": "결제가 취소되었습니다. 청구된 금액은 없습니다."
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "일반 설정",
     "generalDescription": "기본 컴퓨터 설정 구성",
     "displayName": "표시 이름",
     "defaultName": "내 컴퓨터",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "변경사항 저장",
+    "security": "보안",
+    "securityDescription": "보안 및 접근 설정",
+    "sshAuth": "SSH 인증",
+    "username": "사용자 이름:",
+    "keyPair": "키 쌍:",
+    "sshKeyDownloaded": "SSH 키가 다운로드되었습니다",
+    "sshKeyFailed": "SSH 키 다운로드에 실패했습니다",
+    "downloadSshKey": "SSH 키 다운로드",
+    "vncPassword": "VNC 비밀번호",
     "vncPasswordHint": "이 비밀번호는 컴퓨터에 연결하는 데 필요합니다"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "안녕, 요즘 Coasty를 쓰고 있는데 꽤 괜찮아. 컴퓨터를 직접 써주는 AI인데, 검색, 클릭, 입력 다 해줘. 내 링크로 한번 써봐. 우리 둘 다 무료 크레딧 받을 수 있어!",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "이 AI 도구 한번 봐봐",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "방금 전",
+      "minutesAgo": "{minutes}분 전",
+      "hoursAgo": "{hours}시간 전",
+      "daysAgo": "{days}일 전",
+      "monthsAgo": "{months}개월 전"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "추천 링크가 복사되었습니다!",
+    "headline": "좋은 친구는 밈을 공유합니다. 멋진 친구는 AI 에이전트를 공유합니다.",
+    "subheadline": "친구가 가입하면 두 분 모두 무료 크레딧 {credits}개를 받습니다.",
+    "yourLink": "내 추천 링크",
+    "shareDirectly": "바로 공유",
+    "yourReferrals": "내 추천",
+    "referralCount": "{count}건의 추천",
+    "creditsEarned": "{credits} 크레딧 획득",
+    "invitedYou": "당신을 초대했습니다",
+    "joinedViaLink": "내 링크로 가입함",
+    "noInvites": "아직 초대한 사용자가 없습니다",
+    "noInvitesHint": "링크를 공유하면 두 분 모두 50 크레딧을 받습니다"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "공개로 전환",
+    "title": "대화가 이제 공개되었습니다!",
+    "description": "링크가 있는 누구나 이 대화를 볼 수 있으며, 향후 커뮤니티 피드, 추천 페이지 또는 검색 결과에 나타날 수 있습니다.",
+    "viewPage": "페이지 보기",
+    "shareOn": "공유 대상"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "AI 컨트롤 패널",
+    "subtitle": "AI가 할 작업을 설명하세요",
+    "quickCommands": "빠른 명령",
+    "noActions": "아직 수행된 작업이 없습니다",
+    "success": "성공",
+    "failed": "실패",
+    "placeholder": "AI에게 할 일을 알려주세요... (Ctrl+Enter로 전송)",
+    "executing": "실행 중...",
+    "executeCommand": "명령 실행"
   },
   "discover": {
     "badge": "커뮤니티",

@@ -20,7 +20,7 @@
     "useCases": "使用场景",
     "blog": "博客",
     "agentSwarms": "智能体集群",
-    "products": "Products",
+    "products": "产品",
     "discover": "Discover",
     "compare": "对比",
     "demos": "演示",
@@ -57,14 +57,14 @@
       "emailCampaigns": "每次营销发送 {stat} 封个性化邮件"
     },
     "productItems": {
-      "computerUse": "Computer Use",
-      "agentSwarms": "Agent Swarms",
-      "compare": "Compare"
+      "computerUse": "计算机使用",
+      "agentSwarms": "智能体集群",
+      "compare": "对比"
     },
     "productStats": {
-      "computerUse": "{stat} OSWorld benchmark score",
-      "agentSwarms": "{stat} agents in parallel",
-      "compare": "{stat} competitors analyzed"
+      "computerUse": "OSWorld 基准得分 {stat}",
+      "agentSwarms": "{stat} 个智能体并行运行",
+      "compare": "已分析 {stat} 个竞品"
     },
     "blogItems": {
       "allPosts": "所有文章",
@@ -493,16 +493,16 @@
     "demoCaption": "在电脑上运行 AI 代理，或随时随地用手机远程控制。",
     "features": {
       "localControl": {
-        "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "title": "在你的电脑上本地运行",
+        "desc": "下载桌面应用，让 AI 直接控制你的电脑——无需云端 VM。"
       },
       "phoneControl": {
-        "title": "Control your PC from your phone",
-        "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
+        "title": "用手机控制你的电脑",
+        "desc": "在手机上发起任务，实时观看 AI 智能体在你的电脑上完成工作。"
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
-        "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
+        "title": "云端或本地——由你选择",
+        "desc": "使用云端 VM 处理隔离任务，或切换到本地，完整访问你的应用和文件。"
       }
     },
     "viewTitles": {
@@ -740,7 +740,7 @@
       "decreaseMachines": "减少机器数量",
       "increaseMachines": "增加机器数量",
       "machineLimit": "您的套餐最多可使用 {max} 台集群机器。需要更多？请联系 founders@coasty.ai",
-      "label": "Multi-Run",
+      "label": "多线运行",
       "upgradeCta": "集群模式"
     },
     "desktop": {
@@ -773,7 +773,7 @@
       "vmInfo": "虚拟机: {name}",
       "dropHeading": "将文件拖放到此处",
       "dropDescription": "文件将上传到虚拟机的桌面文件夹",
-      "dropPath": "Path: /home/desktop/Desktop/"
+      "dropPath": "路径：/home/desktop/Desktop/"
     },
     "authPrompt": {
       "heading": "登录即可免费体验更多功能",
@@ -1907,7 +1907,7 @@
           "count": "7"
         },
         "ecommerce": {
-          "name": "E-Commerce",
+          "name": "电商",
           "plan": "Plus",
           "count": "7"
         }
@@ -2041,7 +2041,7 @@
       "rpa": "RPA",
       "human": "人工"
     },
-    "vsLabel": "Coasty vs {name}",
+    "vsLabel": "Coasty 对比 {name}",
     "ctaTitle": "准备好体验排名第一的计算机操作 AI 智能体了吗？",
     "ctaButton": "免费试用 Coasty",
     "noCreditCard": "无需信用卡",
@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty — 排名第一的计算机操控AI代理 | 桌面和浏览器自动化AI员工",
+      "title": "Coasty — 排名第一的计算机操控AI代理 | $249/月无限制（市场最低价）",
       "titleTemplate": "{title} | Coasty — AI计算机操控代理",
-      "description": "Coasty是排名第一的计算机操控AI代理 — OSWorld基准测试82%。它像人类一样操控桌面：打开浏览器、点击、输入、填写表单、发送邮件、管理电子表格。每个会话真正的虚拟机级别隔离。$20/月起。",
-      "ogTitle": "Coasty — 排名第一的计算机操控AI代理 | OSWorld 82%",
-      "ogDescription": "像人类一样操控桌面的AI员工。OSWorld基准测试排名第一（82%）。浏览器自动化、桌面控制、CAPTCHA破解、虚拟机隔离。$20/月起。",
-      "twitterDescription": "像人类一样操控桌面的AI员工。打开浏览器、点击、输入、填写表单、发送邮件。真正的虚拟机隔离。$20/月 vs 人工虚拟助手$3,000/月。"
+      "description": "Coasty是排名第一的计算机操控AI代理 — OSWorld基准测试82% — 也是市场上唯一的$249/月定额无限制计算机操控方案（比Devin Team $500+ACU、有速率限制的OpenAI Operator $200，以及有积分上限的竞品都便宜）。像人类一样操控完整桌面：浏览器、表单、邮件、电子表格。VM级别隔离。Starter $19/月或Unlimited $249/月起。",
+      "ogTitle": "Coasty — OSWorld 82% + $249/月无限制（最便宜的计算机操控代理）",
+      "ogDescription": "OSWorld排名第一（82%）。$249/月定额无限制 — 以更高基准成绩比Devin Team（$500+ACU）更便宜。浏览器、桌面、终端自动化。每个会话VM隔离。跨平台原生应用 + REST API + MCP服务器。",
+      "twitterDescription": "操控真实桌面的AI代理。OSWorld 82%（排名第一）。$249/月无限制 — 该品类中最便宜的定额方案。Starter $19/月起。VM隔离 + 26工具MCP服务器。"
     },
     "compare": {
       "title": "Coasty对比 — AI代理替代方案与竞品比较",
@@ -2373,10 +2373,10 @@
       "ogDescription": "OSWorld排名第一的最佳计算机操控代理。通过AI自动化任何桌面、浏览器或终端任务。"
     },
     "pricing": {
-      "title": "价格 — Coasty AI代理方案与定价",
-      "description": "Coasty定价方案$20/月起。用AI员工替代$3,000/月的虚拟助手。提供免费方案。基于积分的计费，无隐藏费用。",
-      "ogTitle": "Coasty价格 — AI代理方案",
-      "ogDescription": "$20/月起的AI员工。用自主AI替代昂贵的虚拟助手。提供免费方案。"
+      "title": "价格 — Starter $19/月或Unlimited $249/月（市场最低价）",
+      "description": "Coasty定价：Starter $19/月（200积分）或Unlimited $249/月（市场上最便宜的定额无限制计算机操控方案 — 比Devin Team $500+ACU、有积分上限的Genspark Pro $249、有上限的Manus Extended $200都便宜）。替代月费$3,000以上的人工虚拟助手。无隐藏费用。",
+      "ogTitle": "Coasty价格 — Starter $19/月，Unlimited $249/月",
+      "ogDescription": "$249/月定额无限制 — 市场上最便宜的无限制计算机操控方案。或个人版Starter $19/月。相比人工VA每年节省$36,000。"
     },
     "faq": {
       "q1": "什么是Coasty？",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty与Anthropic Computer Use有何不同？",
       "a2": "Anthropic Computer Use提供的是计算机控制的原始API，而Coasty是一个生产就绪的平台，提供托管的虚拟机基础设施、内置CAPTCHA破解、Mac和Windows桌面应用、多模型支持以及最高的OSWorld基准分数（82%）。Coasty提供完整的解决方案 — 不仅仅是API。",
       "q3": "Coasty多少钱？",
-      "a3": "Coasty入门方案$20/月起，提供免费方案。相比之下，人工虚拟助手每月$3,000以上。Coasty全天候工作，无需休息、无需培训、可即时扩展。",
+      "a3": "Coasty目前提供两个方案：Starter $19/月（200积分，1台机器，适合个人用户）和Unlimited $249/月（无积分上限）。$249的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案 — 比Devin Team（$500/月 + ACU超额费用）、OpenAI Operator ChatGPT Pro（$200/月有速率限制）、Genspark Pro（$249.99，125k积分上限）和Manus Extended（$200，40k积分上限）都便宜。两个方案都可替代月费$3,000以上的人工虚拟助手；Unlimited相比人工VA每年节省$33,000以上，成本降低92%。",
       "q4": "使用Coasty安全吗？",
       "a4": "是的。每个Coasty会话都在自己的隔离沙箱虚拟机中运行。您的数据安全，您的计算机不受影响，会话之间不会泄露任何信息。这是真正的虚拟机级别隔离，而不是共享池中的容器。",
       "q5": "什么是OSWorld基准测试？",
@@ -2401,11 +2401,11 @@
       "a10": "能。Coasty有内置的CAPTCHA破解流水线，不会像竞品AI代理那样被阻止。这对于网站上常见CAPTCHA的真实自动化至关重要。"
     },
     "structuredData": {
-      "appDescription": "排名第一的计算机操控AI代理。Coasty像人类一样操控桌面 — 自主地打开浏览器、点击、输入、填写表单、发送邮件和管理电子表格。OSWorld基准测试82%。真正的虚拟机级别隔离。内置CAPTCHA破解。$20/月起。",
-      "orgDescription": "Coasty打造排名第一的计算机操控AI代理。我们的平台提供自主桌面控制、浏览器自动化以及真正虚拟机级别隔离的多代理编排。",
-      "productDescription": "像人类一样操控桌面的AI计算机操控代理。OSWorld基准测试排名第一（82%）。自主浏览器自动化、桌面控制、邮件发送、表单填写和电子表格管理，配备真正的虚拟机级别隔离。",
-      "websiteDescription": "排名第一的计算机操控AI代理平台。OSWorld基准测试82%。虚拟机隔离的自主浏览器、桌面和终端自动化。$20/月起。",
-      "softwareDescription": "像人类一样操控桌面的AI计算机操控代理。在369项真实任务中以82%完成率获得OSWorld基准测试第一名。自主浏览器自动化、桌面控制、终端操作、邮件发送、表单填写和电子表格管理。",
+      "appDescription": "排名第一的计算机操控AI代理，也是市场上最便宜的$249/月定额无限制计算机操控方案。Coasty像人类一样操控完整桌面 — 自主地打开浏览器、点击、输入、填写表单、发送邮件和管理电子表格。在369项真实任务的OSWorld基准测试中达到82%。每个会话真正的VM级别隔离。内置CAPTCHA破解。方案：Starter $19/月或Unlimited $249/月。",
+      "orgDescription": "Coasty打造排名第一的计算机操控AI代理（OSWorld 82%），并推出市场上唯一的$249/月定额无限制计算机操控方案 — 比同价位的Devin Team、OpenAI Operator和有积分上限的竞品都便宜。我们的平台提供自主桌面控制、浏览器自动化以及真正VM级别隔离的多代理编排。",
+      "productDescription": "像人类一样操控桌面的AI计算机操控代理。OSWorld基准测试排名第一（82%）。$249/月的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、邮件发送、表单填写和电子表格管理，配备真正的VM级别隔离。",
+      "websiteDescription": "排名第一的计算机操控AI代理平台 — OSWorld基准测试82%，市场上最便宜的$249/月定额无限制方案。VM隔离的自主浏览器、桌面和终端自动化。Starter $19/月或Unlimited $249/月起。",
+      "softwareDescription": "像人类一样操控完整桌面的AI计算机操控代理。在369项真实任务中以82%完成率获得OSWorld基准测试第一名。$249/月的Unlimited方案是市场上最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、终端操作、邮件发送、表单填写和电子表格管理。",
       "breadcrumbs": {
         "home": "首页",
         "caseStudies": "AI代理案例研究",
@@ -2780,7 +2780,7 @@
     },
     "frequencies": {
       "daily": "daily",
-      "weekly": "weekly",
+      "weekly": "每周",
       "every_30_minutes": "每30分钟",
       "every_6_hours": "每6小时",
       "every_12_hours": "每12小时"
@@ -2789,130 +2789,130 @@
   },
   "collaborative": {
     "createRoom": {
-      "titleRequired": "Room title is required",
-      "taskCreated": "Task created successfully",
-      "taskFailed": "Failed to create task",
-      "assignTask": "Assign New Task",
-      "assignTaskDesc": "Start a new task with your AI assistant.",
-      "taskName": "Task Name",
-      "taskNamePlaceholder": "Enter task name",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createTask": "Create Task"
+      "titleRequired": "请填写房间标题",
+      "taskCreated": "任务创建成功",
+      "taskFailed": "任务创建失败",
+      "assignTask": "分配新任务",
+      "assignTaskDesc": "用你的 AI 助手开启一项新任务。",
+      "taskName": "任务名称",
+      "taskNamePlaceholder": "输入任务名称",
+      "cancel": "取消",
+      "creating": "创建中…",
+      "createTask": "创建任务"
     },
     "joinRoom": {
-      "enterCode": "Please enter an invite code",
-      "joinSuccess": "Successfully joined the project!",
-      "joinFailed": "Failed to join project",
-      "invalidCode": "Invalid invite code or project not found",
-      "title": "Join Project",
-      "description": "Enter an invite code to join an existing project.",
-      "inviteCode": "Invite Code",
+      "enterCode": "请输入邀请码",
+      "joinSuccess": "已成功加入项目！",
+      "joinFailed": "加入项目失败",
+      "invalidCode": "邀请码无效或项目不存在",
+      "title": "加入项目",
+      "description": "输入邀请码即可加入现有项目。",
+      "inviteCode": "邀请码",
       "placeholder": "e.g. ABC123",
-      "hint": "Ask your team leader for the project invite code",
-      "cancel": "Cancel",
-      "joining": "Joining...",
-      "joinButton": "Join Project"
+      "hint": "向你的团队负责人索取项目邀请码",
+      "cancel": "取消",
+      "joining": "加入中…",
+      "joinButton": "加入项目"
     },
     "participants": {
-      "title": "Room Participants",
-      "copyCode": "Copy Code",
-      "copyLink": "Copy Link",
-      "codeCopied": "Invite code copied!",
-      "codeFailed": "Failed to copy invite code",
-      "linkCopied": "Invite link copied!",
-      "linkFailed": "Failed to copy invite link",
-      "online": "Online",
-      "offline": "Offline",
+      "title": "房间成员",
+      "copyCode": "复制邀请码",
+      "copyLink": "复制链接",
+      "codeCopied": "邀请码已复制！",
+      "codeFailed": "复制邀请码失败",
+      "linkCopied": "邀请链接已复制！",
+      "linkFailed": "复制邀请链接失败",
+      "online": "在线",
+      "offline": "离线",
       "you": "(you)"
     },
     "createProject": {
-      "titleRequired": "Room title is required",
-      "created": "Project created successfully!",
-      "failed": "Failed to create room",
-      "title": "Create New Project",
-      "description": "Start a new project to build your product with AI.",
-      "projectName": "Project Name",
-      "projectNamePlaceholder": "Enter project name",
-      "teamSize": "Team Size",
-      "cancel": "Cancel",
-      "creating": "Creating...",
-      "createButton": "Create Project"
+      "titleRequired": "请填写房间标题",
+      "created": "项目创建成功！",
+      "failed": "房间创建失败",
+      "title": "创建新项目",
+      "description": "开启新项目，借助 AI 打造你的产品。",
+      "projectName": "项目名称",
+      "projectNamePlaceholder": "输入项目名称",
+      "teamSize": "团队规模",
+      "cancel": "取消",
+      "creating": "创建中…",
+      "createButton": "创建项目"
     }
   },
   "whatsNew": {
-    "trigger": "What's New",
-    "title": "What's New in Coasty",
-    "updateCount": "{count} updates",
+    "trigger": "最新动态",
+    "title": "Coasty 最新动态",
+    "updateCount": "{count} 项更新",
     "tagNew": "New",
-    "tagUpdate": "Update",
+    "tagUpdate": "更新",
     "tagFix": "Fix",
-    "stayTuned": "Stay tuned for more updates",
-    "tagline": "Your AI employee that collaborates with everyone"
+    "stayTuned": "敬请关注更多更新",
+    "tagline": "与每个人协作的 AI 员工"
   },
   "feedbackForm": {
     "ratings": {
       "bad": "Bad",
       "okay": "Okay",
       "good": "Good",
-      "amazing": "Amazing"
+      "amazing": "非常棒"
     },
-    "loginRequired": "Please login to submit feedback",
-    "alreadySubmitted": "You already submitted feedback for this",
-    "thankYou": "Thank you for your feedback!",
-    "creditsEarned": "+{credits} credits earned",
-    "helpImprove": "Your input helps us improve Coasty.",
-    "howsExperience": "How's your experience?",
+    "loginRequired": "请先登录后再提交反馈",
+    "alreadySubmitted": "你已就此提交过反馈",
+    "thankYou": "感谢你的反馈！",
+    "creditsEarned": "已获得 +{credits} 积分",
+    "helpImprove": "你的反馈帮助我们让 Coasty 变得更好。",
+    "howsExperience": "你的体验如何？",
     "plusOne": "+1",
-    "tellMore": "Tell us more",
+    "tellMore": "告诉我们更多",
     "plusFive": "+5",
-    "placeholder": "What's working well? What could improve?",
-    "cancel": "Cancel",
-    "sending": "Sending...",
+    "placeholder": "哪些做得好？哪些可以改进？",
+    "cancel": "取消",
+    "sending": "发送中…",
     "send": "Send"
   },
   "scheduleDialog": {
-    "selectWorkstation": "Please select a workstation",
-    "enterCron": "Please enter a cron expression",
-    "hireFailed": "Failed to hire employee",
-    "removeFailed": "Failed to remove employee",
-    "editEmployee": "Edit Employee",
-    "configureEmployee": "Configure Employee",
-    "editDescription": "Update schedule, workstation, or instructions",
-    "configureDescription": "Set up an AI employee for this chat",
-    "loading": "Loading configuration...",
+    "selectWorkstation": "请选择一台工作站",
+    "enterCron": "请输入 cron 表达式",
+    "hireFailed": "雇佣员工失败",
+    "removeFailed": "移除员工失败",
+    "editEmployee": "编辑员工",
+    "configureEmployee": "配置员工",
+    "editDescription": "更新计划、工作站或指令",
+    "configureDescription": "为该对话配置一名 AI 员工",
+    "loading": "正在加载配置…",
     "name": "Name",
-    "employeeName": "Employee name"
+    "employeeName": "员工名称"
   },
   "deleteChat": {
-    "title": "Delete chat?",
-    "description": "This will delete \"{chatTitle}\"",
-    "cancel": "Cancel",
-    "delete": "Delete"
+    "title": "删除对话？",
+    "description": "此操作将删除「{chatTitle}」",
+    "cancel": "取消",
+    "delete": "删除"
   },
   "paymentHandler": {
-    "success": "Payment successful! Your credits have been added.",
-    "canceled": "Payment was canceled. No charges were made."
+    "success": "支付成功！积分已添加到你的账户。",
+    "canceled": "支付已取消，未产生任何费用。"
   },
   "machineSettings": {
-    "generalSettings": "General Settings",
+    "generalSettings": "通用设置",
     "generalDescription": "配置基本电脑设置",
     "displayName": "显示名称",
     "defaultName": "我的电脑",
-    "saveChanges": "Save Changes",
-    "security": "Security",
-    "securityDescription": "Security and access settings",
-    "sshAuth": "SSH Authentication",
-    "username": "Username:",
-    "keyPair": "Key Pair:",
-    "sshKeyDownloaded": "SSH key downloaded",
-    "sshKeyFailed": "Failed to download SSH key",
-    "downloadSshKey": "Download SSH Key",
-    "vncPassword": "VNC Password",
+    "saveChanges": "保存更改",
+    "security": "安全",
+    "securityDescription": "安全与访问设置",
+    "sshAuth": "SSH 认证",
+    "username": "用户名：",
+    "keyPair": "密钥对：",
+    "sshKeyDownloaded": "SSH 密钥已下载",
+    "sshKeyFailed": "下载 SSH 密钥失败",
+    "downloadSshKey": "下载 SSH 密钥",
+    "vncPassword": "VNC 密码",
     "vncPasswordHint": "连接到电脑需要此密码"
   },
   "referralPopup": {
-    "shareMessage": "Hey, I've been using Coasty and it's pretty cool. It's an AI that can actually use a computer for you. Like browsing, clicking, typing, all of it. Try it with my link and we both get free credits!",
+    "shareMessage": "嘿，我最近在用 Coasty，挺酷的。是个能真正替你操作电脑的 AI，浏览、点击、输入，全都能搞定。用我的链接试试看，咱俩都能领免费积分！",
     "socialLabels": {
       "x": "X",
       "linkedin": "LinkedIn",
@@ -2921,44 +2921,44 @@
       "reddit": "Reddit",
       "email": "Email"
     },
-    "emailSubject": "Check out this AI tool",
+    "emailSubject": "看看这个 AI 工具",
     "timeAgo": {
-      "justNow": "just now",
-      "minutesAgo": "{minutes}m ago",
-      "hoursAgo": "{hours}h ago",
-      "daysAgo": "{days}d ago",
-      "monthsAgo": "{months}mo ago"
+      "justNow": "刚刚",
+      "minutesAgo": "{minutes} 分钟前",
+      "hoursAgo": "{hours} 小时前",
+      "daysAgo": "{days} 天前",
+      "monthsAgo": "{months} 个月前"
     },
-    "linkCopied": "Referral link copied!",
-    "headline": "Good friends share memes. Great friends share AI agents.",
-    "subheadline": "You both get {credits} free credits when your friend joins.",
-    "yourLink": "Your referral link",
-    "shareDirectly": "Share directly",
-    "yourReferrals": "Your referrals",
-    "referralCount": "{count} referral(s)",
-    "creditsEarned": "{credits} credits earned",
-    "invitedYou": "Invited you",
-    "joinedViaLink": "Joined via your link",
-    "noInvites": "No users invited yet",
-    "noInvitesHint": "Share your link and you both earn 50 credits"
+    "linkCopied": "推荐链接已复制！",
+    "headline": "好朋友互相分享梗图，真正的朋友互相分享 AI 智能体。",
+    "subheadline": "你的朋友加入时，你们俩都能获得 {credits} 个免费积分。",
+    "yourLink": "你的推荐链接",
+    "shareDirectly": "直接分享",
+    "yourReferrals": "你的推荐",
+    "referralCount": "{count} 位推荐人",
+    "creditsEarned": "已获得 {credits} 积分",
+    "invitedYou": "邀请了你",
+    "joinedViaLink": "通过你的链接加入",
+    "noInvites": "还未邀请任何用户",
+    "noInvitesHint": "分享你的链接，你们俩都能获得 50 积分"
   },
   "dialogPublish": {
-    "makePublic": "Make public",
-    "title": "Your conversation is now public!",
-    "description": "Anyone with the link can now view this conversation and may appear in community feeds, featured pages, or search results in the future.",
-    "viewPage": "View Page",
-    "shareOn": "Share on"
+    "makePublic": "公开分享",
+    "title": "你的对话已公开发布！",
+    "description": "任何拥有该链接的人都可以查看此对话，未来还可能出现在社区动态、精选页面或搜索结果中。",
+    "viewPage": "查看页面",
+    "shareOn": "分享至"
   },
   "aiCommandPanel": {
-    "title": "AI Control Panel",
-    "subtitle": "Describe what you want the AI to do",
-    "quickCommands": "Quick Commands",
-    "noActions": "No actions performed yet",
-    "success": "Success",
-    "failed": "Failed",
-    "placeholder": "Tell the AI what to do... (Ctrl+Enter to send)",
-    "executing": "Executing...",
-    "executeCommand": "Execute Command"
+    "title": "AI 控制面板",
+    "subtitle": "描述你希望 AI 做什么",
+    "quickCommands": "快捷指令",
+    "noActions": "暂未执行任何操作",
+    "success": "成功",
+    "failed": "失败",
+    "placeholder": "告诉 AI 该做什么……（Ctrl+Enter 发送）",
+    "executing": "执行中…",
+    "executeCommand": "执行指令"
   },
   "discover": {
     "badge": "社区",

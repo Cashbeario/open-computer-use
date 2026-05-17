@@ -786,7 +786,7 @@ function UnlimitedBalanceCard({ label }: { label: string }) {
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           {label}
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/60 backdrop-blur-sm ring-1 ring-amber-500/15 shrink-0">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
           <InfinityIcon
             className="h-3.5 w-3.5 text-amber-500/80"
             strokeWidth={2.25}
@@ -839,7 +839,7 @@ function UnlimitedSavingsCard({
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           Saved
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/60 backdrop-blur-sm ring-1 ring-amber-500/15 shrink-0">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
           <TrendUp size={14} weight="bold" className="text-foreground/40" />
         </div>
       </div>
@@ -890,7 +890,7 @@ function UnlimitedPlanCard({
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           Plan
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/60 backdrop-blur-sm ring-1 ring-amber-500/15 shrink-0">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
           <Crown size={14} weight="fill" className="text-amber-500/80" />
         </div>
       </div>
@@ -996,7 +996,7 @@ function UnlimitedHeroCard({
             full context, so the dollar amount stands alone.  Items-start
             keeps icons aligned with the eyebrow row across cells of
             uneven height. */}
-        <div className="relative grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 border-y border-border/30 bg-card/40 backdrop-blur-sm">
+        <div className="relative grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 border-y border-border/30 bg-background/75 backdrop-blur-md">
           {/* Renewal */}
           <div className="flex items-start gap-2.5 px-5 py-4 sm:px-6 min-w-0">
             <CalendarCheck size={13} weight="bold" className="text-muted-foreground/40 shrink-0 mt-[3px]" />

@@ -495,7 +495,10 @@ function StepCard({
   const agentAction = step.code ? extractAgentAction(step.code) : null
 
   return (
-    <div className={cn("group/step relative pb-1", hasScreenshot ? "pl-8" : "pl-6")}>
+    // Bottom padding intentionally omitted — the parent timeline uses a
+    // uniform `gap-y` to space adjacent items, so individual cards stay
+    // tight internally and breathing room lives at the seam between them.
+    <div className={cn("group/step relative", hasScreenshot ? "pl-8" : "pl-6")}>
       {hasScreenshot ? (
         <ScreenshotDot src={screenshot!} />
       ) : (
@@ -774,6 +777,88 @@ function ItemRenderer({
   }
 }
 
+// ── Live "still working" pulse ──
+//
+// Shown at the foot of the timeline while `isStreaming` is true, to signal
+// that the agent is still active between sections. The pulse hides itself
+// in any state where another live signal already exists (the
+// AwaitingHumanBanner has its own timer + resume button) or where work has
+// visibly concluded (status=completed, code-agent-done, summary). That
+// keeps the indicator from contradicting what the user just read.
+
+type ThinkingVisibility = "show" | "hidden"
+
+function shouldShowThinking(items: TopLevelItem[]): ThinkingVisibility {
+  if (items.length === 0) return "show"
+  const last = items[items.length - 1]
+  switch (last.kind) {
+    case "awaiting-human":
+    case "awaiting-human-timeout":
+      return "hidden"
+    case "status":
+      // Terminal — completed or error; either way the agent is done.
+      return "hidden"
+    case "code-agent-done":
+    case "code-agent-summary":
+      return "hidden"
+    default:
+      return "show"
+  }
+}
+
+function ThinkingPulse() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 3 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -2 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      role="status"
+      aria-live="polite"
+      aria-label="Agent is working"
+      className="relative pl-6 pt-2 pb-1"
+    >
+      {/* Soft halo — radiates outward in counterphase to the core dot so
+          the marker reads as alive without painting an aggressive ring. */}
+      <motion.span
+        aria-hidden="true"
+        className="absolute -left-[3px] top-[6px] size-[13px] rounded-full bg-foreground/15 blur-[1px]"
+        animate={{ scale: [0.7, 1.35, 0.7], opacity: [0.35, 0, 0.35] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+      />
+      {/* Core dot — sits centered over the dotted timeline line at
+          left-[2.5px]. Breathes scale + opacity to feel like a heartbeat. */}
+      <motion.span
+        aria-hidden="true"
+        className="absolute left-0 top-[9px] size-[7px] rounded-full bg-foreground/70"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.55, 0.95, 0.55] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div className="flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-foreground/55">
+        <span>Thinking</span>
+        {/* Three-dot wave — universal "in progress" affordance. Staggered
+            y-translate + opacity gives a gentle ripple rather than a
+            jittery flicker. */}
+        <span className="flex items-end gap-[3px] pb-[1px]">
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="size-[3px] rounded-full bg-foreground/45"
+              animate={{ y: [0, -2, 0], opacity: [0.4, 1, 0.4] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                delay: i * 0.18,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </span>
+      </div>
+    </motion.div>
+  )
+}
+
 // ── Screenshot extraction helper ──
 
 function toDataUri(raw: string): string | null {
@@ -859,6 +944,11 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
     return map
   }, [items, screenshots])
 
+  // Show the live "thinking" pulse only while streaming AND when no other
+  // signal is already covering the same ground — see shouldShowThinking
+  // for the corner cases (awaiting-human / status / done / summary).
+  const showThinking = isStreaming === true && shouldShowThinking(items) === "show"
+
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="relative">
@@ -872,15 +962,34 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
           }}
           aria-hidden="true"
         />
-        <div className="relative flex flex-col">
-          {items.map((item, i) => (
-            <ItemRenderer
-              key={i}
-              item={item}
-              screenshot={stepScreenshotMap.get(i)}
-              isStreaming={isStreaming}
-            />
-          ))}
+        {/* Generous vertical rhythm — 20px between every item. Each
+            point gets clear breathing room so the timeline reads as
+            distinct beats rather than a paragraph of activity. Per-item
+            internal padding stays tight; all the breath lives at the
+            seam between items. */}
+        <div className="relative flex flex-col gap-y-5">
+          {/* initial={false} → existing items on first mount (chat history
+              load) don't animate. New items appended during streaming get
+              the soft fade + 6px lift. Keyed by index because the items
+              array only ever appends — stable index = stable mount. */}
+          <AnimatePresence initial={false}>
+            {items.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <ItemRenderer
+                  item={item}
+                  screenshot={stepScreenshotMap.get(i)}
+                  isStreaming={isStreaming}
+                />
+              </motion.div>
+            ))}
+            {showThinking && <ThinkingPulse key="thinking-pulse" />}
+          </AnimatePresence>
         </div>
       </div>
     </div>

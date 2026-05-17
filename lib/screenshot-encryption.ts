@@ -125,6 +125,10 @@ export function maybeDecryptScreenshot(value: unknown): string | null {
  *
  * Tolerant to malformed input: non-arrays / non-objects pass through.
  */
+// Module-scoped flag: emit the "decrypt failed" diagnostic once per process so
+// CloudWatch picks up the env-mismatch signal without spamming on every reload.
+let _decryptFailureWarned = false
+
 export function decryptScreenshotsInParts<T = unknown>(parts: T): T {
   if (!Array.isArray(parts)) return parts
   let touched = false
@@ -139,6 +143,24 @@ export function decryptScreenshotsInParts<T = unknown>(parts: T): T {
     if (decrypted === null) {
       // Drop the frontendScreenshot; keep everything else so the tool-call
       // text + args + result still render.
+      //
+      // Logging note (2026-05-17 audit, SCREENSHOT-4): on the first decrypt
+      // failure of a process lifetime, emit one structured WARN so operators
+      // can see this in CloudWatch.  The previous silent-drop was the smoking
+      // gun for a class of "no screenshots after page reload" reports where
+      // `ENCRYPTION_KEY` between the Next.js process and the Python backend
+      // got out of sync.  We deliberately do NOT log per-row (could be
+      // thousands per page render after a key rotation) — one-shot is enough
+      // to surface the env-mismatch.
+      if (!_decryptFailureWarned) {
+        _decryptFailureWarned = true
+        console.warn(
+          "[screenshot-encryption] DECRYPT_FAILED — ENCRYPTION_KEY mismatch " +
+            "between Node and Python (or key unset / tampered ciphertext). " +
+            "Stripping `frontendScreenshot` from this part. " +
+            "Verify ENCRYPTION_KEY env var parity across services."
+        )
+      }
       const cleaned: Record<string, unknown> = {}
       for (const k of Object.keys(i)) {
         if (k !== "frontendScreenshot") cleaned[k] = i[k]

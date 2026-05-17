@@ -960,6 +960,59 @@ body.coasty-signing-out [data-sonner-toast] {
     transform: translateZ(0);
   }
 
+  /* ─── Unlimited-tier cinematic drift ────────────────────────────────────
+     Three looping keyframes used by app/components/effects/unlimited-smoke.tsx
+     to render a dark moody aurora (gold/wine/midnight) behind Unlimited
+     surfaces.  Very slow + small movements — the whole point is patient
+     ambient atmosphere, like watching dust suspended in golden hour light. */
+  @keyframes unlimited-drift-1 {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 0.55;
+    }
+    50% {
+      transform: translate3d(22px, -18px, 0) scale(1.05);
+      opacity: 0.72;
+    }
+  }
+  @keyframes unlimited-drift-2 {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translate3d(-26px, 20px, 0) scale(0.96);
+      opacity: 0.65;
+    }
+  }
+  @keyframes unlimited-drift-3 {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 0.48;
+    }
+    50% {
+      transform: translate3d(18px, 24px, 0) scale(1.04);
+      opacity: 0.62;
+    }
+  }
+  .animate-unlimited-drift-1 {
+    animation: unlimited-drift-1 64s ease-in-out infinite;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+  .animate-unlimited-drift-2 {
+    animation: unlimited-drift-2 78s ease-in-out infinite;
+    animation-delay: -20s;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+  .animate-unlimited-drift-3 {
+    animation: unlimited-drift-3 56s ease-in-out infinite;
+    animation-delay: -36s;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
 }
 
 code {

@@ -79,15 +79,25 @@ export function MessageList({ messages, isStreaming }: Props) {
         )
       })()}
 
-      {isStreaming && !awaitingHuman && (
-        <div className="flex items-center gap-2 text-neutral-500 text-sm pl-4">
-          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          Processing...
-        </div>
-      )}
+      {/* Bottom-of-list streaming indicator. Suppressed when the last
+          assistant message has CUA sections — that timeline draws its
+          own in-flow ThinkingPulse at the foot, so showing this one
+          too would double up. Plain-text streaming (no CUA tags) still
+          gets the generic spinner here. */}
+      {isStreaming && !awaitingHuman && (() => {
+        const last = messages[messages.length - 1]
+        const cuaCoversIt = last?.role === 'assistant' && last.content && hasCuaSections(last.content)
+        if (cuaCoversIt) return null
+        return (
+          <div className="flex items-center gap-2 text-neutral-500 text-sm pl-4">
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Processing...
+          </div>
+        )
+      })()}
 
       <div ref={bottomRef} />
     </div>

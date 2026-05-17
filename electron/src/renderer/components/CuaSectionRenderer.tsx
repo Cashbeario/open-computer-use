@@ -506,7 +506,10 @@ function StepCard({
   const agentAction = step.code ? extractAgentAction(step.code) : null
 
   return (
-    <div className={cn('group/step relative pb-1', hasScreenshot ? 'pl-8' : 'pl-6')}>
+    // Bottom padding intentionally omitted — the parent timeline uses a
+    // uniform `gap-y` to space adjacent items, so individual cards stay
+    // tight internally and breathing room lives at the seam between them.
+    <div className={cn('group/step relative', hasScreenshot ? 'pl-8' : 'pl-6')}>
       {hasScreenshot ? (
         <ScreenshotDot src={screenshot!} />
       ) : (
@@ -781,6 +784,74 @@ function ItemRenderer({
   }
 }
 
+// ── Live "still working" pulse ──
+//
+// Shown at the foot of the timeline while `isStreaming` is true, to signal
+// that the agent is still active between sections. The pulse hides itself
+// in any state where another live signal already exists (the
+// AwaitingHumanBanner has its own timer + resume button) or where work has
+// visibly concluded (status=completed, code-agent-done, summary). That
+// keeps the indicator from contradicting what the user just read.
+
+function shouldShowThinking(items: TopLevelItem[]): boolean {
+  if (items.length === 0) return true
+  const last = items[items.length - 1]
+  switch (last.kind) {
+    case 'awaiting-human':
+    case 'awaiting-human-timeout':
+    case 'status':
+    case 'code-agent-done':
+    case 'code-agent-summary':
+      return false
+    default:
+      return true
+  }
+}
+
+function ThinkingPulse() {
+  // CSS-driven (no framer-motion in the electron renderer). Keyframes
+  // are defined in styles/globals.css under "CUA 'thinking' pulse" so
+  // they auto-respect the prefers-reduced-motion fallback there.
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Agent is working"
+      className="relative pl-6 pt-2 pb-1 thinking-pulse-enter"
+    >
+      {/* Soft halo — radiates outward in counterphase to the core dot. */}
+      <span
+        aria-hidden="true"
+        className="thinking-halo absolute -left-[3px] top-[6px] w-[13px] h-[13px] rounded-full bg-white/15 blur-[1px]"
+      />
+      {/* Core dot — sits centered over the dotted timeline line. */}
+      <span
+        aria-hidden="true"
+        className="thinking-dot absolute left-0 top-[9px] w-[7px] h-[7px] rounded-full bg-neutral-300/70"
+      />
+      <div className="flex items-center gap-1.5 text-[12.5px] font-medium tracking-tight text-neutral-400/80">
+        <span>Thinking</span>
+        {/* Three-dot wave — universal "in progress" affordance.
+            Staggered animation-delay gives a gentle ripple. */}
+        <span className="flex items-end gap-[3px] pb-[1px]">
+          <span
+            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
+            style={{ animationDelay: '0ms' }}
+          />
+          <span
+            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
+            style={{ animationDelay: '180ms' }}
+          />
+          <span
+            className="thinking-wave w-[3px] h-[3px] rounded-full bg-neutral-400/60"
+            style={{ animationDelay: '360ms' }}
+          />
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ── Exported ──
 
 export function hasCuaSections(content: string): boolean {
@@ -819,6 +890,11 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
     return map
   }, [items, screenshots])
 
+  // Show the live "thinking" pulse only while streaming AND when no other
+  // signal is already covering the same ground — see shouldShowThinking
+  // for the corner cases (awaiting-human / status / done / summary).
+  const showThinking = isStreaming === true && shouldShowThinking(items)
+
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="relative">
@@ -832,16 +908,26 @@ export const CuaSectionRenderer = memo(function CuaSectionRenderer({
           }}
           aria-hidden="true"
         />
-        <div className="relative flex flex-col">
+        {/* Generous vertical rhythm — 20px between every item. Each
+            point gets clear breathing room so the timeline reads as
+            distinct beats rather than a paragraph of activity. Per-item
+            internal padding stays tight; all the breath lives at the
+            seam between items. */}
+        <div className="relative flex flex-col gap-y-5">
+          {/* Each item gets the cua-item-in fade + lift on mount. CSS
+              animations don't replay on re-render, so existing items
+              stay still and only newly streamed items animate. */}
           {items.map((item, i) => (
-            <ItemRenderer
-              key={i}
-              item={item}
-              screenshot={stepScreenshotMap.get(i)}
-              isStreaming={isStreaming}
-              onResumeHuman={onResumeHuman}
-            />
+            <div key={i} className="cua-item-in">
+              <ItemRenderer
+                item={item}
+                screenshot={stepScreenshotMap.get(i)}
+                isStreaming={isStreaming}
+                onResumeHuman={onResumeHuman}
+              />
+            </div>
           ))}
+          {showThinking && <ThinkingPulse />}
         </div>
       </div>
     </div>

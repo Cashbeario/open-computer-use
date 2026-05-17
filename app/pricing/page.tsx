@@ -713,7 +713,9 @@ export default function PricingPage() {
               <div className={cn(
                 "relative rounded-2xl border overflow-hidden isolate",
                 plan.id === "unlimited"
-                  ? "border-amber-500/40 shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(245,158,11,0.45)]"
+                  // Neutral foreground border — drama comes from the smoke
+                  // inside and the dark CTA, not from a colored frame.
+                  ? "border-foreground/30 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)]"
                   : plan.highlighted
                     ? "border-primary/30 bg-gradient-to-b from-primary/[0.04] to-transparent"
                     : "border-border/60 bg-card/40"
@@ -726,9 +728,12 @@ export default function PricingPage() {
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
                       {plan.id === "unlimited" && (
-                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1">
-                          <InfinityIcon className="h-3 w-3 text-amber-600 dark:text-amber-400" strokeWidth={2.5} />
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700 dark:text-amber-400">
+                        // Neutral pill — same chrome as other badges on the
+                        // site.  The smoke + dark CTA carry the "premium" cue;
+                        // no additional amber tint here.
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-foreground/[0.04] px-2.5 py-1">
+                          <InfinityIcon className="h-3 w-3 text-foreground/70" strokeWidth={2.5} />
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
                             {plan.badge ?? "Best Value"}
                           </span>
                         </div>
@@ -746,14 +751,15 @@ export default function PricingPage() {
                         <span className="text-lg text-muted-foreground">{t("perMonth")}</span>
                       </div>
                       {plan.id === "unlimited" && (
-                        <p className="mt-2 text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
+                        <p className="mt-2 text-xs text-muted-foreground/75 font-medium">
                           No usage caps · No overages · Run agents as much as you want
                         </p>
                       )}
                     </div>
                     {plan.id === "unlimited" ? (
+                      // Dark CTA — solid foreground, no amber.
                       <Button
-                        className="h-11 px-8 flex-shrink-0 bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-[0_8px_24px_-8px_rgba(245,158,11,0.55)]"
+                        className="h-11 px-8 flex-shrink-0 bg-foreground text-background hover:bg-foreground/90 border-0"
                         asChild
                       >
                         <Link href="/auth">{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -771,7 +777,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Split: features left, visual right */}
-                <div className="relative flex flex-col lg:flex-row bg-card/30 backdrop-blur-[1px]">
+                <div className="relative flex flex-col lg:flex-row bg-background/75 backdrop-blur-md">
                   {/* Feature list — left */}
                   <div className="flex-1 p-4 sm:p-6 lg:border-r border-border/30">
                     <div className="space-y-0.5">
@@ -834,7 +840,7 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                <div className="relative px-6 sm:px-8 py-3 border-t border-border/30 text-center bg-card/30 backdrop-blur-[1px]">
+                <div className="relative px-6 sm:px-8 py-3 border-t border-border/30 text-center bg-background/75 backdrop-blur-md">
                   <p className="text-xs text-muted-foreground">
                     {plan.price === 0 ? t("footer.noCreditCardRequired") : t("footer.cancelAnytimeNoContracts")}
                   </p>

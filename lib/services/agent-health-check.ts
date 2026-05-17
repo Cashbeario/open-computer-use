@@ -359,20 +359,23 @@ async function restartAgentViaSsm(instanceId: string): Promise<void> {
   // Dynamic import: only loaded when actually needed so the SDK doesn't
   // bloat the bundle for routes that never run this code path.
   //
-  // Using a `string` indirection on the module specifier so TypeScript skips
-  // type-resolution at compile time. The SSM SDK was added to package.json
-  // alongside this file but the @types may not be installed in every CI lane
-  // (the legacy `npm ci` job intentionally skips devDependencies). The lazy
-  // string import keeps tsc green; runtime resolution proceeds normally.
-  // Once `npm install` has run with the SSM SDK in dependencies this is
-  // identical to a regular `await import("@aws-sdk/client-ssm")`.
-  const moduleId = "@aws-sdk/client-ssm";
-  const { SSMClient, SendCommandCommand } = (await import(
-    /* @vite-ignore */ moduleId
-  )) as {
+  // IMPORTANT: use a **literal** string for the module specifier, NOT a
+  // string variable.  An earlier revision did `const moduleId =
+  // "@aws-sdk/client-ssm"; await import(moduleId)` to dodge TS type
+  // resolution, but that bypasses vitest's `vi.mock("@aws-sdk/client-ssm",
+  // …)` hoisting — vitest can only intercept module specifiers it can
+  // resolve statically.  Under fake timers + the un-mocked SDK, the
+  // SDK's internal HTTP retry uses setTimeout (now faked) and `client.send`
+  // hangs forever — exactly what the 2026-05-17 test timeout exposed.
+  // Literal-string dynamic import keeps the lazy-load benefit AND lets
+  // vitest hoist the mock cleanly.  The kept-on-one-line form is also
+  // pinned by `tests/lib/agent-health-check.test.ts` ("imports SSM SDK
+  // + EC2 service lazily" — regex match against the literal source).
+  const mod = (await import("@aws-sdk/client-ssm")) as unknown as {
     SSMClient: new (cfg: any) => { send: (cmd: any) => Promise<unknown> };
     SendCommandCommand: new (input: any) => unknown;
   };
+  const { SSMClient, SendCommandCommand } = mod;
 
   const region = process.env.AWS_REGION || "us-east-1";
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;

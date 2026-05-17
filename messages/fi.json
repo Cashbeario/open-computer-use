@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Rajaton raskas automaatio",
         "cta": "Hanki Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Ei luottorajoja — koskaan",
+        "cta": "Valitse Unlimited",
+        "badge": "Paras tarjous"
       }
     },
     "vmTemporary": "1 väliaikainen VM (2 t)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Sama työ maksaa {oldPrice} manuaalisesti tehtynä",
       "description": "Virtuaaliassistentti maksaa $2 000–$4 000/kk. Osa-aikainen työntekijä maksaa enemmän. Coasty tekee saman työn 24/7 alkaen $0 — täydellisellä johdonmukaisuudella, kattavalla tarkastusjäljellä ja nollakoulutusajalla."
-    }
+    },
+    "unlimitedCredits": "Rajattomat luotot"
   },
   "faq": {
     "title": "Usein kysytyt kysymykset",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Rajaton raskas automaatio"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Ei luottorajoja — koskaan",
+        "badge": "Paras tarjous"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Rajoittamaton raskas automaatio",
         "cta": "Hanki Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Ei luottorajoja — koskaan",
+        "cta": "Valitse Unlimited",
+        "badge": "Paras tarjous"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 aina paalla",
           "feature": "SLA-takuu"
+        },
+        "unlimited": {
+          "credits": "Rajaton",
+          "machines": "2 aina päällä",
+          "feature": "Paras tarjous · Ei rajoja"
         }
       },
       "perMonth": "{price}/kk",

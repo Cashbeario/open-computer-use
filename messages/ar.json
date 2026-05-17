@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "أتمتة ثقيلة غير محدودة",
         "cta": "احصل على Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "بلا حدود للأرصدة — على الإطلاق",
+        "cta": "اشترك في Unlimited",
+        "badge": "أفضل قيمة"
       }
     },
     "vmTemporary": "1 VM مؤقت (ساعتان)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "نفس العمل يكلف {oldPrice} بالعمالة اليدوية",
       "description": "مساعد افتراضي يكلف $2,000–$4,000/شهر. توظيف جزئي يكلف أكثر. Coasty ينجز نفس العمل 24/7 بدءاً من $0 — بدقة تامة، سجلات مراجعة كاملة، وبدون وقت تدريب."
-    }
+    },
+    "unlimitedCredits": "أرصدة غير محدودة"
   },
   "faq": {
     "title": "الأسئلة الشائعة",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "أتمتة ثقيلة غير محدودة"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "بلا حدود للأرصدة — على الإطلاق",
+        "badge": "أفضل قيمة"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "أتمتة ثقيلة غير محدودة",
         "cta": "احصل على Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "بلا حدود للأرصدة — على الإطلاق",
+        "cta": "اشترك في Unlimited",
+        "badge": "أفضل قيمة"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 دائم",
           "feature": "ضمان SLA"
+        },
+        "unlimited": {
+          "credits": "غير محدود",
+          "machines": "اثنتان دائمتا التشغيل",
+          "feature": "أفضل قيمة · بلا قيود"
         }
       },
       "perMonth": "{price}/شهر",

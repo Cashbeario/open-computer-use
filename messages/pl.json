@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Nieograniczona intensywna automatyzacja",
         "cta": "Wybierz Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Bez limitów kredytów — nigdy",
+        "cta": "Wybierz Unlimited",
+        "badge": "Najlepsza wartość"
       }
     },
     "vmTemporary": "1 tymczasowa VM (2 godz.)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Ta sama praca kosztuje {oldPrice} przy pracy ręcznej",
       "description": "Wirtualny asystent kosztuje $2 000–$4 000/mies. Pracownik na część etatu kosztuje więcej. Coasty wykonuje tę samą pracę 24/7 od $0 — z idealną spójnością, pełnym śladem audytu i zerowym czasem szkolenia."
-    }
+    },
+    "unlimitedCredits": "Nielimitowane kredyty"
   },
   "faq": {
     "title": "Często zadawane pytania",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Nieograniczona intensywna automatyzacja"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Bez limitów kredytów — nigdy",
+        "badge": "Najlepsza wartość"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Nieograniczona ciężka automatyzacja",
         "cta": "Wybierz Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Bez limitów kredytów — nigdy",
+        "cta": "Wybierz Unlimited",
+        "badge": "Najlepsza wartość"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 zawsze włączone",
           "feature": "Gwarancja SLA"
+        },
+        "unlimited": {
+          "credits": "Bez limitu",
+          "machines": "2 zawsze aktywne",
+          "feature": "Najlepsza wartość · Bez ograniczeń"
         }
       },
       "perMonth": "{price}/mies.",

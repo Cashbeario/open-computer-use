@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "無制限のヘビー自動化",
         "cta": "Proを始める"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "クレジット制限なし — 永遠に",
+        "cta": "Unlimited を選択",
+        "badge": "ベストバリュー"
       }
     },
     "vmTemporary": "一時VM 1台（2時間）",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "同じ作業を手動で行うと{oldPrice}かかります",
       "description": "バーチャルアシスタントの費用は月額$2,000〜$4,000。パートタイム雇用はさらに高額。Coastyは同じ作業を$0から24時間365日実行 — 完璧な一貫性、完全な監査証跡、トレーニング時間ゼロ。"
-    }
+    },
+    "unlimitedCredits": "無制限クレジット"
   },
   "faq": {
     "title": "よくある質問",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "無制限のヘビー自動化"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "クレジット制限なし — 永遠に",
+        "badge": "ベストバリュー"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "無制限のヘビー自動化",
         "cta": "Proを取得"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "クレジット制限なし — 永遠に",
+        "cta": "Unlimited を選択",
+        "badge": "ベストバリュー"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3台（常時稼働）",
           "feature": "SLA保証"
+        },
+        "unlimited": {
+          "credits": "無制限",
+          "machines": "2台 常時稼働",
+          "feature": "ベストバリュー · 上限なし"
         }
       },
       "perMonth": "{price}/月",

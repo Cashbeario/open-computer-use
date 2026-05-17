@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "אוטומציה כבדה ללא הגבלה",
         "cta": "קבל Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "ללא הגבלת קרדיט — לעולם",
+        "cta": "בחרו ב-Unlimited",
+        "badge": "התמורה הטובה ביותר"
       }
     },
     "vmTemporary": "VM זמני 1 (שעתיים)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "אותה עבודה עולה {oldPrice} בעבודה ידנית",
       "description": "עוזר וירטואלי עולה $2,000–$4,000/חודש. עובד חלקי עולה יותר. Coasty עושה את אותה עבודה 24/7 החל מ-$0 — עם עקביות מושלמת, מעקב ביקורת מלא ואפס זמן הכשרה."
-    }
+    },
+    "unlimitedCredits": "קרדיטים ללא הגבלה"
   },
   "faq": {
     "title": "שאלות נפוצות",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "אוטומציה כבדה ללא הגבלה"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "ללא הגבלת קרדיט — לעולם",
+        "badge": "התמורה הטובה ביותר"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "אוטומציה כבדה ללא הגבלה",
         "cta": "קבל Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "ללא הגבלת קרדיט — לעולם",
+        "cta": "בחרו ב-Unlimited",
+        "badge": "התמורה הטובה ביותר"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 תמיד פעילים",
           "feature": "ערבות SLA"
+        },
+        "unlimited": {
+          "credits": "ללא הגבלה",
+          "machines": "2 פעילות תמיד",
+          "feature": "הטוב ביותר · ללא הגבלות"
         }
       },
       "perMonth": "{price}/חודש",

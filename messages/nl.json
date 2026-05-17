@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Onbeperkte zware automatisering",
         "cta": "Neem Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Geen creditlimieten — nooit",
+        "cta": "Kies Unlimited",
+        "badge": "Beste waarde"
       }
     },
     "vmTemporary": "1 tijdelijke VM (2 uur)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Hetzelfde werk kost {oldPrice} met handmatige arbeid",
       "description": "Een virtuele assistent kost $2.000–$4.000/maand. Een parttime kracht kost meer. Coasty doet hetzelfde werk 24/7 vanaf $0 — met perfecte consistentie, volledige audittrails en nul trainingstijd."
-    }
+    },
+    "unlimitedCredits": "Onbeperkte credits"
   },
   "faq": {
     "title": "Veelgestelde vragen",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Onbeperkte zware automatisering"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Geen creditlimieten — nooit",
+        "badge": "Beste waarde"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Onbeperkte zware automatisering",
         "cta": "Kies Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Geen creditlimieten — nooit",
+        "cta": "Kies Unlimited",
+        "badge": "Beste waarde"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1.500",
           "machines": "3 altijd-aan",
           "feature": "SLA-garantie"
+        },
+        "unlimited": {
+          "credits": "Onbeperkt",
+          "machines": "2 altijd actief",
+          "feature": "Beste waarde · Geen limieten"
         }
       },
       "perMonth": "{price}/maand",

@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Automatizare intensa nelimitata",
         "cta": "Alege Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Fără limite de credite — niciodată",
+        "cta": "Alege Unlimited",
+        "badge": "Cea mai bună ofertă"
       }
     },
     "vmTemporary": "1 VM temporar (2 ore)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Aceeasi munca costa {oldPrice} cu forta de munca manuala",
       "description": "Un asistent virtual costa $2.000–$4.000/luna. Un angajat part-time costa mai mult. Coasty face aceeasi munca 24/7 incepand de la $0 — cu consistenta perfecta, trasee complete de audit si zero timp de instruire."
-    }
+    },
+    "unlimitedCredits": "Credite nelimitate"
   },
   "faq": {
     "title": "Intrebari frecvente",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Automatizare intensiva nelimitata"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Fără limite de credite — niciodată",
+        "badge": "Cea mai bună ofertă"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Automatizare intensivă nelimitată",
         "cta": "Alege Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Fără limite de credite — niciodată",
+        "cta": "Alege Unlimited",
+        "badge": "Cea mai bună ofertă"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 permanent active",
           "feature": "Garanție SLA"
+        },
+        "unlimited": {
+          "credits": "Nelimitat",
+          "machines": "2 mereu active",
+          "feature": "Cea mai bună · Fără limite"
         }
       },
       "perMonth": "{price}/lună",

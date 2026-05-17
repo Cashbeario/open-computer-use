@@ -12,6 +12,7 @@ import {
   IconCompass,
   IconCreditCard,
   IconGift,
+  IconInfinity,
   IconLoader2,
   IconLogout,
   IconMessage2,
@@ -39,6 +40,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useCredits } from "@/lib/hooks/use-credits"
+import { useSubscription } from "@/lib/hooks/use-subscription"
 import { useUser } from "@/lib/user-store/provider"
 import { createClient } from "@/lib/supabase/client"
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler"
@@ -1132,10 +1134,14 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
   const t = useTranslations("sidebar")
   const openAccountDialog = useAccountDialog((s) => s.open)
   const { credits } = useCredits()
+  const { isUnlimitedPlan } = useSubscription()
 
   const balance = credits?.balance ?? 0
   const totalPurchased = credits?.total_purchased ?? 0
-  const health = getHealth(balance, totalPurchased)
+  // For unlimited plans, force "healthy" — the sentinel balance would
+  // always read healthy anyway, but the visual must render "Unlimited"
+  // (with the amber accent) instead of a number.
+  const health = isUnlimitedPlan ? "healthy" : getHealth(balance, totalPurchased)
   const c = HEALTH[health]
 
   const displayName = user?.display_name || user?.email?.split("@")[0] || t("user")
@@ -1183,8 +1189,17 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
               </button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={8}>
-              <span className="font-semibold tabular-nums">{balance.toLocaleString()}</span>
-              <span className="text-muted-foreground ml-1">{t("credits.creditsLeft")}</span>
+              {isUnlimitedPlan ? (
+                <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                  <IconInfinity size={12} stroke={2.5} />
+                  Unlimited credits
+                </span>
+              ) : (
+                <>
+                  <span className="font-semibold tabular-nums">{balance.toLocaleString()}</span>
+                  <span className="text-muted-foreground ml-1">{t("credits.creditsLeft")}</span>
+                </>
+              )}
             </TooltipContent>
           </Tooltip>
         )}
@@ -1243,23 +1258,32 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
         >
           <div className="flex items-baseline justify-between mb-[5px]">
             <span className="text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/35">
-              {t("credits.remaining")}
+              {isUnlimitedPlan ? "Plan" : t("credits.remaining")}
             </span>
-            <span className={cn("h-1 w-1 rounded-full transition-colors", c.dot)} />
+            <span className={cn("h-1 w-1 rounded-full transition-colors", isUnlimitedPlan ? "bg-amber-500 dark:bg-amber-400" : c.dot)} />
           </div>
           <div className="flex items-baseline gap-2">
-            <span
-              className={cn(
-                "text-[28px] font-semibold tabular-nums tracking-[-0.025em] leading-none transition-colors",
-                c.text
-              )}
-            >
-              {balance.toLocaleString()}
-            </span>
-            {totalPurchased > 0 && totalPurchased > balance && (
-              <span className="text-[10px] text-foreground/30 tabular-nums leading-none">
-                / {totalPurchased.toLocaleString()}
+            {isUnlimitedPlan ? (
+              <span className="inline-flex items-center gap-1.5 text-[24px] font-semibold tracking-[-0.025em] leading-none text-amber-600 dark:text-amber-400">
+                <IconInfinity size={26} stroke={2.4} />
+                <span>Unlimited</span>
               </span>
+            ) : (
+              <>
+                <span
+                  className={cn(
+                    "text-[28px] font-semibold tabular-nums tracking-[-0.025em] leading-none transition-colors",
+                    c.text
+                  )}
+                >
+                  {balance.toLocaleString()}
+                </span>
+                {totalPurchased > 0 && totalPurchased > balance && (
+                  <span className="text-[10px] text-foreground/30 tabular-nums leading-none">
+                    / {totalPurchased.toLocaleString()}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </button>

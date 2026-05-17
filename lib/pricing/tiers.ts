@@ -36,6 +36,7 @@ export type SubscriptionTierId =
   | "starter"
   | "plus"
   | "pro"
+  | "unlimited"
   | "enterprise";
 
 /** Backend / API enforcement tier — what `/v1/*` endpoints honor for rate
@@ -70,7 +71,8 @@ export interface SubscriptionTier {
     | "STRIPE_PRICE_LITE"
     | "STRIPE_PRICE_STARTER"
     | "STRIPE_PRICE_PLUS"
-    | "STRIPE_PRICE_PRO";
+    | "STRIPE_PRICE_PRO"
+    | "STRIPE_PRICE_UNLIMITED";
   /** Stable, ISO-8601 last-update timestamp for cache invalidation */
   updatedAt: string;
 }
@@ -159,6 +161,25 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     updatedAt: PRICING_UPDATED_AT,
   },
   {
+    id: "unlimited",
+    name: "Unlimited",
+    priceUSD: 249,
+    // Sentinel for "unlimited credits".  UI must render the literal string
+    // "Unlimited" when tier === "unlimited" — never display this number.
+    // Backend guard clauses (Phase 5) skip the deduct-credits RPC for this
+    // tier so balance never actually drains.
+    creditsPerMonth: 999_999_999,
+    pricePerCreditUSD: null,
+    apiTier: "professional",
+    machinesIncluded: 2,
+    swarmAgentsLimit: 6,
+    scheduleLimit: 10,
+    visibleInPricingGrid: true,
+    highlighted: false,
+    stripePriceEnvVar: "STRIPE_PRICE_UNLIMITED",
+    updatedAt: PRICING_UPDATED_AT,
+  },
+  {
     id: "enterprise",
     name: "Enterprise",
     priceUSD: null,
@@ -185,6 +206,7 @@ export const SUBSCRIPTION_TO_API_TIER: Record<SubscriptionTierId, ApiTier> = {
   starter: "starter",
   plus: "professional",
   pro: "professional",
+  unlimited: "professional",
   enterprise: "enterprise",
 };
 

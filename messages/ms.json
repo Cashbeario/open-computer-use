@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Automasi berat tanpa had",
         "cta": "Dapatkan Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Tiada had kredit — selamanya",
+        "cta": "Pilih Unlimited",
+        "badge": "Nilai terbaik"
       }
     },
     "vmTemporary": "1 VM sementara (2 jam)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Kerja yang sama berharga {oldPrice} dengan tenaga kerja manual",
       "description": "Pembantu maya berharga $2,000–$4,000/bulan. Pekerja separuh masa lebih mahal. Coasty melakukan kerja yang sama 24/7 bermula pada $0 — dengan konsistensi sempurna, jejak audit penuh, dan sifar masa latihan."
-    }
+    },
+    "unlimitedCredits": "Kredit tanpa had"
   },
   "faq": {
     "title": "Soalan lazim",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Automasi berat tanpa had"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Tiada had kredit — selamanya",
+        "badge": "Nilai terbaik"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Automasi berat tanpa had",
         "cta": "Dapatkan Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Tiada had kredit — selamanya",
+        "cta": "Pilih Unlimited",
+        "badge": "Nilai terbaik"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 sentiasa aktif",
           "feature": "Jaminan SLA"
+        },
+        "unlimited": {
+          "credits": "Tanpa Had",
+          "machines": "2 sentiasa hidup",
+          "feature": "Nilai terbaik · Tiada had"
         }
       },
       "perMonth": "{price}/bln",

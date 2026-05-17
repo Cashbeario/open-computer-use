@@ -173,29 +173,39 @@ export default async function RootLayout({
     }
   }
   const purchasableTiers = VISIBLE_TIERS.filter(t => t.priceUSD !== null)
-  const tierOffers = purchasableTiers.map(tier => ({
-    "@type": "Offer",
-    "name": `${tier.name} Plan`,
-    "price": String(tier.priceUSD),
-    "priceCurrency": "USD",
-    "priceSpecification": {
-      "@type": "UnitPriceSpecification",
-      "price": tier.priceUSD,
+  // Omit eligibleQuantity for the "unlimited" tier — its sentinel credit
+  // value (999_999_999) would otherwise leak as a structured-data spam
+  // signal to crawlers. Use a description field instead.
+  const tierOffers = purchasableTiers.map(tier => {
+    const isUnlimitedTier = tier.id === "unlimited"
+    return {
+      "@type": "Offer",
+      "name": `${tier.name} Plan`,
+      "price": String(tier.priceUSD),
       "priceCurrency": "USD",
-      "billingDuration": "P1M",
-      "billingIncrement": 1
-    },
-    "category": "subscription",
-    "eligibleQuantity": {
-      "@type": "QuantitativeValue",
-      "value": tier.creditsPerMonth,
-      "unitText": "credits/month"
-    },
-    "priceValidUntil": "2027-12-31",
-    "availability": "https://schema.org/InStock",
-    "url": `https://coasty.ai/pricing#${tier.id}`,
-    ...digitalShipping
-  }))
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": tier.priceUSD,
+        "priceCurrency": "USD",
+        "billingDuration": "P1M",
+        "billingIncrement": 1
+      },
+      "category": "subscription",
+      ...(isUnlimitedTier
+        ? { "description": "Unlimited credits per month" }
+        : {
+            "eligibleQuantity": {
+              "@type": "QuantitativeValue",
+              "value": tier.creditsPerMonth,
+              "unitText": "credits/month"
+            },
+          }),
+      "priceValidUntil": "2027-12-31",
+      "availability": "https://schema.org/InStock",
+      "url": `https://coasty.ai/pricing#${tier.id}`,
+      ...digitalShipping
+    }
+  })
   // High/low for the SoftwareApplication AggregateOffer summary.
   const tierPrices = purchasableTiers.map(t => t.priceUSD as number)
   const boostPrices = BOOST_PACKAGES.map(p => p.priceUSD)

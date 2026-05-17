@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Απεριόριστη βαριά αυτοματοποίηση",
         "cta": "Αποκτήστε Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Χωρίς όρια credits — ποτέ",
+        "cta": "Επιλογή Unlimited",
+        "badge": "Καλύτερη αξία"
       }
     },
     "vmTemporary": "1 προσωρινό VM (2 ώρες)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Η ίδια εργασία κοστίζει {oldPrice} με χειρωνακτική εργασία",
       "description": "Ένας εικονικός βοηθός κοστίζει $2.000–$4.000/μήνα. Μια μερική πρόσληψη κοστίζει περισσότερο. Το Coasty κάνει την ίδια δουλειά 24/7 από $0 — με τέλεια συνέπεια, πλήρη ιχνηλασιμότητα και μηδενικό χρόνο εκπαίδευσης."
-    }
+    },
+    "unlimitedCredits": "Απεριόριστα credits"
   },
   "faq": {
     "title": "Συχνές ερωτήσεις",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Απεριόριστη βαριά αυτοματοποίηση"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Χωρίς όρια credits — ποτέ",
+        "badge": "Καλύτερη αξία"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Απεριόριστη βαριά αυτοματοποίηση",
         "cta": "Αποκτήστε Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Χωρίς όρια credits — ποτέ",
+        "cta": "Επιλογή Unlimited",
+        "badge": "Καλύτερη αξία"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1.500",
           "machines": "3 πάντα ενεργά",
           "feature": "Εγγύηση SLA"
+        },
+        "unlimited": {
+          "credits": "Απεριόριστα",
+          "machines": "2 πάντα ενεργές",
+          "feature": "Καλύτερη αξία · Χωρίς όρια"
         }
       },
       "perMonth": "{price}/μήνα",

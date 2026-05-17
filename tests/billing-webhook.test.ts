@@ -66,6 +66,10 @@ class MockDB {
     { id: "plan_starter", tier: "starter", monthly_credits: 200, name: "Starter", price: 19 },
     { id: "plan_professional", tier: "professional", monthly_credits: 600, name: "Plus", price: 50 },
     { id: "plan_enterprise", tier: "enterprise", monthly_credits: 1500, name: "Pro", price: 100 },
+    // Sentinel — UI renders the literal word "Unlimited" instead of this
+    // number; backend guards in agent_billing.charge_step skip the deduct
+    // RPC entirely.  See lib/pricing/tiers.ts L165 and migration 017.
+    { id: "plan_unlimited", tier: "unlimited", monthly_credits: 999_999_999, name: "Unlimited", price: 249 },
   ]
 
   private txCounter = 0
@@ -1059,7 +1063,7 @@ describe("Billing Webhook — Credit Granting", () => {
         retrievePrice?: (id: string) => FakeStripePrice | null
       }
     ): PriceLookupOutcome {
-      const VALID_TIERS = new Set(["lite", "starter", "professional", "enterprise"])
+      const VALID_TIERS = new Set(["lite", "starter", "professional", "unlimited", "enterprise"])
 
       let newPlanId: string | null = null
       let newPlanTier: string | null = null
@@ -1104,7 +1108,8 @@ describe("Billing Webhook — Credit Granting", () => {
               monthly_credits:
                 tier === "lite" ? 100 :
                 tier === "starter" ? 200 :
-                tier === "professional" ? 600 : 0,
+                tier === "professional" ? 600 :
+                tier === "unlimited" ? 999_999_999 : 0,
               name: priceObj.product.name,
               price: priceObj.unit_amount / 100,
               stripe_price_id: newPriceId,
@@ -1132,6 +1137,7 @@ describe("Billing Webhook — Credit Granting", () => {
       const priceMap: Record<string, string> = {
         starter: "price_known_starter",
         professional: "price_known_pro",
+        unlimited: "price_known_unlimited",
         enterprise: "price_known_ent",
       }
       scenarioDb.subscription_plans.forEach((p: any) => {
@@ -1347,6 +1353,71 @@ describe("Billing Webhook — Credit Granting", () => {
       expect(second.newPlanTier).toBe("starter")
       expect(stripeCalled).toBe(false)
       expect(scenarioDb.subscription_plans.length).toBe(planCountBefore)
+    })
+  })
+
+  // ── Scenario 14: Unlimited tier (sentinel credits) ────────────────────────
+  //
+  // The "unlimited" plan carries monthly_credits = 999_999_999 as a sentinel
+  // — application code is expected to render the literal word "Unlimited"
+  // when tier === "unlimited" rather than display the raw number, and the
+  // backend agent_billing / api_billing_service guards skip the deduct RPC
+  // entirely.  At the DB layer though, the webhook treats it like any other
+  // plan: grant the seeded monthly_credits to user_credits.balance.  These
+  // tests pin that contract.
+
+  describe("Scenario 14: Unlimited tier (sentinel credits)", () => {
+    const UNLIMITED_SENTINEL = 999_999_999
+
+    it("checkout.session.completed grants the sentinel balance and sets tier=unlimited", () => {
+      handleCheckoutSessionCompleted(db, "evt_unlim_1", {
+        mode: "subscription",
+        metadata: { user_id: USER_ID, tier: "unlimited" },
+        subscription: SUB_ID,
+        customer: CUSTOMER_ID,
+      }, makeStripeSub())
+
+      const credits = db.getUserCredits(USER_ID)!
+      // 100 free credits + 999_999_999 unlimited grant.  Sentinel addition
+      // is intentional — guards elsewhere prevent it from ever depleting.
+      expect(credits.balance).toBe(100 + UNLIMITED_SENTINEL)
+      expect(credits.has_active_subscription).toBe(true)
+      expect(credits.subscription_tier).toBe("unlimited")
+    })
+
+    it("records exactly one subscription_grant for the sentinel amount", () => {
+      handleCheckoutSessionCompleted(db, "evt_unlim_2", {
+        mode: "subscription",
+        metadata: { user_id: USER_ID, tier: "unlimited" },
+        subscription: SUB_ID,
+        customer: CUSTOMER_ID,
+      }, makeStripeSub())
+
+      const grants = db.credit_transactions.filter((t) => t.type === "subscription_grant")
+      expect(grants).toHaveLength(1)
+      expect(grants[0].amount).toBe(UNLIMITED_SENTINEL)
+      expect(grants[0].metadata.tier).toBe("unlimited")
+      expect(grants[0].metadata.stripe_subscription_id).toBe(SUB_ID)
+    })
+
+    it("creates the subscription row with the unlimited plan_id", () => {
+      handleCheckoutSessionCompleted(db, "evt_unlim_3", {
+        mode: "subscription",
+        metadata: { user_id: USER_ID, tier: "unlimited" },
+        subscription: SUB_ID,
+        customer: CUSTOMER_ID,
+      }, makeStripeSub())
+
+      const sub = db.getSubscription(SUB_ID)
+      expect(sub).toBeDefined()
+      expect(sub!.subscription_plan_id).toBe("plan_unlimited")
+      expect(sub!.status).toBe("active")
+    })
+
+    it("the sentinel sits below INTEGER MAX (no overflow risk)", () => {
+      // Postgres integer is int4 (max 2_147_483_647).  Plus 100 free credits
+      // plus the sentinel must still fit: ~ 1_000_000_099.
+      expect(UNLIMITED_SENTINEL + 100).toBeLessThan(2_147_483_647)
     })
   })
 })

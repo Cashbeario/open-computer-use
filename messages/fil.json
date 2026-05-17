@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Walang limitasyong mabigat na automation",
         "cta": "Kunin ang Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Walang limit sa credits — kailanman",
+        "cta": "Kumuha ng Unlimited",
+        "badge": "Pinakamahusay"
       }
     },
     "vmTemporary": "1 pansamantalang VM (2 oras)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Ang parehong trabaho ay nagkakahalaga ng {oldPrice} sa mano-manong paggawa",
       "description": "Ang virtual assistant ay nagkakahalaga ng $2,000–$4,000/buwan. Ang part-time hire ay mas mahal pa. Ginagawa ng Coasty ang parehong trabaho 24/7 simula sa $0 — na may perpektong consistency, kumpletong audit trails, at zero training time."
-    }
+    },
+    "unlimitedCredits": "Walang limit na credits"
   },
   "faq": {
     "title": "Mga madalas itanong",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Walang limitasyong mabigat na automation"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Walang limit sa credits — kailanman",
+        "badge": "Pinakamahusay"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Walang limitasyong mabigat na automation",
         "cta": "Kumuha ng Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Walang limit sa credits — kailanman",
+        "cta": "Kumuha ng Unlimited",
+        "badge": "Pinakamahusay"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 palaging naka-on",
           "feature": "SLA guarantee"
+        },
+        "unlimited": {
+          "credits": "Walang Hanggan",
+          "machines": "2 palaging bukas",
+          "feature": "Pinakamahusay · Walang takip"
         }
       },
       "perMonth": "{price}/buwan",

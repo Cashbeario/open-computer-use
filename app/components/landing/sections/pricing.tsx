@@ -16,7 +16,7 @@ import { motion } from "framer-motion"
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check, Infinity as InfinityIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LandingSectionTopGlow, LandingSectionHeader } from "../section-shell"
 import { VISIBLE_TIERS, type SubscriptionTierId } from "@/lib/pricing/tiers"
@@ -136,9 +136,11 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
                 onMouseMove={!isMobile ? handleCardMouseMove : undefined}
                 onMouseLeave={!isMobile ? handleCardMouseLeave : undefined}
                 creditsLabel={
-                  plan.credits > 0
-                    ? tc("creditsPerMonth", { count: plan.credits.toLocaleString() })
-                    : "Pay-as-you-go credits"
+                  plan.key === "unlimited"
+                    ? t("pricing.unlimitedCredits")
+                    : plan.credits > 0
+                      ? tc("creditsPerMonth", { count: plan.credits.toLocaleString() })
+                      : "Pay-as-you-go credits"
                 }
                 vmLabel={vmLabel}
                 swarmLabel={
@@ -228,6 +230,7 @@ function PlanCard({
 
   const isFree = plan.key === "free"
   const isHighlighted = plan.highlighted
+  const isUnlimited = plan.key === "unlimited"
 
   return (
     <motion.div
@@ -244,10 +247,13 @@ function PlanCard({
         "p-5 sm:p-6",
         // Shared grey card base across the whole landing page.
         "bg-card/40 backdrop-blur-[2px]",
-        // The highlighted plan only nudges the dial via a stronger border.
-        isHighlighted
-          ? "border border-foreground/25"
-          : "border border-foreground/10 hover:border-foreground/20",
+        // Unlimited is the flagship — solid foreground border, distinct from
+        // Plus's "Most Popular" hairline, plus a faint amber wash.
+        isUnlimited
+          ? "border border-foreground/55 bg-gradient-to-b from-amber-500/[0.04] to-transparent shadow-[0_0_0_1px_rgba(0,0,0,0.02),0_8px_24px_-8px_rgba(245,158,11,0.18)]"
+          : isHighlighted
+            ? "border border-foreground/25"
+            : "border border-foreground/10 hover:border-foreground/20",
         !isMobile && "hover:-translate-y-0.5",
       )}
       style={{ "--mouse-x": "50%", "--mouse-y": "50%" } as React.CSSProperties}
@@ -258,18 +264,37 @@ function PlanCard({
           aria-hidden
           className="absolute inset-0 rounded-2xl overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{
-            background:
-              "radial-gradient(380px circle at var(--mouse-x) var(--mouse-y), rgba(120,130,145,0.05), transparent 45%)",
+            background: isUnlimited
+              ? "radial-gradient(380px circle at var(--mouse-x) var(--mouse-y), rgba(245,158,11,0.08), transparent 45%)"
+              : "radial-gradient(380px circle at var(--mouse-x) var(--mouse-y), rgba(120,130,145,0.05), transparent 45%)",
           }}
         />
       )}
 
       {/* Top sheen — only on the highlighted card, the single signature accent. */}
-      {isHighlighted && (
+      {isHighlighted && !isUnlimited && (
         <div
           aria-hidden
           className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-foreground/30 to-transparent"
         />
+      )}
+
+      {/* Unlimited's signature accent — amber hairline at top edge. */}
+      {isUnlimited && (
+        <div
+          aria-hidden
+          className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/70 to-transparent"
+        />
+      )}
+
+      {/* "BEST VALUE" eyebrow — distinct from Plus's "Popular" badge */}
+      {isUnlimited && (
+        <div className="relative mb-2 -mt-0.5">
+          <span className="inline-flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-400">
+            <InfinityIcon className="h-2.5 w-2.5" strokeWidth={2.5} />
+            Best Value
+          </span>
+        </div>
       )}
 
       {/* Plan name */}
@@ -334,9 +359,11 @@ function PlanCard({
         className={cn(
           "relative inline-flex items-center justify-center gap-1.5 w-full rounded-full px-4 py-2.5",
           "text-sm font-medium transition-all duration-200 border",
-          isHighlighted
-            ? "bg-foreground text-background border-foreground hover:bg-foreground/90"
-            : "bg-transparent text-foreground border-foreground/15 hover:border-foreground/35 hover:bg-foreground/[0.025]",
+          isUnlimited
+            ? "bg-foreground text-background border-foreground hover:bg-foreground/90 shadow-[0_4px_12px_-4px_rgba(245,158,11,0.35)]"
+            : isHighlighted
+              ? "bg-foreground text-background border-foreground hover:bg-foreground/90"
+              : "bg-transparent text-foreground border-foreground/15 hover:border-foreground/35 hover:bg-foreground/[0.025]",
         )}
       >
         <span>{ctaLabel}</span>

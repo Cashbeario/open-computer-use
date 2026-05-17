@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "무제한 대규모 자동화",
         "cta": "Pro 시작"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "크레딧 제한 없음 — 영원히",
+        "cta": "Unlimited 선택",
+        "badge": "최고의 가치"
       }
     },
     "vmTemporary": "임시 VM 1개 (2시간)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "동일한 작업을 수동으로 하면 {oldPrice}가 듭니다",
       "description": "가상 비서의 비용은 월 $2,000–$4,000입니다. 파트타임 고용은 더 비쌉니다. Coasty는 $0부터 24/7 동일한 작업을 수행합니다 — 완벽한 일관성, 완전한 감사 추적, 교육 시간 제로."
-    }
+    },
+    "unlimitedCredits": "무제한 크레딧"
   },
   "faq": {
     "title": "자주 묻는 질문",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "무제한 대규모 자동화"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "크레딧 제한 없음 — 영원히",
+        "badge": "최고의 가치"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "무제한 고급 자동화",
         "cta": "Pro 시작"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "크레딧 제한 없음 — 영원히",
+        "cta": "Unlimited 선택",
+        "badge": "최고의 가치"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "상시 가동 3개",
           "feature": "SLA 보장"
+        },
+        "unlimited": {
+          "credits": "무제한",
+          "machines": "2대 상시 운영",
+          "feature": "최고의 가치 · 한도 없음"
         }
       },
       "perMonth": "{price}/월",

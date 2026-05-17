@@ -15,6 +15,7 @@ export const TIERS = [
   "lite",
   "starter",
   "professional",
+  "unlimited",
   "enterprise",
 ] as const
 
@@ -23,7 +24,8 @@ export const TIER_RANK: Record<UserTier, number> = {
   lite: 1,
   starter: 2,
   professional: 3,
-  enterprise: 4,
+  unlimited: 4,
+  enterprise: 5,
 }
 
 export const TIER_DISPLAY_NAME: Record<UserTier, string> = {
@@ -31,6 +33,7 @@ export const TIER_DISPLAY_NAME: Record<UserTier, string> = {
   lite: "Lite",
   starter: "Starter",
   professional: "Plus",
+  unlimited: "Unlimited",
   enterprise: "Pro",
 }
 
@@ -43,6 +46,7 @@ export const SCHEDULE_LIMITS: Record<UserTier, number> = {
   lite: 3,
   starter: 3,
   professional: 10,
+  unlimited: 10,
   enterprise: 50,
 }
 

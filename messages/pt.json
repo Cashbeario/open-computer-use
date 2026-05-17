@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Automação pesada ilimitada",
         "cta": "Obter Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Sem limites de créditos — nunca",
+        "cta": "Escolher Unlimited",
+        "badge": "Melhor valor"
       }
     },
     "vmTemporary": "1 VM temporária (2h)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "O mesmo trabalho custa {oldPrice} com mão de obra manual",
       "description": "Um assistente virtual custa $2.000–$4.000/mês. Uma contratação meio período custa mais. Coasty faz o mesmo trabalho 24/7 a partir de $0 — com consistência perfeita, trilhas de auditoria completas e zero tempo de treinamento."
-    }
+    },
+    "unlimitedCredits": "Créditos ilimitados"
   },
   "faq": {
     "title": "Perguntas frequentes",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Automação pesada ilimitada"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Sem limites de créditos — nunca",
+        "badge": "Melhor valor"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Automação pesada ilimitada",
         "cta": "Obter Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Sem limites de créditos — nunca",
+        "cta": "Escolher Unlimited",
+        "badge": "Melhor valor"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1.500",
           "machines": "3 sempre ativas",
           "feature": "Garantia de SLA"
+        },
+        "unlimited": {
+          "credits": "Ilimitado",
+          "machines": "2 sempre ativas",
+          "feature": "Melhor valor · Sem limites"
         }
       },
       "perMonth": "{price}/mês",

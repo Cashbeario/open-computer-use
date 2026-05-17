@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Neomezená náročná automatizace",
         "cta": "Získat Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Žádné limity kreditů — nikdy",
+        "cta": "Zvolit Unlimited",
+        "badge": "Nejlepší hodnota"
       }
     },
     "vmTemporary": "1 dočasný VM (2 hod.)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Stejná práce stojí {oldPrice} při manuální práci",
       "description": "Virtuální asistent stojí $2 000–$4 000/měs. Částečný úvazek stojí více. Coasty odvede stejnou práci 24/7 od $0 — s dokonalou konzistencí, kompletní auditní stopou a nulovým časem na zaškolení."
-    }
+    },
+    "unlimitedCredits": "Neomezené kredity"
   },
   "faq": {
     "title": "Často kladené otázky",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Neomezená těžká automatizace"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Žádné limity kreditů — nikdy",
+        "badge": "Nejlepší hodnota"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Neomezená těžká automatizace",
         "cta": "Získat Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Žádné limity kreditů — nikdy",
+        "cta": "Zvolit Unlimited",
+        "badge": "Nejlepší hodnota"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 stále zapnuté",
           "feature": "Garance SLA"
+        },
+        "unlimited": {
+          "credits": "Neomezeně",
+          "machines": "2 trvale spuštěné",
+          "feature": "Nejlepší hodnota · Bez limitů"
         }
       },
       "perMonth": "{price}/měs.",

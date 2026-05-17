@@ -65,7 +65,12 @@ export function useSubscription() {
   const isEnterpriseTier = tier === "enterprise"
   const isPaid = isPaidTier(tier)
   // "Unlimited" historically meant Plus or Pro.  Keep semantics: ≥ professional.
+  // (Now also includes the literal "unlimited" tier introduced in migration 017.)
   const isUnlimitedTier = tierAtLeast(tier, "professional")
+  // Strict check for the literal "unlimited" subscription tier (Stripe plan).
+  // Use this when you need to specifically detect the Unlimited plan, NOT the
+  // legacy ">=professional" semantic above.
+  const isUnlimitedPlan = tier === "unlimited"
 
   return {
     subscription,
@@ -79,6 +84,7 @@ export function useSubscription() {
     isEnterpriseTier,
     isPaid,
     isUnlimitedTier,
+    isUnlimitedPlan,
     refetch: fetchSubscription,
   }
 }

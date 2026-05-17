@@ -20,28 +20,38 @@ export async function generateMetadata(): Promise<Metadata> {
 // purchase offers. Both arrays are reused on the WebAPI schema so search /
 // AI crawlers see consistent pricing across docs and the API surface.
 
+// Omit eligibleQuantity for the "unlimited" tier — its sentinel credit
+// value (999_999_999) would otherwise leak to crawlers / AI agents reading
+// the JSON-LD schema as a literal billion-credit count.
 const subscriptionOffers = VISIBLE_TIERS
   .filter((tier) => tier.priceUSD !== null)
-  .map((tier) => ({
-    "@type": "Offer" as const,
-    name: `${tier.name} Plan`,
-    price: String(tier.priceUSD),
-    priceCurrency: "USD",
-    priceSpecification: {
-      "@type": "UnitPriceSpecification",
-      price: tier.priceUSD,
+  .map((tier) => {
+    const isUnlimitedTier = tier.id === "unlimited"
+    return {
+      "@type": "Offer" as const,
+      name: `${tier.name} Plan`,
+      price: String(tier.priceUSD),
       priceCurrency: "USD",
-      billingDuration: "P1M",
-      billingIncrement: 1,
-    },
-    category: "subscription",
-    eligibleQuantity: {
-      "@type": "QuantitativeValue",
-      value: tier.creditsPerMonth,
-      unitText: "credits/month",
-    },
-    url: `https://coasty.ai/pricing#${tier.id}`,
-  }))
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: tier.priceUSD,
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+        billingIncrement: 1,
+      },
+      category: "subscription",
+      ...(isUnlimitedTier
+        ? { description: "Unlimited credits per month" }
+        : {
+            eligibleQuantity: {
+              "@type": "QuantitativeValue",
+              value: tier.creditsPerMonth,
+              unitText: "credits/month",
+            },
+          }),
+      url: `https://coasty.ai/pricing#${tier.id}`,
+    }
+  })
 
 const boostOffers = BOOST_PACKAGES.map((pkg) => ({
   "@type": "Offer" as const,

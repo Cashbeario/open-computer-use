@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Необмежена інтенсивна автоматизація",
         "cta": "Обрати Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Без лімітів кредитів — ніколи",
+        "cta": "Обрати Unlimited",
+        "badge": "Найкраща цінність"
       }
     },
     "vmTemporary": "1 тимчасова VM (2 год.)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Та сама робота коштує {oldPrice} при ручній праці",
       "description": "Віртуальний асистент коштує $2 000–$4 000/міс. Працівник на часткову зайнятість коштує більше. Coasty виконує ту саму роботу 24/7 від $0 — з ідеальною послідовністю, повним аудиторським слідом та нульовим часом навчання."
-    }
+    },
+    "unlimitedCredits": "Безлімітні кредити"
   },
   "faq": {
     "title": "Часті запитання",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Необмежена інтенсивна автоматизація"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Без лімітів кредитів — ніколи",
+        "badge": "Найкраща цінність"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Neobmezhena vazhka avtomatyzatsiia",
         "cta": "Otrymaty Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Без лімітів кредитів — ніколи",
+        "cta": "Обрати Unlimited",
+        "badge": "Найкраща цінність"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 zavzhdy uvimkneni",
           "feature": "Harantiia SLA"
+        },
+        "unlimited": {
+          "credits": "Безліміт",
+          "machines": "2 завжди активні",
+          "feature": "Найкраща · Без обмежень"
         }
       },
       "perMonth": "{price}/mis.",

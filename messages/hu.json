@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Korlátlan nehéz automatizálás",
         "cta": "Pro beszerzése"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Nincs kreditkorlát — soha",
+        "cta": "Unlimited választása",
+        "badge": "Legjobb érték"
       }
     },
     "vmTemporary": "1 ideiglenes VM (2 óra)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Ugyanez a munka {oldPrice}-ba kerül kézi munkával",
       "description": "Egy virtuális asszisztens $2 000–$4 000/hó. Egy részmunkaidős alkalmazott még többe kerül. A Coasty ugyanazt a munkát végzi 24/7, $0-tól indulva — tökéletes konzisztenciával, teljes audit nyomvonallal és nulla betanulási idővel."
-    }
+    },
+    "unlimitedCredits": "Korlátlan kreditek"
   },
   "faq": {
     "title": "Gyakran ismételt kérdések",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Korlátlan nehéz automatizálás"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Nincs kreditkorlát — soha",
+        "badge": "Legjobb érték"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Korlátlan nehéz automatizálás",
         "cta": "Pro csomag"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Nincs kreditkorlát — soha",
+        "cta": "Unlimited választása",
+        "badge": "Legjobb érték"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 mindig aktív",
           "feature": "SLA garancia"
+        },
+        "unlimited": {
+          "credits": "Korlátlan",
+          "machines": "2 mindig aktív",
+          "feature": "Legjobb érték · Nincs korlát"
         }
       },
       "perMonth": "{price}/hó",

@@ -13,6 +13,7 @@ const STRIPE_PRICE_IDS: Record<string, string> = {
   lite: process.env.STRIPE_PRICE_LITE || "",
   starter: process.env.STRIPE_PRICE_STARTER || "",
   professional: process.env.STRIPE_PRICE_PROFESSIONAL || "",
+  unlimited: process.env.STRIPE_PRICE_UNLIMITED || "",
   enterprise: process.env.STRIPE_PRICE_ENTERPRISE || "",
 }
 

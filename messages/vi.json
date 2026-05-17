@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Tu dong hoa nang khong gioi han",
         "cta": "Chon Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Không giới hạn tín dụng — mãi mãi",
+        "cta": "Chọn Unlimited",
+        "badge": "Giá trị tốt nhất"
       }
     },
     "vmTemporary": "1 VM tam thoi (2 gio)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Cung cong viec ton {oldPrice} voi lao dong thu cong",
       "description": "Tro ly ao ton $2.000–$4.000/thang. Nhan vien ban thoi gian con dat hon. Coasty lam cung cong viec 24/7 bat dau tu $0 — voi su nhat quan hoan hao, nhat ky kiem toan day du va khong can thoi gian dao tao."
-    }
+    },
+    "unlimitedCredits": "Tín dụng không giới hạn"
   },
   "faq": {
     "title": "Cau hoi thuong gap",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Tu dong hoa nang khong gioi han"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Không giới hạn tín dụng — mãi mãi",
+        "badge": "Giá trị tốt nhất"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Tu dong hoa nang khong gioi han",
         "cta": "Chon Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Không giới hạn tín dụng — mãi mãi",
+        "cta": "Chọn Unlimited",
+        "badge": "Giá trị tốt nhất"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1.500",
           "machines": "3 luon bat",
           "feature": "Bao dam SLA"
+        },
+        "unlimited": {
+          "credits": "Không giới hạn",
+          "machines": "2 luôn bật",
+          "feature": "Tốt nhất · Không giới hạn"
         }
       },
       "perMonth": "{price}/thang",

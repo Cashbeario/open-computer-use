@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Lightning,
   Star,
+  Infinity as InfinityIcon,
 } from "@phosphor-icons/react"
 
 /* ─── animation variants ─── */
@@ -64,12 +65,13 @@ const billingAnimations = `
 
 /* ─── plans data ─── */
 
-const planKeys: readonly { key: string; name: string; price: string; popular?: boolean }[] = [
+const planKeys: readonly { key: string; name: string; price: string; popular?: boolean; featured?: boolean }[] = [
   { key: "free", name: "Free", price: "$0" },
   { key: "lite", name: "Lite", price: "$9" },
   { key: "starter", name: "Starter", price: "$19" },
   { key: "plus", name: "Plus", price: "$50", popular: true },
   { key: "pro", name: "Pro", price: "$100" },
+  { key: "unlimited", name: "Unlimited", price: "$249", featured: true },
 ]
 
 const faqKeys = ["howCharged", "runOut", "rollOver"] as const
@@ -200,7 +202,7 @@ export function BillingTab({ inApp }: { inApp: boolean }) {
 
         <motion.div
           variants={stagger}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
         >
           {planKeys.map((plan, i) => (
             <motion.div
@@ -208,12 +210,22 @@ export function BillingTab({ inApp }: { inApp: boolean }) {
               variants={fade}
               custom={i + 1}
               className={`relative rounded-2xl border p-4 text-center transition-colors ${
-                plan.popular
-                  ? "border-foreground/[0.15] bg-foreground/[0.04]"
-                  : "border-foreground/[0.06] bg-foreground/[0.02]"
+                plan.featured
+                  ? "border-amber-500/40 bg-amber-500/[0.05] shadow-[0_8px_24px_-8px_rgba(245,158,11,0.25)]"
+                  : plan.popular
+                    ? "border-foreground/[0.15] bg-foreground/[0.04]"
+                    : "border-foreground/[0.06] bg-foreground/[0.02]"
               }`}
             >
-              {plan.popular && (
+              {plan.featured && (
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 border border-amber-600/30 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_2px_8px_-2px_rgba(245,158,11,0.55)]">
+                    <InfinityIcon size={8} weight="bold" />
+                    Best Value
+                  </span>
+                </div>
+              )}
+              {plan.popular && !plan.featured && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
                   <span className="inline-flex items-center gap-1 rounded-full bg-foreground/[0.06] border border-foreground/[0.1] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-foreground/50">
                     <Star size={8} weight="fill" />
@@ -222,11 +234,11 @@ export function BillingTab({ inApp }: { inApp: boolean }) {
                 </div>
               )}
 
-              <p className="text-[12px] font-semibold text-foreground/60 mb-1 mt-1">{plan.name}</p>
-              <p className="text-xl font-bold text-foreground/70 mb-3">{t("perMonth", { price: plan.price })}</p>
+              <p className={`text-[12px] font-semibold mb-1 mt-1 ${plan.featured ? "text-amber-700 dark:text-amber-400" : "text-foreground/60"}`}>{plan.name}</p>
+              <p className={`text-xl font-bold mb-3 ${plan.featured ? "text-foreground" : "text-foreground/70"}`}>{t("perMonth", { price: plan.price })}</p>
 
               <div className="space-y-2 text-[11px] text-foreground/40">
-                <p><span className="font-semibold text-foreground/55">{t(`planData.${plan.key}.credits`)}</span> {t("credits").toLowerCase()}</p>
+                <p><span className={`font-semibold ${plan.featured ? "text-amber-700 dark:text-amber-400" : "text-foreground/55"}`}>{t(`planData.${plan.key}.credits`)}</span> {plan.key !== "unlimited" && t("credits").toLowerCase()}</p>
                 <p>{t(`planData.${plan.key}.machines`)}</p>
                 <p className="text-foreground/35">{t(`planData.${plan.key}.feature`)}</p>
               </div>

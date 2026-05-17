@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Obegransad tung automatisering",
         "cta": "Valj Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Inga kreditgränser — någonsin",
+        "cta": "Välj Unlimited",
+        "badge": "Bästa värdet"
       }
     },
     "vmTemporary": "1 tillfallig VM (2 tim)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Samma arbete kostar {oldPrice} med manuell arbetskraft",
       "description": "En virtuell assistent kostar $2 000–$4 000/man. En deltidsanstallning kostar mer. Coasty gor samma arbete 24/7 fran $0 — med perfekt konsistens, fullstandiga revisionsloggar och noll utbildningstid."
-    }
+    },
+    "unlimitedCredits": "Obegränsade krediter"
   },
   "faq": {
     "title": "Vanliga fragor",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Obegransad tung automatisering"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Inga kreditgränser — någonsin",
+        "badge": "Bästa värdet"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Obegransad tung automatisering",
         "cta": "Skaffa Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Inga kreditgränser — någonsin",
+        "cta": "Välj Unlimited",
+        "badge": "Bästa värdet"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 alltid-pa",
           "feature": "SLA-garanti"
+        },
+        "unlimited": {
+          "credits": "Obegränsat",
+          "machines": "2 alltid på",
+          "feature": "Bästa värdet · Inga tak"
         }
       },
       "perMonth": "{price}/man",

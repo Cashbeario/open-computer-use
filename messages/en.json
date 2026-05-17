@@ -391,9 +391,16 @@
         "name": "Pro",
         "description": "Unlimited heavy automation",
         "cta": "Get Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "No credit limits — ever",
+        "cta": "Go Unlimited",
+        "badge": "Best Value"
       }
     },
     "vmTemporary": "1 temporary VM (2hr)",
+    "unlimitedCredits": "Unlimited credits",
     "vmDeletedAfterInactivity": "1 VM (deleted after inactivity)",
     "vmAlwaysOn": "{count} always-on VM",
     "vmAlwaysOnPlural": "{count} always-on VMs",
@@ -1043,6 +1050,11 @@
       "pro": {
         "name": "Pro",
         "description": "Unlimited heavy automation"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "No credit limits — ever",
+        "badge": "Best Value"
       }
     },
     "features": {
@@ -1496,6 +1508,12 @@
         "name": "Pro",
         "tagline": "Unlimited heavy automation",
         "cta": "Get Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "No credit limits — ever",
+        "cta": "Go Unlimited",
+        "badge": "Best Value"
       }
     },
     "features": {
@@ -1950,6 +1968,11 @@
           "credits": "1,500",
           "machines": "3 always-on",
           "feature": "SLA guarantee"
+        },
+        "unlimited": {
+          "credits": "Unlimited",
+          "machines": "2 always-on",
+          "feature": "Best value · No caps"
         }
       },
       "perMonth": "{price}/mo",

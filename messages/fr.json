@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Automatisation intensive illimitée",
         "cta": "Choisir Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Aucune limite de crédits — jamais",
+        "cta": "Choisir Unlimited",
+        "badge": "Meilleure offre"
       }
     },
     "vmTemporary": "1 VM temporaire (2h)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Le même travail coûte {oldPrice} en main-d'œuvre",
       "description": "Un assistant virtuel coûte 2 000 à 4 000 $/mois. Un employé à temps partiel coûte encore plus. Coasty fait le même travail 24/7 à partir de $0 — avec une cohérence parfaite, une traçabilité complète et zéro temps de formation."
-    }
+    },
+    "unlimitedCredits": "Crédits illimités"
   },
   "faq": {
     "title": "Questions fréquemment posées",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Automatisation intensive illimitée"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Aucune limite de crédits — jamais",
+        "badge": "Meilleure offre"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Automatisation intensive illimitée",
         "cta": "Choisir Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Aucune limite de crédits — jamais",
+        "cta": "Choisir Unlimited",
+        "badge": "Meilleure offre"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1 500",
           "machines": "3 permanentes",
           "feature": "Garantie SLA"
+        },
+        "unlimited": {
+          "credits": "Illimité",
+          "machines": "2 toujours actives",
+          "feature": "Meilleure offre · Sans limites"
         }
       },
       "perMonth": "{price}/mois",

@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Otomatisasi berat tanpa batas",
         "cta": "Dapatkan Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Tanpa batas kredit — selamanya",
+        "cta": "Pilih Unlimited",
+        "badge": "Nilai terbaik"
       }
     },
     "vmTemporary": "1 VM sementara (2 jam)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Pekerjaan yang sama berharga {oldPrice} dengan tenaga kerja manual",
       "description": "Asisten virtual berharga $2.000–$4.000/bulan. Karyawan paruh waktu lebih mahal. Coasty melakukan pekerjaan yang sama 24/7 mulai dari $0 — dengan konsistensi sempurna, jejak audit lengkap, dan tanpa waktu pelatihan."
-    }
+    },
+    "unlimitedCredits": "Kredit tanpa batas"
   },
   "faq": {
     "title": "Pertanyaan yang sering diajukan",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Otomatisasi berat tanpa batas"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Tanpa batas kredit — selamanya",
+        "badge": "Nilai terbaik"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Otomasi berat tanpa batas",
         "cta": "Dapatkan Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Tanpa batas kredit — selamanya",
+        "cta": "Pilih Unlimited",
+        "badge": "Nilai terbaik"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 selalu aktif",
           "feature": "Jaminan SLA"
+        },
+        "unlimited": {
+          "credits": "Tak Terbatas",
+          "machines": "2 selalu aktif",
+          "feature": "Nilai terbaik · Tanpa batas"
         }
       },
       "perMonth": "{price}/bln",

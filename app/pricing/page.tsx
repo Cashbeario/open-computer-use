@@ -17,6 +17,7 @@ import {
   FileText,
   Lock,
   TerminalSquare,
+  Infinity as InfinityIcon,
   type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -171,6 +172,7 @@ function CreditsVisual({ plan, t }: { plan: Plan; t: ReturnType<typeof useTransl
   ]
 
   const tasks = taskLabels.map((label, i) => ({ label, cost: taskCosts[i] }))
+  const isUnlimited = plan.id === "unlimited"
 
   return (
     <div className="h-full flex flex-col items-center justify-center gap-5 p-6">
@@ -181,15 +183,33 @@ function CreditsVisual({ plan, t }: { plan: Plan; t: ReturnType<typeof useTransl
         transition={{ duration: 0.4, ease }}
         className="text-center"
       >
-        <motion.span
-          key={plan.credits}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-bold tracking-tight text-foreground"
-        >
-          {plan.credits === 0 ? t("plans.free.name") : plan.credits.toLocaleString()}
-        </motion.span>
-        <p className="text-sm text-muted-foreground mt-1">{plan.credits === 0 ? t("features.monthlyCredits.payAsYouGo") : t("animations.creditsPerMonth")}</p>
+        {isUnlimited ? (
+          <motion.div
+            key="unlimited"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-2 text-5xl font-bold tracking-tight text-foreground"
+          >
+            <InfinityIcon className="h-12 w-12 text-amber-500" strokeWidth={2.25} />
+            <span>Unlimited</span>
+          </motion.div>
+        ) : (
+          <motion.span
+            key={plan.credits}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-5xl font-bold tracking-tight text-foreground"
+          >
+            {plan.credits === 0 ? t("plans.free.name") : plan.credits.toLocaleString()}
+          </motion.span>
+        )}
+        <p className="text-sm text-muted-foreground mt-1">
+          {isUnlimited
+            ? "credits — no caps, no overages"
+            : plan.credits === 0
+              ? t("features.monthlyCredits.payAsYouGo")
+              : t("animations.creditsPerMonth")}
+        </p>
       </motion.div>
 
       {/* Animated task list showing credit usage */}
@@ -544,7 +564,11 @@ export default function PricingPage() {
     name: t(`plans.${p.id}.name` as any),
     tagline: t(`plans.${p.id}.tagline` as any),
     cta: t(`plans.${p.id}.cta` as any),
-    badge: p.id === "plus" ? t("plans.plus.badge") : undefined,
+    badge: p.id === "plus"
+      ? t("plans.plus.badge")
+      : p.id === "unlimited"
+        ? t("plans.unlimited.badge")
+        : undefined,
   })), [t])
 
   const featureList: Feature[] = useMemo(() => [
@@ -569,7 +593,11 @@ export default function PricingPage() {
     {
       icon: featureIcons[3],
       title: t("features.monthlyCredits.name"),
-      subtitle: (p: Plan) => p.credits === 0 ? t("features.monthlyCredits.payAsYouGo") : t("features.monthlyCredits.creditsPerMonth", { count: p.credits.toLocaleString() }),
+      subtitle: (p: Plan) => p.id === "unlimited"
+        ? "Unlimited credits — no caps, no overages"
+        : p.credits === 0
+          ? t("features.monthlyCredits.payAsYouGo")
+          : t("features.monthlyCredits.creditsPerMonth", { count: p.credits.toLocaleString() }),
     },
     {
       icon: featureIcons[4],
@@ -638,7 +666,12 @@ export default function PricingPage() {
                 )}
               >
                 {p.badge && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 py-0.5 text-[9px] font-semibold text-primary-foreground uppercase tracking-wider leading-none">
+                  <span className={cn(
+                    "absolute -top-1 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider leading-none",
+                    p.id === "unlimited"
+                      ? "bg-amber-500 text-white shadow-[0_2px_8px_-2px_rgba(245,158,11,0.55)]"
+                      : "bg-primary text-primary-foreground"
+                  )}>
                     {p.badge}
                   </span>
                 )}
@@ -666,14 +699,24 @@ export default function PricingPage() {
             >
               <div className={cn(
                 "rounded-2xl border overflow-hidden",
-                plan.highlighted
-                  ? "border-primary/30 bg-gradient-to-b from-primary/[0.04] to-transparent"
-                  : "border-border/60 bg-card/40"
+                plan.id === "unlimited"
+                  ? "border-amber-500/40 bg-gradient-to-b from-amber-500/[0.05] to-transparent shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(245,158,11,0.45)]"
+                  : plan.highlighted
+                    ? "border-primary/30 bg-gradient-to-b from-primary/[0.04] to-transparent"
+                    : "border-border/60 bg-card/40"
               )}>
                 {/* Price header */}
                 <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-border/30">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
+                      {plan.id === "unlimited" && (
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1">
+                          <InfinityIcon className="h-3 w-3 text-amber-600 dark:text-amber-400" strokeWidth={2.5} />
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700 dark:text-amber-400">
+                            {plan.badge ?? "Best Value"}
+                          </span>
+                        </div>
+                      )}
                       <p className="text-sm text-muted-foreground mb-1">{plan.tagline}</p>
                       <div className="flex items-baseline gap-1.5">
                         <motion.span
@@ -686,8 +729,20 @@ export default function PricingPage() {
                         </motion.span>
                         <span className="text-lg text-muted-foreground">{t("perMonth")}</span>
                       </div>
+                      {plan.id === "unlimited" && (
+                        <p className="mt-2 text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
+                          No usage caps · No overages · Run agents as much as you want
+                        </p>
+                      )}
                     </div>
-                    {plan.highlighted ? (
+                    {plan.id === "unlimited" ? (
+                      <Button
+                        className="h-11 px-8 flex-shrink-0 bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-[0_8px_24px_-8px_rgba(245,158,11,0.55)]"
+                        asChild
+                      >
+                        <Link href="/auth">{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                    ) : plan.highlighted ? (
                       <RainbowButton className="h-11 px-8 text-sm sm:text-base flex-shrink-0" asChild>
                         <Link href="/auth">{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link>
                       </RainbowButton>

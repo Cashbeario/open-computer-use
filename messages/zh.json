@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "无限量重度自动化",
         "cta": "获取 Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "无积分上限 — 永久",
+        "cta": "选择 Unlimited",
+        "badge": "最超值"
       }
     },
     "vmTemporary": "1 个临时 VM（2小时）",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "同样的工作，人工成本为 {oldPrice}",
       "description": "一名虚拟助理每月费用为 $2,000–$4,000。兼职员工更贵。Coasty 以 $0 起步完成同样的工作，全天候运行——完美一致、完整审计追踪、零培训时间。"
-    }
+    },
+    "unlimitedCredits": "无限积分"
   },
   "faq": {
     "title": "常见问题",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "无限大规模自动化"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "无积分上限 — 永久",
+        "badge": "最超值"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "无限高级自动化",
         "cta": "获取 Pro"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "无积分上限 — 永久",
+        "cta": "选择 Unlimited",
+        "badge": "最超值"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1,500",
           "machines": "3 台常驻",
           "feature": "SLA 保障"
+        },
+        "unlimited": {
+          "credits": "无限",
+          "machines": "2 台常开",
+          "feature": "最超值 · 无上限"
         }
       },
       "perMonth": "{price}/月",

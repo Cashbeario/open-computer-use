@@ -29,15 +29,16 @@ import {
 // ---------------------------------------------------------------------------
 
 describe("lib/tier — canonical vocabulary", () => {
-  it("exposes the five canonical tiers in rank order", () => {
-    expect(TIERS).toEqual(["free", "lite", "starter", "professional", "enterprise"])
+  it("exposes the six canonical tiers in rank order", () => {
+    expect(TIERS).toEqual(["free", "lite", "starter", "professional", "unlimited", "enterprise"])
   })
 
   it("ranks tiers monotonically", () => {
     expect(TIER_RANK.free).toBeLessThan(TIER_RANK.lite)
     expect(TIER_RANK.lite).toBeLessThan(TIER_RANK.starter)
     expect(TIER_RANK.starter).toBeLessThan(TIER_RANK.professional)
-    expect(TIER_RANK.professional).toBeLessThan(TIER_RANK.enterprise)
+    expect(TIER_RANK.professional).toBeLessThan(TIER_RANK.unlimited)
+    expect(TIER_RANK.unlimited).toBeLessThan(TIER_RANK.enterprise)
   })
 
   it("normalises canonical values unchanged", () => {
@@ -86,6 +87,7 @@ describe("lib/tier — canonical vocabulary", () => {
     expect(TIER_DISPLAY_NAME.lite).toBe("Lite")
     expect(TIER_DISPLAY_NAME.starter).toBe("Starter")
     expect(TIER_DISPLAY_NAME.professional).toBe("Plus")
+    expect(TIER_DISPLAY_NAME.unlimited).toBe("Unlimited")
     expect(TIER_DISPLAY_NAME.enterprise).toBe("Pro")
   })
 
@@ -95,8 +97,19 @@ describe("lib/tier — canonical vocabulary", () => {
       lite: 3,
       starter: 3,
       professional: 10,
+      unlimited: 10,
       enterprise: 50,
     })
+  })
+
+  it("unlimited tier is normalised and recognised as paid", () => {
+    expect(normalizeTier("unlimited")).toBe("unlimited")
+    expect(normalizeTier("Unlimited")).toBe("unlimited")
+    expect(isPaidTier("unlimited")).toBe(true)
+    expect(tierAtLeast("unlimited", "professional")).toBe(true)
+    expect(tierAtLeast("unlimited", "enterprise")).toBe(false)
+    expect(tierAtLeast("enterprise", "unlimited")).toBe(true)
+    expect(getScheduleLimit("unlimited")).toBe(10)
   })
 
   it("getScheduleLimit normalises legacy aliases", () => {
@@ -171,6 +184,9 @@ class MockDb {
       { id: "plan_starter",      tier: "starter",      stripe_price_id: "price_starter",  monthly_credits: 200 },
       { id: "plan_professional", tier: "professional", stripe_price_id: "price_pro",      monthly_credits: 600 },
       { id: "plan_enterprise",   tier: "enterprise",   stripe_price_id: "price_ent",      monthly_credits: 1500 },
+      // Sentinel — see lib/pricing/tiers.ts L165 + migration 017.
+      // UI renders "Unlimited" literal; backend skips deduct RPC.
+      { id: "plan_unlimited",    tier: "unlimited",    stripe_price_id: "price_unlimited", monthly_credits: 999_999_999 },
     ]
     for (const p of plans) {
       this.subscription_plans.set(p.id, p)
@@ -914,5 +930,144 @@ describe("webhook tier sync — full lifecycle scenarios", () => {
     })
     expect(db.machine_limits.get("u1")?.tier).toBe("lite")
     expect(db.user_credits.get("u1")?.has_active_subscription).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Unlimited tier — tier-sync contract
+// ---------------------------------------------------------------------------
+//
+// Adding the "unlimited" tier (migration 017 + lib/pricing/tiers.ts) requires
+// that the webhook tier-sync handlers propagate the new vocabulary all the
+// way through to machine_limits.tier and user_credits.subscription_tier —
+// not just for new subscriptions but for upgrades and reactivations too.
+//
+// Without this, paying $249/mo Unlimited customers would silently land on
+// the wrong tier in the backend (rate limits, schedule limits, machine
+// caps) — exactly the failure mode migration 011 was created to prevent.
+
+describe("webhook tier sync — unlimited tier", () => {
+  let db: MockDb
+  beforeEach(() => {
+    db = new MockDb()
+    db.seedPlans()
+    db.seedUser("u1")
+  })
+
+  it("new unlimited subscription writes user_credits.subscription_tier = 'unlimited'", () => {
+    db.seedSubscription({
+      user_id: "u1",
+      stripe_subscription_id: "sub_u1",
+      subscription_plan_id: "plan_unlimited",
+      status: "active",
+    })
+
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1",
+      status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      cancel_at_period_end: false,
+      items: { data: [{ price: { id: "price_unlimited" } }] },
+      metadata: { tier: "unlimited" },
+    })
+
+    expect(db.user_credits.get("u1")?.subscription_tier).toBe("unlimited")
+    expect(db.user_credits.get("u1")?.has_active_subscription).toBe(true)
+    // machine_limits.tier propagation — without migration 017 relaxing the
+    // CHECK constraint, this write would silently fail at the DB layer.
+    expect(db.machine_limits.get("u1")?.tier).toBe("unlimited")
+  })
+
+  it("upgrade plus → unlimited propagates via price_id (stale metadata tolerated)", () => {
+    db.seedSubscription({
+      user_id: "u1",
+      stripe_subscription_id: "sub_u1",
+      subscription_plan_id: "plan_professional",
+      status: "active",
+    })
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1", status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      items: { data: [{ price: { id: "price_pro" } }] },
+      metadata: { tier: "professional" },
+    })
+    expect(db.machine_limits.get("u1")?.tier).toBe("professional")
+
+    // Portal upgrade to Unlimited — Stripe carries the new price id, but
+    // the metadata.tier is still the stale "professional" string.  Webhook
+    // must lookup by price_id, NOT trust the metadata.
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1", status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      items: { data: [{ price: { id: "price_unlimited" } }] },
+      metadata: { tier: "professional" }, // stale
+    })
+
+    expect(db.machine_limits.get("u1")?.tier).toBe("unlimited")
+    expect(db.user_credits.get("u1")?.subscription_tier).toBe("unlimited")
+    expect(db.user_subscriptions.get("sub_u1")?.subscription_plan_id).toBe("plan_unlimited")
+
+    // The webhook patches Stripe metadata to match the resolved tier so
+    // subsequent renewal events carry the correct tier without re-lookup.
+    expect(db.stripeMetadataPatches.find((p) => p.subId === "sub_u1")?.metadata.tier).toBe(
+      "unlimited"
+    )
+  })
+
+  it("downgrade unlimited → lite propagates", () => {
+    db.seedSubscription({
+      user_id: "u1",
+      stripe_subscription_id: "sub_u1",
+      subscription_plan_id: "plan_unlimited",
+      status: "active",
+    })
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1", status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      items: { data: [{ price: { id: "price_unlimited" } }] },
+      metadata: { tier: "unlimited" },
+    })
+    expect(db.machine_limits.get("u1")?.tier).toBe("unlimited")
+
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1", status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      items: { data: [{ price: { id: "price_lite" } }] },
+      metadata: { tier: "unlimited" }, // stale
+    })
+
+    expect(db.machine_limits.get("u1")?.tier).toBe("lite")
+    expect(db.user_credits.get("u1")?.subscription_tier).toBe("lite")
+  })
+
+  it("cancel on unlimited sub flips tier back to 'free'", () => {
+    db.seedSubscription({
+      user_id: "u1",
+      stripe_subscription_id: "sub_u1",
+      subscription_plan_id: "plan_unlimited",
+      status: "active",
+    })
+    handleSubscriptionUpdated(db, {
+      id: "sub_u1", status: "active",
+      current_period_start: Math.floor(Date.now() / 1000),
+      current_period_end:   Math.floor(Date.now() / 1000) + 86400 * 30,
+      items: { data: [{ price: { id: "price_unlimited" } }] },
+      metadata: { tier: "unlimited" },
+    })
+    expect(db.machine_limits.get("u1")?.tier).toBe("unlimited")
+
+    // Cancel — should flip non-paid → free, regardless of source tier.
+    handleSubscriptionDeletedHardened(db, {
+      id: "sub_u1", status: "canceled", customer: "cus_u1",
+    })
+
+    expect(db.machine_limits.get("u1")?.tier).toBe("free")
+    expect(db.user_credits.get("u1")?.has_active_subscription).toBe(false)
+    expect(db.user_credits.get("u1")?.subscription_tier).toBeNull()
   })
 })

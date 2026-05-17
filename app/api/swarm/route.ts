@@ -37,7 +37,7 @@ interface SwarmRequest {
 }
 
 /** Tiers that support persistent swarms */
-const PERSISTENT_ELIGIBLE_TIERS = new Set(["starter", "professional", "enterprise"]);
+const PERSISTENT_ELIGIBLE_TIERS = new Set(["starter", "professional", "unlimited", "enterprise"]);
 
 interface SwarmMachineRecord {
   id: string;

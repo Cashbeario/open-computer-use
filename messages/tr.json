@@ -391,6 +391,12 @@
         "name": "Pro",
         "description": "Sinirsiz agir otomasyon",
         "cta": "Pro'yu Al"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Kredi sınırı yok — asla",
+        "cta": "Unlimited'a geç",
+        "badge": "En iyi değer"
       }
     },
     "vmTemporary": "1 gecici VM (2 saat)",
@@ -400,7 +406,8 @@
     "bargain": {
       "title": "Ayni is manuel iscilikle {oldPrice} tutar",
       "description": "Sanal asistan aylik $2.000–$4.000'dir. Yari zamanli calisan daha pahaliya mal olur. Coasty ayni isi 7/24 $0'dan baslayarak yapar — mukemmel tutarlilik, tam denetim izleri ve sifir egitim suresiyle."
-    }
+    },
+    "unlimitedCredits": "Sınırsız kredi"
   },
   "faq": {
     "title": "Sikca sorulan sorular",
@@ -1029,6 +1036,11 @@
       "pro": {
         "name": "Pro",
         "description": "Sinirsiz agir otomasyon"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "description": "Kredi sınırı yok — asla",
+        "badge": "En iyi değer"
       }
     },
     "features": {
@@ -1482,6 +1494,12 @@
         "name": "Pro",
         "tagline": "Sinirsiz yogun otomasyon",
         "cta": "Pro al"
+      },
+      "unlimited": {
+        "name": "Unlimited",
+        "tagline": "Kredi sınırı yok — asla",
+        "cta": "Unlimited'a geç",
+        "badge": "En iyi değer"
       }
     },
     "features": {
@@ -1936,6 +1954,11 @@
           "credits": "1.500",
           "machines": "3 her zaman acik",
           "feature": "SLA garantisi"
+        },
+        "unlimited": {
+          "credits": "Sınırsız",
+          "machines": "2 her zaman açık",
+          "feature": "En iyi değer · Sınırsız"
         }
       },
       "perMonth": "{price}/ay",

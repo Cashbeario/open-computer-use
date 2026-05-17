@@ -126,21 +126,24 @@ export interface MachineLimits {
 
 /**
  * Canonical subscription tier vocabulary.
- * See supabase/migrations/011_unify_tier_vocabulary.sql.
- * Display names: lite=Lite, starter=Starter, professional=Plus, enterprise=Pro.
+ * See supabase/migrations/011_unify_tier_vocabulary.sql and
+ * supabase/migrations/017_add_unlimited_tier.sql (adds 'unlimited').
+ * Display names: lite=Lite, starter=Starter, professional=Plus,
+ * unlimited=Unlimited, enterprise=Pro.
  */
 export type UserTier =
   | "free"
   | "lite"
   | "starter"
   | "professional"
+  | "unlimited"
   | "enterprise";
 
 /** Tiers eligible for API access (lite folds into free). */
-export const API_ELIGIBLE_TIERS = ["starter", "professional", "enterprise"] as const;
+export const API_ELIGIBLE_TIERS = ["starter", "professional", "unlimited", "enterprise"] as const;
 
 /** Tiers eligible for persistent swarm machines. */
-export const PERSISTENT_SWARM_TIERS = ["starter", "professional", "enterprise"] as const;
+export const PERSISTENT_SWARM_TIERS = ["starter", "professional", "unlimited", "enterprise"] as const;
 
 export interface MachineUsage {
   id: string;

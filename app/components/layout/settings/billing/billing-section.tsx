@@ -121,6 +121,26 @@ const subscriptionPlans = [
     ],
     popular: false,
   },
+  {
+    id: "unlimited",
+    name: "Unlimited",
+    tier: "unlimited",
+    price: 249,
+    // Sentinel for "unlimited" — UI must render the literal string when
+    // detecting tier === "unlimited" rather than this number.
+    monthlyCredits: 999_999_999,
+    machines: 2,
+    swarm: 6,
+    description: "No credit limits — ever",
+    features: [
+      "Unlimited credits, no caps",
+      "2 always-on VMs",
+      "6 agents in parallel",
+      "Priority support, 24hr response",
+    ],
+    popular: false,
+    featured: true,
+  },
 ]
 
 const additionalCreditPackages = [
@@ -1219,12 +1239,16 @@ export function BillingSection() {
     ? subscriptionPlans.find((p) => p.tier === subscription.tier)
     : null
 
-  const creditUsagePercent = activePlan
-    ? Math.min(
+  // Unlimited plan: usage % is meaningless (the sentinel monthlyCredits
+  // would always read ~100% used).  Treat as 0 so the progress bar reads
+  // empty (i.e. "nothing depleted") and the UI elsewhere shows "Unlimited".
+  const isUnlimitedActivePlan = activePlan?.tier === "unlimited"
+  const creditUsagePercent = !activePlan || isUnlimitedActivePlan
+    ? 0
+    : Math.min(
         100,
         ((activePlan.monthlyCredits - (credits?.balance || 0)) / activePlan.monthlyCredits) * 100
       )
-    : 0
 
   // ─── Actions ────────────────────────────────────────────────────────────
 
@@ -1507,7 +1531,9 @@ export function BillingSection() {
             <div className="mb-3 flex items-center gap-2 rounded-lg bg-muted/50 border border-border/30 px-3 py-2">
               <Zap className="h-3.5 w-3.5 text-foreground/40 flex-shrink-0" />
               <span className="text-sm font-medium text-foreground">
-                {t("creditsPerMonth", { count: plan.monthlyCredits.toLocaleString() })}
+                {plan.tier === "unlimited"
+                  ? "Unlimited credits — no caps"
+                  : t("creditsPerMonth", { count: plan.monthlyCredits.toLocaleString() })}
               </span>
             </div>
 
@@ -1572,7 +1598,9 @@ export function BillingSection() {
                     ${activePlan?.price || 0}/month
                     {activePlan && (
                       <span className="text-muted-foreground/50">
-                        {" · "}{activePlan.monthlyCredits} credits/mo
+                        {" · "}{activePlan.tier === "unlimited"
+                          ? "Unlimited credits/mo"
+                          : `${activePlan.monthlyCredits.toLocaleString()} credits/mo`}
                       </span>
                     )}
                   </p>

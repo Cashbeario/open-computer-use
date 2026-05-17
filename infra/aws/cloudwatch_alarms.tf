@@ -594,6 +594,495 @@ resource "aws_cloudwatch_metric_alarm" "split_service_cpu" {
 }
 
 
+# =============================================================================
+# VM-AUTO-RECOVERY ALERTING (2026-05-17 post-incident additions)
+# =============================================================================
+#
+# Background
+# ----------
+# On 2026-05-17 14:41–15:05Z a single EC2 cloud VM at 18.207.92.91:8080 went
+# dark for 24 minutes.  The backend retried 7× per call (~38s each) and
+# accumulated 91 dial timeouts in CloudWatch.  No alarm fired.  No one was
+# paged.  The user's CUA session was broken with no automated recovery.
+#
+# This block adds the alarm coverage that would have paged within 5 minutes:
+#
+#   * A1  VM dial-timeout spike      — backend log-pattern metric filter
+#   * A2  Public ALB 5xx (ELB+Target)
+#   * A3  Internal ALB 5xx (gated on remove_frontend_sidecar)
+#   * A4  ECS RunningTaskCount below desired
+#   * A5  ElectronRpc drop storm     — log-pattern metric filter
+#   * A6  RPC reconnect storm        — log-pattern metric filter
+#   * A7  42702 ambiguous_user_id    — log-pattern metric filter (NEW-1 guard)
+#
+# All alarms route to `aws_sns_topic.alarms` (created above on first use).
+#
+# The local helper `local.alarm_actions` already evaluates to the SNS topic ARN
+# when enable_alarms is on and `[]` otherwise; the new alarms reuse it so the
+# enable/disable contract is preserved.
+#
+# Tagging
+# -------
+# Every resource in this block carries:
+#   Module    = "alerting"
+#   Project   = var.project_name
+#   ManagedBy = "terraform"
+# This makes it trivial to slice CloudWatch billing or `aws cloudwatch
+# describe-alarms` output to the post-incident additions.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Shared tags + locals for the auto-recovery alarm block.  Keeping these here
+# avoids polluting locals.tf and keeps the contract local to the file.
+# -----------------------------------------------------------------------------
+
+locals {
+  alerting_tags = {
+    Module    = "alerting"
+    Project   = var.project_name
+    ManagedBy = "terraform"
+  }
+}
+
+
+# =============================================================================
+# A1. VM dial-timeout spike  (P1)
+# =============================================================================
+#
+# Pattern: `Timeout connecting to VM agent at ` (vm_control.py line 306) emits
+# once per failed dial.  On 2026-05-17 the count hit 91 in a 24 min window
+# while ZERO existing alarms covered that signal.
+#
+# CloudWatch Logs filter pattern uses the bracketed [literal] form so AWS
+# performs a substring match against each log line and counts each match
+# as 1 datapoint in the metric.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "backend_vm_dial_timeouts" {
+  count          = var.enable_alarms ? 1 : 0
+  name           = "${var.project_name}-vm-dial-timeouts"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  # CloudWatch Logs filter patterns: quoted substring matches the literal
+  # text inside the log line.  Backend emits "Timeout connecting to VM agent
+  # at {host}:{port}" — we match the stable prefix only so future port/host
+  # changes don't break the metric.
+  pattern = "\"Timeout connecting to VM agent at\""
+
+  metric_transformation {
+    name          = "BackendVmAgentDialTimeouts"
+    namespace     = "Coasty/Backend"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "backend_vm_dial_timeouts" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-backend-vm-dial-timeouts"
+  alarm_description   = "Backend emitted >5 'Timeout connecting to VM agent' lines in 5 min. The 2026-05-17 incident produced 91 in 24 min with NO alarm fire — this catches it within 5 min. Triggers EC2 agent auto-replace via machine-cleanup."
+  namespace           = "Coasty/Backend"
+  metric_name         = "BackendVmAgentDialTimeouts"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 5
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-backend-vm-dial-timeouts"
+    Severity = "P1"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.backend_vm_dial_timeouts]
+}
+
+
+# =============================================================================
+# A2. Public ALB 5xx alarm (P0)
+# =============================================================================
+#
+# A simple count-based alarm separate from the burst-style alarms above.  The
+# existing `alb_elb_5xx_burst` (>50 in 1 min) is calibrated to catch volume
+# spikes during 1,000-RPS DDOS-style events; this one catches lower-volume
+# sustained badness like the 2026-05-17 dial-timeout cascade.
+# =============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "alb_elb_5xx_count" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-alb-elb5xx-count"
+  alarm_description   = "Public ALB returned >10 ELB-side 5xx in 5 min.  Catches lower-volume sustained failure modes that the 50-in-1min burst alarm misses."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "HTTPCode_ELB_5XX_Count"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-alb-elb5xx-count"
+    Severity = "P0"
+  })
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_target_5xx_count" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-alb-target5xx-count"
+  alarm_description   = "Public ALB target returned >10 5xx in 5 min.  Lower threshold than alb_target_5xx_sustained (50/5min) — catches the 2026-05-17 24-min slow-bleed pattern."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "HTTPCode_Target_5XX_Count"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.main.arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-alb-target5xx-count"
+    Severity = "P0"
+  })
+}
+
+
+# =============================================================================
+# A3. Internal ALB 5xx (P1)
+# =============================================================================
+#
+# Internal ALB only exists when var.remove_frontend_sidecar is true.  When the
+# flag is off the count-guards below evaluate to zero and the alarm doesn't
+# fire — no orphan resources.
+# =============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "alb_internal_elb_5xx_count" {
+  count               = var.enable_alarms && var.remove_frontend_sidecar ? 1 : 0
+  alarm_name          = "${var.project_name}-alb-int-elb5xx-count"
+  alarm_description   = "Internal ALB returned >10 ELB-side 5xx in 5 min.  Frontend→backend (via internal ALB) is failing — chat/CRUD paths broken."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "HTTPCode_ELB_5XX_Count"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.internal_backend[0].arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-alb-int-elb5xx-count"
+    Severity = "P1"
+  })
+}
+
+resource "aws_cloudwatch_metric_alarm" "alb_internal_target_5xx_count" {
+  count               = var.enable_alarms && var.remove_frontend_sidecar ? 1 : 0
+  alarm_name          = "${var.project_name}-alb-int-target5xx-count"
+  alarm_description   = "Internal ALB target returned >10 5xx in 5 min.  Backend handlers on the api/sse path are throwing."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "HTTPCode_Target_5XX_Count"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 10
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    LoadBalancer = aws_lb.internal_backend[0].arn_suffix
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-alb-int-target5xx-count"
+    Severity = "P1"
+  })
+}
+
+
+# =============================================================================
+# A4. ECS RunningTaskCount below desired (P1)
+# =============================================================================
+#
+# `AWS/ECS::RunningTaskCount` is published per service.  When it falls below
+# the service's `desired_count` (often because of an OOM kill or a deploy that
+# couldn't place tasks), no other alarm above catches it specifically — they
+# catch downstream symptoms (5xx, latency).  This is the upstream signal.
+#
+# We alarm at < desired_count for 5 min so the alarm doesn't flap during a
+# normal deploy (which briefly shows 1 of 2 tasks running while the second
+# rolls).  The 5-minute window covers a typical deploy window with margin.
+#
+# Frontend `app` service is always present; split services are gated on the
+# three_service_split flag.
+# =============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "ecs_app_task_count" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-ecs-app-task-count"
+  alarm_description   = "Frontend ECS service running task count fell below desired for 5 min.  Likely OOM kill or a deploy that couldn't place tasks.  Check task stop reasons in ECS console."
+  namespace           = "AWS/ECS"
+  metric_name         = "RunningTaskCount"
+  statistic           = "Minimum"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 5
+  # Threshold < min_capacity catches "we lost a task we MUST have"; using
+  # min_capacity (the autoscale floor) means a partial-deploy state isn't
+  # an alarm until it sticks for 5 minutes.
+  threshold           = var.min_capacity
+  comparison_operator = "LessThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.app.name
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-ecs-app-task-count"
+    Severity = "P1"
+  })
+}
+
+resource "aws_cloudwatch_metric_alarm" "ecs_split_task_count" {
+  for_each = var.enable_alarms && var.three_service_split_enabled ? toset(["api", "sse", "ws"]) : toset([])
+
+  alarm_name          = "${var.project_name}-ecs-${each.key}-task-count"
+  alarm_description   = "${each.key} ECS service running task count fell below floor for 5 min.  ws task crash kills Electron desktop connectivity; sse task crash kills chat streaming; api task crash kills CRUD."
+  namespace           = "AWS/ECS"
+  metric_name         = "RunningTaskCount"
+  statistic           = "Minimum"
+  period              = 60
+  evaluation_periods  = 5
+  datapoints_to_alarm = 5
+  threshold = (
+    each.key == "api" ? var.split_api_min_capacity : (
+      each.key == "sse" ? var.split_sse_min_capacity : var.split_ws_min_capacity
+    )
+  )
+  comparison_operator = "LessThanThreshold"
+  treat_missing_data  = "breaching"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = each.key == "api" ? aws_ecs_service.api[0].name : (
+      each.key == "sse" ? aws_ecs_service.sse[0].name : aws_ecs_service.ws[0].name
+    )
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-ecs-${each.key}-task-count"
+    Severity = "P1"
+  })
+}
+
+
+# =============================================================================
+# A5. ElectronRpc drop storm (P0)
+# =============================================================================
+#
+# Pattern: `ElectronRpc: dropping remote command for {machine_id}` — emitted
+# by electron_rpc.py:983 when the inflight ceiling is reached.  On 2026-04-26
+# two machines hit 138 drops in 30 min while the WS sat connected; the user's
+# clicks/keystrokes were silently dropped.  This alarm catches >100/5min so
+# we page before that scale.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "backend_electron_rpc_drops" {
+  count          = var.enable_alarms ? 1 : 0
+  name           = "${var.project_name}-electron-rpc-drops"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  # Substring match on the stable prefix.  The full log line includes the
+  # machine_id and a reason, but anchoring on the prefix is enough to count.
+  pattern = "\"ElectronRpc: dropping remote command\""
+
+  metric_transformation {
+    name          = "ElectronRpcDroppedCommands"
+    namespace     = "Coasty/Backend"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "backend_electron_rpc_drops" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-electron-rpc-drops"
+  alarm_description   = "Backend dropped >100 Electron remote commands in 5 min.  Per-machine inflight cap hit — user clicks/keystrokes silently dropped.  Check electron_rpc.py:983 and the affected machine_ids in the matching log lines."
+  namespace           = "Coasty/Backend"
+  metric_name         = "ElectronRpcDroppedCommands"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 100
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-electron-rpc-drops"
+    Severity = "P0"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.backend_electron_rpc_drops]
+}
+
+
+# =============================================================================
+# A6. RPC reconnect storm (P1)
+# =============================================================================
+#
+# Pattern: `{name} consumer error:` lines emitted by ReconnectBackoff in
+# rpc_backoff.py.  The dominant `{name}` values are:
+#   ElectronRpc.resp / ElectronRpc.cancel / ElectronRpc.resume
+#   SwarmRpc.cmd / SwarmRpc.resp
+#   CuaSessionRpc.cmd / CuaSessionRpc.resp
+# Anchoring on the common suffix "consumer error" matches all of them in one
+# metric filter.  This pages when redis/the broker has been flapping long
+# enough to clear the dedup'd ERROR rate (>= 50 emitted lines in 10 min).
+#
+# Why 10 min and 50: ReconnectBackoff emits at most one ERROR per 60s after
+# the initial 5-WARN burst.  50 in 10 min means >= 5 consumers ALL escalating,
+# i.e. a multi-replica or multi-consumer outage — not a one-off flake.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "backend_rpc_listener_errors" {
+  count          = var.enable_alarms ? 1 : 0
+  name           = "${var.project_name}-rpc-listener-errors"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  # rpc_backoff.py logs as: "{Name}.{role} consumer error: {exc} — restarting in {delay}s ..."
+  # The literal "consumer error" suffix is the most stable anchor.
+  pattern = "\"consumer error\""
+
+  metric_transformation {
+    name          = "RpcConsumerErrors"
+    namespace     = "Coasty/Backend"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "backend_rpc_listener_errors" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-rpc-listener-errors"
+  alarm_description   = "Backend RPC consumer loops (electron/swarm/cua_session) emitted >50 'consumer error' lines in 10 min.  Likely broker/Redis outage or auth-loop.  Check rpc_backoff dedup windows; if escalated, traffic between replicas is silently dropping."
+  namespace           = "Coasty/Backend"
+  metric_name         = "RpcConsumerErrors"
+  statistic           = "Sum"
+  period              = 600
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 50
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-rpc-listener-errors"
+    Severity = "P1"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.backend_rpc_listener_errors]
+}
+
+
+# =============================================================================
+# A7. 42702 ambiguous_user_id regression (P0)
+# =============================================================================
+#
+# Pattern: `update_subscription_status RPC failed` — the exact log line
+# emitted by app/api/credits/webhook/route.ts:673 when the Stripe webhook can't
+# update the subscription row.  The NEW-1 audit fixed a 42702 ambiguous_user_id
+# defect in the matching Supabase function; this alarm fires the SECOND it ever
+# reappears so we know the migration regressed.
+#
+# Threshold = 1: this should NEVER happen post-fix.  If it fires, treat it as
+# a code regression, not an ops issue.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "billing_subscription_rpc_failed" {
+  count          = var.enable_alarms ? 1 : 0
+  name           = "${var.project_name}-billing-subscription-rpc-failed"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  pattern        = "\"update_subscription_status RPC failed\""
+
+  metric_transformation {
+    name          = "BillingSubscriptionRpcFailures"
+    namespace     = "Coasty/Backend"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "billing_subscription_rpc_failed" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-billing-subscription-rpc-failed"
+  alarm_description   = "update_subscription_status RPC has failed at least once.  This is the NEW-1 42702 regression signature — billing webhooks aren't persisting subscription state.  Treat as code regression; do NOT page-and-go, investigate the migration."
+  namespace           = "Coasty/Backend"
+  metric_name         = "BillingSubscriptionRpcFailures"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 0
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-billing-subscription-rpc-failed"
+    Severity = "P0"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.billing_subscription_rpc_failed]
+}
+
+
 # -----------------------------------------------------------------------------
 # Output: SNS topic ARN so people can hook up PagerDuty / Slack / etc.
 # -----------------------------------------------------------------------------

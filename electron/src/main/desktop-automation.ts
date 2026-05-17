@@ -138,7 +138,15 @@ function runPowershellCursor(x: number, y: number): Promise<void> {
       `Add-Type -AssemblyName System.Windows.Forms; ` +
       `[System.Windows.Forms.Cursor]::Position = ` +
       `New-Object System.Drawing.Point(${x}, ${y})`
-    execFile('powershell.exe', ['-NoProfile', '-Command', script], { timeout: 5000 }, (err) => {
+    // maxBuffer raised to 10 MB across the codebase on 2026-05-17 after
+    // ERR_CHILD_PROCESS_STDIO_MAXBUFFER events from PowerShell scripts;
+    // see terminal.ts MAX_OUTPUT_BUFFER_BYTES for the rationale. Cursor
+    // moves are silent so we'll never approach this, but consistency
+    // across every PowerShell spawn is worth more than the few bytes.
+    execFile('powershell.exe', ['-NoProfile', '-Command', script], {
+      timeout: 5000,
+      maxBuffer: 10 * 1024 * 1024,
+    }, (err) => {
       if (err) reject(err); else resolve()
     })
   })

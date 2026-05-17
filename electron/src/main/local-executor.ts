@@ -57,6 +57,10 @@ function runShellForResult(opts: {
   return new Promise((resolve) => {
     execFile(opts.cmd, opts.args, {
       timeout: 8000,
+      // 10 MB — raised from the 1 MB default on 2026-05-17 after
+      // ERR_CHILD_PROCESS_STDIO_MAXBUFFER reports from update-script
+      // codepaths. See terminal.ts MAX_OUTPUT_BUFFER_BYTES for sizing.
+      maxBuffer: 10 * 1024 * 1024,
       env: opts.env ? { ...process.env, ...opts.env } : undefined,
     }, (error, stdout) => {
       if (error) {

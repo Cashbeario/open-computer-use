@@ -27,16 +27,17 @@ What this suite regression-guards
 
 Machine-id naming convention
 ----------------------------
-Every test in this file uses `post-deploy-smoke-{user_id[:8]}` as its
-machine_id. If a test leaves state behind in Supabase (should be rare —
-none of these tests complete a full machine-registration round-trip via
-the real Electron app flow), the operator can grep for the literal prefix
-`post-deploy-smoke-` in the `user_machines` table during triage.
+Every test in this file uses a seeded UUID v5 derived from a fixed
+``post-deploy-smoke`` namespace + the run's ``user_id``. The resulting
+``machine_id`` is a valid UUID (PostgreSQL ``uuid`` column accepts it),
+stable across runs for the same user, and still greppable in logs via
+the operator's saved ``user_machines`` lookup by user_id.
 
-The `post-deploy-smoke-` prefix is stable across runs on purpose: if two
-CI runs race, they will target the same machine_id and the server's
-"last auth wins" semantics handle that cleanly. We do NOT randomize the
-suffix because a stable prefix is easier to grep in logs than a UUID.
+Why this changed (2026-05-14): the previous literal prefix
+``post-deploy-smoke-<user[:8]>`` failed PostgreSQL UUID validation and
+produced 22 ERROR/day in ``database.get_machine`` and ownership checks,
+masking real ownership failures during smoke-test windows. Switching to
+UUID v5 keeps the "stable per user" property without breaking the DB.
 
 WebSocket client choice
 -----------------------
@@ -60,6 +61,7 @@ import json
 import socket
 import ssl
 import time
+import uuid
 from urllib.parse import urlparse, urlencode
 
 import httpx
@@ -113,9 +115,23 @@ WS_OPEN_TIMEOUT = 8.0
 WS_RECV_TIMEOUT = 5.0
 
 
+# UUID v5 namespace for post-deploy smoke machine_ids. Chosen by
+# ``uuid.uuid5(uuid.NAMESPACE_DNS, "post-deploy-smoke.coasty.ai")`` —
+# committed as a constant so a re-derivation doesn't accidentally
+# produce a new namespace.
+_SMOKE_MACHINE_NAMESPACE = uuid.UUID("a3a9b9a4-7a8d-50aa-9a3e-bdf26b7d11a1")
+
+
 def _machine_id(user_id: str) -> str:
-    """Stable machine_id for the run. See module docstring."""
-    return f"post-deploy-smoke-{user_id[:8]}"
+    """Stable machine_id (UUID v5) for the run. See module docstring.
+
+    Returns a valid PostgreSQL ``uuid`` value derived deterministically
+    from ``user_id`` so the same user always sees the same smoke
+    machine_id. The original literal ``post-deploy-smoke-<user[:8]>``
+    failed PostgreSQL UUID validation (22P02) and produced 22 ERROR/day
+    in machine ownership checks. See module docstring for the history.
+    """
+    return str(uuid.uuid5(_SMOKE_MACHINE_NAMESPACE, user_id))
 
 
 def _ws_url(base_ws: str, path: str = "/api/electron/ws", **params: str) -> str:

@@ -395,9 +395,33 @@ describe('output truncation', () => {
     expect(result.stderr.length).toBe(5000)
   })
 
-  it('caps maxBuffer at 1MB at the spawn level', async () => {
+  it('caps maxBuffer at 10MB at the spawn level (defense-in-depth)', async () => {
+    // ─── Security property under test ──────────────────────────────────
+    //
+    // The PRIMARY defense against runaway output is `truncateOutput()`
+    // which slices stdout/stderr to 5,000 chars before the agent sees
+    // them (see the "truncates stdout to 5000 chars even when shell
+    // emits ~100MB" test directly above).
+    //
+    // `maxBuffer` is the SECONDARY (defense-in-depth) backstop: a hard
+    // OS-level ceiling so the child process can't fill RAM faster than
+    // truncation can read it.  Originally pinned at 1 MB; raised to
+    // 10 MB on 2026-05-17 after three production
+    // `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` incidents from legitimate
+    // verbose output (PowerShell `Get-Process | Format-List *`, brew
+    // install logs, npm install verbose) which all exceed 1 MB.
+    //
+    // 10 MB is still a finite hard cap → an adversarial command that
+    // tries to fill RAM gets killed by Node before the renderer is
+    // affected.  Bumping further (e.g. 100 MB) would erode this
+    // property; this test pins the ceiling so a casual `* 100` typo
+    // gets caught.
+    const TEN_MB = 10 * 1024 * 1024
     const promise = executeTerminal({ command: 'echo hi' })
-    expect(execFileCalls[0].opts.maxBuffer).toBe(1024 * 1024)
+    expect(execFileCalls[0].opts.maxBuffer).toBe(TEN_MB)
+    // Must NOT have crept above the documented ceiling — defense-in-depth
+    // is meaningful only while the ceiling is genuinely finite.
+    expect(execFileCalls[0].opts.maxBuffer).toBeLessThanOrEqual(TEN_MB)
     execFileCalls[0].cb(null, '', '')
     await promise
   })

@@ -1372,7 +1372,15 @@ async def main():
  except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
- async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=None,ping_timeout=None,close_timeout=60,compression=None):
+ # ping_interval=20 / ping_timeout=10 — server-side keep-alive (2026-05-17 NAT fix).
+ # The backend (vm_control.py) already pings every 20s on its side; adding the
+ # server-side ping closes the asymmetry where a partition losing the
+ # backend->VM direction first would keep the VM-side socket alive for the
+ # full TCP keepalive window (~2h on Linux defaults). With both sides
+ # pinging at 20s, AWS NAT GW's 350s idle timeout can never expire on
+ # a healthy connection. Existing AMI'd instances do NOT pick this up
+ # automatically — see operator runbook for rolling restart guidance.
+ async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=20,ping_timeout=10,close_timeout=60,compression=None):
   await asyncio.Future()
 if __name__=="__main__":asyncio.run(main())
 `;
@@ -2600,7 +2608,12 @@ async def main():
  except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
- async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=None,ping_timeout=None,close_timeout=60,compression=None):
+ # ping_interval=20 / ping_timeout=10 — server-side keep-alive (Windows variant).
+ # Mirrors the Linux agent fix in generateUserData. See the Linux agent's
+ # main() for the full NAT-idle-timeout rationale. Existing Windows AMI
+ # instances do NOT pick this up automatically — recycle them via the
+ # operator runbook before this side becomes effective.
+ async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=20,ping_timeout=10,close_timeout=60,compression=None):
   await asyncio.Future()
 if __name__=="__main__":asyncio.run(main())
 `;

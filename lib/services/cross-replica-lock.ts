@@ -42,6 +42,34 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import os from "node:os";
 
+// ── Periodic-summary state ──────────────────────────────────────────────
+// The cooperative skip is logged at DEBUG (was INFO, contributing the
+// majority of cron-lock log volume — 90% of 13k lines / 4 days in the
+// audited window). We still want operators to see at a glance that the
+// lock IS working, so every SUMMARY_INTERVAL_MS we emit an INFO-level
+// rollup of running counters. Counters live at module scope so they
+// accumulate across all jobs sharing this process; they reset after
+// each summary emission so the next window's number is a fresh diff.
+const SUMMARY_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+
+let _acquiredCount = 0;
+let _skippedCount = 0;
+let _failedCount = 0;
+let _lastSummaryEmit = Date.now();
+
+function _maybeEmitSummary(): void {
+  const now = Date.now();
+  if (now - _lastSummaryEmit < SUMMARY_INTERVAL_MS) return;
+  console.log(
+    `[cron-lock] stats: acquired=${_acquiredCount} skipped=${_skippedCount} ` +
+      `failed=${_failedCount} window_ms=${now - _lastSummaryEmit}`
+  );
+  _acquiredCount = 0;
+  _skippedCount = 0;
+  _failedCount = 0;
+  _lastSummaryEmit = now;
+}
+
 /**
  * Result of a lock-acquisition attempt.
  */
@@ -125,6 +153,8 @@ export async function tryAcquireCronLock(
       console.log(
         `[cron-lock] acquired ${jobName}@${runWindow} (host=${hostname})`
       );
+      _acquiredCount += 1;
+      _maybeEmitSummary();
       return { jobName, runWindow, hostname, acquiredAt };
     }
 
@@ -133,9 +163,14 @@ export async function tryAcquireCronLock(
     const code = (error as any).code as string | undefined;
     const message = ((error as any).message ?? "") as string;
     if (code === "23505" || message.includes("23505") || /duplicate key/i.test(message)) {
-      console.log(
+      // Demoted to console.debug — this is the designed cooperative skip
+      // and fires once per replica per run-window. Visible via the
+      // periodic summary instead (acquired/skipped/failed counts).
+      console.debug(
         `[cron-lock] another replica is running ${jobName}@${runWindow}; skipping`
       );
+      _skippedCount += 1;
+      _maybeEmitSummary();
       return null;
     }
 
@@ -144,17 +179,23 @@ export async function tryAcquireCronLock(
       console.error(
         `[cron-lock] table 'cron_runs' missing — apply supabase/migrations/013_cron_runs.sql. Skipping ${jobName}@${runWindow} to avoid the cross-replica race we just patched.`
       );
+      _failedCount += 1;
+      _maybeEmitSummary();
       return null;
     }
 
     console.error(
       `[cron-lock] unexpected error acquiring ${jobName}@${runWindow}: ${code ?? "(no code)"}: ${message}`
     );
+    _failedCount += 1;
+    _maybeEmitSummary();
     return null;
   } catch (err: any) {
     console.error(
       `[cron-lock] threw acquiring ${jobName}@${runWindow}: ${err?.message ?? err}`
     );
+    _failedCount += 1;
+    _maybeEmitSummary();
     return null;
   }
 }

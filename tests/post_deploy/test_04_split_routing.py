@@ -57,12 +57,29 @@ from __future__ import annotations
 import json
 import ssl
 import time
+import uuid
 from contextlib import closing
 from typing import Any
 
 import pytest
 
 import websockets  # required — WS tests use this client
+
+
+# Pre-allocated valid UUIDs used as ``machine_id`` for routing smoke tests.
+# These don't correspond to real machines in the DB — they exist purely
+# so the ALB-routing assertions can construct a request the backend will
+# accept past Pydantic validation. We chose deterministic UUIDs (matching
+# the smoke-fingerprint naming scheme used in test_06) so they're easy
+# to grep in CloudWatch.
+#
+# Before 2026-05-14 these were literal strings ``post-deploy-routing-2``,
+# ``post-deploy-routing-443``, etc. — which fail PostgreSQL UUID validation
+# (22P02) and surfaced as 22 ERROR/day in ``database.get_machine`` and
+# ownership checks during smoke-test windows.
+_ROUTING_MACHINE_GENERIC = "00000000-0000-0000-0000-deadbeef0001"
+_ROUTING_MACHINE_443     = "00000000-0000-0000-0000-deadbeef0443"
+_ROUTING_MACHINE_8001    = "00000000-0000-0000-0000-deadbeef8001"
 
 
 # Permissive SSL context for direct-ALB wss:// — the direct ALB DNS doesn't
@@ -84,7 +101,7 @@ def _cfg():
     return cfg()
 
 
-def _minimal_chat_body(user_id: str, machine_id: str = "post-deploy-routing") -> dict:
+def _minimal_chat_body(user_id: str, machine_id: str = _ROUTING_MACHINE_GENERIC) -> dict:
     """
     Smallest ChatRequest payload the backend will accept without throwing at
     Pydantic-validation time.  We don't care whether the *chat* succeeds;
@@ -199,7 +216,7 @@ def test_electron_ws_routes_to_ws_service_via_443(test_jwt: str, test_user_id: s
                 await ws.send(json.dumps({
                     "type": "auth",
                     "token": test_jwt,
-                    "machine_id": "post-deploy-routing-443",
+                    "machine_id": _ROUTING_MACHINE_443,
                     "user_id": test_user_id,
                 }))
                 raw = await ws.recv()
@@ -232,7 +249,7 @@ def test_electron_ws_routes_to_ws_service_via_8001(test_jwt: str, test_user_id: 
                 await ws.send(json.dumps({
                     "type": "auth",
                     "token": test_jwt,
-                    "machine_id": "post-deploy-routing-8001",
+                    "machine_id": _ROUTING_MACHINE_8001,
                     "user_id": test_user_id,
                 }))
                 raw = await ws.recv()

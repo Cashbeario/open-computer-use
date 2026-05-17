@@ -1,6 +1,10 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { deleteSwarmMailbox } from "@/lib/services/workmail-service";
 import { withCronLock } from "@/lib/services/cross-replica-lock";
+import {
+  runAgentHealthCheck,
+  type AgentHealthCheckStats,
+} from "@/lib/services/agent-health-check";
 
 interface CleanupStats {
   deleted: number;
@@ -13,14 +17,37 @@ interface CleanupStats {
 // race for the same lock; exactly one replica wins per cycle.
 const CLEANUP_BUCKET_MINUTES = 120;
 
+// The agent-health-check cron runs much more frequently (every 2 minutes)
+// than the heavy cleanup jobs above. Its bucket size matches its tick rate
+// so each tick across all replicas races for one lock, and exactly one
+// replica polls the backend + runs the SSM/EC2 remediation per cycle.
+//
+// Why a separate constant: the 2-hour cron is fundamentally
+// "snapshot-and-delete free user machines"; the 2-min cron is
+// "self-heal unresponsive agents." They don't share a cadence or a
+// failure model, so coupling them via a shared bucket would be wrong.
+const AGENT_HEALTH_CHECK_BUCKET_MINUTES = 2;
+
 export class MachineCleanupService {
   private intervalId: NodeJS.Timeout | null = null;
+  private agentHealthIntervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
 
   constructor() {}
 
   /**
-   * Start the periodic cleanup service (runs every 2 hours)
+   * Start the periodic cleanup service.
+   *
+   * Two cadences:
+   *   * Heavy cleanup (snapshot, free-user purge, swarm reap) — every 2 hours
+   *   * Agent health check (post-incident 2026-05-17) — every 2 minutes
+   *
+   * Both share the same cross-replica leader-election helper
+   * (`withCronLock`) but with different bucket sizes so they elect leaders
+   * independently. The agent-health-check job is intentionally short and
+   * idempotent — even if the lock briefly slips between replicas (e.g. row
+   * deletion between buckets), the worst case is "we try SSM restart twice"
+   * which is harmless.
    */
   start() {
     if (this.intervalId) {
@@ -46,6 +73,16 @@ export class MachineCleanupService {
       this.runPeriodicSnapshotsLocked();
       this.cleanupSwarmMachinesLocked();
     }, 2 * 60 * 60 * 1000);
+
+    // Agent-health auto-recovery loop. Kill switch: setting
+    // DISABLE_AGENT_AUTO_REPLACE=true at the env layer keeps the cron
+    // mounted (for telemetry) but the inner runAgentHealthCheck no-ops
+    // — see lib/services/agent-health-check.ts for the gate.
+    console.log("Starting agent-health auto-recovery loop - runs every 2 minutes");
+    this.runAgentHealthCheckLocked();
+    this.agentHealthIntervalId = setInterval(() => {
+      this.runAgentHealthCheckLocked();
+    }, 2 * 60 * 1000);
   }
 
   /**
@@ -94,6 +131,49 @@ export class MachineCleanupService {
   }
 
   /**
+   * Cross-replica-locked wrapper for `runAgentHealthCheck`.
+   *
+   * Background — 2026-05-17 incident
+   * --------------------------------
+   * A single EC2 cloud VM agent died but the EC2 instance stayed "running".
+   * The backend retried 7× per call (~38s each) and produced 91 dial
+   * timeouts in CloudWatch over 24 minutes. NO alarm fired, NO recovery
+   * kicked in, the user's CUA session sat broken. The only available
+   * recovery path was the user manually stopping + relaunching the machine.
+   *
+   * Fix
+   * ---
+   * vm_control.py now flips an `agent_unresponsive` circuit breaker after
+   * 3 consecutive dial failures within 5 minutes. /api/internal/vm-health
+   * lists the flagged machines. This cron polls that endpoint every 2 min
+   * (under a cross-replica lock so only one Next.js replica per bucket
+   * issues SSM commands) and for each entry:
+   *   1. SSM RunCommand `systemctl restart ai-agent.service`. Wait 60s.
+   *   2. If still flagged: terminate + relaunch the EC2 instance, update
+   *      Supabase, notify the user via WebSocket.
+   *
+   * `withCronLock` returns `false` when this replica didn't win the lock —
+   * we report nothing in that case because the winning replica will write
+   * the cron_runs row with the real numbers.
+   */
+  private async runAgentHealthCheckLocked(): Promise<void> {
+    await withCronLock(
+      "runAgentHealthCheck",
+      AGENT_HEALTH_CHECK_BUCKET_MINUTES,
+      async (report) => {
+        const stats: AgentHealthCheckStats = await runAgentHealthCheck();
+        report({
+          polled: stats.polled,
+          ssmRestarted: stats.ssmRestarted,
+          ec2Replaced: stats.ec2Replaced,
+          errors: stats.errors,
+          skipped: stats.skipped,
+        });
+      }
+    );
+  }
+
+  /**
    * Stop the cleanup service
    */
   stop() {
@@ -101,6 +181,11 @@ export class MachineCleanupService {
       clearInterval(this.intervalId);
       this.intervalId = null;
       console.log("Machine cleanup service stopped");
+    }
+    if (this.agentHealthIntervalId) {
+      clearInterval(this.agentHealthIntervalId);
+      this.agentHealthIntervalId = null;
+      console.log("Agent-health auto-recovery loop stopped");
     }
   }
 
@@ -533,7 +618,9 @@ export class MachineCleanupService {
     return {
       isRunning: this.isRunning,
       hasScheduledCleanup: this.intervalId !== null,
-      nextCleanupIn: this.intervalId ? "Within 2 hours" : "Not scheduled"
+      nextCleanupIn: this.intervalId ? "Within 2 hours" : "Not scheduled",
+      hasScheduledAgentHealthCheck: this.agentHealthIntervalId !== null,
+      nextAgentHealthCheckIn: this.agentHealthIntervalId ? "Within 2 minutes" : "Not scheduled",
     };
   }
 }

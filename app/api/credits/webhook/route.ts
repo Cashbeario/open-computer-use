@@ -3,6 +3,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { headers } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import { logApiAccess } from "@/lib/observability/api-access-log"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -97,15 +98,23 @@ async function handleCreditPurchase(session: Stripe.Checkout.Session, supabase: 
 }
 
 export async function POST(req: NextRequest) {
+  // Per-request access log. Critical for the Stripe webhook because a 500
+  // here means Stripe retries — without the access log we couldn't tell
+  // the difference between "Stripe is hammering us due to retries" vs
+  // "normal webhook traffic spiked".
+  const t_start = Date.now()
+  let webhookEventType: string | undefined
+  let outResponse: NextResponse | undefined
   try {
     const body = await req.text()
     const signature = (await headers()).get("stripe-signature")
 
     if (!signature) {
-      return NextResponse.json(
+      outResponse = NextResponse.json(
         { error: "Missing stripe signature" },
         { status: 400 }
       )
+      return outResponse
     }
 
     let event: Stripe.Event
@@ -114,11 +123,14 @@ export async function POST(req: NextRequest) {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err) {
       console.error("Webhook signature verification failed:", err)
-      return NextResponse.json(
+      outResponse = NextResponse.json(
         { error: "Invalid signature" },
         { status: 400 }
       )
+      return outResponse
     }
+
+    webhookEventType = event.type
 
     // Use service role client for webhook operations (bypasses RLS)
     const supabase = createServiceClient(
@@ -152,13 +164,15 @@ export async function POST(req: NextRequest) {
     // Real DB error — let Stripe retry
     if (eventInsertError) {
       console.error(`Error recording stripe event ${event.id}:`, eventInsertError)
-      return NextResponse.json({ error: "Database error" }, { status: 500 })
+      outResponse = NextResponse.json({ error: "Database error" }, { status: 500 })
+      return outResponse
     }
 
     // No row returned means the event already existed — skip processing
     if (!insertedEvent) {
       console.log(`Event ${event.id} already processed (atomic check)`)
-      return NextResponse.json({ received: true })
+      outResponse = NextResponse.json({ received: true })
+      return outResponse
     }
 
     // Log the event for debugging
@@ -942,7 +956,7 @@ export async function POST(req: NextRequest) {
             console.error(
               `webhook.invoice.fallback.exhausted subscription=${subscriptionId} invoice=${invoice.id} — returning 500 for Stripe to retry`
             )
-            return NextResponse.json(
+            outResponse = NextResponse.json(
               {
                 error: "Unable to derive billing period for renewal",
                 subscription_id: subscriptionId,
@@ -950,6 +964,7 @@ export async function POST(req: NextRequest) {
               },
               { status: 500 }
             )
+            return outResponse
           }
 
           console.log(
@@ -1073,12 +1088,23 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", event.id)
 
-    return NextResponse.json({ received: true })
+    outResponse = NextResponse.json({ received: true })
+    return outResponse
   } catch (error) {
     // Webhook processing error occurred
-    return NextResponse.json(
+    outResponse = NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }
     )
+    return outResponse
+  } finally {
+    // Unified access-log line. The `event_type` extra is critical for
+    // distinguishing the Stripe webhook retry source — without it
+    // CloudWatch can't tell whether the 500s are concentrated on
+    // checkout.session.completed (init flow) or invoice.payment_succeeded
+    // (renewal flow).
+    logApiAccess(req, outResponse?.status ?? 500, Date.now() - t_start, {
+      event_type: webhookEventType,
+    })
   }
 }

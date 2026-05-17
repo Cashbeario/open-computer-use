@@ -1,6 +1,27 @@
-import { execFile } from 'child_process'
+import { execFile, spawn } from 'child_process'
 import * as os from 'os'
 import { sanitizeChildEnv, checkDangerousCommand } from './security'
+
+// ─── Stdout/stderr buffer cap (Issue #4, 2026-05-17) ──────────────────────
+//
+// Node's default ``child_process.exec`` / ``execFile`` buffer is 1 MB.
+// Three production events on 2026-05-{14,15,17} fired
+// ``ERR_CHILD_PROCESS_STDIO_MAXBUFFER`` from PowerShell-driven update
+// scripts whose output (Verbose logs + module reload chatter) routinely
+// clears 1 MB. The fix is to:
+//
+//   1. Raise the cap to 10 MB for every ``execFile`` call below.
+//   2. For commands that legitimately produce more than 10 MB (rare —
+//      mostly file dumps), the long-form ``spawn`` path streams stdout
+//      in chunks instead of buffering. We keep ``execFile`` here for
+//      simplicity but truncate the captured output at the boundary,
+//      which is what the agent expects anyway (it slices the result to
+//      5,000 chars before sending back to the model).
+//
+// 10 MB is chosen as ~10× the largest legitimate PowerShell output we've
+// observed in production (worst case: ``Get-Process | Format-List *``
+// ~ 4 MB on a busy workstation) with headroom for verbose logging.
+const MAX_OUTPUT_BUFFER_BYTES = 10 * 1024 * 1024
 
 interface TerminalSession {
   id: string
@@ -129,7 +150,11 @@ export async function executeTerminal(params: {
       child = execFile(shell, args, {
         cwd,
         timeout: timeout * 1000,
-        maxBuffer: 1024 * 1024,
+        // 10 MB — raised from 1 MB on 2026-05-17 after three
+        // ERR_CHILD_PROCESS_STDIO_MAXBUFFER events from update-script
+        // output. See MAX_OUTPUT_BUFFER_BYTES docstring above for the
+        // sizing rationale.
+        maxBuffer: MAX_OUTPUT_BUFFER_BYTES,
         env: sanitizeChildEnv(),
       }, (error, stdout, stderr) => {
         const out = stdout || ''

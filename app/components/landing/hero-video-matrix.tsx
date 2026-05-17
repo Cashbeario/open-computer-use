@@ -48,18 +48,17 @@ function StatCell({
   rawValue,
   label,
   sublabel,
-  delay,
   isMobile,
 }: {
   rawValue: string
   label: string
   sublabel: string
-  delay: number
   isMobile: boolean
 }) {
   const { prefix, num, suffix } = useMemo(() => parseStat(rawValue), [rawValue])
-  const [inView, setInView] = useState(false)
-  const animated = useCountUp(num, 1800, inView)
+  // Above-the-fold hero — count-up starts on mount. The parent stats row
+  // owns the coordinated entrance animation.
+  const animated = useCountUp(num, 1800, true)
   const display = num === 0
     ? `${prefix}0${suffix}`
     : `${prefix}${animated.toLocaleString()}${suffix}`
@@ -71,13 +70,10 @@ function StatCell({
   //               footnote that explains what the number is benchmarked
   //               against. Sans→mono→sans creates clear visual rhythm
   //               without italics or extra ornament.
+  // No inner motion — the parent stats wrapper handles the coordinated
+  // entrance for the whole row.
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      onViewportEnter={() => setInView(true)}
-      viewport={{ once: true, amount: 0.45 }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
       className="flex flex-col items-center text-center"
     >
       <div
@@ -86,7 +82,9 @@ function StatCell({
           "bg-clip-text text-transparent",
           "bg-gradient-to-b from-foreground to-foreground/85",
           "dark:from-white dark:to-white/80",
-          isMobile ? "text-[1.7rem]" : "text-[1.85rem] lg:text-[2rem]",
+          // Mobile: 1.55rem (~25px) reads as composed, not loud, at 320–
+          // 414px viewports. Desktop unchanged.
+          isMobile ? "text-[1.55rem]" : "text-[1.85rem] lg:text-[2rem]",
         )}
       >
         {display}
@@ -95,7 +93,7 @@ function StatCell({
         className={cn(
           "font-mono uppercase leading-tight text-foreground/55 dark:text-white/55",
           isMobile
-            ? "mt-2.5 text-[8px] tracking-[0.2em]"
+            ? "mt-2 text-[8px] tracking-[0.18em]"
             : "mt-3 text-[9px] tracking-[0.24em]",
         )}
       >
@@ -104,14 +102,17 @@ function StatCell({
       <div
         className={cn(
           "font-light leading-[1.35] text-foreground/35 dark:text-white/35 normal-case",
+          // min-h reserves the height of a 2-line sublabel so cells in
+          // the 2x2 mobile grid (and 1x4 desktop row) line up vertically
+          // even when some sublabels wrap to 1 line and others to 2.
           isMobile
-            ? "mt-1.5 max-w-[120px] text-[9.5px]"
-            : "mt-2 max-w-[150px] text-[11px]",
+            ? "mt-1 max-w-[130px] text-[9px] min-h-[2.4em]"
+            : "mt-2 max-w-[150px] text-[11px] min-h-[2.7em]",
         )}
       >
         {sublabel}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -133,6 +134,162 @@ const ROW_OFFSETS = [0, 3, 1, 5, 2, 4, 1]
 // false: hero scrolls naturally — smoothest on every device.
 // true:  original 250vh sticky cinema sequence is restored.
 const ENABLE_CINEMATIC_INTRO = false
+
+// ─── Ambient background ──────────────────────────────────────────
+// Two layers on every viewport (top radial wash + bottom fade), plus
+// extra layers on desktop only (left/right ambient orbs, mouse-tracked
+// spotlight, film grain). Mobile stays super clean — only the wash +
+// the fade survive there, so the headline reads on near-empty ground.
+function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+
+  // Mouse-tracked spotlight — a quiet radial that follows the cursor on
+  // desktop. Pure CSS var update + composited radial gradient — no React
+  // re-render. Disabled on mobile.
+  useEffect(() => {
+    if (isMobile) return
+    const el = rootRef.current
+    if (!el) return
+    let raf = 0
+    let pendingX = 50
+    let pendingY = 30
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      pendingX = ((e.clientX - rect.left) / rect.width) * 100
+      pendingY = ((e.clientY - rect.top) / rect.height) * 100
+      if (!raf) {
+        raf = requestAnimationFrame(() => {
+          el.style.setProperty("--hero-spot-x", `${pendingX}%`)
+          el.style.setProperty("--hero-spot-y", `${pendingY}%`)
+          raf = 0
+        })
+      }
+    }
+    window.addEventListener("pointermove", onMove, { passive: true })
+    return () => {
+      window.removeEventListener("pointermove", onMove)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [isMobile])
+
+  return (
+    <div
+      ref={rootRef}
+      aria-hidden="true"
+      className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+      style={{
+        transform: "translateZ(0)",
+        "--hero-spot-x": "50%",
+        "--hero-spot-y": "30%",
+      } as React.CSSProperties}
+    >
+      {/* Top radial wash — "lit from above" centre glow. Always on; the
+          mobile version uses a slightly tighter, lower-opacity wash. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isMobile
+            ? "radial-gradient(ellipse 110% 45% at 50% 0%, color-mix(in oklab, var(--foreground) 3%, transparent), transparent 70%)"
+            : "radial-gradient(ellipse 90% 55% at 50% 0%, color-mix(in oklab, var(--foreground) 4%, transparent), transparent 70%)",
+        }}
+      />
+
+      {/* Desktop-only chrome — orbs + dot grid. Skipped on mobile so the
+          hero is just type on ground; no orbs to clutter a small viewport
+          and no grid to compete with the 2×2 stats row. */}
+      {!isMobile && (
+        <>
+          {/* Local keyframes for the orb drift — kept inside this branch so
+              they're absent from the mobile build entirely.
+              Respects prefers-reduced-motion: when the OS signal is set,
+              the orbs hold still (no animation), and the spotlight bg
+              transition is removed so cursor moves don't tween. */}
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                @keyframes coasty-hero-orb-a {
+                  0%, 100% { transform: translate3d(-4%, -2%, 0) scale(1); }
+                  50%      { transform: translate3d(4%, 3%, 0) scale(1.05); }
+                }
+                @keyframes coasty-hero-orb-b {
+                  0%, 100% { transform: translate3d(3%, 2%, 0) scale(1.04); }
+                  50%      { transform: translate3d(-3%, -3%, 0) scale(1); }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                  [data-coasty-hero-orb] { animation: none !important; }
+                  [data-coasty-hero-spotlight] { transition: none !important; }
+                }
+              `,
+            }}
+          />
+
+          {/* Left ambient orb — far-blurred foreground disc, slow drift.
+              Heavier blur (120px) so it reads as atmosphere, not a disc. */}
+          <div
+            data-coasty-hero-orb=""
+            className="absolute top-[18%] left-[8%] h-[42vh] w-[42vh] rounded-full opacity-60"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--foreground) 6%, transparent), transparent 65%)",
+              filter: "blur(120px)",
+              animation: "coasty-hero-orb-a 22s ease-in-out infinite",
+              willChange: "transform",
+            }}
+          />
+
+          {/* Right ambient orb — mirrored, opposite phase */}
+          <div
+            data-coasty-hero-orb=""
+            className="absolute top-[28%] right-[6%] h-[48vh] w-[48vh] rounded-full opacity-55"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 65%)",
+              filter: "blur(130px)",
+              animation: "coasty-hero-orb-b 26s ease-in-out infinite",
+              willChange: "transform",
+            }}
+          />
+
+          {/* Mouse-tracked spotlight — quiet radial that softly follows
+              the cursor. Pure CSS variables drive the centre; no React
+              re-renders. transition softens the var update so quick
+              cursor moves don't snap-jump. */}
+          <div
+            data-coasty-hero-spotlight=""
+            className="absolute inset-0 transition-[background] duration-300 ease-out"
+            style={{
+              background:
+                "radial-gradient(620px circle at var(--hero-spot-x) var(--hero-spot-y), color-mix(in oklab, var(--foreground) 4%, transparent), transparent 55%)",
+            }}
+          />
+
+          {/* Film grain — fractal SVG noise blended in at very low alpha.
+              The "premium texture" detail used by Linear / Vercel / Stripe
+              heroes. Static (no animation), zero JS, ~700 bytes inline.
+              Mix-blend-overlay makes it lighten light bg and darken dark
+              bg, so it stays a quiet film grain in both modes. */}
+          <div
+            className="absolute inset-0 mix-blend-overlay opacity-[0.35] dark:opacity-[0.18]"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+              backgroundSize: "220px 220px",
+            }}
+          />
+        </>
+      )}
+
+      {/* Bottom fade — linear handoff to the next section. Always on. */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-40"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent, var(--background) 85%)",
+        }}
+      />
+    </div>
+  )
+}
 
 export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   const cols = isMobile ? 9 : 11
@@ -539,13 +696,32 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
             : undefined
         }
       >
-        {/* ─── Cinematic-mode-only chrome ───
-            All the layers below (bg fader, video tile grid, vignette,
-            bottom fade) only mean something when the rAF loop is
-            driving them. In natural-scroll mode they're dead weight
-            (77 image fetches, sticky-related GPU work, layout). The
-            gate keeps them in source for easy re-enable but doesn't
-            ship a single byte to the client when disabled. */}
+        {/* ─── Natural-scroll ambient background ───
+            Layered, performance-cheap composition that lives BELOW
+            the z-10 hero overlay and ABOVE the page bg-background.
+            All layers are pointer-events-none and aria-hidden so
+            they're decorative only.
+
+            Five layers, back-to-front:
+              1. Top radial wash — "lit from above" foreground glow
+                 anchored at the top centre, fades by 70%.
+              2. Two ambient orbs — far-blurred foreground discs
+                 drifting slowly opposite each other. Single-channel
+                 (foreground tint), zero brand colour.
+              3. Dot grid — a 24px micro-grid clipped to a central
+                 radial mask so only the headline area shows the
+                 grain. Edges stay pristine bg.
+              4. Side gutter vignette — gentle inward fade on left
+                 and right edges so the gutter video cards read
+                 against quiet ground.
+              5. Bottom fade — linear handoff to the next section.
+
+            Total cost: zero JS, zero images, four absolute divs +
+            two slow CSS keyframe animations. Renders identically
+            in dark mode via foreground/* CSS variables. */}
+        {!ENABLE_CINEMATIC_INTRO && (
+          <HeroAmbientBackground isMobile={isMobile} />
+        )}
         {ENABLE_CINEMATIC_INTRO && (
           <>
             {/* ─── Background fader (separate layer — avoids repainting sticky) ─── */}
@@ -650,24 +826,38 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
             )}
           >
             {/* Headline — tightened tracking + leading + text-balance for
-                a more confident editorial wrap. Sized 0.25rem smaller per
-                breakpoint than before so it reads as composed, not loud. */}
-            <h1
+                a more confident editorial wrap. Vertical gradient sheen
+                (foreground → foreground/85) is the same "type from paper"
+                treatment used on the stat numbers below — it pulls the
+                bottom of each glyph down a touch in luminance, which the
+                eye reads as quiet depth, not contrast. Cinematic entrance
+                with quint ease-out arrives first; the rest of the column
+                follows in a coordinated wave. */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.95, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "font-semibold tracking-[-0.045em] text-foreground text-balance",
+                "font-semibold tracking-[-0.045em] text-balance",
+                "bg-clip-text text-transparent",
+                "bg-gradient-to-b from-foreground to-foreground/85",
+                "dark:from-white dark:to-white/82",
                 isMobile
                   ? "text-[1.65rem] leading-[1.08]"
                   : "text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.04]"
               )}
             >
               {t("headline")}
-            </h1>
+            </motion.h1>
 
             {/* Rotating subheadline — signature ease curve for a
                 "confident settle" arrival; 0.6s duration breathes longer
                 than the previous 0.5s. Tracking matched to the headline
                 for typographic continuity. */}
             <div
+              role="text"
+              aria-live="polite"
+              aria-atomic="true"
               className={cn(
                 "relative overflow-hidden",
                 isMobile ? "mt-1 pb-1" : "mt-2.5 pb-2"
@@ -690,12 +880,12 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               <AnimatePresence mode="wait">
                 <motion.span
                   key={headlineIndex}
-                  initial={{ opacity: 0, y: 14 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  exit={{ opacity: 0, y: -7 }}
+                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                   className={cn(
-                    "absolute inset-x-0 top-0 font-medium tracking-[-0.035em] text-foreground/45 dark:text-white/50",
+                    "absolute inset-x-0 top-0 font-medium tracking-[-0.035em] text-foreground/50 dark:text-white/55",
                     isMobile
                       ? "text-[1.2rem] leading-[1.28]"
                       : "text-[1.6rem] md:text-[1.85rem] lg:text-[2.05rem] leading-[1.28]"
@@ -708,16 +898,19 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
 
             {/* Description — tighter leading (1.55 vs relaxed 1.625), narrower
                 measure on desktop for a true editorial line length. */}
-            <p
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "mx-auto text-foreground/55 dark:text-white/60",
+                "mx-auto text-foreground/65 dark:text-white/65",
                 isMobile
-                  ? "mt-3 text-[12.5px] leading-[1.5] max-w-[320px]"
+                  ? "mt-2.5 text-[12.5px] leading-[1.5] max-w-[300px]"
                   : "mt-4 text-[15px] sm:text-[16px] leading-[1.55] max-w-[440px]"
               )}
             >
               {t("useCases.computerAgent.outcome")}
-            </p>
+            </motion.p>
 
             {/* ─── Resources saved — money / time / output / effort.
                 A glass spec-strip mirroring the landing-header chrome
@@ -728,10 +921,9 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 wash behind it — the stats stand on their own against
                 the page background. */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "relative mx-auto",
                 isMobile ? "mt-6 max-w-[320px]" : "mt-9 max-w-[620px]",
@@ -765,7 +957,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                           "relative",
                           // Padding — tighter on mobile so the 2x2 grid
                           // breathes without crushing the sublabel wrap.
-                          isMobile ? "px-2 py-4" : "px-4 py-8",
+                          isMobile ? "px-2 py-3.5" : "px-4 py-8",
                           // Desktop divider — eased to a whisper.
                           hasLeftDivider &&
                             "before:content-[''] before:absolute before:left-0 before:top-7 before:bottom-7 before:w-px before:bg-gradient-to-b before:from-transparent before:via-foreground/[0.09] dark:before:via-white/[0.11] before:to-transparent",
@@ -779,7 +971,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                       >
                         <StatCell
                           isMobile={isMobile}
-                          delay={0.4 + i * 0.07}
                           rawValue={t(`resourceStats.${key}.value`)}
                           label={t(`resourceStats.${key}.label`)}
                           sublabel={t(`resourceStats.${key}.sublabel`)}
@@ -796,35 +987,39 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 the hover scale back to 1.015 (premium restraint over
                 the previous 1.02). Secondary drops the x-translate
                 gimmick — colour shift alone reads more confident. */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
                 "flex items-center justify-center",
-                isMobile ? "mt-6 gap-3 flex-col" : "mt-7 gap-6"
+                isMobile ? "mt-5 gap-2.5 flex-col" : "mt-7 gap-6"
               )}
             >
               <Link
                 href="/auth"
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
+                  "group/cta inline-flex items-center justify-center gap-2 rounded-full font-medium cursor-pointer",
                   "bg-foreground text-background",
                   "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)]",
                   "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)]",
                   "transition-[box-shadow,transform] duration-300",
                   "hover:scale-[1.012] active:scale-[0.985]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isMobile
-                    ? "px-6 py-3 text-sm"
+                    ? "w-full max-w-[260px] px-6 py-3 text-sm"
                     : "px-7 py-3 text-[14.5px]"
                 )}
               >
                 {tc("tryCoastyFree")}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover/cta:translate-x-0.5" />
               </Link>
               <a
                 href="https://cal.com/coasty/15min"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full font-medium cursor-pointer",
+                  "inline-flex items-center justify-center gap-2 rounded-full font-medium cursor-pointer",
                   // Outlined glass pill — mirrors the primary's shape and
                   // size for visual rhythm but trades the solid fill for a
                   // hairline ring + barely-tinted glass plate. Reads on
@@ -844,15 +1039,16 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                   "dark:hover:bg-white/[0.06] dark:hover:border-white/25",
                   "transition-[background,border-color,transform] duration-300",
                   "active:scale-[0.985]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   isMobile
-                    ? "px-6 py-3 text-sm"
+                    ? "w-full max-w-[260px] px-6 py-3 text-sm"
                     : "px-7 py-3 text-[14.5px]"
                 )}
               >
                 <Video className="h-3.5 w-3.5" />
                 {tc("bookDemo")}
               </a>
-            </div>
+            </motion.div>
           </div>
         </div>
 

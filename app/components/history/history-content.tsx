@@ -410,7 +410,7 @@ export function HistoryContent() {
                 ))}
               </div>
 
-              <h2 className="text-2xl font-medium tracking-tight mb-2.5">No chats yet</h2>
+              <h2 className="text-2xl font-medium tracking-tight mb-2.5">No tasks yet</h2>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed mb-8">
                 Start a new task to get going. Your task history will appear here.
               </p>

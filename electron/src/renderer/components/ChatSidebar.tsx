@@ -86,7 +86,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
           )}
 
           {!chatListLoading && chatList.length === 0 && (
-            <div className="text-xs text-neutral-500 text-center py-8">No chats yet</div>
+            <div className="text-xs text-neutral-500 text-center py-8">No tasks yet</div>
           )}
 
           {chatList.map((chat) => (

@@ -20,6 +20,7 @@ import { ArrowRight, Check, Infinity as InfinityIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LandingSectionTopGlow, LandingSectionHeader } from "../section-shell"
 import { VISIBLE_TIERS, type SubscriptionTierId } from "@/lib/pricing/tiers"
+import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -286,6 +287,12 @@ function PlanCard({
           }}
         />
       )}
+
+      {/* Unlimited-only: slow amber smoke wash.  Sits below all chrome
+          because subsequent content has `relative` (z=auto in the same
+          stacking context, painted in source order — content renders
+          after, on top). */}
+      {isUnlimited && <UnlimitedSmoke variant="card" />}
 
       {/* Top sheen — only on the highlighted card, the single signature accent. */}
       {isHighlighted && !isUnlimited && (

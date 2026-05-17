@@ -276,7 +276,7 @@ export function ChatHistory({ onSelectChat, onBack }: Props) {
                 : <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>}
             </svg>
             <span className="text-[11.5px] text-neutral-500 mt-3 tracking-tight">
-              {query ? 'No matches' : 'No chats yet'}
+              {query ? 'No matches' : 'No tasks yet'}
             </span>
             <span className="text-[10px] text-neutral-600 mt-0.5 tracking-tight">
               {query ? 'Try a different search' : 'Start a new task to begin'}

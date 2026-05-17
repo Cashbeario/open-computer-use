@@ -25,6 +25,7 @@ import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
+import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "next-intl"
 import {
@@ -710,15 +711,18 @@ export default function PricingPage() {
               transition={{ duration: 0.3, ease }}
             >
               <div className={cn(
-                "rounded-2xl border overflow-hidden",
+                "relative rounded-2xl border overflow-hidden isolate",
                 plan.id === "unlimited"
-                  ? "border-amber-500/40 bg-gradient-to-b from-amber-500/[0.05] to-transparent shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(245,158,11,0.45)]"
+                  ? "border-amber-500/40 shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_24px_60px_-30px_rgba(245,158,11,0.45)]"
                   : plan.highlighted
                     ? "border-primary/30 bg-gradient-to-b from-primary/[0.04] to-transparent"
                     : "border-border/60 bg-card/40"
               )}>
+                {/* Unlimited-only: slow amber smoke wash behind the card. */}
+                {plan.id === "unlimited" && <UnlimitedSmoke variant="wide" />}
+
                 {/* Price header */}
-                <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-border/30">
+                <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-border/30">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
                       {plan.id === "unlimited" && (
@@ -767,7 +771,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Split: features left, visual right */}
-                <div className="flex flex-col lg:flex-row">
+                <div className="relative flex flex-col lg:flex-row bg-card/30 backdrop-blur-[1px]">
                   {/* Feature list — left */}
                   <div className="flex-1 p-4 sm:p-6 lg:border-r border-border/30">
                     <div className="space-y-0.5">
@@ -830,7 +834,7 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                <div className="px-6 sm:px-8 py-3 border-t border-border/30 text-center">
+                <div className="relative px-6 sm:px-8 py-3 border-t border-border/30 text-center bg-card/30 backdrop-blur-[1px]">
                   <p className="text-xs text-muted-foreground">
                     {plan.price === 0 ? t("footer.noCreditCardRequired") : t("footer.cancelAnytimeNoContracts")}
                   </p>

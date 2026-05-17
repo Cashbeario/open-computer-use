@@ -107,25 +107,6 @@ function LeftBrandPanel() {
 
       {/* Cinematic animation */}
       <CinematicLoop key={cycle} onLoop={() => setCycle((c) => c + 1)} />
-
-      {/* Bottom branding — always visible, overlaid */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 px-8 xl:px-10 pb-8 xl:pb-10">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <CoastyIcon className="size-5 text-white/70" />
-            <span className="text-white/30 text-[10px] font-semibold tracking-[0.3em] uppercase">Coasty</span>
-          </div>
-          <p className="text-white/25 text-[13px] font-normal leading-relaxed max-w-xs">
-            AI agents that control computers like humans do.
-          </p>
-        </motion.div>
-      </div>
     </motion.div>
   )
 }

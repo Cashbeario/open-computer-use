@@ -31,10 +31,11 @@ import { WorkforceTab } from "./tabs/workforce"
 import { DesktopAppTab } from "./tabs/desktop-app"
 import { BillingTab } from "./tabs/billing"
 import { APITab } from "./tabs/api"
+import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 
 /* ─── tab config ─── */
 
-const tabConfig = [
+const ALL_TABS = [
   { id: "overview", labelKey: "tabs.overview", shortLabel: "Overview", icon: BookOpen },
   { id: "getting-started", labelKey: "tabs.gettingStarted", shortLabel: "Start", icon: RocketLaunch },
   { id: "chat-tasks", labelKey: "tabs.chatTasks", shortLabel: "Chat", icon: ChatText },
@@ -47,7 +48,12 @@ const tabConfig = [
   { id: "api", labelKey: "", shortLabel: "API", icon: Lightning },
 ] as const
 
-type TabId = (typeof tabConfig)[number]["id"]
+type TabId = (typeof ALL_TABS)[number]["id"]
+
+// Filter at module load — DEVELOPERS_API_ENABLED is a compile-time constant.
+const tabConfig = ALL_TABS.filter(
+  (t) => DEVELOPERS_API_ENABLED || t.id !== "api",
+)
 
 const tabIds = new Set<string>(tabConfig.map((t) => t.id))
 function isValidTabId(value: string | null): value is TabId {

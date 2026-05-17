@@ -3,6 +3,7 @@ import {
   getAllBlogPostsForSitemap,
   getAllSeoPagesForSitemap,
 } from '@/lib/blog/api'
+import { DEVELOPERS_API_ENABLED } from '@/lib/feature-flags'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,7 +97,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/download`,         lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/download']),     changeFrequency: 'monthly', priority: 0.9 },
     { url: `${baseUrl}/blog`,             lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/blog']),         changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/compare`,          lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/compare']),      changeFrequency: 'weekly',  priority: 0.85 },
-    { url: `${baseUrl}/api-docs`,         lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/api-docs']),     changeFrequency: 'weekly',  priority: 0.85 },
+    ...(DEVELOPERS_API_ENABLED
+      ? [{ url: `${baseUrl}/api-docs`,     lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/api-docs']),     changeFrequency: 'weekly' as const,  priority: 0.85 }]
+      : []),
     { url: `${baseUrl}/pricing`,          lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/pricing']),      changeFrequency: 'weekly',  priority: 0.85 },
     { url: `${baseUrl}/guide`,            lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/guide']),        changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${baseUrl}/auth`,             lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/auth']),         changeFrequency: 'monthly', priority: 0.7 },

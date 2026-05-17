@@ -36,6 +36,7 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useSidebarMachines } from "./hooks/use-sidebar-machines"
 import { useLazyFetch } from "./hooks/use-lazy-fetch"
+import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 
 // ─── Types ────────────────────────────────────────────────────────
 type HoverInfo = {
@@ -1262,21 +1263,23 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             />
           )
         })()}
-        <NavButton
-          id="sidebar-developers-link"
-          icon={<IconKey size={16} stroke={1.5} className="shrink-0" />}
-          label="Developers"
-          tooltip="API, MCP & integrations"
-          href="/developers"
-          isActive={isItemActive("/developers")}
-          accentColor="text-purple-500 dark:text-purple-400"
-          onClick={closeMobileIfNeeded}
-          hoverInfo={{
-            description: "Developers",
-            detail: "API keys, MCP, SDKs, and everything to integrate computer-use intelligence into your apps.",
-            visual: "developers",
-          }}
-        />
+        {DEVELOPERS_API_ENABLED && (
+          <NavButton
+            id="sidebar-developers-link"
+            icon={<IconKey size={16} stroke={1.5} className="shrink-0" />}
+            label="Developers"
+            tooltip="API, MCP & integrations"
+            href="/developers"
+            isActive={isItemActive("/developers")}
+            accentColor="text-purple-500 dark:text-purple-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Developers",
+              detail: "API keys, MCP, SDKs, and everything to integrate computer-use intelligence into your apps.",
+              visual: "developers",
+            }}
+          />
+        )}
       </div>
 
       {/* Memory quick-edit popup — mounted unconditionally so its open

@@ -15,6 +15,7 @@ import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggle
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
 import { LanguageSwitcherCompact } from "@/components/language-switcher"
+import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 
 /* ─── data ─── */
 
@@ -48,7 +49,9 @@ const blogDropdownDef = [
 
 const navItemsDef = [
   { href: "/pricing", labelKey: "pricing", label: "Pricing", external: true },
-  { href: "/api-docs", labelKey: "api", label: "API", external: true },
+  ...(DEVELOPERS_API_ENABLED
+    ? [{ href: "/api-docs", labelKey: "api", label: "API", external: true }]
+    : []),
 ]
 
 /* ─── spring configs ─── */
@@ -867,7 +870,9 @@ export function LandingHeader({
           const resourceLinks = [
             { href: "/blog", label: t("blog") },
             { href: "/guide", label: t("blogItems.guide") },
-            { href: "/api-docs", label: "API" },
+            ...(DEVELOPERS_API_ENABLED
+              ? [{ href: "/api-docs", label: "API" }]
+              : []),
             { href: "/download", label: t("download") },
           ]
           // 35ms stagger keeps the cascade brisk — at 10 rows that's a

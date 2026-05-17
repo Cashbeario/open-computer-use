@@ -1,9 +1,11 @@
 "use client"
 
+import { notFound } from "next/navigation"
 import { SectionDivider } from "@/app/components/landing/guide-lines"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { APITab } from "@/app/guide/tabs/api"
+import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState, type MouseEvent } from "react"
@@ -1033,6 +1035,8 @@ function PrimaryCTA({
    ═══════════════════════════════════════════════════════════════ */
 
 export default function ApiDocsPage() {
+  if (!DEVELOPERS_API_ENABLED) notFound()
+
   return (
     <div className="min-h-screen bg-background text-foreground relative">
       <LandingHeader />

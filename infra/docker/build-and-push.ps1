@@ -128,15 +128,102 @@ if ($env:SKIP_TESTS -eq '1') {
 }
 
 # ---------- 2. ECR login ----------
+#
+# This step has TWO common Windows-only failure modes -- both produce
+# `Error response from daemon: ... 400 Bad Request`:
+#
+#  (A) PowerShell pipe encoding.  `$pw | docker login --password-stdin` in
+#      Windows PowerShell appends a CRLF (uses [Environment]::NewLine =
+#      "`r`n") which corrupts the Basic-auth header bytes.  Mitigated by
+#      `Invoke-DockerLoginViaStdin` below -- we write raw ASCII bytes via
+#      Process.StandardInput.BaseStream so stdin is byte-exact to the
+#      password.
+#
+#  (B) Docker Desktop "Registry Access Management" HTTP proxy intercept.
+#      Newer Docker Desktop versions route ALL daemon HTTP traffic through
+#      `http.docker.internal:3128` and only exempt Docker Hub.  ECR calls
+#      get a 400 from the proxy that LOOKS like an ECR error.  The
+#      pre-flight check below detects this and points the operator at the
+#      runbook BEFORE we spend time on the password handshake.  See
+#      `infra/docker/TROUBLESHOOTING_ECR_LOGIN.md` for fixes.
 Log 'ecr' "logging in to $EcrHost"
+
+# Pre-flight: detect the Docker Desktop proxy intercept that masquerades as
+# a 400 from ECR.  If HttpsProxy is set AND ECR isn't on the NoProxy list,
+# warn loudly so the operator knows what's up.  We DON'T hard-fail because
+# some orgs intentionally proxy ECR through their corporate egress and
+# accept that -- they'll have configured NoProxy correctly anyway.
+#
+# NB: parse `docker info` JSON instead of using `--format '{{.X}}'` because
+# PowerShell 5.1's parser misinterprets `{{...}}` even inside single-quoted
+# strings (treats them as nested script-blocks).  JSON shape is stable
+# across Docker versions for these top-level keys.
+try {
+    $rawJson = (& docker info --format=json 2>$null) -join "`n"
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrEmpty($rawJson)) {
+        $info = $rawJson | ConvertFrom-Json
+        $httpsProxy = if ($info.HttpsProxy) { $info.HttpsProxy } else { '' }
+        $noProxy    = if ($info.NoProxy)    { $info.NoProxy }    else { '' }
+        if (-not [string]::IsNullOrEmpty($httpsProxy) -and
+            $noProxy -notmatch [regex]::Escape('dkr.ecr')) {
+            Write-Host "[ecr] WARNING: Docker daemon is using HTTPS proxy '$httpsProxy'" -ForegroundColor Yellow
+            Write-Host "[ecr]   and ECR is NOT in the NoProxy list ('$noProxy')." -ForegroundColor Yellow
+            Write-Host "[ecr]   This is the #1 cause of '400 Bad Request' on docker login." -ForegroundColor Yellow
+            Write-Host "[ecr]   Fix: Docker Desktop > Settings > Resources > Proxies > 'No proxy' = '*.dkr.ecr.*.amazonaws.com'" -ForegroundColor Yellow
+            Write-Host "[ecr]   Or edit %USERPROFILE%\.docker\daemon.json -- see infra/docker/TROUBLESHOOTING_ECR_LOGIN.md" -ForegroundColor Yellow
+        }
+    }
+} catch {
+    # `docker info` not available / daemon not running.  Either way the
+    # `Require-Cmd 'docker'` check at the top of the script would have
+    # caught it; this is best-effort diagnostic so swallow the error.
+}
 $pw = (& aws ecr get-login-password --region $AwsRegion)
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrEmpty($pw)) {
     Fail 'ecr' "aws ecr get-login-password failed (rc=$LASTEXITCODE)"
     exit 1
 }
-$pw.Trim() | & docker login --username AWS --password-stdin $EcrHost | Out-Null
-if ($LASTEXITCODE -ne 0) {
-    Fail 'ecr' "docker login failed (rc=$LASTEXITCODE)"
+
+function Invoke-DockerLoginViaStdin {
+    param([string]$Password, [string]$Username, [string]$Registry)
+    $dockerExe = (Get-Command docker -ErrorAction Stop).Source
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName               = $dockerExe
+    $psi.Arguments              = "login --username $Username --password-stdin $Registry"
+    $psi.UseShellExecute        = $false
+    $psi.RedirectStandardInput  = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError  = $true
+    # NOTE: `ProcessStartInfo.StandardInputEncoding` only exists in .NET Core
+    # / PowerShell 7+; Windows PowerShell 5.1 throws PropertyAssignmentException
+    # if you try to set it.  We get the same result by bypassing the StreamWriter
+    # entirely and writing raw ASCII bytes via BaseStream below, which works on
+    # both runtimes.
+    $p = [System.Diagnostics.Process]::Start($psi)
+    # CRITICAL: write raw ASCII bytes -- no encoding ambiguity, no trailing
+    # newline.  The .NET Framework StreamWriter default encoding on PS 5.1
+    # is UTF-16-with-BOM, which corrupts the Basic-auth header bytes; the
+    # default StreamWriter newline on Windows is CRLF, which also corrupts
+    # them.  BaseStream.Write skips both of those landmines.
+    $bytes = [System.Text.Encoding]::ASCII.GetBytes($Password)
+    $p.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
+    $p.StandardInput.BaseStream.Flush()
+    $p.StandardInput.Close()
+    $stdout = $p.StandardOutput.ReadToEnd()
+    $stderr = $p.StandardError.ReadToEnd()
+    $p.WaitForExit()
+    return [PSCustomObject]@{
+        ExitCode = $p.ExitCode
+        Stdout   = $stdout
+        Stderr   = $stderr
+    }
+}
+
+$loginResult = Invoke-DockerLoginViaStdin -Password $pw.Trim() -Username 'AWS' -Registry $EcrHost
+if ($loginResult.ExitCode -ne 0) {
+    if ($loginResult.Stderr) { Write-Host $loginResult.Stderr.TrimEnd() -ForegroundColor Red }
+    if ($loginResult.Stdout) { Write-Host $loginResult.Stdout.TrimEnd() -ForegroundColor Red }
+    Fail 'ecr' "docker login failed (rc=$($loginResult.ExitCode))"
     exit 1
 }
 Log 'ecr' 'logged in'

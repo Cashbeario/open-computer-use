@@ -43,31 +43,15 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     t = (key: string) => key
   }
 
-  // Shared shipping/return shape — Google Merchant requires both fields on
-  // every Offer. SaaS has no physical fulfillment so we emit zero-day digital
-  // delivery + no-returns.
-  const digitalShipping = {
-    shippingDetails: {
-      "@type": "OfferShippingDetails",
-      "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-      "deliveryTime": {
-        "@type": "ShippingDeliveryTime",
-        "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-        "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-      },
-      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" },
-    },
-    hasMerchantReturnPolicy: {
-      "@type": "MerchantReturnPolicy",
-      "applicableCountry": "US",
-      "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-      "merchantReturnDays": "0",
-    },
-  }
-
   // Subscription tiers — sourced from `lib/pricing/tiers.ts`. Enterprise is
   // priceUSD === null, so it's filtered out (it's a contact-sales play, not
   // a self-serve Offer).
+  //
+  // Note: we do NOT emit `shippingDetails` / `hasMerchantReturnPolicy` on
+  // these Offers. Those properties are for physical-goods Merchant
+  // Listings (Google updated guidance Nov 2025). SaaS subscriptions are
+  // a service, not a shipped good.
+  //
   // Sentinel guard: "unlimited" tier carries creditsPerMonth=999_999_999.
   // Schema.org has no canonical "unlimited" quantity, so we omit
   // eligibleQuantity entirely for that tier rather than emit a misleading
@@ -90,7 +74,10 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
         },
         "category": "subscription",
         ...(isUnlimitedTier
-          ? { "description": "Unlimited credits per month" }
+          ? {
+              "description":
+                "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 1 concurrent agent (abuse cap).",
+            }
           : {
               "eligibleQuantity": {
                 "@type": "QuantitativeValue",
@@ -101,7 +88,6 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
         "priceValidUntil": "2027-12-31",
         "availability": "https://schema.org/InStock",
         "url": `https://coasty.ai/pricing#${tier.id}`,
-        ...digitalShipping,
       }
     })
 
@@ -120,7 +106,6 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "priceValidUntil": "2027-12-31",
     "availability": "https://schema.org/InStock",
     "url": "https://coasty.ai/pricing#boosts",
-    ...digitalShipping,
   }))
 
   const productSchema = {
@@ -140,7 +125,10 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
       "bestRating": "5",
       "ratingCount": "1250",
     },
-    "award": "#1 Ranked on OSWorld Benchmark — 82% completion rate across 369 real-world computer tasks",
+    "award": [
+      "#1 Ranked on OSWorld Benchmark — 82% completion rate across 369 real-world computer tasks",
+      "Cheapest flat-rate Unlimited computer-use plan — $249/month (vs Devin Team $500 + ACU, OpenAI Operator $200 rate-limited, Genspark Pro $249 credit-capped)",
+    ],
   }
 
   const breadcrumbSchema = {

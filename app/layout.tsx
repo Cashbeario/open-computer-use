@@ -89,7 +89,8 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t("home.ogTitle"),
       description: t("home.twitterDescription"),
       images: ["/demo-screenshot.png"],
-      creator: "@coasty_ai",
+      creator: "@coastyai",
+      site: "@coastyai",
     },
     robots: {
       index: true,
@@ -154,24 +155,11 @@ export default async function RootLayout({
   // ─── Canonical pricing → JSON-LD offers ──────────────────────────────────
   // Sourced from `lib/pricing/tiers.ts` so structured data never goes stale.
   // Used by the WebApplication and SoftwareApplication blocks below.
-  const digitalShipping = {
-    shippingDetails: {
-      "@type": "OfferShippingDetails",
-      "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "USD" },
-      "deliveryTime": {
-        "@type": "ShippingDeliveryTime",
-        "handlingTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" },
-        "transitTime": { "@type": "QuantitativeValue", "minValue": "0", "maxValue": "0", "unitCode": "d" }
-      },
-      "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "US" }
-    },
-    hasMerchantReturnPolicy: {
-      "@type": "MerchantReturnPolicy",
-      "applicableCountry": "US",
-      "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
-      "merchantReturnDays": "0"
-    }
-  }
+  //
+  // Note: we do NOT emit `shippingDetails` / `hasMerchantReturnPolicy` on
+  // these Offers — those properties are for physical-goods Merchant
+  // Listings (Google updated guidance Nov 2025). SaaS subscriptions are
+  // a service, not a shipped good; including them was schema noise.
   const purchasableTiers = VISIBLE_TIERS.filter(t => t.priceUSD !== null)
   // Omit eligibleQuantity for the "unlimited" tier — its sentinel credit
   // value (999_999_999) would otherwise leak as a structured-data spam
@@ -192,7 +180,10 @@ export default async function RootLayout({
       },
       "category": "subscription",
       ...(isUnlimitedTier
-        ? { "description": "Unlimited credits per month" }
+        ? {
+            "description":
+              "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 1 concurrent agent (abuse cap).",
+          }
         : {
             "eligibleQuantity": {
               "@type": "QuantitativeValue",
@@ -203,7 +194,6 @@ export default async function RootLayout({
       "priceValidUntil": "2027-12-31",
       "availability": "https://schema.org/InStock",
       "url": `https://coasty.ai/pricing#${tier.id}`,
-      ...digitalShipping
     }
   })
   // High/low for the SoftwareApplication AggregateOffer summary.
@@ -245,8 +235,13 @@ export default async function RootLayout({
               "bestRating": "5",
               "ratingCount": "1250"
             },
-            "award": "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark (369 real-world tasks)",
+            "award": [
+              "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark (369 real-world tasks)",
+              "Cheapest flat-rate Unlimited computer-use plan — $249/month"
+            ],
             "featureList": [
+              "82% OSWorld Benchmark — #1 in production",
+              "$249/mo Unlimited plan — flat-rate, no credit caps",
               "Autonomous Browser Automation",
               "Desktop Application Control",
               "Terminal & Command Execution",
@@ -261,12 +256,14 @@ export default async function RootLayout({
               "Web Scraping & Data Extraction",
               "Multi-Agent Orchestration",
               "Desktop App for Mac & Windows",
+              "First-party MCP Server (26 tools, Claude Desktop / Cursor / Windsurf compatible)",
               "Open Source Framework",
               "24/7 Autonomous Operation"
             ],
             "screenshot": "https://coasty.ai/demo-screenshot.png",
             "sameAs": [
-              "https://x.com/coasty_ai",
+              "https://x.com/coastyai",
+              "https://www.linkedin.com/company/coastyai/",
               "https://github.com/anthropics/open-computer-use"
             ]
           })
@@ -287,10 +284,10 @@ export default async function RootLayout({
             "foundingDate": "2025",
             "knowsAbout": ["Computer Use Agents", "AI Automation", "Desktop Automation", "Browser Automation", "Autonomous AI Agents", "Virtual Machine Isolation"],
             "sameAs": [
-              "https://x.com/coasty_ai",
-              "https://twitter.com/coasty_ai",
+              "https://x.com/coastyai",
+              "https://twitter.com/coastyai",
               "https://github.com/anthropics/open-computer-use",
-              "https://www.linkedin.com/company/coasty",
+              "https://www.linkedin.com/company/coastyai/",
               "https://www.producthunt.com/products/coasty"
             ],
             "contactPoint": [
@@ -342,7 +339,10 @@ export default async function RootLayout({
             "operatingSystem": "Web Browser, Windows 10+, macOS 10.15+",
             "softwareVersion": "1.5.0",
             "description": seoT("structuredData.softwareDescription"),
-            "award": "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark",
+            "award": [
+              "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark",
+              "Cheapest flat-rate Unlimited computer-use plan — $249/month"
+            ],
             "isAccessibleForFree": true,
             "offers": {
               "@type": "AggregateOffer",
@@ -358,13 +358,15 @@ export default async function RootLayout({
               "ratingCount": "1250"
             },
             "featureList": [
-              "82% OSWorld Benchmark Score",
+              "82% OSWorld Benchmark Score (#1 in production)",
+              "$249/month Unlimited plan — flat-rate, no credit caps (cheapest in market)",
               "Autonomous Browser Automation",
               "Full Desktop Control",
               "Built-in CAPTCHA Solving",
               "VM-Level Session Isolation",
               "Multi-Model AI (OpenAI, Anthropic, Google, Mistral)",
               "Desktop App for Mac & Windows",
+              "First-party MCP Server (npx -y @coasty/mcp, 26 tools)",
               "24/7 Operation",
               "Open Source Framework"
             ],

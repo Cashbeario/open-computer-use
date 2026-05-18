@@ -309,46 +309,6 @@ function createWindow(): void {
     mainWindow = null
   })
 
-  // ── macOS: trigger a permission re-check when the window regains focus ───
-  //
-  // When the user returns to Coasty after granting a permission in System
-  // Settings, the window gains focus. That's the right moment to re-check:
-  //
-  //   - **Accessibility**: `isTrustedAccessibilityClient(false)` IPCs into
-  //     tccd on every call (no in-process cache), so the renderer can flip
-  //     the "Accessibility" row from red to green WITHOUT a restart.
-  //
-  //   - **Screen Recording**: `getMediaAccessStatus('screen')` caches at the
-  //     process level and keeps returning 'denied' until restart
-  //     (electron/electron#36722, marked "closed as not planned"). The
-  //     focus signal is still useful here as the trigger for the
-  //     PermissionToast / PermissionsGuard to surface a "Detected likely
-  //     grant — restart now?" prompt when the user had previously clicked
-  //     "Open Settings".
-  //
-  // Focus events can fire multiple times in rapid succession (drag-induced
-  // focus loops; secondary-window focus chains — electron/electron#20673,
-  // #25429). Debounce with a short trailing timer so a burst becomes a
-  // single IPC. The 200 ms window is short enough to feel instantaneous
-  // when the user alt-tabs back, long enough to coalesce any focus storm.
-  //
-  // Non-darwin builds skip entirely: TCC only exists on macOS, and the
-  // renderer's PermissionsGuard short-circuits on `isMac === false`
-  // anyway, so a recheck would be wasted work.
-  let permRecheckTimer: ReturnType<typeof setTimeout> | null = null
-  mainWindow.on('focus', () => {
-    if (process.platform !== 'darwin') return
-    if (permRecheckTimer) clearTimeout(permRecheckTimer)
-    permRecheckTimer = setTimeout(() => {
-      permRecheckTimer = null
-      // Re-check `mainWindow` and `isDestroyed()` at fire time — the window
-      // could have been closed during the debounce window.
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('permissions:recheck')
-      }
-    }, 200)
-  })
-
   // In development, load from dev server; in production, load the built file
   if (process.env.ELECTRON_RENDERER_URL) {
     mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
@@ -603,19 +563,8 @@ app.whenReady().then(async () => {
   // Defense-in-depth: even if a future change to checkAllPermissions
   // re-introduces a `_debug` field, the IPC layer must never forward it
   // to the renderer (P2-01).
-  //
-  // `skipBitmapFallback` (optional, renderer-supplied): when truthy, the
-  // permissions module skips the expensive desktopCapturer.getSources()
-  // confirmation that runs on `not-determined` status. The renderer's
-  // bounded-polling code (PermissionsGuard / PermissionToast 1.5 s ticks)
-  // sets this to keep the per-tick cost down to two cheap TCC reads.
-  // The flag is normalised to a strict boolean here — never pass renderer
-  // data straight into a typed param without coercion. Worst case if the
-  // flag is forged: the renderer makes its own checks cheaper but less
-  // precise. No security impact.
-  secureHandle('permissions:check', async (_event, opts?: { skipBitmapFallback?: boolean }) => {
-    const skipBitmapFallback = !!(opts && opts.skipBitmapFallback === true)
-    const result = (await checkAllPermissions({ skipBitmapFallback })) as unknown as Record<string, unknown>
+  secureHandle('permissions:check', async () => {
+    const result = (await checkAllPermissions()) as unknown as Record<string, unknown>
     const { _debug: _drop, ...safe } = result
     void _drop
     return safe

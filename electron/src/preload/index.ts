@@ -114,16 +114,7 @@ contextBridge.exposeInMainWorld('coasty', {
   },
 
   // Permissions (macOS)
-  //
-  // `checkPermissions` accepts an optional `{ skipBitmapFallback }` flag.
-  // Default (omitted) preserves the existing behaviour: a one-shot check
-  // that runs the bitmap fallback when the TCC API returns
-  // 'not-determined'. Polling-path callers (PermissionsGuard /
-  // PermissionToast bounded 1.5 s ticks) pass `{ skipBitmapFallback: true }`
-  // to avoid the expensive `desktopCapturer.getSources()` confirmation —
-  // a single user-driven check still gets the precise answer at mount.
-  checkPermissions: (opts?: { skipBitmapFallback?: boolean }) =>
-    ipcRenderer.invoke('permissions:check', opts),
+  checkPermissions: () => ipcRenderer.invoke('permissions:check'),
   requestAccessibility: () => ipcRenderer.invoke('permissions:request-accessibility'),
   openScreenRecordingSettings: () => ipcRenderer.invoke('permissions:open-screen-recording'),
   openAccessibilitySettings: () => ipcRenderer.invoke('permissions:open-accessibility'),
@@ -131,18 +122,6 @@ contextBridge.exposeInMainWorld('coasty', {
     const handler = (_event: any, data: { type: string; message: string }) => callback(data)
     ipcRenderer.on('permission:denied', handler)
     return () => ipcRenderer.removeListener('permission:denied', handler)
-  },
-  // Fired by the main process when the main window regains focus on macOS.
-  // The main process debounces multi-fire focus storms into a single event
-  // (see index.ts permRecheckTimer) so renderers can subscribe without
-  // worrying about handler reentrancy. Listeners use this as the trigger to
-  // re-query checkPermissions() after the user has likely toggled a setting
-  // in System Settings and returned to Coasty. No-op on non-darwin builds
-  // because the main process never emits the event off-macOS.
-  onPermissionsRecheck: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('permissions:recheck', handler)
-    return () => ipcRenderer.removeListener('permissions:recheck', handler)
   },
   getPlatform: () => process.platform,
 
@@ -337,7 +316,7 @@ export interface CoastyAPI {
   onUpdateStatusChanged: (callback: (status: string) => void) => () => void
 
   // Permissions (macOS)
-  checkPermissions: (opts?: { skipBitmapFallback?: boolean }) => Promise<{
+  checkPermissions: () => Promise<{
     screenRecording: 'granted' | 'denied' | 'not-applicable'
     accessibility: 'granted' | 'denied' | 'not-applicable'
   }>
@@ -345,7 +324,6 @@ export interface CoastyAPI {
   openScreenRecordingSettings: () => Promise<void>
   openAccessibilitySettings: () => Promise<void>
   onPermissionDenied: (callback: (data: { type: string; message: string }) => void) => () => void
-  onPermissionsRecheck: (callback: () => void) => () => void
   getPlatform: () => string
 
   // Action approval

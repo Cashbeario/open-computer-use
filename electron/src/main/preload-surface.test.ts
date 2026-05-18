@@ -239,8 +239,7 @@ describe('window.coasty API surface snapshot', () => {
     'onUpdateStatusChanged',
     // Permissions
     'checkPermissions', 'requestAccessibility', 'openScreenRecordingSettings',
-    'openAccessibilitySettings', 'onPermissionDenied', 'onPermissionsRecheck',
-    'getPlatform',
+    'openAccessibilitySettings', 'onPermissionDenied', 'getPlatform',
     // Approval
     'getApprovalMode', 'setApprovalMode', 'respondToApproval',
     'onApprovalRequest', 'onApprovalModeChanged',

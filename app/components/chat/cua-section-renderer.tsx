@@ -367,11 +367,12 @@ function PlainDot({ status: _status }: { status: "success" | "error" | "pending"
 
 // ── Primitives ──
 
-function stripResultFences(raw: string): string {
-  // The backend wraps stdout in ``` fences and the code agent further
-  // wraps each command/answer in <answer>...</answer> tags. Strip both
-  // so the user sees clean text — fences and tags would otherwise leak
-  // through as raw markup inside the result card.
+function stripAgentMarkup(raw: string): string {
+  // The code agent wraps each command/answer in <answer>...</answer>
+  // tags and wraps stdout in ``` fences. Strip both so the user sees
+  // clean text — these are internal markers, not user-facing markup.
+  // Used by every code-agent-* section type (thought, result, summary)
+  // since the agent can leak the tags into any of them.
   return raw
     // Strip <answer> / </answer> tags wherever they appear (inline OR
     // on their own line). The backend produces both forms.
@@ -543,7 +544,7 @@ function StepCard({
 
       {/* Action — the natural language line (truncated for readability) */}
       {actionText && (
-        <p className="text-[15px] leading-relaxed text-foreground/90">
+        <p className="text-[15px] leading-relaxed text-foreground/90 break-words overflow-hidden">
           {truncateText(actionText, 200)}
         </p>
       )}
@@ -558,8 +559,8 @@ function StepCard({
             </span>
           </div>
           {agentAction.detail && (
-            <div className="px-3 pb-2.5 -mt-0.5">
-              <p className="text-[12.5px] leading-relaxed text-foreground/60 dark:text-foreground/50">
+            <div className="px-3 pb-2.5 -mt-0.5 overflow-hidden">
+              <p className="text-[12.5px] leading-relaxed text-foreground/60 dark:text-foreground/50 break-words">
                 {truncateText(agentAction.detail, 300)}
               </p>
             </div>
@@ -671,25 +672,40 @@ function ItemRenderer({
     }
 
     case "code-agent-thought": {
-      // Render the agent's mid-execution reasoning as regular timeline text —
-      // same size and color as the rest of the agent's output.
-      const cleaned = item.content.trim()
+      // The agent's mid-execution reasoning is virtually always a code
+      // command (with the agent's narrative occasionally mixed in).
+      // Rendering through Markdown was the source of the inconsistent
+      // formatting the user reported: Python comments (`# x`) became
+      // <h1> headings, `>` lines became blockquotes, indentation got
+      // collapsed in paragraphs, and stripped fence markers left some
+      // lines as plain prose and others as monospace. We bypass
+      // Markdown entirely and render the whole block as a single
+      // monospace <pre> so every line — code, narrative, comment —
+      // gets the same treatment.
+      const cleaned = truncateText(stripAgentMarkup(item.content), 3000)
       if (!cleaned) return null
       return (
-        <div className="pl-6 py-0.5 text-[15px] leading-relaxed text-foreground">
-          <CuaMarkdown>{cleaned}</CuaMarkdown>
-        </div>
+        <pre
+          className={cn(
+            "m-0 pl-6 py-1",
+            "font-mono text-[12.5px] leading-[1.65] tabular-nums text-foreground/85",
+            "whitespace-pre-wrap break-words",
+            "min-w-0 overflow-hidden",
+          )}
+        >
+          {cleaned}
+        </pre>
       )
     }
 
     case "code-agent-result": {
       // Single-card view: a clean two-row card with a contextual header
       // label + copy button on top and mono content below. The content
-      // is filtered by stripResultFences which removes <answer>/</answer>
+      // is filtered by stripAgentMarkup which removes <answer>/</answer>
       // tags and ``` fence markers so the user sees clean text. The
       // card sits behind a TerminalDot timeline marker — the code-step
       // equivalent of the ScreenshotDot used for visual actions.
-      const cleaned = stripResultFences(item.content)
+      const cleaned = stripAgentMarkup(item.content)
       if (!cleaned) return null
       const hasError = /\bError:\s/.test(cleaned)
       return (
@@ -735,8 +751,10 @@ function ItemRenderer({
       // The agent's end-of-execution recap. No card chrome, no sparkle
       // icon, no decorative gradient — just a small muted label and
       // clean prose. Copy button hovers in the top-right at low opacity
-      // until the group is hovered.
-      const cleaned = item.content.trim()
+      // until the group is hovered. stripAgentMarkup filters any
+      // <answer> tags / fences the agent leaks into the summary too.
+      // Cap at 5000 chars (very generous — most summaries fit easily).
+      const cleaned = truncateText(stripAgentMarkup(item.content), 5000)
       if (!cleaned) return null
       return (
         <div className="group/summary relative pl-6 py-2">
@@ -751,6 +769,9 @@ function ItemRenderer({
           <div
             className={cn(
               "text-[14px] leading-[1.65] text-foreground/85",
+              // Containment: long unbreakable strings wrap inside the
+              // bubble instead of pushing it wider.
+              "min-w-0 overflow-hidden break-words",
               "[&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
               "[&_p]:my-2",
               "[&_strong]:font-semibold [&_strong]:text-foreground",
@@ -762,7 +783,9 @@ function ItemRenderer({
               "[&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-[14.5px] [&_h2]:font-semibold [&_h2]:text-foreground",
               "[&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-foreground",
               "[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-foreground/[0.06] [&_pre]:!bg-foreground/[0.03] [&_pre]:p-3",
-              "[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-foreground/30 hover:[&_a]:decoration-foreground/60",
+              "[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden",
+              "[&_code]:break-words",
+              "[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-foreground/30 hover:[&_a]:decoration-foreground/60 [&_a]:break-all",
               "[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-foreground/15 [&_blockquote]:pl-3 [&_blockquote]:text-foreground/70 [&_blockquote]:italic"
             )}
           >
@@ -830,7 +853,15 @@ function ItemRenderer({
       const cleaned = stripAgentCode(item.content)
       if (!cleaned) return null
       return (
-        <div className="pl-6 py-0.5 text-[15px] leading-relaxed text-foreground/80">
+        <div
+          className={cn(
+            "pl-6 py-0.5 text-[15px] leading-relaxed text-foreground/80",
+            "min-w-0 overflow-hidden break-words",
+            "[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden",
+            "[&_code]:break-words",
+            "[&_a]:break-all",
+          )}
+        >
           <CuaMarkdown>{truncateText(cleaned, 500)}</CuaMarkdown>
         </div>
       )

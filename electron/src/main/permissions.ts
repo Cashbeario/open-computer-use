@@ -92,8 +92,31 @@ export function inspectThumbnailForPermission(
   return 'denied'
 }
 
+/**
+ * Options for {@link checkAllPermissions}.
+ *
+ * `skipBitmapFallback` (default: `false`) — when true, the function never
+ * invokes {@link runBitmapFallback} even if the macOS API returns
+ * `'not-determined'`. The renderer's bounded-polling code passes this to
+ * keep the per-tick cost down to two cheap TCC queries; the bitmap
+ * fallback issues a real `desktopCapturer.getSources()` call which is
+ * expensive and could theoretically trigger a TCC re-prompt on some
+ * macOS versions. Only the one-shot first-launch check should pay that
+ * cost — repeated polls should not.
+ *
+ * When the bitmap is skipped and the API returns `'not-determined'`, we
+ * conservatively report `'denied'` for that tick — better to leave the
+ * UI showing "still missing" until the next focus event / poll than to
+ * spam the user with a flicker between granted and denied.
+ */
+export interface CheckPermissionsOptions {
+  skipBitmapFallback?: boolean
+}
+
 /** Check all macOS permissions required for desktop automation. */
-export async function checkAllPermissions(): Promise<PermissionStatus> {
+export async function checkAllPermissions(
+  options: CheckPermissionsOptions = {},
+): Promise<PermissionStatus> {
   if (process.platform !== 'darwin') {
     return {
       screenRecording: 'not-applicable',
@@ -102,6 +125,11 @@ export async function checkAllPermissions(): Promise<PermissionStatus> {
   }
 
   // --- Accessibility ---
+  // isTrustedAccessibilityClient(false) is a status-only check (no prompt).
+  // Verified safe to call repeatedly from a polling loop — it IPC's into
+  // tccd on each call and reflects the live grant state without requiring
+  // a process restart. (Screen Recording does NOT have the same property
+  // — see the long comment below.)
   const accessibilityGranted = systemPreferences.isTrustedAccessibilityClient(false)
 
   // --- Screen Recording ---
@@ -135,11 +163,23 @@ export async function checkAllPermissions(): Promise<PermissionStatus> {
   if (apiStatus === 'granted') {
     screenRecording = 'granted'
   } else if (apiStatus === 'not-determined') {
-    // Try a real capture; if we get colored pixels, permission is granted
-    // even though the API hasn't caught up yet.
-    screenRecording = await runBitmapFallback()
+    // skipBitmapFallback path: see CheckPermissionsOptions docstring for why.
+    // The actual capture-based confirmation is still inside the
+    // apiStatus === 'not-determined' branch — the skip flag only chooses
+    // between "report denied for this tick" and "run the real check".
+    screenRecording = options.skipBitmapFallback
+      ? 'denied'
+      : await runBitmapFallback()
   } else {
     // 'denied' / 'restricted' / 'unknown' → trust the API.
+    //
+    // Important: this branch is the dominant case for the
+    // "user-just-granted-Screen-Recording-but-API-still-says-denied"
+    // problem (electron/electron#36722). The renderer cannot tell whether
+    // a 'denied' here is a true denial or a stale cache — that's why the
+    // PermissionToast & PermissionsGuard surface a restart prompt when
+    // the user has previously clicked "Open Settings" / "Grant Access"
+    // and the API still returns 'denied' on focus return.
     screenRecording = 'denied'
   }
 
@@ -151,7 +191,8 @@ export async function checkAllPermissions(): Promise<PermissionStatus> {
         apiStatus,
         screenRecording,
         accessibilityGranted,
-        usedBitmap: apiStatus === 'not-determined',
+        usedBitmap: apiStatus === 'not-determined' && !options.skipBitmapFallback,
+        skipBitmapFallback: !!options.skipBitmapFallback,
       }),
     )
   }

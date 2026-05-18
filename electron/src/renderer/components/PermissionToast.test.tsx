@@ -24,17 +24,36 @@ import '@testing-library/jest-dom/vitest'
 // ─── Mock window.coasty ──────────────────────────────────────────────────
 
 type DeniedHandler = (data: { type: string; message: string }) => void
+type RecheckHandler = () => void
 
 const coastyMocks = {
   openScreenRecordingSettings: vi.fn(),
   requestAccessibility: vi.fn(),
   relaunch: vi.fn(),
+  // The PermissionToast polls checkPermissions every 1500 ms while
+  // visible (Piece 3) and re-checks on focus events (Piece 1). Default
+  // to "still denied for both" so existing tests can advance fake timers
+  // freely without the poll loop triggering a hideToast() side effect.
+  // Tests that want to assert the auto-hide-on-grant behaviour swap this
+  // mock to return granted before triggering the relevant tick.
+  checkPermissions: vi.fn(async () => ({
+    screenRecording: 'denied' as const,
+    accessibility: 'denied' as const,
+  })),
   // The onPermissionDenied subscription stores the handler so tests can
   // synthesize a denial event by calling triggerDenied(...) below.
   _handler: null as DeniedHandler | null,
   onPermissionDenied: vi.fn((cb: DeniedHandler) => {
     coastyMocks._handler = cb
     return () => { coastyMocks._handler = null }
+  }),
+  // The onPermissionsRecheck subscription mirrors onPermissionDenied so
+  // a triggerRecheck() helper (below) can simulate a focus-event-driven
+  // permission recheck deterministically.
+  _recheckHandler: null as RecheckHandler | null,
+  onPermissionsRecheck: vi.fn((cb: RecheckHandler) => {
+    coastyMocks._recheckHandler = cb
+    return () => { coastyMocks._recheckHandler = null }
   }),
 }
 
@@ -44,8 +63,17 @@ beforeEach(() => {
   coastyMocks.openScreenRecordingSettings.mockClear()
   coastyMocks.requestAccessibility.mockClear()
   coastyMocks.relaunch.mockClear()
+  coastyMocks.checkPermissions.mockClear()
+  // Reset the default mock implementation in case a previous test swapped
+  // it via mockResolvedValueOnce / mockImplementationOnce.
+  coastyMocks.checkPermissions.mockResolvedValue({
+    screenRecording: 'denied' as const,
+    accessibility: 'denied' as const,
+  })
   coastyMocks.onPermissionDenied.mockClear()
+  coastyMocks.onPermissionsRecheck.mockClear()
   coastyMocks._handler = null
+  coastyMocks._recheckHandler = null
   try { localStorage.clear() } catch { /* sandbox */ }
 })
 

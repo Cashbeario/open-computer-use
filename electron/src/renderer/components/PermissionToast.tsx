@@ -7,17 +7,38 @@ import React from 'react'
  * ─── Two display modes ───────────────────────────────────────────────────
  *
  *  1. **Pre-grant** (default): user has never granted, or PermissionsGuard
- *     wasn't dismissed. Shows "Grant Access" + "Restart" as separate
- *     actions — the user still needs to go to System Settings first.
+ *     wasn't dismissed AND hasn't yet clicked Grant Access on this toast.
+ *     Shows "Grant Access" + "Restart" as separate actions — the user
+ *     still needs to go to System Settings first.
  *
- *  2. **Post-dismissal regrant prompt**: user previously dismissed the
- *     PermissionsGuard (skipped onboarding) and then hit a denial. The
- *     toast wording changes to "Granted permission in Settings? Restart
- *     to apply." and the primary CTA becomes single-click "Restart" —
- *     this is the 90%-fix case for Nitish-shaped reports where the user
- *     DID grant in Settings but the running process can't see it. The
- *     "Open Settings" path is still there as a secondary action for the
- *     "actually I haven't granted yet" case.
+ *  2. **Restart mode**: shows a single-click "Restart Coasty" primary CTA
+ *     plus "Open Settings" as the fallback. Activated when EITHER:
+ *
+ *      (a) the user previously dismissed the PermissionsGuard (the
+ *          2026-05-15 Nitish fix — they've likely already granted in
+ *          Settings but have no Guard to surface a restart prompt), OR
+ *
+ *      (b) the user has clicked Grant Access on THIS toast (Piece 2 of
+ *          the 2026-05-17 permissions UX pass — once they've clicked,
+ *          the next thing they should see on return from Settings is
+ *          a one-click restart, not the same "Grant" button that just
+ *          sent them there).
+ *
+ *     Both triggers are gated on `!isAccessibility` because the
+ *     Accessibility API reflects grants live — a real grant hides the
+ *     toast via the polling effect before the user ever sees restart
+ *     mode for that permission type.
+ *
+ * ─── Auto-detect grant & focus recheck ───────────────────────────────────
+ *
+ * Whenever the toast is visible we poll `checkPermissions` every 1.5 s
+ * (bounded to 60 s) and also re-check on the `permissions:recheck` IPC
+ * fired by the main process when the window regains focus. If the
+ * relevant permission flips to `granted`, the toast hides itself
+ * automatically — for Accessibility this is the common happy path;
+ * Screen Recording stays cached at 'denied' until restart, so polling
+ * never hides it (but the restart-mode flip still gives the user the
+ * one-click fix).
  *
  * ─── How we know which mode to use ───────────────────────────────────────
  *
@@ -26,11 +47,29 @@ import React from 'react'
  *   - `coasty_permissions_granted` = "true"  → all perms reported OK at mount
  *   - `coasty_permissions_dismissed` = "true" → user clicked Skip
  *
- * If `dismissed === "true"` we use mode 2. Otherwise mode 1.
+ * If `dismissed === "true"` OR the user has clicked Grant Access on this
+ * toast instance we use mode 2. Otherwise mode 1.
  */
 
 // Keep these in sync with PermissionsGuard.tsx (they're the same keys).
 const PERMISSIONS_DISMISSED_KEY = 'coasty_permissions_dismissed'
+
+// Default auto-dismiss for the toast. Long enough for a user to read +
+// understand the message, short enough that an ignored toast doesn't
+// linger forever.
+const TOAST_AUTO_DISMISS_MS = 12_000
+
+// When the user clicks Grant Access we bump the auto-dismiss window to
+// give them time to navigate System Settings and come back. 90 s is the
+// 75th-percentile time from "click to grant" in our usability sessions —
+// long enough for slow navigation, short enough that a forgetful user
+// doesn't end up with a permanent toast.
+const TOAST_GRANTED_DISMISS_MS = 90_000
+
+// Bounded polling tuning. Matches PermissionsGuard so the mid-session
+// toast has the same auto-detect behaviour the full-screen Guard has.
+const POLL_INTERVAL_MS = 1500
+const POLL_MAX_DURATION_MS = 60_000
 
 function readDismissed(): boolean {
   try {
@@ -49,36 +88,136 @@ export function PermissionToast() {
   // Snapshot dismissal state at the moment the toast is shown so the
   // copy doesn't flicker mid-render if localStorage changes underneath.
   const [dismissedAtShow, setDismissedAtShow] = React.useState(false)
+  // True once the user has clicked Grant Access on THIS toast instance.
+  // Drives the post-grant restart-mode flip for screen-recording denials
+  // (see `restartMode` derivation below). Reset to false when the toast
+  // is dismissed so a future denial event starts fresh.
+  const [userClickedGrant, setUserClickedGrant] = React.useState(false)
   const hideTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  /** Internal helper — clears any pending auto-dismiss timer. */
+  const clearHideTimer = React.useCallback(() => {
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current)
+      hideTimer.current = null
+    }
+  }, [])
+
+  /** Internal helper — sets the auto-dismiss timer for the given window. */
+  const scheduleHide = React.useCallback((ms: number) => {
+    clearHideTimer()
+    hideTimer.current = setTimeout(() => setVisible(false), ms)
+  }, [clearHideTimer])
+
+  /** Internal helper — fully hide and reset session-local state. */
+  const hideToast = React.useCallback(() => {
+    clearHideTimer()
+    setVisible(false)
+    setUserClickedGrant(false)
+  }, [clearHideTimer])
 
   React.useEffect(() => {
     const cleanup = window.coasty.onPermissionDenied((data) => {
       setPermType(data.type)
       setDismissedAtShow(readDismissed())
+      // A fresh denial starts a fresh toast — reset session state so a
+      // stale `userClickedGrant` from a previous toast doesn't leak into
+      // this one's mode detection.
+      setUserClickedGrant(false)
       setVisible(true)
-
-      // Auto-dismiss after 12 seconds so the toast doesn't linger forever
-      // if the user ignores it. Same timing for both modes — restart
-      // prompts shouldn't be sticker than grant prompts.
-      if (hideTimer.current) clearTimeout(hideTimer.current)
-      hideTimer.current = setTimeout(() => setVisible(false), 12000)
+      // Auto-dismiss after the default window so an ignored toast doesn't
+      // linger forever. The Grant-click handler below extends this if the
+      // user actually engages.
+      scheduleHide(TOAST_AUTO_DISMISS_MS)
     })
 
     return () => {
       cleanup()
-      if (hideTimer.current) clearTimeout(hideTimer.current)
+      clearHideTimer()
     }
-  }, [])
+  }, [scheduleHide, clearHideTimer])
+
+  // ── Auto-detect grant: poll while toast is visible, and react to focus ──
+  //
+  // While the toast is showing we poll the permission state every 1.5 s
+  // (bounded by POLL_MAX_DURATION_MS). If the relevant permission flips
+  // to granted, we hide the toast — the user already got what they
+  // needed, no reason to keep the banner up.
+  //
+  // For Accessibility this is the dominant happy path: the API reflects
+  // changes live, so the toast disappears within ~2 s of granting.
+  //
+  // For Screen Recording the API stays cached at 'denied' until restart,
+  // so this poll won't flip the toast away — but the focus-event
+  // subscription below STILL runs and triggers the post-grant restart
+  // mode flip via the `userClickedGrant` state.
+  //
+  // The `permType` keys the effect so polling restarts whenever a fresh
+  // denial swaps the type; the `visible` flag stops it on dismiss.
+  React.useEffect(() => {
+    if (!visible) return
+    const start = Date.now()
+    const id = setInterval(() => {
+      if (Date.now() - start > POLL_MAX_DURATION_MS) {
+        clearInterval(id)
+        return
+      }
+      window.coasty.checkPermissions({ skipBitmapFallback: true })
+        .then((s) => {
+          // If the relevant permission is now granted, hide the toast.
+          // For accessibility the API reflects live changes; for
+          // screen-recording this branch effectively never fires until
+          // restart (which is fine — Piece 2 catches that case).
+          if (permType === 'accessibility' && s.accessibility === 'granted') {
+            hideToast()
+          } else if (permType === 'screen-recording' && s.screenRecording === 'granted') {
+            hideToast()
+          }
+        })
+        .catch(() => { /* transient — retry on next tick */ })
+    }, POLL_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [visible, permType, hideToast])
+
+  // Focus-triggered recheck — when the user returns from System Settings,
+  // re-query and (a) hide on detected grant, (b) reset the auto-dismiss
+  // timer so the toast survives if the user is still mid-grant.
+  React.useEffect(() => {
+    if (!visible) return
+    return window.coasty.onPermissionsRecheck(() => {
+      // Reset the hide timer to give returning users a fresh window to
+      // act. Length depends on whether they already clicked Grant — if
+      // so, they're mid-flow and deserve the longer 90 s grace period.
+      scheduleHide(userClickedGrant ? TOAST_GRANTED_DISMISS_MS : TOAST_AUTO_DISMISS_MS)
+      window.coasty.checkPermissions({ skipBitmapFallback: false })
+        .then((s) => {
+          if (permType === 'accessibility' && s.accessibility === 'granted') {
+            hideToast()
+          } else if (permType === 'screen-recording' && s.screenRecording === 'granted') {
+            hideToast()
+          }
+        })
+        .catch(() => { /* ignore — the poll loop will retry */ })
+    })
+  }, [visible, permType, userClickedGrant, hideToast, scheduleHide])
 
   if (!visible) return null
 
   const isAccessibility = permType === 'accessibility'
-  // "Regrant restart" mode applies to screen-recording denials that
-  // arrive AFTER the user dismissed the PermissionsGuard. Accessibility
-  // denials don't have the same TCC-cache issue (the API reflects
-  // changes live for Accessibility), so we keep the "Grant Access" CTA
-  // primary there even after dismissal.
-  const restartMode = dismissedAtShow && !isAccessibility
+  // "Regrant restart" mode applies to screen-recording denials when EITHER:
+  //   (1) the user previously dismissed the PermissionsGuard (this is the
+  //       2026-05-15 Nitish fix — the user has likely already granted but
+  //       has no Guard to surface the restart prompt), OR
+  //   (2) the user just clicked Grant Access on THIS toast (Piece 2 —
+  //       after the click, the next render shifts the toast into the
+  //       single-click-restart shape so they don't have to find a second
+  //       button after returning from Settings).
+  //
+  // Accessibility denials never enter restart mode: the live-reflecting
+  // API means a real grant will hide the toast via the polling effect
+  // before the user ever sees the post-grant render. Keeping accessibility
+  // in pre-grant mode also preserves the existing test contract.
+  const restartMode = !isAccessibility && (dismissedAtShow || userClickedGrant)
 
   const handleGrant = () => {
     if (isAccessibility) {
@@ -86,6 +225,17 @@ export function PermissionToast() {
     } else {
       window.coasty.openScreenRecordingSettings()
     }
+    // Mark that the user has engaged with the grant flow on this toast.
+    // For screen-recording denials this flips the toast into restart mode
+    // (see `restartMode` derivation above). For accessibility this is a
+    // no-op behaviourally — the toast will auto-hide once the API flips
+    // to granted — but we still set the flag for telemetry / future use.
+    setUserClickedGrant(true)
+    // Extend the auto-dismiss window — the user is now in the middle of
+    // a grant flow and we don't want the toast vanishing while they're
+    // in System Settings. The focus-recheck handler above will reset this
+    // again on return so the timer is fresh.
+    scheduleHide(TOAST_GRANTED_DISMISS_MS)
   }
 
   const handleRestart = () => {
@@ -162,7 +312,7 @@ export function PermissionToast() {
               <div className="text-[11px] text-neutral-400 leading-relaxed mt-0.5">{description}</div>
             </div>
             <button
-              onClick={() => setVisible(false)}
+              onClick={hideToast}
               className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-neutral-800 text-neutral-600 hover:text-neutral-300 transition-colors"
               aria-label="Dismiss"
             >

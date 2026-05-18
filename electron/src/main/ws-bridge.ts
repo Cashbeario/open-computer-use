@@ -141,6 +141,30 @@ const HEARTBEAT_INTERVAL_MS = 30000
 const HEARTBEAT_PONG_TIMEOUT_MS = 75000
 
 // ─────────────────────────────────────────────────────────────────────
+// Initial-connect watchdog
+// ─────────────────────────────────────────────────────────────────────
+//
+// `new WebSocket(url)` from the `ws` package has NO connect timeout —
+// if the TCP handshake stalls (e.g. signed-bundle TLS quirk on macOS,
+// strict corporate proxy that accepts the SYN but never finishes the
+// TLS exchange, captive portal, DNS pointed at a black-holed IP), the
+// socket can sit in CONNECTING state for tens of minutes before the
+// OS-level TCP keepalive finally tears it down.
+//
+// The pong watchdog above only arms AFTER the 'open' event fires, so
+// it cannot rescue a pre-open hang. Without this connect watchdog the
+// renderer's connection-state pill is stuck on the pulsing-yellow
+// "connecting" dot forever, which is exactly the "stuck in working"
+// symptom packaged macOS builds were exhibiting.
+//
+// 15 s matches the reconnect-cap interval — long enough to ride out a
+// slow first handshake on poor networks, short enough that a broken
+// handshake escalates to the reconnect chain promptly. On expiry the
+// socket is force-closed which fires our `close` handler and schedules
+// a normal reconnect (subject to MAX_RECONNECT_ATTEMPTS).
+const CONNECT_TIMEOUT_MS = 15000
+
+// ─────────────────────────────────────────────────────────────────────
 // Command-queue backpressure thresholds
 // ─────────────────────────────────────────────────────────────────────
 //
@@ -184,6 +208,7 @@ export class WebSocketBridge {
   private reconnectAttempts = 0
   private heartbeatInterval: ReturnType<typeof setInterval> | null = null
   private pongWatchdog: ReturnType<typeof setTimeout> | null = null
+  private connectWatchdog: ReturnType<typeof setTimeout> | null = null
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private state: ConnectionState = 'disconnected'
   private intentionalClose = false
@@ -511,7 +536,17 @@ export class WebSocketBridge {
 
     this.ws = new WebSocket(wsUrl)
 
+    // Arm the initial-connect watchdog. See CONNECT_TIMEOUT_MS above for
+    // why this is needed — the `ws` package gives us no built-in connect
+    // timeout, and a stalled handshake leaves the renderer's pill on
+    // "connecting" forever. Disarmed by either 'open' (handshake done) or
+    // 'close' / 'error' (cleanup path below).
+    this.armConnectWatchdog()
+
     this.ws.on('open', async () => {
+      // Handshake succeeded — disarm the pre-open watchdog. From here on
+      // the pong watchdog is the liveness gate.
+      this.disarmConnectWatchdog()
       console.log('[WS Bridge] Connected, authenticating...')
       // On reconnect (e.g. after sleep/hibernate), the stored token may be
       // expired. Ask the auth layer for a fresh token before authenticating.
@@ -785,6 +820,7 @@ export class WebSocketBridge {
 
     this.ws.on('close', (code, reason) => {
       console.log(`[WS Bridge] Disconnected: ${code} ${reason}`)
+      this.disarmConnectWatchdog()
       this.stopHeartbeat()
       this.stopRainbow()
       // Cancel all pending approvals (local + remote) so promises don't hang
@@ -802,6 +838,7 @@ export class WebSocketBridge {
 
     this.ws.on('error', (error) => {
       console.error('[WS Bridge] Error:', error.message)
+      this.disarmConnectWatchdog()
       this.setState('error')
       reportError('ws_bridge', {
         severity: 'warn',  // transient network errors are warns; reconnect handles them
@@ -813,6 +850,7 @@ export class WebSocketBridge {
 
   disconnect(): void {
     this.intentionalClose = true
+    this.disarmConnectWatchdog()
     this.stopHeartbeat()
     this.stopRainbow()
     this.clearReconnectTimer()
@@ -959,6 +997,46 @@ export class WebSocketBridge {
   private resetPongWatchdog(): void {
     if (this.pongWatchdog) {
       this.armPongWatchdog()
+    }
+  }
+
+  /**
+   * Arm the initial-connect watchdog. Fires if the WS hasn't reached
+   * the 'open' state within ``CONNECT_TIMEOUT_MS``. On expiry we
+   * force-close the socket; the 'close' handler then runs the normal
+   * reconnect chain (subject to MAX_RECONNECT_ATTEMPTS).
+   *
+   * Production failure modes this catches:
+   *   - macOS signed-bundle TLS handshake quirk (the symptom that
+   *     surfaced as "stuck in working" on packaged builds before this
+   *     watchdog existed)
+   *   - Strict corporate proxy that accepts the SYN but never finishes
+   *     the TLS exchange
+   *   - DNS pointed at a black-holed IP
+   *   - Captive portal silently dropping the request
+   *
+   * The pong watchdog can't help here — it only arms after 'open'.
+   */
+  private armConnectWatchdog(): void {
+    this.disarmConnectWatchdog()
+    this.connectWatchdog = setTimeout(() => {
+      console.warn(
+        `[WS Bridge] Initial connect did not complete in ${CONNECT_TIMEOUT_MS}ms ` +
+        `— force-closing stalled socket so the reconnect chain can take over`,
+      )
+      try {
+        this.ws?.terminate?.()
+      } catch { /* terminate may not exist on all WS impls */ }
+      try {
+        this.ws?.close()
+      } catch { /* already closed */ }
+    }, CONNECT_TIMEOUT_MS)
+  }
+
+  private disarmConnectWatchdog(): void {
+    if (this.connectWatchdog) {
+      clearTimeout(this.connectWatchdog)
+      this.connectWatchdog = null
     }
   }
 

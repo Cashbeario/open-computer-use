@@ -96,6 +96,29 @@ mac:
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   notarize: true
+  # Info.plist additions — REQUIRED for a signed/notarized macOS bundle to
+  # actually receive TCC permissions (Screen Recording, Accessibility,
+  # Apple Events). Without these strings macOS silently denies the
+  # permission prompt in production, and downstream calls like
+  # `desktopCapturer.getSources()` and `systemPreferences.getMediaAccessStatus`
+  # can hang waiting for a prompt that will never appear — which presents
+  # as the overlay pill being stuck on the "working" / "connecting" state.
+  # In `npm run dev` these don't matter because Electron's dev binary is
+  # not signed-and-notarized and TCC applies to "Electron" (the helper),
+  # which the developer has typically already granted.
+  extendInfo:
+    NSScreenCaptureUsageDescription: >-
+      Coasty needs Screen Recording access to see your screen so its AI
+      agent can read what you're working on and take actions on your
+      behalf.
+    NSAccessibilityUsageDescription: >-
+      Coasty needs Accessibility access to control your keyboard and
+      mouse so its AI agent can carry out the actions you ask it to
+      perform.
+    NSAppleEventsUsageDescription: >-
+      Coasty uses Apple Events (System Events / osascript) to switch
+      between application windows and list visible windows on your
+      behalf.
   # Default for non-DMG mac targets — i.e. the ZIP that electron-updater
   # downloads for differential updates. The "-mac" suffix is mandatory: that
   # is what electron-updater greps for in latest-mac.yml. Override per-target

@@ -614,6 +614,13 @@ export function registerIpcHandlers(
           balance,
           can_start_session: balance >= 20,
           estimated_runtime_minutes: Math.floor(balance / 10),
+          // OSS mode: Unlimited is a managed-service plan, never applies
+          // here.  Surface explicit nulls/false so the renderer's
+          // unlimited-aware branch correctly short-circuits to the
+          // standard balance display.
+          subscription_tier: null,
+          has_active_subscription: false,
+          is_unlimited: false,
         }
       }
 
@@ -622,42 +629,57 @@ export function registerIpcHandlers(
 
       const supabase = await auth.getSupabaseClient()
 
-      // Try RPC first (creates credits row if missing)
+      // Helper: build the unlimited-aware response shape.  When the user
+      // is on the 'unlimited' tier with an active subscription, we mark
+      // is_unlimited=true so the renderer can render "Unlimited" instead
+      // of the literal sentinel balance (999_999_999).
+      const buildResp = (row: any) => {
+        const balance = row?.balance ?? 0
+        const tier = row?.subscription_tier ?? null
+        const active = !!row?.has_active_subscription
+        const isUnlimited = tier === 'unlimited' && active
+        return {
+          success: true,
+          balance,
+          // For unlimited users, can_start is always true (the backend
+          // gates everything via the token throttle, not credits).
+          can_start_session: isUnlimited ? true : balance >= 20,
+          estimated_runtime_minutes: isUnlimited
+            ? null
+            : Math.floor(balance / 10),
+          subscription_tier: tier,
+          has_active_subscription: active,
+          is_unlimited: isUnlimited,
+        }
+      }
+
+      // Try RPC first (creates credits row if missing).  The RPC returns
+      // the full row (subscription_tier + has_active_subscription are
+      // existing columns in user_credits — no schema change required).
       const { data: credits, error: rpcError } = await (supabase as any)
         .rpc('get_or_create_user_credits', { p_user_id: userId })
         .single()
 
-      if (!rpcError && credits) {
-        return {
-          success: true,
-          balance: credits.balance ?? 0,
-          can_start_session: (credits.balance ?? 0) >= 20,
-          estimated_runtime_minutes: Math.floor((credits.balance ?? 0) / 10),
-        }
-      }
+      if (!rpcError && credits) return buildResp(credits)
 
-      // Fallback: direct select
+      // Fallback: direct select (with tier columns now included).
       const { data: existing, error: selectError } = await (supabase as any)
         .from('user_credits')
-        .select('balance, total_purchased, total_used')
+        .select('balance, total_purchased, total_used, subscription_tier, has_active_subscription')
         .eq('user_id', userId)
         .single()
 
-      if (!selectError && existing) {
-        return {
-          success: true,
-          balance: existing.balance ?? 0,
-          can_start_session: (existing.balance ?? 0) >= 20,
-          estimated_runtime_minutes: Math.floor((existing.balance ?? 0) / 10),
-        }
-      }
+      if (!selectError && existing) return buildResp(existing)
 
-      // No credits row at all — return zero
+      // No credits row at all — return zero, not unlimited.
       return {
         success: true,
         balance: 0,
         can_start_session: false,
         estimated_runtime_minutes: 0,
+        subscription_tier: null,
+        has_active_subscription: false,
+        is_unlimited: false,
       }
     } catch (error: any) {
       console.error('[Credits] Failed to fetch balance:', error.message)

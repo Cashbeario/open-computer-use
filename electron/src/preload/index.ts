@@ -276,7 +276,15 @@ export interface CoastyAPI {
     success: boolean
     balance?: number
     can_start_session?: boolean
-    estimated_runtime_minutes?: number
+    /** null for Unlimited subscribers (no per-minute runtime concept) */
+    estimated_runtime_minutes?: number | null
+    /** "unlimited" | "starter" | "professional" | ... | null when no row */
+    subscription_tier?: string | null
+    has_active_subscription?: boolean
+    /** Convenience flag: true iff subscription_tier='unlimited' AND
+     * has_active_subscription=true.  Use this to branch UI (render
+     * "Unlimited" instead of the sentinel balance number). */
+    is_unlimited?: boolean
     error?: string
   }>
 

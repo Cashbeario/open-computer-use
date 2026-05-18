@@ -402,12 +402,19 @@ function AccountMenu({
   const { user, signOut } = useAuthStore()
   const [credits, setCredits] = React.useState<number | null>(null)
   const [runtime, setRuntime] = React.useState<number | null>(null)
+  const [isUnlimited, setIsUnlimited] = React.useState<boolean>(false)
   const [appVersion, setAppVersion] = React.useState('...')
   const [localUpdateStatus, setLocalUpdateStatus] = React.useState(initialUpdateStatus)
 
   React.useEffect(() => {
     window.coasty.getCredits().then((res) => {
-      if (res.success) { setCredits(res.balance ?? 0); setRuntime(res.estimated_runtime_minutes ?? 0) }
+      if (res.success) {
+        setCredits(res.balance ?? 0)
+        // estimated_runtime_minutes is null for Unlimited subscribers
+        // (no per-minute runtime concept on a token-budget plan).
+        setRuntime(res.estimated_runtime_minutes ?? 0)
+        setIsUnlimited(res.is_unlimited === true)
+      }
     }).catch(() => {})
     window.coasty.getAppVersion().then(setAppVersion).catch(() => {})
   }, [])
@@ -433,16 +440,36 @@ function AccountMenu({
         </div>
 
         {/* Credits */}
-        <button onClick={() => window.open('https://coasty.ai/account?section=billing', '_blank')} className="w-full rounded-lg bg-neutral-800/50 border border-neutral-700/40 px-3 py-2.5 hover:bg-neutral-800/70 transition-colors group">
+        <button onClick={() => window.open('https://coasty.ai/account?section=billing', '_blank')} className={`w-full rounded-lg border px-3 py-2.5 hover:bg-neutral-800/70 transition-colors group ${
+          isUnlimited
+            ? 'bg-amber-950/20 border-amber-500/20 hover:bg-amber-950/30'
+            : 'bg-neutral-800/50 border-neutral-700/40'
+        }`}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Credits</span>
+            <span className={`text-[10px] font-medium uppercase tracking-wider ${
+              isUnlimited ? 'text-amber-500/70' : 'text-neutral-500'
+            }`}>
+              {isUnlimited ? 'Plan' : 'Credits'}
+            </span>
             <ExternalIcon />
           </div>
           {credits !== null ? (
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-semibold text-neutral-100">{credits.toLocaleString()}</span>
-              {runtime !== null && runtime > 0 && <span className="text-[10px] text-neutral-500">{runtime} min remaining</span>}
-            </div>
+            isUnlimited ? (
+              <div className="flex items-center gap-1.5">
+                {/* Inline ∞ glyph — matches the amber accent used on the
+                    web app's UnlimitedHeroCard and on the landing /pricing
+                    Unlimited tier. */}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 -mt-0.5">
+                  <path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z" />
+                </svg>
+                <span className="text-lg font-semibold text-amber-100">Unlimited</span>
+              </div>
+            ) : (
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-semibold text-neutral-100">{credits.toLocaleString()}</span>
+                {runtime !== null && runtime > 0 && <span className="text-[10px] text-neutral-500">{runtime} min remaining</span>}
+              </div>
+            )
           ) : (
             <div className="h-5 w-20 rounded bg-neutral-700/50 animate-pulse" />
           )}

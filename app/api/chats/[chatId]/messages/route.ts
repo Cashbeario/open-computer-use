@@ -24,13 +24,15 @@
  * decryption). This route is only for the standard non-collaborative path.
  */
 import { createClient } from "@/lib/supabase/server"
-import { NextResponse } from "next/server"
+import { createClient as createSupabaseClient, SupabaseClient } from "@supabase/supabase-js"
+import { NextRequest, NextResponse } from "next/server"
 import { decryptScreenshotsInMessages } from "@/lib/screenshot-encryption"
+import { verifyBearerToken } from "@/lib/supabase/bearer-auth"
 
 export const dynamic = "force-dynamic"
 
 export async function GET(
-  _req: Request,
+  req: NextRequest,
   context: { params: Promise<{ chatId: string }> }
 ) {
   const { chatId } = await context.params
@@ -38,21 +40,53 @@ export async function GET(
     return NextResponse.json({ error: "Missing chatId" }, { status: 400 })
   }
 
-  const supabase = await createClient()
-  if (!supabase) {
-    return NextResponse.json(
-      { error: "Database connection failed" },
-      { status: 500 }
-    )
+  // ── Auth resolution ──────────────────────────────────────────────────
+  // Two paths reach this route:
+  //   1. Web app — Supabase session in cookies. `createClient()` returns a
+  //      server client wired to those cookies; `getUser()` validates and
+  //      returns the user.
+  //   2. Electron desktop — `Authorization: Bearer <jwt>` header. No cookies
+  //      because Electron's fetch isn't tied to a browser session. We
+  //      stateless-verify the JWT via `verifyBearerToken` and then build a
+  //      Bearer-authenticated Supabase client so subsequent RLS checks see
+  //      the user.
+  //
+  // Without the Bearer fallback, every Electron call to this route 401s
+  // (the symptom that broke "click history → load chat" in the desktop
+  // app — RLS is fine, the cookie-based getUser() just returns null).
+  let userId: string | null = null
+  let supabase: SupabaseClient | null = null
+
+  const cookieClient = await createClient()
+  if (cookieClient) {
+    const { data: cookieAuth, error: cookieErr } = await cookieClient.auth.getUser()
+    if (!cookieErr && cookieAuth?.user) {
+      userId = cookieAuth.user.id
+      supabase = cookieClient
+    }
   }
 
-  // Auth — RLS will enforce per-row access too, but we 401 early on no
-  // session to avoid an unintentional empty array masking missing auth.
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
+  if (!userId) {
+    const bearer = await verifyBearerToken(req)
+    if (bearer.user) {
+      userId = bearer.user.id
+      // Build a Supabase client that carries the Bearer token on every
+      // outgoing request — needed so RLS on `messages` evaluates the
+      // policies against THIS user, not anon.
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      if (supabaseUrl && supabaseAnonKey) {
+        const authHeader = req.headers.get("Authorization") || ""
+        const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : ""
+        supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+          global: { headers: { Authorization: `Bearer ${token}` } },
+        })
+      }
+    }
+  }
+
+  if (!userId || !supabase) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

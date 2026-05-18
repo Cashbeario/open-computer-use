@@ -485,8 +485,15 @@ export function registerIpcHandlers(
       // Backward compatibility: for users who never opted in, the backend
       // route returns plaintext records unchanged. So this change is a no-op
       // for the majority case, and a fix for the opt-in case.
+      // Use auth.getAccessToken() directly — NOT getTokenOrDeclareDead.
+      // Loading chat history is a READ-ONLY operation; a transient token
+      // gap (refresh in-flight, brief network hiccup) should surface as
+      // an in-place error banner the user can retry, NOT sign them out
+      // of the entire app. Sign-out is reserved for the connection-level
+      // auth_error path where the backend has explicitly rejected the JWT.
       const token = await auth.getAccessToken()
       if (!token) {
+        console.warn('[Chats] get-messages: no auth token available (transient)')
         return { success: false, error: 'Not authenticated' }
       }
       const res = await fetch(
@@ -502,16 +509,20 @@ export function registerIpcHandlers(
       )
       if (!res.ok) {
         const text = await res.text().catch(() => '')
+        console.warn(
+          `[Chats] get-messages backend ${res.status} for chat ${chatId}: ${text.slice(0, 200)}`,
+        )
         return {
           success: false,
           error: `backend ${res.status}: ${text.slice(0, 200)}`,
         }
       }
       const body: any = await res.json().catch(() => ({}))
-      return { success: true, messages: body.messages ?? [] }
+      const messages = Array.isArray(body?.messages) ? body.messages : []
+      return { success: true, messages }
     } catch (error: any) {
-      console.error('[Chats] Get messages failed:', error.message)
-      return { success: false, error: error.message }
+      console.error('[Chats] Get messages failed:', error?.message, error)
+      return { success: false, error: error?.message || 'Unknown error' }
     }
   })
 

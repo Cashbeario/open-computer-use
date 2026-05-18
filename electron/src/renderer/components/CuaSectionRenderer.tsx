@@ -48,15 +48,6 @@ function IconCode({ className }: { className?: string }) {
   )
 }
 
-function IconSparkle({ className }: { className?: string }) {
-  // 4-point star sparkle — used in the Session Summary header chip.
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0L13.6 9.4L23 12L13.6 14.6L12 24L10.4 14.6L1 12L10.4 9.4L12 0Z" />
-    </svg>
-  )
-}
-
 function IconCopy({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -328,21 +319,40 @@ function ScreenshotLightbox({
 function ScreenshotDot({ src }: { src: string }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
+  // Micro-interactions:
+  //   • Rest        — tilted -7° to match TerminalDot's character.
+  //   • Hover       — straightens to 0°, scales up 12%, lifts 1px, and
+  //                   the shadow + ring intensify. Reads as "the
+  //                   screenshot is righting itself for inspection."
+  //   • Press       — quick scale-down + slight counter-tilt for a
+  //                   tactile click response.
+  // Easing uses a slight overshoot bezier (1.56 peak) so the spring-y
+  // feel matches the web version's Framer Motion springs.
   return (
     <>
-      <div
-        className="absolute -left-[10px] top-[3px] z-[2] cursor-pointer cua-thumb"
+      <button
+        type="button"
         onClick={() => setLightboxOpen(true)}
+        aria-label="View screenshot"
+        className={cn(
+          // 36×22 landscape — close to 16:10 screen aspect so the
+          // thumbnail reads as a tiny screen rather than a generic
+          // square chip. Position -left-[15px] keeps the dot's center
+          // on the timeline rail at x=3 (36/2 - 3 = 15).
+          'absolute -left-[15px] top-[3px] z-[2] block w-[36px] h-[22px] cursor-pointer overflow-hidden rounded-[5px]',
+          'ring-1 ring-white/[0.08]',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.18),0_3px_6px_rgba(0,0,0,0.08)]',
+          '-rotate-[7deg]',
+          'transition-[transform,box-shadow,outline-color] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+          'hover:rotate-0 hover:scale-[1.12] hover:-translate-y-[1px]',
+          'hover:ring-white/[0.16]',
+          'hover:shadow-[0_4px_10px_rgba(0,0,0,0.30),0_10px_28px_rgba(0,0,0,0.18)]',
+          'active:scale-[0.95] active:-rotate-[3deg] active:duration-100',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+        )}
       >
-        <div className="w-[26px] h-[26px] rounded-[5px] overflow-hidden ring-1 ring-white/[0.08] shadow-sm">
-          <img src={src} alt="" className="w-full h-full object-cover" draggable={false} />
-        </div>
-        <style>{`
-          .cua-thumb { transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
-          .cua-thumb:hover { transform: scale(1.18); }
-          .cua-thumb:active { transform: scale(0.95); }
-        `}</style>
-      </div>
+        <img src={src} alt="" className="w-full h-full object-cover" draggable={false} />
+      </button>
 
       {lightboxOpen && (
         <ScreenshotLightbox src={src} onClose={() => setLightboxOpen(false)} />
@@ -361,13 +371,24 @@ function PlainDot({ status: _status }: { status: 'success' | 'error' | 'pending'
 // ── Primitives ──
 
 function stripResultFences(raw: string): string {
-  // The backend wraps stdout in ``` fences (see code_agent.py). Strip those
-  // fence lines so the Markdown renderer's code-block chrome (language label,
-  // its own copy button) doesn't appear inside the result card.
+  // The backend wraps stdout in ``` fences and the code agent further
+  // wraps each command/answer in <answer>...</answer> tags. Strip both
+  // so the user sees clean text — fences and tags would otherwise leak
+  // through as raw markup inside the result card.
   return raw
+    // Strip <answer> / </answer> tags wherever they appear (inline OR
+    // on their own line). The backend produces both forms.
+    .replace(/<\/?answer\b[^>]*>/gi, '')
+    // Strip inline triple-backtick fences with an optional language tag
+    // (e.g. ```bash ...```) wherever they appear.
+    .replace(/```\w*\s*/g, '')
+    .replace(/\s*```/g, '')
+    // Strip lone fence lines that survived (``` on its own line).
     .split('\n')
     .filter((line) => !/^\s*```\s*\w*\s*$/.test(line))
     .join('\n')
+    // Collapse runs of 3+ blank lines down to one for tidiness.
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
@@ -574,6 +595,32 @@ function StepCard({
   )
 }
 
+// ── Timeline markers for non-step items ──
+
+function TerminalDot() {
+  // The code-step equivalent of ScreenshotDot. A small solid-black
+  // rectangle — slightly tilted (-7deg) for character — with a mono
+  // `>_` prompt in white. Minimal: no title bar, no traffic lights —
+  // just the silhouette of a terminal screen and a prompt cursor.
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        'absolute -left-[13px] top-[2px]',
+        'flex h-[22px] w-[32px] items-center justify-center',
+        'rounded-[6px] -rotate-[7deg]',
+        'bg-neutral-950',
+        'ring-1 ring-white/[0.08]',
+        'shadow-[0_2px_6px_rgba(0,0,0,0.30),0_5px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.08)]',
+      )}
+    >
+      <span className="font-mono text-[10px] font-bold leading-none tracking-tight text-neutral-100/90">
+        {">_"}
+      </span>
+    </div>
+  )
+}
+
 // ── Item Renderer ──
 
 function ItemRenderer({
@@ -630,28 +677,35 @@ function ItemRenderer({
     }
 
     case 'code-agent-result': {
-      // Show the result of one execution step in a clean two-row card:
-      // header strip with a contextual label + copy button, hairline divider,
-      // mono content below. Strip the producer's ``` fences first so the
-      // Markdown renderer's code-block chrome doesn't appear.
+      // Single-card view: a clean two-row card with a contextual header
+      // label + copy button on top and mono content below. The content
+      // is filtered by stripResultFences which removes <answer>/</answer>
+      // tags and ``` fence markers so the user sees clean text. The
+      // card sits behind a TerminalDot timeline marker — the code-step
+      // equivalent of the ScreenshotDot used for visual actions.
       const cleaned = stripResultFences(item.content)
       if (!cleaned) return null
       const hasError = /\bError:\s/.test(cleaned)
       return (
-        <div className="pl-6 py-1.5">
-          <div className="group/result-card relative overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.02] shadow-sm">
-            <div className="flex items-center justify-between gap-3 border-b border-white/[0.05] px-3.5 py-1.5">
-              <span
-                className={cn(
-                  'text-[10px] font-medium uppercase tracking-[0.12em]',
-                  hasError ? 'text-red-400/70' : 'text-neutral-200/40'
-                )}
-              >
-                {hasError ? 'Error' : 'Output'}
-              </span>
+        <div className="relative pl-8 py-1.5">
+          <TerminalDot />
+          {/* Result card — shadcn-style minimal: hairline border on a
+              subtle muted surface, no title bar, mono body. Copy button
+              floats in the top-right corner, muted at rest and full
+              brightness on hover. Errors are signaled by red body text
+              only — no extra chrome. */}
+          <div className="group/result-card relative overflow-hidden rounded-lg border border-white/[0.07] bg-white/[0.02]">
+            <div className="absolute right-1.5 top-1.5 opacity-40 transition-opacity duration-150 group-hover/result-card:opacity-100">
               <CopyButton text={cleaned} />
             </div>
-            <pre className="m-0 px-3.5 py-2.5 font-mono text-[12px] leading-[1.6] tabular-nums text-neutral-100/80 whitespace-pre-wrap break-words">
+            <pre
+              className={cn(
+                // pr-10 reserves room for the floating copy button so
+                // long unbreakable lines never slide under it.
+                'm-0 pl-4 pr-10 py-3 font-mono text-[12px] leading-[1.65] tabular-nums whitespace-pre-wrap break-words',
+                hasError ? 'text-red-400/85' : 'text-neutral-100/85'
+              )}
+            >
               {cleaned}
             </pre>
           </div>
@@ -670,53 +724,42 @@ function ItemRenderer({
       )
 
     case 'code-agent-summary': {
-      // The agent's end-of-execution recap. This is a "report card" — a
-      // dedicated, premium card with a sparkle-chip header, a hairline
-      // decorative top accent, a copy button, and refined markdown styling
-      // for the body (proper spacing for headings, lists, inline code).
+      // The agent's end-of-execution recap. No card chrome, no sparkle
+      // icon, no decorative gradient — just a small muted label and
+      // clean prose. Copy button hovers in the top-right at low opacity
+      // until the group is hovered.
       const cleaned = item.content.trim()
       if (!cleaned) return null
       return (
-        <div className="pl-6 py-2">
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] shadow-[0_1px_3px_rgba(0,0,0,0.2)]">
-            {/* Decorative top hairline gradient — gives a "premium card" cue */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.18] to-transparent" />
-
-            {/* Header: sparkle chip + label, copy button on the right */}
-            <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <div className="flex w-5 h-5 items-center justify-center rounded-md bg-gradient-to-br from-white/[0.08] to-white/[0.04] ring-1 ring-white/[0.05]">
-                  <IconSparkle className="w-2.5 h-2.5 text-neutral-100/60" />
-                </div>
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-neutral-200/55">
-                  Session Summary
-                </span>
-              </div>
-              <CopyButton text={cleaned} />
-            </div>
-
-            {/* Body: refined markdown styling */}
-            <div
-              className={cn(
-                'px-4 py-3 text-[14px] leading-[1.6] text-neutral-100/85',
-                '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
-                '[&_p]:my-2',
-                '[&_strong]:font-semibold [&_strong]:text-neutral-100',
-                '[&_em]:italic [&_em]:text-neutral-100/75',
-                '[&_ul]:my-2 [&_ul]:space-y-0.5 [&_ul]:pl-4',
-                '[&_ol]:my-2 [&_ol]:space-y-0.5 [&_ol]:pl-5',
-                '[&_li]:marker:text-neutral-400/40 [&_li]:leading-[1.55]',
-                '[&_h1]:mt-3 [&_h1]:mb-1.5 [&_h1]:text-[15px] [&_h1]:font-semibold [&_h1]:text-neutral-100',
-                '[&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-[14.5px] [&_h2]:font-semibold [&_h2]:text-neutral-100',
-                '[&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-neutral-100',
-                '[&_code]:rounded-md [&_code]:bg-white/[0.06] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[12px] [&_code]:text-neutral-100/90 [&_code]:before:content-none [&_code]:after:content-none',
-                '[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-white/[0.06] [&_pre]:!bg-white/[0.03] [&_pre]:p-3',
-                '[&_a]:text-neutral-100 [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-neutral-400/40 hover:[&_a]:decoration-neutral-100/60',
-                '[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-white/15 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-100/70 [&_blockquote]:italic'
-              )}
-            >
-              <Markdown>{cleaned}</Markdown>
-            </div>
+        <div className="group/summary relative pl-6 py-2">
+          <div className="absolute right-1 top-2 opacity-40 transition-opacity duration-150 group-hover/summary:opacity-100">
+            <CopyButton text={cleaned} />
+          </div>
+          <div className="mb-2">
+            <span className="text-[11.5px] font-medium tracking-tight text-neutral-200/55">
+              Session Summary
+            </span>
+          </div>
+          <div
+            className={cn(
+              'text-[14px] leading-[1.65] text-neutral-100/85',
+              '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+              '[&_p]:my-2',
+              '[&_strong]:font-semibold [&_strong]:text-neutral-100',
+              '[&_em]:italic [&_em]:text-neutral-100/75',
+              '[&_ul]:my-2 [&_ul]:space-y-0.5 [&_ul]:pl-4',
+              '[&_ol]:my-2 [&_ol]:space-y-0.5 [&_ol]:pl-5',
+              '[&_li]:marker:text-neutral-400/40 [&_li]:leading-[1.55]',
+              '[&_h1]:mt-3 [&_h1]:mb-1.5 [&_h1]:text-[15px] [&_h1]:font-semibold [&_h1]:text-neutral-100',
+              '[&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-[14.5px] [&_h2]:font-semibold [&_h2]:text-neutral-100',
+              '[&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-neutral-100',
+              '[&_code]:rounded-md [&_code]:bg-white/[0.06] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[12px] [&_code]:text-neutral-100/90 [&_code]:before:content-none [&_code]:after:content-none',
+              '[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-white/[0.06] [&_pre]:!bg-white/[0.03] [&_pre]:p-3',
+              '[&_a]:text-neutral-100 [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-neutral-400/40 hover:[&_a]:decoration-neutral-100/60',
+              '[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-white/15 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-100/70 [&_blockquote]:italic'
+            )}
+          >
+            <Markdown>{cleaned}</Markdown>
           </div>
         </div>
       )

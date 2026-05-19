@@ -234,20 +234,6 @@ export function FeaturesSection({ isMobile }: { isMobile: boolean }) {
           })}
         </div>
 
-        {/* section footer — restrained "and more" hairline strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
-          transition={{ duration: 0.5, delay: 0.4, ease: EASE }}
-          className="mt-10 flex items-center gap-3"
-        >
-          <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-transparent via-border/60 to-border/20" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground/55 whitespace-nowrap">
-            AND MORE · BYOK · MULTI-MODEL · CRON · WEBHOOKS · API
-          </span>
-          <span aria-hidden className="h-px flex-1 bg-gradient-to-l from-transparent via-border/60 to-border/20" />
-        </motion.div>
       </div>
     </section>
   )

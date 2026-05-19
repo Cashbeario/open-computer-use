@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
   if (isPersistent) {
     if (!PERSISTENT_ELIGIBLE_TIERS.has(planTier)) {
       return NextResponse.json(
-        { error: "Persistent swarms require a Starter ($19), Plus ($50), or Pro ($100) plan" },
+        { error: "Persistent swarms require a Starter ($19) or Unlimited ($249) plan" },
         { status: 403 }
       );
     }

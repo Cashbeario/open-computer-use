@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 tietokonetta käyttävä agentti · {score} OSWorld",
-    "headline": "Autonomiset tietokoneoperaattorit",
+    "headline": "Paras tietokoneen käyttöagentti",
     "useCases": {
       "computerAgent": {
         "label": "Tietokoneagentti",

@@ -189,10 +189,16 @@ interface HeroTaskShotsProps {
    *  swap. `null` (or "hero") means no card is featured; all live
    *  in their gutter positions. */
   currentSection?: TriggerSection | "hero" | null
+  /** Gates the entire overlay — when false (hero still in view) the
+   *  cards aren't mounted, so the hero stage stays clean. When it
+   *  flips true (user has scrolled past hero), cards mount and run
+   *  their pan-in cascade from the gutter edges. */
+  visible?: boolean
 }
 
-export function HeroTaskShots({ isMobile, currentSection }: HeroTaskShotsProps) {
+export function HeroTaskShots({ isMobile, currentSection, visible = true }: HeroTaskShotsProps) {
   if (isMobile) return null
+  if (!visible) return null
 
   const featuredIndex = SHOTS.findIndex(
     (s) => s.triggerSection && s.triggerSection === currentSection,
@@ -334,12 +340,19 @@ function ShotCard({
         ? 0.96
         : 0.74
 
+  // Pan-in entrance — card slides in horizontally from its own gutter
+  // (left cards drift in from the left edge, right cards from the
+  // right) instead of fading up. Combined with the top-down delay
+  // cascade, the overall reveal reads as the gutters "filling in"
+  // once the user clears the hero.
+  const panFromX = shot.side === "left" ? -80 : 80
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, x: panFromX }}
       animate={{
         opacity: targetOpacity,
-        y: 0,
+        x: 0,
         scale: inFocusBackground ? 0.94 : 1,
         filter: inFocusBackground ? "saturate(0.6)" : "saturate(1)",
         ...target,
@@ -347,7 +360,7 @@ function ShotCard({
       transition={{
         // Initial mount — top-down wave with the entrance ease.
         opacity: { duration: 0.85, delay: initialDelay, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.85, delay: initialDelay, ease: [0.22, 1, 0.36, 1] },
+        x: { duration: 0.9, delay: initialDelay, ease: [0.22, 1, 0.36, 1] },
         // Featured swap — quint ease-out, ~550ms. Short enough to
         // feel responsive, long enough to read as deliberate.
         // Non-featured cards lag the featured by ~80ms so the

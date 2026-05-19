@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "Agent Computer-Use #1 · {score} OSWorld",
-    "headline": "Autonomiczni operatorzy komputerów",
+    "headline": "Najlepszy agent do obsługi komputera",
     "useCases": {
       "computerAgent": {
         "label": "Agent komputerowy",

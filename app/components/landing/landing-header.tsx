@@ -11,7 +11,6 @@ import Image from "next/image"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler"
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
 import { LanguageSwitcherCompact } from "@/components/language-switcher"
@@ -788,12 +787,6 @@ export function LandingHeader({
                   <Download className={cn(scrolled ? "h-3.5 w-3.5" : "h-4 w-4")} strokeWidth={1.8} />
                 </Link>
                 <LanguageSwitcherCompact />
-                <AnimatedThemeToggler
-                  className={cn(
-                    "rounded-lg transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.05]",
-                    scrolled ? "h-7 w-7 p-1.5 text-sm" : "h-9 w-9 p-2",
-                  )}
-                />
                 <div className="w-px h-4 bg-foreground/[0.08] mx-0.5" />
                 <Link
                   href="/auth"
@@ -815,7 +808,6 @@ export function LandingHeader({
               {/* ── mobile controls ── */}
               <div className="flex items-center gap-1 lg:hidden">
                 <LanguageSwitcherCompact />
-                <AnimatedThemeToggler className="p-1.5 rounded-lg h-8 w-8 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.05] inline-flex items-center justify-center transition-all duration-200" />
                 <button
                   className={cn(
                     "inline-flex items-center justify-center rounded-lg h-9 w-9 transition-all duration-200",

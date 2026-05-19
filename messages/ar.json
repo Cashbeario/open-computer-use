@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "الوكيل رقم 1 لاستخدام الحاسوب · {score} OSWorld",
-    "headline": "مشغّلو حاسوب مستقلون",
+    "headline": "أفضل وكيل لاستخدام الحاسوب",
     "useCases": {
       "computerAgent": {
         "label": "وكيل الحاسوب",

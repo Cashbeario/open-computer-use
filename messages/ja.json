@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 コンピュータ操作エージェント · {score} OSWorld",
-    "headline": "自律型コンピュータオペレーター",
+    "headline": "最高のコンピュータ操作エージェント",
     "useCases": {
       "computerAgent": {
         "label": "コンピュータエージェント",

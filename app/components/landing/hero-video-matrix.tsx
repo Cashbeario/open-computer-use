@@ -802,7 +802,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
         <div
           ref={overlayRef}
           className={cn(
-            "absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none pt-20 pb-16"
+            "absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none pt-36 sm:pt-44 pb-16"
           )}
           style={{
             transform: "translateZ(0)",
@@ -838,13 +838,13 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.95, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                "font-semibold tracking-[-0.045em] text-balance",
+                "font-semibold tracking-[-0.045em] text-balance pb-1 sm:pb-2",
                 "bg-clip-text text-transparent",
                 "bg-gradient-to-b from-foreground to-foreground/85",
                 "dark:from-white dark:to-white/82",
                 isMobile
-                  ? "text-[1.65rem] leading-[1.08]"
-                  : "text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.04]"
+                  ? "text-[1.65rem] leading-[1.14]"
+                  : "text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.12]"
               )}
             >
               {t("headline")}

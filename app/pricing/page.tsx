@@ -713,9 +713,13 @@ export default function PricingPage() {
               <div className={cn(
                 "relative rounded-2xl border overflow-hidden isolate",
                 plan.id === "unlimited"
-                  // Neutral foreground border — drama comes from the smoke
-                  // inside and the dark CTA, not from a colored frame.
-                  ? "border-foreground/30 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)]"
+                  // Cinematic dark base — the card itself is a "dark pocket"
+                  // regardless of page theme, so the smoke reads as candlelit
+                  // gold + oxblood against deep ink, never as colorful wash
+                  // over a bright surface.  Feature/footer sections below
+                  // still pull bg-background/75 to tint back to the page
+                  // palette, so only the banner area shows the dark base.
+                  ? "border-white/10 bg-neutral-950 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)]"
                   : plan.highlighted
                     ? "border-primary/30 bg-gradient-to-b from-primary/[0.04] to-transparent"
                     : "border-border/60 bg-card/40"
@@ -724,42 +728,63 @@ export default function PricingPage() {
                 {plan.id === "unlimited" && <UnlimitedSmoke variant="wide" />}
 
                 {/* Price header */}
-                <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b border-border/30">
-                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div className={cn(
+                  "relative px-6 sm:px-8 pt-6 sm:pt-8 pb-5 border-b",
+                  plan.id === "unlimited" ? "border-white/10" : "border-border/30"
+                )}>
+                  {/* Banner-only vignette — deepens the edges so the smoke
+                      sits in a soft pool of darkness rather than spreading
+                      uniformly.  Sits between smoke and content. */}
+                  {plan.id === "unlimited" && (
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_85%_75%_at_50%_35%,transparent_30%,rgba(0,0,0,0.45))]"
+                    />
+                  )}
+                  <div className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
                       {plan.id === "unlimited" && (
-                        // Neutral pill — same chrome as other badges on the
-                        // site.  The smoke + dark CTA carry the "premium" cue;
-                        // no additional amber tint here.
-                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-foreground/[0.04] px-2.5 py-1">
-                          <InfinityIcon className="h-3 w-3 text-foreground/70" strokeWidth={2.5} />
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground/70">
+                        // Dark-mode pill — chrome tuned for the neutral-950
+                        // base so it reads regardless of page theme.
+                        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-2.5 py-1">
+                          <InfinityIcon className="h-3 w-3 text-white/80" strokeWidth={2.5} />
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/80">
                             {plan.badge ?? "Best Value"}
                           </span>
                         </div>
                       )}
-                      <p className="text-sm text-muted-foreground mb-1">{plan.tagline}</p>
+                      <p className={cn(
+                        "text-sm mb-1",
+                        plan.id === "unlimited" ? "text-white/65" : "text-muted-foreground"
+                      )}>{plan.tagline}</p>
                       <div className="flex items-baseline gap-1.5">
                         <motion.span
                           key={plan.id}
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="text-5xl sm:text-6xl font-bold tracking-tight"
+                          className={cn(
+                            "text-5xl sm:text-6xl font-bold tracking-tight",
+                            plan.id === "unlimited" && "text-white"
+                          )}
                         >
                           ${price}
                         </motion.span>
-                        <span className="text-lg text-muted-foreground">{t("perMonth")}</span>
+                        <span className={cn(
+                          "text-lg",
+                          plan.id === "unlimited" ? "text-white/55" : "text-muted-foreground"
+                        )}>{t("perMonth")}</span>
                       </div>
                       {plan.id === "unlimited" && (
-                        <p className="mt-2 text-xs text-muted-foreground/75 font-medium">
+                        <p className="mt-2 text-xs text-white/55 font-medium">
                           No usage caps · No overages · Run agents as much as you want
                         </p>
                       )}
                     </div>
                     {plan.id === "unlimited" ? (
-                      // Dark CTA — solid foreground, no amber.
+                      // Light CTA on the dark banner — inverts cleanly in
+                      // both page themes since the banner itself is dark.
                       <Button
-                        className="h-11 px-8 flex-shrink-0 bg-foreground text-background hover:bg-foreground/90 border-0"
+                        className="h-11 px-8 flex-shrink-0 bg-white text-neutral-950 hover:bg-white/90 border-0 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.6)]"
                         asChild
                       >
                         <Link href="/auth">{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link>

@@ -303,9 +303,7 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
     return () => obs.disconnect()
   }, [isMobile])
 
-  // Tick mark positions on the axis. The 82 mark is rendered with extra
-  // emphasis (foreground triangle + caps label) and drives the leader hairline.
-  const ticks = [0, 25, 50, 75]
+  // Leader position on the axis — drives the hairline + indicator label.
   const leaderPct = (LEADER_SCORE / AXIS_MAX) * 100
 
   return (
@@ -354,19 +352,6 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
             className="pointer-events-none absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.06] to-transparent"
           />
 
-          {/* Eyebrow strip above chart — context for what the leaderboard is */}
-          <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/40">
-              <span className="h-1.5 w-1.5 rounded-full bg-foreground/40" />
-              <span>OSWORLD 2026</span>
-              <span className="hidden sm:inline opacity-40">/</span>
-              <span className="hidden sm:inline">EVALUATED Q1 2026</span>
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/40 tabular-nums">
-              N = 9
-            </div>
-          </div>
-
           {/* ── AXIS RAIL (desktop only) ─────────────────────────────── */}
           {!isMobile && (
             <motion.div
@@ -386,23 +371,6 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
               <div className="relative h-9">
                 {/* Base axis line */}
                 <div className="absolute left-0 right-0 bottom-3 h-px bg-foreground/10" />
-
-                {/* Ordinary ticks */}
-                {ticks.map((pct) => {
-                  const left = (pct / AXIS_MAX) * 100
-                  return (
-                    <div
-                      key={pct}
-                      className="absolute bottom-3 flex flex-col items-center"
-                      style={{ left: `${left}%`, transform: "translateX(-50%)" }}
-                    >
-                      <div className="h-1.5 w-px bg-foreground/15" />
-                      <span className="absolute top-2 font-mono text-[9px] uppercase tracking-[0.2em] text-foreground/35 tabular-nums">
-                        {pct}%
-                      </span>
-                    </div>
-                  )
-                })}
 
                 {/* Leader tick (82) — triangular indicator + label above */}
                 <div
@@ -469,25 +437,6 @@ export function BenchmarkSection({ isMobile }: { isMobile: boolean }) {
             </div>
           </div>
 
-          {/* ── FOOTER MICRO-STRIP ───────────────────────────────────── */}
-          <div className="mt-8 sm:mt-10 pt-4 border-t border-foreground/10">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/35">
-              <span>OSWORLD BENCHMARK</span>
-              <span aria-hidden className="opacity-50">·</span>
-              <span>369 REAL-WORLD COMPUTER TASKS</span>
-              <span aria-hidden className="opacity-50">·</span>
-              <a
-                href="#methodology"
-                className="relative text-foreground/50 hover:text-foreground transition-colors duration-200 group"
-              >
-                METHODOLOGY
-                <span
-                  aria-hidden
-                  className="absolute left-0 right-0 -bottom-0.5 h-px bg-foreground/0 group-hover:bg-foreground/60 transition-colors duration-200"
-                />
-              </a>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>

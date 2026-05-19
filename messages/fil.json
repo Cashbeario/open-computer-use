@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 Computer-Use Agent · {score} OSWorld",
-    "headline": "Mga autonomous na computer operator",
+    "headline": "Pinakamahusay na ahente sa paggamit ng kompyuter",
     "useCases": {
       "computerAgent": {
         "label": "Computer agent",

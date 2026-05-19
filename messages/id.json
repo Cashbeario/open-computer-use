@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "Agen Computer-Use #1 · {score} OSWorld",
-    "headline": "Operator komputer otonom",
+    "headline": "Agen pengguna komputer terbaik",
     "useCases": {
       "computerAgent": {
         "label": "Agen komputer",

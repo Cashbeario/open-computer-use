@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 计算机使用智能体 · {score} OSWorld",
-    "headline": "自主计算机操作员",
+    "headline": "最好的计算机使用智能体",
     "useCases": {
       "computerAgent": {
         "label": "计算机智能体",

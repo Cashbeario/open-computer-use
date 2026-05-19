@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 datamaskinagent · {score} OSWorld",
-    "headline": "Autonome datamaskinoperatorer",
+    "headline": "Den beste agenten for datamaskinbruk",
     "useCases": {
       "computerAgent": {
         "label": "Datamaskinagent",

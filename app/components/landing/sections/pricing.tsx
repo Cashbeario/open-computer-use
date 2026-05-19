@@ -186,12 +186,6 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
           transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
           className="mt-14 flex flex-col items-center gap-4"
         >
-          <div className="h-px w-24 bg-foreground/10" />
-          <p
-            className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/40 text-center"
-          >
-            No credit card <span className="opacity-40">·</span> Cancel anytime <span className="opacity-40">·</span> All plans, full features
-          </p>
           <Link
             href="/pricing"
             className="group inline-flex items-center gap-1.5 text-[12px] text-foreground/55 hover:text-foreground transition-colors"

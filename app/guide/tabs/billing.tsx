@@ -74,8 +74,6 @@ const ALL_PLAN_KEYS: readonly { key: string; name: string; price: string; popula
   { key: "free", name: "Free", price: "$0", purchasable: false },
   { key: "lite", name: "Lite", price: "$9", purchasable: false },
   { key: "starter", name: "Starter", price: "$19", purchasable: true },
-  { key: "plus", name: "Plus", price: "$50", popular: true, purchasable: false },
-  { key: "pro", name: "Pro", price: "$100", purchasable: false },
   { key: "unlimited", name: "Unlimited", price: "$249", featured: true, purchasable: true },
 ]
 

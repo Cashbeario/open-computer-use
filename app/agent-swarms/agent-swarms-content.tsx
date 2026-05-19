@@ -1226,9 +1226,8 @@ export function AgentSwarmsContent() {
               )}
             >
               {[
-                { plan: "Starter", price: "$19", machines: "2 machines" },
-                { plan: "Plus", price: "$50", machines: "4 machines" },
-                { plan: "Pro", price: "$100", machines: "6 machines" },
+                { plan: "Starter", price: "$19", machines: "1 machine" },
+                { plan: "Unlimited", price: "$249", machines: "2 machines" },
               ].map(p => (
                 <div key={p.plan} className="flex items-baseline gap-2">
                   <span className="text-sm font-semibold">{p.plan}</span>

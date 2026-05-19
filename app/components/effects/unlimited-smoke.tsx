@@ -34,13 +34,15 @@ interface Blob {
   className: string
 }
 
-// ─── Palette (cinematic dark — burnt bronze / oxblood / ink) ─────────────
-// Very-deep low-luminance hues.  Combined with the keyframe opacity
-// (which oscillates 0.45 → 0.72), effective rendered opacity peaks
-// around 18-25% — reads as moody atmosphere, never as a bright glow.
+// ─── Palette (cinematic dark — burnt bronze / oxblood / deep teal) ──────
+// Classic teal-and-orange film grading: warm anchors (gold + oxblood)
+// against a cool teal counterpoint instead of indigo, which read as
+// purple on the new dark-pocket banner.  Very-deep low-luminance hues.
+// Combined with the keyframe opacity (oscillates 0.45 → 0.72), effective
+// rendered opacity peaks around 18-25% — moody atmosphere, never glow.
 const GOLD     = "bg-amber-800/45"     // burnt bronze warm anchor
 const WINE     = "bg-rose-950/45"      // oxblood deep red bridge
-const MIDNIGHT = "bg-indigo-950/50"    // ink-blue depth
+const OCEAN    = "bg-teal-950/55"      // deep teal cool counterpoint
 
 const VARIANTS: Record<Variant, Blob[]> = {
   // Compact stat card — three corner-anchored blobs, all visible.
@@ -62,7 +64,7 @@ const VARIANTS: Record<Variant, Blob[]> = {
     {
       className: cn(
         "top-[20%] left-[30%] w-[80%] h-[80%] blur-3xl",
-        MIDNIGHT,
+        OCEAN,
         "animate-unlimited-drift-3",
       ),
     },
@@ -87,7 +89,7 @@ const VARIANTS: Record<Variant, Blob[]> = {
     {
       className: cn(
         "-bottom-[60%] -right-[10%] w-[55%] h-[260%] blur-3xl",
-        MIDNIGHT,
+        OCEAN,
         "animate-unlimited-drift-2",
       ),
     },
@@ -112,7 +114,7 @@ const VARIANTS: Record<Variant, Blob[]> = {
     {
       className: cn(
         "-bottom-[10%] -right-[20%] w-[90%] h-[60%] blur-3xl",
-        MIDNIGHT,
+        OCEAN,
         "animate-unlimited-drift-2",
       ),
     },
@@ -137,7 +139,7 @@ const VARIANTS: Record<Variant, Blob[]> = {
     {
       className: cn(
         "-bottom-[20%] -right-[5%] w-[55%] h-[140%] blur-3xl",
-        MIDNIGHT,
+        OCEAN,
         "animate-unlimited-drift-2",
       ),
     },

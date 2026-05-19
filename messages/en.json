@@ -92,11 +92,11 @@
   },
   "hero": {
     "badge": "#1 Computer-Use Agent · {score} OSWorld",
-    "headline": "Autonomous computer operators",
+    "headline": "The Best Computer Use Agent",
     "useCases": {
       "computerAgent": {
         "label": "Computer agent",
-        "headline": "automate any browser task",
+        "headline": "automate any computer task",
         "outcome": "Coasty controls a real computer. It browses, clicks, types, and delivers finished work. No setup required."
       },
       "competitorIntel": {

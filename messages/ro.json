@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "Agentul Computer-Use #1 · {score} OSWorld",
-    "headline": "Operatori de computer autonomi",
+    "headline": "Cel mai bun agent de utilizare a computerului",
     "useCases": {
       "computerAgent": {
         "label": "Agent de computer",

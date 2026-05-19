@@ -41,6 +41,10 @@ const TRIGGER_SECTIONS = [
 export function LandingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [currentSection, setCurrentSection] = useState<TriggerSection | null>(null)
+  // Gates HeroTaskShots — keeps the side cards hidden during the hero
+  // so the headline gets a clean stage, then lets them pan in from
+  // their gutters as the user scrolls into the next section.
+  const [pastHero, setPastHero] = useState(false)
 
   const searchParams = useSearchParams()
 
@@ -62,6 +66,30 @@ export function LandingPage() {
     const onResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  // Past-hero reveal — flips true once the user has scrolled ~60% of
+  // a viewport, which is roughly where the hero ends and the next
+  // section's top edge enters view. Reveals the gutter cards with
+  // their pan-in cascade so the hero stays uncluttered.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    let rafId = 0
+    const onScroll = () => {
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        setPastHero(window.scrollY > window.innerHeight * 0.6)
+      })
+    }
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll)
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
   }, [])
 
   // ── Section-in-view tracking for HeroTaskShots ──
@@ -150,6 +178,7 @@ export function LandingPage() {
       <HeroTaskShots
         isMobile={isMobile}
         currentSection={currentSection}
+        visible={pastHero}
       />
 
       {/* Main content — natural scroll. The hero is a single

@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 Computer-Use Agent · {score} OSWorld",
-    "headline": "Autonoma datoroperatorer",
+    "headline": "Den bästa datoranvändningsagenten",
     "useCases": {
       "computerAgent": {
         "label": "Datoragent",

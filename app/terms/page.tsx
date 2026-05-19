@@ -154,20 +154,20 @@ const termsSections = [
     icon: Zap,
     subsections: [
       {
-        title: "Plus Plan ($50/month)",
-        description: "The Plus plan includes the following monthly quotas:",
+        title: "Starter Plan ($19/month)",
+        description: "The Starter plan includes the following monthly quotas:",
         items: [
-          "600 credits of AI agent usage per month",
+          "200 credits of AI agent usage per month",
           "Fair usage policy applies to prevent abuse",
           "Usage resets at the beginning of each billing cycle",
           "Overage may result in temporary throttling or suspension"
         ]
       },
       {
-        title: "Pro Plan ($100/month)",
-        description: "The Pro plan includes the following monthly quotas:",
+        title: "Unlimited Plan ($249/month)",
+        description: "The Unlimited plan includes the following monthly quotas:",
         items: [
-          "1,500 credits of AI agent usage per month",
+          "Unlimited AI agent usage per month, subject to the fair usage policy",
           "Priority resource allocation and higher limits",
           "Enhanced fair usage policy with higher thresholds",
           "Usage resets at the beginning of each billing cycle",

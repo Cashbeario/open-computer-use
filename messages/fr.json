@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "Agent n°1 d'utilisation d'ordinateur · {score} OSWorld",
-    "headline": "Opérateurs informatiques autonomes",
+    "headline": "Le meilleur agent d'utilisation d'ordinateur",
     "useCases": {
       "computerAgent": {
         "label": "Agent informatique",

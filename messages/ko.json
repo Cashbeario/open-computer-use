@@ -92,7 +92,7 @@
   },
   "hero": {
     "badge": "#1 컴퓨터 사용 에이전트 · {score} OSWorld",
-    "headline": "자율 컴퓨터 운영자",
+    "headline": "최고의 컴퓨터 사용 에이전트",
     "useCases": {
       "computerAgent": {
         "label": "컴퓨터 에이전트",

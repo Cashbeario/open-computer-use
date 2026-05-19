@@ -350,7 +350,11 @@ resource "aws_ecs_service" "api" {
     }
   }
 
-  health_check_grace_period_seconds  = 60
+  # Raised 60→180s on 2026-05-19 to match llmhub-service (app) after audit of
+  # v2026-05-19-8d34ab1 showed ALB TargetConnectionError 502s during deploy +
+  # autoscale warmup.  Backend init takes ~10-30s and needs 2 consecutive ALB
+  # health checks (60s) to flip healthy; 60s grace was tripping on cold start.
+  health_check_grace_period_seconds  = 180
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
 
@@ -406,7 +410,10 @@ resource "aws_ecs_service" "sse" {
     }
   }
 
-  health_check_grace_period_seconds  = 60
+  # Raised 60→180s on 2026-05-19 to match llmhub-service (app) after audit of
+  # v2026-05-19-8d34ab1 showed ALB TargetConnectionError 502s during deploy +
+  # autoscale warmup.  See aws_ecs_service.api above for rationale.
+  health_check_grace_period_seconds  = 180
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
 
@@ -466,7 +473,10 @@ resource "aws_ecs_service" "ws" {
   # wired to the internal listener (default action for api_internal, rules
   # 20/30 for sse_internal).
 
-  health_check_grace_period_seconds  = 60
+  # Raised 60→180s on 2026-05-19 to match llmhub-service (app) after audit of
+  # v2026-05-19-8d34ab1 showed ALB TargetConnectionError 502s during deploy +
+  # autoscale warmup.  See aws_ecs_service.api above for rationale.
+  health_check_grace_period_seconds  = 180
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
 

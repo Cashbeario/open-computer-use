@@ -328,7 +328,13 @@ function AvatarMenu({
     | { kind: "external"; icon: typeof IconSettings; label: string; href: string }
 
   const items: Item[] = [
-    { kind: "button", icon: IconSettings, label: t("account"), onClick: () => { openDialog("account"); onAction() } },
+    // "Account" is a generic "open settings" entry, not a deep-link
+    // to the General profile section. On the mobile drawer this opens
+    // the dialog at the section-list view so the user can pick where
+    // to go (Memory, Appearance, Billing, …) instead of being dropped
+    // into a specific panel. Desktop renders nav + content side-by-side
+    // and ignores the hint, so behavior there is unchanged.
+    { kind: "button", icon: IconSettings, label: t("account"), onClick: () => { openDialog("account", { mobileView: "menu" }); onAction() } },
     { kind: "button", icon: IconCreditCard, label: t("credits.buy"), onClick: () => { openDialog("billing"); onAction() } },
     { kind: "link", icon: IconBook2, label: t("guide"), href: "/guide" },
     { kind: "link", icon: IconCompass, label: "Community", href: "/discover" },
@@ -897,10 +903,17 @@ function ResizableFeedbackModal({
   )
 }
 
-// ─── Mobile feedback drawer (< sm) ───────────────────────────────
+// ─── Mobile feedback drawer (< md) ───────────────────────────────
 //   Bottom sheet via vaul. Drag-down dismisses; the drag-handle pill
-//   is provided by `DrawerContent`. Height is fixed at 78vh so the
-//   keyboard has room to open without collapsing the textarea.
+//   is provided by `DrawerContent`. The drawer needs to render *above*
+//   the still-open mobile sidebar (panel z-[100]) — the raised default
+//   in `components/ui/drawer.tsx` (z-[10001]) handles that.
+//
+//   Height is sized off `dvh` (dynamic viewport height) instead of vh
+//   so the soft keyboard pushes the sheet up rather than clipping the
+//   textarea behind it on iOS Safari and Chrome Android. The cap is
+//   relaxed to 88dvh to keep the visible status row and Send button
+//   above the keyboard on 360×640 phones.
 function MobileFeedbackDrawer({
   open,
   onOpenChange,
@@ -912,7 +925,12 @@ function MobileFeedbackDrawer({
 }) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[78vh] max-h-[88vh] flex flex-col focus:outline-none">
+      <DrawerContent
+        className={cn(
+          "h-[78dvh] max-h-[88dvh] flex flex-col focus:outline-none",
+          "rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]",
+        )}
+      >
         <DrawerTitle className="sr-only">Send feedback</DrawerTitle>
         {/* The drawer's drag-handle pill (rendered by DrawerContent)
             sits above this body. We give the body flex-1 so the
@@ -925,8 +943,17 @@ function MobileFeedbackDrawer({
 
 // ─── Responsive feedback dialog ──────────────────────────────────
 //   One entry point for callers. Picks the right surface based on
-//   viewport width. Form state (text, status) lives at this level so
-//   it survives the responsive switch when the viewport crosses 640px.
+//   viewport width.
+//
+//   Breakpoint = 768 (md) — must match the sidebar's mobile/desktop
+//   split (see `components/ui/sidebar.tsx`). With the old 640 breakpoint
+//   there was a 640–768px band where the sidebar still rendered as a
+//   mobile overlay (`z-[100]`) but feedback used the desktop modal,
+//   resulting in the modal feeling cramped while the sidebar overlay
+//   still consumed half the screen.
+//
+//   Form state (text, status) lives at this level so it survives the
+//   responsive switch when the viewport crosses 768px.
 function FeedbackDialog({
   open,
   onOpenChange,
@@ -936,7 +963,7 @@ function FeedbackDialog({
   onOpenChange: (open: boolean) => void
   userId: string
 }) {
-  const isMobile = useBreakpoint(640)
+  const isMobile = useBreakpoint(768)
   const close = useCallback(() => onOpenChange(false), [onOpenChange])
   const { text, setText, status, submit } = useFeedbackSubmit({
     userId,
@@ -1348,7 +1375,15 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
                 onOpenChange={setMenuOpen}
                 dismissible={!menuPinned}
               >
-                <DrawerContent className="max-h-[82vh] focus:outline-none">
+                <DrawerContent
+                  className={cn(
+                    // `dvh` so the sheet resizes with the soft keyboard
+                    // (when the inline feedback composer is active)
+                    // instead of getting clipped behind it.
+                    "max-h-[82dvh] focus:outline-none",
+                    "rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]",
+                  )}
+                >
                   <DrawerTitle className="sr-only">Account menu</DrawerTitle>
                   <div className="flex-1 min-h-0 overflow-y-auto pb-2">
                     <AvatarMenu

@@ -51,7 +51,6 @@ import {
   Infinity as InfinityIcon,
 } from "lucide-react"
 import { CoastyIcon } from "@/components/icons/coasty"
-import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
 import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
 
@@ -773,27 +772,27 @@ function StatCard({
 
 // ─── Unlimited Plan — Sleek Stat Card Variants ──────────────────────────────
 //
-// Design: minimal hairline borders, no animations, single signature accent
-// per card (a tinted icon).  Matches the existing StatCard footprint so the
-// 4-card grid stays visually balanced — only the icon color + value content
-// changes for unlimited.
+// Design: identical shell to <StatCard /> — hairline border, no animations,
+// no tinted accents.  The word "Unlimited" carries enough weight on its own;
+// piling amber rings, smoke gradients, and warm icon tints on top read as
+// over-decoration.  Only the value content (and the choice of icon glyph)
+// differentiates these from the standard stat cards beside them.
 
 function UnlimitedBalanceCard({ label }: { label: string }) {
   return (
-    <div className="relative rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden isolate">
-      <UnlimitedSmoke variant="stat" />
-      <div className="relative flex items-center justify-between mb-auto gap-2 min-w-0">
+    <div className="rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden">
+      <div className="flex items-center justify-between mb-auto gap-2 min-w-0">
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           {label}
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-foreground/[0.04] shrink-0">
           <InfinityIcon
-            className="h-3.5 w-3.5 text-amber-500/80"
+            className="h-3.5 w-3.5 text-foreground/40"
             strokeWidth={2.25}
           />
         </div>
       </div>
-      <div className="relative min-w-0">
+      <div className="min-w-0">
         <div className="flex items-baseline gap-1.5 flex-wrap">
           <span className="text-[20px] font-bold tracking-tight text-foreground leading-none whitespace-nowrap">
             Unlimited
@@ -833,17 +832,16 @@ function UnlimitedSavingsCard({
     .replace(/^all time$/i, "all-time")
 
   return (
-    <div className="relative rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden isolate">
-      <UnlimitedSmoke variant="stat" />
-      <div className="relative flex items-center justify-between mb-auto gap-2 min-w-0">
+    <div className="rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden">
+      <div className="flex items-center justify-between mb-auto gap-2 min-w-0">
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           Saved
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-foreground/[0.04] shrink-0">
           <TrendUp size={14} weight="bold" className="text-foreground/40" />
         </div>
       </div>
-      <div className="relative min-w-0">
+      <div className="min-w-0">
         {hasMeaningfulSavings ? (
           <>
             {/* Headline — bold dollar amount, fixed-width digits */}
@@ -884,17 +882,16 @@ function UnlimitedPlanCard({
   cancelAtPeriodEnd: boolean
 }) {
   return (
-    <div className="relative rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden isolate">
-      <UnlimitedSmoke variant="stat" />
-      <div className="relative flex items-center justify-between mb-auto gap-2 min-w-0">
+    <div className="rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden">
+      <div className="flex items-center justify-between mb-auto gap-2 min-w-0">
         <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider truncate">
           Plan
         </span>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-background/70 backdrop-blur-md ring-1 ring-amber-500/25 shrink-0">
-          <Crown size={14} weight="fill" className="text-amber-500/80" />
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-foreground/[0.04] shrink-0">
+          <Crown size={14} weight="fill" className="text-foreground/40" />
         </div>
       </div>
-      <div className="relative min-w-0">
+      <div className="min-w-0">
         {/* Plan name — bold, like a title */}
         <p className="text-[20px] font-bold tracking-tight text-foreground leading-none truncate">
           {planName}
@@ -921,9 +918,11 @@ function UnlimitedPlanCard({
 //
 // Replaces Auto-Refill + Add Credits + Credit Activity chart for Unlimited
 // subscribers.  Single sleek box — no perks grid, no feature-list noise,
-// no animations.  Just: title, the 3 stats that actually matter (renewal,
-// savings, this-period usage), and a cancel-anytime reassurance.
-// One signature element: a faint amber hairline at the top edge.
+// no animations, and (per the account section's calmer vocabulary) no
+// tinted accents either.  Just: title, the 3 stats that actually matter
+// (renewal, savings, this-period usage), and a cancel-anytime reassurance.
+// The hierarchy is carried by typography and one quiet hairline divider
+// row, the same chrome the rest of the account dialog uses.
 
 function UnlimitedHeroCard({
   creditsUsedThisPeriod,
@@ -948,26 +947,13 @@ function UnlimitedHeroCard({
 }) {
   return (
     <motion.div {...fadeUpVariant}>
-      <div className="relative rounded-xl border border-border/40 bg-card/30 overflow-hidden isolate">
-        {/* Slow amber smoke — sits below all card chrome.  See
-            app/components/effects/unlimited-smoke.tsx + globals.css
-            smoke-optimized-* keyframes. */}
-        <UnlimitedSmoke variant="hero" />
-
-        {/* Single signature accent — a hairline at the top edge, the only
-            "decoration" on the card.  Mirrors the landing pricing card's
-            unlimited treatment. */}
-        <div
-          aria-hidden
-          className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent z-10"
-        />
-
+      <div className="rounded-xl border border-border/40 bg-card/30 overflow-hidden">
         {/* ── Header row ──────────────────────────────────────────────── */}
-        <div className="relative flex items-start justify-between gap-4 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
+        <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
           <div className="flex items-start gap-3 min-w-0">
             <div className="h-9 w-9 rounded-lg bg-foreground/[0.04] flex items-center justify-center shrink-0">
               <InfinityIcon
-                className="h-4 w-4 text-amber-500/80"
+                className="h-4 w-4 text-foreground/45"
                 strokeWidth={2.25}
               />
             </div>
@@ -996,7 +982,7 @@ function UnlimitedHeroCard({
             full context, so the dollar amount stands alone.  Items-start
             keeps icons aligned with the eyebrow row across cells of
             uneven height. */}
-        <div className="relative grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 border-y border-border/30 bg-background/75 backdrop-blur-md">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 border-y border-border/30">
           {/* Renewal */}
           <div className="flex items-start gap-2.5 px-5 py-4 sm:px-6 min-w-0">
             <CalendarCheck size={13} weight="bold" className="text-muted-foreground/40 shrink-0 mt-[3px]" />
@@ -1052,7 +1038,7 @@ function UnlimitedHeroCard({
         </div>
 
         {/* ── Bottom strip — member-since + cancel reassurance ────────── */}
-        <div className="relative flex items-center justify-between gap-3 px-5 py-3 sm:px-6">
+        <div className="flex items-center justify-between gap-3 px-5 py-3 sm:px-6">
           <p className="text-[11px] text-muted-foreground/50 leading-none truncate min-w-0">
             {activeSinceStr ? (
               <>
@@ -1061,7 +1047,10 @@ function UnlimitedHeroCard({
               </>
             ) : null}
             {cancelAtPeriodEnd ? (
-              <span className="text-amber-600/80 dark:text-amber-400/80">
+              // Same hierarchy as the regular text — the message itself
+              // is informative enough; an amber tint reads as alarm and
+              // we want the rest of the account dialog's quiet voice.
+              <span className="text-foreground/70">
                 Subscription ends at period close
               </span>
             ) : (

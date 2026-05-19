@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils"
 import { ReferralPopup } from "../../referral/referral-popup"
 import { SidebarNavSection } from "./sidebar-nav-section"
 import { SidebarFooterSection } from "./sidebar-footer-section"
+import { MemoryDialog } from "@/app/components/layout/settings/general/memory-dialog"
+import { useMemoryDialog } from "@/lib/memory-dialog-store"
 
 const SIDEBAR_PINNED_KEY = "coasty:sidebar:pinned"
 
@@ -271,6 +273,24 @@ export function AppSidebar() {
           onOpenChange={setIsReferralPopupOpen}
         />
       </Sidebar>
+
+      {/* Memory quick-edit popup — mounted OUTSIDE the <Sidebar> tree
+          so it survives the mobile sidebar's exit animation. The
+          sidebar's `AnimatePresence` unmounts its entire children
+          subtree ~320ms after `setOpenMobile(false)`; if this lived
+          inside, it'd vanish mid-fade and read as "the popup opens
+          behind the sidebar". Open/close state is shared via the
+          `useMemoryDialog` store. */}
+      <MemoryDialogMount />
     </>
   )
+}
+
+// Tiny wrapper so we don't subscribe AppSidebar itself to the memory
+// dialog store (which would cause unnecessary re-renders of the sidebar
+// tree whenever the popup toggles).
+function MemoryDialogMount() {
+  const isOpen = useMemoryDialog((s) => s.isOpen)
+  const setOpen = useMemoryDialog((s) => s.setOpen)
+  return <MemoryDialog open={isOpen} onOpenChange={setOpen} />
 }

@@ -13,6 +13,7 @@ import {
   Share2,
   Mail,
   Loader2,
+  ChevronLeft,
   ChevronRight,
   X,
   Globe,
@@ -165,7 +166,7 @@ function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentTyp
 const validSections: SectionType[] = ["account", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
 
 export function AccountDialog() {
-  const { isOpen, section, close, setSection, _syncFromUrl } = useAccountDialog()
+  const { isOpen, section, close, setSection, _syncFromUrl, _initialMobileView } = useAccountDialog()
   const { user, isLoading } = useUser()
   const [mobileView, setMobileView] = useState<"menu" | "content">("content")
   const router = useRouter()
@@ -281,10 +282,16 @@ export function AccountDialog() {
 
       const path = window.location.pathname
       if (path === "/account") {
-        // We're on /account — sync section from URL
+        // We're on /account — sync section from URL.
+        // No `?section=` param means the user landed on the bare hub:
+        // on mobile that's an unambiguous "show me the section list"
+        // signal, so we hint the dialog to start in menu view. With a
+        // `?section=X` param the URL is already a deep link, so we
+        // honor it and jump straight into that panel.
         const params = new URLSearchParams(window.location.search)
         const sec = params.get("section") as SectionType | null
-        _syncFromUrl(sec && validSections.includes(sec) ? sec : "account")
+        const resolved = sec && validSections.includes(sec) ? sec : "account"
+        _syncFromUrl(resolved, sec ? "content" : "menu")
       } else if (currentlyOpen) {
         // Navigated away from /account — close dialog without further URL manipulation
         useAccountDialog.setState({ isOpen: false, _previousPath: null, _didPushState: false })
@@ -296,7 +303,10 @@ export function AccountDialog() {
     return () => window.removeEventListener("popstate", handlePopState)
   }, [_syncFromUrl])
 
-  // If the page loads on /account, open the dialog
+  // If the page loads on /account, open the dialog. Same rule as the
+  // popstate handler above: a bare `/account` URL means the user wants
+  // the section-list hub (menu view on mobile); `/account?section=X`
+  // is a deep link and should open directly into that panel.
   useEffect(() => {
     if (typeof window === "undefined") return
     const path = window.location.pathname
@@ -305,16 +315,27 @@ export function AccountDialog() {
       const sec = params.get("section") as SectionType | null
       // Save the referring page as "/" since we loaded directly on /account
       useAccountDialog.setState({ _previousPath: "/" })
-      _syncFromUrl(sec && validSections.includes(sec) ? sec : "account")
+      const resolved = sec && validSections.includes(sec) ? sec : "account"
+      _syncFromUrl(resolved, sec ? "content" : "menu")
     }
   // Only run once on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Reset mobile view when dialog opens
+  // Reset mobile view when dialog opens.
+  // Honors the caller's intent via `_initialMobileView` on the store:
+  //   • "content" (default): jump straight into the active section
+  //     panel — used when the caller targeted a specific section
+  //     (e.g. tapping "Buy credits" → billing, deep-linking to memory).
+  //   • "menu": land on the section list so the user can pick — used
+  //     when the caller is a generic "open settings" affordance (e.g.
+  //     the sidebar avatar drawer's "Account" row on mobile, where
+  //     there's no implied destination).
+  // The desktop layout renders both nav + content at once, so this is
+  // a no-op above the md breakpoint.
   useEffect(() => {
-    if (isOpen) setMobileView("content")
-  }, [isOpen])
+    if (isOpen) setMobileView(_initialMobileView)
+  }, [isOpen, _initialMobileView])
 
   // Safety cleanup: ensure pointer-events is restored when dialog unmounts or closes
   useEffect(() => {
@@ -446,80 +467,135 @@ export function AccountDialog() {
                 </div>
               </aside>
 
-              {/* ─── Mobile nav (< md) ─────────────────────────────── */}
-              <div className="md:hidden flex flex-col h-full w-full">
+              {/* ─── Mobile nav (< md) ───────────────────────────────
+                  Two views in this column, toggled by `mobileView`:
+                    • "menu":   the section-list hub. Sticky title bar
+                                with the user's identity (avatar + name
+                                + email) so the hub never reads like an
+                                anonymous list, and the close affordance
+                                stays glued to the top while the body
+                                scrolls under it.
+                    • "content": a single section's panel, with a sticky
+                                back-row that pairs a left chevron with
+                                the section label and an X on the right.
+                  Both views share `flex-1 overflow-hidden` so only the
+                  inner scroll region grows; the sticky chrome never
+                  drifts under the keyboard or off the safe area. */}
+              <div className="md:hidden flex flex-col h-full w-full overflow-hidden">
                 {mobileView === "menu" ? (
-                  <div className="flex-1 overflow-y-auto px-4 py-5 space-y-5">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-[15px] font-semibold">{tDialog("settingsHeading")}</h2>
-                      <button onClick={handleClose} className="p-1.5 -mr-1 rounded-md hover:bg-foreground/[0.04] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    {localizedNavGroups.map((group) => {
-                      const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
-                      return (
-                        <div key={group.label}>
-                          <p className="text-[10px] font-medium tracking-[0.05em] uppercase text-muted-foreground/35 mb-2 px-0.5">
-                            {group.label}
+                  <>
+                    {/* Sticky top — identity + close.
+                        Padding mirrors the desktop sidebar's user row
+                        (px-4 pt-5 pb-3) so the typography rhythm reads
+                        the same across breakpoints. The X sits in the
+                        corner so users coming from the avatar drawer
+                        always see a clear escape hatch. */}
+                    <div className="shrink-0 px-4 pt-4 pb-3 border-b border-border/30 dark:border-white/[0.05] bg-popover">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/40">
+                          <AvatarImage src={user?.profile_image || undefined} className="object-cover" />
+                          <AvatarFallback className="bg-foreground/[0.04] dark:bg-white/[0.06] text-[12px] font-medium text-foreground/60">
+                            {userInitial}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-semibold leading-tight truncate text-foreground/90 tracking-[-0.01em]">
+                            {user?.display_name || user?.email?.split("@")[0] || "User"}
                           </p>
-                          <div className="rounded-lg border border-border/30 dark:border-white/[0.06] divide-y divide-border/20 dark:divide-white/[0.04] overflow-hidden">
-                            {groupSections.map((s) => {
-                              const Icon = s.icon
-                              const isDisabled = !s.component
-                              return (
-                                <button
-                                  key={s.id}
-                                  onClick={() => !isDisabled && handleSectionChange(s.id)}
-                                  disabled={isDisabled}
-                                  className={cn(
-                                    "w-full flex items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-foreground/[0.02]",
-                                    isDisabled && "opacity-30 cursor-not-allowed"
-                                  )}
-                                >
-                                  <Icon className="h-[15px] w-[15px] text-muted-foreground/40 shrink-0" strokeWidth={1.75} />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-[13px] font-medium leading-tight">{s.label}</div>
-                                    <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{s.description}</div>
-                                  </div>
-                                  {/* "Soon" badge for disabled sections is commented out for
-                                      now — re-enable when coming-soon features land.
-                                  {isDisabled ? (
-                                    <span className="text-[10px] text-muted-foreground/25">{tDialog("comingSoon.badge")}</span>
-                                  ) : (
-                                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
-                                  )}
-                                  */}
-                                  {!isDisabled && (
-                                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
-                                  )}
-                                </button>
-                              )
-                            })}
-                          </div>
+                          {user?.email && (
+                            <p className="text-[11.5px] text-muted-foreground/55 truncate mt-0.5">
+                              {user.email}
+                            </p>
+                          )}
                         </div>
-                      )
-                    })}
-                  </div>
+                        <button
+                          onClick={handleClose}
+                          aria-label="Close"
+                          className="-mr-1 p-1.5 rounded-md hover:bg-foreground/[0.05] text-muted-foreground/45 hover:text-muted-foreground transition-colors shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable group list. `min-h-0` is mandatory
+                        inside the parent's `flex-col` so this child
+                        actually claims the remaining vertical space
+                        and lets `overflow-y-auto` engage. */}
+                    <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
+                      {localizedNavGroups.map((group) => {
+                        const groupSections = localizedSections.filter((s) => group.ids.includes(s.id))
+                        return (
+                          <div key={group.label}>
+                            <p className="text-[10px] font-medium tracking-[0.05em] uppercase text-muted-foreground/35 mb-2 px-0.5">
+                              {group.label}
+                            </p>
+                            <div className="rounded-lg border border-border/30 dark:border-white/[0.06] divide-y divide-border/20 dark:divide-white/[0.04] overflow-hidden">
+                              {groupSections.map((s) => {
+                                const Icon = s.icon
+                                const isDisabled = !s.component
+                                return (
+                                  <button
+                                    key={s.id}
+                                    onClick={() => !isDisabled && handleSectionChange(s.id)}
+                                    disabled={isDisabled}
+                                    className={cn(
+                                      "w-full flex items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-foreground/[0.02] active:bg-foreground/[0.04]",
+                                      isDisabled && "opacity-30 cursor-not-allowed"
+                                    )}
+                                  >
+                                    <Icon className="h-[15px] w-[15px] text-muted-foreground/40 shrink-0" strokeWidth={1.75} />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-[13px] font-medium leading-tight">{s.label}</div>
+                                      <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{s.description}</div>
+                                    </div>
+                                    {!isDisabled && (
+                                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
+                                    )}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })}
+                      {/* Trailing safe-area pad so the last row doesn't
+                          hug the gesture handle / home indicator. */}
+                      <div className="h-2" />
+                    </div>
+                  </>
                 ) : (
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="sticky top-0 z-10 flex items-center gap-2 px-4 py-3 bg-popover/95 backdrop-blur-md border-b border-border/15 dark:border-white/[0.04]">
+                  <>
+                    {/* Sticky back-row. Larger left-aligned tap target
+                        (h-9 w-9) for the back chevron — matches iOS/
+                        Android stack-navigation conventions. The label
+                        is the active section, centered visually by the
+                        flex layout. Close X stays in the corner. */}
+                    <div className="shrink-0 flex items-center gap-1 px-2 py-2 bg-popover border-b border-border/15 dark:border-white/[0.04]">
                       <button
                         onClick={() => setMobileView("menu")}
-                        className="text-[13px] text-muted-foreground/50 hover:text-foreground flex items-center gap-1 transition-colors"
+                        aria-label="Back to menu"
+                        className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-foreground/[0.04] transition-colors shrink-0"
                       >
-                        <ChevronRight className="h-3 w-3 rotate-180" />
-                        Back
+                        <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={1.75} />
                       </button>
-                      <span className="text-[13px] font-medium">{activeConfig?.label}</span>
-                      <button onClick={handleClose} className="ml-auto p-1 rounded-md hover:bg-foreground/[0.04] text-muted-foreground/40 transition-colors">
+                      <span className="text-[14px] font-semibold tracking-[-0.01em] text-foreground/90 truncate flex-1 text-center pr-1">
+                        {activeConfig?.label}
+                      </span>
+                      <button
+                        onClick={handleClose}
+                        aria-label="Close"
+                        className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground/45 hover:text-foreground/80 hover:bg-foreground/[0.04] transition-colors shrink-0"
+                      >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="p-5">
-                      {renderSectionContent()}
+                    <div className="flex-1 min-h-0 overflow-y-auto">
+                      <div className="p-5">
+                        {renderSectionContent()}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
 

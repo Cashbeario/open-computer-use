@@ -14,7 +14,7 @@ import {
   IconStack2,
   IconBrain,
 } from "@tabler/icons-react"
-import { MemoryDialog } from "@/app/components/layout/settings/general/memory-dialog"
+import { useMemoryDialog } from "@/lib/memory-dialog-store"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import {
@@ -1106,11 +1106,18 @@ export const SidebarNavSection = memo(function SidebarNavSection({
   const { chats: allChats } = useChats()
   const { stats: machineStats } = useSidebarMachines(user)
 
-  // Memory quick-edit popup state. Opened from the "Memory" entry in
-  // the Resources group (both expanded inline and collapsed flyout
-  // modes). The dialog component is mounted unconditionally so its
-  // mount/unmount lifecycle doesn't fight Radix's portal cleanup.
-  const [memoryDialogOpen, setMemoryDialogOpen] = useState<boolean>(false)
+  // Memory quick-edit popup is opened from the "Memory" entry in the
+  // Resources group (both expanded inline and collapsed flyout modes).
+  //
+  // The open/close state lives in a global store, NOT in this component.
+  // Why: on mobile we close the sidebar drawer when the user taps a
+  // resource (via `onNavigate: closeMobileIfNeeded`) so the dialog isn't
+  // hidden behind the rail. The sidebar uses AnimatePresence and will
+  // unmount its entire subtree ~320ms after close — which, when the
+  // state lived here, destroyed the dialog right after it opened. The
+  // store + AppSidebar-level mount decouples the dialog from this
+  // section's lifecycle. See `lib/memory-dialog-store.ts` for context.
+  const openMemoryDialog = useMemoryDialog((s) => s.open)
 
   // Lazy-fetch popup data — only fetched on first hover. Schedules and
   // secrets previews are handled inside the Resources dropdown itself,
@@ -1248,7 +1255,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               // affordance. `active` stays false so the rail's caret
               // bar doesn't appear here.
               active: false,
-              onAction: () => setMemoryDialogOpen(true),
+              onAction: openMemoryDialog,
               onNavigate: closeMobileIfNeeded,
             },
           ]
@@ -1282,9 +1289,11 @@ export const SidebarNavSection = memo(function SidebarNavSection({
         )}
       </div>
 
-      {/* Memory quick-edit popup — mounted unconditionally so its open
-          animation always plays from a stable DOM root. */}
-      <MemoryDialog open={memoryDialogOpen} onOpenChange={setMemoryDialogOpen} />
+      {/* The Memory quick-edit popup is mounted at the AppSidebar root
+          (a sibling of `Sidebar`, not a descendant) so it survives the
+          mobile sidebar's exit animation. State is shared via
+          `useMemoryDialog`. Mounting it here would put it back inside
+          the sidebar subtree and reintroduce the unmount bug. */}
     </>
   )
 })

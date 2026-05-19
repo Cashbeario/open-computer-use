@@ -33,12 +33,19 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import { useBreakpoint } from "@/app/hooks/use-breakpoint"
 import { cn } from "@/lib/utils"
 import { MemoryEditor } from "./memory-editor"
 
@@ -240,8 +247,69 @@ function MemoryDemoVisual({ replayKey }: { replayKey: number }) {
   )
 }
 
-// ─── Dialog shell ──────────────────────────────────────────────────────────
+// ─── Shared body (used by both the desktop dialog and mobile drawer) ──────
+//   Header + scrollable editor body. The hero visual is rendered by the
+//   wrappers themselves so each surface can decide whether to include it
+//   (desktop: yes, mobile: yes but slightly tighter). Keeping the rest
+//   of the chrome in one component prevents the two variants from
+//   drifting apart.
+function MemoryDialogBody({
+  onClose,
+  showCloseButton,
+}: {
+  onClose: () => void
+  /** Mobile drawer hides this because vaul provides a drag handle and
+   *  the user can swipe down to dismiss; desktop dialog shows it so
+   *  the X is always reachable. */
+  showCloseButton: boolean
+}) {
+  const t = useTranslations("memory")
 
+  return (
+    <>
+      {/* ─── Header ──────────────────────────────────────────────── */}
+      <div className={cn("shrink-0 px-5 pt-4 pb-3", showCloseButton && "pr-12")}>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-[15px] font-medium tracking-tight text-foreground">
+            {t("dialog.title")}
+          </h2>
+          <Link
+            href="/account?section=memory"
+            onClick={onClose}
+            className={cn(
+              "group inline-flex items-center gap-1 shrink-0",
+              "text-[10.5px] text-muted-foreground/55 hover:text-foreground/80",
+              "transition-colors",
+            )}
+          >
+            {t("dialog.openFull")}
+            <ArrowUpRight
+              className="h-3 w-3 transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]"
+              strokeWidth={2}
+            />
+          </Link>
+        </div>
+        <p className="text-[12px] text-muted-foreground/55 mt-1 leading-snug">
+          {t("dialog.description")}
+        </p>
+      </div>
+
+      {/* ─── Body — scrollable region with the shared editor ─────── */}
+      <div className="flex-1 overflow-y-auto px-5 pb-5 min-h-0">
+        <MemoryEditor compact autoFocus />
+      </div>
+    </>
+  )
+}
+
+// ─── Responsive shell ─────────────────────────────────────────────────────
+//   < md (768px): a vaul Drawer bottom-sheet — native mobile pattern,
+//     respects the soft keyboard, drag-down to dismiss, raised z-index
+//     so it renders above the sidebar drawer that just exited. The hero
+//     visual is preserved because it's part of the brand language, but
+//     capped at 110px so the editor still gets prime vertical space on
+//     short Android viewports.
+//   ≥ md: the original centered Radix Dialog at 500px, unchanged.
 export function MemoryDialog({
   open,
   onOpenChange,
@@ -250,12 +318,49 @@ export function MemoryDialog({
   onOpenChange: (next: boolean) => void
 }) {
   const t = useTranslations("memory")
-  // Replay the visual every time the dialog opens — feels alive on
+  const isMobile = useBreakpoint(768)
+  // Replay the visual every time the popup opens — feels alive on
   // every revisit instead of greeting users with a settled frame.
   const [replayKey, setReplayKey] = useState<number>(0)
   useEffect(() => {
     if (open) setReplayKey((k) => k + 1)
   }, [open])
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent
+          className={cn(
+            // Height: bounded by viewport, leaves room for the soft
+            // keyboard. 90vh max means even a 600px-tall phone gives
+            // the editor breathing room. `flex-col` so the editor body
+            // can scroll independently.
+            "max-h-[90vh] flex flex-col focus:outline-none p-0 gap-0",
+            "bg-popover",
+            // Match the editorial chrome of the desktop dialog so the
+            // visual identity reads the same across breakpoints.
+            "rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]",
+          )}
+        >
+          <VisuallyHidden>
+            <DrawerTitle>{t("dialog.title")}</DrawerTitle>
+            <DrawerDescription>{t("dialog.description")}</DrawerDescription>
+          </VisuallyHidden>
+
+          {/* The hero. The `mt-1` clears vaul's built-in drag-handle
+              pill so the pill and the hero don't fight visually. The
+              hero keeps its full 128px height — clipping it via
+              max-height truncated the right column's "applied" tiles
+              and read as a layout bug, not a design choice. */}
+          <div className="shrink-0 mt-1">
+            <MemoryDemoVisual replayKey={replayKey} />
+          </div>
+
+          <MemoryDialogBody onClose={() => onOpenChange(false)} showCloseButton={false} />
+        </DrawerContent>
+      </Drawer>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -285,37 +390,7 @@ export function MemoryDialog({
           <MemoryDemoVisual replayKey={replayKey} />
         </div>
 
-        {/* ─── Header ──────────────────────────────────────────────── */}
-        <div className="shrink-0 px-5 pt-4 pb-3 pr-12">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-[15px] font-medium tracking-tight text-foreground">
-              {t("dialog.title")}
-            </h2>
-            <Link
-              href="/account?section=memory"
-              onClick={() => onOpenChange(false)}
-              className={cn(
-                "group inline-flex items-center gap-1 shrink-0",
-                "text-[10.5px] text-muted-foreground/55 hover:text-foreground/80",
-                "transition-colors",
-              )}
-            >
-              {t("dialog.openFull")}
-              <ArrowUpRight
-                className="h-3 w-3 transition-transform group-hover:translate-x-[1px] group-hover:-translate-y-[1px]"
-                strokeWidth={2}
-              />
-            </Link>
-          </div>
-          <p className="text-[12px] text-muted-foreground/55 mt-1 leading-snug">
-            {t("dialog.description")}
-          </p>
-        </div>
-
-        {/* ─── Body — scrollable region with the shared editor ─────── */}
-        <div className="flex-1 overflow-y-auto px-5 pb-5 min-h-0">
-          <MemoryEditor compact autoFocus />
-        </div>
+        <MemoryDialogBody onClose={() => onOpenChange(false)} showCloseButton={true} />
       </DialogContent>
     </Dialog>
   )

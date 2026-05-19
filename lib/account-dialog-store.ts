@@ -23,11 +23,33 @@ interface AccountDialogStore {
   _previousPath: string | null
   /** Whether open() pushed a history entry (overlay mode) vs direct URL visit */
   _didPushState: boolean
-  open: (section?: AccountSectionType) => void
+  /**
+   * Initial view to render on mobile (<md). "menu" shows the section
+   * list (Memory, Appearance, Billing, …); "content" jumps straight
+   * into the selected `section`'s panel. Desktop renders both at once
+   * so this is ignored there. Defaults to "content" — only callers
+   * that don't carry the user toward a specific section (e.g. tapping
+   * "Account" in the sidebar avatar drawer) should request "menu".
+   */
+  _initialMobileView: "menu" | "content"
+  open: (
+    section?: AccountSectionType,
+    options?: { mobileView?: "menu" | "content" }
+  ) => void
   close: () => void
   setSection: (section: AccountSectionType) => void
-  /** Called from the dialog component to sync state without URL side-effects */
-  _syncFromUrl: (section: AccountSectionType) => void
+  /**
+   * Called from the dialog component (and page-level openers) to sync
+   * state without URL side-effects. `mobileView` lets the caller tell
+   * the dialog whether to land on the section list or jump into the
+   * resolved section's panel — used when the URL is `/account` (no
+   * `?section=` param) on mobile, where the user picked the hub, not
+   * a specific section.
+   */
+  _syncFromUrl: (
+    section: AccountSectionType,
+    mobileView?: "menu" | "content"
+  ) => void
 }
 
 export const useAccountDialog = create<AccountDialogStore>((set, get) => ({
@@ -35,8 +57,9 @@ export const useAccountDialog = create<AccountDialogStore>((set, get) => ({
   section: "account",
   _previousPath: null,
   _didPushState: false,
+  _initialMobileView: "content",
 
-  open: (section = "account") => {
+  open: (section = "account", options = {}) => {
     if (typeof window === "undefined") return
     const current = get()
     // Save current path if we're not already on /account
@@ -46,7 +69,13 @@ export const useAccountDialog = create<AccountDialogStore>((set, get) => ({
     // Determine if this is an overlay (pushState) or already on /account route
     const needsPush = !window.location.pathname.startsWith("/account") && window.location.pathname !== "/credits"
 
-    set({ isOpen: true, section, _previousPath: previousPath, _didPushState: needsPush })
+    set({
+      isOpen: true,
+      section,
+      _previousPath: previousPath,
+      _didPushState: needsPush,
+      _initialMobileView: options.mobileView ?? "content",
+    })
 
     // Push /account?section=X to the URL
     const url = section === "account" ? "/account" : `/account?section=${section}`
@@ -83,7 +112,7 @@ export const useAccountDialog = create<AccountDialogStore>((set, get) => ({
     window.history.replaceState({ accountDialog: true, section }, "", url)
   },
 
-  _syncFromUrl: (section) => {
-    set({ isOpen: true, section })
+  _syncFromUrl: (section, mobileView = "content") => {
+    set({ isOpen: true, section, _initialMobileView: mobileView })
   },
 }))

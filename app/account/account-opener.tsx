@@ -17,7 +17,11 @@ export function AccountOpener() {
       const sec = searchParams.get("section") as AccountSectionType | null
       // Save "/" as previous path so closing goes home
       useAccountDialog.setState({ _previousPath: "/" })
-      _syncFromUrl(sec && validSections.includes(sec) ? sec : "account")
+      // Bare `/account` → user wants the section-list hub, so on mobile
+      // we start in menu view. `/account?section=X` is a deep link and
+      // jumps into that panel directly.
+      const resolved = sec && validSections.includes(sec) ? sec : "account"
+      _syncFromUrl(resolved, sec ? "content" : "menu")
     }
     // Only run on mount and when searchParams change
     // eslint-disable-next-line react-hooks/exhaustive-deps

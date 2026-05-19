@@ -136,150 +136,102 @@ const ROW_OFFSETS = [0, 3, 1, 5, 2, 4, 1]
 const ENABLE_CINEMATIC_INTRO = false
 
 // ─── Ambient background ──────────────────────────────────────────
-// Two layers on every viewport (top radial wash + bottom fade), plus
-// extra layers on desktop only (left/right ambient orbs, mouse-tracked
-// spotlight, film grain). Mobile stays super clean — only the wash +
-// the fade survive there, so the headline reads on near-empty ground.
+// Hero background composition, back-to-front:
+//   1. Media layer — looping mp4 on desktop, static jpg poster on mobile
+//      and for reduced-motion users (saves data/battery, respects OS pref).
+//      Wrapped in a defocus reveal: blur 24px → 0, scale 1.05 → 1, fade
+//      0 → 1 over 1.4s. Reads as a lens settling.
+//   2. Readability tint — semi-opaque background wash so the headline,
+//      subhead, CTA, and stats row stay legible on top of moving video
+//   3. Edge vignette — gentle radial darken so the centre content sits
+//      anchored and the corners recede
+//   4. Bottom fade — linear handoff into the next section
 function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
-  const rootRef = useRef<HTMLDivElement | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const [videoReady, setVideoReady] = useState(false)
 
-  // Mouse-tracked spotlight — a quiet radial that follows the cursor on
-  // desktop. Pure CSS var update + composited radial gradient — no React
-  // re-render. Disabled on mobile.
+  // Pause the video when the hero is off-screen. Looping video kept
+  // running in a background tab is a known battery + decode cost on
+  // laptops, and Safari throttles offscreen video erratically (frames
+  // freeze mid-loop on return). Pausing explicitly skips both issues.
   useEffect(() => {
     if (isMobile) return
-    const el = rootRef.current
+    const el = videoRef.current
     if (!el) return
-    let raf = 0
-    let pendingX = 50
-    let pendingY = 30
-    const onMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect()
-      pendingX = ((e.clientX - rect.left) / rect.width) * 100
-      pendingY = ((e.clientY - rect.top) / rect.height) * 100
-      if (!raf) {
-        raf = requestAnimationFrame(() => {
-          el.style.setProperty("--hero-spot-x", `${pendingX}%`)
-          el.style.setProperty("--hero-spot-y", `${pendingY}%`)
-          raf = 0
-        })
-      }
-    }
-    window.addEventListener("pointermove", onMove, { passive: true })
-    return () => {
-      window.removeEventListener("pointermove", onMove)
-      if (raf) cancelAnimationFrame(raf)
-    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) el.play().catch(() => {})
+        else el.pause()
+      },
+      { threshold: 0 },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
   }, [isMobile])
 
   return (
     <div
-      ref={rootRef}
       aria-hidden="true"
       className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-      style={{
-        transform: "translateZ(0)",
-        "--hero-spot-x": "50%",
-        "--hero-spot-y": "30%",
-      } as React.CSSProperties}
     >
-      {/* Top radial wash — "lit from above" centre glow. Always on; the
-          mobile version uses a slightly tighter, lower-opacity wash. */}
+      {/* Defocus reveal — blur + scale + opacity all resolve over 1.4s
+          with a quintic ease-out. Applies once on mount; subsequent
+          renders see the resolved state. */}
+      <motion.div
+        initial={{ filter: "blur(24px)", opacity: 0, scale: 1.05 }}
+        animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+        className="absolute inset-0"
+      >
+        {/* Poster — always rendered, fills the hero from first paint. */}
+        <NextImage
+          src="/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+
+        {/* Video — desktop only, fades in once `canplay` fires. */}
+        {!isMobile && (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/hero-bg.jpg"
+            onCanPlay={() => setVideoReady(true)}
+            className={cn(
+              "absolute inset-0 w-full h-full object-cover motion-reduce:hidden",
+              "transition-opacity duration-700 ease-out",
+              videoReady ? "opacity-100" : "opacity-0",
+            )}
+          >
+            <source src="/hero-bg.mp4" type="video/mp4" />
+          </video>
+        )}
+      </motion.div>
+
+      {/* Readability tint — backdrop wash so type stays legible on top of
+          the moving media. Dark mode gets a slightly heavier veil because
+          the page bg is near-black and contrast budgets are tighter. */}
+      <div className="absolute inset-0 bg-background/55 dark:bg-background/65" />
+
+      {/* Edge vignette — soft radial darken that pushes the corners back
+          and anchors the centre content. Quiet enough to read as lighting,
+          not a frame. */}
       <div
         className="absolute inset-0"
         style={{
-          background: isMobile
-            ? "radial-gradient(ellipse 110% 45% at 50% 0%, color-mix(in oklab, var(--foreground) 3%, transparent), transparent 70%)"
-            : "radial-gradient(ellipse 90% 55% at 50% 0%, color-mix(in oklab, var(--foreground) 4%, transparent), transparent 70%)",
+          background:
+            "radial-gradient(ellipse 90% 70% at 50% 45%, transparent 35%, color-mix(in oklab, var(--background) 40%, transparent) 80%, var(--background) 100%)",
         }}
       />
 
-      {/* Desktop-only chrome — orbs + dot grid. Skipped on mobile so the
-          hero is just type on ground; no orbs to clutter a small viewport
-          and no grid to compete with the 2×2 stats row. */}
-      {!isMobile && (
-        <>
-          {/* Local keyframes for the orb drift — kept inside this branch so
-              they're absent from the mobile build entirely.
-              Respects prefers-reduced-motion: when the OS signal is set,
-              the orbs hold still (no animation), and the spotlight bg
-              transition is removed so cursor moves don't tween. */}
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-                @keyframes coasty-hero-orb-a {
-                  0%, 100% { transform: translate3d(-4%, -2%, 0) scale(1); }
-                  50%      { transform: translate3d(4%, 3%, 0) scale(1.05); }
-                }
-                @keyframes coasty-hero-orb-b {
-                  0%, 100% { transform: translate3d(3%, 2%, 0) scale(1.04); }
-                  50%      { transform: translate3d(-3%, -3%, 0) scale(1); }
-                }
-                @media (prefers-reduced-motion: reduce) {
-                  [data-coasty-hero-orb] { animation: none !important; }
-                  [data-coasty-hero-spotlight] { transition: none !important; }
-                }
-              `,
-            }}
-          />
-
-          {/* Left ambient orb — far-blurred foreground disc, slow drift.
-              Heavier blur (120px) so it reads as atmosphere, not a disc. */}
-          <div
-            data-coasty-hero-orb=""
-            className="absolute top-[18%] left-[8%] h-[42vh] w-[42vh] rounded-full opacity-60"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--foreground) 6%, transparent), transparent 65%)",
-              filter: "blur(120px)",
-              animation: "coasty-hero-orb-a 22s ease-in-out infinite",
-              willChange: "transform",
-            }}
-          />
-
-          {/* Right ambient orb — mirrored, opposite phase */}
-          <div
-            data-coasty-hero-orb=""
-            className="absolute top-[28%] right-[6%] h-[48vh] w-[48vh] rounded-full opacity-55"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 65%)",
-              filter: "blur(130px)",
-              animation: "coasty-hero-orb-b 26s ease-in-out infinite",
-              willChange: "transform",
-            }}
-          />
-
-          {/* Mouse-tracked spotlight — quiet radial that softly follows
-              the cursor. Pure CSS variables drive the centre; no React
-              re-renders. transition softens the var update so quick
-              cursor moves don't snap-jump. */}
-          <div
-            data-coasty-hero-spotlight=""
-            className="absolute inset-0 transition-[background] duration-300 ease-out"
-            style={{
-              background:
-                "radial-gradient(620px circle at var(--hero-spot-x) var(--hero-spot-y), color-mix(in oklab, var(--foreground) 4%, transparent), transparent 55%)",
-            }}
-          />
-
-          {/* Film grain — fractal SVG noise blended in at very low alpha.
-              The "premium texture" detail used by Linear / Vercel / Stripe
-              heroes. Static (no animation), zero JS, ~700 bytes inline.
-              Mix-blend-overlay makes it lighten light bg and darken dark
-              bg, so it stays a quiet film grain in both modes. */}
-          <div
-            className="absolute inset-0 mix-blend-overlay opacity-[0.35] dark:opacity-[0.18]"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-              backgroundSize: "220px 220px",
-            }}
-          />
-        </>
-      )}
-
-      {/* Bottom fade — linear handoff to the next section. Always on. */}
+      {/* Bottom fade — linear handoff to the next section. */}
       <div
         className="absolute bottom-0 left-0 right-0 h-40"
         style={{

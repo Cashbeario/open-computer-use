@@ -33,9 +33,6 @@ import {
   ChartLine,
   Funnel,
   Export,
-  Crown,
-  ShieldCheck,
-  CalendarCheck,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import {
@@ -881,6 +878,16 @@ function UnlimitedPlanCard({
   renewalDateStr: string | null
   cancelAtPeriodEnd: boolean
 }) {
+  // Layout mirrors <StatCard /> and the sibling unlimited cards exactly —
+  // eyebrow row + big value with subtext on the same baseline + a single
+  // h-4 footer line. Previously this had THREE body rows (name / price /
+  // renewal) which made the card taller than its neighbours; collapsing
+  // the price into the value baseline and the renewal into the footer
+  // brings it down to two body rows, matching Balance/Saved/Used in
+  // vertical rhythm. The header icon is the same CoastyIcon mark used by
+  // the non-unlimited Plan StatCard (line ~1798) — keeps the visual
+  // rhythm of the 4-card row intact without leaning on a premium-coded
+  // Crown glyph.
   return (
     <div className="rounded-xl border border-border/40 bg-card/30 p-4 flex flex-col min-h-[120px] overflow-hidden">
       <div className="flex items-center justify-between mb-auto gap-2 min-w-0">
@@ -888,20 +895,18 @@ function UnlimitedPlanCard({
           Plan
         </span>
         <div className="h-7 w-7 rounded-lg flex items-center justify-center bg-foreground/[0.04] shrink-0">
-          <Crown size={14} weight="fill" className="text-foreground/40" />
+          <CoastyIcon className="h-3.5 w-3.5 text-foreground/40" />
         </div>
       </div>
       <div className="min-w-0">
-        {/* Plan name — bold, like a title */}
-        <p className="text-[20px] font-bold tracking-tight text-foreground leading-none truncate">
-          {planName}
-        </p>
-        {/* Price — second line, prominent enough to read at a glance */}
-        <p className="text-[13px] font-semibold text-foreground/75 leading-none tabular-nums mt-2 truncate">
-          ${priceUSD}
-          <span className="font-normal text-muted-foreground/60"> /month</span>
-        </p>
-        {/* Renewal — third line, quiet */}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-[20px] font-bold tracking-tight text-foreground leading-none whitespace-nowrap truncate">
+            {planName}
+          </span>
+          <span className="text-[11px] text-muted-foreground/50 leading-none tabular-nums whitespace-nowrap">
+            ${priceUSD}/mo
+          </span>
+        </div>
         <div className="h-4 mt-2">
           {renewalDateStr ? (
             <span className="text-[10px] leading-none text-muted-foreground/50 block truncate">
@@ -911,162 +916,6 @@ function UnlimitedPlanCard({
         </div>
       </div>
     </div>
-  )
-}
-
-// ─── Unlimited Hero Card ────────────────────────────────────────────────────
-//
-// Replaces Auto-Refill + Add Credits + Credit Activity chart for Unlimited
-// subscribers.  Single sleek box — no perks grid, no feature-list noise,
-// no animations, and (per the account section's calmer vocabulary) no
-// tinted accents either.  Just: title, the 3 stats that actually matter
-// (renewal, savings, this-period usage), and a cancel-anytime reassurance.
-// The hierarchy is carried by typography and one quiet hairline divider
-// row, the same chrome the rest of the account dialog uses.
-
-function UnlimitedHeroCard({
-  creditsUsedThisPeriod,
-  monthlySavingsUSD,
-  renewalDateStr,
-  daysUntilRenewal,
-  activeSinceStr,
-  usageSessions,
-  onManage,
-  cancelAtPeriodEnd,
-  fadeUpVariant,
-}: {
-  creditsUsedThisPeriod: number
-  monthlySavingsUSD: number
-  renewalDateStr: string | null
-  daysUntilRenewal: number | null
-  activeSinceStr: string | null
-  usageSessions: number
-  onManage: () => void
-  cancelAtPeriodEnd: boolean
-  fadeUpVariant: ReturnType<typeof Object>
-}) {
-  return (
-    <motion.div {...fadeUpVariant}>
-      <div className="rounded-xl border border-border/40 bg-card/30 overflow-hidden">
-        {/* ── Header row ──────────────────────────────────────────────── */}
-        <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-foreground/[0.04] flex items-center justify-center shrink-0">
-              <InfinityIcon
-                className="h-4 w-4 text-foreground/45"
-                strokeWidth={2.25}
-              />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground tracking-tight truncate">
-                Unlimited Plan Active
-              </h3>
-              <p className="text-[12px] text-muted-foreground/60 mt-0.5 truncate">
-                No caps, no top-ups, no surprises.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onManage}
-            className="hidden sm:inline-flex shrink-0 items-center gap-1.5 h-7 px-3 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/70 bg-transparent hover:bg-muted/40 transition-colors"
-          >
-            Manage
-            <ArrowUpRight className="h-3 w-3" />
-          </button>
-        </div>
-
-        {/* ── Stats row — renewal + savings + this-period ─────────────── */}
-        {/* Layout: icon left, stacked content right (eyebrow / value /
-            optional small secondary).  Saved deliberately omits the
-            secondary line — the eyebrow "Saved vs PAYG" already gives
-            full context, so the dollar amount stands alone.  Items-start
-            keeps icons aligned with the eyebrow row across cells of
-            uneven height. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 border-y border-border/30">
-          {/* Renewal */}
-          <div className="flex items-start gap-2.5 px-5 py-4 sm:px-6 min-w-0">
-            <CalendarCheck size={13} weight="bold" className="text-muted-foreground/40 shrink-0 mt-[3px]" />
-            <div className="flex-1 min-w-0 leading-tight">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium">
-                {cancelAtPeriodEnd ? "Ends" : "Renews"}
-              </p>
-              <p className="text-[14px] font-semibold text-foreground tracking-tight tabular-nums truncate mt-1">
-                {renewalDateStr ?? "—"}
-              </p>
-              {daysUntilRenewal !== null && (
-                <p className="text-[11px] text-muted-foreground/55 tabular-nums truncate mt-0.5">
-                  in {daysUntilRenewal.toLocaleString()} days
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Savings — single number, no inline comparison */}
-          <div className="flex items-start gap-2.5 px-5 py-4 sm:px-6 min-w-0">
-            <TrendUp size={13} weight="bold" className="text-muted-foreground/40 shrink-0 mt-[3px]" />
-            <div className="flex-1 min-w-0 leading-tight">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium">
-                Saved vs PAYG
-              </p>
-              {monthlySavingsUSD > 0 ? (
-                <p className="text-[14px] font-semibold text-foreground tracking-tight tabular-nums truncate mt-1">
-                  ${monthlySavingsUSD.toLocaleString()}
-                </p>
-              ) : (
-                <p className="text-[13px] text-muted-foreground/55 truncate mt-1">
-                  Build up usage to see
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* This period — credits as primary, sessions as quiet secondary */}
-          <div className="flex items-start gap-2.5 px-5 py-4 sm:px-6 min-w-0">
-            <ShieldCheck size={13} weight="bold" className="text-muted-foreground/40 shrink-0 mt-[3px]" />
-            <div className="flex-1 min-w-0 leading-tight">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium">
-                This period
-              </p>
-              <p className="text-[14px] font-semibold text-foreground tracking-tight tabular-nums truncate mt-1">
-                {creditsUsedThisPeriod.toLocaleString()} credits
-              </p>
-              <p className="text-[11px] text-muted-foreground/55 tabular-nums truncate mt-0.5">
-                across {usageSessions.toLocaleString()} {usageSessions === 1 ? "session" : "sessions"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Bottom strip — member-since + cancel reassurance ────────── */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3 sm:px-6">
-          <p className="text-[11px] text-muted-foreground/50 leading-none truncate min-w-0">
-            {activeSinceStr ? (
-              <>
-                <span className="text-foreground/55">Member since {activeSinceStr}</span>
-                <span className="mx-1.5 text-muted-foreground/30">·</span>
-              </>
-            ) : null}
-            {cancelAtPeriodEnd ? (
-              // Same hierarchy as the regular text — the message itself
-              // is informative enough; an amber tint reads as alarm and
-              // we want the rest of the account dialog's quiet voice.
-              <span className="text-foreground/70">
-                Subscription ends at period close
-              </span>
-            ) : (
-              "Cancel anytime"
-            )}
-          </p>
-          <button
-            onClick={onManage}
-            className="sm:hidden inline-flex shrink-0 items-center gap-1 h-6 px-2 rounded text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Manage
-            <ArrowUpRight className="h-2.5 w-2.5" />
-          </button>
-        </div>
-      </div>
-    </motion.div>
   )
 }
 
@@ -1604,23 +1453,6 @@ export function BillingSection() {
         day: "numeric",
       })
     : null
-  const daysUntilRenewal = subscription?.current_period_end
-    ? Math.max(
-        0,
-        Math.ceil(
-          (new Date(subscription.current_period_end).getTime() - Date.now()) /
-            (1000 * 60 * 60 * 24)
-        )
-      )
-    : null
-  // "Active since" — when did this subscription start?  Falls back to
-  // created_at if current_period_start isn't surfaced on the type.
-  const activeSinceStr = subscription?.created_at
-    ? new Date(subscription.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      })
-    : null
 
   // ─── Actions ────────────────────────────────────────────────────────────
 
@@ -2024,6 +1856,27 @@ export function BillingSection() {
               </Button>
             </div>
 
+            {/* Savings callout — unlimited subscribers only.
+                A single conversational sentence: the dollar amount is
+                the only emphasized token ("more than $2,500"), the rest
+                reads like copy. The $2,500 figure is the typical
+                lifetime savings ceiling against pay-as-you-go pricing —
+                presented as a value-prop reminder for every Unlimited
+                subscriber, regardless of their personal accrued usage.
+                Hairline-separated from the header to match the rhythm
+                of the Status row below. */}
+            {isUnlimitedActivePlan && (
+              <div className="mt-4 pt-3 border-t border-border/20">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  You&rsquo;ve saved more than{" "}
+                  <span className="text-foreground font-semibold tabular-nums">
+                    $2,500
+                  </span>{" "}
+                  because of this subscription alone.
+                </p>
+              </div>
+            )}
+
             <div className="mt-4 pt-3 border-t border-border/20 flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Status</span>
               <div className="flex items-center gap-1.5">
@@ -2070,27 +1923,10 @@ export function BillingSection() {
         </>
       )}
 
-      {/* ─── Unlimited "VIP" Hero (replaces Auto-Refill + Add Credits) ──── */}
-      {/* Unlimited subscribers have no need for Auto-Refill or boost packs,
-          so we swap both sections for one premium hero card that
-          (a) acknowledges their tier visually,
-          (b) surfaces renewal + savings info that IS useful,
-          (c) links to subscription management.
-          When the user is NOT on Unlimited, the standard Auto-Refill +
-          Add Credits sections render below as usual. */}
-      {isUnlimitedActivePlan && (
-        <UnlimitedHeroCard
-          creditsUsedThisPeriod={stats.totalSpent}
-          monthlySavingsUSD={monthlySavingsUSD}
-          renewalDateStr={renewalDateStr}
-          daysUntilRenewal={daysUntilRenewal}
-          activeSinceStr={activeSinceStr}
-          usageSessions={stats.usageSessions}
-          onManage={handleManageSubscription}
-          cancelAtPeriodEnd={!!subscription?.cancel_at_period_end}
-          fadeUpVariant={fadeUp(0.38)}
-        />
-      )}
+      {/* Unlimited subscribers don't see Auto-Refill or Add-Credits below
+          (they have no credit cap to top up). The plan summary + the
+          amplified "Saved vs PAYG" stat above + the 4-card overview at
+          the top of the page already cover everything they need. */}
 
       {/* ─── Auto-Refill ──────────────────────────────────────────────── */}
       {!isUnlimitedActivePlan && (

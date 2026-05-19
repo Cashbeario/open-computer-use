@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { getLocalizedMetadata } from "@/lib/seo"
+import { getLocalizedMetadata, PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 import { JsonLd } from "@/app/components/seo/json-ld"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
 
@@ -19,6 +19,12 @@ export async function generateMetadata(): Promise<Metadata> {
 // still listed on the page itself. Boost packages are emitted as one-time
 // purchase offers. Both arrays are reused on the WebAPI schema so search /
 // AI crawlers see consistent pricing across docs and the API surface.
+//
+// Merchant Listings: every Offer spreads MERCHANT_LISTING_EXTRAS from
+// `lib/seo.ts`, which carries `availability` + digital `shippingDetails` +
+// `hasMerchantReturnPolicy` shapes Google Search Console expects on any
+// Offer with price + priceCurrency. The parent Product carries the
+// `image` array (Merchant Listings critical field).
 
 // Omit eligibleQuantity for the "unlimited" tier — its sentinel credit
 // value (999_999_999) would otherwise leak to crawlers / AI agents reading
@@ -49,7 +55,9 @@ const subscriptionOffers = VISIBLE_TIERS
               unitText: "credits/month",
             },
           }),
+      priceValidUntil: "2027-12-31",
       url: `https://coasty.ai/pricing#${tier.id}`,
+      ...MERCHANT_LISTING_EXTRAS,
     }
   })
 
@@ -64,7 +72,9 @@ const boostOffers = BOOST_PACKAGES.map((pkg) => ({
     value: pkg.credits,
     unitText: "credits",
   },
+  priceValidUntil: "2027-12-31",
   url: "https://coasty.ai/pricing#boosts",
+  ...MERCHANT_LISTING_EXTRAS,
 }))
 
 const allOffers = [...subscriptionOffers, ...boostOffers]
@@ -77,6 +87,7 @@ const productLd = {
     "Computer-use AI agent platform — autonomous browser, desktop, and terminal automation with VM-level isolation. Subscription credits + one-time boost packages.",
   brand: { "@type": "Brand", name: "Coasty" },
   category: "Software > Productivity > AI Automation",
+  image: PRODUCT_IMAGES,
   url: "https://coasty.ai/pricing",
   offers: allOffers,
 }

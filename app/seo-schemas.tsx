@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
+import { PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 
 export async function FAQSchema({ locale }: { locale: string }) {
   let t: (key: string) => string
@@ -47,10 +48,10 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
   // priceUSD === null, so it's filtered out (it's a contact-sales play, not
   // a self-serve Offer).
   //
-  // Note: we do NOT emit `shippingDetails` / `hasMerchantReturnPolicy` on
-  // these Offers. Those properties are for physical-goods Merchant
-  // Listings (Google updated guidance Nov 2025). SaaS subscriptions are
-  // a service, not a shipped good.
+  // Merchant Listings: every Offer spreads MERCHANT_LISTING_EXTRAS from
+  // `lib/seo.ts`, which carries the SaaS-correct `availability` + digital
+  // `shippingDetails` + `hasMerchantReturnPolicy` shapes Google Search
+  // Console expects on any Offer with price + priceCurrency.
   //
   // Sentinel guard: "unlimited" tier carries creditsPerMonth=999_999_999.
   // Schema.org has no canonical "unlimited" quantity, so we omit
@@ -86,8 +87,8 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
               },
             }),
         "priceValidUntil": "2027-12-31",
-        "availability": "https://schema.org/InStock",
         "url": `https://coasty.ai/pricing#${tier.id}`,
+        ...MERCHANT_LISTING_EXTRAS,
       }
     })
 
@@ -104,8 +105,8 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
       "unitText": "credits",
     },
     "priceValidUntil": "2027-12-31",
-    "availability": "https://schema.org/InStock",
     "url": "https://coasty.ai/pricing#boosts",
+    ...MERCHANT_LISTING_EXTRAS,
   }))
 
   const productSchema = {
@@ -115,7 +116,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "description": t("structuredData.productDescription"),
     "brand": { "@type": "Brand", "name": "Coasty" },
     "category": "Software > Productivity > AI Automation",
-    "image": "https://coasty.ai/demo-screenshot.png",
+    "image": PRODUCT_IMAGES,
     "url": "https://coasty.ai",
     "inLanguage": locale,
     "offers": [...subscriptionOffers, ...boostOffers],

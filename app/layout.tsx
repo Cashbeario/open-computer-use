@@ -21,7 +21,7 @@ import { LocalizedSEOSchemas } from "./seo-schemas"
 import { IntlClientProvider } from "./intl-client-provider"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { locales, rtlLocales, type Locale } from "@/i18n/config"
-import { getHreflangAlternates } from "@/lib/seo"
+import { getHreflangAlternates, PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
 
 const geistSans = Geist({
@@ -156,10 +156,12 @@ export default async function RootLayout({
   // Sourced from `lib/pricing/tiers.ts` so structured data never goes stale.
   // Used by the WebApplication and SoftwareApplication blocks below.
   //
-  // Note: we do NOT emit `shippingDetails` / `hasMerchantReturnPolicy` on
-  // these Offers — those properties are for physical-goods Merchant
-  // Listings (Google updated guidance Nov 2025). SaaS subscriptions are
-  // a service, not a shipped good; including them was schema noise.
+  // Merchant Listings: every Offer spreads MERCHANT_LISTING_EXTRAS from
+  // `lib/seo.ts`, which carries the SaaS-correct `availability` + digital
+  // `shippingDetails` + `hasMerchantReturnPolicy` shapes Google Search
+  // Console expects on any Offer with price + priceCurrency. Removing them
+  // (as we briefly did) triggered GSC warnings — they belong on every
+  // Offer even for digital subscriptions.
   const purchasableTiers = VISIBLE_TIERS.filter(t => t.priceUSD !== null)
   // Omit eligibleQuantity for the "unlimited" tier — its sentinel credit
   // value (999_999_999) would otherwise leak as a structured-data spam
@@ -192,8 +194,8 @@ export default async function RootLayout({
             },
           }),
       "priceValidUntil": "2027-12-31",
-      "availability": "https://schema.org/InStock",
       "url": `https://coasty.ai/pricing#${tier.id}`,
+      ...MERCHANT_LISTING_EXTRAS,
     }
   })
   // High/low for the SoftwareApplication AggregateOffer summary.
@@ -225,6 +227,7 @@ export default async function RootLayout({
             "alternateName": ["Coasty AI", "Coasty Computer Use Agent", "Coasty AI Employee"],
             "url": "https://coasty.ai",
             "logo": "https://coasty.ai/logo_light.svg",
+            "image": PRODUCT_IMAGES,
             "description": seoT("structuredData.appDescription"),
             "applicationCategory": "ProductivityApplication",
             "operatingSystem": "Web Browser, Windows, macOS",
@@ -334,6 +337,7 @@ export default async function RootLayout({
             "name": "Coasty AI Employee",
             "alternateName": ["Coasty Desktop", "Coasty Computer Use Agent"],
             "url": "https://coasty.ai",
+            "image": PRODUCT_IMAGES,
             "downloadUrl": "https://coasty.ai/download",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web Browser, Windows 10+, macOS 10.15+",
@@ -349,7 +353,18 @@ export default async function RootLayout({
               "lowPrice": String(lowPrice),
               "highPrice": String(highPrice),
               "priceCurrency": "USD",
-              "offerCount": String(tierOffers.length + BOOST_PACKAGES.length)
+              "offerCount": String(tierOffers.length + BOOST_PACKAGES.length),
+              // Mirror the merchant fields on the AggregateOffer node itself.
+              // Google's Merchant Listings crawler may pick the parent node
+              // as "the seller Offer" and flag the fields as missing on
+              // THAT node, even when the nested children have them. Spreading
+              // the helper here keeps belt-and-suspenders coverage so both
+              // the summary and the per-tier children pass validation.
+              ...MERCHANT_LISTING_EXTRAS,
+              // Embed the individual Offers so each tier's `shippingDetails`,
+              // `hasMerchantReturnPolicy`, and `availability` are also visible
+              // on each detailed Offer (Google parses both layers).
+              "offers": tierOffers,
             },
             "aggregateRating": {
               "@type": "AggregateRating",

@@ -2311,7 +2311,7 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 Tietokonetta käyttävä tekoälyagentti | $249/kk Rajaton (Markkinoiden edullisin)",
+      "title": "Coasty - #1 Tietokonetta käyttävä tekoälyagentti | Tekoälytyöntekijä työpöytä- ja selainautomaatioon",
       "titleTemplate": "{title} | Coasty - Tekoälyn tietokonekäyttöagentti",
       "description": "Coasty on #1-sijoitettu tietokonetta käyttävä tekoälyagentti — 82% OSWorld-vertailussa — ja ainoa kiinteähintainen Rajaton tietokonekäyttösuunnitelma hintaan $249/kk (edullisempi kuin Devin Team $500+ACU, OpenAI Operator $200 nopeusrajoitettuna ja krediittirajoitetut kilpailijat). Hallitsee koko työpöytää kuin ihminen: selaimet, lomakkeet, sähköpostit, taulukot. VM-tason eristys. Alkaen $19/kk Starter tai $249/kk Rajaton.",
       "ogTitle": "Coasty — 82% OSWorld + $249/kk Rajaton (Edullisin tietokonekäyttöagentti)",
@@ -2373,7 +2373,7 @@
       "ogDescription": "Paras tietokonekäyttöagentti, #1 OSWorld-vertailussa. Automatisoi mikä tahansa työpöytä-, selain- tai terminaalitehtävä tekoälyllä."
     },
     "pricing": {
-      "title": "Hinnoittelu — $19/kk Starter tai $249/kk Rajaton (Markkinoiden edullisin)",
+      "title": "Hinnoittelu — Coasty-tekoälyagentin suunnitelmat ja hinnat",
       "description": "Coastyn hinnoittelu: Starter $19/kk (200 krediittiä) tai Rajaton $249/kk (markkinoiden edullisin kiinteähintainen rajaton tietokonekäyttösuunnitelma — edullisempi kuin Devin Team $500+ACU, Genspark Pro $249 krediittirajoitettuna ja Manus Extended $200 rajoitettuna). Korvaa $3 000+/kk maksavat ihmisvirtuaaliavustajat. Ei piilokustannuksia.",
       "ogTitle": "Coasty-hinnoittelu — $19/kk Starter, $249/kk Rajaton",
       "ogDescription": "$249/kk kiinteä Rajaton — markkinoiden edullisin rajaton tietokonekäyttösuunnitelma. Tai $19/kk Starter yksityishenkilöille. Säästää $36 000/vuosi verrattuna ihmisavustajiin."

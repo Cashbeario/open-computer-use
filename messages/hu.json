@@ -2311,7 +2311,7 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 Számítógépet használó AI ügynök | $249/mo Korlátlan (A legolcsóbb a piacon)",
+      "title": "Coasty - #1 Számítógépet használó AI ügynök | AI alkalmazott asztali és böngésző automatizáláshoz",
       "titleTemplate": "{title} | Coasty - AI számítógép-használati ügynök",
       "description": "A Coasty a #1 rangsorolt számítógépet használó AI ügynök — 82% az OSWorld benchmarkon — és az egyetlen átalánydíjas Korlátlan számítógép-használati csomag $249/mo áron (olcsóbb mint a Devin Team $500+ACU, az OpenAI Operator $200 lekérdezés-korláttal és a kreditkorlátos versenytársak). Teljes asztalt irányít, mint egy ember: böngészők, űrlapok, e-mailek, táblázatok. VM-szintű izoláció. $19/mo a Starter csomaggal vagy $249/mo Korlátlan.",
       "ogTitle": "Coasty — 82% OSWorld + $249/mo Korlátlan (A legolcsóbb számítógép-használati ügynök)",
@@ -2373,7 +2373,7 @@
       "ogDescription": "A legjobb számítógép-használati ügynök, #1 az OSWorld-ön. Automatizáljon bármilyen asztali, böngésző vagy terminál feladatot AI-val."
     },
     "pricing": {
-      "title": "Árazás — $19/mo Starter vagy $249/mo Korlátlan (A legolcsóbb a piacon)",
+      "title": "Árazás — Coasty AI ügynök csomagok és árak",
       "description": "Coasty árazás: Starter $19/mo (200 kredit) vagy Korlátlan $249/mo (a piac legolcsóbb átalánydíjas korlátlan számítógép-használati csomagja — olcsóbb mint a Devin Team $500+ACU, a Genspark Pro $249 kreditkorláttal és a Manus Extended $200 korláttal). Helyettesít $3 000/mo feletti emberi virtuális asszisztenseket. Nincsenek rejtett díjak.",
       "ogTitle": "Coasty árazás — $19/mo Starter, $249/mo Korlátlan",
       "ogDescription": "Átalánydíjas $249/mo Korlátlan — a piac legolcsóbb korlátlan számítógép-használati csomagja. Vagy $19/mo Starter magánszemélyeknek. Évente $36 000 megtakarítás emberi asszisztensekhez képest."

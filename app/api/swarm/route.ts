@@ -39,6 +39,56 @@ interface SwarmRequest {
 /** Tiers that support persistent swarms */
 const PERSISTENT_ELIGIBLE_TIERS = new Set(["starter", "professional", "unlimited", "enterprise"]);
 
+/**
+ * Compute the per-request machine ceiling for a swarm POST.
+ *
+ * Exported as a pure function so the cap logic is unit-testable without
+ * having to mock Supabase + AWS + WorkMail + the Python backend in a
+ * route-level integration test. The POST handler below is the only
+ * production caller.
+ *
+ * Rules (matching the longstanding comment in POST):
+ *   - "unlimited" tier ALWAYS caps at 1, regardless of `isPersistent`.
+ *     This is the abuse-prevention valve described in
+ *     [lib/pricing/tiers.ts](../../lib/pricing/tiers.ts) (the same value
+ *     surfaced as `swarmAgentsLimit` to the UI).
+ *   - Persistent swarms cap at the plan's `max_machines` (they become
+ *     real persistent machines, so they consume the plan's machine slot
+ *     budget).
+ *   - Temporary swarms cap at `min(max_machines * 3, 10)` — three
+ *     parallel disposable runners per slot, with an absolute ceiling of
+ *     10 to keep per-user blast radius bounded.
+ *
+ * Returns an integer ≥ 0 (callers should still apply their own ≥ 1
+ * floor; this function trusts the inputs as plan data).
+ */
+export function computeSwarmMaxMachines(opts: {
+  planTier: string;
+  planMaxMachines: number;
+  isPersistent: boolean;
+}): number {
+  if (opts.planTier === "unlimited") return 1;
+  if (opts.isPersistent) return opts.planMaxMachines;
+  return Math.min(opts.planMaxMachines * 3, 10);
+}
+
+/**
+ * Clamp the user's requested machine count to the computed cap.
+ *
+ * Mirrors the inline `Math.min(body.machineCount || cap, cap)` pattern
+ * the POST handler used pre-refactor. Treats 0/undefined/negative as
+ * "no explicit request" → default to the cap. Always returns the
+ * minimum of (explicit request, cap), so a malicious or buggy client
+ * cannot exceed the cap by sending an inflated `machineCount`.
+ */
+export function clampRequestedMachineCount(
+  requested: number | undefined,
+  cap: number,
+): number {
+  if (!requested || requested < 1) return cap;
+  return Math.min(requested, cap);
+}
+
 interface SwarmMachineRecord {
   id: string;
   awsInstanceId: string;
@@ -140,25 +190,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Persistent swarms are capped at plan's max_machines (they become persistent machines).
-  // Temporary swarms get 3x the limit, hard-capped at 10.
-  //
-  // EXCEPTION: the "unlimited" tier ships with unlimited credits but only
-  // 1 concurrent agent — without this cap a single user could spin up 6
-  // (= 2 * 3) machines and burn massive compute per hour at flat $249/mo,
-  // breaking plan economics.  The cap is also reflected in lib/pricing/tiers.ts
-  // (unlimited.swarmAgentsLimit = 1) and shown in the marketing UI as
-  // "1 concurrent agent".
-  const swarmMaxMachines = planTier === "unlimited"
-    ? 1
-    : isPersistent
-      ? planMaxMachines
-      : Math.min(planMaxMachines * 3, 10);
+  // Per-request machine ceiling. See computeSwarmMaxMachines docstring
+  // above — exported so the cap logic can be unit-tested without having
+  // to mock the full POST handler dependency tree (Supabase + AWS + the
+  // Python backend).
+  const swarmMaxMachines = computeSwarmMaxMachines({
+    planTier,
+    planMaxMachines,
+    isPersistent,
+  });
 
-  const requestedCount = Math.min(
-    body.machineCount || swarmMaxMachines,
-    swarmMaxMachines,
-  );
+  const requestedCount = clampRequestedMachineCount(body.machineCount, swarmMaxMachines);
 
   if (requestedCount < 1) {
     return NextResponse.json(

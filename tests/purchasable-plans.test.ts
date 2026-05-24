@@ -3,9 +3,9 @@
  * from every customer-facing surface while preserving definitions so
  * they can be re-enabled with a single flag flip.
  *
- * Current state (as of 2026-05-16):
- *   LIVE  : starter ($19), unlimited ($249)
- *   HIDDEN: free, lite, plus, pro, enterprise
+ * Current state (as of 2026-05-17):
+ *   LIVE  : starter ($19), plus ($50), unlimited ($249)
+ *   HIDDEN: free, lite, pro, enterprise
  *
  * What this file is testing is the contract — not the specific plans
  * that happen to be live today.  To re-enable a plan: flip its
@@ -65,29 +65,29 @@ describe("purchasable filter — definitions preserved", () => {
 // ─── 2. Live set — current purchasable plans ───────────────────────────────
 
 describe("purchasable filter — live set", () => {
-  it("currently only starter and unlimited are purchasable", () => {
-    expect(PURCHASABLE_TIER_IDS.size).toBe(2)
+  it("currently starter, plus, and unlimited are purchasable", () => {
+    expect(PURCHASABLE_TIER_IDS.size).toBe(3)
     expect(PURCHASABLE_TIER_IDS.has("starter")).toBe(true)
+    expect(PURCHASABLE_TIER_IDS.has("plus")).toBe(true)
     expect(PURCHASABLE_TIER_IDS.has("unlimited")).toBe(true)
   })
 
-  it("free / lite / plus / pro / enterprise are NOT purchasable", () => {
+  it("free / lite / pro / enterprise are NOT purchasable", () => {
     expect(PURCHASABLE_TIER_IDS.has("free")).toBe(false)
     expect(PURCHASABLE_TIER_IDS.has("lite")).toBe(false)
-    expect(PURCHASABLE_TIER_IDS.has("plus")).toBe(false)
     expect(PURCHASABLE_TIER_IDS.has("pro")).toBe(false)
     expect(PURCHASABLE_TIER_IDS.has("enterprise")).toBe(false)
   })
 
   it("PURCHASABLE_TIERS list matches the live tier ids", () => {
-    expect(PURCHASABLE_TIERS.map((t) => t.id).sort()).toEqual(["starter", "unlimited"])
+    expect(PURCHASABLE_TIERS.map((t) => t.id).sort()).toEqual(["plus", "starter", "unlimited"])
   })
 
   it("VISIBLE_TIERS (the marketing-grid set) only contains live plans", () => {
     // Both flags (visibleInPricingGrid && purchasable) must be true to
     // appear in VISIBLE_TIERS.  Anything decommissioned drops out here,
     // which auto-removes it from landing, /pricing, SEO offers, etc.
-    expect(VISIBLE_TIERS.map((t) => t.id).sort()).toEqual(["starter", "unlimited"])
+    expect(VISIBLE_TIERS.map((t) => t.id).sort()).toEqual(["plus", "starter", "unlimited"])
   })
 
   it("each purchasable tier has a Stripe price env var configured", () => {
@@ -104,28 +104,27 @@ describe("purchasable filter — checkout DB allowlist", () => {
   it("PURCHASABLE_DB_TIERS contains the DB-tier names for live plans", () => {
     // The DB stores subscription_plans.tier as one of:
     //   lite, starter, professional, enterprise, unlimited
-    // For the current live set (starter + unlimited), both happen to
-    // match their marketing ids 1:1.
+    // For the current live set: starter and unlimited match their
+    // marketing ids 1:1; "plus" (marketing) maps to "professional" (DB).
     expect(PURCHASABLE_DB_TIERS.has("starter")).toBe(true)
+    expect(PURCHASABLE_DB_TIERS.has("professional")).toBe(true) // marketing "plus"
     expect(PURCHASABLE_DB_TIERS.has("unlimited")).toBe(true)
-    expect(PURCHASABLE_DB_TIERS.size).toBe(2)
+    expect(PURCHASABLE_DB_TIERS.size).toBe(3)
   })
 
   it("hidden DB-tier names are NOT in the checkout allowlist", () => {
     expect(PURCHASABLE_DB_TIERS.has("lite")).toBe(false)
-    // "professional" is the DB tier for marketing "plus"
-    expect(PURCHASABLE_DB_TIERS.has("professional")).toBe(false)
     // "enterprise" is the DB tier for marketing "pro" + "enterprise"
     expect(PURCHASABLE_DB_TIERS.has("enterprise")).toBe(false)
   })
 
-  it("marketing and DB allowlists agree on count", () => {
-    // The marketing list has 2 entries; the DB list also has 2 — the
-    // two stay in sync because starter and unlimited share names across
-    // both vocabularies.  If we ever re-enable plus or pro, the DB list
-    // gets 1 entry while the marketing list gets 2 (plus + pro both map
-    // to "professional"); this assertion is documenting the current
-    // simple case, not a general invariant.
+  it("marketing and DB allowlists agree on count today", () => {
+    // The marketing list has 3 entries (starter, plus, unlimited); the DB
+    // list also has 3 (starter, professional, unlimited) — they currently
+    // line up 1:1.  If we ever re-enable marketing "pro" (which also maps
+    // to DB "enterprise" historically) the DB list gets 1 entry while the
+    // marketing list gets 2 — this assertion documents the current shape,
+    // not a general invariant.
     expect(PURCHASABLE_DB_TIERS.size).toBe(PURCHASABLE_TIER_IDS.size)
   })
 })
@@ -137,7 +136,7 @@ describe("purchasable filter — public PricingSnapshot", () => {
 
   it("snapshot only exposes live plans (no decommissioned-plan leak to MCP/agents)", () => {
     const ids = snapshot.subscriptions.map((s) => s.id).sort()
-    expect(ids).toEqual(["starter", "unlimited"])
+    expect(ids).toEqual(["plus", "starter", "unlimited"])
   })
 
   it("snapshot reflects exactly the PURCHASABLE_TIERS set", () => {
@@ -205,8 +204,9 @@ describe("purchasable filter — checkout validation logic", () => {
     return { ok: true }
   }
 
-  it("accepts live tiers", () => {
+  it("accepts the live DB tiers (starter, professional, unlimited)", () => {
     expect(validateTierForCheckout("starter").ok).toBe(true)
+    expect(validateTierForCheckout("professional").ok).toBe(true) // marketing "plus"
     expect(validateTierForCheckout("unlimited").ok).toBe(true)
   })
 
@@ -215,10 +215,8 @@ describe("purchasable filter — checkout validation logic", () => {
     expect(lite.ok).toBe(false)
     expect(lite.error).toMatch(/no longer available/i)
 
-    const professional = validateTierForCheckout("professional") // marketing "plus"
-    expect(professional.ok).toBe(false)
-
-    const enterprise = validateTierForCheckout("enterprise") // marketing "pro" + "enterprise"
+    // "enterprise" is the DB tier for marketing "pro" + "enterprise"
+    const enterprise = validateTierForCheckout("enterprise")
     expect(enterprise.ok).toBe(false)
   })
 
@@ -255,13 +253,13 @@ describe("purchasable filter — invariants", () => {
     }
   })
 
-  it("Plus's 'highlighted' flag is decoupled from purchasable", () => {
-    // Plus is currently hidden, but its `highlighted: true` marketing
-    // status is preserved so re-enabling Plus restores the Most Popular
-    // badge automatically.
+  it("Plus is live and carries the 'Most Popular' highlight", () => {
+    // Plus is the mid-tier volume seller — both flags true.  If it ever
+    // gets paused again, only `purchasable` should flip; `highlighted`
+    // stays so re-enable restores the badge automatically.
     const plus = getTier("plus")!
     expect(plus.highlighted).toBe(true)
-    expect(plus.purchasable).toBe(false)
+    expect(plus.purchasable).toBe(true)
   })
 
   it("Unlimited remains the flagship (purchasable + not highlighted, distinct badge)", () => {

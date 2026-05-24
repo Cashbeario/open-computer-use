@@ -115,7 +115,7 @@ const subscriptionPlans = [
       "Priority support, 24hr response",
     ],
     popular: true,
-    purchasable: false, // HIDDEN — kept for existing subscribers' billing UI
+    purchasable: true, // ✅ LIVE — "Most Popular" volume tier
   },
   {
     id: "enterprise",

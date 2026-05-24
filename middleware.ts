@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { validateCsrfToken } from "./lib/csrf"
 import { describeMode } from "./lib/oss-mode"
 import { getClientIp, classifyBot } from "./lib/client-ip"
+import { isScannerPath } from "./lib/scanner-paths"
 import { locales, defaultLocale, type Locale } from "./i18n/config"
 
 // One-shot mode log: emit `[coasty] mode=oss|production` on the first
@@ -14,22 +15,12 @@ let _modeLogged = false
 
 // Bot-scanner probe paths. Returning 200 (the Next.js default for unknown
 // pages, which renders not-found.tsx) signals "live target" to mass scanners
-// and keeps us on automated retry lists. Short-circuiting these with a real
-// 404 before locale routing / Supabase session refresh removes us from those
-// lists and saves the per-request auth round-trip. Patterns cover:
-//   .env(.*)         leaked-secret probes (/.env, /.env.local, /backend/.env)
-//   wp-<anything>    WordPress (/wp-admin, /wp-login.php, /wp-content/...)
-//   .git/            exposed-repo probes (/.git/config, /.git/HEAD)
-//   cgi-bin/         classic CGI shell probes
-//   actuator/        Spring Boot endpoints (/actuator/env, /actuator/health)
-//   phpmyadmin       DB admin probes (case-insensitive: /phpMyAdmin/)
-//   adminer          DB admin probes (/adminer.php)
-//   xmlrpc.php       WordPress pingback abuse
-// Patterns anchor to `^` or `/` so they match path segments only — they
-// won't accidentally hit a route like `/help-actuator-docs`.
-const SCANNER_PROBE_RE =
-  /(?:^|\/)(?:\.env[\w.-]*|wp-[\w.-]+|\.git(?:\/|$)|cgi-bin(?:\/|$)|actuator(?:\/|$)|phpmyadmin|adminer|xmlrpc\.php)/i
-
+// and keeps us on automated retry lists. The pattern set + allowlist now
+// lives in `lib/scanner-paths.ts` so it can be unit-tested in isolation and
+// extended without touching middleware control flow. We short-circuit with
+// 410 Gone (intentionally stronger than 404) so scanner toolchains drop us
+// from their retry queues, and so analytics / autoscale signals are not
+// polluted by 200-on-probe traffic.
 function detectLocaleFromHeader(request: NextRequest): Locale {
   const acceptLanguage = request.headers.get("accept-language")
   if (!acceptLanguage) return defaultLocale
@@ -82,11 +73,30 @@ export async function middleware(request: NextRequest) {
     // Bot-scanner short-circuit — must run BEFORE updateSession so we don't
     // pay the Supabase auth round-trip on probe traffic, and BEFORE locale
     // routing so we don't leak signal via Set-Cookie / Content-Language on a
-    // 404 to a scanner. The finally block still logs the response for
-    // security monitoring (see SCANNER_PROBE_RE comment above).
-    if (SCANNER_PROBE_RE.test(path)) {
+    // probe response. The finally block still logs the response for security
+    // monitoring (the `[req]` access log line carries status=410, which is
+    // distinct from any normal app response).
+    //
+    // We also emit a separate structured log line (`kind:"scanner_blocked"`)
+    // so a CloudWatch Logs Insights query can group probe traffic by hour
+    // without re-parsing UA strings. Only the pathname is logged, never the
+    // full URL — attacker-controlled query strings echoed into a dashboard
+    // can become a stored-XSS-by-log vector.
+    if (isScannerPath(path)) {
+      try {
+        console.log(JSON.stringify({
+          kind: "scanner_blocked",
+          ts: new Date().toISOString(),
+          path,
+          ip,
+          ua: ua?.substring(0, 200) ?? "",
+          bot_class,
+        }))
+      } catch {
+        // never let logging break the short-circuit
+      }
       response = new NextResponse(null, {
-        status: 404,
+        status: 410,
         headers: {
           // Belt-and-suspenders against any CDN/proxy that might cache and
           // hide future probes from our access log.

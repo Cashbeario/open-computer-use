@@ -1695,12 +1695,12 @@ export function SchedulesContent() {
 
                     <div className="px-5 sm:px-7 pb-5 sm:pb-6 max-h-[60vh] overflow-y-auto space-y-5 sm:space-y-7 scrollbar-thin">
                       {/* Only render template categories for plans that
-                          are currently purchasable. Plus/pro template
-                          definitions stay in TEAM_TEMPLATES — re-add "plus"
-                          / "pro" to this array when those plans are
-                          re-listed.  Source of truth: lib/pricing/tiers.ts
+                          are currently purchasable.  Pro template
+                          definitions stay in TEAM_TEMPLATES — re-add
+                          "pro" to this array when that plan is re-listed.
+                          Source of truth: lib/pricing/tiers.ts
                           PURCHASABLE_TIER_IDS. */}
-                      {(["starter"] as const).map(tier => {
+                      {(["starter", "plus"] as const).map(tier => {
                         const meta = TIER_META[tier]
                         const TierIcon = meta.icon
                         const tierTemplates = TEAM_TEMPLATES.filter(tmpl => tmpl.tier === tier)

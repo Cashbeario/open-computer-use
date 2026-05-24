@@ -392,34 +392,34 @@ describe("middleware: bot-scanner probe paths return 404", () => {
       mockState.user = null
       const req = makeRequest(`https://example.com${path}`)
       const res = await middleware(req)
-      expect(res.status).toBe(404)
+      expect(res.status).toBe(410)
     })
   }
 
-  it("sets Cache-Control: no-store on the 404 so CDNs don't hide future probes from our access log", async () => {
+  it("sets Cache-Control: no-store on the 410 so CDNs don't hide future probes from our access log", async () => {
     const req = makeRequest("https://example.com/.env")
     const res = await middleware(req)
-    expect(res.status).toBe(404)
+    expect(res.status).toBe(410)
     expect(res.headers.get("Cache-Control")).toMatch(/no-store/)
   })
 
-  it("sets X-Robots-Tag: noindex on the 404", async () => {
+  it("sets X-Robots-Tag: noindex on the 410", async () => {
     const req = makeRequest("https://example.com/wp-admin/")
     const res = await middleware(req)
-    expect(res.status).toBe(404)
+    expect(res.status).toBe(410)
     expect(res.headers.get("X-Robots-Tag")).toMatch(/noindex/)
   })
 
   it("does NOT redirect to /auth for a scanner probe even when unauthenticated and the path looks protected", async () => {
     // Without the short-circuit, /wp-admin would fall through to updateSession,
     // which would NOT redirect (wp-admin isn't a protected route), but the
-    // Next.js app would render not-found.tsx as a 200. We want a real 404 and
+    // Next.js app would render not-found.tsx as a 200. We want a real 410 and
     // no Supabase work at all.
     mockState.user = null
     const req = makeRequest("https://example.com/wp-admin/setup-config.php")
     const res = await middleware(req)
-    expect(res.status).toBe(404)
-    // No locale cookie should be set on a 404 to a scanner.
+    expect(res.status).toBe(410)
+    // No locale cookie should be set on a 410 to a scanner.
     const setCookie = res.headers.get("set-cookie") ?? ""
     expect(setCookie).not.toContain("NEXT_LOCALE")
   })
@@ -427,13 +427,13 @@ describe("middleware: bot-scanner probe paths return 404", () => {
   it("scanner short-circuit runs BEFORE Supabase — no DB query on probe traffic", async () => {
     // throwOnUserQuery would normally cause a 5xx if updateSession were invoked
     // and reached the onboarding lookup. The scanner short-circuit must run
-    // before any of that, so a probe returns a clean 404 even when the DB is
+    // before any of that, so a probe returns a clean 410 even when the DB is
     // broken.
     mockState.user = { id: "u1" }
     mockState.throwOnUserQuery = true
     const req = makeRequest("https://example.com/.git/config")
     const res = await middleware(req)
-    expect(res.status).toBe(404)
+    expect(res.status).toBe(410)
   })
 
   // --- Negative cases: legitimate paths must NOT be blocked. ---

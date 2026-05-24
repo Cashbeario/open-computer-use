@@ -155,7 +155,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
     scheduleLimit: 10,
     visibleInPricingGrid: true,
     highlighted: true,
-    purchasable: false, // HIDDEN — kept in code for future re-launch
+    purchasable: true, // ✅ LIVE — "Most Popular" volume tier
     stripePriceEnvVar: "STRIPE_PRICE_PLUS",
     updatedAt: PRICING_UPDATED_AT,
   },
@@ -355,6 +355,7 @@ export const PURCHASABLE_TIER_IDS: ReadonlySet<SubscriptionTierId> = new Set(
  * add its DB-equivalent name here too. */
 export const PURCHASABLE_DB_TIERS: ReadonlySet<string> = new Set([
   "starter",
+  "professional", // ← marketing "plus" maps here
   "unlimited",
 ]);
 

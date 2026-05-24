@@ -44,6 +44,7 @@
  */
 
 import type { NextRequest } from "next/server"
+import { getClientIp, classifyBot } from "@/lib/client-ip"
 
 export interface ApiAccessLogExtra {
   /** Operator-supplied extra fields, e.g. `op`, `user_id`, `upstream_ms`. */
@@ -72,12 +73,17 @@ export function logApiAccess(
   try {
     const method = req.method
     const path = req.nextUrl?.pathname ?? new URL(req.url).pathname
-    const ua = req.headers.get("user-agent")?.substring(0, 200) ?? ""
-    // Cloudflare / ALB forwarded IP — `req.ip` was removed in Next 15.
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      ""
+    const rawUa = req.headers.get("user-agent")
+    const ua = rawUa?.substring(0, 200) ?? ""
+    // Cloudflare / ALB forwarded IP via lib/client-ip.ts — `req.ip` was
+    // removed in Next 15 and the previous inline implementation here
+    // reported private ALB hops as the client IP. See lib/client-ip.ts
+    // for precedence rules (cf-connecting-ip > true-client-ip > XFF
+    // first-public > x-real-ip > 'unknown'). The literal string
+    // 'unknown' is intentional — Logs Insights operators were misreading
+    // an empty field as "request originated locally" (the original bug).
+    const ip = getClientIp(req.headers)
+    const bot_class = classifyBot(rawUa)
 
     const line: Record<string, unknown> = {
       type: "api_request",
@@ -88,6 +94,7 @@ export function logApiAccess(
       duration_ms: Math.round(ms),
       ua,
       ip,
+      bot_class,
     }
     if (extra) {
       // Merge AFTER core fields so caller-supplied keys can't shadow the

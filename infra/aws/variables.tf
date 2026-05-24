@@ -184,6 +184,27 @@ variable "health_check_path" {
 }
 
 # -----------------------------------------------------------------------------
+# ALB Access Logs
+# -----------------------------------------------------------------------------
+
+variable "alb_access_logs_retention_days" {
+  description = <<-EOT
+    Days to retain ALB access logs in S3 before lifecycle expiration. Logs
+    transition to STANDARD_IA after 30 days; expiration takes effect at this
+    boundary. 90 days covers post-mortem timelines for the three open
+    incidents (Tue scanner, Fri storm, Sat burst) plus 60 days of headroom.
+    Bump to 365+ if compliance / regulator requests retention.
+  EOT
+  type        = number
+  default     = 90
+
+  validation {
+    condition     = var.alb_access_logs_retention_days >= 30
+    error_message = "alb_access_logs_retention_days must be >= 30 (must exceed the STANDARD_IA transition window)."
+  }
+}
+
+# -----------------------------------------------------------------------------
 # Environment Variables
 # All config is passed as plain environment variables on the task definition.
 # Mark sensitive values as sensitive = true if using Terraform Cloud.
@@ -273,9 +294,29 @@ variable "split_api_cpu" {
 }
 
 variable "split_api_memory" {
-  description = "Memory (MiB) for the api service task"
+  description = <<-EOT
+    Memory (MiB) for the llmhub-api Fargate task. Bumped from 1024 to 2048 on
+    2026-05-23 after OSWorld memory saturation on Mon 05/18 (peak 98.53%,
+    ~30 MB headroom, 20h sustained). The api service holds ~40 retained
+    OSWorld sessions × 11.5 MB plus the ~500 MB Python / PIL / SDK baseline.
+    See INCIDENT_MON_API_MEMORY_OSWORLD.md and API_MEMORY_BUMP.md.
+
+    Band-aid: real fix is splitting /api/osworld/* into a dedicated
+    llmhub-osworld service. Once that lands, return this to 1024.
+
+    Paired with split_api_cpu (default 512 = 0.5 vCPU). Fargate's valid
+    memory sizes for 0.5 vCPU are 1024, 2048, 3072, 4096 MiB. The
+    validation below mirrors the full Fargate-supported memory table for
+    0.25 / 0.5 / 1 / 2 vCPU tasks; if you bump CPU above 2 vCPU you must
+    widen the allowed list.
+  EOT
   type        = number
-  default     = 1024
+  default     = 2048
+
+  validation {
+    condition     = contains([512, 1024, 2048, 3072, 4096, 5120, 6144, 7168, 8192], var.split_api_memory)
+    error_message = "split_api_memory must be a Fargate-valid memory size (512, 1024, 2048, 3072, 4096, 5120, 6144, 7168, or 8192 MiB)."
+  }
 }
 
 variable "split_api_desired_count" {

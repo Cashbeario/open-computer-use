@@ -12,12 +12,18 @@ resource "aws_lb" "main" {
   # Higher idle timeout for long-lived WebSocket connections (Electron bridge)
   idle_timeout = 3600
 
-  # Enable access logs by uncommenting and configuring an S3 bucket
-  # access_logs {
-  #   bucket  = aws_s3_bucket.alb_logs.id
-  #   prefix  = var.project_name
-  #   enabled = true
-  # }
+  # Per-request access logs to S3 for forensic / incident-response work.
+  # Bucket, encryption, lifecycle, and policy are defined in s3_alb_logs.tf.
+  # Object key layout under the bucket:
+  #   s3://coasty-alb-access-logs-us-east-1/alb-coasty/AWSLogs/<account>/elasticloadbalancing/<region>/<yyyy>/<mm>/<dd>/*.log.gz
+  # Athena DDL + query patterns documented in ALB_ACCESS_LOGS.md.
+  # Enabling this is an in-place update on the ALB (no DNS change, no
+  # downtime) per the AWS provider docs.
+  access_logs {
+    bucket  = aws_s3_bucket.alb_access_logs.id
+    prefix  = "alb-coasty"
+    enabled = true
+  }
 
   tags = { Name = "${var.project_name}-alb" }
 }

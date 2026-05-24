@@ -2,6 +2,7 @@ import { updateSession } from "@/utils/supabase/middleware"
 import { NextResponse, type NextRequest } from "next/server"
 import { validateCsrfToken } from "./lib/csrf"
 import { describeMode } from "./lib/oss-mode"
+import { getClientIp, classifyBot } from "./lib/client-ip"
 import { locales, defaultLocale, type Locale } from "./i18n/config"
 
 // One-shot mode log: emit `[coasty] mode=oss|production` on the first
@@ -65,10 +66,11 @@ export async function middleware(request: NextRequest) {
   const method = request.method
   const path = request.nextUrl.pathname
   const ua = request.headers.get("user-agent")
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    ""
+  // Real client IP via Cloudflare/ALB-aware extraction. See lib/client-ip.ts
+  // for precedence rules. Replaces the naive XFF split that was reporting
+  // private hops (and 127.0.0.1) as the client IP.
+  const ip = getClientIp(request.headers)
+  const bot_class = classifyBot(ua)
 
   // activeLocale is computed inside the try block but we need it visible to the
   // logger in `finally`. Default it to defaultLocale so the log line is well-typed
@@ -183,7 +185,8 @@ export async function middleware(request: NextRequest) {
           status,
           duration_ms: Math.round(performance.now() - t_start),
           ua: ua?.substring(0, 200) ?? "",
-          ip: ip ?? "",
+          ip,
+          bot_class,
           locale: activeLocale,
         }))
       } catch {

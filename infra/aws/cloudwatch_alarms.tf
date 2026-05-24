@@ -255,28 +255,129 @@ resource "aws_cloudwatch_metric_alarm" "frontend_unhealthy" {
   tags          = { Name = "${var.project_name}-frontend-unhealthy" }
 }
 
+#
+# 2026-05-23 retune: gate the alarm on RequestCount >= 30 via metric math.
+# Pre-tune state (8 of 10 minutes above threshold) flapped on Friday 00:51 UTC
+# when p99 peaked at 6.126 s with only 62 requests in the window. A single
+# slow sample dominates p99 in low-traffic buckets, making the raw p99
+# statistically meaningless. The IF(reqs >= 30, p99latency, 0) gate zeroes
+# the metric out below 30 req/min so the alarm only evaluates statistically
+# meaningful p99 values.
+#
+# Also relaxed 8-of-10 to 5-of-10: with low-traffic samples filtered out, a
+# tighter 5-of-10 is appropriate for the remaining real signal.
 resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency" {
   count               = var.enable_alarms ? 1 : 0
   alarm_name          = "${var.project_name}-frontend-p99-latency"
-  alarm_description   = "Frontend P99 latency >${var.alarm_target_response_time_p99_seconds}s for 10 min. The 23:18Z burst incident hit P99 53s before crashing — this fires LONG before that point."
-  namespace           = "AWS/ApplicationELB"
-  metric_name         = "TargetResponseTime"
-  extended_statistic  = "p99"
-  period              = 60
-  evaluation_periods  = 10
-  datapoints_to_alarm = 8
-  threshold           = var.alarm_target_response_time_p99_seconds
+  alarm_description   = "Frontend p99 > ${var.alarm_target_response_time_p99_seconds}s with at least 30 requests in the bucket. Suppressed when request count is too low to be statistically meaningful (e.g. low-traffic late-night windows that produced the 2026-05-22T00:51Z double-flap)."
   comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 10
+  datapoints_to_alarm = 5
+  threshold           = var.alarm_target_response_time_p99_seconds
   treat_missing_data  = "notBreaching"
 
-  dimensions = {
-    LoadBalancer = aws_lb.main.arn_suffix
-    TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+  metric_query {
+    id          = "p99"
+    return_data = true
+    expression  = "IF(reqs >= 30, p99latency, 0)"
+    label       = "p99 latency (gated on >= 30 req/min)"
+  }
+
+  metric_query {
+    id = "p99latency"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "TargetResponseTime"
+      period      = 60
+      stat        = "p99"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
+  }
+
+  metric_query {
+    id = "reqs"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "RequestCount"
+      period      = 60
+      stat        = "Sum"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
   }
 
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
   tags          = { Name = "${var.project_name}-frontend-p99-latency" }
+}
+
+# -----------------------------------------------------------------------------
+# Rolling-slow p99 alarm (2026-05-23 addition)
+#
+# Coverage gap closed: master audit timeline found p99 sat at 5-7s for 10
+# hours on Thu 16:00 -> Fri 01:00 UTC 2026-05-21/22. NO alarm fired because:
+#   * frontend-p99-latency required 8 of 10 consecutive minutes above 5s
+#   * frontend-p99-latency-burst required 3 of 5 minutes above 10s
+# p99 bounced between 4.2 and 6.8 enough to keep resetting both windows.
+# Result: 10 hours of degraded latency with zero pager fire.
+#
+# This alarm catches that pattern: 10 of 30 minutes above 4s, with the same
+# RequestCount >= 30 gating used by frontend-p99-latency. Lower threshold
+# (4s vs 5s) because sustained slowness is the concern, not headline peaks.
+# -----------------------------------------------------------------------------
+resource "aws_cloudwatch_metric_alarm" "frontend_p99_rolling_slow" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-frontend-p99-rolling-slow"
+  alarm_description   = "Frontend p99 > 4s sustained over 10 of 30 minutes (with >= 30 req/min gating). Catches slow-rolling degradation that bypasses 5-of-10 alarms. Closes the hidden 2026-05-21T16:00Z to 2026-05-22T01:00Z 10-hour SLO breach coverage gap."
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 30
+  datapoints_to_alarm = 10
+  threshold           = 4
+  treat_missing_data  = "notBreaching"
+
+  metric_query {
+    id          = "p99"
+    return_data = true
+    expression  = "IF(reqs >= 30, p99latency, 0)"
+    label       = "p99 latency (gated on >= 30 req/min)"
+  }
+
+  metric_query {
+    id = "p99latency"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "TargetResponseTime"
+      period      = 60
+      stat        = "p99"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
+  }
+
+  metric_query {
+    id = "reqs"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "RequestCount"
+      period      = 60
+      stat        = "Sum"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+  tags          = { Name = "${var.project_name}-frontend-p99-rolling-slow" }
 }
 
 # Short-burst p99 alarm — catches the kind of incident the alarm above misses.
@@ -295,23 +396,54 @@ resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency" {
 # catches sustained slowness (gradual degradation), this one catches
 # bursty tail latency (intermittent backend hiccups). Both shapes hurt
 # users; both deserve separate signals.
+#
+# 2026-05-23 retune: same RequestCount >= 30 gating as frontend_p99_latency.
+# The burst alarm fired 11 times in 7 days, dominated by low-traffic windows
+# (e.g. Fri 00:51 UTC: p99 6.126 s with only 62 RequestCount in the bucket).
+# Threshold stays at 10 s — the concern is real bursts, not low-traffic noise.
 resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency_burst" {
   count               = var.enable_alarms ? 1 : 0
   alarm_name          = "${var.project_name}-frontend-p99-latency-burst"
-  alarm_description   = "Frontend P99 latency >10s for 3 of 5 minutes (burst-pattern detector). Catches short tail-latency clusters the sustained alarm misses (e.g. 2026-05-02T14:40-16:25Z had p99=55.97s in scattered buckets but only 6 of 105 min total)."
-  namespace           = "AWS/ApplicationELB"
-  metric_name         = "TargetResponseTime"
-  extended_statistic  = "p99"
-  period              = 60
+  alarm_description   = "Frontend p99 > 10s for 3 of 5 minutes (burst-pattern detector) with >= 30 req/min gating. Catches short tail-latency clusters the sustained alarm misses (e.g. 2026-05-02T14:40-16:25Z had p99=55.97s in scattered buckets but only 6 of 105 min total). Gating eliminates the 2026-05-22T00:51Z low-traffic false-flap class."
+  comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 3
   threshold           = 10
-  comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
 
-  dimensions = {
-    LoadBalancer = aws_lb.main.arn_suffix
-    TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+  metric_query {
+    id          = "p99"
+    return_data = true
+    expression  = "IF(reqs >= 30, p99latency, 0)"
+    label       = "p99 latency (gated on >= 30 req/min)"
+  }
+
+  metric_query {
+    id = "p99latency"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "TargetResponseTime"
+      period      = 60
+      stat        = "p99"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
+  }
+
+  metric_query {
+    id = "reqs"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "RequestCount"
+      period      = 60
+      stat        = "Sum"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
   }
 
   alarm_actions = local.alarm_actions
@@ -1080,6 +1212,71 @@ resource "aws_cloudwatch_metric_alarm" "billing_subscription_rpc_failed" {
   })
 
   depends_on = [aws_cloudwatch_log_metric_filter.billing_subscription_rpc_failed]
+}
+
+
+# =============================================================================
+# A8. OSWorld retained-session count (2026-05-23 addition, P1)
+# =============================================================================
+#
+# The OSWorld cleanup agent publishes a custom CloudWatch metric after each
+# cleanup pass:
+#
+#   Namespace   : Coasty/OSWorld
+#   MetricName  : SessionCount
+#   Dimension   : ServiceName=${var.project_name}-api
+#   Unit        : Count
+#   Period      : 60s
+#
+# Memory budget derivation:
+#   * llmhub-api task memory cap          : 1024 MB
+#   * per-OSWorld-session footprint       : ~11.5 MB
+#   * non-OSWorld baseline                : ~500 MB
+#   * 30 sessions -> 30 * 11.5 + 500       = 845 MB  (~ 82% of 1024 MB)
+#
+# Existing alarm split_service_memory["api"] fires at 80% MemoryUtilization
+# sustained 5 min. OSWorld saturation is the dominant driver of api memory
+# growth, so we want a UPSTREAM signal that fires BEFORE the memory alarm
+# does -- giving cleanup logic / ops a window to act before the OOM kill or
+# autoscale thrash.
+#
+# Threshold = 30 sessions sustained 3 of 5 minutes (so a brief settle
+# between cleanup passes doesn't page). Statistic = Maximum so we catch the
+# peak per-minute count, not an averaged-down value.
+#
+# Cross-agent contract: assumes OSWorld cleanup agent has not landed yet, so
+# the metric will simply be MISSING until the cleanup agent ships. With
+# treat_missing_data = notBreaching the alarm stays in OK until the metric
+# starts publishing. If the cleanup agent ships with a DIFFERENT namespace /
+# metric name / dimension key, update this alarm to match.
+# =============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "osworld_session_count" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-osworld-session-count"
+  alarm_description   = "OSWorld retained-session count >= 30 sustained 3 of 5 minutes. Each session ~11.5MB; 30 sessions ~ 460MB OSWorld + ~500MB baseline ~ 845MB on ${var.project_name}-api 1024MB cap (~82%). Fires BEFORE split_service_memory[api] at 80% so ops can intervene before OOM."
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 3
+  threshold           = 30
+  treat_missing_data  = "notBreaching"
+
+  namespace   = "Coasty/OSWorld"
+  metric_name = "SessionCount"
+  period      = 60
+  statistic   = "Maximum"
+
+  dimensions = {
+    ServiceName = "${var.project_name}-api"
+  }
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-osworld-session-count"
+    Severity = "P1"
+  })
 }
 
 

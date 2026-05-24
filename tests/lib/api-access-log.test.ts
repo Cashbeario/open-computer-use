@@ -98,11 +98,16 @@ describe("logApiAccess", () => {
     expect(() => logApiAccess(fakeReq, 500, 10)).not.toThrow()
   })
 
-  it("falls back to empty string for missing IP / UA", () => {
+  it("uses 'unknown' for missing IP and empty string for missing UA", () => {
+    // Contract change (client-ip fix): an absent IP now logs the
+    // explicit string 'unknown' instead of '' so oncall can't misread
+    // an empty field as "request originated locally" (the old bug that
+    // wrote 127.0.0.1 for every request). UA still falls back to ''
+    // since it's a free-text field with no equivalent failure mode.
     const req = makeReq({ url: "https://coasty.ai/api/chat" })
     logApiAccess(req, 401, 1)
     const line = JSON.parse(logSpy.mock.calls[0]![0] as string)
-    expect(line.ip).toBe("")
+    expect(line.ip).toBe("unknown")
     expect(line.ua).toBe("")
   })
 })

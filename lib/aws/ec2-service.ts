@@ -20,6 +20,11 @@ import {
   type _InstanceType,
   type RunInstancesCommandInput,
 } from "@aws-sdk/client-ec2";
+import {
+  getOrLoad as getOrLoadSnapshotInfo,
+  invalidate as invalidateSnapshotCache,
+  type SnapshotInfo,
+} from "@/lib/aws/snapshot-cache";
 
 export interface EC2InstanceConfig {
   name?: string;
@@ -396,6 +401,10 @@ export class AwsEc2Service {
       }
 
       console.log(`Created snapshot AMI ${amiId} (${name}) from instance ${instanceId}`);
+      // Invalidate the per-user snapshot cache so the next
+      // findLatestUserSnapshotInfo call observes the freshly-created AMI
+      // rather than returning the previous one for up to 10 minutes.
+      invalidateSnapshotCache(userId);
       return { amiId, name };
     } catch (err: any) {
       // TOCTOU: instance state changed between DescribeInstances and CreateImage.
@@ -430,35 +439,61 @@ export class AwsEc2Service {
     return info?.amiId ?? null;
   }
 
-  async findLatestUserSnapshotInfo(userId: string): Promise<{ amiId: string; createdAt: string } | null> {
+  /**
+   * Cached entry point. See `lib/aws/snapshot-cache.ts` for the cache
+   * design (positive TTL 10 min, negative TTL 60 s, per-process
+   * singleflight dedup, fail-open on cache errors).
+   *
+   * Behaviour preservation: pre-cache, this method caught ALL errors and
+   * returned `null`. We preserve that contract for backwards
+   * compatibility with both callers in `app/api/machines/route.ts`, which
+   * treat `null` as "no snapshot" with no operator alerting. The
+   * underlying `_describeLatestUserSnapshot` propagates errors so the
+   * cache layer can avoid poisoning the cache on transient AWS faults.
+   */
+  async findLatestUserSnapshotInfo(userId: string): Promise<SnapshotInfo | null> {
     try {
-      const result = await this.client.send(
-        new DescribeImagesCommand({
-          Owners: ["self"],
-          Filters: [
-            { Name: "tag:UserId", Values: [userId] },
-            { Name: "tag:ManagedBy", Values: ["coasty-snapshot"] },
-            { Name: "state", Values: ["available"] },
-          ],
-        })
+      return await getOrLoadSnapshotInfo(userId, () =>
+        this._describeLatestUserSnapshot(userId),
       );
-
-      const images = result.Images || [];
-      if (images.length === 0) return null;
-
-      // Sort by creation date descending, pick latest
-      images.sort((a, b) =>
-        (b.CreationDate || "").localeCompare(a.CreationDate || "")
-      );
-
-      const latestAmi = images[0].ImageId!;
-      const createdAt = images[0].CreationDate || new Date().toISOString();
-      console.log(`Found snapshot AMI ${latestAmi} for user ${userId.substring(0, 8)}`);
-      return { amiId: latestAmi, createdAt };
     } catch (error) {
       console.error("Failed to find user snapshots:", error);
       return null;
     }
+  }
+
+  /**
+   * Raw AWS DescribeImages call. Propagates errors — the public
+   * `findLatestUserSnapshotInfo` wrapper catches them. Kept on the class
+   * (rather than module-scope) so it can use `this.client` and stay
+   * mockable through the same EC2Client mock our existing tests use.
+   */
+  async _describeLatestUserSnapshot(
+    userId: string,
+  ): Promise<SnapshotInfo | null> {
+    const result = await this.client.send(
+      new DescribeImagesCommand({
+        Owners: ["self"],
+        Filters: [
+          { Name: "tag:UserId", Values: [userId] },
+          { Name: "tag:ManagedBy", Values: ["coasty-snapshot"] },
+          { Name: "state", Values: ["available"] },
+        ],
+      })
+    );
+
+    const images = result.Images || [];
+    if (images.length === 0) return null;
+
+    // Sort by creation date descending, pick latest
+    images.sort((a, b) =>
+      (b.CreationDate || "").localeCompare(a.CreationDate || "")
+    );
+
+    const latestAmi = images[0].ImageId!;
+    const createdAt = images[0].CreationDate || new Date().toISOString();
+    console.log(`Found snapshot AMI ${latestAmi} for user ${userId.substring(0, 8)}`);
+    return { amiId: latestAmi, createdAt };
   }
 
   /**

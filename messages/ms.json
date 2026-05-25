@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - Ejen AI #1 Penggunaan Komputer | Pekerja AI untuk Automasi Desktop & Pelayar",
+      "title": "Coasty - Ejen AI #1 Penggunaan Komputer | Terbaik untuk Automasi Desktop & Pelayar",
       "titleTemplate": "{title} | Coasty - Ejen AI Penggunaan Komputer",
-      "description": "Coasty ialah ejen AI #1 yang menggunakan komputer — 82% pada penanda aras OSWorld — dan satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada $249/mo (lebih murah daripada Devin Team $500+ACU, OpenAI Operator $200 yang dihadkan kadar, dan pesaing yang dihadkan kredit). Mengawal desktop penuh seperti manusia: pelayar, borang, e-mel, hamparan. Pengasingan tahap VM. Dari Starter $19/mo atau Unlimited $249/mo.",
-      "ogTitle": "Coasty — 82% OSWorld + Unlimited $249/mo (Ejen Penggunaan Komputer Termurah)",
-      "ogDescription": "#1 pada OSWorld (82%). Unlimited kadar tetap $249/mo — lebih murah daripada Devin Team ($500+ACU) pada penanda aras yang lebih tinggi. Automasi pelayar, desktop, terminal. Pengasingan VM setiap sesi. Natif merentas platform + REST API + MCP server.",
-      "twitterDescription": "Ejen AI yang menjalankan desktop sebenar. 82% OSWorld (#1). Unlimited $249/mo — pelan kadar tetap termurah dalam kategori ini. Starter dari $19/mo. Pengasingan VM + MCP server 26 alat."
+      "description": "Coasty ialah ejen AI #1 yang menggunakan komputer — 82% pada penanda aras OSWorld — dan satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada {unlimitedPrice} (lebih murah daripada Devin Team $500+ACU, OpenAI Operator $200 yang dihadkan kadar, dan pesaing yang dihadkan kredit). Mengawal desktop penuh seperti manusia: pelayar, borang, e-mel, hamparan. Pengasingan tahap VM. Dari Starter {starterPrice} atau Unlimited {unlimitedPrice}.",
+      "ogTitle": "Coasty — 82% OSWorld + Unlimited {unlimitedPrice} (Ejen Penggunaan Komputer Termurah)",
+      "ogDescription": "#1 pada OSWorld (82%). Unlimited kadar tetap {unlimitedPrice} — lebih murah daripada Devin Team ($500+ACU) pada penanda aras yang lebih tinggi. Automasi pelayar, desktop, terminal. Pengasingan VM setiap sesi. Natif merentas platform + REST API + MCP server.",
+      "twitterDescription": "Ejen AI yang menjalankan desktop sebenar. 82% OSWorld (#1). Unlimited {unlimitedPrice} — pelan kadar tetap termurah dalam kategori ini. Starter dari {starterPrice}. Pengasingan VM + MCP server 26 alat."
     },
     "compare": {
       "title": "Bandingkan Coasty - Alternatif Ejen AI & Perbandingan Pesaing",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Harga — Pelan & Harga Ejen AI Coasty",
-      "description": "Harga Coasty: Starter $19/mo (200 kredit) atau Unlimited $249/mo (pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran — lebih murah daripada Devin Team $500+ACU, Genspark Pro $249 yang dihadkan kredit, dan Manus Extended $200 yang dihadkan). Menggantikan pembantu maya manusia $3,000+/mo. Tiada caj tersembunyi.",
-      "ogTitle": "Harga Coasty — Starter $19/mo, Unlimited $249/mo",
-      "ogDescription": "Unlimited kadar tetap $249/mo — pelan penggunaan komputer tanpa had termurah di pasaran. Atau Starter $19/mo untuk individu. Menjimatkan $36k/tahun berbanding VA manusia."
+      "description": "Harga Coasty: Starter {starterPrice} (200 kredit) atau Unlimited {unlimitedPrice} (pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran — lebih murah daripada Devin Team $500+ACU, Genspark Pro $249 yang dihadkan kredit, dan Manus Extended $200 yang dihadkan). Menggantikan pembantu maya manusia $3,000+/mo. Tiada caj tersembunyi.",
+      "ogTitle": "Harga Coasty — Starter {starterPrice}, Unlimited {unlimitedPrice}",
+      "ogDescription": "Unlimited kadar tetap {unlimitedPrice} — pelan penggunaan komputer tanpa had termurah di pasaran. Atau Starter {starterPrice} untuk individu. Menjimatkan $36k/tahun berbanding VA manusia."
     },
     "faq": {
       "q1": "Apa itu Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Bagaimana Coasty berbanding dengan Anthropic Computer Use?",
       "a2": "Manakala Anthropic Computer Use menyediakan API mentah untuk kawalan komputer, Coasty ialah platform sedia pengeluaran dengan infrastruktur VM terurus, penyelesaian CAPTCHA terbina dalam, aplikasi desktop untuk Mac dan Windows, sokongan pelbagai model dan skor penanda aras OSWorld tertinggi (82%). Coasty menyediakan penyelesaian lengkap — bukan sekadar API.",
       "q3": "Berapa harga Coasty?",
-      "a3": "Coasty mempunyai dua pelan aktif: Starter pada $19/month (200 kredit, 1 mesin, sesuai untuk individu) dan Unlimited pada $249/month tanpa had kredit. Pelan Unlimited $249 ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada — lebih murah daripada Devin Team ($500/month + caj tambahan ACU), OpenAI Operator ChatGPT Pro ($200/month yang dihadkan kadar), Genspark Pro ($249.99 dihadkan kredit pada 125k kredit), dan Manus Extended ($200 dihadkan pada 40k kredit). Kedua-duanya menggantikan pembantu maya manusia $3,000+/month; pelan Unlimited menjimatkan $33,000+/tahun berbanding VA manusia dengan pengurangan kos 92%.",
+      "a3": "Coasty mempunyai dua pelan aktif: Starter pada $19/month (200 kredit, 1 mesin, sesuai untuk individu) dan Unlimited pada $99/month tanpa had kredit. Pelan Unlimited $99 ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada — lebih murah daripada Devin Team ($500/month + caj tambahan ACU), OpenAI Operator ChatGPT Pro ($200/month yang dihadkan kadar), Genspark Pro ($249.99 dihadkan kredit pada 125k kredit), dan Manus Extended ($200 dihadkan pada 40k kredit). Kedua-duanya menggantikan pembantu maya manusia $3,000+/month; pelan Unlimited menjimatkan $33,000+/tahun berbanding VA manusia dengan pengurangan kos 92%.",
       "q4": "Adakah Coasty selamat digunakan?",
       "a4": "Ya. Setiap sesi Coasty berjalan dalam mesin maya terpencil dan berkotak pasirnya sendiri. Data anda kekal selamat, mesin anda kekal tidak disentuh dan tiada kebocoran antara sesi. Ini pengasingan tahap VM sebenar, bukan sekadar kontena dalam kumpulan dikongsi.",
       "q5": "Apa itu penanda aras OSWorld?",
@@ -2401,11 +2401,11 @@
       "a10": "Ya. Coasty mempunyai saluran penyelesaian CAPTCHA terbina dalam, jadi ia tidak disekat seperti ejen AI pesaing. Ini kritikal untuk automasi dunia sebenar di mana CAPTCHA adalah biasa di laman web."
     },
     "structuredData": {
-      "appDescription": "Ejen AI #1 yang menggunakan komputer dan pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran pada $249/month. Coasty mengawal desktop penuh seperti manusia — membuka pelayar, mengklik, menaip, mengisi borang, menghantar e-mel dan menguruskan hamparan secara autonomi. 82% pada penanda aras OSWorld merentasi 369 tugas dunia sebenar. Pengasingan tahap VM sebenar setiap sesi. Penyelesaian CAPTCHA terbina dalam. Pelan: $19/mo Starter atau $249/mo Unlimited.",
-      "orgDescription": "Coasty membina ejen AI #1 yang menggunakan komputer (82% OSWorld) dan menghantar satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada $249/month — lebih murah daripada Devin Team, OpenAI Operator dan pesaing yang dihadkan kredit pada tahap harga yang sama. Platform kami menyediakan kawalan desktop autonomi, automasi pelayar dan orkestrasi pelbagai ejen dengan pengasingan tahap VM sebenar.",
-      "productDescription": "Ejen AI penggunaan komputer yang mengawal desktop seperti manusia. #1 pada penanda aras OSWorld (82%). Pelan Unlimited $249/mo ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada. Automasi pelayar autonomi, kawalan desktop, penghantaran e-mel, pengisian borang dan pengurusan hamparan dengan pengasingan tahap VM sebenar.",
-      "websiteDescription": "Platform ejen AI #1 penggunaan komputer — 82% penanda aras OSWorld dan pelan Unlimited kadar tetap termurah pada $249/month. Automasi pelayar, desktop dan terminal autonomi dengan pengasingan VM. Dari $19/mo Starter atau $249/mo Unlimited.",
-      "softwareDescription": "Ejen AI penggunaan komputer yang mengawal desktop penuh seperti manusia. #1 pada penanda aras OSWorld dengan kadar penyelesaian 82% merentasi 369 tugas dunia sebenar. Pelan Unlimited $249/month ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran. Automasi pelayar autonomi, kawalan desktop, operasi terminal, penghantaran e-mel, pengisian borang dan pengurusan hamparan.",
+      "appDescription": "Ejen AI #1 yang menggunakan komputer dan pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran pada {unlimitedPriceLong}. Coasty mengawal desktop penuh seperti manusia — membuka pelayar, mengklik, menaip, mengisi borang, menghantar e-mel dan menguruskan hamparan secara autonomi. 82% pada penanda aras OSWorld merentasi 369 tugas dunia sebenar. Pengasingan tahap VM sebenar setiap sesi. Penyelesaian CAPTCHA terbina dalam. Pelan: {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty membina ejen AI #1 yang menggunakan komputer (82% OSWorld) dan menghantar satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada {unlimitedPriceLong} — lebih murah daripada Devin Team, OpenAI Operator dan pesaing yang dihadkan kredit pada tahap harga yang sama. Platform kami menyediakan kawalan desktop autonomi, automasi pelayar dan orkestrasi pelbagai ejen dengan pengasingan tahap VM sebenar.",
+      "productDescription": "Ejen AI penggunaan komputer yang mengawal desktop seperti manusia. #1 pada penanda aras OSWorld (82%). Pelan Unlimited {unlimitedPrice} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada. Automasi pelayar autonomi, kawalan desktop, penghantaran e-mel, pengisian borang dan pengurusan hamparan dengan pengasingan tahap VM sebenar.",
+      "websiteDescription": "Platform ejen AI #1 penggunaan komputer — 82% penanda aras OSWorld dan pelan Unlimited kadar tetap termurah pada {unlimitedPriceLong}. Automasi pelayar, desktop dan terminal autonomi dengan pengasingan VM. Dari {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
+      "softwareDescription": "Ejen AI penggunaan komputer yang mengawal desktop penuh seperti manusia. #1 pada penanda aras OSWorld dengan kadar penyelesaian 82% merentasi 369 tugas dunia sebenar. Pelan Unlimited {unlimitedPriceLong} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran. Automasi pelayar autonomi, kawalan desktop, operasi terminal, penghantaran e-mel, pengisian borang dan pengurusan hamparan.",
       "breadcrumbs": {
         "home": "Laman Utama",
         "caseStudies": "Kajian Kes Ejen AI",

@@ -10,6 +10,7 @@ import {
   Infinity as InfinityIcon,
 } from "@phosphor-icons/react"
 import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
+import { priceDollar } from "@/lib/pricing/format"
 
 /* ─── animation variants ─── */
 
@@ -70,13 +71,16 @@ const billingAnimations = `
 // single `purchasable: true` flip.  The render filters to purchasable
 // entries only; the source of truth for which plans are live is
 // lib/pricing/tiers.ts (PURCHASABLE_DB_TIERS).
+// Prices are sourced from lib/pricing/format → priceDollar(tier).  A
+// price change in lib/pricing/tiers.ts propagates here automatically;
+// no manual edit required.
 const ALL_PLAN_KEYS: readonly { key: string; name: string; price: string; popular?: boolean; featured?: boolean; purchasable: boolean }[] = [
-  { key: "free", name: "Free", price: "$0", purchasable: false },
-  { key: "lite", name: "Lite", price: "$9", purchasable: false },
-  { key: "starter", name: "Starter", price: "$19", purchasable: true },
-  { key: "plus", name: "Plus", price: "$50", popular: true, purchasable: true },
-  { key: "pro", name: "Pro", price: "$100", purchasable: false },
-  { key: "unlimited", name: "Unlimited", price: "$249", featured: true, purchasable: true },
+  { key: "free", name: "Free", price: priceDollar("free"), purchasable: false },
+  { key: "lite", name: "Lite", price: priceDollar("lite"), purchasable: false },
+  { key: "starter", name: "Starter", price: priceDollar("starter"), purchasable: true },
+  { key: "plus", name: "Plus", price: priceDollar("plus"), popular: true, purchasable: true },
+  { key: "pro", name: "Pro", price: priceDollar("pro"), purchasable: false },
+  { key: "unlimited", name: "Unlimited", price: priceDollar("unlimited"), featured: true, purchasable: true },
 ]
 
 const planKeys = ALL_PLAN_KEYS.filter((p) => p.purchasable)

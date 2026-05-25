@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - Agente IA per l'Uso del Computer #1 | Dipendente IA per l'Automazione di Desktop e Browser",
+      "title": "Coasty - Agente IA per l'Uso del Computer #1 | Il Migliore per l'Automazione di Desktop e Browser",
       "titleTemplate": "{title} | Coasty - Agente IA per l'Uso del Computer",
-      "description": "Coasty è l'agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld — e l'unico piano Unlimited a tariffa fissa per l'uso del computer a $249/mese (più economico di Devin Team $500+ACU, OpenAI Operator $200 con limite di richieste e dei concorrenti con tetto di crediti). Controlla un desktop completo come un umano: browser, moduli, e-mail, fogli di calcolo. Isolamento a livello VM. Da $19/mo Starter o $249/mo Unlimited.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Unlimited (l'agente per l'uso del computer più economico)",
-      "ogDescription": "#1 su OSWorld (82%). $249/mo Unlimited a tariffa fissa — più economico di Devin Team ($500+ACU) e con un punteggio benchmark più alto. Automazione di browser, desktop e terminale. Isolamento VM per sessione. Nativo multipiattaforma + REST API + server MCP.",
-      "twitterDescription": "Agente IA che gestisce un vero desktop. 82% OSWorld (#1). $249/mo Unlimited — il piano a tariffa fissa più economico della categoria. Starter da $19/mo. Isolamento VM + server MCP con 26 strumenti."
+      "description": "Coasty è l'agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld — e l'unico piano Unlimited a tariffa fissa per l'uso del computer a $99/mese (più economico di Devin Team $500+ACU, OpenAI Operator $200 con limite di richieste e dei concorrenti con tetto di crediti). Controlla un desktop completo come un umano: browser, moduli, e-mail, fogli di calcolo. Isolamento a livello VM. Da {starterPrice} Starter o {unlimitedPrice} Unlimited.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (l'agente per l'uso del computer più economico)",
+      "ogDescription": "#1 su OSWorld (82%). {unlimitedPrice} Unlimited a tariffa fissa — più economico di Devin Team ($500+ACU) e con un punteggio benchmark più alto. Automazione di browser, desktop e terminale. Isolamento VM per sessione. Nativo multipiattaforma + REST API + server MCP.",
+      "twitterDescription": "Agente IA che gestisce un vero desktop. 82% OSWorld (#1). {unlimitedPrice} Unlimited — il piano a tariffa fissa più economico della categoria. Starter da {starterPrice}. Isolamento VM + server MCP con 26 strumenti."
     },
     "compare": {
       "title": "Confronta Coasty - Alternative di Agenti IA e Confronto con i Concorrenti",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Prezzi — Piani e Prezzi dell'Agente IA Coasty",
-      "description": "Prezzi Coasty: Starter $19/mo (200 crediti) o Unlimited $249/mo (il piano a tariffa fissa illimitato per l'uso del computer più economico sul mercato — più economico di Devin Team $500+ACU, Genspark Pro $249 con tetto di crediti e Manus Extended $200 con tetto). Sostituisce assistenti virtuali umani da $3,000+/mo. Nessun costo nascosto.",
-      "ogTitle": "Prezzi Coasty — $19/mo Starter, $249/mo Unlimited",
-      "ogDescription": "$249/mo Unlimited a tariffa fissa — il piano illimitato per l'uso del computer più economico sul mercato. Oppure $19/mo Starter per i singoli. Fa risparmiare $36k all'anno rispetto a un assistente virtuale umano."
+      "description": "Prezzi Coasty: Starter {starterPrice} (200 crediti) o Unlimited {unlimitedPrice} (il piano a tariffa fissa illimitato per l'uso del computer più economico sul mercato — più economico di Devin Team $500+ACU, Genspark Pro $249 con tetto di crediti e Manus Extended $200 con tetto). Sostituisce assistenti virtuali umani da $3,000+/mo. Nessun costo nascosto.",
+      "ogTitle": "Prezzi Coasty — {starterPrice} Starter, {unlimitedPrice} Unlimited",
+      "ogDescription": "{unlimitedPrice} Unlimited a tariffa fissa — il piano illimitato per l'uso del computer più economico sul mercato. Oppure {starterPrice} Starter per i singoli. Fa risparmiare $36k all'anno rispetto a un assistente virtuale umano."
     },
     "faq": {
       "q1": "Cos'è Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Come si confronta Coasty con Anthropic Computer Use?",
       "a2": "Mentre Anthropic Computer Use fornisce un'API grezza per il controllo del computer, Coasty è una piattaforma pronta per la produzione con infrastruttura VM gestita, risoluzione CAPTCHA integrata, un'app desktop per Mac e Windows, supporto multi-modello e il punteggio più alto nel benchmark OSWorld (82%). Coasty fornisce la soluzione completa — non solo l'API.",
       "q3": "Quanto costa Coasty?",
-      "a3": "Coasty offre due piani attivi: Starter a $19/mese (200 crediti, 1 macchina, ideale per i singoli) e Unlimited a $249/mese senza limiti di crediti. Il piano Unlimited da $249 è il piano a tariffa fissa illimitato per l'uso del computer più economico disponibile — più economico di Devin Team ($500/mese + supplemento ACU), OpenAI Operator ChatGPT Pro ($200/mese con limite di richieste), Genspark Pro ($249,99 con tetto di 125k crediti) e Manus Extended ($200 con tetto di 40k crediti). Entrambi sostituiscono un assistente virtuale umano da $3,000+/mese; Unlimited fa risparmiare $33,000+/anno rispetto a un assistente umano, con una riduzione dei costi del 92%.",
+      "a3": "Coasty offre due piani attivi: Starter a $19/mese (200 crediti, 1 macchina, ideale per i singoli) e Unlimited a $99/mese senza limiti di crediti. Il piano Unlimited da $99 è il piano a tariffa fissa illimitato per l'uso del computer più economico disponibile — più economico di Devin Team ($500/mese + supplemento ACU), OpenAI Operator ChatGPT Pro ($200/mese con limite di richieste), Genspark Pro ($249,99 con tetto di 125k crediti) e Manus Extended ($200 con tetto di 40k crediti). Entrambi sostituiscono un assistente virtuale umano da $3,000+/mese; Unlimited fa risparmiare $33,000+/anno rispetto a un assistente umano, con una riduzione dei costi del 92%.",
       "q4": "È sicuro usare Coasty?",
       "a4": "Sì. Ogni sessione Coasty viene eseguita nella propria macchina virtuale isolata e protetta. I tuoi dati restano al sicuro, la tua macchina non viene toccata e nulla trapela tra le sessioni. Questo è vero isolamento a livello VM, non solo container in un pool condiviso.",
       "q5": "Cos'è il benchmark OSWorld?",
@@ -2401,11 +2401,11 @@
       "a10": "Sì. Coasty ha una pipeline di risoluzione CAPTCHA integrata, quindi non viene bloccato come gli agenti IA concorrenti. Questo è fondamentale per l'automazione reale dove i CAPTCHA sono comuni sui siti web."
     },
     "structuredData": {
-      "appDescription": "L'agente IA per l'uso del computer #1 e il piano Unlimited a tariffa fissa per l'uso del computer più economico sul mercato a $249/mese. Coasty controlla un desktop completo come un umano — apre browser, clicca, digita, compila moduli, invia e-mail e gestisce fogli di calcolo in autonomia. 82% nel benchmark OSWorld su 369 attività reali. Vero isolamento a livello VM per sessione. Risoluzione CAPTCHA integrata. Piani: $19/mo Starter o $249/mo Unlimited.",
-      "orgDescription": "Coasty sviluppa l'agente IA per l'uso del computer #1 (82% OSWorld) e offre l'unico piano Unlimited a tariffa fissa per l'uso del computer a $249/mese — più economico di Devin Team, OpenAI Operator e dei concorrenti con tetto di crediti nella stessa fascia di prezzo. La nostra piattaforma fornisce controllo autonomo del desktop, automazione del browser e orchestrazione multi-agente con vero isolamento a livello VM.",
-      "productDescription": "Agente IA per l'uso del computer che controlla un desktop come un umano. #1 nel benchmark OSWorld (82%). Il piano Unlimited da $249/mo è il piano a tariffa fissa illimitato per l'uso del computer più economico disponibile. Automazione autonoma del browser, controllo del desktop, invio e-mail, compilazione moduli e gestione fogli di calcolo con vero isolamento a livello VM.",
-      "websiteDescription": "Piattaforma di agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld e il piano Unlimited a tariffa fissa più economico a $249/mese. Automazione autonoma di browser, desktop e terminale con isolamento VM. Da $19/mo Starter o $249/mo Unlimited.",
-      "softwareDescription": "Agente IA per l'uso del computer che controlla un desktop completo come un umano. #1 nel benchmark OSWorld con un tasso di completamento dell'82% su 369 attività reali. Il piano Unlimited da $249/mese è il piano a tariffa fissa illimitato per l'uso del computer più economico sul mercato. Automazione autonoma del browser, controllo del desktop, operazioni di terminale, invio e-mail, compilazione moduli e gestione fogli di calcolo.",
+      "appDescription": "L'agente IA per l'uso del computer #1 e il piano Unlimited a tariffa fissa per l'uso del computer più economico sul mercato a $99/mese. Coasty controlla un desktop completo come un umano — apre browser, clicca, digita, compila moduli, invia e-mail e gestisce fogli di calcolo in autonomia. 82% nel benchmark OSWorld su 369 attività reali. Vero isolamento a livello VM per sessione. Risoluzione CAPTCHA integrata. Piani: {starterPrice} Starter o {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty sviluppa l'agente IA per l'uso del computer #1 (82% OSWorld) e offre l'unico piano Unlimited a tariffa fissa per l'uso del computer a $99/mese — più economico di Devin Team, OpenAI Operator e dei concorrenti con tetto di crediti nella stessa fascia di prezzo. La nostra piattaforma fornisce controllo autonomo del desktop, automazione del browser e orchestrazione multi-agente con vero isolamento a livello VM.",
+      "productDescription": "Agente IA per l'uso del computer che controlla un desktop come un umano. #1 nel benchmark OSWorld (82%). Il piano Unlimited da {unlimitedPrice} è il piano a tariffa fissa illimitato per l'uso del computer più economico disponibile. Automazione autonoma del browser, controllo del desktop, invio e-mail, compilazione moduli e gestione fogli di calcolo con vero isolamento a livello VM.",
+      "websiteDescription": "Piattaforma di agente IA per l'uso del computer #1 — 82% nel benchmark OSWorld e il piano Unlimited a tariffa fissa più economico a $99/mese. Automazione autonoma di browser, desktop e terminale con isolamento VM. Da {starterPrice} Starter o {unlimitedPrice} Unlimited.",
+      "softwareDescription": "Agente IA per l'uso del computer che controlla un desktop completo come un umano. #1 nel benchmark OSWorld con un tasso di completamento dell'82% su 369 attività reali. Il piano Unlimited da $99/mese è il piano a tariffa fissa illimitato per l'uso del computer più economico sul mercato. Automazione autonoma del browser, controllo del desktop, operazioni di terminale, invio e-mail, compilazione moduli e gestione fogli di calcolo.",
       "breadcrumbs": {
         "home": "Home",
         "caseStudies": "Casi Studio Agenti IA",

@@ -4,7 +4,7 @@
  * they can be re-enabled with a single flag flip.
  *
  * Current state (as of 2026-05-17):
- *   LIVE  : starter ($19), plus ($50), unlimited ($249)
+ *   LIVE  : starter ($19), plus ($50), unlimited ($99)
  *   HIDDEN: free, lite, pro, enterprise
  *
  * What this file is testing is the contract — not the specific plans
@@ -149,7 +149,7 @@ describe("purchasable filter — public PricingSnapshot", () => {
     expect(starter?.creditsPerMonth).toBe(200)
 
     const unlimited = snapshot.subscriptions.find((s) => s.id === "unlimited")
-    expect(unlimited?.priceUSD).toBe(249)
+    expect(unlimited?.priceUSD).toBe(99)
     expect(unlimited?.creditsPerMonth).toBe(999_999_999) // sentinel
   })
 })

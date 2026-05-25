@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
+import { priceMonthlyLong, i18nPriceVars } from "@/lib/pricing/format"
 import { PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 
 export async function FAQSchema({ locale }: { locale: string }) {
@@ -36,10 +37,13 @@ export async function FAQSchema({ locale }: { locale: string }) {
 }
 
 export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
-  let t: (key: string) => string
+  // Two-arg form supports `t(key, values)` for placeholder substitution
+  // — used by price-bearing seo.* keys via i18nPriceVars().
+  let t: (key: string, values?: Record<string, string | number>) => string
   try {
     const trans = await getTranslations("seo")
-    t = (key: string) => trans(key as never)
+    t = (key: string, values?: Record<string, string | number>) =>
+      trans(key as never, values as never)
   } catch {
     t = (key: string) => key
   }
@@ -77,7 +81,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
         ...(isUnlimitedTier
           ? {
               "description":
-                "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 5 concurrent agents (abuse cap).",
+                `Unlimited computer-use agent runs at a flat ${priceMonthlyLong("unlimited")} — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 5 concurrent agents (abuse cap).`,
             }
           : {
               "eligibleQuantity": {
@@ -113,7 +117,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": "Coasty AI Employee",
-    "description": t("structuredData.productDescription"),
+    "description": t("structuredData.productDescription", i18nPriceVars()),
     "brand": { "@type": "Brand", "name": "Coasty" },
     "category": "Software > Productivity > AI Automation",
     "image": PRODUCT_IMAGES,
@@ -128,7 +132,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     },
     "award": [
       "#1 Ranked on OSWorld Benchmark — 82% completion rate across 369 real-world computer tasks",
-      "Cheapest flat-rate Unlimited computer-use plan — $249/month (vs Devin Team $500 + ACU, OpenAI Operator $200 rate-limited, Genspark Pro $249 credit-capped)",
+      `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")} (vs Devin Team $500 + ACU, OpenAI Operator $200 rate-limited, Genspark Pro $249 credit-capped)`,
     ],
   }
 

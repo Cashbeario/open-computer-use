@@ -50,6 +50,8 @@ import {
 import { CoastyIcon } from "@/components/icons/coasty"
 import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
+import { priceUSD } from "@/lib/pricing/format"
+import type { SubscriptionTierId } from "@/lib/pricing/tiers"
 
 // ─── Plan & Package Data ────────────────────────────────────────────────────
 //
@@ -67,7 +69,7 @@ const subscriptionPlans = [
     id: "lite",
     name: "Lite",
     tier: "lite",
-    price: 9,
+    price: priceUSD("lite"),
     monthlyCredits: 100,
     machines: 1,
     swarm: 2,
@@ -85,7 +87,7 @@ const subscriptionPlans = [
     id: "starter",
     name: "Starter",
     tier: "starter",
-    price: 19,
+    price: priceUSD("starter"),
     monthlyCredits: 200,
     machines: 1,
     swarm: 3,
@@ -103,7 +105,7 @@ const subscriptionPlans = [
     id: "professional",
     name: "Plus",
     tier: "professional",
-    price: 50,
+    price: priceUSD("plus"),
     monthlyCredits: 600,
     machines: 2,
     swarm: 6,
@@ -121,7 +123,7 @@ const subscriptionPlans = [
     id: "enterprise",
     name: "Pro",
     tier: "enterprise",
-    price: 100,
+    price: priceUSD("pro"),
     monthlyCredits: 1500,
     machines: 3,
     swarm: 9,
@@ -139,7 +141,7 @@ const subscriptionPlans = [
     id: "unlimited",
     name: "Unlimited",
     tier: "unlimited",
-    price: 249,
+    price: priceUSD("unlimited"),
     // Sentinel for "unlimited" — UI must render the literal string when
     // detecting tier === "unlimited" rather than this number.
     monthlyCredits: 999_999_999,
@@ -169,7 +171,7 @@ const additionalCreditPackages = [
     id: "boost-small",
     name: "Boost",
     credits: 150,
-    price: 19,
+    price: priceUSD("starter"),
     description: "Quick top-up",
   },
   {
@@ -1443,7 +1445,7 @@ export function BillingSection() {
   // ($99/1,200 credits = $0.0825/credit) — the cheapest pay-as-you-go
   // option, so the savings number stays conservative even at heavy usage.
   const PAYG_CREDIT_RATE_USD = 0.0825
-  const UNLIMITED_MONTHLY_PRICE_USD = 249
+  const UNLIMITED_MONTHLY_PRICE_USD = priceUSD("unlimited")
   const wouldHavePaidPAYG = Math.round(stats.totalSpent * PAYG_CREDIT_RATE_USD)
   const monthlySavingsUSD = Math.max(0, wouldHavePaidPAYG - UNLIMITED_MONTHLY_PRICE_USD)
 

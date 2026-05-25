@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 AI-agent til computerbrug | AI-medarbejder til skrivebords- og browserautomatisering",
+      "title": "Coasty - #1 AI-agent til computerbrug | Bedst til skrivebords- og browserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-agent til computerbrug",
-      "description": "Coasty er den #1-rangerede AI-agent til computerbrug — 82% på OSWorld benchmark — og den eneste Ubegrænsede computerbrugsplan med fast pris på $249/mo (billigere end Devin Team $500+ACU, OpenAI Operator $200 med hastighedsbegrænsning og kreditbegrænsede konkurrenter). Styrer et helt skrivebord som et menneske: browsere, formularer, e-mails, regneark. VM-isolering. Fra $19/mo Starter eller $249/mo Ubegrænset.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Ubegrænset (Billigste computerbrugsagent)",
-      "ogDescription": "#1 på OSWorld (82%). $249/mo fast Ubegrænset — billigere end Devin Team ($500+ACU) på en højere benchmark. Browser-, skrivebords- og terminalautomatisering. VM-isolering per session. Cross-platform native + REST API + MCP-server.",
-      "twitterDescription": "AI-agent der kører et rigtigt skrivebord. 82% OSWorld (#1). $249/mo Ubegrænset — billigste plan med fast pris i kategorien. Starter fra $19/mo. VM-isolering + 26-tool MCP-server."
+      "description": "Coasty er den #1-rangerede AI-agent til computerbrug — 82% på OSWorld benchmark — og den eneste Ubegrænsede computerbrugsplan med fast pris på {unlimitedPrice} (billigere end Devin Team $500+ACU, OpenAI Operator $200 med hastighedsbegrænsning og kreditbegrænsede konkurrenter). Styrer et helt skrivebord som et menneske: browsere, formularer, e-mails, regneark. VM-isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrænset.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Ubegrænset (Billigste computerbrugsagent)",
+      "ogDescription": "#1 på OSWorld (82%). {unlimitedPrice} fast Ubegrænset — billigere end Devin Team ($500+ACU) på en højere benchmark. Browser-, skrivebords- og terminalautomatisering. VM-isolering per session. Cross-platform native + REST API + MCP-server.",
+      "twitterDescription": "AI-agent der kører et rigtigt skrivebord. 82% OSWorld (#1). {unlimitedPrice} Ubegrænset — billigste plan med fast pris i kategorien. Starter fra {starterPrice}. VM-isolering + 26-tool MCP-server."
     },
     "compare": {
       "title": "Sammenlign Coasty - AI-agentalternativer og konkurrentsammenligning",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Priser — Coasty AI-agentplaner og priser",
-      "description": "Coasty-priser: Starter $19/mo (200 kreditter) eller Ubegrænset $249/mo (den billigste Ubegrænsede computerbrugsplan med fast pris på markedet — billigere end Devin Team $500+ACU, Genspark Pro $249 kreditbegrænset og Manus Extended $200 begrænset). Erstatter menneskelige virtuelle assistenter til $3,000+/mo. Ingen skjulte gebyrer.",
-      "ogTitle": "Coasty-priser — $19/mo Starter, $249/mo Ubegrænset",
-      "ogDescription": "$249/mo fast Ubegrænset — den billigste ubegrænsede computerbrugsplan på markedet. Eller $19/mo Starter for individuelle brugere. Sparer $36,000/år sammenlignet med menneskelige VA'er."
+      "description": "Coasty-priser: Starter {starterPrice} (200 kreditter) eller Ubegrænset {unlimitedPrice} (den billigste Ubegrænsede computerbrugsplan med fast pris på markedet — billigere end Devin Team $500+ACU, Genspark Pro $249 kreditbegrænset og Manus Extended $200 begrænset). Erstatter menneskelige virtuelle assistenter til $3,000+/mo. Ingen skjulte gebyrer.",
+      "ogTitle": "Coasty-priser — {starterPrice} Starter, {unlimitedPrice} Ubegrænset",
+      "ogDescription": "{unlimitedPrice} fast Ubegrænset — den billigste ubegrænsede computerbrugsplan på markedet. Eller {starterPrice} Starter for individuelle brugere. Sparer $36,000/år sammenlignet med menneskelige VA'er."
     },
     "faq": {
       "q1": "Hvad er Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Hvordan sammenligner Coasty sig med Anthropic Computer Use?",
       "a2": "Mens Anthropic Computer Use leverer et rå API til computerkontrol, er Coasty en produktionsklar platform med administreret VM-infrastruktur, indbygget CAPTCHA-løsning, desktopapp til Mac og Windows, understøttelse af flere modeller og den højeste OSWorld benchmark-score (82%). Coasty giver den komplette løsning — ikke bare API'et.",
       "q3": "Hvad koster Coasty?",
-      "a3": "Coasty har to aktive planer: Starter til $19/mo (200 kreditter, 1 maskine, ideel til individuelle brugere) og Ubegrænset til $249/mo uden kreditbegrænsninger. $249 Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris, der findes — billigere end Devin Team ($500/mo + ACU-overskridelse), OpenAI Operator ChatGPT Pro ($200/mo med hastighedsbegrænsning), Genspark Pro ($249,99 kreditbegrænset til 125k kreditter) og Manus Extended ($200 begrænset til 40k kreditter). Begge erstatter en menneskelig virtuel assistent til $3,000+/mo; Ubegrænset sparer $33,000+/år sammenlignet med en menneskelig VA med 92% omkostningsreduktion.",
+      "a3": "Coasty har to aktive planer: Starter til $19/mo (200 kreditter, 1 maskine, ideel til individuelle brugere) og Ubegrænset til $99/mo uden kreditbegrænsninger. $99 Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris, der findes — billigere end Devin Team ($500/mo + ACU-overskridelse), OpenAI Operator ChatGPT Pro ($200/mo med hastighedsbegrænsning), Genspark Pro ($249,99 kreditbegrænset til 125k kreditter) og Manus Extended ($200 begrænset til 40k kreditter). Begge erstatter en menneskelig virtuel assistent til $3,000+/mo; Ubegrænset sparer $33,000+/år sammenlignet med en menneskelig VA med 92% omkostningsreduktion.",
       "q4": "Er Coasty sikkert at bruge?",
       "a4": "Ja. Hver Coasty-session kører i sin egen isolerede, sandkassebaserede virtuelle maskine. Dine data er sikre, din maskine forbliver urørt, og intet lækker mellem sessioner. Dette er ægte VM-niveau isolering, ikke bare containere i en delt pulje.",
       "q5": "Hvad er OSWorld benchmark?",
@@ -2401,11 +2401,11 @@
       "a10": "Ja. Coasty har en indbygget CAPTCHA-løsningspipeline, så den bliver ikke blokeret som konkurrerende AI-agenter. Dette er afgørende for automatisering i den virkelige verden, hvor CAPTCHA'er er almindelige på hjemmesider."
     },
     "structuredData": {
-      "appDescription": "Den #1-rangerede AI-agent til computerbrug og den billigste Ubegrænsede computerbrugsplan med fast pris på markedet til $249/mo. Coasty styrer et helt skrivebord som et menneske — åbner browsere, klikker, skriver, udfylder formularer, sender e-mails og administrerer regneark autonomt. 82% på OSWorld benchmark over 369 virkelige opgaver. Ægte VM-niveau isolering per session. Indbygget CAPTCHA-løsning. Planer: $19/mo Starter eller $249/mo Ubegrænset.",
-      "orgDescription": "Coasty bygger den #1-rangerede AI-agent til computerbrug (82% OSWorld) og leverer den eneste Ubegrænsede computerbrugsplan med fast pris til $249/mo — billigere end Devin Team, OpenAI Operator og kreditbegrænsede konkurrenter i samme prisklasse. Vores platform tilbyder autonom skrivebordskontrol, browserautomatisering og orkestrering af flere agenter med ægte VM-niveau isolering.",
-      "productDescription": "AI-computerbrugsagent der styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). $249/mo Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris, der findes. Autonom browserautomatisering, skrivebordskontrol, e-mailafsendelse, formularudfyldning og regnearkshåndtering med ægte VM-niveau isolering.",
-      "websiteDescription": "#1 AI-agentplatform til computerbrug — 82% OSWorld benchmark og den billigste Ubegrænsede plan med fast pris til $249/mo. Autonom browser-, skrivebords- og terminalautomatisering med VM-isolering. Fra $19/mo Starter eller $249/mo Ubegrænset.",
-      "softwareDescription": "AI-computerbrugsagent der styrer et helt skrivebord som et menneske. #1 på OSWorld benchmark med 82% fuldførelsesrate over 369 virkelige opgaver. $249/mo Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris på markedet. Autonom browserautomatisering, skrivebordskontrol, terminaloperationer, e-mailafsendelse, formularudfyldning og regnearkshåndtering.",
+      "appDescription": "Den #1-rangerede AI-agent til computerbrug og den billigste Ubegrænsede computerbrugsplan med fast pris på markedet til {unlimitedPrice}. Coasty styrer et helt skrivebord som et menneske — åbner browsere, klikker, skriver, udfylder formularer, sender e-mails og administrerer regneark autonomt. 82% på OSWorld benchmark over 369 virkelige opgaver. Ægte VM-niveau isolering per session. Indbygget CAPTCHA-løsning. Planer: {starterPrice} Starter eller {unlimitedPrice} Ubegrænset.",
+      "orgDescription": "Coasty bygger den #1-rangerede AI-agent til computerbrug (82% OSWorld) og leverer den eneste Ubegrænsede computerbrugsplan med fast pris til {unlimitedPrice} — billigere end Devin Team, OpenAI Operator og kreditbegrænsede konkurrenter i samme prisklasse. Vores platform tilbyder autonom skrivebordskontrol, browserautomatisering og orkestrering af flere agenter med ægte VM-niveau isolering.",
+      "productDescription": "AI-computerbrugsagent der styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). {unlimitedPrice} Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris, der findes. Autonom browserautomatisering, skrivebordskontrol, e-mailafsendelse, formularudfyldning og regnearkshåndtering med ægte VM-niveau isolering.",
+      "websiteDescription": "#1 AI-agentplatform til computerbrug — 82% OSWorld benchmark og den billigste Ubegrænsede plan med fast pris til {unlimitedPrice}. Autonom browser-, skrivebords- og terminalautomatisering med VM-isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrænset.",
+      "softwareDescription": "AI-computerbrugsagent der styrer et helt skrivebord som et menneske. #1 på OSWorld benchmark med 82% fuldførelsesrate over 369 virkelige opgaver. {unlimitedPrice} Ubegrænset-planen er den billigste Ubegrænsede computerbrugsplan med fast pris på markedet. Autonom browserautomatisering, skrivebordskontrol, terminaloperationer, e-mailafsendelse, formularudfyldning og regnearkshåndtering.",
       "breadcrumbs": {
         "home": "Hjem",
         "caseStudies": "AI-agent casestudier",

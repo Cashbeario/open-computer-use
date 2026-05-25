@@ -3,6 +3,7 @@
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { cn } from "@/lib/utils"
+import { priceDollar } from "@/lib/pricing/format"
 import Link from "next/link"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useTranslations } from "next-intl"
@@ -1226,8 +1227,8 @@ export function AgentSwarmsContent() {
               )}
             >
               {[
-                { plan: "Starter", price: "$19", machines: "1 machine" },
-                { plan: "Unlimited", price: "$249", machines: "2 machines" },
+                { plan: "Starter", price: priceDollar("starter"), machines: "1 machine" },
+                { plan: "Unlimited", price: priceDollar("unlimited"), machines: "2 machines" },
               ].map(p => (
                 <div key={p.plan} className="flex items-baseline gap-2">
                   <span className="text-sm font-semibold">{p.plan}</span>

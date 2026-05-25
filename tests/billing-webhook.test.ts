@@ -69,7 +69,7 @@ class MockDB {
     // Sentinel — UI renders the literal word "Unlimited" instead of this
     // number; backend guards in agent_billing.charge_step skip the deduct
     // RPC entirely.  See lib/pricing/tiers.ts L165 and migration 017.
-    { id: "plan_unlimited", tier: "unlimited", monthly_credits: 999_999_999, name: "Unlimited", price: 249 },
+    { id: "plan_unlimited", tier: "unlimited", monthly_credits: 999_999_999, name: "Unlimited", price: 99 },
   ]
 
   private txCounter = 0

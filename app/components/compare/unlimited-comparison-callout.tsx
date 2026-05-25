@@ -2,8 +2,9 @@
 
 /**
  * UnlimitedComparisonCallout — competitor-page banner that lands the
- * "Coasty $249/mo Unlimited vs <Competitor> $X" claim in the rendered
- * HTML (not just metadata).
+ * "Coasty <Unlimited price>/mo vs <Competitor> $X" claim in the rendered
+ * HTML (not just metadata). Price strings come from priceMonthly/priceUSD
+ * so they stay in sync with lib/pricing/tiers.ts.
  *
  * Why this exists:
  *   Per the Peec 2026 study, comparison pages capture ~32.5% of AI
@@ -13,8 +14,8 @@
  *   is what makes that citation actually happen.
  *
  * Structure (intentionally crawler-friendly):
- *   - <p><strong>Coasty Unlimited — $249/month</strong> ... vs
- *     <strong>{Competitor} — {Competitor price}</strong>.</p>
+ *   - <p><strong>Coasty Unlimited — {priceMonthlyLong("unlimited")}</strong>
+ *     ... vs <strong>{Competitor} — {Competitor price}</strong>.</p>
  *   - One factual zinger sentence per competitor (the citation hook).
  *   - One CTA link out to /pricing#unlimited.
  *
@@ -25,6 +26,11 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, Infinity as InfinityIcon } from "lucide-react"
 import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
+import {
+  priceDollar,
+  priceMonthlyLong,
+  priceUSD,
+} from "@/lib/pricing/format"
 
 interface UnlimitedComparisonCalloutProps {
   competitorName: string
@@ -47,7 +53,7 @@ export function UnlimitedComparisonCallout({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
       className="relative isolate overflow-hidden rounded-2xl border border-amber-500/40 bg-card mb-12"
-      aria-label={`Coasty Unlimited $249 per month vs ${competitorName} ${competitorPrice}`}
+      aria-label={`Coasty Unlimited ${priceUSD("unlimited")} per month vs ${competitorName} ${competitorPrice}`}
     >
       <UnlimitedSmoke variant="hero" />
 
@@ -61,7 +67,7 @@ export function UnlimitedComparisonCallout({
             </span>
           </div>
           <p className="text-4xl sm:text-5xl font-bold tracking-tight leading-none">
-            $249<span className="text-lg sm:text-xl font-medium text-muted-foreground">/mo</span>
+            {priceDollar("unlimited")}<span className="text-lg sm:text-xl font-medium text-muted-foreground">/mo</span>
           </p>
           <p className="text-xs text-muted-foreground/70 mt-1">
             vs {competitorName} — {competitorPrice}
@@ -71,7 +77,7 @@ export function UnlimitedComparisonCallout({
         {/* Center: citation-grade head-to-head sentence */}
         <div className="flex-1 min-w-0">
           <p className="text-base sm:text-lg leading-relaxed text-foreground/90">
-            <strong className="font-semibold">Coasty Unlimited — $249/month, flat-rate, no caps.</strong>{" "}
+            <strong className="font-semibold">Coasty Unlimited — {priceMonthlyLong("unlimited")}, flat-rate, no caps.</strong>{" "}
             {unlimitedZinger}
           </p>
           <p className="text-[13px] text-muted-foreground/70 mt-2">

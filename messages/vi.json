@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Nhân viên AI cho tự động hóa máy tính và trình duyệt",
+      "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Tốt nhất cho tự động hóa máy tính và trình duyệt",
       "titleTemplate": "{title} | Coasty - Trợ lý AI sử dụng máy tính",
-      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark — và là gói Không giới hạn trọn gói duy nhất trên thị trường với $249/mo (rẻ hơn Devin Team $500+ACU, OpenAI Operator $200 bị giới hạn tốc độ, và các đối thủ bị giới hạn tín dụng). Điều khiển toàn bộ máy tính như con người: trình duyệt, biểu mẫu, email, bảng tính. Cách ly cấp VM. Từ $19/mo Starter hoặc $249/mo Không giới hạn.",
-      "ogTitle": "Coasty — 82% OSWorld + Không giới hạn $249/mo (Trợ lý sử dụng máy tính rẻ nhất)",
-      "ogDescription": "Số 1 trên OSWorld (82%). Không giới hạn trọn gói $249/mo — rẻ hơn Devin Team ($500+ACU) ở điểm benchmark cao hơn. Tự động hóa trình duyệt, máy tính, terminal. Cách ly VM mỗi phiên. Ứng dụng native đa nền tảng + REST API + MCP server.",
-      "twitterDescription": "Trợ lý AI vận hành máy tính thật. 82% OSWorld (số 1). Không giới hạn $249/mo — gói trọn gói rẻ nhất trong danh mục. Starter từ $19/mo. Cách ly VM + MCP server 26 công cụ."
+      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark — và là gói Không giới hạn trọn gói duy nhất trên thị trường với {unlimitedPrice} (rẻ hơn Devin Team $500+ACU, OpenAI Operator $200 bị giới hạn tốc độ, và các đối thủ bị giới hạn tín dụng). Điều khiển toàn bộ máy tính như con người: trình duyệt, biểu mẫu, email, bảng tính. Cách ly cấp VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "ogTitle": "Coasty — 82% OSWorld + Không giới hạn {unlimitedPrice} (Trợ lý sử dụng máy tính rẻ nhất)",
+      "ogDescription": "Số 1 trên OSWorld (82%). Không giới hạn trọn gói {unlimitedPrice} — rẻ hơn Devin Team ($500+ACU) ở điểm benchmark cao hơn. Tự động hóa trình duyệt, máy tính, terminal. Cách ly VM mỗi phiên. Ứng dụng native đa nền tảng + REST API + MCP server.",
+      "twitterDescription": "Trợ lý AI vận hành máy tính thật. 82% OSWorld (số 1). Không giới hạn {unlimitedPrice} — gói trọn gói rẻ nhất trong danh mục. Starter từ {starterPrice}. Cách ly VM + MCP server 26 công cụ."
     },
     "compare": {
       "title": "So sánh Coasty - Các giải pháp thay thế trợ lý AI và so sánh đối thủ",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Bảng giá — Gói và giá trợ lý AI Coasty",
-      "description": "Bảng giá Coasty: Starter $19/mo (200 tín dụng) hoặc Không giới hạn $249/mo (gói Không giới hạn trọn gói rẻ nhất trên thị trường — rẻ hơn Devin Team $500+ACU, Genspark Pro $249 bị giới hạn tín dụng, và Manus Extended $200 bị giới hạn). Thay thế trợ lý ảo con người $3,000+/mo. Không có phí ẩn.",
-      "ogTitle": "Bảng giá Coasty — $19/mo Starter, $249/mo Không giới hạn",
-      "ogDescription": "Không giới hạn trọn gói $249/mo — gói sử dụng máy tính không giới hạn rẻ nhất trên thị trường. Hoặc Starter $19/mo cho cá nhân. Tiết kiệm $36k/năm so với VA con người."
+      "description": "Bảng giá Coasty: Starter {starterPrice} (200 tín dụng) hoặc Không giới hạn {unlimitedPrice} (gói Không giới hạn trọn gói rẻ nhất trên thị trường — rẻ hơn Devin Team $500+ACU, Genspark Pro $249 bị giới hạn tín dụng, và Manus Extended $200 bị giới hạn). Thay thế trợ lý ảo con người $3,000+/mo. Không có phí ẩn.",
+      "ogTitle": "Bảng giá Coasty — {starterPrice} Starter, {unlimitedPrice} Không giới hạn",
+      "ogDescription": "Không giới hạn trọn gói {unlimitedPrice} — gói sử dụng máy tính không giới hạn rẻ nhất trên thị trường. Hoặc Starter {starterPrice} cho cá nhân. Tiết kiệm $36k/năm so với VA con người."
     },
     "faq": {
       "q1": "Coasty là gì?",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty so với Anthropic Computer Use như thế nào?",
       "a2": "Trong khi Anthropic Computer Use cung cấp API thô để điều khiển máy tính, Coasty là nền tảng sẵn sàng sản xuất với hạ tầng VM được quản lý, giải CAPTCHA tích hợp, ứng dụng máy tính cho Mac và Windows, hỗ trợ nhiều mô hình và điểm OSWorld benchmark cao nhất (82%). Coasty cung cấp giải pháp hoàn chỉnh — không chỉ API.",
       "q3": "Coasty giá bao nhiêu?",
-      "a3": "Coasty có hai gói đang hoạt động: Starter ở mức $19/month (200 tín dụng, 1 máy, lý tưởng cho cá nhân) và Không giới hạn ở mức $249/month không giới hạn tín dụng. Gói Không giới hạn $249 là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có — rẻ hơn Devin Team ($500/month + phụ phí ACU), OpenAI Operator ChatGPT Pro ($200/month bị giới hạn tốc độ), Genspark Pro ($249.99 giới hạn tín dụng tại 125k tín dụng) và Manus Extended ($200 giới hạn tại 40k tín dụng). Cả hai gói đều thay thế một trợ lý ảo con người trị giá $3,000+/month; gói Không giới hạn tiết kiệm $33,000+/năm so với VA con người, giảm 92% chi phí.",
+      "a3": "Coasty có hai gói đang hoạt động: Starter ở mức $19/month (200 tín dụng, 1 máy, lý tưởng cho cá nhân) và Không giới hạn ở mức $99/month không giới hạn tín dụng. Gói Không giới hạn $99 là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có — rẻ hơn Devin Team ($500/month + phụ phí ACU), OpenAI Operator ChatGPT Pro ($200/month bị giới hạn tốc độ), Genspark Pro ($249.99 giới hạn tín dụng tại 125k tín dụng) và Manus Extended ($200 giới hạn tại 40k tín dụng). Cả hai gói đều thay thế một trợ lý ảo con người trị giá $3,000+/month; gói Không giới hạn tiết kiệm $33,000+/năm so với VA con người, giảm 92% chi phí.",
       "q4": "Coasty có an toàn không?",
       "a4": "Có. Mọi phiên Coasty chạy trong VM cách ly, sandbox riêng. Dữ liệu của bạn an toàn, máy của bạn không bị ảnh hưởng và không có gì rò rỉ giữa các phiên. Đây là cách ly VM thực sự, không chỉ container trong pool chung.",
       "q5": "OSWorld benchmark là gì?",
@@ -2401,11 +2401,11 @@
       "a10": "Có. Coasty có hệ thống giải CAPTCHA tích hợp, nên không bị chặn như các trợ lý AI cạnh tranh. Điều này rất quan trọng cho tự động hóa thực tế khi CAPTCHA phổ biến trên các trang web."
     },
     "structuredData": {
-      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1 và gói Không giới hạn trọn gói rẻ nhất trên thị trường với $249/month. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark qua 369 tác vụ thực tế. Cách ly cấp VM thực sự mỗi phiên. Giải CAPTCHA tích hợp. Gói: $19/mo Starter hoặc $249/mo Không giới hạn.",
-      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) và phát hành gói Không giới hạn trọn gói duy nhất ở mức $249/month — rẻ hơn Devin Team, OpenAI Operator và các đối thủ bị giới hạn tín dụng ở cùng phân khúc giá. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly cấp VM thực sự.",
-      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Gói Không giới hạn $249/mo là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có. Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính tự động với cách ly cấp VM thực sự.",
-      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1 — 82% OSWorld benchmark và gói Không giới hạn trọn gói rẻ nhất ở mức $249/month. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Từ $19/mo Starter hoặc $249/mo Không giới hạn.",
-      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Gói Không giới hạn $249/month là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
+      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1 và gói Không giới hạn trọn gói rẻ nhất trên thị trường với {unlimitedPriceLong}. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark qua 369 tác vụ thực tế. Cách ly cấp VM thực sự mỗi phiên. Giải CAPTCHA tích hợp. Gói: {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) và phát hành gói Không giới hạn trọn gói duy nhất ở mức {unlimitedPriceLong} — rẻ hơn Devin Team, OpenAI Operator và các đối thủ bị giới hạn tín dụng ở cùng phân khúc giá. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly cấp VM thực sự.",
+      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Gói Không giới hạn {unlimitedPrice} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có. Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính tự động với cách ly cấp VM thực sự.",
+      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1 — 82% OSWorld benchmark và gói Không giới hạn trọn gói rẻ nhất ở mức {unlimitedPriceLong}. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Gói Không giới hạn {unlimitedPriceLong} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
       "breadcrumbs": {
         "home": "Trang chủ",
         "caseStudies": "Nghiên cứu tình huống trợ lý AI",

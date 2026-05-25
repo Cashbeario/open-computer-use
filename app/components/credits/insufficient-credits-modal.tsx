@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Crown, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { startingAtWithCredits } from "@/lib/pricing/format"
 import { useCredits } from "@/lib/hooks/use-credits"
 import { trackPricingViewed } from "@/lib/posthog/analytics"
 import { CoastyIcon } from "@/components/icons/coasty"
@@ -149,7 +150,7 @@ export function InsufficientCreditsModal({
                 <div className="space-y-2.5">
                   <p className="text-sm font-medium">Subscription Required</p>
                   <div className="space-y-1.5 text-xs text-muted-foreground">
-                    <p>Starting at $19/month with 200 credits included</p>
+                    <p>{startingAtWithCredits()}</p>
                     <p>Purchase additional credits anytime</p>
                   </div>
                 </div>

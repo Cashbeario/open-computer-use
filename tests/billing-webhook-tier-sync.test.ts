@@ -942,7 +942,7 @@ describe("webhook tier sync — full lifecycle scenarios", () => {
 // way through to machine_limits.tier and user_credits.subscription_tier —
 // not just for new subscriptions but for upgrades and reactivations too.
 //
-// Without this, paying $249/mo Unlimited customers would silently land on
+// Without this, paying Unlimited customers would silently land on
 // the wrong tier in the backend (rate limits, schedule limits, machine
 // caps) — exactly the failure mode migration 011 was created to prevent.
 

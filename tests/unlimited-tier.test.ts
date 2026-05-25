@@ -136,7 +136,7 @@ describe("unlimited tier — resource limits", () => {
   it("swarmAgentsLimit is capped at 5 — abuse-prevention valve", () => {
     // Critical: unlimited credits + unbounded concurrency would let a
     // single user burn 100k credits/hour at $0 marginal cost.  The 5-agent
-    // cap is what makes the $249 flat rate sustainable while still leaving
+    // cap is what makes the $99 flat rate sustainable while still leaving
     // room for genuine multi-agent workflows.
     const u = getTier("unlimited")
     expect(u!.swarmAgentsLimit).toBe(5)
@@ -173,8 +173,8 @@ describe("unlimited tier — pricing data + sentinel safety", () => {
     expect(unlimited).toBeDefined()
   })
 
-  it("price is $249", () => {
-    expect(unlimited!.priceUSD).toBe(249)
+  it("price is $99", () => {
+    expect(unlimited!.priceUSD).toBe(99)
   })
 
   it("creditsPerMonth is the sentinel (999_999_999)", () => {

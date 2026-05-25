@@ -10,7 +10,7 @@
  *     if (opts.isPersistent) return opts.planMaxMachines;
  *     return Math.min(opts.planMaxMachines * 3, 10);
  *
- * The cap is the abuse-prevention valve for the $249 flat-rate plan:
+ * The cap is the abuse-prevention valve for the flat-rate Unlimited plan:
  * unlimited credits + fully unbounded parallelism would let one user
  * burn the plan economics in a single hour. Capping to 5 keeps the
  * plan sustainable while leaving room for genuine multi-agent workflows

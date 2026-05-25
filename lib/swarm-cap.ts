@@ -16,7 +16,7 @@
  *
  * Rules:
  *   - "unlimited" tier ALWAYS caps at 5, regardless of `isPersistent`.
- *     Abuse-prevention valve for the $249 flat-rate plan — unlimited
+ *     Abuse-prevention valve for the flat-rate Unlimited plan — unlimited
  *     credits + unbounded parallelism would let one user burn the plan
  *     economics in an hour. 5 leaves room for genuine multi-agent
  *     workflows without that exposure.  (Same value surfaced as

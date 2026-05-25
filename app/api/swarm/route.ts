@@ -19,6 +19,7 @@ import {
   computeSwarmMaxMachines,
   clampRequestedMachineCount,
 } from "@/lib/swarm-cap";
+import { priceDollar } from "@/lib/pricing/format";
 import WebSocket from "ws";
 
 const PYTHON_BACKEND_URL =
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
   if (isPersistent) {
     if (!PERSISTENT_ELIGIBLE_TIERS.has(planTier)) {
       return NextResponse.json(
-        { error: "Persistent swarms require a Starter ($19) or Unlimited ($249) plan" },
+        { error: `Persistent swarms require a Starter (${priceDollar("starter")}) or Unlimited (${priceDollar("unlimited")}) plan` },
         { status: 403 }
       );
     }

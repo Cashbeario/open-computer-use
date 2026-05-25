@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 AI Agent na Gumagamit ng Computer | AI Employee para sa Desktop at Browser Automation",
+      "title": "Coasty - #1 AI Agent na Gumagamit ng Computer | Pinakamahusay para sa Desktop at Browser Automation",
       "titleTemplate": "{title} | Coasty - AI Computer-Use Agent",
-      "description": "Ang Coasty ang #1 na naka-rank na computer-using AI agent — 82% sa OSWorld benchmark — at ang tanging flat-rate na Unlimited computer-use plan sa $249/buwan (mas mura kaysa sa Devin Team $500+ACU, rate-limited na OpenAI Operator $200, at mga kakumpitensyang may credit cap). Kinokontrol ang buong desktop tulad ng tao: mga browser, form, email, spreadsheet. VM-level isolation. Simula sa Starter $19/mo o Unlimited $249/mo.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Unlimited (Pinakamurang Computer-Use Agent)",
-      "ogDescription": "#1 sa OSWorld (82%). $249/mo flat na Unlimited — mas mura kaysa Devin Team ($500+ACU) sa mas mataas na benchmark. Browser, desktop, terminal automation. VM isolation bawat session. Cross-platform native + REST API + MCP server.",
-      "twitterDescription": "AI agent na nagpapatakbo ng tunay na desktop. 82% OSWorld (#1). $249/mo Unlimited — pinakamurang flat-rate plan sa kategorya. Simula sa Starter $19/mo. VM isolation + 26-tool MCP server."
+      "description": "Ang Coasty ang #1 na naka-rank na computer-using AI agent — 82% sa OSWorld benchmark — at ang tanging flat-rate na Unlimited computer-use plan sa $99/buwan (mas mura kaysa sa Devin Team $500+ACU, rate-limited na OpenAI Operator $200, at mga kakumpitensyang may credit cap). Kinokontrol ang buong desktop tulad ng tao: mga browser, form, email, spreadsheet. VM-level isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (Pinakamurang Computer-Use Agent)",
+      "ogDescription": "#1 sa OSWorld (82%). {unlimitedPrice} flat na Unlimited — mas mura kaysa Devin Team ($500+ACU) sa mas mataas na benchmark. Browser, desktop, terminal automation. VM isolation bawat session. Cross-platform native + REST API + MCP server.",
+      "twitterDescription": "AI agent na nagpapatakbo ng tunay na desktop. 82% OSWorld (#1). {unlimitedPrice} Unlimited — pinakamurang flat-rate plan sa kategorya. Simula sa Starter {starterPrice}. VM isolation + 26-tool MCP server."
     },
     "compare": {
       "title": "Ihambing ang Coasty - Mga AI Agent Alternative at Paghahambing ng Kakumpitensya",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Presyo — Mga Plano at Presyo ng Coasty AI Agent",
-      "description": "Presyo ng Coasty: Starter $19/mo (200 credits) o Unlimited $249/mo (ang pinakamurang flat-rate na unlimited computer-use plan sa merkado — mas mura kaysa sa Devin Team $500+ACU, sa Genspark Pro $249 na may credit cap, at sa Manus Extended $200 na may cap). Pumapalit sa $3,000+/buwan na human virtual assistant. Walang nakatagong bayarin.",
-      "ogTitle": "Presyo ng Coasty — $19/mo Starter, $249/mo Unlimited",
-      "ogDescription": "$249/mo flat na Unlimited — ang pinakamurang unlimited computer-use plan sa merkado. O $19/mo Starter para sa mga indibidwal. Nakakatipid ng $36k/taon kumpara sa human VA."
+      "description": "Presyo ng Coasty: Starter {starterPrice} (200 credits) o Unlimited {unlimitedPrice} (ang pinakamurang flat-rate na unlimited computer-use plan sa merkado — mas mura kaysa sa Devin Team $500+ACU, sa Genspark Pro $249 na may credit cap, at sa Manus Extended $200 na may cap). Pumapalit sa $3,000+/buwan na human virtual assistant. Walang nakatagong bayarin.",
+      "ogTitle": "Presyo ng Coasty — {starterPrice} Starter, {unlimitedPrice} Unlimited",
+      "ogDescription": "{unlimitedPrice} flat na Unlimited — ang pinakamurang unlimited computer-use plan sa merkado. O {starterPrice} Starter para sa mga indibidwal. Nakakatipid ng $36k/taon kumpara sa human VA."
     },
     "faq": {
       "q1": "Ano ang Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Paano inihahambing ang Coasty sa Anthropic Computer Use?",
       "a2": "Habang ang Anthropic Computer Use ay nagbibigay ng raw API para sa computer control, ang Coasty ay isang production-ready platform na may managed VM infrastructure, built-in CAPTCHA solving, desktop app para sa Mac at Windows, multi-model support, at pinakamataas na OSWorld benchmark score (82%). Nagbibigay ang Coasty ng kumpletong solusyon — hindi lang ang API.",
       "q3": "Magkano ang Coasty?",
-      "a3": "Mayroong dalawang live na plan ang Coasty: Starter sa $19/buwan (200 credits, 1 machine, ideal para sa mga indibidwal) at Unlimited sa $249/buwan na walang credit cap. Ang $249 Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan na available — mas mura kaysa sa Devin Team ($500/buwan + ACU overage), OpenAI Operator ChatGPT Pro ($200/buwan rate-limited), Genspark Pro ($249.99 may cap sa 125k credits), at Manus Extended ($200 may cap sa 40k credits). Pareho silang pumapalit sa $3,000+/buwan na human virtual assistant; ang Unlimited ay nakakatipid ng $33,000+/taon kumpara sa human VA sa 92% na pagbawas sa gastos.",
+      "a3": "Mayroong dalawang live na plan ang Coasty: Starter sa $19/buwan (200 credits, 1 machine, ideal para sa mga indibidwal) at Unlimited sa $99/buwan na walang credit cap. Ang $99 Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan na available — mas mura kaysa sa Devin Team ($500/buwan + ACU overage), OpenAI Operator ChatGPT Pro ($200/buwan rate-limited), Genspark Pro ($249.99 may cap sa 125k credits), at Manus Extended ($200 may cap sa 40k credits). Pareho silang pumapalit sa $3,000+/buwan na human virtual assistant; ang Unlimited ay nakakatipid ng $33,000+/taon kumpara sa human VA sa 92% na pagbawas sa gastos.",
       "q4": "Ligtas bang gamitin ang Coasty?",
       "a4": "Oo. Bawat Coasty session ay tumatakbo sa sarili nitong isolated, sandboxed virtual machine. Nananatiling ligtas ang iyong data, nananatiling hindi nagagalaw ang iyong makina, at walang tumatagas sa pagitan ng sessions. Ito ay tunay na VM-level isolation, hindi lang containers sa isang shared pool.",
       "q5": "Ano ang OSWorld benchmark?",
@@ -2401,11 +2401,11 @@
       "a10": "Oo. Ang Coasty ay may built-in CAPTCHA-solving pipeline, kaya hindi ito naba-block tulad ng mga kakumpitensyang AI agent. Ito ay kritikal para sa totoong automation kung saan karaniwan ang mga CAPTCHA sa mga website."
     },
     "structuredData": {
-      "appDescription": "Ang #1 na naka-rank na computer-using AI agent at ang pinakamurang flat-rate na Unlimited computer-use plan sa merkado sa $249/buwan. Kinokontrol ng Coasty ang buong desktop tulad ng tao — nagbubukas ng browser, nagki-click, nagta-type, nagpupuno ng form, nagpapadala ng email, at namamahala ng spreadsheet nang autonomous. 82% sa OSWorld benchmark sa 369 na totoong gawain. Tunay na VM-level isolation bawat session. Built-in CAPTCHA solving. Mga plan: $19/mo Starter o $249/mo Unlimited.",
-      "orgDescription": "Binubuo ng Coasty ang #1 computer-using AI agent (82% OSWorld) at inilalabas ang tanging flat-rate na Unlimited computer-use plan sa $249/buwan — mas mura kaysa sa Devin Team, OpenAI Operator, at mga kakumpitensyang may credit cap sa parehong price tier. Nagbibigay ang aming platform ng autonomous desktop control, browser automation, at multi-agent orchestration na may tunay na VM-level isolation.",
-      "productDescription": "Computer-using AI agent na kumokontrol ng desktop tulad ng tao. #1 sa OSWorld benchmark (82%). Ang $249/mo Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan na available. Autonomous browser automation, desktop control, email sending, form filling, at spreadsheet management na may tunay na VM-level isolation.",
-      "websiteDescription": "#1 computer-using AI agent platform — 82% OSWorld benchmark at ang pinakamurang flat-rate na Unlimited plan sa $249/buwan. Autonomous browser, desktop, at terminal automation na may VM isolation. Simula sa Starter $19/mo o Unlimited $249/mo.",
-      "softwareDescription": "Computer-using AI agent na kumokontrol ng buong desktop tulad ng tao. #1 sa OSWorld benchmark na may 82% completion rate sa 369 na totoong gawain. Ang $249/buwan na Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan sa merkado. Autonomous browser automation, desktop control, terminal operations, email sending, form filling, at spreadsheet management.",
+      "appDescription": "Ang #1 na naka-rank na computer-using AI agent at ang pinakamurang flat-rate na Unlimited computer-use plan sa merkado sa $99/buwan. Kinokontrol ng Coasty ang buong desktop tulad ng tao — nagbubukas ng browser, nagki-click, nagta-type, nagpupuno ng form, nagpapadala ng email, at namamahala ng spreadsheet nang autonomous. 82% sa OSWorld benchmark sa 369 na totoong gawain. Tunay na VM-level isolation bawat session. Built-in CAPTCHA solving. Mga plan: {starterPrice} Starter o {unlimitedPrice} Unlimited.",
+      "orgDescription": "Binubuo ng Coasty ang #1 computer-using AI agent (82% OSWorld) at inilalabas ang tanging flat-rate na Unlimited computer-use plan sa $99/buwan — mas mura kaysa sa Devin Team, OpenAI Operator, at mga kakumpitensyang may credit cap sa parehong price tier. Nagbibigay ang aming platform ng autonomous desktop control, browser automation, at multi-agent orchestration na may tunay na VM-level isolation.",
+      "productDescription": "Computer-using AI agent na kumokontrol ng desktop tulad ng tao. #1 sa OSWorld benchmark (82%). Ang {unlimitedPrice} Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan na available. Autonomous browser automation, desktop control, email sending, form filling, at spreadsheet management na may tunay na VM-level isolation.",
+      "websiteDescription": "#1 computer-using AI agent platform — 82% OSWorld benchmark at ang pinakamurang flat-rate na Unlimited plan sa $99/buwan. Autonomous browser, desktop, at terminal automation na may VM isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
+      "softwareDescription": "Computer-using AI agent na kumokontrol ng buong desktop tulad ng tao. #1 sa OSWorld benchmark na may 82% completion rate sa 369 na totoong gawain. Ang $99/buwan na Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan sa merkado. Autonomous browser automation, desktop control, terminal operations, email sending, form filling, at spreadsheet management.",
       "breadcrumbs": {
         "home": "Home",
         "caseStudies": "Mga AI Agent Case Study",

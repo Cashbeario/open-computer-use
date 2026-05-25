@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 AI agent ovládající počítač | AI zaměstnanec pro automatizaci desktopu a prohlížeče",
+      "title": "Coasty - #1 AI agent ovládající počítač | Nejlepší pro automatizaci desktopu a prohlížeče",
       "titleTemplate": "{title} | Coasty - AI agent pro ovládání počítače",
-      "description": "Coasty je #1 hodnocený AI agent ovládající počítač — 82% v benchmarku OSWorld — a jediný plán Neomezený s pevnou sazbou za ovládání počítače za $249/mo (levnější než Devin Team $500+ACU, OpenAI Operator $200 s omezením požadavků a konkurence s limitem kreditů). Ovládá plný desktop jako člověk: prohlížeče, formuláře, e-maily, tabulky. Izolace na úrovni VM. Od $19/mo s plánem Starter nebo $249/mo Neomezený.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Neomezený (Nejlevnější agent ovládající počítač)",
-      "ogDescription": "#1 v OSWorld (82%). Pevná sazba $249/mo Neomezený — levnější než Devin Team ($500+ACU) při vyšším skóre benchmarku. Automatizace prohlížeče, desktopu a terminálu. Izolace VM pro každou relaci. Nativní aplikace napříč platformami + REST API + MCP server.",
-      "twitterDescription": "AI agent ovládající skutečný desktop. 82% OSWorld (#1). $249/mo Neomezený — nejlevnější plán s pevnou sazbou v této kategorii. Starter od $19/mo. Izolace VM + MCP server s 26 nástroji."
+      "description": "Coasty je #1 hodnocený AI agent ovládající počítač — 82% v benchmarku OSWorld — a jediný plán Neomezený s pevnou sazbou za ovládání počítače za {unlimitedPrice} (levnější než Devin Team $500+ACU, OpenAI Operator $200 s omezením požadavků a konkurence s limitem kreditů). Ovládá plný desktop jako člověk: prohlížeče, formuláře, e-maily, tabulky. Izolace na úrovni VM. Od {starterPrice} s plánem Starter nebo {unlimitedPrice} Neomezený.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Neomezený (Nejlevnější agent ovládající počítač)",
+      "ogDescription": "#1 v OSWorld (82%). Pevná sazba {unlimitedPrice} Neomezený — levnější než Devin Team ($500+ACU) při vyšším skóre benchmarku. Automatizace prohlížeče, desktopu a terminálu. Izolace VM pro každou relaci. Nativní aplikace napříč platformami + REST API + MCP server.",
+      "twitterDescription": "AI agent ovládající skutečný desktop. 82% OSWorld (#1). {unlimitedPrice} Neomezený — nejlevnější plán s pevnou sazbou v této kategorii. Starter od {starterPrice}. Izolace VM + MCP server s 26 nástroji."
     },
     "compare": {
       "title": "Porovnání Coasty - Alternativy AI agentů a srovnání s konkurencí",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Ceník — Plány a ceny AI agenta Coasty",
-      "description": "Ceník Coasty: Starter $19/mo (200 kreditů) nebo Neomezený $249/mo (nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu — levnější než Devin Team $500+ACU, Genspark Pro $249 s limitem kreditů a Manus Extended $200 s limitem). Nahrazuje lidské virtuální asistenty za více než $3 000/mo. Bez skrytých poplatků.",
-      "ogTitle": "Ceník Coasty — $19/mo Starter, $249/mo Neomezený",
-      "ogDescription": "Pevná sazba $249/mo Neomezený — nejlevnější plán neomezeného ovládání počítače na trhu. Nebo $19/mo Starter pro jednotlivce. Úspora $36 000 ročně oproti lidským asistentům."
+      "description": "Ceník Coasty: Starter {starterPrice} (200 kreditů) nebo Neomezený {unlimitedPrice} (nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu — levnější než Devin Team $500+ACU, Genspark Pro $249 s limitem kreditů a Manus Extended $200 s limitem). Nahrazuje lidské virtuální asistenty za více než $3 000/mo. Bez skrytých poplatků.",
+      "ogTitle": "Ceník Coasty — {starterPrice} Starter, {unlimitedPrice} Neomezený",
+      "ogDescription": "Pevná sazba {unlimitedPrice} Neomezený — nejlevnější plán neomezeného ovládání počítače na trhu. Nebo {starterPrice} Starter pro jednotlivce. Úspora $36 000 ročně oproti lidským asistentům."
     },
     "faq": {
       "q1": "Co je Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Jak se Coasty srovnává s Anthropic Computer Use?",
       "a2": "Zatímco Anthropic Computer Use poskytuje surové API pro ovládání počítače, Coasty je produkčně připravená platforma se spravovanou VM infrastrukturou, vestavěným řešením CAPTCHA, desktopovou aplikací pro Mac a Windows, podporou více modelů a nejvyšším skóre v benchmarku OSWorld (82%). Coasty poskytuje kompletní řešení — nejen API.",
       "q3": "Kolik stojí Coasty?",
-      "a3": "Coasty má dva dostupné plány: Starter za $19/mo (200 kreditů, 1 počítač, ideální pro jednotlivce) a Neomezený za $249/mo bez limitu kreditů. Plán Neomezený za $249 je nejlevnější dostupný plán neomezeného ovládání počítače s pevnou sazbou — levnější než Devin Team ($500/mo + příplatky za ACU), OpenAI Operator ChatGPT Pro ($200/mo s omezením požadavků), Genspark Pro ($249.99 s limitem 125k kreditů) a Manus Extended ($200 s limitem 40k kreditů). Oba plány nahrazují lidského virtuálního asistenta za více než $3 000/mo; plán Neomezený šetří přes $33 000 ročně oproti lidskému asistentovi, což představuje 92% snížení nákladů.",
+      "a3": "Coasty má dva dostupné plány: Starter za $19/mo (200 kreditů, 1 počítač, ideální pro jednotlivce) a Neomezený za $99/mo bez limitu kreditů. Plán Neomezený za $99 je nejlevnější dostupný plán neomezeného ovládání počítače s pevnou sazbou — levnější než Devin Team ($500/mo + příplatky za ACU), OpenAI Operator ChatGPT Pro ($200/mo s omezením požadavků), Genspark Pro ($249.99 s limitem 125k kreditů) a Manus Extended ($200 s limitem 40k kreditů). Oba plány nahrazují lidského virtuálního asistenta za více než $3 000/mo; plán Neomezený šetří přes $33 000 ročně oproti lidskému asistentovi, což představuje 92% snížení nákladů.",
       "q4": "Je Coasty bezpečný?",
       "a4": "Ano. Každá relace Coasty běží ve vlastním izolovaném, sandboxovaném virtuálním stroji. Vaše data zůstávají v bezpečí, váš stroj zůstává nedotčen a nic neuniká mezi relacemi. Toto je skutečná izolace na úrovni VM, nikoli jen kontejnery ve sdíleném prostředí.",
       "q5": "Co je benchmark OSWorld?",
@@ -2401,11 +2401,11 @@
       "a10": "Ano. Coasty má vestavěný pipeline pro řešení CAPTCHA, takže se nezasekne jako konkurenční AI agenti. To je zásadní pro reálnou automatizaci, kde jsou CAPTCHA na webových stránkách běžné."
     },
     "structuredData": {
-      "appDescription": "#1 hodnocený AI agent ovládající počítač a nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu za $249/mo. Coasty ovládá plný desktop jako člověk — otevírá prohlížeče, kliká, píše, vyplňuje formuláře, posílá e-maily a spravuje tabulky autonomně. 82% v benchmarku OSWorld u 369 reálných úkolů. Skutečná izolace na úrovni VM pro každou relaci. Vestavěné řešení CAPTCHA. Plány: $19/mo Starter nebo $249/mo Neomezený.",
-      "orgDescription": "Coasty vyvíjí #1 AI agenta ovládajícího počítač (82% OSWorld) a dodává jediný plán s pevnou sazbou pro neomezené ovládání počítače za $249/mo — levnější než Devin Team, OpenAI Operator a konkurence s limitem kreditů ve stejné cenové kategorii. Naše platforma poskytuje autonomní ovládání desktopu, automatizaci prohlížeče a orchestraci více agentů se skutečnou izolací na úrovni VM.",
-      "productDescription": "AI agent ovládající počítač, který řídí desktop jako člověk. #1 v benchmarku OSWorld (82%). Plán Neomezený za $249/mo je nejlevnější dostupný plán neomezeného ovládání počítače s pevnou sazbou. Autonomní automatizace prohlížeče, ovládání desktopu, odesílání e-mailů, vyplňování formulářů a správa tabulek se skutečnou izolací na úrovni VM.",
-      "websiteDescription": "#1 platforma AI agenta ovládajícího počítač — 82% benchmark OSWorld a nejlevnější plán Neomezený s pevnou sazbou za $249/mo. Autonomní automatizace prohlížeče, desktopu a terminálu s izolací VM. Od $19/mo s plánem Starter nebo $249/mo Neomezený.",
-      "softwareDescription": "AI agent ovládající počítač, který řídí plný desktop jako člověk. #1 v benchmarku OSWorld s 82% mírou dokončení u 369 reálných úkolů. Plán Neomezený za $249/mo je nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu. Autonomní automatizace prohlížeče, ovládání desktopu, terminálové operace, odesílání e-mailů, vyplňování formulářů a správa tabulek.",
+      "appDescription": "#1 hodnocený AI agent ovládající počítač a nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu za {unlimitedPrice}. Coasty ovládá plný desktop jako člověk — otevírá prohlížeče, kliká, píše, vyplňuje formuláře, posílá e-maily a spravuje tabulky autonomně. 82% v benchmarku OSWorld u 369 reálných úkolů. Skutečná izolace na úrovni VM pro každou relaci. Vestavěné řešení CAPTCHA. Plány: {starterPrice} Starter nebo {unlimitedPrice} Neomezený.",
+      "orgDescription": "Coasty vyvíjí #1 AI agenta ovládajícího počítač (82% OSWorld) a dodává jediný plán s pevnou sazbou pro neomezené ovládání počítače za {unlimitedPrice} — levnější než Devin Team, OpenAI Operator a konkurence s limitem kreditů ve stejné cenové kategorii. Naše platforma poskytuje autonomní ovládání desktopu, automatizaci prohlížeče a orchestraci více agentů se skutečnou izolací na úrovni VM.",
+      "productDescription": "AI agent ovládající počítač, který řídí desktop jako člověk. #1 v benchmarku OSWorld (82%). Plán Neomezený za {unlimitedPrice} je nejlevnější dostupný plán neomezeného ovládání počítače s pevnou sazbou. Autonomní automatizace prohlížeče, ovládání desktopu, odesílání e-mailů, vyplňování formulářů a správa tabulek se skutečnou izolací na úrovni VM.",
+      "websiteDescription": "#1 platforma AI agenta ovládajícího počítač — 82% benchmark OSWorld a nejlevnější plán Neomezený s pevnou sazbou za {unlimitedPrice}. Autonomní automatizace prohlížeče, desktopu a terminálu s izolací VM. Od {starterPrice} s plánem Starter nebo {unlimitedPrice} Neomezený.",
+      "softwareDescription": "AI agent ovládající počítač, který řídí plný desktop jako člověk. #1 v benchmarku OSWorld s 82% mírou dokončení u 369 reálných úkolů. Plán Neomezený za {unlimitedPrice} je nejlevnější plán s pevnou sazbou pro neomezené ovládání počítače na trhu. Autonomní automatizace prohlížeče, ovládání desktopu, terminálové operace, odesílání e-mailů, vyplňování formulářů a správa tabulek.",
       "breadcrumbs": {
         "home": "Domů",
         "caseStudies": "Případové studie AI agenta",

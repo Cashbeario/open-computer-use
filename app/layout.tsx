@@ -23,6 +23,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { locales, rtlLocales, type Locale } from "@/i18n/config"
 import { getHreflangAlternates, PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
+import { priceMonthly, priceMonthlyLong, i18nPriceVars } from "@/lib/pricing/format"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: t("home.title"),
       template: t("home.titleTemplate", { title: "%s" }),
     },
-    description: t("home.description"),
+    description: t("home.description", i18nPriceVars()),
     keywords: [
       "computer use agent", "AI computer control", "AI agent desktop automation",
       "computer-using AI", "AI employee", "autonomous AI agent",
@@ -73,21 +74,21 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: locale === "en" ? "en_US" : locale,
       url: "https://coasty.ai",
       siteName: "Coasty - #1 Computer-Use AI Agent",
-      title: t("home.ogTitle"),
-      description: t("home.ogDescription"),
+      title: t("home.ogTitle", i18nPriceVars()),
+      description: t("home.ogDescription", i18nPriceVars()),
       images: [
         {
           url: "/demo-screenshot.png",
           width: 1920,
           height: 1080,
-          alt: t("home.ogTitle"),
+          alt: t("home.ogTitle", i18nPriceVars()),
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: t("home.ogTitle"),
-      description: t("home.twitterDescription"),
+      title: t("home.ogTitle", i18nPriceVars()),
+      description: t("home.twitterDescription", i18nPriceVars()),
       images: ["/demo-screenshot.png"],
       creator: "@coastyai",
       site: "@coastyai",
@@ -138,12 +139,15 @@ export default async function RootLayout({
 
   let locale = "en"
   let messages = {}
-  let seoT: (key: string) => string = (key) => key
+  // Two-arg form supports `t(key, values)` for placeholder substitution
+  // (used by price-bearing seo.* keys via i18nPriceVars()).
+  let seoT: (key: string, values?: Record<string, string | number>) => string = (key) => key
   try {
     locale = await getLocale()
     messages = await getMessages()
     const t = await getTranslations("seo")
-    seoT = (key: string) => t(key as never)
+    seoT = (key: string, values?: Record<string, string | number>) =>
+      t(key as never, values as never)
   } catch {
     // Fallback to English if i18n fails (e.g. during static generation)
     const fallback = await import("../messages/en.json")
@@ -184,7 +188,7 @@ export default async function RootLayout({
       ...(isUnlimitedTier
         ? {
             "description":
-              "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 5 concurrent agents (abuse cap).",
+              `Unlimited computer-use agent runs at a flat ${priceMonthlyLong("unlimited")} — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 5 concurrent agents (abuse cap).`,
           }
         : {
             "eligibleQuantity": {
@@ -228,7 +232,7 @@ export default async function RootLayout({
             "url": "https://coasty.ai",
             "logo": "https://coasty.ai/logo_light.svg",
             "image": PRODUCT_IMAGES,
-            "description": seoT("structuredData.appDescription"),
+            "description": seoT("structuredData.appDescription", i18nPriceVars()),
             "applicationCategory": "ProductivityApplication",
             "operatingSystem": "Web Browser, Windows, macOS",
             "offers": tierOffers,
@@ -240,11 +244,11 @@ export default async function RootLayout({
             },
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark (369 real-world tasks)",
-              "Cheapest flat-rate Unlimited computer-use plan — $249/month"
+              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`
             ],
             "featureList": [
               "82% OSWorld Benchmark — #1 in production",
-              "$249/mo Unlimited plan — flat-rate, no credit caps",
+              `${priceMonthly("unlimited")} Unlimited plan — flat-rate, no credit caps`,
               "Autonomous Browser Automation",
               "Desktop Application Control",
               "Terminal & Command Execution",
@@ -283,7 +287,7 @@ export default async function RootLayout({
             "alternateName": "Coasty AI",
             "url": "https://coasty.ai",
             "logo": "https://coasty.ai/logo_dark.svg",
-            "description": seoT("structuredData.orgDescription"),
+            "description": seoT("structuredData.orgDescription", i18nPriceVars()),
             "foundingDate": "2025",
             "knowsAbout": ["Computer Use Agents", "AI Automation", "Desktop Automation", "Browser Automation", "Autonomous AI Agents", "Virtual Machine Isolation"],
             "sameAs": [
@@ -315,7 +319,7 @@ export default async function RootLayout({
             "name": "Coasty",
             "alternateName": ["Coasty AI", "Coasty Computer Use Agent"],
             "url": "https://coasty.ai",
-            "description": seoT("structuredData.websiteDescription"),
+            "description": seoT("structuredData.websiteDescription", i18nPriceVars()),
             "potentialAction": {
               "@type": "SearchAction",
               "target": {
@@ -342,10 +346,10 @@ export default async function RootLayout({
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web Browser, Windows 10+, macOS 10.15+",
             "softwareVersion": "1.5.0",
-            "description": seoT("structuredData.softwareDescription"),
+            "description": seoT("structuredData.softwareDescription", i18nPriceVars()),
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark",
-              "Cheapest flat-rate Unlimited computer-use plan — $249/month"
+              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`
             ],
             "isAccessibleForFree": true,
             "offers": {
@@ -374,7 +378,7 @@ export default async function RootLayout({
             },
             "featureList": [
               "82% OSWorld Benchmark Score (#1 in production)",
-              "$249/month Unlimited plan — flat-rate, no credit caps (cheapest in market)",
+              `${priceMonthlyLong("unlimited")} Unlimited plan — flat-rate, no credit caps (cheapest in market)`,
               "Autonomous Browser Automation",
               "Full Desktop Control",
               "Built-in CAPTCHA Solving",

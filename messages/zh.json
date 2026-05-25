@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty — 排名第一的计算机操控AI代理 | 桌面和浏览器自动化AI员工",
+      "title": "Coasty — 排名第一的计算机操控AI代理 | 桌面和浏览器自动化的最佳选择",
       "titleTemplate": "{title} | Coasty — AI计算机操控代理",
-      "description": "Coasty是排名第一的计算机操控AI代理 — OSWorld基准测试82% — 也是市场上唯一的$249/月定额无限制计算机操控方案（比Devin Team $500+ACU、有速率限制的OpenAI Operator $200，以及有积分上限的竞品都便宜）。像人类一样操控完整桌面：浏览器、表单、邮件、电子表格。VM级别隔离。Starter $19/月或Unlimited $249/月起。",
-      "ogTitle": "Coasty — OSWorld 82% + $249/月无限制（最便宜的计算机操控代理）",
-      "ogDescription": "OSWorld排名第一（82%）。$249/月定额无限制 — 以更高基准成绩比Devin Team（$500+ACU）更便宜。浏览器、桌面、终端自动化。每个会话VM隔离。跨平台原生应用 + REST API + MCP服务器。",
-      "twitterDescription": "操控真实桌面的AI代理。OSWorld 82%（排名第一）。$249/月无限制 — 该品类中最便宜的定额方案。Starter $19/月起。VM隔离 + 26工具MCP服务器。"
+      "description": "Coasty是排名第一的计算机操控AI代理 — OSWorld基准测试82% — 也是市场上唯一的$99/月定额无限制计算机操控方案（比Devin Team $500+ACU、有速率限制的OpenAI Operator $200，以及有积分上限的竞品都便宜）。像人类一样操控完整桌面：浏览器、表单、邮件、电子表格。VM级别隔离。Starter $19/月或Unlimited $99/月起。",
+      "ogTitle": "Coasty — OSWorld 82% + $99/月无限制（最便宜的计算机操控代理）",
+      "ogDescription": "OSWorld排名第一（82%）。$99/月定额无限制 — 以更高基准成绩比Devin Team（$500+ACU）更便宜。浏览器、桌面、终端自动化。每个会话VM隔离。跨平台原生应用 + REST API + MCP服务器。",
+      "twitterDescription": "操控真实桌面的AI代理。OSWorld 82%（排名第一）。$99/月无限制 — 该品类中最便宜的定额方案。Starter $19/月起。VM隔离 + 26工具MCP服务器。"
     },
     "compare": {
       "title": "Coasty对比 — AI代理替代方案与竞品比较",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "价格 — Coasty AI代理方案与定价",
-      "description": "Coasty定价：Starter $19/月（200积分）或Unlimited $249/月（市场上最便宜的定额无限制计算机操控方案 — 比Devin Team $500+ACU、有积分上限的Genspark Pro $249、有上限的Manus Extended $200都便宜）。替代月费$3,000以上的人工虚拟助手。无隐藏费用。",
-      "ogTitle": "Coasty价格 — Starter $19/月，Unlimited $249/月",
-      "ogDescription": "$249/月定额无限制 — 市场上最便宜的无限制计算机操控方案。或个人版Starter $19/月。相比人工VA每年节省$36,000。"
+      "description": "Coasty定价：Starter $19/月（200积分）或Unlimited $99/月（市场上最便宜的定额无限制计算机操控方案 — 比Devin Team $500+ACU、有积分上限的Genspark Pro $249、有上限的Manus Extended $200都便宜）。替代月费$3,000以上的人工虚拟助手。无隐藏费用。",
+      "ogTitle": "Coasty价格 — Starter $19/月，Unlimited $99/月",
+      "ogDescription": "$99/月定额无限制 — 市场上最便宜的无限制计算机操控方案。或个人版Starter $19/月。相比人工VA每年节省$36,000。"
     },
     "faq": {
       "q1": "什么是Coasty？",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty与Anthropic Computer Use有何不同？",
       "a2": "Anthropic Computer Use提供的是计算机控制的原始API，而Coasty是一个生产就绪的平台，提供托管的虚拟机基础设施、内置CAPTCHA破解、Mac和Windows桌面应用、多模型支持以及最高的OSWorld基准分数（82%）。Coasty提供完整的解决方案 — 不仅仅是API。",
       "q3": "Coasty多少钱？",
-      "a3": "Coasty目前提供两个方案：Starter $19/月（200积分，1台机器，适合个人用户）和Unlimited $249/月（无积分上限）。$249的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案 — 比Devin Team（$500/月 + ACU超额费用）、OpenAI Operator ChatGPT Pro（$200/月有速率限制）、Genspark Pro（$249.99，125k积分上限）和Manus Extended（$200，40k积分上限）都便宜。两个方案都可替代月费$3,000以上的人工虚拟助手；Unlimited相比人工VA每年节省$33,000以上，成本降低92%。",
+      "a3": "Coasty目前提供两个方案：Starter $19/月（200积分，1台机器，适合个人用户）和Unlimited $99/月（无积分上限）。$99的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案 — 比Devin Team（$500/月 + ACU超额费用）、OpenAI Operator ChatGPT Pro（$200/月有速率限制）、Genspark Pro（$249.99，125k积分上限）和Manus Extended（$200，40k积分上限）都便宜。两个方案都可替代月费$3,000以上的人工虚拟助手；Unlimited相比人工VA每年节省$33,000以上，成本降低92%。",
       "q4": "使用Coasty安全吗？",
       "a4": "是的。每个Coasty会话都在自己的隔离沙箱虚拟机中运行。您的数据安全，您的计算机不受影响，会话之间不会泄露任何信息。这是真正的虚拟机级别隔离，而不是共享池中的容器。",
       "q5": "什么是OSWorld基准测试？",
@@ -2401,11 +2401,11 @@
       "a10": "能。Coasty有内置的CAPTCHA破解流水线，不会像竞品AI代理那样被阻止。这对于网站上常见CAPTCHA的真实自动化至关重要。"
     },
     "structuredData": {
-      "appDescription": "排名第一的计算机操控AI代理，也是市场上最便宜的$249/月定额无限制计算机操控方案。Coasty像人类一样操控完整桌面 — 自主地打开浏览器、点击、输入、填写表单、发送邮件和管理电子表格。在369项真实任务的OSWorld基准测试中达到82%。每个会话真正的VM级别隔离。内置CAPTCHA破解。方案：Starter $19/月或Unlimited $249/月。",
-      "orgDescription": "Coasty打造排名第一的计算机操控AI代理（OSWorld 82%），并推出市场上唯一的$249/月定额无限制计算机操控方案 — 比同价位的Devin Team、OpenAI Operator和有积分上限的竞品都便宜。我们的平台提供自主桌面控制、浏览器自动化以及真正VM级别隔离的多代理编排。",
-      "productDescription": "像人类一样操控桌面的AI计算机操控代理。OSWorld基准测试排名第一（82%）。$249/月的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、邮件发送、表单填写和电子表格管理，配备真正的VM级别隔离。",
-      "websiteDescription": "排名第一的计算机操控AI代理平台 — OSWorld基准测试82%，市场上最便宜的$249/月定额无限制方案。VM隔离的自主浏览器、桌面和终端自动化。Starter $19/月或Unlimited $249/月起。",
-      "softwareDescription": "像人类一样操控完整桌面的AI计算机操控代理。在369项真实任务中以82%完成率获得OSWorld基准测试第一名。$249/月的Unlimited方案是市场上最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、终端操作、邮件发送、表单填写和电子表格管理。",
+      "appDescription": "排名第一的计算机操控AI代理，也是市场上最便宜的$99/月定额无限制计算机操控方案。Coasty像人类一样操控完整桌面 — 自主地打开浏览器、点击、输入、填写表单、发送邮件和管理电子表格。在369项真实任务的OSWorld基准测试中达到82%。每个会话真正的VM级别隔离。内置CAPTCHA破解。方案：Starter $19/月或Unlimited $99/月。",
+      "orgDescription": "Coasty打造排名第一的计算机操控AI代理（OSWorld 82%），并推出市场上唯一的$99/月定额无限制计算机操控方案 — 比同价位的Devin Team、OpenAI Operator和有积分上限的竞品都便宜。我们的平台提供自主桌面控制、浏览器自动化以及真正VM级别隔离的多代理编排。",
+      "productDescription": "像人类一样操控桌面的AI计算机操控代理。OSWorld基准测试排名第一（82%）。$99/月的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、邮件发送、表单填写和电子表格管理，配备真正的VM级别隔离。",
+      "websiteDescription": "排名第一的计算机操控AI代理平台 — OSWorld基准测试82%，市场上最便宜的$99/月定额无限制方案。VM隔离的自主浏览器、桌面和终端自动化。Starter $19/月或Unlimited $99/月起。",
+      "softwareDescription": "像人类一样操控完整桌面的AI计算机操控代理。在369项真实任务中以82%完成率获得OSWorld基准测试第一名。$99/月的Unlimited方案是市场上最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、终端操作、邮件发送、表单填写和电子表格管理。",
       "breadcrumbs": {
         "home": "首页",
         "caseStudies": "AI代理案例研究",

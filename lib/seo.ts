@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server"
 import { locales, type Locale } from "@/i18n/config"
+import { i18nPriceVars } from "@/lib/pricing/format"
 import type { Metadata } from "next"
 
 const BASE_URL = "https://coasty.ai"
@@ -105,8 +106,15 @@ export async function getLocalizedMetadata(
   const locale = await getLocale()
   const t = await getTranslations("seo")
 
-  const title = t(`${page}.title`)
-  const description = t(`${page}.description`)
+  // Every SEO key may contain Coasty price placeholders ({starterPrice},
+  // {unlimitedPrice}, etc.) — pass the full price-vars bag to every t()
+  // call below.  next-intl silently drops unused placeholders, so it's
+  // safe to pass them even for keys that don't reference any price.
+  // Source of truth for the placeholder values: lib/pricing/format.ts.
+  const priceVars = i18nPriceVars()
+
+  const title = t(`${page}.title` as never, priceVars as never)
+  const description = t(`${page}.description` as never, priceVars as never)
   const canonicalUrl = path ? `${BASE_URL}${path}` : BASE_URL
 
   const metadata: Metadata = {
@@ -124,8 +132,8 @@ export async function getLocalizedMetadata(
 
   // Add OG tags if the page has them
   try {
-    const ogTitle = t(`${page}.ogTitle`)
-    const ogDescription = t(`${page}.ogDescription`)
+    const ogTitle = t(`${page}.ogTitle` as never, priceVars as never)
+    const ogDescription = t(`${page}.ogDescription` as never, priceVars as never)
     metadata.openGraph = {
       title: ogTitle,
       description: ogDescription,

@@ -24,6 +24,7 @@ import { X } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/lib/user-store/provider"
+import { priceMonthly, priceUSD } from "@/lib/pricing/format"
 
 type Variant = "logged-out" | "logged-in"
 
@@ -54,8 +55,8 @@ const VARIANTS: Record<
     href: "/account?section=billing",
     pill: "New",
     title: "Go Unlimited",
-    detail: "$249/mo, unlimited agent runs",
-    ariaLabel: "Announcement: Unlimited plan now available for $249 a month",
+    detail: `${priceMonthly("unlimited")}, unlimited agent runs`,
+    ariaLabel: `Announcement: Unlimited plan now available for ${priceUSD("unlimited")} a month`,
   },
 }
 

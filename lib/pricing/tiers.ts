@@ -178,7 +178,7 @@ export const SUBSCRIPTION_TIERS: readonly SubscriptionTier[] = [
   {
     id: "unlimited",
     name: "Unlimited",
-    priceUSD: 249,
+    priceUSD: 99,
     // Sentinel for "unlimited credits".  UI must render the literal string
     // "Unlimited" when tier === "unlimited" — never display this number.
     // Backend guard clauses (Phase 5) skip the deduct-credits RPC for this

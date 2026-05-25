@@ -85,6 +85,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { priceMonthly } from "@/lib/pricing/format"
+import type { SubscriptionTierId } from "@/lib/pricing/tiers"
 import { PageLoader } from "@/components/common/page-loader"
 import { getScheduleLimit, normalizeTier } from "@/lib/tier"
 
@@ -1720,10 +1722,14 @@ export function SchedulesContent() {
                                 <span>&middot;</span>
                                 <span>{t(meta.employeesKey)}</span>
                                 <span>&middot;</span>
-                                <span className="font-semibold text-foreground/50">{t(meta.priceKey)}</span>
+                                {/* Price sourced via the canonical helper —
+                                    bypasses the (deprecated) i18n key so a
+                                    price change in lib/pricing/tiers.ts
+                                    propagates here automatically. */}
+                                <span className="font-semibold text-foreground/50">{priceMonthly(tier as SubscriptionTierId)}</span>
                               </div>
                               <span className={cn("sm:hidden text-[10px] font-semibold shrink-0", meta.color)}>
-                                {t(meta.priceKey)}
+                                {priceMonthly(tier as SubscriptionTierId)}
                               </span>
                             </div>
 

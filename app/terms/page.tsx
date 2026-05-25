@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion, AnimatePresence } from "framer-motion"
+import { priceTermsForm } from "@/lib/pricing/format"
 
 const termsSections = [
   {
@@ -154,7 +155,7 @@ const termsSections = [
     icon: Zap,
     subsections: [
       {
-        title: "Starter Plan ($19/month)",
+        title: priceTermsForm("starter"),
         description: "The Starter plan includes the following monthly quotas:",
         items: [
           "200 credits of AI agent usage per month",
@@ -164,7 +165,7 @@ const termsSections = [
         ]
       },
       {
-        title: "Unlimited Plan ($249/month)",
+        title: priceTermsForm("unlimited"),
         description: "The Unlimited plan includes the following monthly quotas:",
         items: [
           "Unlimited AI agent usage per month, subject to the fair usage policy",

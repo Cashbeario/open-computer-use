@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - 1 Numaralı Bilgisayar Kullanan AI Ajanı | Masaüstü ve Tarayıcı Otomasyonu için AI Çalışan",
+      "title": "Coasty - 1 Numaralı Bilgisayar Kullanan AI Ajanı | Masaüstü ve Tarayıcı Otomasyonu için En İyi",
       "titleTemplate": "{title} | Coasty - AI Bilgisayar Kullanım Ajanı",
-      "description": "Coasty, 1 numaralı bilgisayar kullanan AI ajanıdır — OSWorld benchmark'ta 82% — ve $249/mo sabit fiyatla sunulan tek Sınırsız bilgisayar kullanım planıdır (Devin Team $500+ACU, OpenAI Operator $200 hız limitli ve kredi sınırlı rakiplerden daha ucuz). Tam bir masaüstünü insan gibi kontrol eder: tarayıcılar, formlar, e-postalar, elektronik tablolar. VM düzeyinde izolasyon. $19/mo Starter veya $249/mo Sınırsız.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Sınırsız (En Ucuz Bilgisayar Kullanım Ajanı)",
-      "ogDescription": "OSWorld'de 1 numara (82%). $249/mo sabit Sınırsız — Devin Team'den ($500+ACU) daha ucuz, üstelik daha yüksek benchmark puanıyla. Tarayıcı, masaüstü, terminal otomasyonu. Oturum başına VM izolasyonu. Çoklu platform yerel uygulama + REST API + MCP sunucusu.",
-      "twitterDescription": "Gerçek bir masaüstünü çalıştıran AI ajanı. 82% OSWorld (1 numara). $249/mo Sınırsız — kategorideki en ucuz sabit fiyatlı plan. Starter $19/mo'dan başlar. VM izolasyonu + 26 araçlı MCP sunucusu."
+      "description": "Coasty, 1 numaralı bilgisayar kullanan AI ajanıdır — OSWorld benchmark'ta 82% — ve {unlimitedPrice} sabit fiyatla sunulan tek Sınırsız bilgisayar kullanım planıdır (Devin Team $500+ACU, OpenAI Operator $200 hız limitli ve kredi sınırlı rakiplerden daha ucuz). Tam bir masaüstünü insan gibi kontrol eder: tarayıcılar, formlar, e-postalar, elektronik tablolar. VM düzeyinde izolasyon. {starterPrice} Starter veya {unlimitedPrice} Sınırsız.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Sınırsız (En Ucuz Bilgisayar Kullanım Ajanı)",
+      "ogDescription": "OSWorld'de 1 numara (82%). {unlimitedPrice} sabit Sınırsız — Devin Team'den ($500+ACU) daha ucuz, üstelik daha yüksek benchmark puanıyla. Tarayıcı, masaüstü, terminal otomasyonu. Oturum başına VM izolasyonu. Çoklu platform yerel uygulama + REST API + MCP sunucusu.",
+      "twitterDescription": "Gerçek bir masaüstünü çalıştıran AI ajanı. 82% OSWorld (1 numara). {unlimitedPrice} Sınırsız — kategorideki en ucuz sabit fiyatlı plan. Starter {starterPrice}'dan başlar. VM izolasyonu + 26 araçlı MCP sunucusu."
     },
     "compare": {
       "title": "Coasty Karşılaştırma - AI Ajanı Alternatifleri ve Rakip Karşılaştırması",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Fiyatlandırma — Coasty AI Ajanı Planları ve Fiyatları",
-      "description": "Coasty fiyatlandırma: Starter $19/mo (200 kredi) veya Sınırsız $249/mo (piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planı — Devin Team $500+ACU, Genspark Pro $249 kredi sınırlı ve Manus Extended $200 sınırlı planlardan daha ucuz). $3,000+/mo insan sanal asistanın yerini alır. Gizli ücret yok.",
-      "ogTitle": "Coasty Fiyatlandırma — $19/mo Starter, $249/mo Sınırsız",
-      "ogDescription": "$249/mo sabit Sınırsız — piyasadaki en ucuz sınırsız bilgisayar kullanım planı. Veya bireyler için $19/mo Starter. İnsan asistana kıyasla yılda $36k tasarruf."
+      "description": "Coasty fiyatlandırma: Starter {starterPrice} (200 kredi) veya Sınırsız {unlimitedPrice} (piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planı — Devin Team $500+ACU, Genspark Pro $249 kredi sınırlı ve Manus Extended $200 sınırlı planlardan daha ucuz). $3,000+/mo insan sanal asistanın yerini alır. Gizli ücret yok.",
+      "ogTitle": "Coasty Fiyatlandırma — {starterPrice} Starter, {unlimitedPrice} Sınırsız",
+      "ogDescription": "{unlimitedPrice} sabit Sınırsız — piyasadaki en ucuz sınırsız bilgisayar kullanım planı. Veya bireyler için {starterPrice} Starter. İnsan asistana kıyasla yılda $36k tasarruf."
     },
     "faq": {
       "q1": "Coasty nedir?",
@@ -2384,7 +2384,7 @@
       "q2": "Coasty, Anthropic Computer Use ile nasıl karşılaştırılır?",
       "a2": "Anthropic Computer Use bilgisayar kontrolü için ham bir API sağlarken, Coasty yönetilen VM altyapısı, yerleşik CAPTCHA çözümü, Mac ve Windows için masaüstü uygulaması, çoklu model desteği ve en yüksek OSWorld benchmark puanı (82%) ile üretime hazır bir platformdur. Coasty eksiksiz çözümü sunar — sadece API değil.",
       "q3": "Coasty'nin maliyeti nedir?",
-      "a3": "Coasty'nin iki aktif planı var: Starter $19/ay (200 kredi, 1 makine, bireyler için ideal) ve Sınırsız $249/ay (kredi sınırı yok). $249 Sınırsız plan, piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır — Devin Team ($500/ay + ACU aşım ücreti), OpenAI Operator ChatGPT Pro ($200/ay hız limitli), Genspark Pro ($249.99 125k kredi sınırlı) ve Manus Extended ($200 40k kredi sınırlı) planlarından daha ucuzdur. Her ikisi de $3,000+/ay maliyetli bir insan sanal asistanın yerini alır; Sınırsız plan, insan asistana kıyasla yılda $33,000+ tasarruf sağlar — yani %92 maliyet düşüşü.",
+      "a3": "Coasty'nin iki aktif planı var: Starter $19/ay (200 kredi, 1 makine, bireyler için ideal) ve Sınırsız $99/ay (kredi sınırı yok). $99 Sınırsız plan, piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır — Devin Team ($500/ay + ACU aşım ücreti), OpenAI Operator ChatGPT Pro ($200/ay hız limitli), Genspark Pro ($249.99 125k kredi sınırlı) ve Manus Extended ($200 40k kredi sınırlı) planlarından daha ucuzdur. Her ikisi de $3,000+/ay maliyetli bir insan sanal asistanın yerini alır; Sınırsız plan, insan asistana kıyasla yılda $33,000+ tasarruf sağlar — yani %92 maliyet düşüşü.",
       "q4": "Coasty kullanmak güvenli mi?",
       "a4": "Evet. Her Coasty oturumu kendi izole, sandbox sanal makinesinde çalışır. Verileriniz güvende, makinenize dokunulmaz ve oturumlar arasında hiçbir şey sızmaz. Bu gerçek VM düzeyinde izolasyondur, paylaşılan havuzda konteynerler değil.",
       "q5": "OSWorld benchmark nedir?",
@@ -2401,11 +2401,11 @@
       "a10": "Evet. Coasty'nin yerleşik CAPTCHA çözme sistemi vardır, bu nedenle rakip AI ajanların engellenmesi gibi engellenmez. Bu, web sitelerinde CAPTCHA'nın yaygın olduğu gerçek dünya otomasyonu için kritik öneme sahiptir."
     },
     "structuredData": {
-      "appDescription": "1 numaralı bilgisayar kullanan AI ajanı ve piyasadaki en ucuz sabit fiyatlı Sınırsız bilgisayar kullanım planı — $249/mo. Coasty tam bir masaüstünü insan gibi kontrol eder — tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir ve elektronik tabloları otonom olarak yönetir. 369 gerçek dünya görevinde OSWorld benchmark'ta 82%. Oturum başına gerçek VM düzeyinde izolasyon. Yerleşik CAPTCHA çözümü. Planlar: $19/mo Starter veya $249/mo Sınırsız.",
-      "orgDescription": "Coasty, 1 numaralı bilgisayar kullanan AI ajanını geliştirir (82% OSWorld) ve $249/mo sabit fiyatla sunulan tek Sınırsız bilgisayar kullanım planını sunar — aynı fiyat segmentindeki Devin Team, OpenAI Operator ve kredi sınırlı rakiplerden daha ucuz. Platformumuz gerçek VM düzeyinde izolasyonla otonom masaüstü kontrolü, tarayıcı otomasyonu ve çoklu ajan orkestrasyonu sağlar.",
-      "productDescription": "Masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. OSWorld benchmark'ta 1 numara (82%). $249/mo Sınırsız plan, mevcut en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır. Gerçek VM izolasyonuyla otonom tarayıcı otomasyonu, masaüstü kontrolü, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
-      "websiteDescription": "1 numaralı bilgisayar kullanan AI ajanı platformu — 82% OSWorld benchmark ve $249/mo'da en ucuz sabit fiyatlı Sınırsız plan. VM izolasyonuyla otonom tarayıcı, masaüstü ve terminal otomasyonu. $19/mo Starter veya $249/mo Sınırsız.",
-      "softwareDescription": "Tam bir masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. 369 gerçek dünya görevinde 82% tamamlama oranıyla OSWorld benchmark'ta 1 numara. $249/mo Sınırsız plan, piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır. Otonom tarayıcı otomasyonu, masaüstü kontrolü, terminal işlemleri, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
+      "appDescription": "1 numaralı bilgisayar kullanan AI ajanı ve piyasadaki en ucuz sabit fiyatlı Sınırsız bilgisayar kullanım planı — {unlimitedPrice}. Coasty tam bir masaüstünü insan gibi kontrol eder — tarayıcı açar, tıklar, yazar, form doldurur, e-posta gönderir ve elektronik tabloları otonom olarak yönetir. 369 gerçek dünya görevinde OSWorld benchmark'ta 82%. Oturum başına gerçek VM düzeyinde izolasyon. Yerleşik CAPTCHA çözümü. Planlar: {starterPrice} Starter veya {unlimitedPrice} Sınırsız.",
+      "orgDescription": "Coasty, 1 numaralı bilgisayar kullanan AI ajanını geliştirir (82% OSWorld) ve {unlimitedPrice} sabit fiyatla sunulan tek Sınırsız bilgisayar kullanım planını sunar — aynı fiyat segmentindeki Devin Team, OpenAI Operator ve kredi sınırlı rakiplerden daha ucuz. Platformumuz gerçek VM düzeyinde izolasyonla otonom masaüstü kontrolü, tarayıcı otomasyonu ve çoklu ajan orkestrasyonu sağlar.",
+      "productDescription": "Masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. OSWorld benchmark'ta 1 numara (82%). {unlimitedPrice} Sınırsız plan, mevcut en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır. Gerçek VM izolasyonuyla otonom tarayıcı otomasyonu, masaüstü kontrolü, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
+      "websiteDescription": "1 numaralı bilgisayar kullanan AI ajanı platformu — 82% OSWorld benchmark ve {unlimitedPrice}'da en ucuz sabit fiyatlı Sınırsız plan. VM izolasyonuyla otonom tarayıcı, masaüstü ve terminal otomasyonu. {starterPrice} Starter veya {unlimitedPrice} Sınırsız.",
+      "softwareDescription": "Tam bir masaüstünü insan gibi kontrol eden AI bilgisayar kullanım ajanı. 369 gerçek dünya görevinde 82% tamamlama oranıyla OSWorld benchmark'ta 1 numara. {unlimitedPrice} Sınırsız plan, piyasadaki en ucuz sabit fiyatlı sınırsız bilgisayar kullanım planıdır. Otonom tarayıcı otomasyonu, masaüstü kontrolü, terminal işlemleri, e-posta gönderimi, form doldurma ve elektronik tablo yönetimi.",
       "breadcrumbs": {
         "home": "Ana Sayfa",
         "caseStudies": "AI Ajanı Vaka Çalışmaları",

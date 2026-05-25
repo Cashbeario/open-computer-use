@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 Számítógépet használó AI ügynök | AI alkalmazott asztali és böngésző automatizáláshoz",
+      "title": "Coasty - #1 Számítógépet használó AI ügynök | Legjobb asztali és böngésző automatizáláshoz",
       "titleTemplate": "{title} | Coasty - AI számítógép-használati ügynök",
-      "description": "A Coasty a #1 rangsorolt számítógépet használó AI ügynök — 82% az OSWorld benchmarkon — és az egyetlen átalánydíjas Korlátlan számítógép-használati csomag $249/mo áron (olcsóbb mint a Devin Team $500+ACU, az OpenAI Operator $200 lekérdezés-korláttal és a kreditkorlátos versenytársak). Teljes asztalt irányít, mint egy ember: böngészők, űrlapok, e-mailek, táblázatok. VM-szintű izoláció. $19/mo a Starter csomaggal vagy $249/mo Korlátlan.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Korlátlan (A legolcsóbb számítógép-használati ügynök)",
-      "ogDescription": "#1 az OSWorld-ön (82%). Átalánydíjas $249/mo Korlátlan — olcsóbb mint a Devin Team ($500+ACU) magasabb benchmark eredménnyel. Böngésző, asztal és terminál automatizálás. Munkamenetenkénti VM izoláció. Platformfüggetlen natív alkalmazás + REST API + MCP szerver.",
-      "twitterDescription": "AI ügynök, amely igazi asztalt működtet. 82% OSWorld (#1). $249/mo Korlátlan — a kategória legolcsóbb átalánydíjas csomagja. A Starter már $19/mo-tól. VM izoláció + 26 eszközös MCP szerver."
+      "description": "A Coasty a #1 rangsorolt számítógépet használó AI ügynök — 82% az OSWorld benchmarkon — és az egyetlen átalánydíjas Korlátlan számítógép-használati csomag {unlimitedPrice} áron (olcsóbb mint a Devin Team $500+ACU, az OpenAI Operator $200 lekérdezés-korláttal és a kreditkorlátos versenytársak). Teljes asztalt irányít, mint egy ember: böngészők, űrlapok, e-mailek, táblázatok. VM-szintű izoláció. {starterPrice} a Starter csomaggal vagy {unlimitedPrice} Korlátlan.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Korlátlan (A legolcsóbb számítógép-használati ügynök)",
+      "ogDescription": "#1 az OSWorld-ön (82%). Átalánydíjas {unlimitedPrice} Korlátlan — olcsóbb mint a Devin Team ($500+ACU) magasabb benchmark eredménnyel. Böngésző, asztal és terminál automatizálás. Munkamenetenkénti VM izoláció. Platformfüggetlen natív alkalmazás + REST API + MCP szerver.",
+      "twitterDescription": "AI ügynök, amely igazi asztalt működtet. 82% OSWorld (#1). {unlimitedPrice} Korlátlan — a kategória legolcsóbb átalánydíjas csomagja. A Starter már {starterPrice}-tól. VM izoláció + 26 eszközös MCP szerver."
     },
     "compare": {
       "title": "Coasty összehasonlítás - AI ügynök alternatívák és versenytárs összehasonlítás",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Árazás — Coasty AI ügynök csomagok és árak",
-      "description": "Coasty árazás: Starter $19/mo (200 kredit) vagy Korlátlan $249/mo (a piac legolcsóbb átalánydíjas korlátlan számítógép-használati csomagja — olcsóbb mint a Devin Team $500+ACU, a Genspark Pro $249 kreditkorláttal és a Manus Extended $200 korláttal). Helyettesít $3 000/mo feletti emberi virtuális asszisztenseket. Nincsenek rejtett díjak.",
-      "ogTitle": "Coasty árazás — $19/mo Starter, $249/mo Korlátlan",
-      "ogDescription": "Átalánydíjas $249/mo Korlátlan — a piac legolcsóbb korlátlan számítógép-használati csomagja. Vagy $19/mo Starter magánszemélyeknek. Évente $36 000 megtakarítás emberi asszisztensekhez képest."
+      "description": "Coasty árazás: Starter {starterPrice} (200 kredit) vagy Korlátlan {unlimitedPrice} (a piac legolcsóbb átalánydíjas korlátlan számítógép-használati csomagja — olcsóbb mint a Devin Team $500+ACU, a Genspark Pro $249 kreditkorláttal és a Manus Extended $200 korláttal). Helyettesít $3 000/mo feletti emberi virtuális asszisztenseket. Nincsenek rejtett díjak.",
+      "ogTitle": "Coasty árazás — {starterPrice} Starter, {unlimitedPrice} Korlátlan",
+      "ogDescription": "Átalánydíjas {unlimitedPrice} Korlátlan — a piac legolcsóbb korlátlan számítógép-használati csomagja. Vagy {starterPrice} Starter magánszemélyeknek. Évente $36 000 megtakarítás emberi asszisztensekhez képest."
     },
     "faq": {
       "q1": "Mi az a Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Hogyan hasonlít a Coasty az Anthropic Computer Use-hoz?",
       "a2": "Míg az Anthropic Computer Use nyers API-t biztosít a számítógép vezérléséhez, a Coasty egy éles környezetre kész platform kezelt VM infrastruktúrával, beépített CAPTCHA megoldással, asztali alkalmazással Mac és Windows rendszerekre, több modell támogatásával és a legmagasabb OSWorld benchmark pontszámmal (82%). A Coasty a teljes megoldást nyújtja — nem csak az API-t.",
       "q3": "Mennyibe kerül a Coasty?",
-      "a3": "A Coasty két élő csomagot kínál: Starter $19/mo áron (200 kredit, 1 gép, magánszemélyeknek ideális) és Korlátlan $249/mo áron, kreditkorlát nélkül. A $249-es Korlátlan csomag a legolcsóbb elérhető átalánydíjas korlátlan számítógép-használati csomag — olcsóbb mint a Devin Team ($500/mo + ACU túlhasználati díj), az OpenAI Operator ChatGPT Pro ($200/mo lekérdezés-korláttal), a Genspark Pro ($249.99 125k kredites korláttal) és a Manus Extended ($200 40k kredites korláttal). Mindkettő helyettesít egy $3 000/mo feletti emberi virtuális asszisztenst; a Korlátlan évente több mint $33 000 megtakarítást jelent egy emberi asszisztenshez képest, ami 92%-os költségcsökkentés.",
+      "a3": "A Coasty két élő csomagot kínál: Starter $19/mo áron (200 kredit, 1 gép, magánszemélyeknek ideális) és Korlátlan $99/mo áron, kreditkorlát nélkül. A $99-es Korlátlan csomag a legolcsóbb elérhető átalánydíjas korlátlan számítógép-használati csomag — olcsóbb mint a Devin Team ($500/mo + ACU túlhasználati díj), az OpenAI Operator ChatGPT Pro ($200/mo lekérdezés-korláttal), a Genspark Pro ($249.99 125k kredites korláttal) és a Manus Extended ($200 40k kredites korláttal). Mindkettő helyettesít egy $3 000/mo feletti emberi virtuális asszisztenst; a Korlátlan évente több mint $33 000 megtakarítást jelent egy emberi asszisztenshez képest, ami 92%-os költségcsökkentés.",
       "q4": "Biztonságos a Coasty használata?",
       "a4": "Igen. Minden Coasty munkamenet saját izolált, sandboxolt virtuális gépen fut. Az adatai biztonságban maradnak, a gépe érintetlen marad, és semmi nem szivárog a munkamenetek között. Ez valódi VM-szintű izoláció, nem csak konténerek egy megosztott környezetben.",
       "q5": "Mi az OSWorld benchmark?",
@@ -2401,11 +2401,11 @@
       "a10": "Igen. A Coasty beépített CAPTCHA-megoldó pipeline-nal rendelkezik, így nem akad el, ahogy a versenytárs AI ügynökök. Ez kritikus a valós automatizáláshoz, ahol a CAPTCHA-k gyakoriak a weboldalakon."
     },
     "structuredData": {
-      "appDescription": "A #1 rangsorolt számítógépet használó AI ügynök és a piac legolcsóbb átalánydíjas Korlátlan számítógép-használati csomagja $249/mo áron. A Coasty teljes asztalt irányít, mint egy ember — böngészőket nyit, kattint, gépel, űrlapokat tölt ki, e-maileket küld és táblázatokat kezel önállóan. 82% az OSWorld benchmarkon 369 valós feladat közül. Valódi VM-szintű izoláció munkamenetenként. Beépített CAPTCHA megoldás. Csomagok: $19/mo Starter vagy $249/mo Korlátlan.",
-      "orgDescription": "A Coasty a #1 számítógépet használó AI ügynököt fejleszti (82% OSWorld), és kizárólag az egyetlen átalánydíjas Korlátlan számítógép-használati csomagot kínálja $249/mo áron — olcsóbb mint a Devin Team, az OpenAI Operator és az ugyanazon árkategóriában lévő kreditkorlátos versenytársak. Platformunk autonóm asztali vezérlést, böngésző automatizálást és több ügynökös vezénylést biztosít valódi VM-szintű izolációval.",
-      "productDescription": "Számítógépet használó AI ügynök, amely úgy irányítja az asztalt, mint egy ember. #1 az OSWorld benchmarkon (82%). A $249/mo Korlátlan csomag a legolcsóbb elérhető átalánydíjas korlátlan számítógép-használati csomag. Autonóm böngésző automatizálás, asztali vezérlés, e-mail küldés, űrlap kitöltés és táblázatkezelés valódi VM-szintű izolációval.",
-      "websiteDescription": "#1 számítógépet használó AI ügynök platform — 82% OSWorld benchmark és a legolcsóbb átalánydíjas Korlátlan csomag $249/mo áron. Autonóm böngésző, asztali és terminál automatizálás VM izolációval. $19/mo Starter vagy $249/mo Korlátlan.",
-      "softwareDescription": "Számítógépet használó AI ügynök, amely teljes asztalt irányít, mint egy ember. #1 az OSWorld benchmarkon 82%-os teljesítési aránnyal 369 valós feladat esetén. A $249/mo Korlátlan csomag a piacon elérhető legolcsóbb átalánydíjas korlátlan számítógép-használati csomag. Autonóm böngésző automatizálás, asztali vezérlés, terminál műveletek, e-mail küldés, űrlap kitöltés és táblázatkezelés.",
+      "appDescription": "A #1 rangsorolt számítógépet használó AI ügynök és a piac legolcsóbb átalánydíjas Korlátlan számítógép-használati csomagja {unlimitedPrice} áron. A Coasty teljes asztalt irányít, mint egy ember — böngészőket nyit, kattint, gépel, űrlapokat tölt ki, e-maileket küld és táblázatokat kezel önállóan. 82% az OSWorld benchmarkon 369 valós feladat közül. Valódi VM-szintű izoláció munkamenetenként. Beépített CAPTCHA megoldás. Csomagok: {starterPrice} Starter vagy {unlimitedPrice} Korlátlan.",
+      "orgDescription": "A Coasty a #1 számítógépet használó AI ügynököt fejleszti (82% OSWorld), és kizárólag az egyetlen átalánydíjas Korlátlan számítógép-használati csomagot kínálja {unlimitedPrice} áron — olcsóbb mint a Devin Team, az OpenAI Operator és az ugyanazon árkategóriában lévő kreditkorlátos versenytársak. Platformunk autonóm asztali vezérlést, böngésző automatizálást és több ügynökös vezénylést biztosít valódi VM-szintű izolációval.",
+      "productDescription": "Számítógépet használó AI ügynök, amely úgy irányítja az asztalt, mint egy ember. #1 az OSWorld benchmarkon (82%). A {unlimitedPrice} Korlátlan csomag a legolcsóbb elérhető átalánydíjas korlátlan számítógép-használati csomag. Autonóm böngésző automatizálás, asztali vezérlés, e-mail küldés, űrlap kitöltés és táblázatkezelés valódi VM-szintű izolációval.",
+      "websiteDescription": "#1 számítógépet használó AI ügynök platform — 82% OSWorld benchmark és a legolcsóbb átalánydíjas Korlátlan csomag {unlimitedPrice} áron. Autonóm böngésző, asztali és terminál automatizálás VM izolációval. {starterPrice} Starter vagy {unlimitedPrice} Korlátlan.",
+      "softwareDescription": "Számítógépet használó AI ügynök, amely teljes asztalt irányít, mint egy ember. #1 az OSWorld benchmarkon 82%-os teljesítési aránnyal 369 valós feladat esetén. A {unlimitedPrice} Korlátlan csomag a piacon elérhető legolcsóbb átalánydíjas korlátlan számítógép-használati csomag. Autonóm böngésző automatizálás, asztali vezérlés, terminál műveletek, e-mail küldés, űrlap kitöltés és táblázatkezelés.",
       "breadcrumbs": {
         "home": "Kezdőlap",
         "caseStudies": "AI ügynök esettanulmányok",

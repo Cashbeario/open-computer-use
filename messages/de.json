@@ -2311,12 +2311,12 @@
   },
   "seo": {
     "home": {
-      "title": "Coasty - #1 KI-Agent für Computernutzung | KI-Mitarbeiter für Desktop- und Browser-Automatisierung",
+      "title": "Coasty - #1 KI-Agent für Computernutzung | Beste für Desktop- und Browser-Automatisierung",
       "titleTemplate": "{title} | Coasty - KI-Agent für Computernutzung",
-      "description": "Coasty ist der #1 KI-Agent für Computernutzung — 82% im OSWorld-Benchmark — und der einzige Pauschal-Tarif für unbegrenzte Computernutzung für $249/mo (günstiger als Devin Team $500+ACU, OpenAI Operator $200 mit Ratenlimit und kreditgedeckelte Wettbewerber). Steuert einen kompletten Desktop wie ein Mensch: Browser, Formulare, E-Mails, Tabellen. Isolation auf VM-Ebene. Ab $19/mo Starter oder $249/mo Unlimited.",
-      "ogTitle": "Coasty — 82% OSWorld + $249/mo Unlimited (günstigster Computernutzungs-Agent)",
-      "ogDescription": "#1 auf OSWorld (82%). $249/mo Pauschal-Unlimited — günstiger als Devin Team ($500+ACU) bei höherem Benchmark. Browser-, Desktop- und Terminal-Automatisierung. VM-Isolation pro Sitzung. Plattformübergreifend nativ + REST API + MCP-Server.",
-      "twitterDescription": "KI-Agent, der einen echten Desktop bedient. 82% OSWorld (#1). $249/mo Unlimited — der günstigste Pauschal-Tarif in der Kategorie. Starter ab $19/mo. VM-Isolation + MCP-Server mit 26 Tools."
+      "description": "Coasty ist der #1 KI-Agent für Computernutzung — 82% im OSWorld-Benchmark — und der einzige Pauschal-Tarif für unbegrenzte Computernutzung für {unlimitedPrice} (günstiger als Devin Team $500+ACU, OpenAI Operator $200 mit Ratenlimit und kreditgedeckelte Wettbewerber). Steuert einen kompletten Desktop wie ein Mensch: Browser, Formulare, E-Mails, Tabellen. Isolation auf VM-Ebene. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (günstigster Computernutzungs-Agent)",
+      "ogDescription": "#1 auf OSWorld (82%). {unlimitedPrice} Pauschal-Unlimited — günstiger als Devin Team ($500+ACU) bei höherem Benchmark. Browser-, Desktop- und Terminal-Automatisierung. VM-Isolation pro Sitzung. Plattformübergreifend nativ + REST API + MCP-Server.",
+      "twitterDescription": "KI-Agent, der einen echten Desktop bedient. 82% OSWorld (#1). {unlimitedPrice} Unlimited — der günstigste Pauschal-Tarif in der Kategorie. Starter ab {starterPrice}. VM-Isolation + MCP-Server mit 26 Tools."
     },
     "compare": {
       "title": "Coasty Vergleichen - KI-Agent-Alternativen und Wettbewerbsvergleich",
@@ -2374,9 +2374,9 @@
     },
     "pricing": {
       "title": "Preise — Coasty KI-Agent Pläne und Preise",
-      "description": "Coasty Preise: Starter $19/mo (200 Credits) oder Unlimited $249/mo (der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — günstiger als Devin Team $500+ACU, Genspark Pro $249 kreditgedeckelt und Manus Extended $200 gedeckelt). Ersetzt menschliche virtuelle Assistenten für $3,000+/mo. Keine versteckten Gebühren.",
-      "ogTitle": "Coasty Preise — $19/mo Starter, $249/mo Unlimited",
-      "ogDescription": "$249/mo Pauschal-Unlimited — der günstigste Tarif für unbegrenzte Computernutzung am Markt. Oder $19/mo Starter für Einzelpersonen. Spart $36k pro Jahr gegenüber menschlichen virtuellen Assistenten."
+      "description": "Coasty Preise: Starter {starterPrice} (200 Credits) oder Unlimited {unlimitedPrice} (der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — günstiger als Devin Team $500+ACU, Genspark Pro $249 kreditgedeckelt und Manus Extended $200 gedeckelt). Ersetzt menschliche virtuelle Assistenten für $3,000+/mo. Keine versteckten Gebühren.",
+      "ogTitle": "Coasty Preise — {starterPrice} Starter, {unlimitedPrice} Unlimited",
+      "ogDescription": "{unlimitedPrice} Pauschal-Unlimited — der günstigste Tarif für unbegrenzte Computernutzung am Markt. Oder {starterPrice} Starter für Einzelpersonen. Spart $36k pro Jahr gegenüber menschlichen virtuellen Assistenten."
     },
     "faq": {
       "q1": "Was ist Coasty?",
@@ -2384,7 +2384,7 @@
       "q2": "Wie schneidet Coasty im Vergleich zu Anthropic Computer Use ab?",
       "a2": "Während Anthropic Computer Use eine rohe API für Computersteuerung bietet, ist Coasty eine produktionsreife Plattform mit verwalteter VM-Infrastruktur, integrierter CAPTCHA-Lösung, einer Desktop-App für Mac und Windows, Multi-Modell-Unterstützung und dem höchsten OSWorld-Benchmark-Ergebnis (82%). Coasty bietet die komplette Lösung — nicht nur die API.",
       "q3": "Wie viel kostet Coasty?",
-      "a3": "Coasty bietet zwei aktive Pläne: Starter für $19/Monat (200 Credits, 1 Maschine, ideal für Einzelpersonen) und Unlimited für $249/Monat ohne Kredit-Obergrenze. Der $249 Unlimited-Plan ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung — günstiger als Devin Team ($500/Monat + ACU-Überschreitung), OpenAI Operator ChatGPT Pro ($200/Monat mit Ratenlimit), Genspark Pro ($249,99 kreditgedeckelt bei 125k Credits) und Manus Extended ($200 gedeckelt bei 40k Credits). Beide ersetzen einen menschlichen virtuellen Assistenten für $3,000+/Monat; Unlimited spart $33,000+/Jahr gegenüber einem menschlichen VA — eine Kostenreduktion von 92%.",
+      "a3": "Coasty bietet zwei aktive Pläne: Starter für $19/Monat (200 Credits, 1 Maschine, ideal für Einzelpersonen) und Unlimited für $99/Monat ohne Kredit-Obergrenze. Der $99 Unlimited-Plan ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung — günstiger als Devin Team ($500/Monat + ACU-Überschreitung), OpenAI Operator ChatGPT Pro ($200/Monat mit Ratenlimit), Genspark Pro ($249,99 kreditgedeckelt bei 125k Credits) und Manus Extended ($200 gedeckelt bei 40k Credits). Beide ersetzen einen menschlichen virtuellen Assistenten für $3,000+/Monat; Unlimited spart $33,000+/Jahr gegenüber einem menschlichen VA — eine Kostenreduktion von 92%.",
       "q4": "Ist die Nutzung von Coasty sicher?",
       "a4": "Ja. Jede Coasty-Sitzung läuft in einer eigenen isolierten, geschützten virtuellen Maschine. Ihre Daten bleiben sicher, Ihr Computer wird nicht berührt und nichts wird zwischen Sitzungen übertragen. Das ist echte VM-Isolation, nicht nur Container in einem gemeinsamen Pool.",
       "q5": "Was ist der OSWorld-Benchmark?",
@@ -2401,11 +2401,11 @@
       "a10": "Ja. Coasty verfügt über eine integrierte CAPTCHA-Lösungs-Pipeline und wird daher nicht blockiert wie konkurrierende KI-Agenten. Dies ist entscheidend für reale Automatisierung, bei der CAPTCHAs auf Websites häufig vorkommen."
     },
     "structuredData": {
-      "appDescription": "Der #1 KI-Agent für Computernutzung und der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — $249/mo. Coasty steuert einen kompletten Desktop wie ein Mensch — öffnet Browser, klickt, tippt, füllt Formulare aus, sendet E-Mails und verwaltet Tabellen autonom. 82% im OSWorld-Benchmark bei 369 realen Aufgaben. Echte Isolation auf VM-Ebene pro Sitzung. Integrierte CAPTCHA-Lösung. Pläne: $19/mo Starter oder $249/mo Unlimited.",
-      "orgDescription": "Coasty entwickelt den #1 KI-Agent für Computernutzung (82% OSWorld) und liefert den einzigen Pauschal-Tarif für unbegrenzte Computernutzung für $249/mo — günstiger als Devin Team, OpenAI Operator und kreditgedeckelte Wettbewerber in derselben Preisklasse. Unsere Plattform bietet autonome Desktop-Steuerung, Browser-Automatisierung und Multi-Agent-Orchestrierung mit echter Isolation auf VM-Ebene.",
-      "productDescription": "KI-Computernutzungs-Agent, der einen Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark (82%). Der $249/mo Unlimited-Plan ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung. Autonome Browser-Automatisierung, Desktop-Steuerung, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung mit echter Isolation auf VM-Ebene.",
-      "websiteDescription": "#1 KI-Agent-Plattform für Computernutzung — 82% im OSWorld-Benchmark und der günstigste Pauschal-Unlimited-Tarif für $249/mo. Autonome Browser-, Desktop- und Terminal-Automatisierung mit VM-Isolation. Ab $19/mo Starter oder $249/mo Unlimited.",
-      "softwareDescription": "KI-Computernutzungs-Agent, der einen kompletten Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark mit einer Abschlussrate von 82% bei 369 realen Aufgaben. Der $249/mo Unlimited-Plan ist der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt. Autonome Browser-Automatisierung, Desktop-Steuerung, Terminal-Operationen, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung.",
+      "appDescription": "Der #1 KI-Agent für Computernutzung und der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — {unlimitedPrice}. Coasty steuert einen kompletten Desktop wie ein Mensch — öffnet Browser, klickt, tippt, füllt Formulare aus, sendet E-Mails und verwaltet Tabellen autonom. 82% im OSWorld-Benchmark bei 369 realen Aufgaben. Echte Isolation auf VM-Ebene pro Sitzung. Integrierte CAPTCHA-Lösung. Pläne: {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty entwickelt den #1 KI-Agent für Computernutzung (82% OSWorld) und liefert den einzigen Pauschal-Tarif für unbegrenzte Computernutzung für {unlimitedPrice} — günstiger als Devin Team, OpenAI Operator und kreditgedeckelte Wettbewerber in derselben Preisklasse. Unsere Plattform bietet autonome Desktop-Steuerung, Browser-Automatisierung und Multi-Agent-Orchestrierung mit echter Isolation auf VM-Ebene.",
+      "productDescription": "KI-Computernutzungs-Agent, der einen Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark (82%). Der {unlimitedPrice} Unlimited-Plan ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung. Autonome Browser-Automatisierung, Desktop-Steuerung, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung mit echter Isolation auf VM-Ebene.",
+      "websiteDescription": "#1 KI-Agent-Plattform für Computernutzung — 82% im OSWorld-Benchmark und der günstigste Pauschal-Unlimited-Tarif für {unlimitedPrice}. Autonome Browser-, Desktop- und Terminal-Automatisierung mit VM-Isolation. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "softwareDescription": "KI-Computernutzungs-Agent, der einen kompletten Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark mit einer Abschlussrate von 82% bei 369 realen Aufgaben. Der {unlimitedPrice} Unlimited-Plan ist der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt. Autonome Browser-Automatisierung, Desktop-Steuerung, Terminal-Operationen, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung.",
       "breadcrumbs": {
         "home": "Startseite",
         "caseStudies": "KI-Agent-Fallstudien",

@@ -111,6 +111,14 @@ export interface SwarmEvent {
   screenshot: string | null
   tool_name: string | null
   created_at: string
+  /** Present on awaiting_human / step_complete / error / machine_status events.
+   * Needed downstream for the resume/connect buttons to call
+   * `/api/chat/resume-human/{machineId}` and to fetch noVNC URLs. */
+  machine_id?: string | null
+  /** Reason string the agent supplied with awaiting_human. Stored alongside
+   * because `content` is a free-form display string that may be truncated
+   * or non-JSON; pulling reason from a typed field avoids brittle parsing. */
+  reason?: string | null
 }
 
 export interface TimelineStep {
@@ -401,11 +409,25 @@ export function buildTimelineSteps(events: SwarmEvent[]): TimelineStep[] {
       }
     } else if (event.event_type === "awaiting_human") {
       flush()
-      let reason = "Human intervention needed"
-      try {
-        const parsed = JSON.parse(event.content)
-        reason = parsed.reason || reason
-      } catch { /* use default */ }
+      // Three input shapes:
+      //   1. Live SSE — event.reason + event.machine_id are typed fields
+      //      populated in SwarmPanel.appendSwarmEvent.
+      //   2. Polled DB row — `content` holds JSON `{reason, machine_id}`
+      //      because swarm_run_events lacks dedicated columns.
+      //   3. Legacy/older rows — `content` is a plain string reason.
+      // Reader tolerates all three so reload keeps the banner functional.
+      let reason = event.reason || ""
+      let machineId = event.machine_id || ""
+      if ((!reason || !machineId) && event.content) {
+        try {
+          const parsed = JSON.parse(event.content)
+          if (!reason) reason = parsed.reason || ""
+          if (!machineId) machineId = parsed.machine_id || ""
+        } catch {
+          if (!reason) reason = event.content
+        }
+      }
+      if (!reason) reason = "Human intervention needed"
       steps.push({
         machineIndex: mIdx,
         text: reason,
@@ -413,7 +435,7 @@ export function buildTimelineSteps(events: SwarmEvent[]): TimelineStep[] {
         toolResults: [],
         screenshot: null,
         status: "awaiting_human",
-        machineId: (event as any).machine_id || "",
+        machineId,
         awaitingHumanReason: reason,
         timestamp: event.created_at,
       })
@@ -1834,6 +1856,18 @@ function MachinePlayerCard({
   const isRunning = isLive && status === "pending"
   const isFollowingLive = isLatest && isRunning
 
+  // "Currently asking for a human" — defined as: the LATEST step (not the
+  // scrubbed-back-to step) has status awaiting_human, AND the swarm is live.
+  // Tied to LATEST so a user scrubbing through history doesn't see the
+  // active banner on a past step that's already been resumed. Tied to
+  // isLive so the History view's completed swarms show the passive
+  // "was awaiting" indicator instead of an interactive (but dead) banner.
+  const latestStep = totalSteps > 0 ? steps[totalSteps - 1] : undefined
+  const isAwaitingHuman = isLive && latestStep?.status === "awaiting_human"
+  const awaitingReason =
+    latestStep?.awaitingHumanReason || latestStep?.text || ""
+  const awaitingMachineId = latestStep?.machineId || ""
+
   // Resolve which screenshot to show in the frame:
   //   1. The current step's screenshot, if it has one.
   //   2. Else: the most recent screenshot at or before the current step.
@@ -1864,8 +1898,12 @@ function MachinePlayerCard({
     return counts
   }, [interactions])
 
-  const cardBorder =
-    status === "success"
+  // Card border. Awaiting-human wins over every other state because it's
+  // the only status that requires the user to ACT — the amber outer ring
+  // (shadow) draws the eye even when the card is small / off-axis.
+  const cardBorder = isAwaitingHuman
+    ? "border-amber-500/55 dark:border-amber-400/55 shadow-[0_0_0_3px_rgba(245,158,11,0.12)]"
+    : status === "success"
       ? "border-emerald-500/25 dark:border-emerald-500/30"
       : status === "error"
         ? "border-red-500/25 dark:border-red-500/30"
@@ -1927,20 +1965,28 @@ function MachinePlayerCard({
         {/* Top gradient so the chrome pills stay legible on bright screenshots */}
         <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-background/55 via-background/10 to-transparent pointer-events-none" />
 
-        {/* Top-left: machine identity pill */}
+        {/* Top-left: machine identity pill. The dot's pulse + color reflects
+            the current state so users glance-recognise even when zoomed out
+            to "every machine in the swarm at once" in the canvas. */}
         <div className="absolute top-2 left-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-background/85 backdrop-blur-sm border border-border/40 text-[10px] font-medium shadow-sm">
           <span
             className={cn(
               "relative flex size-1.5",
-              isRunning && "items-center justify-center"
+              (isRunning || isAwaitingHuman) && "items-center justify-center"
             )}
           >
-            {isRunning && (
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-blue-500 opacity-65" />
+            {(isRunning || isAwaitingHuman) && (
+              <span
+                className={cn(
+                  "absolute inline-flex size-full animate-ping rounded-full opacity-65",
+                  isAwaitingHuman ? "bg-amber-400" : "bg-blue-500"
+                )}
+              />
             )}
             <span
               className={cn(
                 "relative inline-flex size-1.5 rounded-full",
+                isAwaitingHuman ? "bg-amber-500" :
                 status === "success" ? "bg-emerald-500" :
                 status === "error" ? "bg-red-500" :
                 isRunning ? "bg-blue-500" :
@@ -1951,9 +1997,24 @@ function MachinePlayerCard({
           <span className="tracking-tight">Machine #{machineIndex + 1}</span>
         </div>
 
-        {/* Top-right: status / live indicator */}
-        <div className="absolute top-2 right-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-background/85 backdrop-blur-sm border border-border/40 text-[10px] font-medium shadow-sm">
-          {status === "success" ? (
+        {/* Top-right: status / live indicator. Awaiting-human wins over
+            every other state because it's the action signal — the small
+            pulsing HandPalm in the chip is the same hand-icon the banner
+            below uses, so the eye links the two without thinking. */}
+        <div
+          className={cn(
+            "absolute top-2 right-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full backdrop-blur-sm border text-[10px] font-medium shadow-sm",
+            isAwaitingHuman
+              ? "bg-amber-500/15 border-amber-500/45 text-amber-700 dark:text-amber-300"
+              : "bg-background/85 border-border/40"
+          )}
+        >
+          {isAwaitingHuman ? (
+            <>
+              <HandPalm className="size-2.5 text-amber-500 animate-pulse" weight="fill" />
+              <span>Needs you</span>
+            </>
+          ) : status === "success" ? (
             <>
               <CheckCircle className="size-2.5 text-emerald-500" weight="fill" />
               <span className="text-muted-foreground">Done</span>
@@ -2053,6 +2114,23 @@ function MachinePlayerCard({
 
       {/* Body strip */}
       <div className="px-3.5 py-3 space-y-2.5">
+        {/* Awaiting-human banner — slotted at the TOP of the body so it
+            sits in the user's gaze path right after the screenshot. Only
+            renders when:
+              (1) the swarm is live (no dead buttons in history), AND
+              (2) the LATEST step is awaiting_human (not a past step the
+                  user happens to be scrubbing back to).
+            Uses `compact` so the two action buttons stack vertically
+            and the whole block fits inside the 280px card width. */}
+        {isAwaitingHuman && (
+          <AwaitingHumanBanner
+            compact
+            isActive
+            reason={awaitingReason}
+            machineId={awaitingMachineId}
+          />
+        )}
+
         {/* Subtask brief — the prompt this specific machine was given by the
             swarm planner. Stays muted/italic so the action ticker below is
             clearly the live element. */}

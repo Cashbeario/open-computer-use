@@ -127,6 +127,8 @@ export function SwarmPanel({ isActive, swarmId, prompt, machineCount, persistent
       screenshot: screenshot || null,
       tool_name: toolName || null,
       created_at: new Date().toISOString(),
+      machine_id: chunk.machine_id ?? null,
+      reason: chunk.reason ?? null,
     }
     setSwarmEvents((prev) => [...prev, event])
   }, [swarmId])

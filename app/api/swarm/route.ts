@@ -655,6 +655,20 @@ export async function POST(req: NextRequest) {
               "step_complete",
               `Step ${chunk.step || "?"}`
             );
+          } else if (type === "awaiting_human") {
+            // The swarm_run_events table lacks machine_id / reason columns,
+            // so pack them into `content` as JSON. The reader
+            // (swarm-tree.tsx buildTimelineSteps) tolerates both raw strings
+            // and this JSON shape. Persisting this lets the resume/connect
+            // buttons survive a page reload while the agent is still paused.
+            saveEvent(
+              chunk.machine_index ?? null,
+              "awaiting_human",
+              JSON.stringify({
+                reason: chunk.reason || "Human intervention needed",
+                machine_id: chunk.machine_id || null,
+              }),
+            );
           } else if (type === "error") {
             saveEvent(
               chunk.machine_index ?? null,

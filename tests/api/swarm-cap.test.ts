@@ -1,21 +1,20 @@
 /**
  * Concurrent-swarm-machine cap for the Unlimited tier.
  *
- * Pins the "1 concurrent swarm machine for Unlimited subscribers"
- * invariant enforced at
- * [app/api/swarm/route.ts:152-156](../../app/api/swarm/route.ts#L152-L156):
+ * Pins the "5 concurrent swarm machines for Unlimited subscribers"
+ * invariant enforced in
+ * [app/api/swarm/route.ts](../../app/api/swarm/route.ts) via
+ * `computeSwarmMaxMachines`:
  *
- *     const swarmMaxMachines = planTier === "unlimited"
- *       ? 1
- *       : isPersistent
- *         ? planMaxMachines
- *         : Math.min(planMaxMachines * 3, 10);
+ *     if (opts.planTier === "unlimited") return 5;
+ *     if (opts.isPersistent) return opts.planMaxMachines;
+ *     return Math.min(opts.planMaxMachines * 3, 10);
  *
  * The cap is the abuse-prevention valve for the $249 flat-rate plan:
- * unlimited credits + N parallel agents would let one user burn the
- * plan economics in a single hour. Capping to 1 forces serial usage,
- * which the token-based throttle ([backend/app/services/unlimited_throttle.py](../../backend/app/services/unlimited_throttle.py))
- * then bounds the cost of.
+ * unlimited credits + fully unbounded parallelism would let one user
+ * burn the plan economics in a single hour. Capping to 5 keeps the
+ * plan sustainable while leaving room for genuine multi-agent workflows
+ * (a step up from the prior 1-concurrent design).
  *
  * The cap logic was extracted into the pure helpers
  * `computeSwarmMaxMachines` and `clampRequestedMachineCount` so the
@@ -23,7 +22,7 @@
  * Supabase/AWS/WorkMail/Python-backend mock tree just to test these
  * 4 lines. The POST handler in route.ts is the only production
  * caller; the tests below pin both layers (compute then clamp) so a
- * regression in either silently raising the Unlimited cap above 1
+ * regression in either silently raising the Unlimited cap above 5
  * fails loudly.
  */
 import { describe, it, expect } from "vitest"
@@ -31,44 +30,44 @@ import { describe, it, expect } from "vitest"
 import {
   computeSwarmMaxMachines,
   clampRequestedMachineCount,
-} from "@/app/api/swarm/route"
+} from "@/lib/swarm-cap"
 
-describe("swarm cap — Unlimited tier (1-concurrent invariant)", () => {
-  it("Unlimited tier always returns cap=1, even with high plan.max_machines", () => {
-    // Even though Unlimited's plan.max_machines is 2 (matches Plus),
-    // the swarm cap is the harder invariant of "1 concurrent agent" —
-    // so the POST handler must clamp to 1, never planMaxMachines.
-    // Pathologically high `planMaxMachines` here proves the tier check
-    // wins over any other input.
+describe("swarm cap — Unlimited tier (5-concurrent invariant)", () => {
+  it("Unlimited tier always returns cap=5, even with high plan.max_machines", () => {
+    // Even with a pathologically high `planMaxMachines` (which would
+    // otherwise feed the temporary-swarm multiplier and yield a cap of
+    // min(10*3, 10)=10), the early-return for "unlimited" must clamp to
+    // 5. Pathologically high `planMaxMachines` here proves the tier
+    // check wins over any other input.
     expect(
       computeSwarmMaxMachines({
         planTier: "unlimited",
         planMaxMachines: 10,
         isPersistent: false,
       }),
-    ).toBe(1)
+    ).toBe(5)
   })
 
-  it("Unlimited tier caps at 1 EVEN for persistent swarms (the trick edge case)", () => {
+  it("Unlimited tier caps at 5 EVEN for persistent swarms (the trick edge case)", () => {
     // Without the explicit `planTier === "unlimited"` early-return AT
     // THE TOP, this call would fall through to the `isPersistent`
     // branch and return planMaxMachines (currently 2). The whole point
     // of the early return is to make the cap unconditional. This test
-    // would have caught a silent 2x-cap regression if the early return
-    // ever gets removed in a refactor.
+    // would have caught a silent regression if the early return ever
+    // gets removed in a refactor.
     expect(
       computeSwarmMaxMachines({
         planTier: "unlimited",
         planMaxMachines: 2,
         isPersistent: true,
       }),
-    ).toBe(1)
+    ).toBe(5)
   })
 
-  it("Unlimited end-to-end: malicious request of 99 still resolves to 1 machine", () => {
-    // Two-layer defense. Layer 1: computeSwarmMaxMachines returns 1.
+  it("Unlimited end-to-end: malicious request of 99 still resolves to 5 machines", () => {
+    // Two-layer defense. Layer 1: computeSwarmMaxMachines returns 5.
     // Layer 2: clampRequestedMachineCount clamps the buggy/hostile
-    // client request down to 1. Either layer alone would suffice; the
+    // client request down to 5. Either layer alone would suffice; the
     // POST handler chains both. This test pins the chained behavior so
     // the cap holds end-to-end even if one layer is later loosened.
     const cap = computeSwarmMaxMachines({
@@ -76,8 +75,27 @@ describe("swarm cap — Unlimited tier (1-concurrent invariant)", () => {
       planMaxMachines: 2,
       isPersistent: false,
     })
-    expect(cap).toBe(1)
-    expect(clampRequestedMachineCount(99, cap)).toBe(1)
+    expect(cap).toBe(5)
+    expect(clampRequestedMachineCount(99, cap)).toBe(5)
+  })
+
+  it("Unlimited cap is strictly less than Plus's swarm budget", () => {
+    // Plus ($50) sells parallelism as a feature: planMaxMachines=2,
+    // temporary multiplier = min(2*3, 10) = 6.  Unlimited at 5 is
+    // intentionally one step below — Plus still offers more
+    // parallelism, Unlimited offers unlimited credits.  If this
+    // inequality ever flips, the two plans' positioning is broken.
+    const unlimitedCap = computeSwarmMaxMachines({
+      planTier: "unlimited",
+      planMaxMachines: 2,
+      isPersistent: false,
+    })
+    const plusCap = computeSwarmMaxMachines({
+      planTier: "plus",
+      planMaxMachines: 2,
+      isPersistent: false,
+    })
+    expect(unlimitedCap).toBeLessThan(plusCap)
   })
 })
 

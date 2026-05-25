@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Không giới hạn",
           "machines": "2 luôn bật",
-          "feature": "1 tác nhân đồng thời"
+          "feature": "5 tác nhân đồng thời"
         }
       },
       "perMonth": "{price}/thang",

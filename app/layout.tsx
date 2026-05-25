@@ -184,7 +184,7 @@ export default async function RootLayout({
       ...(isUnlimitedTier
         ? {
             "description":
-              "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 1 concurrent agent (abuse cap).",
+              "Unlimited computer-use agent runs at a flat $249/month — the cheapest flat-rate unlimited plan in the computer-use category. Includes 2 machines, 10 schedules, and 5 concurrent agents (abuse cap).",
           }
         : {
             "eligibleQuantity": {

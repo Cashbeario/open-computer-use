@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Rajaton",
           "machines": "2 aina päällä",
-          "feature": "1 samanaikainen agentti"
+          "feature": "5 samanaikaista agenttia"
         }
       },
       "perMonth": "{price}/kk",

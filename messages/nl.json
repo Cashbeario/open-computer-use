@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Onbeperkt",
           "machines": "2 altijd actief",
-          "feature": "1 gelijktijdige agent"
+          "feature": "5 gelijktijdige agents"
         }
       },
       "perMonth": "{price}/maand",

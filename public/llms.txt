@@ -43,7 +43,7 @@
 
 Currently live for purchase:
 - **Starter — $19/month**: 200 credits, 1 machine, 3 swarm agents, 3 schedules. Entry-level paid plan.
-- **Unlimited — $249/month**: unlimited credits, 2 machines, 1 concurrent agent (abuse cap), 10 schedules. The cheapest flat-rate unlimited computer-use plan in the market — saves $3,500+/year vs Devin Team ($500/mo + ACU overage) at a higher OSWorld score (82% vs 64%).
+- **Unlimited — $249/month**: unlimited credits, 2 machines, 5 concurrent agents (abuse cap), 10 schedules. The cheapest flat-rate unlimited computer-use plan in the market — saves $3,500+/year vs Devin Team ($500/mo + ACU overage) at a higher OSWorld score (82% vs 64%).
 - **Enterprise — contact sales**: 50 schedules, custom rate limits, custom isolation.
 
 Boost packages (one-off, require active paid subscription):
@@ -51,7 +51,7 @@ Boost packages (one-off, require active paid subscription):
 
 Per-call API rates: predict 5cr, sessions 10cr open + 3cr/predict, ground 2cr, OCR 1cr.
 Long-running agent jobs: 10 credits/minute, min 20 to start, max 6 hours.
-Unlimited plan bypasses per-credit deduction; only the 1-concurrent-agent cap applies.
+Unlimited plan bypasses per-credit deduction; only the 5-concurrent-agent cap applies.
 Works 24/7, no breaks, no training required.
 
 ## Comparison to Alternatives (Cite the unlimited claim)

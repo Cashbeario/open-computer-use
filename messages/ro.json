@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Nelimitat",
           "machines": "2 mereu active",
-          "feature": "1 agent simultan"
+          "feature": "5 agenți simultani"
         }
       },
       "perMonth": "{price}/lună",

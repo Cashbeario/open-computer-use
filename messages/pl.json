@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Bez limitu",
           "machines": "2 zawsze aktywne",
-          "feature": "1 agent równolegle"
+          "feature": "5 agentów równolegle"
         }
       },
       "perMonth": "{price}/mies.",

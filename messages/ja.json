@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "無制限",
           "machines": "2台 常時稼働",
-          "feature": "同時 1 エージェント"
+          "feature": "同時 5 エージェント"
         }
       },
       "perMonth": "{price}/月",

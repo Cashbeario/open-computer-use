@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Ubegrenset",
           "machines": "2 alltid på",
-          "feature": "1 samtidig agent"
+          "feature": "5 samtidige agenter"
         }
       },
       "perMonth": "{price}/måned",

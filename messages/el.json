@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Απεριόριστα",
           "machines": "2 πάντα ενεργές",
-          "feature": "1 ταυτόχρονος agent"
+          "feature": "5 ταυτόχρονοι agents"
         }
       },
       "perMonth": "{price}/μήνα",

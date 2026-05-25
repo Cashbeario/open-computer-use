@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Tak Terbatas",
           "machines": "2 selalu aktif",
-          "feature": "1 agen bersamaan"
+          "feature": "5 agen bersamaan"
         }
       },
       "perMonth": "{price}/bln",

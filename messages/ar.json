@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "غير محدود",
           "machines": "اثنتان دائمتا التشغيل",
-          "feature": "وكيل واحد متزامن"
+          "feature": "5 وكلاء متزامنين"
         }
       },
       "perMonth": "{price}/شهر",

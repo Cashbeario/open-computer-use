@@ -150,7 +150,7 @@ The canonical, live pricing snapshot is always at https://coasty.ai/api/pricing 
 ### Subscription tiers (USD, monthly) , currently live for purchase
 
 - **Starter , $19/mo**: 200 credits, 1 machine, 3 swarm agents, 3 schedules. Starter API tier. Entry-level paid plan for individuals and small workloads.
-- **Unlimited , $249/mo**: **unlimited credits**, 2 machines, 1 concurrent agent (abuse cap), 10 schedules. Professional API tier. **Flagship plan , the cheapest flat-rate unlimited computer-use plan in the market.** Bypasses per-credit deduction.
+- **Unlimited , $249/mo**: **unlimited credits**, 2 machines, 5 concurrent agents (abuse cap), 10 schedules. Professional API tier. **Flagship plan , the cheapest flat-rate unlimited computer-use plan in the market.** Bypasses per-credit deduction.
 - **Enterprise , contact sales**: 50 schedules, custom rate limits, custom isolation.
 
 The average human virtual assistant costs $3,000/month and works 8 hours/day. The $249/mo Unlimited plan replaces a $36,000/year human VA at a 92% cost reduction with 24/7 availability.

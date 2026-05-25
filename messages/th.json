@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "ไม่จำกัด",
           "machines": "2 เปิดตลอด",
-          "feature": "1 เอเจนต์พร้อมกัน"
+          "feature": "5 เอเจนต์พร้อมกัน"
         }
       },
       "perMonth": "{price}/เดือน",

@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Sınırsız",
           "machines": "2 her zaman açık",
-          "feature": "1 eşzamanlı ajan"
+          "feature": "5 eşzamanlı ajan"
         }
       },
       "perMonth": "{price}/ay",

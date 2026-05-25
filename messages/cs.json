@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Neomezeně",
           "machines": "2 trvale spuštěné",
-          "feature": "1 souběžný agent"
+          "feature": "5 souběžných agentů"
         }
       },
       "perMonth": "{price}/měs.",

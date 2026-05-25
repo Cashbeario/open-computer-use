@@ -156,13 +156,18 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
                 swarmLabel={
                   // Three cases so the grammar reads right at every count:
                   //  0  → "Single agent at a time"  (free — no swarm mode)
-                  //  1  → "1 concurrent agent"      (unlimited — explicit cap)
-                  //  2+ → "N agents in parallel"    (paid swarm tiers)
+                  //  1  → "1 concurrent agent"      (kept for any future
+                  //                                   tier capped at 1;
+                  //                                   currently unused)
+                  //  2+ → "N agents in parallel"    (paid swarm tiers,
+                  //                                   incl. Unlimited at 5)
                   plan.swarm === 0
                     ? "Single agent at a time"
                     : plan.swarm === 1
                       ? "1 concurrent agent"
-                      : tc("agentsInParallel", { count: plan.swarm })
+                      : plan.key === "unlimited"
+                        ? `${plan.swarm} concurrent agents`
+                        : tc("agentsInParallel", { count: plan.swarm })
                 }
                 ctaLabel={
                   plan.price === "$0"

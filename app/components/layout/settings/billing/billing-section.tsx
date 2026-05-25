@@ -144,13 +144,13 @@ const subscriptionPlans = [
     // detecting tier === "unlimited" rather than this number.
     monthlyCredits: 999_999_999,
     machines: 2,
-    // 1 concurrent agent only — see lib/pricing/tiers.ts comment.
-    swarm: 1,
+    // 5 concurrent agents — abuse-prevention cap; see lib/pricing/tiers.ts.
+    swarm: 5,
     description: "No credit limits — ever",
     features: [
       "Unlimited credits, no caps",
       "2 always-on VMs",
-      "1 concurrent agent (no parallel runs)",
+      "5 concurrent agents",
       "Priority support, 24hr response",
     ],
     popular: false,

@@ -588,13 +588,18 @@ export default function PricingPage() {
     {
       icon: featureIcons[1],
       title: t("features.swarmMode.name"),
-      // Singular grammar fix for the "1 concurrent agent" case (unlimited).
+      // Three cases: 0=sequential, 1=singular grammar fix, 2+ uses plural i18n.
+      // Unlimited (5 concurrent) gets a custom "X concurrent agents" string so
+      // the abuse-prevention cap reads as a feature, not "X agents in parallel"
+      // which oversells the parallelism story.
       subtitle: (p: Plan) =>
         p.swarm === 0
           ? t("features.swarmMode.sequential")
           : p.swarm === 1
             ? "1 concurrent agent"
-            : t("features.swarmMode.parallel", { count: p.swarm }),
+            : p.id === "unlimited"
+              ? `${p.swarm} concurrent agents`
+              : t("features.swarmMode.parallel", { count: p.swarm }),
       highlight: { label: t("features.swarmMode.badge"), ...featureHighlights[1]! },
     },
     {

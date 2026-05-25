@@ -1958,7 +1958,7 @@
         "unlimited": {
           "credits": "Korlátlan",
           "machines": "2 mindig aktív",
-          "feature": "1 egyidejű ügynök"
+          "feature": "5 egyidejű ügynök"
         }
       },
       "perMonth": "{price}/hó",

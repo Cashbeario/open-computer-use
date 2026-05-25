@@ -107,8 +107,9 @@ describe("unlimited tier — tierAtLeast ordering", () => {
 
 describe("unlimited tier — resource limits", () => {
   // Per Phase 4 design (revised): Unlimited mirrors Plus on machines + schedule
-  // limit, but caps concurrent agents at 1 to prevent runaway compute on the
-  // flat-rate plan.  See lib/pricing/tiers.ts comment + app/api/swarm/route.ts.
+  // limit, but caps concurrent agents at 5 to prevent runaway compute on the
+  // flat-rate plan while leaving room for genuine multi-agent workflows.
+  // See lib/pricing/tiers.ts comment + app/api/swarm/route.ts.
 
   it("schedule limit is 10 (matches Plus)", () => {
     expect(SCHEDULE_LIMITS.unlimited).toBe(10)
@@ -132,14 +133,16 @@ describe("unlimited tier — resource limits", () => {
     expect(u!.scheduleLimit).toBe(plus!.scheduleLimit)
   })
 
-  it("swarmAgentsLimit is capped at 1 — abuse-prevention valve", () => {
-    // Critical: unlimited credits + unlimited concurrency would let a
-    // single user burn 100k credits/hour at $0 marginal cost.  The 1-agent
-    // cap is what makes the $249 flat rate sustainable.
+  it("swarmAgentsLimit is capped at 5 — abuse-prevention valve", () => {
+    // Critical: unlimited credits + unbounded concurrency would let a
+    // single user burn 100k credits/hour at $0 marginal cost.  The 5-agent
+    // cap is what makes the $249 flat rate sustainable while still leaving
+    // room for genuine multi-agent workflows.
     const u = getTier("unlimited")
-    expect(u!.swarmAgentsLimit).toBe(1)
-    // Distinct from Plus on purpose — Plus has 6 (parallel-execution
-    // is part of what Plus sells), Unlimited does not.
+    expect(u!.swarmAgentsLimit).toBe(5)
+    // Still distinct from Plus on purpose — Plus has 6 (a touch more
+    // parallelism), Unlimited has 5.  Both flat-rate plans, different
+    // positioning.
     const plus = getTier("plus")
     expect(u!.swarmAgentsLimit).toBeLessThan(plus!.swarmAgentsLimit)
   })

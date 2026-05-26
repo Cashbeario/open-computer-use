@@ -72,6 +72,25 @@ resource "aws_s3_bucket_public_access_block" "alb_access_logs" {
   restrict_public_buckets = true
 }
 
+# Ownership controls: BucketOwnerEnforced (the post-April-2023 S3 default).
+# ACLs are disabled; the bucket owner automatically owns every uploaded
+# object. We declare this explicitly to (a) document intent and (b) keep
+# the apply idempotent if AWS ever changes the default again.
+#
+# CRITICAL INTERACTION with the bucket policy below: because ACLs are
+# disabled, the policy MUST NOT contain a Condition on `s3:x-amz-acl`. If
+# it does, ALB log-delivery requests send the canned ACL header, S3 strips
+# it (ACLs disabled), the StringEquals condition no longer matches, and
+# every PutObject returns 403 AccessDenied. This is the bug that bricked
+# the 2026-05-25 apply.
+resource "aws_s3_bucket_ownership_controls" "alb_access_logs" {
+  bucket = aws_s3_bucket.alb_access_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
 # Server-side encryption: AES256 (SSE-S3).
 #
 # We deliberately do NOT use a customer-managed KMS key here. AWS ALB access
@@ -121,20 +140,29 @@ resource "aws_s3_bucket_lifecycle_configuration" "alb_access_logs" {
 # -----------------------------------------------------------------------------
 # Bucket policy: allow the regional ELB service account to write logs.
 #
-# Three statements:
+# Two statements:
 #   1. AllowELBLogDelivery: the actual log-put permission, scoped to the
-#      AWSLogs/<account_id>/* key prefix and requiring the canned ACL
-#      `bucket-owner-full-control` so the bucket owner (us) retains full
-#      control over objects written by the ELB-owned principal.
-#   2. AllowGetBucketAcl: the log-delivery service queries the ACL before
-#      each write to confirm it has permission. Without this, deliveries
-#      fail with a generic 403 AccessDenied.
-#   3. DenyUnencryptedTransport: HTTPS-only access. ALB delivers logs over
+#      AWSLogs/<account_id>/* key prefix.
+#   2. DenyUnencryptedTransport: HTTPS-only access. ALB delivers logs over
 #      HTTPS already; this guards against future API consumers (Athena,
 #      ad-hoc aws s3 cp) that might be misconfigured.
 #
 # The us-east-1 ELB service account is arn:aws:iam::127311923021:root, but
 # we use data.aws_elb_service_account.main.arn for region portability.
+#
+# IMPORTANT history (2026-05-25 incident):
+#   * The previous version of this policy included a Condition on
+#     `s3:x-amz-acl == bucket-owner-full-control`. Combined with the
+#     BucketOwnerEnforced ownership control above, this caused every ALB
+#     PutObject to be denied (S3 strips the ACL header when ACLs are
+#     disabled, so the StringEquals condition never matched). Fix: drop
+#     the condition. With BucketOwnerEnforced the bucket owner already
+#     gets ownership of every object — the canned ACL is redundant.
+#   * We also dropped AllowGetBucketAcl. Modern ALB access-log delivery
+#     does not call GetBucketAcl before writes; the statement was carried
+#     over from legacy Classic Load Balancer docs and adds no value.
+#   * AWS's current published policy for ALB access logs:
+#     https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#attach-bucket-policy
 # -----------------------------------------------------------------------------
 
 resource "aws_s3_bucket_policy" "alb_access_logs" {
@@ -151,20 +179,6 @@ resource "aws_s3_bucket_policy" "alb_access_logs" {
         }
         Action   = "s3:PutObject"
         Resource = "${aws_s3_bucket.alb_access_logs.arn}/alb-coasty/AWSLogs/${data.aws_caller_identity.alb_logs.account_id}/*"
-        Condition = {
-          StringEquals = {
-            "s3:x-amz-acl" = "bucket-owner-full-control"
-          }
-        }
-      },
-      {
-        Sid    = "AllowGetBucketAcl"
-        Effect = "Allow"
-        Principal = {
-          AWS = data.aws_elb_service_account.main.arn
-        }
-        Action   = "s3:GetBucketAcl"
-        Resource = aws_s3_bucket.alb_access_logs.arn
       },
       {
         Sid       = "DenyUnencryptedTransport"
@@ -184,9 +198,13 @@ resource "aws_s3_bucket_policy" "alb_access_logs" {
     ]
   })
 
-  # Public-access-block must apply first so the policy evaluation runs with
-  # the final access-block in place.
-  depends_on = [aws_s3_bucket_public_access_block.alb_access_logs]
+  # Ownership controls must apply first: BucketOwnerEnforced disables ACLs,
+  # which is the precondition for the policy NOT carrying an ACL condition.
+  # Public-access-block must also be in place before the policy evaluates.
+  depends_on = [
+    aws_s3_bucket_public_access_block.alb_access_logs,
+    aws_s3_bucket_ownership_controls.alb_access_logs,
+  ]
 }
 
 # -----------------------------------------------------------------------------

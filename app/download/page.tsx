@@ -34,6 +34,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "next-intl"
 
 type Platform = "windows" | "mac"
+type MacArch = "arm64" | "x64" | "unknown"
 
 interface PlatformInfo {
   version: string
@@ -47,6 +48,8 @@ interface PlatformInfo {
 interface DownloadData {
   windows: PlatformInfo | null
   mac: PlatformInfo | null
+  macArm64: PlatformInfo | null
+  macX64: PlatformInfo | null
 }
 
 const platformMeta: Record<
@@ -68,8 +71,17 @@ const platformMeta: Record<
     label: "macOS",
     icon: AppleIcon,
     extension: ".dmg",
-    requirements: ["macOS 10.15 (Catalina) or later", "Apple Silicon or Intel", "4 GB RAM minimum"],
+    requirements: [
+      "macOS 11 (Big Sur) or later",
+      "Apple Silicon (M1/M2/M3/M4) or Intel",
+      "4 GB RAM minimum",
+    ],
   },
+}
+
+const macArchMeta: Record<Exclude<MacArch, "unknown">, { label: string; sublabel: string }> = {
+  arm64: { label: "Apple Silicon", sublabel: "M1, M2, M3, M4" },
+  x64: { label: "Intel", sublabel: "2019 and earlier" },
 }
 
 function detectPlatform(): Platform {
@@ -77,6 +89,62 @@ function detectPlatform(): Platform {
   const ua = navigator.userAgent.toLowerCase()
   if (ua.includes("mac")) return "mac"
   return "windows"
+}
+
+/**
+ * Detect whether the user is on Apple Silicon vs Intel. Three signals,
+ * tried in order:
+ *
+ *  1. ``navigator.userAgentData.getHighEntropyValues(['architecture'])``
+ *     — Chromium-based browsers (Chrome / Edge / Brave / Arc). Returns
+ *     ``arm`` for Apple Silicon and ``x86`` for Intel. The most reliable
+ *     source where it's available.
+ *
+ *  2. WebGL ``UNMASKED_RENDERER_WEBGL`` fingerprint — Safari fallback.
+ *     "Apple M1/M2/M3/M4" or "Apple GPU" maps to arm64; "Intel" / "AMD" /
+ *     "Radeon" maps to x64. Some Safari versions restrict this string for
+ *     privacy, in which case the call returns empty and we fall through.
+ *
+ *  3. Return ``unknown`` so the UI can present both options as equals
+ *     rather than guess wrong. We never silently default to one arch —
+ *     downloading the wrong .dmg is a worse UX than asking the user.
+ */
+async function detectMacArch(): Promise<MacArch> {
+  if (typeof navigator === "undefined") return "unknown"
+
+  const uad = (navigator as unknown as {
+    userAgentData?: {
+      getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }>
+    }
+  }).userAgentData
+  if (uad?.getHighEntropyValues) {
+    try {
+      const v = await uad.getHighEntropyValues(["architecture"])
+      if (v.architecture === "arm") return "arm64"
+      if (v.architecture === "x86") return "x64"
+    } catch {
+      /* fall through */
+    }
+  }
+
+  try {
+    const canvas = document.createElement("canvas")
+    const gl = (canvas.getContext("webgl") ??
+      canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null
+    if (gl) {
+      const ext = gl.getExtension("WEBGL_debug_renderer_info") as { UNMASKED_RENDERER_WEBGL: number } | null
+      if (ext) {
+        const raw = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
+        const renderer = String(raw ?? "").toLowerCase()
+        if (/apple\s*(m\d|gpu)/.test(renderer)) return "arm64"
+        if (/intel|radeon|amd/.test(renderer)) return "x64"
+      }
+    }
+  } catch {
+    /* fall through */
+  }
+
+  return "unknown"
 }
 
 function formatSize(bytes: number): string {
@@ -89,6 +157,7 @@ export default function DownloadPage() {
   const t = useTranslations("downloadPage")
   const [isMobile, setIsMobile] = useState(false)
   const [detectedPlatform, setDetectedPlatform] = useState<Platform>("windows")
+  const [detectedMacArch, setDetectedMacArch] = useState<MacArch>("unknown")
   const [downloadData, setDownloadData] = useState<DownloadData | null>(null)
   const [loading, setLoading] = useState(true)
   const [showSplash, setShowSplash] = useState(true)
@@ -108,7 +177,12 @@ export default function DownloadPage() {
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768)
-    setDetectedPlatform(detectPlatform())
+    const platform = detectPlatform()
+    setDetectedPlatform(platform)
+    if (platform === "mac") {
+      // Fire-and-forget; the UI shows both arches until detection resolves.
+      detectMacArch().then(setDetectedMacArch).catch(() => setDetectedMacArch("unknown"))
+    }
 
     const onResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener("resize", onResize)
@@ -159,6 +233,50 @@ export default function DownloadPage() {
     { icon: RefreshCw, label: t("features.updates") },
     { icon: Smartphone, label: t("features.remote") },
   ]
+
+  /**
+   * Pick the right .dmg for the user's Mac. Returns the detected arch as
+   * primary + the other arch as secondary so the UI can offer a "wrong
+   * chip? switch" affordance. When detection failed AND the manifest only
+   * has one arch, secondary is null and the UI hides the switch.
+   *
+   * Backward compat: pre-per-arch releases only publish a single .dmg, so
+   * `macArm64` / `macX64` are null and we fall through to the legacy `mac`
+   * slot (which the API populates with the first DMG).
+   */
+  function pickMacDownload(arch: MacArch): {
+    primary: PlatformInfo | null
+    primaryArch: "arm64" | "x64"
+    secondary: PlatformInfo | null
+    secondaryArch: "arm64" | "x64"
+    archDetected: boolean
+  } {
+    const arm64 = downloadData?.macArm64 ?? null
+    const x64 = downloadData?.macX64 ?? null
+
+    if (arch === "arm64" && arm64) {
+      return { primary: arm64, primaryArch: "arm64", secondary: x64, secondaryArch: "x64", archDetected: true }
+    }
+    if (arch === "x64" && x64) {
+      return { primary: x64, primaryArch: "x64", secondary: arm64, secondaryArch: "arm64", archDetected: true }
+    }
+    // Detection unknown OR detected arch not available — prefer arm64 as the
+    // primary (vast majority of Macs sold since late 2020 are Apple Silicon).
+    if (arm64) {
+      return { primary: arm64, primaryArch: "arm64", secondary: x64, secondaryArch: "x64", archDetected: false }
+    }
+    if (x64) {
+      return { primary: x64, primaryArch: "x64", secondary: arm64, secondaryArch: "arm64", archDetected: false }
+    }
+    // No per-arch DMGs at all — fall back to the legacy single-DMG slot.
+    return {
+      primary: downloadData?.mac ?? null,
+      primaryArch: "arm64",
+      secondary: null,
+      secondaryArch: "x64",
+      archDetected: false,
+    }
+  }
 
   function getDownloadButton(platform: Platform, variant: "hero" | "card") {
     const meta = platformMeta[platform]
@@ -213,7 +331,13 @@ export default function DownloadPage() {
     )
   }
 
-  const splashPlatform = downloadData?.[detectedPlatform]
+  const macPick = pickMacDownload(detectedMacArch)
+  const splashPlatform: PlatformInfo | null =
+    detectedPlatform === "mac" ? macPick.primary : (downloadData?.windows ?? null)
+  const splashPrimaryLabel =
+    detectedPlatform === "mac"
+      ? `macOS · ${macArchMeta[macPick.primaryArch].label}`
+      : platformMeta[detectedPlatform].label
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -384,30 +508,51 @@ export default function DownloadPage() {
                     </p>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    {splashPlatform ? (
-                      <a
-                        href={splashPlatform.downloadUrl}
-                        onClick={() => handleDownloadClick(detectedPlatform)}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-black transition-all duration-200 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        {t("downloadFor", { platform: platformMeta[detectedPlatform].label })}
-                      </a>
-                    ) : loading ? (
-                      <div className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white/10 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white/50">
-                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                        {t("loading")}
-                      </div>
-                    ) : null}
+                  <div className="flex flex-col items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                      {splashPlatform ? (
+                        <a
+                          href={splashPlatform.downloadUrl}
+                          onClick={() => handleDownloadClick(detectedPlatform)}
+                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-black transition-all duration-200 hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          {detectedPlatform === "mac"
+                            ? `Download for ${splashPrimaryLabel}`
+                            : t("downloadFor", { platform: splashPrimaryLabel })}
+                        </a>
+                      ) : loading ? (
+                        <div className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white/10 px-5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white/50">
+                          <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                          {t("loading")}
+                        </div>
+                      ) : null}
 
-                    <button
-                      type="button"
-                      onClick={closeSplash}
-                      className="text-[11px] sm:text-sm text-white/30 hover:text-white/60 transition-colors duration-200 py-0.5"
-                    >
-                      {t("browserCta")}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={closeSplash}
+                        className="text-[11px] sm:text-sm text-white/30 hover:text-white/60 transition-colors duration-200 py-0.5"
+                      >
+                        {t("browserCta")}
+                      </button>
+                    </div>
+
+                    {/* Mac arch switch — visible whenever we have a "the other
+                        chip" build to offer. When auto-detect succeeded, we
+                        phrase it as "wrong chip?" (the primary is the user's
+                        likely match). When detection failed we phrase it
+                        neutrally so neither arch feels demoted. */}
+                    {detectedPlatform === "mac" && macPick.secondary && (
+                      <a
+                        href={macPick.secondary.downloadUrl}
+                        onClick={() => handleDownloadClick("mac")}
+                        className="text-[10.5px] sm:text-xs text-white/40 hover:text-white/70 underline underline-offset-2 transition-colors"
+                      >
+                        {macPick.archDetected
+                          ? `Using ${macArchMeta[macPick.secondaryArch].label}? Get the ${macArchMeta[macPick.secondaryArch].label} build`
+                          : `Other Mac? Switch to ${macArchMeta[macPick.secondaryArch].label}`}
+                      </a>
+                    )}
                   </div>
                 </motion.div>
               </div>
@@ -620,8 +765,16 @@ export default function DownloadPage() {
             <motion.div variants={itemVariants} className="mb-12">
               {(() => {
                 const meta = platformMeta[detectedPlatform]
-                const data = downloadData?.[detectedPlatform]
                 const Icon = meta.icon
+                const isMac = detectedPlatform === "mac"
+                // Mac: use the arch-aware primary (and offer a switch). Windows:
+                // the existing single-file path.
+                const heroPrimary: PlatformInfo | null = isMac
+                  ? macPick.primary
+                  : (downloadData?.windows ?? null)
+                const heroTitle = isMac
+                  ? `Coasty for macOS · ${macArchMeta[macPick.primaryArch].label}`
+                  : t("coastyFor", { platform: meta.label })
                 return (
                   <div
                     className={cn(
@@ -639,17 +792,47 @@ export default function DownloadPage() {
                         <Icon className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-semibold">
-                          {t("coastyFor", { platform: meta.label })}
-                        </h2>
-                        {data && (
+                        <h2 className="text-xl font-semibold">{heroTitle}</h2>
+                        {heroPrimary && (
                           <p className="text-sm text-muted-foreground mt-1">
                             {t("installerLabel", { extension: meta.extension })}
-                            {data.size ? ` · ${formatSize(data.size)}` : ""}
+                            {heroPrimary.size ? ` · ${formatSize(heroPrimary.size)}` : ""}
+                            {isMac && (
+                              <span className="text-muted-foreground/70">
+                                {` · for ${macArchMeta[macPick.primaryArch].sublabel}`}
+                              </span>
+                            )}
                           </p>
                         )}
                       </div>
-                      {getDownloadButton(detectedPlatform, "hero")}
+                      {isMac && heroPrimary ? (
+                        <RainbowButton size="lg" className="w-full sm:w-auto" asChild>
+                          <a
+                            href={heroPrimary.downloadUrl}
+                            onClick={() => handleDownloadClick("mac")}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            {`Download for ${macArchMeta[macPick.primaryArch].label}`}
+                          </a>
+                        </RainbowButton>
+                      ) : (
+                        getDownloadButton(detectedPlatform, "hero")
+                      )}
+
+                      {/* Inline arch-switch link for the recommended hero — same
+                          copy logic as the splash: phrasing depends on whether
+                          we successfully auto-detected the user's chip. */}
+                      {isMac && macPick.secondary && (
+                        <a
+                          href={macPick.secondary.downloadUrl}
+                          onClick={() => handleDownloadClick("mac")}
+                          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                        >
+                          {macPick.archDetected
+                            ? `Using ${macArchMeta[macPick.secondaryArch].label}? Get the ${macArchMeta[macPick.secondaryArch].label} build`
+                            : `Other Mac? Switch to ${macArchMeta[macPick.secondaryArch].label}`}
+                        </a>
+                      )}
                     </div>
                   </div>
                 )
@@ -716,9 +899,15 @@ export default function DownloadPage() {
               >
                 {allPlatforms.map((platform) => {
                   const meta = platformMeta[platform]
-                  const data = downloadData?.[platform]
                   const Icon = meta.icon
                   const isRecommended = platform === detectedPlatform
+                  const isMac = platform === "mac"
+                  // For Mac, show both arches as separate buttons inside the
+                  // single card so users don't have to guess which file to grab.
+                  // For Windows, keep the existing one-button card.
+                  const archArm = downloadData?.macArm64 ?? null
+                  const archX64 = downloadData?.macX64 ?? null
+                  const macHasBothArches = isMac && (archArm || archX64)
                   return (
                     <div
                       key={platform}
@@ -735,10 +924,72 @@ export default function DownloadPage() {
                           <p className="font-medium">{meta.label}</p>
                           <p className="text-xs text-muted-foreground">
                             {meta.extension}
-                            {data?.size ? ` · ${formatSize(data.size)}` : ""}
+                            {!isMac && downloadData?.[platform]?.size
+                              ? ` · ${formatSize(downloadData![platform]!.size)}`
+                              : ""}
                           </p>
                         </div>
-                        {getDownloadButton(platform, "card")}
+                        {macHasBothArches ? (
+                          <div className="flex w-full flex-col gap-2">
+                            {/* Apple Silicon — listed first because most new
+                                Macs sold since late 2020 are M-series. */}
+                            {archArm ? (
+                              <Button
+                                variant={
+                                  isRecommended && (detectedMacArch === "arm64" || detectedMacArch === "unknown")
+                                    ? "default"
+                                    : "outline"
+                                }
+                                size="sm"
+                                className="w-full"
+                                asChild
+                              >
+                                <a
+                                  href={archArm.downloadUrl}
+                                  onClick={() => handleDownloadClick("mac")}
+                                >
+                                  <Download className="mr-1.5 h-3.5 w-3.5" />
+                                  {macArchMeta.arm64.label}
+                                  {archArm.size ? (
+                                    <span className="ml-1.5 text-[10px] opacity-60">
+                                      {formatSize(archArm.size)}
+                                    </span>
+                                  ) : null}
+                                </a>
+                              </Button>
+                            ) : null}
+                            {archX64 ? (
+                              <Button
+                                variant={
+                                  isRecommended && detectedMacArch === "x64"
+                                    ? "default"
+                                    : "outline"
+                                }
+                                size="sm"
+                                className="w-full"
+                                asChild
+                              >
+                                <a
+                                  href={archX64.downloadUrl}
+                                  onClick={() => handleDownloadClick("mac")}
+                                >
+                                  <Download className="mr-1.5 h-3.5 w-3.5" />
+                                  {macArchMeta.x64.label}
+                                  {archX64.size ? (
+                                    <span className="ml-1.5 text-[10px] opacity-60">
+                                      {formatSize(archX64.size)}
+                                    </span>
+                                  ) : null}
+                                </a>
+                              </Button>
+                            ) : null}
+                            <p className="text-[10px] text-muted-foreground/70 leading-snug">
+                              Not sure? Click  → About This Mac to see your chip.
+                            </p>
+                          </div>
+                        ) : (
+                          getDownloadButton(platform, "card")
+                        )}
                       </div>
                     </div>
                   )

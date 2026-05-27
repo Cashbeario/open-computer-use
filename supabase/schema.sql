@@ -1433,9 +1433,17 @@ $$;
 ALTER FUNCTION "public"."update_machine_last_active"() OWNER TO "postgres";
 
 
--- See supabase/migrations/011_unify_tier_vocabulary.sql for full documentation.
+-- See supabase/migrations/011_unify_tier_vocabulary.sql, 015_fix_ambiguous_user_id.sql,
+-- and 021_re_apply_ambiguous_user_id_fix.sql for full documentation.
 -- Single writer for tier state.  Updates user_subscriptions, user_credits,
 -- and machine_limits.tier atomically.  Called by Stripe webhook.
+-- OUT columns prefixed out_* to avoid the PG 42702 "ambiguous user_id"
+-- footgun that regressed via a schema.sql snapshot deploy on 2026-05-26
+-- (NEW-1 incident, sub_1TbEA5Kk9kzNS1Sh6knJJINH).  Do NOT revert the
+-- out_* prefix.  We do NOT use plpgsql.variable_conflict here because
+-- Supabase managed Postgres rejects setting that GUC (42501 permission
+-- denied; SUPERUSER required).  Defense-in-depth lives at CI via
+-- tests/schema-ambiguous-out-params.test.ts.
 CREATE OR REPLACE FUNCTION "public"."update_subscription_status"(
     "p_stripe_subscription_id" "text",
     "p_status"                  "text",
@@ -1444,9 +1452,9 @@ CREATE OR REPLACE FUNCTION "public"."update_subscription_status"(
     "p_cancel_at_period_end"    boolean                  DEFAULT NULL,
     "p_subscription_plan_id"    "uuid"                   DEFAULT NULL
 ) RETURNS TABLE (
-    "user_id"       "uuid",
-    "resolved_tier" "text",
-    "is_paid"       boolean
+    "out_user_id"       "uuid",
+    "out_resolved_tier" "text",
+    "out_is_paid"       boolean
 )
     LANGUAGE "plpgsql"
     SECURITY DEFINER
@@ -1457,8 +1465,13 @@ DECLARE
     v_plan_tier text;
     v_new_tier  text;
     v_is_paid   boolean;
+    v_paid_set  text[] := ARRAY['active','trialing','past_due'];
 BEGIN
-    v_is_paid := p_status IN ('active','trialing','past_due');
+    -- Audit log on every entry for cross-correlation with webhook logs.
+    RAISE LOG 'update_subscription_status: sub=% status=% plan=%',
+        p_stripe_subscription_id, p_status, p_subscription_plan_id;
+
+    v_is_paid := p_status = ANY(v_paid_set);
 
     UPDATE public.user_subscriptions
     SET    status               = p_status,
@@ -1544,11 +1557,13 @@ BEGIN
 
     v_tier := COALESCE(v_tier, 'free');
 
-    UPDATE public.user_credits
+    -- Defence in depth: alias the target table so user_id cannot shadow
+    -- (see migrations 015, 021).
+    UPDATE public.user_credits AS uc
     SET    has_active_subscription = (v_tier <> 'free'),
            subscription_tier       = CASE WHEN v_tier <> 'free' THEN v_tier ELSE NULL END,
            updated_at              = NOW()
-    WHERE  user_id = p_user_id;
+    WHERE  uc.user_id = p_user_id;
 
     INSERT INTO public.machine_limits (user_id, tier)
     VALUES (p_user_id, v_tier)
@@ -3774,9 +3789,9 @@ GRANT ALL ON FUNCTION "public"."update_machine_last_active"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean) TO "anon";
-GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean) TO "service_role";
+GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean, "p_subscription_plan_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean, "p_subscription_plan_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_subscription_status"("p_stripe_subscription_id" "text", "p_status" "text", "p_period_start" timestamp with time zone, "p_period_end" timestamp with time zone, "p_cancel_at_period_end" boolean, "p_subscription_plan_id" "uuid") TO "service_role";
 
 
 
@@ -4011,8 +4026,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
 
 
 

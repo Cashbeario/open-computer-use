@@ -1192,7 +1192,7 @@ resource "aws_cloudwatch_log_metric_filter" "billing_subscription_rpc_failed" {
 resource "aws_cloudwatch_metric_alarm" "billing_subscription_rpc_failed" {
   count               = var.enable_alarms ? 1 : 0
   alarm_name          = "${var.project_name}-billing-subscription-rpc-failed"
-  alarm_description   = "update_subscription_status RPC has failed at least once.  This is the NEW-1 42702 regression signature — billing webhooks aren't persisting subscription state.  Treat as code regression; do NOT page-and-go, investigate the migration."
+  alarm_description   = "update_subscription_status RPC has failed at least once. This is the NEW-1 42702 regression signature - billing webhooks aren't persisting subscription state. Treat as code regression; do NOT page-and-go, investigate the migration. Recovery: query public.webhook_dead_letters for unresolved rows, replay via scripts/reconcile_subscription.py. Re-apply migration 015 or 021 if schema.sql regressed. See infra/aws/ALARMS_BILLING_HARDENING.md."
   namespace           = "Coasty/Backend"
   metric_name         = "BillingSubscriptionRpcFailures"
   statistic           = "Sum"
@@ -1277,6 +1277,192 @@ resource "aws_cloudwatch_metric_alarm" "osworld_session_count" {
     Name     = "${var.project_name}-osworld-session-count"
     Severity = "P1"
   })
+}
+
+
+# =============================================================================
+# B1. Postgres 42702 SQLSTATE anywhere (P0) — 2026-05-26 NEW-1 hardening
+# =============================================================================
+#
+# The NEW-1 42702 (ambiguous_column_reference) defect first surfaced inside
+# update_subscription_status, but the same shape can occur in ANY PL/pgSQL
+# function with RETURNS TABLE that shadows a real column. The A7 alarm above
+# pins on the specific log line emitted by the billing webhook handler; this
+# alarm fires on the literal SQLSTATE anywhere in /ecs/llmhub so we catch the
+# next occurrence even if it's in a different RPC (e.g. credits, sessions).
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "postgres_42702_errors" {
+  count = var.enable_alarms ? 1 : 0
+
+  name           = "${var.project_name}-postgres-42702-errors"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  pattern        = "\"42702\"" # Matches the literal SQLSTATE in any log line
+
+  metric_transformation {
+    name          = "Postgres42702Errors"
+    namespace     = "Coasty/Database"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "postgres_42702_errors" {
+  count = var.enable_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-postgres-42702-errors"
+  alarm_description   = "Postgres SQLSTATE 42702 (ambiguous column reference) detected ANYWHERE in /ecs/llmhub. This is the NEW-1 regression signature, can occur in any PL/pgSQL function with RETURNS TABLE that shadows real table columns. Investigate the function and re-apply migration 015/021. See infra/aws/ALARMS_BILLING_HARDENING.md."
+  namespace           = "Coasty/Database"
+  metric_name         = "Postgres42702Errors"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 0
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-postgres-42702-errors"
+    Severity = "P0"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.postgres_42702_errors]
+}
+
+
+# =============================================================================
+# B2. Webhook RPC failed (structured log) (P0)
+# =============================================================================
+#
+# Agent B is adding a structured log line of the shape:
+#   [webhook-rpc-failed] event=X type=Y rpc=Z code=W dead_letter_written=true
+# emitted for EVERY RPC failure inside the Stripe webhook handler (not just
+# update_subscription_status). The A7 alarm above is RPC-specific; this one
+# catches the broader signal so we know a dead-letter row was just written.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "webhook_rpc_failed" {
+  count = var.enable_alarms ? 1 : 0
+
+  name           = "${var.project_name}-webhook-rpc-failed"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  pattern        = "\"[webhook-rpc-failed]\""
+
+  metric_transformation {
+    name          = "WebhookRpcFailed"
+    namespace     = "Coasty/Billing"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "webhook_rpc_failed" {
+  count = var.enable_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-webhook-rpc-failed"
+  alarm_description   = "Stripe webhook handler caught a downstream RPC failure and dead-lettered the event. Recovery: query public.webhook_dead_letters for unresolved rows, replay via scripts/reconcile_subscription.py. See incident 2026-05-26 22:57 UTC NEW-1."
+  namespace           = "Coasty/Billing"
+  metric_name         = "WebhookRpcFailed"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 0
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-webhook-rpc-failed"
+    Severity = "P0"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.webhook_rpc_failed]
+}
+
+
+# =============================================================================
+# B3. Webhook 5xx responses (P1)
+# =============================================================================
+#
+# Agent B is converting the silent-200-on-RPC-error response to a proper 5xx
+# so Stripe retries. We track the rate of 5xx returns from /api/credits/webhook
+# to spot cascading failures (missing migration, broken RPC). Threshold is >5
+# in 5 min because Stripe will retry each event a few times naturally, but a
+# burst means the underlying RPC is structurally broken, not transient.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "webhook_5xx_responses" {
+  count = var.enable_alarms ? 1 : 0
+
+  name           = "${var.project_name}-webhook-5xx-responses"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  pattern        = "{ $.path = \"/api/credits/webhook\" && $.status >= 500 }"
+
+  metric_transformation {
+    name          = "Webhook5xxResponses"
+    namespace     = "Coasty/Billing"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "webhook_5xx_responses_burst" {
+  count = var.enable_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-webhook-5xx-burst"
+  alarm_description   = "More than 5 Stripe webhook 5xx responses in 5 min. Stripe will retry for ~3 days but downstream RPC is broken. Investigate via webhook_dead_letters."
+  namespace           = "Coasty/Billing"
+  metric_name         = "Webhook5xxResponses"
+  statistic           = "Sum"
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+  threshold           = 5
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+
+  alarm_actions = local.alarm_actions
+  ok_actions    = local.alarm_actions
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-webhook-5xx-burst"
+    Severity = "P1"
+  })
+
+  depends_on = [aws_cloudwatch_log_metric_filter.webhook_5xx_responses]
+}
+
+
+# =============================================================================
+# B4. Webhook dead-letter writes (metric only, no alarm)
+# =============================================================================
+#
+# Kept for dashboard visibility and post-incident analysis. The B2 alarm above
+# (webhook_rpc_failed) already pages on each occurrence; tracking the
+# dead_letter_written=true sub-signal separately lets us confirm the
+# dead-letter table is actually being populated when the upstream alarm fires.
+# =============================================================================
+
+resource "aws_cloudwatch_log_metric_filter" "webhook_dead_letter_writes" {
+  count = var.enable_alarms ? 1 : 0
+
+  name           = "${var.project_name}-webhook-dead-letter-writes"
+  log_group_name = aws_cloudwatch_log_group.ecs.name
+  pattern        = "\"dead_letter_written=true\""
+
+  metric_transformation {
+    name          = "WebhookDeadLetterWrites"
+    namespace     = "Coasty/Billing"
+    value         = "1"
+    default_value = "0"
+  }
 }
 
 

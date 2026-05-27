@@ -14,14 +14,125 @@ const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
+// ---------------------------------------------------------------------------
+// Fail-loud helpers (NEW-1 hardening, 2026-05-26 22:57 UTC).
+// ---------------------------------------------------------------------------
+//
+// Pre-fix pattern (the bug):
+//   const { error: rpcError } = await supabase.rpc(...)
+//   if (rpcError) {
+//     console.error("X RPC failed:", rpcError)
+//     // ...falls through to return 200
+//   }
+//
+// Stripe sees 200, never retries, DB state desyncs permanently.
+//
+// Post-fix pattern: every load-bearing RPC failure writes the event to
+// webhook_dead_letters (idempotent upsert on stripe_event_id) and returns
+// a 5xx so Stripe retries on its exponential schedule (~3 days).  The
+// dead-letter row is the recovery path for permanent failures.
+//
+// The structured log line "[webhook-rpc-failed] event=... type=... rpc=..."
+// is grepped by Agent D's CloudWatch alarm to page on-call.
+// ---------------------------------------------------------------------------
+
+type RpcLikeError = {
+  code?: string | null
+  message?: string | null
+  details?: string | null
+}
+
+interface DeadLetterArgs {
+  supabase: any
+  event: Stripe.Event
+  rpcName: string
+  rpcError: RpcLikeError
+  // Additional structured context for the smoking-gun log line.
+  extra?: Record<string, unknown>
+}
+
+/**
+ * Write the failed event to webhook_dead_letters and emit the structured
+ * log line Agent D's alarm grep depends on.  Idempotent: keyed on
+ * stripe_event_id (UNIQUE constraint on the table), so Stripe retries
+ * during the alarm window do not multiply rows.
+ */
+async function writeDeadLetter(args: DeadLetterArgs): Promise<void> {
+  const { supabase, event, rpcName, rpcError, extra } = args
+
+  // Use upsert with onConflict so a Stripe retry of the same event lands on
+  // the same row (no duplicates, no error from the unique index).
+  const { error: dlqError } = await supabase
+    .from("webhook_dead_letters")
+    .upsert(
+      {
+        stripe_event_id: event.id,
+        event_type: event.type,
+        rpc_name: rpcName,
+        rpc_error_code: rpcError.code ?? null,
+        rpc_error_message: rpcError.message ?? null,
+        payload: (event.data as any)?.object ?? event.data,
+      },
+      { onConflict: "stripe_event_id" }
+    )
+
+  if (dlqError) {
+    // The DLQ write itself failed.  We still want Stripe to retry, but the
+    // operator-side recovery path is now harder.  Log loudly.
+    console.error(
+      `[webhook-dlq-write-failed] event=${event.id} type=${event.type} rpc=${rpcName} dlq_error=${(dlqError as any)?.code ?? "?"}: ${(dlqError as any)?.message ?? dlqError}`
+    )
+  }
+
+  // Structured log line.  Format MUST stay stable — CloudWatch metric filter
+  // greps for the literal prefix "[webhook-rpc-failed]".
+  const extraStr =
+    extra && Object.keys(extra).length
+      ? " " + Object.entries(extra).map(([k, v]) => `${k}=${v}`).join(" ")
+      : ""
+  console.error(
+    `[webhook-rpc-failed] event=${event.id} type=${event.type} rpc=${rpcName} code=${rpcError.code ?? "none"} dead_letter_written=${dlqError ? "false" : "true"}${extraStr}`
+  )
+}
+
+/**
+ * Compose the standard 5xx response we return after dead-lettering.  The
+ * exact JSON shape is documented (eventId, code) so the on-call runbook
+ * can correlate Stripe's "Failed delivery" dashboard with our DLQ row.
+ */
+function failLoudResponse(
+  event: Stripe.Event,
+  rpcError: RpcLikeError,
+  message: string
+): NextResponse {
+  return NextResponse.json(
+    {
+      error: message,
+      eventId: event.id,
+      code: rpcError.code ?? null,
+    },
+    { status: 500 }
+  )
+}
+
+// Outcome marker so handleCreditPurchase can signal a fail-loud condition
+// to the top-level switch without throwing.
+type HandlerOutcome =
+  | { ok: true }
+  | { ok: false; response: NextResponse }
+
 // Helper function to handle credit purchases (receives service role client)
-async function handleCreditPurchase(session: Stripe.Checkout.Session, supabase: any) {
+async function handleCreditPurchase(
+  session: Stripe.Checkout.Session,
+  supabase: any,
+  event: Stripe.Event
+): Promise<HandlerOutcome> {
   const userId = session.metadata?.user_id
   const credits = parseInt(session.metadata?.credits || "0")
 
   if (!userId || !credits) {
     console.error("Missing user_id or credits in session metadata")
-    return
+    return { ok: true } // Not a fail-loud condition; bad metadata is not retriable.
   }
 
   // Atomic balance increment via migration 014 RPC.  Replaces the legacy
@@ -37,8 +148,30 @@ async function handleCreditPurchase(session: Stripe.Checkout.Session, supabase: 
   )
 
   if (rpcError) {
-    console.error("add_credits_atomic RPC failed:", rpcError)
-    return
+    console.error("add_credits_atomic RPC failed:", {
+      eventId: event.id,
+      eventType: event.type,
+      userId,
+      credits,
+      code: rpcError.code,
+      message: rpcError.message,
+      details: rpcError.details,
+    })
+    await writeDeadLetter({
+      supabase,
+      event,
+      rpcName: "add_credits_atomic",
+      rpcError,
+      extra: { user_id: userId, credits },
+    })
+    return {
+      ok: false,
+      response: failLoudResponse(
+        event,
+        rpcError,
+        "add_credits_atomic RPC failed; event dead-lettered for manual reconciliation"
+      ),
+    }
   }
 
   const newBalance: number =
@@ -87,14 +220,44 @@ async function handleCreditPurchase(session: Stripe.Checkout.Session, supabase: 
           "Failed to compensate duplicate-insert race:",
           compensateError
         )
+        await writeDeadLetter({
+          supabase,
+          event,
+          rpcName: "add_credits_atomic (compensating)",
+          rpcError: compensateError,
+          extra: { user_id: userId, credits: -credits },
+        })
+        return {
+          ok: false,
+          response: failLoudResponse(
+            event,
+            compensateError,
+            "Compensating add_credits_atomic failed; event dead-lettered"
+          ),
+        }
       }
-      return
+      return { ok: true }
     }
     console.error("Error inserting credit_transactions row:", txnError)
-    return
+    await writeDeadLetter({
+      supabase,
+      event,
+      rpcName: "credit_transactions.insert",
+      rpcError: txnError as any,
+      extra: { user_id: userId, credits },
+    })
+    return {
+      ok: false,
+      response: failLoudResponse(
+        event,
+        txnError as any,
+        "credit_transactions insert failed; event dead-lettered"
+      ),
+    }
   }
 
   console.log(`Successfully processed payment: ${credits} credits`)
+  return { ok: true }
 }
 
 export async function POST(req: NextRequest) {
@@ -105,6 +268,10 @@ export async function POST(req: NextRequest) {
   const t_start = Date.now()
   let webhookEventType: string | undefined
   let outResponse: NextResponse | undefined
+  // Tracks whether the downstream RPC path completed without dead-lettering.
+  // When false we skip the trailing webhook_events_processed write so a
+  // future retry is not short-circuited as "already processed".
+  let processedOk = true
   try {
     const body = await req.text()
     const signature = (await headers()).get("stripe-signature")
@@ -144,6 +311,27 @@ export async function POST(req: NextRequest) {
       }
     )
 
+    // Idempotency: if we've already processed this event.id, return 200
+    // immediately.  Stripe retries are normal; double-applying is not.
+    // This sits alongside the existing stripe_events table — that one
+    // tracks delivery, webhook_events_processed tracks downstream success.
+    // See supabase/migrations/022_webhook_dead_letters.sql.
+    const { data: existingProcessed } = await supabase
+      .from("webhook_events_processed")
+      .select("stripe_event_id, succeeded")
+      .eq("stripe_event_id", event.id)
+      .maybeSingle()
+    if (existingProcessed) {
+      console.log(
+        `Webhook event ${event.id} (${event.type}) already processed: succeeded=${existingProcessed.succeeded}`
+      )
+      outResponse = NextResponse.json(
+        { received: true, idempotent: true },
+        { status: 200 }
+      )
+      return outResponse
+    }
+
     // Atomically check and record the event (prevents race condition with simultaneous deliveries)
     // Uses upsert with onConflict + ignoreDuplicates → INSERT ON CONFLICT DO NOTHING
     // maybeSingle() returns null data (no error) when the row is skipped, vs single() which throws PGRST116
@@ -164,6 +352,7 @@ export async function POST(req: NextRequest) {
     // Real DB error — let Stripe retry
     if (eventInsertError) {
       console.error(`Error recording stripe event ${event.id}:`, eventInsertError)
+      processedOk = false
       outResponse = NextResponse.json({ error: "Database error" }, { status: 500 })
       return outResponse
     }
@@ -177,22 +366,22 @@ export async function POST(req: NextRequest) {
 
     // Log the event for debugging
     console.log(`Processing webhook event: ${event.type}`)
-    
+
     // Handle the event
     switch (event.type) {
       // Handle subscription creation
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
         console.log(`Processing checkout session: ${session.id}, mode: ${session.mode}`)
-        
+
         // Check if this is a subscription checkout
         if (session.mode === "subscription") {
           const userId = session.metadata?.user_id
           const tier = session.metadata?.tier
           const subscriptionId = session.subscription as string
-          
+
           console.log(`Subscription checkout - tier: ${tier}`)
-          
+
           if (!userId || !tier || !subscriptionId) {
             console.error("Missing subscription metadata")
             break
@@ -215,7 +404,7 @@ export async function POST(req: NextRequest) {
 
           // Get the subscription details from Stripe
           const subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
-          
+
           // Get the plan from database first
           const { data: plan } = await (supabase as any)
             .from("subscription_plans")
@@ -231,7 +420,7 @@ export async function POST(req: NextRequest) {
           // Handle timestamps - they might not be available yet in checkout.session.completed
           let periodStart: string
           let periodEnd: string
-          
+
           if (subscription.current_period_start && subscription.current_period_end) {
             try {
               periodStart = new Date(subscription.current_period_start * 1000).toISOString()
@@ -268,7 +457,7 @@ export async function POST(req: NextRequest) {
             .single()
 
           let newSubscription
-          
+
           if (existingSubscription) {
             console.log(`Subscription already exists for ${subscriptionId}, updating it`)
             // Update existing subscription record (reactivation)
@@ -287,12 +476,25 @@ export async function POST(req: NextRequest) {
               .eq("stripe_subscription_id", subscriptionId)
               .select()
               .single()
-            
+
             if (updateError) {
               console.error("Error updating subscription record:", updateError)
-              break
+              await writeDeadLetter({
+                supabase,
+                event,
+                rpcName: "user_subscriptions.update",
+                rpcError: updateError as any,
+                extra: { stripe_subscription_id: subscriptionId, user_id: userId },
+              })
+              processedOk = false
+              outResponse = failLoudResponse(
+                event,
+                updateError as any,
+                "user_subscriptions update failed; event dead-lettered"
+              )
+              return outResponse
             }
-            
+
             newSubscription = updated
             console.log(`Subscription record updated (reactivated) with ID: ${newSubscription.id}`)
           } else {
@@ -322,16 +524,42 @@ export async function POST(req: NextRequest) {
                   .select("*")
                   .eq("stripe_subscription_id", subscriptionId)
                   .single()
-                
+
                 if (concurrent) {
                   newSubscription = concurrent
                 } else {
                   console.error("Could not find or create subscription")
-                  break
+                  await writeDeadLetter({
+                    supabase,
+                    event,
+                    rpcName: "user_subscriptions.insert (23505 + concurrent miss)",
+                    rpcError: insertError,
+                    extra: { stripe_subscription_id: subscriptionId, user_id: userId },
+                  })
+                  processedOk = false
+                  outResponse = failLoudResponse(
+                    event,
+                    insertError,
+                    "user_subscriptions concurrent-insert lookup failed; event dead-lettered"
+                  )
+                  return outResponse
                 }
               } else {
                 console.error("Error creating subscription record:", insertError)
-                break
+                await writeDeadLetter({
+                  supabase,
+                  event,
+                  rpcName: "user_subscriptions.insert",
+                  rpcError: (insertError ?? { message: "no row returned" }) as any,
+                  extra: { stripe_subscription_id: subscriptionId, user_id: userId },
+                })
+                processedOk = false
+                outResponse = failLoudResponse(
+                  event,
+                  (insertError ?? { message: "no row returned" }) as any,
+                  "user_subscriptions insert failed; event dead-lettered"
+                )
+                return outResponse
               }
             } else {
               newSubscription = created
@@ -379,7 +607,33 @@ export async function POST(req: NextRequest) {
             )
 
             if (rpcError) {
-              console.error("grant_subscription_credits_atomic (checkout) failed:", rpcError)
+              console.error("grant_subscription_credits_atomic (checkout) failed:", {
+                eventId: event.id,
+                eventType: event.type,
+                subscriptionId,
+                userId,
+                code: rpcError.code,
+                message: rpcError.message,
+                details: rpcError.details,
+              })
+              await writeDeadLetter({
+                supabase,
+                event,
+                rpcName: "grant_subscription_credits_atomic",
+                rpcError,
+                extra: {
+                  stripe_subscription_id: subscriptionId,
+                  user_id: userId,
+                  source: "checkout.session.completed",
+                },
+              })
+              processedOk = false
+              outResponse = failLoudResponse(
+                event,
+                rpcError,
+                "grant_subscription_credits_atomic (checkout) failed; event dead-lettered"
+              )
+              return outResponse
             } else {
               const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
               if (result?.was_granted) {
@@ -406,13 +660,32 @@ export async function POST(req: NextRequest) {
             )
             if (syncError) {
               console.error("sync_user_tier after checkout failed:", syncError)
+              await writeDeadLetter({
+                supabase,
+                event,
+                rpcName: "sync_user_tier",
+                rpcError: syncError,
+                extra: { user_id: userId, source: "checkout.session.completed" },
+              })
+              processedOk = false
+              outResponse = failLoudResponse(
+                event,
+                syncError,
+                "sync_user_tier (checkout) failed; event dead-lettered"
+              )
+              return outResponse
             }
           }
 
           console.log(`Subscription created for user ${userId}: ${tier} plan`)
         } else {
           // Handle one-time credit purchases (existing code)
-          await handleCreditPurchase(session, supabase)
+          const outcome = await handleCreditPurchase(session, supabase, event)
+          if (!outcome.ok) {
+            processedOk = false
+            outResponse = outcome.response
+            return outResponse
+          }
         }
         break
       }
@@ -522,7 +795,33 @@ export async function POST(req: NextRequest) {
                 )
 
                 if (rpcError) {
-                  console.error("grant_subscription_credits_atomic (reactivation) failed:", rpcError)
+                  console.error("grant_subscription_credits_atomic (reactivation) failed:", {
+                    eventId: event.id,
+                    eventType: event.type,
+                    subscriptionId: subscription.id,
+                    userId,
+                    code: rpcError.code,
+                    message: rpcError.message,
+                    details: rpcError.details,
+                  })
+                  await writeDeadLetter({
+                    supabase,
+                    event,
+                    rpcName: "grant_subscription_credits_atomic",
+                    rpcError,
+                    extra: {
+                      stripe_subscription_id: subscription.id,
+                      user_id: userId,
+                      source: "subscription.created (reactivation)",
+                    },
+                  })
+                  processedOk = false
+                  outResponse = failLoudResponse(
+                    event,
+                    rpcError,
+                    "grant_subscription_credits_atomic (reactivation) failed; event dead-lettered"
+                  )
+                  return outResponse
                 } else {
                   const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
                   if (result?.was_granted) {
@@ -548,6 +847,20 @@ export async function POST(req: NextRequest) {
             )
             if (syncError) {
               console.error("sync_user_tier after subscription.created (existing) failed:", syncError)
+              await writeDeadLetter({
+                supabase,
+                event,
+                rpcName: "sync_user_tier",
+                rpcError: syncError,
+                extra: { user_id: userId, source: "subscription.created (existing sub)" },
+              })
+              processedOk = false
+              outResponse = failLoudResponse(
+                event,
+                syncError,
+                "sync_user_tier (subscription.created existing) failed; event dead-lettered"
+              )
+              return outResponse
             }
           }
 
@@ -587,7 +900,20 @@ export async function POST(req: NextRequest) {
 
         if (insertError) {
           console.error("Error creating subscription in subscription.created:", insertError)
-          break
+          await writeDeadLetter({
+            supabase,
+            event,
+            rpcName: "user_subscriptions.insert",
+            rpcError: insertError as any,
+            extra: { stripe_subscription_id: subscription.id, user_id: userId, source: "subscription.created (new)" },
+          })
+          processedOk = false
+          outResponse = failLoudResponse(
+            event,
+            insertError as any,
+            "user_subscriptions insert (subscription.created) failed; event dead-lettered"
+          )
+          return outResponse
         }
 
         // Ensure user_credits has subscription flags set (but don't add credits)
@@ -618,6 +944,20 @@ export async function POST(req: NextRequest) {
           )
           if (syncError) {
             console.error("sync_user_tier after subscription.created (new) failed:", syncError)
+            await writeDeadLetter({
+              supabase,
+              event,
+              rpcName: "sync_user_tier",
+              rpcError: syncError,
+              extra: { user_id: userId, source: "subscription.created (new sub)" },
+            })
+            processedOk = false
+            outResponse = failLoudResponse(
+              event,
+              syncError,
+              "sync_user_tier (subscription.created new) failed; event dead-lettered"
+            )
+            return outResponse
           }
         }
 
@@ -672,6 +1012,12 @@ export async function POST(req: NextRequest) {
 
         // Single atomic RPC: writes user_subscriptions, user_credits, and
         // machine_limits.tier — see migration 011.
+        //
+        // ===== NEW-1 fail-loud (2026-05-26 22:57 UTC) =====
+        // Pre-fix this caught rpcError, logged it, and fell through to 200.
+        // Stripe never retried, machine_limits.tier stayed stuck.  Now we
+        // dead-letter and return 500 so Stripe retries after migration 021
+        // lands (which removes the 42702 source).
         const { data: rpcResult, error: rpcError } = await (supabase as any).rpc(
           "update_subscription_status",
           {
@@ -684,7 +1030,31 @@ export async function POST(req: NextRequest) {
           }
         )
         if (rpcError) {
-          console.error("update_subscription_status RPC failed:", rpcError)
+          console.error("update_subscription_status RPC failed:", {
+            eventId: event.id,
+            eventType: event.type,
+            subscriptionId: subscription.id,
+            code: rpcError.code,
+            message: rpcError.message,
+            details: rpcError.details,
+          })
+          await writeDeadLetter({
+            supabase,
+            event,
+            rpcName: "update_subscription_status",
+            rpcError,
+            extra: {
+              stripe_subscription_id: subscription.id,
+              status: subscription.status,
+            },
+          })
+          processedOk = false
+          outResponse = failLoudResponse(
+            event,
+            rpcError,
+            "update_subscription_status RPC failed; event dead-lettered for manual reconciliation"
+          )
+          return outResponse
         }
 
         // Stripe stores the original tier in subscription.metadata.tier.  When
@@ -735,11 +1105,22 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        console.log(
-          `Subscription updated: ${subscription.id} status=${subscription.status} planChange=${
-            newPlanId ? `→${newPlanTier}` : "no"
-          } rpcUserId=${rpcResult?.[0]?.out_user_id ?? "none"}`
-        )
+        // ===== NEW-1 smoking-gun log line =====
+        // Pre-fix, this read `subscription updated: ... rpcUserId=none` at
+        // INFO level even when the RPC had silently 42702'd.  Now: if the RPC
+        // returned no rows (the symptom of the bug, even with a fail-loud
+        // RPC), emit an ERROR-level structured line so CloudWatch alarms.
+        if (!rpcResult || rpcResult.length === 0) {
+          console.error(
+            `subscription.updated WEBHOOK_FAILED: event=${event.id} sub=${subscription.id} status=${subscription.status} rpcError=${(rpcError as RpcLikeError | null)?.code ?? "none"} rpcRows=${rpcResult?.length ?? 0}`
+          )
+        } else {
+          console.log(
+            `Subscription updated: ${subscription.id} status=${subscription.status} planChange=${
+              newPlanId ? `→${newPlanTier}` : "no"
+            } rpcUserId=${rpcResult?.[0]?.out_user_id ?? "none"}`
+          )
+        }
         break
       }
 
@@ -767,7 +1148,31 @@ export async function POST(req: NextRequest) {
           }
         )
         if (rpcError) {
-          console.error("subscription.deleted RPC failed:", rpcError)
+          console.error("subscription.deleted RPC failed:", {
+            eventId: event.id,
+            eventType: event.type,
+            subscriptionId: subscription.id,
+            code: rpcError.code,
+            message: rpcError.message,
+            details: rpcError.details,
+          })
+          await writeDeadLetter({
+            supabase,
+            event,
+            rpcName: "update_subscription_status",
+            rpcError,
+            extra: {
+              stripe_subscription_id: subscription.id,
+              status: "canceled",
+            },
+          })
+          processedOk = false
+          outResponse = failLoudResponse(
+            event,
+            rpcError,
+            "update_subscription_status (delete) RPC failed; event dead-lettered"
+          )
+          return outResponse
         }
 
         // Defensive fallback: subscription wasn't in our DB.  Find the user
@@ -830,7 +1235,7 @@ export async function POST(req: NextRequest) {
       // Handle invoice payment (monthly renewal)
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as any
-        
+
         // Skip the first invoice (handled by checkout.session.completed)
         if (invoice.billing_reason === "subscription_create") {
           console.log("Skipping first invoice - handled by checkout.session.completed")
@@ -956,11 +1361,20 @@ export async function POST(req: NextRequest) {
             console.error(
               `webhook.invoice.fallback.exhausted subscription=${subscriptionId} invoice=${invoice.id} — returning 500 for Stripe to retry`
             )
+            await writeDeadLetter({
+              supabase,
+              event,
+              rpcName: "(period derivation)",
+              rpcError: { code: "period_exhausted", message: "Unable to derive billing period for renewal" },
+              extra: { stripe_subscription_id: subscriptionId, invoice_id: invoice.id },
+            })
+            processedOk = false
             outResponse = NextResponse.json(
               {
                 error: "Unable to derive billing period for renewal",
                 subscription_id: subscriptionId,
                 invoice_id: invoice.id,
+                eventId: event.id,
               },
               { status: 500 }
             )
@@ -981,7 +1395,7 @@ export async function POST(req: NextRequest) {
             .gte("created_at", periodStart)
             .lte("created_at", periodEnd)
             .single()
-          
+
           if (existingRenewal) {
             console.log(`Credits already granted for this billing period (${periodStart} to ${periodEnd}), skipping`)
             break
@@ -1016,7 +1430,35 @@ export async function POST(req: NextRequest) {
           )
 
           if (rpcError) {
-            console.error("grant_subscription_credits_atomic (renewal) failed:", rpcError)
+            console.error("grant_subscription_credits_atomic (renewal) failed:", {
+              eventId: event.id,
+              eventType: event.type,
+              subscriptionId,
+              invoiceId: invoice.id,
+              userId,
+              code: rpcError.code,
+              message: rpcError.message,
+              details: rpcError.details,
+            })
+            await writeDeadLetter({
+              supabase,
+              event,
+              rpcName: "grant_subscription_credits_atomic",
+              rpcError,
+              extra: {
+                stripe_subscription_id: subscriptionId,
+                invoice_id: invoice.id,
+                user_id: userId,
+                source: "invoice.payment_succeeded (renewal)",
+              },
+            })
+            processedOk = false
+            outResponse = failLoudResponse(
+              event,
+              rpcError,
+              "grant_subscription_credits_atomic (renewal) failed; event dead-lettered"
+            )
+            return outResponse
           } else {
             const result = Array.isArray(rpcRows) ? rpcRows[0] : (rpcRows as any)
             if (result?.was_granted) {
@@ -1041,7 +1483,7 @@ export async function POST(req: NextRequest) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as any
         const subscriptionId = invoice.subscription as string
-        
+
         await (supabase as any)
           .from("user_subscriptions")
           .update({
@@ -1088,10 +1530,28 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", event.id)
 
+    // Record idempotency success.  Future Stripe retries for the same event.id
+    // will short-circuit at the top of this handler via the existingProcessed
+    // check.  Upsert (onConflict=stripe_event_id) is safe under concurrent
+    // sibling-replica deliveries.
+    if (processedOk) {
+      await supabase
+        .from("webhook_events_processed")
+        .upsert(
+          {
+            stripe_event_id: event.id,
+            event_type: event.type,
+            succeeded: true,
+          },
+          { onConflict: "stripe_event_id" }
+        )
+    }
+
     outResponse = NextResponse.json({ received: true })
     return outResponse
   } catch (error) {
     // Webhook processing error occurred
+    processedOk = false
     outResponse = NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }

@@ -1520,7 +1520,14 @@ pip3 install --quiet \\
   requests \\
   python-xlib \\
   pytesseract \\
-  selenium
+  selenium \\
+  webdriver-manager \\
+  beautifulsoup4 \\
+  lxml \\
+  pandas \\
+  openpyxl \\
+  pyperclip \\
+  httpx
 
 # Remove screen lockers that get pulled in by xfce4-goodies
 apt-get remove -y light-locker xfce4-screensaver xscreensaver 2>/dev/null || true

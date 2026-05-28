@@ -311,9 +311,12 @@ resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency" {
     }
   }
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
-  tags          = { Name = "${var.project_name}-frontend-p99-latency" }
+  # Actions intentionally omitted — paging is routed through
+  # aws_cloudwatch_composite_alarm.frontend_p99_any below. This alarm's state
+  # is still visible in CloudWatch for post-mortem forensics (which p99 shape
+  # fired: sustained vs rolling-slow vs burst). See the composite for the
+  # 2026-05-27 dedup rationale.
+  tags = { Name = "${var.project_name}-frontend-p99-latency" }
 }
 
 # -----------------------------------------------------------------------------
@@ -375,9 +378,8 @@ resource "aws_cloudwatch_metric_alarm" "frontend_p99_rolling_slow" {
     }
   }
 
-  alarm_actions = local.alarm_actions
-  ok_actions    = local.alarm_actions
-  tags          = { Name = "${var.project_name}-frontend-p99-rolling-slow" }
+  # Actions muted — paging routed through composite (see frontend_p99_any below).
+  tags = { Name = "${var.project_name}-frontend-p99-rolling-slow" }
 }
 
 # Short-burst p99 alarm — catches the kind of incident the alarm above misses.
@@ -446,9 +448,138 @@ resource "aws_cloudwatch_metric_alarm" "frontend_p99_latency_burst" {
     }
   }
 
+  # Actions muted — paging routed through composite (see frontend_p99_any below).
+  tags = { Name = "${var.project_name}-frontend-p99-latency-burst" }
+}
+
+# -----------------------------------------------------------------------------
+# Composite alarm: frontend p99 — single pager fire across all three shapes
+#
+# Context (2026-05-27 dedup)
+# --------------------------
+# The three frontend p99 alarms above (sustained, rolling-slow, burst) each
+# catch a distinct degradation shape and they SHOULD continue to exist as
+# independent detectors. But the 2026-05-26 06:24 UTC spike paged on-call
+# twice (rolling-slow at 06:24Z, latency at 06:28Z) for what was one
+# underlying incident — alert fatigue.
+#
+# Fix: keep the three detectors, but mute their individual SNS actions and
+# route paging through this composite OR alarm instead. One incident now
+# produces exactly one page and one OK notification regardless of how many
+# shape-detectors trip.
+#
+# Post-mortem forensics still work: each underlying alarm's state and history
+# are visible in CloudWatch, so you can see whether the incident manifested
+# as a burst (>10s for 3 of 5 min), a sustained spike (>5s for 5 of 10 min),
+# or slow-rolling latency (>4s for 10 of 30 min) — or all three.
+#
+# Why composite (not metric-math merge): each detector has different
+# evaluation windows (5/10/30 min) and thresholds (10/5/4 s). A single math
+# expression cannot reproduce that without losing the per-shape signal.
+# -----------------------------------------------------------------------------
+resource "aws_cloudwatch_composite_alarm" "frontend_p99_any" {
+  count             = var.enable_alarms ? 1 : 0
+  alarm_name        = "${var.project_name}-frontend-p99-any"
+  alarm_description = "Frontend p99 latency degraded (any of: burst >10s/3min, sustained >5s/5-of-10min, rolling-slow >4s/10-of-30min). De-duplicates the three underlying shape-detectors so one incident pages exactly once. Check the individual member alarms in CloudWatch to identify which latency shape fired."
+
+  alarm_rule = join(" OR ", [
+    "ALARM(\"${aws_cloudwatch_metric_alarm.frontend_p99_latency[0].alarm_name}\")",
+    "ALARM(\"${aws_cloudwatch_metric_alarm.frontend_p99_rolling_slow[0].alarm_name}\")",
+    "ALARM(\"${aws_cloudwatch_metric_alarm.frontend_p99_latency_burst[0].alarm_name}\")",
+  ])
+
+  actions_enabled = true
+  alarm_actions   = local.alarm_actions
+  ok_actions      = local.alarm_actions
+
+  tags = { Name = "${var.project_name}-frontend-p99-any" }
+}
+
+# -----------------------------------------------------------------------------
+# Frontend RequestCountPerTarget overload alarm (2026-05-27 addition)
+#
+# Context
+# -------
+# `aws_appautoscaling_policy.request_count` in ecs.tf targets 200 req/min/
+# target on `ALBRequestCountPerTarget` for the frontend `app` service.
+# AppAutoScaling creates its own pair of CloudWatch alarms internally
+# (TargetTracking-...-AlarmHigh / -AlarmLow). Those alarms are managed by
+# the autoscaling service and do not page on-call directly — they only
+# drive scale-out/in.
+#
+# The 2026-05-25 → 2026-05-27 audit observed steady-state 771 req/min/
+# target with peaks of 2180 and ZERO scale-out events firing. That means
+# either:
+#   (a) The internal AppAutoScaling AlarmHigh is in INSUFFICIENT_DATA
+#       (e.g. the ResourceLabel points at a TG that no longer carries the
+#       service's traffic), so it never fires.
+#   (b) max_capacity has been hit and scaling cannot help — the workload
+#       is genuinely larger than provisioned headroom.
+# Either way, sustained req/min/target ≫ the autoscale target is the
+# critical condition we want to page on, because it means user-facing
+# traffic is queuing on tasks that scaling did not save us from.
+#
+# Threshold rationale
+# -------------------
+# - Autoscale target: 200 req/min/target (var.request_count_per_target_target).
+# - Critical alarm at 5x that target sustained for 5 min — well above
+#   typical bursts AND above the autoscale's correction zone, so it
+#   ONLY fires when scaling has demonstrably failed to keep up.
+# - Math expression with a min-request gate (>= 30 req/min total at the
+#   TG) prevents low-traffic windows from producing meaningless ratios
+#   (matches the gating pattern used on the frontend p99 alarms).
+# -----------------------------------------------------------------------------
+resource "aws_cloudwatch_metric_alarm" "frontend_request_count_overload" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project_name}-frontend-request-overload"
+  alarm_description   = "Frontend req/min/target > 1000 (5x autoscale target) sustained 5 min with >= 30 req/min in window. Means AppAutoScaling has failed to keep up (either AlarmHigh in INSUFFICIENT_DATA or max_capacity exhausted). User-facing traffic is queuing. Investigate AppAutoScaling state + max_capacity headroom."
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 5
+  datapoints_to_alarm = 5
+  threshold           = 1000
+  treat_missing_data  = "notBreaching"
+
+  metric_query {
+    id          = "rpt"
+    return_data = true
+    expression  = "IF(reqs >= 30, rpt_raw, 0)"
+    label       = "req/min/target (gated on >= 30 req/min total)"
+  }
+
+  metric_query {
+    id = "rpt_raw"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "RequestCountPerTarget"
+      period      = 60
+      stat        = "Sum"
+      dimensions = {
+        TargetGroup = aws_lb_target_group.frontend.arn_suffix
+      }
+    }
+  }
+
+  metric_query {
+    id = "reqs"
+    metric {
+      namespace   = "AWS/ApplicationELB"
+      metric_name = "RequestCount"
+      period      = 60
+      stat        = "Sum"
+      dimensions = {
+        TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+        LoadBalancer = aws_lb.main.arn_suffix
+      }
+    }
+  }
+
   alarm_actions = local.alarm_actions
   ok_actions    = local.alarm_actions
-  tags          = { Name = "${var.project_name}-frontend-p99-latency-burst" }
+
+  tags = merge(local.alerting_tags, {
+    Name     = "${var.project_name}-frontend-request-overload"
+    Severity = "P1"
+  })
 }
 
 # Equivalent burst-pattern p99 alarms for the api / sse / ws split target
@@ -981,11 +1112,33 @@ resource "aws_cloudwatch_metric_alarm" "alb_internal_target_5xx_count" {
 # three_service_split flag.
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# 2026-05-27 namespace correction (the "10-day zombie alarm" fix)
+#
+# These four alarms (`-ecs-app-task-count` and the three split-service
+# `-ecs-{api,sse,ws}-task-count`) sat stuck in ALARM from 2026-05-17 through
+# 2026-05-27 — 10 calendar days of false-positive paging — because the
+# metric was being read from the wrong namespace.
+#
+# `RunningTaskCount` is published ONLY in the `ECS/ContainerInsights`
+# namespace, NOT in `AWS/ECS`. The basic `AWS/ECS` namespace only carries
+# CPUUtilization, MemoryUtilization, CPUReservation, MemoryReservation.
+# With `treat_missing_data = "breaching"`, the missing-namespace metric
+# caused continuous ALARM state and no real datapoints.
+#
+# Container Insights is enabled on the cluster (see ecs.tf cluster setting
+# `containerInsights = enabled`), so the metric IS publishing — just not
+# under the namespace these alarms were querying.
+#
+# The fix is the namespace change. Threshold and missing-data behaviour
+# are deliberately retained: a real "below desired count for 5 min" event
+# is genuinely critical (OOM kill, failed deploy, capacity exhaustion).
+# -----------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "ecs_app_task_count" {
   count               = var.enable_alarms ? 1 : 0
   alarm_name          = "${var.project_name}-ecs-app-task-count"
-  alarm_description   = "Frontend ECS service running task count fell below desired for 5 min.  Likely OOM kill or a deploy that couldn't place tasks.  Check task stop reasons in ECS console."
-  namespace           = "AWS/ECS"
+  alarm_description   = "Frontend ECS service running task count fell below floor (${var.min_capacity}) for 5 min. Real signals only: OOM kill, failed deploy, or capacity exhaustion. The 2026-05-17 to 2026-05-27 zombie-ALARM period was a namespace bug (AWS/ECS instead of ECS/ContainerInsights), now fixed."
+  namespace           = "ECS/ContainerInsights"
   metric_name         = "RunningTaskCount"
   statistic           = "Minimum"
   period              = 60
@@ -996,7 +1149,11 @@ resource "aws_cloudwatch_metric_alarm" "ecs_app_task_count" {
   # an alarm until it sticks for 5 minutes.
   threshold           = var.min_capacity
   comparison_operator = "LessThanThreshold"
-  treat_missing_data  = "breaching"
+  # treat_missing_data = "breaching" is intentional: if the metric stops
+  # publishing entirely (Container Insights agent crash, IAM revocation,
+  # account suspension) we WANT to be paged. The bug that caused 10 days
+  # of false alarms was the wrong namespace, not this setting.
+  treat_missing_data = "breaching"
 
   dimensions = {
     ClusterName = aws_ecs_cluster.main.name
@@ -1016,8 +1173,8 @@ resource "aws_cloudwatch_metric_alarm" "ecs_split_task_count" {
   for_each = var.enable_alarms && var.three_service_split_enabled ? toset(["api", "sse", "ws"]) : toset([])
 
   alarm_name          = "${var.project_name}-ecs-${each.key}-task-count"
-  alarm_description   = "${each.key} ECS service running task count fell below floor for 5 min.  ws task crash kills Electron desktop connectivity; sse task crash kills chat streaming; api task crash kills CRUD."
-  namespace           = "AWS/ECS"
+  alarm_description   = "${each.key} ECS service running task count fell below floor for 5 min. ws task crash kills Electron desktop connectivity; sse task crash kills chat streaming; api task crash kills CRUD. See ecs_app_task_count for the 2026-05-27 namespace-bug rationale."
+  namespace           = "ECS/ContainerInsights"
   metric_name         = "RunningTaskCount"
   statistic           = "Minimum"
   period              = 60

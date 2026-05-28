@@ -137,11 +137,16 @@ describe('schema.sql ↔ migrations: RETURNS TABLE name consistency', () => {
     }
   })
 
-  it('schema.sql sets plpgsql.variable_conflict = use_column on update_subscription_status (migration 021 hardening)', () => {
+  it('schema.sql does NOT set plpgsql.variable_conflict on update_subscription_status (Supabase 42501 constraint)', () => {
+    // Supabase managed Postgres rejects `SET plpgsql.variable_conflict = ...`
+    // at function-definition time with 42501 (permission denied; SUPERUSER
+    // required). Migration 021 documents this explicitly in its preamble
+    // and the canonical fix is the out_* OUT-param rename, not the GUC.
+    // If this assertion ever flips, the function will fail to deploy on
+    // Supabase — keep this in lockstep with migration 021.
     const fn = SCHEMA_FN_BY_NAME.get('update_subscription_status')!
-    // Look in the function header (before AS $$), case-insensitive.
     const header = fn.raw.split(/\bAS\s+\$/i)[0]
-    expect(header.toLowerCase()).toContain('plpgsql.variable_conflict = use_column')
+    expect(header.toLowerCase()).not.toContain('plpgsql.variable_conflict')
   })
 })
 

@@ -800,7 +800,10 @@ body.coasty-signing-out [data-sonner-toast] {
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.6 0.18 15);
   --destructive-foreground: oklch(0.95 0.01 20);
-  --border: oklch(100% 0 0 / 40%);
+  /* Hairline border — softened from white/40% (harsh white edge on
+     buttons/cards in dark mode) to a quiet white/12%, in line with
+     --sidebar-border below and the rest of the hairline design language. */
+  --border: oklch(100% 0 0 / 12%);
   --input: oklch(20% 0 0);
   --ring: oklch(0.6 0.017 285.786);
   --chart-1: oklch(0.488 0.243 264.376);

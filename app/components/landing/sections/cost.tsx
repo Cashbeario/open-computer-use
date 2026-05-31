@@ -12,7 +12,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LandingSectionTopGlow, LandingSectionHeader } from "../section-shell"
 
@@ -47,7 +47,9 @@ export function CostSection({ isMobile }: { isMobile: boolean }) {
             "relative rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-[2px] overflow-hidden"
           )}
         >
-          {/* Column header */}
+          {/* Column header — desktop only. On mobile each row self-labels
+              its values with ✕ / ✓ + weight, so the column header is dropped. */}
+          {!isMobile && (
           <div
             className={cn(
               "grid items-center border-b border-foreground/10",
@@ -85,6 +87,7 @@ export function CostSection({ isMobile }: { isMobile: boolean }) {
               </span>
             </span>
           </div>
+          )}
 
           {/* Comparison rows */}
           <div>
@@ -164,6 +167,40 @@ function ComparisonRow({
   coasty: string
   index: number
 }) {
+  // ── MOBILE: stacked block ──
+  // The 3-column table crushes long values (e.g. "Run unlimited tasks in
+  // parallel") into ~70px columns that wrap to 4–5 lines on a phone. On
+  // mobile we drop to one column: the row label on top, then the manual
+  // and Coasty values stacked full-width with ✕ / ✓ + weight carrying the
+  // comparison. Long values now read on 1–2 lines instead of a ragged stack.
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+        transition={{ duration: 0.45, ease: EASE, delay: 0.1 + index * 0.05 }}
+        className={cn(
+          "px-4 py-4 transition-colors duration-300",
+          !isLast && "border-b border-foreground/[0.06]",
+        )}
+        data-row-key={rowKey}
+      >
+        <div className="mb-2.5 text-[13px] font-medium text-foreground/80">{label}</div>
+        <div className="space-y-1.5">
+          <div className="flex items-start gap-2 text-[13px] leading-snug text-foreground/45">
+            <X className="mt-[3px] h-3 w-3 shrink-0 text-foreground/30" strokeWidth={2.2} />
+            <span>{manual}</span>
+          </div>
+          <div className="flex items-start gap-2 text-[13px] font-medium leading-snug text-foreground">
+            <Check className="mt-[3px] h-3 w-3 shrink-0 text-foreground/60" strokeWidth={2.4} />
+            <span>{coasty}</span>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

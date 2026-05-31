@@ -692,6 +692,171 @@ function ResizeHandles({ windowSize }: { windowSize: { width: number; height: nu
   )
 }
 
+/* ─── Working-state smoke ─────────────────────────────────────────────────
+   A cobalt haze rendered behind the overlay content in BOTH compact and
+   expanded modes (see the `.smoke*` rules in globals.css for geometry/colour).
+
+   Motion is driven by ONE requestAnimationFrame loop. A single accumulated
+   time `t` advances by `dt * speed` each frame, and `speed` eases 0↔1 toward
+   the task-running state with a ~0.7s time constant. Each of the five clouds
+   drifts along a SUM of two detuned sines per axis (organic, non-elliptical),
+   with its own scale "breathing", slow rotation, and a density (opacity) pulse
+   so the haze thickens and thins; the layers `screen`-blend so they glow where
+   they overlap, like lit fog. Because every term is a function of `t`, and `t`
+   only advances at the eased `speed`, the visible
+   VELOCITY is proportional to `speed`. So when a task starts the drift glides
+   up to full motion, and when it ends the drift DECELERATES smoothly to a
+   complete, frozen still (no snap). The layer is always visible — idle is just
+   a calmer, dimmer static composition. The loop parks itself (zero CPU) once
+   idle has fully settled and relaunches when the next task begins. Only
+   `transform` + `opacity` are written, both via refs, so React re-renders
+   never fight the animation and everything stays on the GPU compositor.
+   `prefers-reduced-motion` keeps it permanently static. */
+interface SmokeSine { a: number; f: number; p: number } // amplitude(%), freq(rad/s), phase
+interface SmokeBlob {
+  x: [SmokeSine, SmokeSine]   // two detuned sines per axis → organic, non-elliptical drift
+  y: [SmokeSine, SmokeSine]
+  baseS: number; sAmp: number; sF: number; sP: number   // scale "breathing"
+  rAmp: number; rF: number; rP: number                  // rotation (deg)
+  oB: number; oA: number; oF: number; oP: number        // per-blob density (opacity) pulse
+}
+// Five layers: a deep slow base → mid bodies → bright fast wisps. Bodies move
+// little + slow; wisps move more + quicker. Translate amplitudes are % of each
+// blob's own size; every frequency is low and mutually detuned so the
+// composite never visibly repeats (real smoke never looks periodic).
+const SMOKE_BLOBS: SmokeBlob[] = [
+  { x: [{ a: 9, f: 0.12, p: 0.0 }, { a: 5, f: 0.21, p: 1.3 }], y: [{ a: 12, f: 0.10, p: 0.6 }, { a: 6, f: 0.16, p: 2.1 }], baseS: 1.05, sAmp: 0.09, sF: 0.10, sP: 0.4, rAmp: 4, rF: 0.07, rP: 0.7, oB: 0.85, oA: 0.14, oF: 0.09, oP: 1.0 },
+  { x: [{ a: 14, f: 0.17, p: 2.1 }, { a: 7, f: 0.29, p: 0.2 }], y: [{ a: 12, f: 0.15, p: 0.3 }, { a: 6, f: 0.24, p: 1.7 }], baseS: 1.05, sAmp: 0.11, sF: 0.14, sP: 1.2, rAmp: 6, rF: 0.12, rP: 2.0, oB: 0.82, oA: 0.16, oF: 0.13, oP: 0.3 },
+  { x: [{ a: 24, f: 0.24, p: 1.2 }, { a: 11, f: 0.40, p: 2.6 }], y: [{ a: 20, f: 0.22, p: 3.0 }, { a: 10, f: 0.34, p: 0.5 }], baseS: 1.05, sAmp: 0.14, sF: 0.20, sP: 0.9, rAmp: 9, rF: 0.17, rP: 1.4, oB: 0.78, oA: 0.18, oF: 0.18, oP: 2.2 },
+  { x: [{ a: 30, f: 0.32, p: 0.4 }, { a: 14, f: 0.50, p: 1.9 }], y: [{ a: 25, f: 0.29, p: 1.1 }, { a: 12, f: 0.45, p: 2.8 }], baseS: 1.05, sAmp: 0.16, sF: 0.26, sP: 0.6, rAmp: 12, rF: 0.23, rP: 0.9, oB: 0.74, oA: 0.20, oF: 0.24, oP: 1.6 },
+  { x: [{ a: 36, f: 0.42, p: 1.7 }, { a: 17, f: 0.62, p: 0.5 }], y: [{ a: 30, f: 0.38, p: 0.2 }, { a: 15, f: 0.56, p: 2.3 }], baseS: 1.05, sAmp: 0.18, sF: 0.34, sP: 2.0, rAmp: 14, rF: 0.30, rP: 1.2, oB: 0.70, oA: 0.22, oF: 0.30, oP: 0.8 },
+]
+const SMOKE_IDLE_OPACITY = 0.45
+const SMOKE_RUN_OPACITY = 0.95
+const SMOKE_SPEED_TAU = 0.7 // s — ease constant for the accel-in / settle-out
+
+const smokeWave = (c: [SmokeSine, SmokeSine], t: number): number =>
+  c[0].a * Math.sin(t * c[0].f + c[0].p) + c[1].a * Math.sin(t * c[1].f + c[1].p)
+
+function smokeTransform(b: SmokeBlob, t: number, xScale: number, yScale: number): string {
+  const x = smokeWave(b.x, t) * xScale
+  const y = smokeWave(b.y, t) * yScale
+  const s = b.baseS + b.sAmp * Math.sin(t * b.sF + b.sP)
+  const r = b.rAmp * Math.sin(t * b.rF + b.rP)
+  return `translate3d(${x.toFixed(2)}%, ${y.toFixed(2)}%, 0) scale(${s.toFixed(3)}) rotate(${r.toFixed(2)}deg)`
+}
+
+function smokeOpacity(b: SmokeBlob, t: number): number {
+  return b.oB + b.oA * Math.sin(t * b.oF + b.oP)
+}
+
+const SmokeLayer = React.memo(function SmokeLayer({ active, expanded }: { active: boolean; expanded: boolean }) {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const b1 = React.useRef<HTMLSpanElement>(null)
+  const b2 = React.useRef<HTMLSpanElement>(null)
+  const b3 = React.useRef<HTMLSpanElement>(null)
+  const b4 = React.useRef<HTMLSpanElement>(null)
+  const b5 = React.useRef<HTMLSpanElement>(null)
+
+  const tRef = React.useRef(0)          // accumulated motion time (s)
+  const speedRef = React.useRef(0)      // eased 0..1
+  const targetRef = React.useRef(active ? 1 : 0)
+  const rafRef = React.useRef<number | null>(null)
+  const lastTsRef = React.useRef(0)
+  const reduceRef = React.useRef(false)
+  const expandedRef = React.useRef(expanded)
+
+  const writeFrame = React.useCallback(() => {
+    const t = tRef.current
+    // Compact is short + wide: push horizontal travel so the round wisps glide
+    // boldly across the pill, while keeping vertical motion in check so they
+    // don't clip the 56px ceiling. Expanded uses the full organic motion.
+    const xScale = expandedRef.current ? 1 : 1.6
+    const yScale = expandedRef.current ? 1 : 0.5
+    const els = [b1.current, b2.current, b3.current, b4.current, b5.current]
+    for (let i = 0; i < SMOKE_BLOBS.length; i++) {
+      const el = els[i]
+      if (!el) continue
+      el.style.transform = smokeTransform(SMOKE_BLOBS[i], t, xScale, yScale)
+      el.style.opacity = smokeOpacity(SMOKE_BLOBS[i], t).toFixed(3)
+    }
+    if (containerRef.current) {
+      const op = SMOKE_IDLE_OPACITY + (SMOKE_RUN_OPACITY - SMOKE_IDLE_OPACITY) * speedRef.current
+      containerRef.current.style.opacity = op.toFixed(3)
+    }
+  }, [])
+
+  const tick = React.useCallback((ts: number) => {
+    const last = lastTsRef.current
+    const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016 // clamp tab-sleep gaps
+    lastTsRef.current = ts
+
+    // Critically-damped ease of speed toward the target.
+    const k = 1 - Math.exp(-dt / SMOKE_SPEED_TAU)
+    speedRef.current += (targetRef.current - speedRef.current) * k
+    // Advance motion time ONLY by the eased speed → velocity ∝ speed, so the
+    // drift glides to a stop rather than snapping when a task ends.
+    tRef.current += dt * speedRef.current
+
+    writeFrame()
+
+    // Settled into idle → park the loop; the blobs hold their last frozen
+    // transform until the next task starts.
+    if (targetRef.current === 0 && speedRef.current < 0.002) {
+      speedRef.current = 0
+      writeFrame()
+      rafRef.current = null
+      lastTsRef.current = 0
+      return
+    }
+    rafRef.current = requestAnimationFrame(tick)
+  }, [writeFrame])
+
+  const start = React.useCallback(() => {
+    if (rafRef.current != null || reduceRef.current) return
+    lastTsRef.current = 0
+    rafRef.current = requestAnimationFrame(tick)
+  }, [tick])
+
+  // Mount: honour reduced-motion and paint the initial static frame.
+  React.useLayoutEffect(() => {
+    reduceRef.current =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+    if (reduceRef.current) { speedRef.current = 0; targetRef.current = 0 }
+    writeFrame()
+    return () => {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+  }, [writeFrame])
+
+  // Retarget on running-state change. Starting the loop covers BOTH the
+  // ease-in (target 1) and the ease-out-to-settle (target 0) directions.
+  React.useEffect(() => {
+    if (reduceRef.current) return
+    targetRef.current = active ? 1 : 0
+    start()
+  }, [active, start])
+
+  // Mode change: update the scale source and repaint once so the new per-mode
+  // geometry + damping show immediately, even when idle (loop parked).
+  React.useEffect(() => {
+    expandedRef.current = expanded
+    writeFrame()
+  }, [expanded, writeFrame])
+
+  return (
+    <div ref={containerRef} aria-hidden="true" className={`smoke ${expanded ? 'smoke--expanded' : 'smoke--compact'}`}>
+      <span ref={b1} className="smoke-blob smoke-blob-1" />
+      <span ref={b2} className="smoke-blob smoke-blob-2" />
+      <span ref={b3} className="smoke-blob smoke-blob-3" />
+      <span ref={b4} className="smoke-blob smoke-blob-4" />
+      <span ref={b5} className="smoke-blob smoke-blob-5" />
+    </div>
+  )
+})
+
 /* ═══════════════════════════════════════════
    MAIN OVERLAY
    ═══════════════════════════════════════════ */
@@ -745,88 +910,17 @@ export function Overlay() {
   // Auto-expand on approval
   React.useEffect(() => { if (pendingApprovals.length > 0 && !isExpanded) toggleExpanded() }, [pendingApprovals.length])
 
-  // ─── Auto-collapse on stream START + auto-restore on stream END ───
+  // ─── Window mode is the user's choice ───
   //
-  // Three refs drive the state machine:
-  //
-  //   wasExpandedAtStartRef — were they expanded when this stream began?
-  //   userStoppedRef         — did they click Stop themselves?
-  //   userToggledDuringStreamRef — did they manually toggle mode mid-task?
-  //
-  // Decision tree at stream END (true→false edge), given mode === 'compact':
-  //
-  //   stoppedByUser → expand. They asked us to abort; show them the panel
-  //                   so they can react regardless of any prior toggling.
-  //   wasExpanded
-  //     && !userToggled → expand. Started expanded, didn't manually
-  //                       override mid-stream → restore where they started.
-  //   else            → leave compact. They started compact, OR they
-  //                       manually toggled to compact during the stream.
-  //                       Either way, respect their last choice.
-  //
-  // The `userToggled` flag is set by `userToggleExpand()` (defined below),
-  // which wraps every user-initiated mode toggle. The system-driven
-  // approval auto-expand and the auto-collapse/restore effect itself use
-  // `setMode`/`toggleExpanded` directly so they don't pollute the flag.
-  //
-  // `wasStreaming` is captured at the top of the effect once so an
-  // instant-fail stream (true→false in the same render cycle) still
-  // reliably hits both edges via the snapshot rather than the ref.
-  const prevStreamingRef = React.useRef(false)
-  const wasExpandedAtStartRef = React.useRef(false)
-  const userStoppedRef = React.useRef(false)
-  const userToggledDuringStreamRef = React.useRef(false)
-  const { setMode } = useWindowStore()
-
-  // Wraps handleStop so the END branch can tell a user-initiated stop
-  // apart from a natural stream completion.
-  const stopTask = React.useCallback(() => {
-    userStoppedRef.current = true
-    handleStop()
-  }, [handleStop])
-
-  // Wraps toggleExpanded so user-initiated mode toggles during a stream
-  // mark the userToggled flag — preventing the END branch from overriding
-  // the user's last manual choice on a natural completion.
-  const userToggleExpand = React.useCallback(() => {
-    if (isStreaming) userToggledDuringStreamRef.current = true
-    toggleExpanded()
-  }, [isStreaming, toggleExpanded])
-
-  React.useEffect(() => {
-    const wasStreaming = prevStreamingRef.current
-
-    if (isStreaming && !wasStreaming) {
-      // Stream START
-      wasExpandedAtStartRef.current = mode === 'expanded'
-      userStoppedRef.current = false
-      userToggledDuringStreamRef.current = false
-      if (mode === 'expanded') setMode('compact')
-    } else if (!isStreaming && wasStreaming) {
-      // Stream END
-      const stoppedByUser = userStoppedRef.current
-      const wasExpanded = wasExpandedAtStartRef.current
-      const userToggled = userToggledDuringStreamRef.current
-
-      if (mode === 'compact') {
-        if (stoppedByUser) {
-          // User-initiated stop ALWAYS expands so they see what happened
-          setMode('expanded')
-        } else if (wasExpanded && !userToggled) {
-          // Natural end + we auto-collapsed at start + user didn't
-          // manually override mid-stream → restore to expanded
-          setMode('expanded')
-        }
-        // else: stayed in compact intentionally — respect their choice
-      }
-
-      wasExpandedAtStartRef.current = false
-      userStoppedRef.current = false
-      userToggledDuringStreamRef.current = false
-    }
-
-    prevStreamingRef.current = isStreaming
-  }, [isStreaming])
+  // Sending a task no longer auto-collapses an expanded overlay, and
+  // finishing or stopping no longer auto-restores/auto-expands: whatever mode
+  // the user is in (compact pill or expanded panel) stays put across the whole
+  // task lifecycle. The only system-driven expansions left are the ones that
+  // genuinely need the panel to act on — a pending approval (effect above) and
+  // the awaiting-human handoff (App.tsx) — both of which are reversible by the
+  // user. These two thin aliases keep the existing call sites unchanged.
+  const stopTask = handleStop
+  const userToggleExpand = toggleExpanded
 
   // Sync opacity
   React.useEffect(() => {
@@ -887,10 +981,11 @@ export function Overlay() {
     // (see app/components/chat-input/chat-input.tsx): never destroy
     // user-typed content without confirmation.
     //
-    // Always navigate to the chat panel and (if compact) expand the
-    // overlay so the user can see the chat thread / busy banner —
-    // whether they're sending or being prompted to override.
-    if (!isExpanded) userToggleExpand()
+    // Do NOT change the window mode on send — respect where the user is. A
+    // compact user stays in the pill (and sees the live StreamingTicker /
+    // override button); an expanded user stays in the panel. We only ensure
+    // the active page is the chat (a no-op in compact, where page is always
+    // 'chat').
     if (page !== 'chat') setPage('chat')
 
     const files = attachedFiles.length > 0 ? attachedFiles : undefined
@@ -977,16 +1072,12 @@ export function Overlay() {
           borderRadius: 'inherit',
         }} />
 
-      {/* Working-state smoke — cobalt fog that drifts behind content ONLY while
-          the agent is mid-task. Pure CSS (transform/opacity only); fades in
-          over 600ms via data-active. Sits at z-index -5: above the three -z-10
-          backing layers (so the glass blur never washes it out) and below the
-          chat content. Replaces the old desktop rainbow glow. */}
-      <div aria-hidden="true" className="smoke" data-active={isStreaming ? 'true' : 'false'}>
-        <span className="smoke-blob smoke-blob-1" />
-        <span className="smoke-blob smoke-blob-2" />
-        <span className="smoke-blob smoke-blob-3" />
-      </div>
+      {/* Working-state smoke — cobalt haze behind the content in BOTH compact
+          and expanded modes. <SmokeLayer> drifts it while a task runs and eases
+          the motion to a frozen still when idle (never a hard stop). Sits at
+          z-index -5: above the three -z-10 backing layers (so the glass blur
+          never washes it out) and below the chat content. */}
+      <SmokeLayer active={isStreaming} expanded={isExpanded} />
 
       {/* ═══ PILL BAR ═══ */}
       <div className="titlebar-drag flex items-center gap-2.5 w-full h-14 px-3 flex-shrink-0 select-none">

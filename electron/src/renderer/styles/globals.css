@@ -358,13 +358,16 @@ html, body {
 }
 
 /* ─── Working-state smoke / fog ──────────────────────────────────────────
-   Volumetric cobalt smoke that drifts behind UI content ONLY while the agent
-   is working (gated by data-active, driven from isStreaming). CSS-only: three
-   layered radial-gradient blobs, each on its own slow keyframe at a different
-   size / speed / phase so the composite motion never visibly loops. Animates
-   transform + opacity exclusively (GPU compositor — no per-frame paint or
-   layout). The soft "blur" is baked into the gradient falloff + a static edge
-   mask, NOT an animated filter.
+   Volumetric cobalt smoke behind the overlay content, shown in BOTH compact
+   and expanded modes. Three layered radial-gradient blobs whose motion is
+   driven by a single requestAnimationFrame loop in <SmokeLayer> (Overlay.tsx):
+   it advances an accumulated time by `dt * speed`, where `speed` eases 0↔1
+   with the task-running state. Velocity is proportional to speed, so the drift
+   accelerates in smoothly when a task starts and DECELERATES to a frozen still
+   when it ends — never a hard snap. The layer stays visible at all times; it
+   just settles to a calmer static haze when idle. Only transform + opacity are
+   written each frame (GPU compositor — no paint/layout); the soft "blur" is
+   baked into the gradient falloff + a static edge mask, not an animated filter.
 
    z-index -5: above the three -z-10 backing layers (so the glass
    backdrop-filter blur(40px) never washes it out) but below the chat content
@@ -376,98 +379,68 @@ html, body {
   border-radius: inherit;
   overflow: hidden;          /* clip blobs to the rounded card */
   pointer-events: none;
-  opacity: 0;                /* fades to 1 while a task runs */
-  transition: opacity 600ms var(--ease-apple);
-  /* Feather the layer toward the edges so smoke never hard-clips against the
-     card border — a static mask (no per-frame cost). */
-  -webkit-mask-image: radial-gradient(130% 130% at 50% 50%, #000 55%, transparent 100%);
-          mask-image: radial-gradient(130% 130% at 50% 50%, #000 55%, transparent 100%);
+  opacity: 0.45;             /* idle baseline; SmokeLayer eases it up while running */
+  will-change: opacity;
+  /* Isolate so the blobs' `screen` blend mixes among THEMSELVES over a
+     transparent base (luminous overlaps), never with the desktop behind. */
+  isolation: isolate;
 }
-.smoke[data-active='true'] { opacity: 1; }
+
+/* The whole layer is BLURRED so the individual drifting blobs melt into one
+   continuous, flowing light field — aurora/smoke structure, not discrete
+   dots. (Re-rasterised only while the motion loop runs; idle parks.) */
+
+/* Expanded: a soft blur for billowing curtains, held in the LOWER HALF and
+   faded out toward the top so the content area above stays clean. */
+.smoke--expanded {
+  filter: blur(20px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 38%, rgba(0, 0, 0, 0.4) 62%, transparent 85%);
+          mask-image: linear-gradient(to top, #000 0%, #000 38%, rgba(0, 0, 0, 0.4) 62%, transparent 85%);
+}
+
+/* Compact: a lighter blur (the pill is only 56px tall) + a centred feather so
+   the flowing band melts into the pill's edges. */
+.smoke--compact {
+  filter: blur(6px);
+  -webkit-mask-image: radial-gradient(135% 150% at 50% 50%, #000 34%, transparent 100%);
+          mask-image: radial-gradient(135% 150% at 50% 50%, #000 34%, transparent 100%);
+}
 
 .smoke-blob {
   position: absolute;
-  border-radius: 50%;
+  /* `screen` adds light where the curtains overlap (aurora glow). transform +
+     opacity are written per-frame by SmokeLayer. */
+  mix-blend-mode: screen;
   will-change: transform, opacity;
-  transform: translateZ(0);              /* own compositor layer */
+  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-/* Blob 1 — big slow base cloud: largest, dimmest, slowest; fills the card
-   with atmosphere via a gentle vertical rise + breathing scale. */
-.smoke-blob-1 {
-  width: 150%;
-  height: 220%;
-  left: -25%;
-  bottom: -90%;
-  background: radial-gradient(
-    closest-side,
-    rgba(12, 153, 233, 0.16) 0%,
-    rgba(12, 122, 200, 0.09) 38%,
-    rgba(10, 80, 150, 0.04) 62%,
-    transparent 78%
-  );
-  animation: smoke-rise-1 29s ease-in-out infinite;
-}
+/* Colour per blob — soft elongated (aspect-matched) gradients that overlap
+   into a continuous field once blurred. A gentle blue → cyan → violet shift
+   across the layers gives an aurora shimmer while staying in the brand family.
+   Size + anchor are per-mode below. */
+.smoke-blob-1 { background: radial-gradient(farthest-side, rgba(18, 92, 185, 0.30) 0%, rgba(14, 70, 150, 0.14) 46%, transparent 100%); }
+.smoke-blob-2 { background: radial-gradient(farthest-side, rgba(22, 130, 226, 0.32) 0%, rgba(16, 104, 195, 0.15) 48%, transparent 100%); }
+.smoke-blob-3 { background: radial-gradient(farthest-side, rgba(32, 172, 232, 0.34) 0%, rgba(22, 140, 215, 0.15) 50%, transparent 100%); }
+.smoke-blob-4 { background: radial-gradient(farthest-side, rgba(72, 198, 250, 0.34) 0%, rgba(40, 165, 235, 0.15) 52%, transparent 100%); }
+.smoke-blob-5 { background: radial-gradient(farthest-side, rgba(120, 145, 255, 0.32) 0%, rgba(80, 120, 240, 0.14) 54%, transparent 100%); }
 
-/* Blob 2 — mid cloud: brighter cobalt core, faster diagonal drift + rotation.
-   The layer that most reads as "moving smoke". */
-.smoke-blob-2 {
-  width: 95%;
-  height: 130%;
-  right: -20%;
-  top: -35%;
-  background: radial-gradient(
-    closest-side,
-    rgba(12, 153, 233, 0.22) 0%,
-    rgba(20, 130, 220, 0.11) 40%,
-    rgba(12, 90, 160, 0.04) 66%,
-    transparent 80%
-  );
-  animation: smoke-drift-2 23s ease-in-out infinite;
-}
+/* ── Expanded geometry: large, heavily overlapping layers in the LOWER HALF,
+   so the blur fuses them into a continuous aurora rising from the bottom. ── */
+.smoke--expanded .smoke-blob-1 { width: 170%; height: 110%; left: -35%; bottom: -45%; }
+.smoke--expanded .smoke-blob-2 { width: 115%; height: 92%;  right: -28%; bottom: -32%; }
+.smoke--expanded .smoke-blob-3 { width: 92%;  height: 76%;  left: -10%; bottom: -18%; }
+.smoke--expanded .smoke-blob-4 { width: 76%;  height: 66%;  right: -6%; bottom: -8%; }
+.smoke--expanded .smoke-blob-5 { width: 60%;  height: 56%;  left: 18%;  bottom: 0%; }
 
-/* Blob 3 — small high accent wisp: brightest + quickest; adds a live curl
-   near the top so even the 56px compact pill shows motion. */
-.smoke-blob-3 {
-  width: 60%;
-  height: 95%;
-  left: 18%;
-  top: -30%;
-  background: radial-gradient(
-    closest-side,
-    rgba(40, 170, 245, 0.20) 0%,
-    rgba(12, 153, 233, 0.10) 44%,
-    transparent 74%
-  );
-  animation: smoke-curl-3 19s ease-in-out infinite;
-}
-
-@keyframes smoke-rise-1 {
-  0%   { transform: translate3d(0,    4%, 0) scale(1.00) rotate(0deg); opacity: 0.75; }
-  50%  { transform: translate3d(-3%, -6%, 0) scale(1.12) rotate(3deg); opacity: 1;    }
-  100% { transform: translate3d(0,    4%, 0) scale(1.00) rotate(0deg); opacity: 0.75; }
-}
-
-@keyframes smoke-drift-2 {
-  0%   { transform: translate3d(0,   0,  0) scale(1.00) rotate(0deg);  opacity: 0.6;  }
-  35%  { transform: translate3d(-7%, 5%, 0) scale(1.15) rotate(-6deg); opacity: 0.95; }
-  70%  { transform: translate3d(5%, -4%, 0) scale(0.92) rotate(5deg);  opacity: 0.8;  }
-  100% { transform: translate3d(0,   0,  0) scale(1.00) rotate(0deg);  opacity: 0.6;  }
-}
-
-@keyframes smoke-curl-3 {
-  0%   { transform: translate3d(0,   0,  0) scale(0.95) rotate(0deg);  opacity: 0.5; }
-  40%  { transform: translate3d(8%,  6%, 0) scale(1.20) rotate(10deg); opacity: 0.9; }
-  75%  { transform: translate3d(-5%, 3%, 0) scale(1.05) rotate(-4deg); opacity: 0.7; }
-  100% { transform: translate3d(0,   0,  0) scale(0.95) rotate(0deg);  opacity: 0.5; }
-}
-
-/* Reduced-motion: hold the smoke still but keep a faint static cobalt
-   presence so the working-state still reads. */
-@media (prefers-reduced-motion: reduce) {
-  .smoke-blob { animation: none !important; opacity: 0.7 !important; }
-}
+/* ── Compact geometry: wide, overlapping layers spanning the pill; the blur
+   fuses them into one flowing horizontal band of light. ── */
+.smoke--compact .smoke-blob-1 { width: 95%; height: 200%; left: -8%;  top: -50%; }
+.smoke--compact .smoke-blob-2 { width: 75%; height: 175%; right: -6%; top: -38%; }
+.smoke--compact .smoke-blob-3 { width: 55%; height: 150%; left: 12%;  top: -25%; }
+.smoke--compact .smoke-blob-4 { width: 45%; height: 135%; right: 14%; top: -18%; }
+.smoke--compact .smoke-blob-5 { width: 36%; height: 120%; left: 40%;  top: -10%; }
 
 /* ── Permission toast slide-in ── */
 @keyframes slide-down {

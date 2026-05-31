@@ -15,21 +15,12 @@ import { useDisplayStore } from '../stores/display-store'
 
 /* ─── Helpers ─── */
 
-function statusDot(state: string): string {
-  switch (state) {
-    case 'connected': return 'bg-emerald-400'
-    case 'connecting': return 'bg-yellow-400 animate-pulse'
-    case 'error': return 'bg-red-400'
-    default: return 'bg-neutral-500'
-  }
-}
-
 function statusLabel(state: string): string {
   switch (state) {
     case 'connected': return 'Connected'
-    case 'connecting': return 'Connecting...'
-    case 'error': return 'Connection error'
-    default: return 'Disconnected'
+    case 'connecting': return 'Connecting…'
+    case 'error': return 'Connection error — click to reconnect'
+    default: return 'Disconnected — click to reconnect'
   }
 }
 
@@ -421,17 +412,38 @@ function WelcomeScreen({ user, showGuide, onTry, onDismiss, onEnable, connected 
           ))}
         </p>
 
-        {/* ── Sample prompts — Spotlight-style quoted text rows ──
-             No icons, no chips, no colored accents. Just curly-quoted
-             example commands that brighten on hover. The quotes carry
-             the "this is a thing you can say" semantic. */}
-        {/* Sample prompts removed — welcome screen is now greeting + tagline only.
-            The "Control this PC from your phone" CTA lives as a persistent compact pill
-            above the chat input, so it shows on every screen, not just here. */}
-
-        {/* The Continue-on-phone CTA used to live here — it's now a
-            persistent compact pill above the chat input so it stays
-            visible during conversations, not just on the welcome screen. */}
+        {/* ── Control-from-phone CTA — shown ONLY here on the welcome homepage
+             (greeting + tagline), never during a conversation or on other
+             pages. */}
+        <a
+          href="https://coasty.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group press-scale shimmer-sweep flex items-center gap-2 px-2.5 py-1.5 mt-7 rounded-full bg-white/[0.025] hover:bg-white/[0.05] transition-colors self-center max-w-full"
+          style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.05)' }}
+          title="Sign in on coasty.ai from your phone to control this computer remotely"
+        >
+          <span
+            className="relative flex-shrink-0 w-4 h-4 rounded-[5px] flex items-center justify-center bg-blue-500/15"
+            style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.05)' }}
+          >
+            <span aria-hidden="true" className="aura-ring" />
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-300 relative z-10">
+              <rect x="5" y="2" width="14" height="20" rx="2.5" />
+              <line x1="12" y1="18" x2="12.01" y2="18" />
+            </svg>
+          </span>
+          <span className="text-[10px] text-neutral-400 group-hover:text-neutral-100 tracking-tight transition-colors whitespace-nowrap">
+            Control this PC from your phone
+          </span>
+          <span className="text-[10px] font-medium text-neutral-300 group-hover:text-neutral-50 tracking-tight transition-colors whitespace-nowrap">
+            coasty.ai
+          </span>
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="nudge-arrow text-neutral-600 group-hover:text-neutral-200 flex-shrink-0">
+            <line x1="7" y1="17" x2="17" y2="7" />
+            <polyline points="7 7 17 7 17 17" />
+          </svg>
+        </a>
       </div>
     </div>
   )
@@ -1090,15 +1102,26 @@ export function Overlay() {
           </div>
         )}
 
-        {/* Logo + status badge */}
-        <div className="titlebar-no-drag relative flex-shrink-0 cursor-default" title={statusLabel(connectionState)}
+        {/* Logo — the brand mark itself carries the connection status (no
+            status dot): bright + calm when connected, a soft brightness pulse
+            while connecting, and dimmed (clickable to reconnect) when offline
+            or errored, with a faint red glow on error. */}
+        <div className="titlebar-no-drag relative flex-shrink-0" title={statusLabel(connectionState)}
           onClick={(connectionState === 'disconnected' || connectionState === 'error') ? reconnect : undefined}
-          style={(connectionState === 'disconnected' || connectionState === 'error') ? { cursor: 'pointer' } : undefined}>
-          <svg className="w-5 h-5" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          style={{ cursor: (connectionState === 'disconnected' || connectionState === 'error') ? 'pointer' : 'default' }}>
+          <svg
+            className={`w-5 h-5 ${connectionState === 'connecting' ? 'logo-pulse' : ''}`}
+            viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
+            style={{
+              // 'connecting' leaves opacity to the logo-pulse animation.
+              opacity: connectionState === 'connecting' ? undefined : connectionState === 'connected' ? 1 : 0.4,
+              filter: connectionState === 'error' ? 'drop-shadow(0 0 5px rgba(239, 68, 68, 0.5))' : undefined,
+              transition: 'opacity 500ms var(--ease-apple), filter 500ms var(--ease-apple)',
+            }}
+          >
             <defs><linearGradient id="coastyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="rgba(255,255,255,0)" stopOpacity={0} /><stop offset="30%" stopColor="rgba(255,255,255,0.1)" stopOpacity={1} /><stop offset="50%" stopColor="rgba(255,255,255,0.3)" stopOpacity={1} /><stop offset="70%" stopColor="rgba(255,255,255,0.6)" stopOpacity={1} /><stop offset="100%" stopColor="rgba(255,255,255,1)" stopOpacity={1} /></linearGradient></defs>
             <circle cx="100" cy="100" r="100" fill="url(#coastyGrad)" />
           </svg>
-          <div className={`absolute -bottom-px -right-px w-1.5 h-1.5 rounded-full ring-[1.5px] ring-neutral-950 ${statusDot(connectionState)} ${isStreaming && connectionState === 'connected' ? 'breathe-emerald' : ''}`} />
           {updateStatus === 'ready' && <div className="absolute -top-px -right-px w-1.5 h-1.5 rounded-full bg-emerald-400 ring-[1.5px] ring-neutral-950" />}
         </div>
 
@@ -1277,51 +1300,6 @@ export function Overlay() {
                 )}
               </div>
             )}
-
-            {/* Compact "Control from phone" pill — persistent above the input.
-                Single line, smaller icon, micro shimmer + soft aura kept
-                from the welcome version but at half scale.
-
-                Copy choice: the previous "Continue on your phone" framed
-                this as continuing a chat thread, which under-sells what
-                Coasty's mobile surface actually does (full remote control
-                of this machine — clicks, typing, screenshots, the whole
-                desktop). The new copy makes the value prop explicit. */}
-            <a
-              href="https://coasty.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group press-scale shimmer-sweep flex items-center gap-2 px-2 py-1 mb-1.5 rounded-full bg-white/[0.025] hover:bg-white/[0.05] transition-colors self-center max-w-full"
-              style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.05)' }}
-              title="Sign in on coasty.ai from your phone to control this computer remotely"
-            >
-              <span
-                className="relative flex-shrink-0 w-4 h-4 rounded-[5px] flex items-center justify-center bg-blue-500/15"
-                style={{ boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.05)' }}
-              >
-                <span aria-hidden="true" className="aura-ring" />
-                <svg
-                  width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                  className="text-blue-300 relative z-10"
-                >
-                  <rect x="5" y="2" width="14" height="20" rx="2.5" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" />
-                </svg>
-              </span>
-              <span className="text-[10px] text-neutral-400 group-hover:text-neutral-100 tracking-tight transition-colors whitespace-nowrap">
-                Control this PC from your phone
-              </span>
-              <span className="text-[10px] font-medium text-neutral-300 group-hover:text-neutral-50 tracking-tight transition-colors whitespace-nowrap">
-                coasty.ai
-              </span>
-              <svg
-                width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                className="nudge-arrow text-neutral-600 group-hover:text-neutral-200 flex-shrink-0"
-              >
-                <line x1="7" y1="17" x2="17" y2="7" />
-                <polyline points="7 7 17 7 17 17" />
-              </svg>
-            </a>
 
             {/* Busy-state banner — appears above the input form whenever
                 the machine has another task running and the user has

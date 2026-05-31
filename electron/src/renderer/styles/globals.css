@@ -315,6 +315,15 @@ html, body {
 }
 .breathe-emerald { animation: breathe-emerald 2s ease-out infinite; }
 
+/* Connection status, shown ON the brand mark instead of a status dot: a soft
+   brightness pulse while connecting. (Connected = full + calm; offline =
+   dimmed, both handled inline on the logo.) */
+@keyframes logo-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.logo-pulse { animation: logo-pulse 1.6s ease-in-out infinite; }
+
 /* ── Shining beam border ── */
 @property --beam-angle {
   syntax: '<angle>';

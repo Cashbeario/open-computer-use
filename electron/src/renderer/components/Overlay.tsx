@@ -49,6 +49,59 @@ function EyeIcon({ opacity }: { opacity: number }) {
   return (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>)
 }
 
+function BeamIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+    </svg>
+  )
+}
+
+/**
+ * Presentational iOS-style switch visual. NOT interactive itself — the
+ * enclosing row owns the click + `role="switch"`/`aria-checked` semantics
+ * (a <button> inside a <button> is invalid and double-fires). Geometry is
+ * inline-styled (not Tailwind utilities) so the knob slide and track colour
+ * are guaranteed to render and animate regardless of Tailwind version,
+ * arbitrary-value generation, or the shared `.press-scale` transform.
+ * Track 38x22, knob 18x18, 16px of travel.
+ */
+function ToggleVisual({ checked }: { checked: boolean }) {
+  const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
+  return (
+    <span
+      aria-hidden="true"
+      className="relative block flex-shrink-0"
+      style={{
+        width: 38,
+        height: 22,
+        borderRadius: 9999,
+        background: checked ? '#0c99e9' : 'rgba(115, 115, 115, 0.45)',
+        boxShadow: checked
+          ? 'inset 0 0 0 0.5px rgba(255,255,255,0.18), 0 0 8px rgba(12,153,233,0.35)'
+          : 'inset 0 0 0 0.5px rgba(255,255,255,0.07)',
+        transition: `background-color 220ms ${EASE}, box-shadow 220ms ${EASE}`,
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 2,
+          left: 2,
+          width: 18,
+          height: 18,
+          borderRadius: 9999,
+          background: '#fff',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.4)',
+          transform: checked ? 'translateX(16px)' : 'translateX(0)',
+          transition: `transform 220ms ${EASE}`,
+        }}
+      />
+    </span>
+  )
+}
+
 function ShieldIcon({ mode }: { mode: string }) {
   const s = { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
   if (mode === 'full_control') return (<svg {...s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></svg>)
@@ -390,6 +443,7 @@ function AccountMenu({
   onBack, updateStatus: initialUpdateStatus,
   approvalMode, pendingCount, onNavigateApproval,
   opacity, setOpacityAndPersist,
+  glowBorder, setGlowBorder,
 }: {
   onBack: () => void
   updateStatus: string
@@ -398,6 +452,8 @@ function AccountMenu({
   onNavigateApproval: () => void
   opacity: number
   setOpacityAndPersist: (v: number) => void
+  glowBorder: boolean
+  setGlowBorder: (v: boolean) => void
 }) {
   const { user, signOut } = useAuthStore()
   const [credits, setCredits] = React.useState<number | null>(null)
@@ -543,6 +599,25 @@ function AccountMenu({
               })}
             </div>
           </div>
+
+          {/* Glow border — opt-in rotating beam around the overlay.
+              The whole row is the single interactive control (role=switch);
+              ToggleVisual is presentational only. */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={glowBorder}
+            aria-label="Glow border"
+            onClick={() => setGlowBorder(!glowBorder)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.04] text-left"
+          >
+            <span className="flex-shrink-0 text-neutral-500"><BeamIcon /></span>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-neutral-300 tracking-tight">Glow border</div>
+              <div className="text-[10px] text-neutral-600">Rotating beam around the overlay</div>
+            </div>
+            <ToggleVisual checked={glowBorder} />
+          </button>
         </div>
 
         <div className="h-px bg-neutral-800/40" />
@@ -653,6 +728,17 @@ export function Overlay() {
   })
   const [displayAutoOpen, setDisplayAutoOpen] = React.useState(false)
 
+  // Glow border (the rotating beam around the compact pill) — opt-in and OFF
+  // by default. Persisted in localStorage like the welcome-guide preference so
+  // it survives restarts without touching the main process.
+  const [glowBorder, setGlowBorder] = React.useState(() => {
+    try { return localStorage.getItem('coasty-glow-border') === 'true' } catch { return false }
+  })
+  const setGlowBorderAndPersist = React.useCallback((v: boolean) => {
+    setGlowBorder(v)
+    try { localStorage.setItem('coasty-glow-border', String(v)) } catch {}
+  }, [])
+
   // Reset page on collapse
   React.useEffect(() => { if (!isExpanded) setPage('chat') }, [isExpanded])
 
@@ -740,19 +826,6 @@ export function Overlay() {
     }
 
     prevStreamingRef.current = isStreaming
-  }, [isStreaming])
-
-  // Drive the rainbow lifecycle from `isStreaming`. The renderer's
-  // stream state is the only reliable signal for "is the agent doing work
-  // right now". The backend's task_end WebSocket message is fire-and-forget
-  // and can be lost (network blip, backend exception, etc.) — relying on it
-  // alone leaves the rainbow stuck on. Guarded by a ref so we only push on
-  // actual edge transitions, not on initial mount.
-  const prevTaskActiveRef = React.useRef<boolean | null>(null)
-  React.useEffect(() => {
-    if (prevTaskActiveRef.current === isStreaming) return
-    prevTaskActiveRef.current = isStreaming
-    window.coasty.setTaskActive(isStreaming).catch(() => {})
   }, [isStreaming])
 
   // Sync opacity
@@ -872,10 +945,11 @@ export function Overlay() {
 
   return (
     <div
-      // The rotating beam (.glow-border) lives on the compact pill only —
-      // it's a signature of the floating-pill identity. In expanded mode
-      // the panel reads as a card, so the beam would feel decorative.
-      className={`morph-radius relative flex flex-col w-full h-full overflow-hidden premium-shadow ${isExpanded ? '' : 'glow-border'}`}
+      // The rotating beam (.glow-border) is opt-in (OFF by default) via the
+      // Account → Overlay "Glow border" toggle. When enabled it traces both
+      // the compact pill and the expanded panel, so flipping the toggle from
+      // the (expanded) settings page gives immediate visible feedback.
+      className={`morph-radius relative flex flex-col w-full h-full overflow-hidden premium-shadow ${glowBorder ? 'glow-border' : ''}`}
       style={{
         borderRadius: isExpanded ? 22 : 28,
         isolation: 'isolate',
@@ -902,6 +976,17 @@ export function Overlay() {
             'linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 38%, rgba(0,0,0,0.18) 100%)',
           borderRadius: 'inherit',
         }} />
+
+      {/* Working-state smoke — cobalt fog that drifts behind content ONLY while
+          the agent is mid-task. Pure CSS (transform/opacity only); fades in
+          over 600ms via data-active. Sits at z-index -5: above the three -z-10
+          backing layers (so the glass blur never washes it out) and below the
+          chat content. Replaces the old desktop rainbow glow. */}
+      <div aria-hidden="true" className="smoke" data-active={isStreaming ? 'true' : 'false'}>
+        <span className="smoke-blob smoke-blob-1" />
+        <span className="smoke-blob smoke-blob-2" />
+        <span className="smoke-blob smoke-blob-3" />
+      </div>
 
       {/* ═══ PILL BAR ═══ */}
       <div className="titlebar-drag flex items-center gap-2.5 w-full h-14 px-3 flex-shrink-0 select-none">
@@ -1032,6 +1117,8 @@ export function Overlay() {
           onNavigateApproval={() => setPage('approval')}
           opacity={opacity}
           setOpacityAndPersist={(v) => { setOpacity(v); window.coasty.setOpacity(v) }}
+          glowBorder={glowBorder}
+          setGlowBorder={setGlowBorderAndPersist}
         />
       )}
 

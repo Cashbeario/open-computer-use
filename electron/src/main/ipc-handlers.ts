@@ -327,10 +327,10 @@ export function registerIpcHandlers(
     return bridge?.getState() || 'disconnected'
   })
 
-  // Renderer-driven rainbow lifecycle. The renderer's `isStreaming` is
-  // the source of truth — the backend's `task_end` WebSocket message is
-  // fire-and-forget and cannot be trusted to always arrive. This IPC
-  // ensures the rainbow ALWAYS follows the renderer's streaming state.
+  // Renderer-driven task-active signal. `bridge.setTaskActive` is currently a
+  // no-op (it used to drive the desktop rainbow window, which has been removed;
+  // the in-overlay smoke now reads `isStreaming` directly in the renderer).
+  // The IPC is kept wired for any future task-active use.
   secureHandle('bridge:set-task-active', async (_event, active: boolean) => {
     const bridge = getWsBridge()
     if (bridge) bridge.setTaskActive(!!active)

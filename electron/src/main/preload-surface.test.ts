@@ -23,7 +23,6 @@ import * as path from 'path'
 const REPO_ROOT = path.resolve(__dirname, '..', '..')
 const PRELOAD_PATH = path.join(REPO_ROOT, 'src', 'preload', 'index.ts')
 const INDEX_PATH = path.join(REPO_ROOT, 'src', 'main', 'index.ts')
-const RAINBOW_PATH = path.join(REPO_ROOT, 'src', 'main', 'rainbow-border.ts')
 const IPC_HANDLERS_PATH = path.join(REPO_ROOT, 'src', 'main', 'ipc-handlers.ts')
 const MAIN_DIR = path.join(REPO_ROOT, 'src', 'main')
 
@@ -148,12 +147,6 @@ describe('BrowserWindow webPreferences', () => {
     // — we just verify the flag is explicitly set rather than left to Electron's
     // default (which has changed across major versions).
     expect(indexSrc).toMatch(/sandbox\s*:\s*(true|false)/)
-  })
-
-  it('rainbow-border BrowserWindow also has contextIsolation/nodeIntegration locked down', () => {
-    const rainbowSrc = readSource(RAINBOW_PATH)
-    expect(rainbowSrc).toMatch(/contextIsolation\s*:\s*true/)
-    expect(rainbowSrc).toMatch(/nodeIntegration\s*:\s*false/)
   })
 })
 

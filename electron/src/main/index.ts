@@ -13,7 +13,6 @@ import {
   openAccessibilitySettings,
 } from './permissions'
 import { ApprovalManager } from './approval-manager'
-import { showAmbientRainbow, hideAmbientRainbow, moveRainbowToDisplay } from './rainbow-border'
 import { warmupNativeScreenshot } from './native-screenshot'
 import { getDisplayList, getActiveDisplayId, setActiveDisplayId, getActiveDisplay } from './display-manager'
 import { performFullShutdown } from './app-shutdown'
@@ -289,18 +288,17 @@ function createWindow(): void {
 
   // External links + navigation guards are installed via the
   // registerWebContentsGuard listener, which catches every WebContents
-  // — main overlay, rainbow border, devtools. Keeping the registration
-  // centralized prevents drift between windows.
+  // — main overlay, devtools. Keeping the registration centralized
+  // prevents drift between windows.
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
   })
 
   // User-initiated close path (Alt+F4, ⌘W, taskbar close, in-app × button).
-  // Runs BEFORE the window is destroyed so the rainbow-border BrowserWindow
-  // is torn down in time for `window-all-closed` to fire. Without this, the
-  // lingering rainbow window blocks quit and the process stays in the
-  // background even though the UI has disappeared.
+  // Runs BEFORE the window is destroyed so every long-lived resource (WS
+  // bridge, auth refresh timer, tray) is torn down in time for
+  // `window-all-closed` to fire and the process to actually quit.
   mainWindow.on('close', () => {
     performFullShutdown({ wsBridge, auth, tray })
   })
@@ -434,8 +432,7 @@ app.whenReady().then(async () => {
   RENDERER_PREFIX = computeRendererPrefix()
 
   // Install URL guards (setWindowOpenHandler + will-navigate + will-redirect
-  // + will-attach-webview) for every WebContents the app ever creates,
-  // including auxiliary windows like the rainbow border.
+  // + will-attach-webview) for every WebContents the app ever creates.
   registerWebContentsGuard()
 
   // Initialize auth and approval manager
@@ -516,12 +513,6 @@ app.whenReady().then(async () => {
   // Window mode control — renderer requests mode changes
   secureHandle('window:set-mode', async (_event, mode: string) => {
     setWindowMode(mode as 'auth' | 'compact' | 'expanded')
-    // Show a subtle ambient rainbow when overlay is expanded, hide when collapsed
-    if (mode === 'expanded') {
-      showAmbientRainbow()
-    } else if (mode === 'compact') {
-      hideAmbientRainbow()
-    }
   })
 
   // Window opacity control
@@ -578,10 +569,9 @@ app.whenReady().then(async () => {
   secureHandle('displays:get-active', () => getActiveDisplayId())
   secureHandle('displays:set-active', (_event, id: number | null) => {
     setActiveDisplayId(id)
-    // Move overlay + rainbow border to the selected display
+    // Move the overlay to the selected display
     const display = getActiveDisplay()
     moveToDisplay(display)
-    moveRainbowToDisplay(display)
   })
 
   // App restart (used after granting permissions)

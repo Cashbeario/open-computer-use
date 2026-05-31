@@ -151,13 +151,6 @@ vi.mock('child_process', () => ({
 // Real terminal.ts uses os.homedir(), os.platform(), etc. — keep them real.
 // (We don't mock 'os'.)
 
-// Stub the rainbow border so tests don't try to spawn windows.
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: vi.fn(),
-  hideRainbowBorder: vi.fn(),
-  initRainbowBorder: vi.fn(),
-}))
-
 // Stub electron — bridge needs `screen.getPrimaryDisplay` for system info.
 vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => []) },

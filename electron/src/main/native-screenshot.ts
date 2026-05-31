@@ -68,7 +68,7 @@ if #available(macOS 14.0, *) {
                 return
             }
 
-            // Find our app by PID and exclude ALL its windows (overlay + rainbow border)
+            // Find our app by PID and exclude ALL its windows (the overlay)
             let myApp = content.applications.first { $0.processID == pid }
 
             let filter: SCContentFilter

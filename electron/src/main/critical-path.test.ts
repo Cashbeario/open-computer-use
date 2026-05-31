@@ -110,12 +110,6 @@ vi.mock('./display-manager', () => ({
   getActiveDisplayId: () => 1,
 }))
 
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: vi.fn(),
-  hideRainbowBorder: vi.fn(),
-  initRainbowBorder: vi.fn(),
-}))
-
 vi.mock('./window-manager', () => ({
   contentProtectionReliable: false,
   hideForDesktopAction: vi.fn().mockResolvedValue(undefined),

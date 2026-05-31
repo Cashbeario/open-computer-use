@@ -357,6 +357,118 @@ html, body {
   to { --beam-angle: 360deg; }
 }
 
+/* ─── Working-state smoke / fog ──────────────────────────────────────────
+   Volumetric cobalt smoke that drifts behind UI content ONLY while the agent
+   is working (gated by data-active, driven from isStreaming). CSS-only: three
+   layered radial-gradient blobs, each on its own slow keyframe at a different
+   size / speed / phase so the composite motion never visibly loops. Animates
+   transform + opacity exclusively (GPU compositor — no per-frame paint or
+   layout). The soft "blur" is baked into the gradient falloff + a static edge
+   mask, NOT an animated filter.
+
+   z-index -5: above the three -z-10 backing layers (so the glass
+   backdrop-filter blur(40px) never washes it out) but below the chat content
+   (z-index auto). isolation:isolate on the overlay root keeps it local. */
+.smoke {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  border-radius: inherit;
+  overflow: hidden;          /* clip blobs to the rounded card */
+  pointer-events: none;
+  opacity: 0;                /* fades to 1 while a task runs */
+  transition: opacity 600ms var(--ease-apple);
+  /* Feather the layer toward the edges so smoke never hard-clips against the
+     card border — a static mask (no per-frame cost). */
+  -webkit-mask-image: radial-gradient(130% 130% at 50% 50%, #000 55%, transparent 100%);
+          mask-image: radial-gradient(130% 130% at 50% 50%, #000 55%, transparent 100%);
+}
+.smoke[data-active='true'] { opacity: 1; }
+
+.smoke-blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  transform: translateZ(0);              /* own compositor layer */
+  backface-visibility: hidden;
+}
+
+/* Blob 1 — big slow base cloud: largest, dimmest, slowest; fills the card
+   with atmosphere via a gentle vertical rise + breathing scale. */
+.smoke-blob-1 {
+  width: 150%;
+  height: 220%;
+  left: -25%;
+  bottom: -90%;
+  background: radial-gradient(
+    closest-side,
+    rgba(12, 153, 233, 0.16) 0%,
+    rgba(12, 122, 200, 0.09) 38%,
+    rgba(10, 80, 150, 0.04) 62%,
+    transparent 78%
+  );
+  animation: smoke-rise-1 29s ease-in-out infinite;
+}
+
+/* Blob 2 — mid cloud: brighter cobalt core, faster diagonal drift + rotation.
+   The layer that most reads as "moving smoke". */
+.smoke-blob-2 {
+  width: 95%;
+  height: 130%;
+  right: -20%;
+  top: -35%;
+  background: radial-gradient(
+    closest-side,
+    rgba(12, 153, 233, 0.22) 0%,
+    rgba(20, 130, 220, 0.11) 40%,
+    rgba(12, 90, 160, 0.04) 66%,
+    transparent 80%
+  );
+  animation: smoke-drift-2 23s ease-in-out infinite;
+}
+
+/* Blob 3 — small high accent wisp: brightest + quickest; adds a live curl
+   near the top so even the 56px compact pill shows motion. */
+.smoke-blob-3 {
+  width: 60%;
+  height: 95%;
+  left: 18%;
+  top: -30%;
+  background: radial-gradient(
+    closest-side,
+    rgba(40, 170, 245, 0.20) 0%,
+    rgba(12, 153, 233, 0.10) 44%,
+    transparent 74%
+  );
+  animation: smoke-curl-3 19s ease-in-out infinite;
+}
+
+@keyframes smoke-rise-1 {
+  0%   { transform: translate3d(0,    4%, 0) scale(1.00) rotate(0deg); opacity: 0.75; }
+  50%  { transform: translate3d(-3%, -6%, 0) scale(1.12) rotate(3deg); opacity: 1;    }
+  100% { transform: translate3d(0,    4%, 0) scale(1.00) rotate(0deg); opacity: 0.75; }
+}
+
+@keyframes smoke-drift-2 {
+  0%   { transform: translate3d(0,   0,  0) scale(1.00) rotate(0deg);  opacity: 0.6;  }
+  35%  { transform: translate3d(-7%, 5%, 0) scale(1.15) rotate(-6deg); opacity: 0.95; }
+  70%  { transform: translate3d(5%, -4%, 0) scale(0.92) rotate(5deg);  opacity: 0.8;  }
+  100% { transform: translate3d(0,   0,  0) scale(1.00) rotate(0deg);  opacity: 0.6;  }
+}
+
+@keyframes smoke-curl-3 {
+  0%   { transform: translate3d(0,   0,  0) scale(0.95) rotate(0deg);  opacity: 0.5; }
+  40%  { transform: translate3d(8%,  6%, 0) scale(1.20) rotate(10deg); opacity: 0.9; }
+  75%  { transform: translate3d(-5%, 3%, 0) scale(1.05) rotate(-4deg); opacity: 0.7; }
+  100% { transform: translate3d(0,   0,  0) scale(0.95) rotate(0deg);  opacity: 0.5; }
+}
+
+/* Reduced-motion: hold the smoke still but keep a faint static cobalt
+   presence so the working-state still reads. */
+@media (prefers-reduced-motion: reduce) {
+  .smoke-blob { animation: none !important; opacity: 0.7 !important; }
+}
+
 /* ── Permission toast slide-in ── */
 @keyframes slide-down {
   from {

@@ -122,10 +122,6 @@ vi.mock('./display-manager', () => ({
   getActiveDisplay: () => h.display,
 }))
 
-vi.mock('./rainbow-border', () => ({
-  setRainbowOrigin: vi.fn(),
-}))
-
 describe('window-manager bounds-event suppression', () => {
   let setMainWindow: any
   let setWindowMode: any

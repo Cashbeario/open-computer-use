@@ -137,12 +137,6 @@ vi.mock('child_process', () => ({
   exec: h.mockExecFile,
 }))
 
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: vi.fn(),
-  hideRainbowBorder: vi.fn(),
-  initRainbowBorder: vi.fn(),
-}))
-
 vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => []) },
   screen: {

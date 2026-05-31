@@ -78,7 +78,7 @@ function StatCell({
     >
       <div
         className={cn(
-          "font-semibold tabular-nums tracking-[-0.05em] leading-none",
+          "font-semibold tabular-nums tracking-[-0.05em] leading-none pb-1",
           "bg-clip-text text-transparent",
           "bg-gradient-to-b from-foreground to-foreground/85",
           "dark:from-white dark:to-white/80",

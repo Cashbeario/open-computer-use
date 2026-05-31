@@ -101,7 +101,7 @@ function DropdownItem({
         )} strokeWidth={1.8} />
       </span>
       <span className={cn(
-        "relative text-[12.5px] font-medium transition-colors duration-150 truncate",
+        "relative text-[12.5px] font-medium leading-tight line-clamp-2 transition-colors duration-150",
         isHovered ? "text-foreground" : "text-muted-foreground/55"
       )}>
         {label}

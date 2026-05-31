@@ -249,7 +249,7 @@ export function LandingFooter() {
             <div className="h-[50%] w-[65%] rounded-full bg-foreground/[0.04] blur-[100px] dark:bg-foreground/[0.025]" />
           </div>
           <h2
-            className="relative bg-gradient-to-b from-foreground/[0.14] via-foreground/[0.06] to-transparent bg-clip-text text-[20vw] font-black leading-none tracking-[-0.04em] text-transparent sm:text-[18vw] md:text-[15vw] lg:text-[13vw]"
+            className="relative bg-gradient-to-b from-foreground/[0.14] via-foreground/[0.06] to-transparent bg-clip-text text-[20vw] font-black leading-none tracking-[-0.04em] text-transparent pb-[0.08em] sm:text-[18vw] md:text-[15vw] lg:text-[13vw]"
             aria-hidden="true"
           >
             Coasty

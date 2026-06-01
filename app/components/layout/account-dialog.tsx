@@ -20,6 +20,7 @@ import {
   Brain,
   BookOpen,
   Gift,
+  Plug,
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -31,6 +32,7 @@ import { DataSection } from "@/app/components/layout/settings/general/data-secti
 import { PublicChatsSection } from "@/app/components/layout/settings/general/public-chats-section"
 import { MemorySection } from "@/app/components/layout/settings/general/memory-section"
 import { BillingSection } from "@/app/components/layout/settings/billing/billing-section"
+import { ComposioSection } from "@/app/components/layout/settings/integrations/composio-section"
 import { ThemeSelection } from "@/app/components/layout/settings/appearance/theme-selection"
 import { BackgroundSelection } from "@/app/components/layout/settings/appearance/background-selection"
 import { LanguageSelection } from "@/app/components/layout/settings/appearance/language-selection"
@@ -86,6 +88,7 @@ function AppearanceSection() {
 // inside the dialog. They never become the dialog's active section.
 const sections = [
   { id: "account" as SectionType, label: "General", icon: User, description: "Profile and account", component: CombinedAccount },
+  { id: "integrations" as SectionType, label: "Integrations", icon: Plug, description: "Connect third-party apps", component: ComposioSection },
   { id: "memory" as SectionType, label: "Memory", icon: Brain, description: "Context applied to every agent run", component: MemorySection },
   { id: "appearance" as SectionType, label: "Appearance", icon: Paintbrush, description: "Theme, language, and background", component: AppearanceSection },
   { id: "billing" as SectionType, label: "Billing", icon: CreditCard, description: "Plans and credits", component: BillingSection },
@@ -100,7 +103,7 @@ const sections = [
 ]
 
 const navGroups = [
-  { label: "Settings", ids: ["account", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
+  { label: "Settings", ids: ["account", "integrations", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
   { label: "Resources", ids: ["guide", "referral", "data"] as SectionType[] },
   { label: "More", ids: ["feedback", "about", "social"] as SectionType[] },
 ]
@@ -163,7 +166,7 @@ function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentTyp
 // excluded on purpose — they are quick-link redirects, not section
 // states the dialog can settle on, so landing on /account?section=guide
 // falls back to "account" while the link still works from the sidebar.
-const validSections: SectionType[] = ["account", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
+const validSections: SectionType[] = ["account", "integrations", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
 
 export function AccountDialog() {
   const { isOpen, section, close, setSection, _syncFromUrl, _initialMobileView } = useAccountDialog()
@@ -183,6 +186,7 @@ export function AccountDialog() {
     { label: string; description: string } | null
   > = {
     account: { label: tDialog("sections.account.label"), description: tDialog("sections.account.description") },
+    integrations: { label: tDialog("sections.integrations.label"), description: tDialog("sections.integrations.description") },
     memory: { label: tMemory("section.title"), description: tMemory("sidebarDescription") },
     appearance: { label: tDialog("sections.appearance.label"), description: tDialog("sections.appearance.description") },
     billing: { label: tDialog("sections.billing.label"), description: tDialog("sections.billing.description") },

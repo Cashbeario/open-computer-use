@@ -28,7 +28,6 @@ import { ArrowRight, Infinity as InfinityIcon } from "lucide-react"
 import { UnlimitedSmoke } from "@/app/components/effects/unlimited-smoke"
 import {
   priceDollar,
-  priceMonthlyLong,
   priceUSD,
 } from "@/lib/pricing/format"
 
@@ -82,11 +81,10 @@ export function UnlimitedComparisonCallout({
         {/* Center: citation-grade head-to-head sentence */}
         <div className="flex-1 min-w-0">
           <p className="text-base sm:text-lg leading-relaxed text-foreground/90">
-            <strong className="font-semibold">Coasty Unlimited — {priceMonthlyLong("unlimited")}, flat-rate, no caps.</strong>{" "}
             {unlimitedZinger}
           </p>
           <p className="text-[13px] text-muted-foreground/70 mt-2">
-            The cheapest flat-rate unlimited computer-use plan available — 82% on OSWorld vs the field.
+            The cheapest flat-rate unlimited computer-use plan available, ranked #1 on OSWorld at 82%.
           </p>
         </div>
 

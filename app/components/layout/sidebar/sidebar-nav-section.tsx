@@ -8,6 +8,7 @@ import {
   IconClockPlay,
   IconBinaryTree,
   IconDeviceDesktop,
+  IconPlug,
   IconCalendarClock,
   IconShieldLock,
   IconKey,
@@ -1222,6 +1223,14 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               href: "/machines",
               active: isItemActive("/machines"),
               dot: machineStats.running > 0,
+              onNavigate: closeMobileIfNeeded,
+            },
+            {
+              id: "sidebar-connections-link",
+              icon: <IconPlug size={16} stroke={1.5} />,
+              label: t("connections"),
+              href: "/connections",
+              active: isItemActive("/connections"),
               onNavigate: closeMobileIfNeeded,
             },
             {

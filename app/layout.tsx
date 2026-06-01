@@ -6,6 +6,7 @@ import { ConditionalLayout } from "./conditional-layout"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
+import { ComposioProvider } from "@/lib/composio-store/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
 import { TanstackQueryProvider } from "@/lib/tanstack-query/tanstack-query-provider"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
@@ -406,8 +407,9 @@ export default async function RootLayout({
             <TanstackQueryProvider>
               <LayoutClient />
               <UserProvider initialUser={userProfile}>
-                <ModelProvider>
-                  <ChatsProvider userId={userProfile?.id}>
+                <ComposioProvider>
+                  <ModelProvider>
+                    <ChatsProvider userId={userProfile?.id}>
                     <ChatSessionProvider>
                       <UserPreferencesProvider
                         userId={userProfile?.id}
@@ -430,6 +432,7 @@ export default async function RootLayout({
                     </ChatSessionProvider>
                   </ChatsProvider>
                 </ModelProvider>
+                </ComposioProvider>
               </UserProvider>
             </TanstackQueryProvider>
           </PostHogProvider>

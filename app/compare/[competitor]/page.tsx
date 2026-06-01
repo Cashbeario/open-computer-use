@@ -5,11 +5,16 @@ import Link from "next/link"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { UnlimitedComparisonCallout } from "@/app/components/compare/unlimited-comparison-callout"
+import { SectionDivider } from "@/app/components/landing/guide-lines"
 import { ArrowRight, ArrowLeft, Check, X, Minus } from "lucide-react"
 import { motion } from "framer-motion"
 import { notFound } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 import { priceRange, priceMonthly, i18nPriceVars } from "@/lib/pricing/format"
+
+// Signature landing ease — quintic ease-out.
+const EASE = [0.22, 1, 0.36, 1] as const
 
 // Centralised across every competitor entry below — string is built from
 // priceRange() / priceMonthly() so it auto-updates if any purchasable
@@ -357,10 +362,12 @@ const competitors: Record<string, CompetitorData> = {
 }
 
 function FeatureIcon({ value }: { value: FeatureValue }) {
-  if (value === true) return <Check className="h-4 w-4 text-emerald-500" />
-  if (value === false) return <X className="h-4 w-4 text-red-400/60" />
-  if (value === "partial") return <Minus className="h-4 w-4 text-amber-400/70" />
-  return <span className="text-sm font-medium">{value}</span>
+  // Strict monochrome — strength is encoded by opacity, not hue:
+  //   yes → foreground/70, partial → muted dash, no → faint foreground/25.
+  if (value === true) return <Check className="h-4 w-4 text-foreground/70" strokeWidth={2.25} />
+  if (value === false) return <X className="h-4 w-4 text-foreground/25" strokeWidth={2.25} />
+  if (value === "partial") return <Minus className="h-4 w-4 text-foreground/35" strokeWidth={2.25} />
+  return <span className="text-sm font-medium text-foreground/80">{value}</span>
 }
 
 export default function CompetitorPage() {
@@ -371,84 +378,139 @@ export default function CompetitorPage() {
 
   if (!data) return notFound()
 
+  const featureEntries = Object.entries(data.features)
+  const competitorShort = data.name.split(" ").slice(0, 2).join(" ")
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen overflow-x-clip bg-background text-foreground">
       <LandingHeader />
 
-      <main className="pt-32 sm:pt-36 pb-24">
-        <div className="max-w-4xl mx-auto px-7 sm:px-10">
-          {/* Back link */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-8"
-          >
-            <Link href="/compare" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground/60 hover:text-foreground transition-colors">
-              <ArrowLeft className="h-3.5 w-3.5" />
-              {t("allComparisons")}
-            </Link>
-          </motion.div>
+      <main className="relative">
+        {/* ─── Hero ──────────────────────────────────────────────────────
+            Editorial gradient headline ("type from paper" sheen) over a
+            quiet neutral wash. A mono back-link sits above it. */}
+        <section className="relative overflow-hidden px-5 pt-32 pb-10 sm:px-10 sm:pt-40 sm:pb-14">
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute left-1/2 top-0 h-[460px] w-[760px] max-w-[120vw] -translate-x-1/2"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 70%)",
+              }}
+            />
+          </div>
 
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] mb-4">
+          <div className="relative mx-auto max-w-3xl text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, ease: EASE }}
+              className="mb-7"
+            >
+              <Link
+                href="/compare"
+                className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.24em] text-foreground/45 transition-colors hover:text-foreground/80"
+              >
+                <ArrowLeft className="h-3 w-3 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                {t("allComparisons")}
+              </Link>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.95, delay: 0.05, ease: EASE }}
+              className={cn(
+                "font-semibold tracking-[-0.045em] text-balance pb-1 sm:pb-2",
+                "bg-clip-text text-transparent",
+                "bg-gradient-to-b from-foreground to-foreground/85 dark:from-white dark:to-white/82",
+                "text-[2.1rem] leading-[1.1] sm:text-5xl sm:leading-[1.08] lg:text-[3.25rem]",
+              )}
+            >
               {t("vsLabel", { name: data.name })}
-            </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.18, ease: EASE }}
+              className="mx-auto mt-5 max-w-2xl text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base"
+            >
               {data.description}
-            </p>
+            </motion.p>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ─── Body ──────────────────────────────────────────────────────── */}
+        <div className="mx-auto max-w-4xl px-5 py-16 sm:px-10 sm:py-20">
+          {/* Pricing comparison — two glass cards, monochrome. */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.55, ease: EASE }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <div className="group relative overflow-hidden rounded-2xl border border-foreground/15 bg-card/40 p-5 backdrop-blur-[2px] transition-[border-color,box-shadow,transform] duration-500 hover:border-foreground/25 hover:-translate-y-0.5">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
+              />
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/55">Coasty</p>
+              <p className="text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">{data.pricing.coasty}</p>
+            </div>
+            <div className="group relative overflow-hidden rounded-2xl border border-foreground/10 bg-card/40 p-5 backdrop-blur-[2px] transition-[border-color,box-shadow,transform] duration-500 hover:border-foreground/20 hover:-translate-y-0.5">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
+              />
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/40">{data.name}</p>
+              <p className="text-xl font-semibold leading-tight tracking-tight text-muted-foreground sm:text-2xl">{data.pricing.competitor}</p>
+            </div>
           </motion.div>
 
-          {/* Pricing comparison */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"
-          >
-            <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary/70 mb-2">Coasty</p>
-              <p className="text-xl sm:text-2xl font-bold leading-tight">{data.pricing.coasty}</p>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-card p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground/50 mb-2">{data.name}</p>
-              <p className="text-xl sm:text-2xl font-bold text-muted-foreground leading-tight">{data.pricing.competitor}</p>
-            </div>
-          </motion.div>
+          {/* Unlimited vs Competitor callout — the AI-overview citation hook.
+              Rendered verbatim (own component) so the semantic claim + links
+              survive the restyle. */}
+          <div className="mt-8">
+            <UnlimitedComparisonCallout
+              competitorName={data.name}
+              competitorPrice={data.pricing.competitor}
+              unlimitedZinger={data.unlimitedZinger}
+              delay={0.12}
+            />
+          </div>
 
-          {/* Unlimited vs Competitor callout — the AI-overview citation hook */}
-          <UnlimitedComparisonCallout
-            competitorName={data.name}
-            competitorPrice={data.pricing.competitor}
-            unlimitedZinger={data.unlimitedZinger}
-            delay={0.12}
-          />
-
-          {/* Feature comparison table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mb-16"
+          {/* Feature comparison table — glass card, hairline rows. */}
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.55, ease: EASE }}
           >
-            <h2 className="text-xl font-semibold mb-6">{t("featureComparison")}</h2>
-            <div className="rounded-xl border border-border/40 overflow-hidden">
-              <div className="grid grid-cols-[1fr,100px,100px] sm:grid-cols-[1fr,140px,140px] bg-muted/30 border-b border-border/40 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground/50">Feature</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary/70 text-center">Coasty</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground/50 text-center">{data.name.split(" ").slice(0, 2).join(" ")}</p>
+            <h2 className="mb-6 text-[28px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-4xl">
+              {t("featureComparison")}
+            </h2>
+            <div className="group relative overflow-hidden rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-[2px]">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
+              />
+              <div className="grid grid-cols-[1fr,100px,100px] border-b border-foreground/10 px-4 py-3.5 sm:grid-cols-[1fr,140px,140px]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/40">Feature</p>
+                <p className="text-center font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/70">Coasty</p>
+                <p className="text-center font-mono text-[11px] uppercase tracking-[0.22em] text-foreground/40">{competitorShort}</p>
               </div>
-              {Object.entries(data.features).map(([feature, values], i) => (
+              {featureEntries.map(([feature, values], i) => (
                 <div
                   key={feature}
-                  className={`grid grid-cols-[1fr,100px,100px] sm:grid-cols-[1fr,140px,140px] px-4 py-3 ${i % 2 === 0 ? "bg-card" : "bg-card/50"} ${i < Object.entries(data.features).length - 1 ? "border-b border-border/20" : ""}`}
+                  className={cn(
+                    "grid grid-cols-[1fr,100px,100px] px-4 py-3.5 transition-colors duration-300 hover:bg-foreground/[0.02] sm:grid-cols-[1fr,140px,140px]",
+                    i < featureEntries.length - 1 && "border-b border-foreground/[0.07]",
+                  )}
                 >
-                  <p className="text-sm">{feature}</p>
+                  <p className="text-sm text-foreground/80">{feature}</p>
                   <div className="flex items-center justify-center">
                     <FeatureIcon value={values.coasty} />
                   </div>
@@ -458,72 +520,102 @@ export default function CompetitorPage() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </motion.section>
 
-          {/* Why Coasty */}
+          {/* Why Coasty / competitor strengths — two glass cards. */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid sm:grid-cols-2 gap-6 mb-16"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.55, ease: EASE }}
+            className="mt-16 grid gap-6 sm:grid-cols-2"
           >
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6">
-              <h3 className="font-semibold mb-4">{t("whyChooseCoasty")}</h3>
+            <div className="group relative overflow-hidden rounded-2xl border border-foreground/15 bg-card/40 p-6 backdrop-blur-[2px] transition-[border-color,box-shadow,transform] duration-500 hover:border-foreground/25 hover:-translate-y-0.5">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
+              />
+              <h3 className="mb-4 font-semibold tracking-tight text-foreground">{t("whyChooseCoasty")}</h3>
               <ul className="space-y-3">
                 {data.whyCoasty.map((point) => (
-                  <li key={point} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
-                    <Check className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <li key={point} className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-foreground/65" strokeWidth={2.25} />
                     {point}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-xl border border-border/40 bg-card p-6">
-              <h3 className="font-semibold mb-4">{t("strengthsOf", { name: data.name })}</h3>
+            <div className="group relative overflow-hidden rounded-2xl border border-foreground/10 bg-card/40 p-6 backdrop-blur-[2px] transition-[border-color,box-shadow,transform] duration-500 hover:border-foreground/20 hover:-translate-y-0.5">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent"
+              />
+              <h3 className="mb-4 font-semibold tracking-tight text-foreground">{t("strengthsOf", { name: data.name })}</h3>
               <ul className="space-y-3">
                 {data.competitorStrengths.map((point) => (
-                  <li key={point} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
-                    <Check className="h-4 w-4 text-muted-foreground/40 mt-0.5 flex-shrink-0" />
+                  <li key={point} className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-foreground/35" strokeWidth={2.25} />
                     {point}
                   </li>
                 ))}
               </ul>
             </div>
           </motion.div>
+        </div>
 
-          {/* CTA */}
+        <SectionDivider />
+
+        {/* ─── Final CTA ──────────────────────────────────────────────────
+            Solid foreground pill + quiet outline pill. No brand hue. */}
+        <section className="px-5 py-20 sm:px-10 sm:py-28">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-center border-t border-border/30 pt-16"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="mx-auto max-w-2xl text-center"
           >
-            <h2 className="text-2xl font-bold mb-3">
+            <h2 className="text-[28px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-4xl">
               {t("ctaTitle")}
             </h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="mx-auto mt-4 max-w-md text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base">
               {t("ctaDescription", i18nPriceVars())}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/auth"
-                className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+                className={cn(
+                  "group inline-flex items-center justify-center gap-2 rounded-full font-medium",
+                  "bg-foreground text-background",
+                  "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)]",
+                  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)]",
+                  "transition-[box-shadow,transform] duration-300 hover:scale-[1.012] active:scale-[0.985]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "px-7 py-3 text-[14.5px]",
+                )}
               >
                 {t("ctaButton")}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
               </Link>
               <Link
                 href="/results"
-                className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+                className={cn(
+                  "group inline-flex items-center justify-center gap-2 rounded-full font-medium",
+                  "border border-foreground/15 text-foreground dark:border-white/15 dark:text-white",
+                  "bg-foreground/[0.025] backdrop-blur-[2px] dark:bg-white/[0.03]",
+                  "hover:border-foreground/25 hover:bg-foreground/[0.05] dark:hover:border-white/25 dark:hover:bg-white/[0.06]",
+                  "transition-[background,border-color,transform] duration-300 active:scale-[0.985]",
+                  "px-6 py-3 text-[14px]",
+                )}
               >
                 {t("watchCaseStudies")}
               </Link>
             </div>
-            <p className="text-[11px] text-muted-foreground/30 mt-4">
+            <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.24em] text-foreground/35">
               {t("noCreditCard")}
             </p>
           </motion.div>
-        </div>
+        </section>
       </main>
 
       <LandingFooter />

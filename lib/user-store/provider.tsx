@@ -64,23 +64,24 @@ export function UserProvider({
     // Sign-out has to be atomic from the user's perspective: one click,
     // immediate redirect to /, no transient broken state in between.
     //
-    // Bug we're fixing: the previous implementation only cleared the Supabase
-    // session and React state, then RETURNED. Whatever protected page the user
-    // was on (chat, /c/[id], dashboard) re-rendered with `user=null` —
-    // showing a half-empty header, no display name, etc. Only when the user
-    // hit refresh did the middleware see no auth cookie and redirect them to
-    // the landing page.
-    //
-    // Fix: do every cleanup synchronously, THEN hard-navigate via
-    // `window.location.replace("/")`. The full page reload is deliberate:
-    //   - the home page server component re-renders with isAuthenticated=false
-    //     so the LandingPage shows immediately on the new request (no flash);
-    //   - every Zustand store, React Query cache, and in-memory ref is
-    //     wiped — important on shared devices so the next user doesn't see
-    //     stale chats while the page transitions;
-    //   - `replace` (not `assign`) strips the protected URL from history, so
-    //     pressing Back after sign-out doesn't take the user to a now-broken
-    //     authenticated route.
+    // History of bugs this code is defending against:
+    //   1) Original implementation only cleared the Supabase session and
+    //      React state, then RETURNED. The protected page (chat, /c/[id],
+    //      dashboard) re-rendered with `user=null` and stayed mounted
+    //      until the user refreshed. → Fixed by hard-navigating to "/".
+    //   2) Calling `setUser(null)` BEFORE `window.location.replace("/")`
+    //      re-rendered every protected descendant with user=null while
+    //      the page was still mounted. Anything in the tree that assumed
+    //      `user` was non-null (settings dialogs, account dropdowns, the
+    //      sidebar profile row) threw during that render, and Next.js's
+    //      automatic error boundary (app/error.tsx) mounted as a full
+    //      "Something went wrong" page for 50–300ms before the queued
+    //      hard navigation completed. User-visible symptom: "I click
+    //      logout and see an error message, then the landing page."
+    //      → Fix: do NOT touch React state before the hard reload. The
+    //      reload discards the entire component tree anyway, so there is
+    //      nothing to be gained from re-rendering with user=null first,
+    //      and plenty to lose if any descendant crashes.
     //
     // We don't await IndexedDB cleanup before navigation — `idb` queues the
     // deletes and they complete after the unload starts, which is fine since
@@ -93,7 +94,9 @@ export function UserProvider({
     // cleared a few lines below — without this flag, those failures bubble
     // up as toasts ("An error occurred", "Failed to ...") right as the
     // user is being navigated away. Listeners that surface transient
-    // errors check `isSigningOut()` and stay quiet.
+    // errors check `isSigningOut()` and stay quiet. The flag is also read
+    // by app/error.tsx so the Next.js error boundary stays blank instead
+    // of flashing "Something went wrong" if anything throws mid-teardown.
     markSigningOut()
     // Tear down any toasts that rendered just before our sentinel was
     // set. Even with the sentinel in place, a toast that was already
@@ -114,7 +117,6 @@ export function UserProvider({
       // survives the unload, so calling this before replace() is safe.
       trackSignOut()
       resetUser()
-      setUser(null)
       // Fire-and-forget IDB cleanup. The deletes are queued by `idb` and
       // complete after the unload starts; that's fine because the next
       // page (LandingPage) doesn't read those stores until they're gone.
@@ -122,14 +124,12 @@ export function UserProvider({
         console.warn("clearAllIndexedDBStores failed during signOut:", e),
       )
 
-      // setUser(null) above triggers a re-render of every UserContext
-      // consumer with `user=null`. Some of those have useEffect deps on
-      // `user` and will refetch — with the just-cleared auth cookie that
-      // returns 401, and the call site might toast. We don't try to
-      // prevent the refetches (it'd require touching every provider in
-      // the tree); instead, the toast() utility checks `isSigningOut()`
-      // and silently drops error/warning toasts during this window.
-      // See components/ui/toast.tsx + lib/user-store/sign-out-state.ts.
+      // DELIBERATELY NOT CALLING `setUser(null)` HERE. See bug #2 above:
+      // updating React state right before the hard reload causes protected
+      // descendants to re-render with user=null, which crashes the ones
+      // that assume an authenticated user, which mounts Next.js's error
+      // boundary as a full-page UI right before the navigation lands.
+      // The hard reload below wipes the entire React tree anyway.
 
       // Guard for SSR / non-browser callers (tests, server components if
       // anyone re-uses this hook by mistake).

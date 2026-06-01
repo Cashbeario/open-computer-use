@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
+import { SectionDivider } from "@/app/components/landing/guide-lines"
 import { JsonLd } from "@/app/components/seo/json-ld"
 import { getSeoPages } from "@/lib/blog/api"
 
@@ -49,13 +50,63 @@ const COMPARE_LINKS = [
 
 export const revalidate = 300
 
+// ─── Shared landing-language chrome (static; no client JS) ───────────────────
+// The landing's card recipe minus the mouse-tracking spotlight (which needs a
+// client handler) — kept server-renderable so this SEO hub stays fully in the
+// first-paint HTML. Hover lift + sheen are pure CSS.
+const CARD_CHROME =
+  "group relative overflow-hidden rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-[2px] " +
+  "transition-[border-color,box-shadow,transform] duration-500 " +
+  "hover:border-foreground/20 hover:-translate-y-0.5 " +
+  "hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_44px_-22px_rgba(0,0,0,0.18)] " +
+  "dark:hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_18px_44px_-22px_rgba(0,0,0,0.5)]"
+
+const PRIMARY_PILL =
+  "group inline-flex items-center justify-center gap-2 rounded-full font-medium bg-foreground text-background " +
+  "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)] " +
+  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)] " +
+  "transition-[box-shadow,transform] duration-300 hover:scale-[1.012] active:scale-[0.985] " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+
+const OUTLINE_PILL =
+  "group inline-flex items-center justify-center gap-2 rounded-full font-medium " +
+  "border border-foreground/15 dark:border-white/15 text-foreground dark:text-white " +
+  "bg-foreground/[0.025] dark:bg-white/[0.03] backdrop-blur-[2px] " +
+  "hover:bg-foreground/[0.05] hover:border-foreground/25 dark:hover:bg-white/[0.06] dark:hover:border-white/25 " +
+  "transition-[background,border-color,transform] duration-300 active:scale-[0.985] " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+
+// Section heading — solid foreground (NOT clip-text, so no descender clip),
+// matching LandingSectionHeader's type. Static so it renders for crawlers.
+function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <header className="mb-10 text-center sm:mb-14">
+      <h2 className="font-semibold tracking-tight text-foreground text-[28px] leading-[1.1] sm:text-4xl">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">{subtitle}</p>
+      )}
+    </header>
+  )
+}
+
+// Top sheen hairline used on every glass card.
+function TopSheen() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
+    />
+  )
+}
+
 /**
- * Computer-Use SEO hub — Server Component.
- *
- * The capabilities grid, the dynamic SEO-page grid, and comparison links
- * are all rendered server-side so AI search bots and lightweight crawlers
- * see every link target on first paint. Emits TechArticle JSON-LD for
- * schema.org search-engine consumers.
+ * Computer-Use SEO hub — Server Component, restyled in the landing's design
+ * language (Geist Sans/Mono, monochrome, hairlines, glass-card chrome,
+ * gradient hero). Kept fully server-rendered (no client JS) so AI search bots
+ * and lightweight crawlers see every link target on first paint. Emits
+ * TechArticle JSON-LD for schema.org consumers.
  */
 export default async function ComputerUseHub() {
   const seoPages = await getSeoPages()
@@ -83,135 +134,167 @@ export default async function ComputerUseHub() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen overflow-x-clip bg-background text-foreground">
       <JsonLd data={techArticleJsonLd} />
       <LandingHeader />
 
-      <main className="pt-32 sm:pt-36 pb-24">
-        {/* Hero */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-20">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground/50 mb-4">
-            Computer Use AI Agent
-          </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] mb-5">
-            The #1 Computer Use Agent
-          </h1>
-          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl leading-relaxed mb-8">
-            Coasty is the best computer use AI agent — ranked #1 on OSWorld with 82% accuracy.
-            It controls desktops, browsers, and terminals like a human, automating any task you can do on a computer.
-          </p>
-          <div className="flex gap-4">
-            <Link
-              href="/auth"
-              className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
-            >
-              Try Computer Use Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/results"
-              className="inline-flex items-center gap-2 rounded-full font-medium text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/60 px-6 py-3 text-[14px] cursor-pointer transition-all duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
-            >
-              Watch Demos
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+      <main className="relative">
+        {/* ─── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden px-5 pt-32 pb-10 sm:px-10 sm:pt-40 sm:pb-14">
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute left-1/2 top-0 h-[460px] w-[760px] max-w-[120vw] -translate-x-1/2"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 70%)",
+              }}
+            />
           </div>
-        </div>
 
-        {/* Capabilities Grid */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-20">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-8">
-            What Can Computer Use Do?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CAPABILITIES.map((cap) => (
-              <div
-                key={cap.label}
-                className="rounded-xl border border-border/30 bg-card p-5 space-y-2"
-              >
-                <cap.icon className="h-5 w-5 text-muted-foreground/50" />
-                <h3 className="font-semibold text-sm">{cap.label}</h3>
-                <p className="text-xs text-muted-foreground/70 leading-relaxed">{cap.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dynamic SEO pages grid */}
-        {seoPages.length > 0 && (
-          <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-20">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-              Computer Use for Every Task
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-xl">
-              Explore how Coasty&apos;s computer use agent handles specific tasks across industries and workflows.
+          <div className="relative mx-auto max-w-3xl text-center">
+            <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.24em] text-foreground/45">
+              Computer Use AI Agent
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {seoPages.map((page) => (
-                <Link key={page.slug} href={`/computer-use/${page.slug}`}>
-                  <div className="group rounded-xl border border-border/30 bg-card hover:border-border/60 transition-colors p-5 h-full">
-                    <div className="flex items-center justify-between mb-3">
-                      {page.hero_stat && (
-                        <span className="text-2xl font-bold text-foreground/80">{page.hero_stat}</span>
+            <h1
+              className={
+                "font-semibold tracking-[-0.045em] text-balance pb-1 sm:pb-2 " +
+                "bg-clip-text text-transparent " +
+                "bg-gradient-to-b from-foreground to-foreground/85 dark:from-white dark:to-white/82 " +
+                "text-[2.1rem] leading-[1.1] sm:text-5xl sm:leading-[1.08] lg:text-[3.25rem]"
+              }
+            >
+              The #1 Computer Use Agent
+            </h1>
+            <p className="mx-auto mt-5 max-w-xl text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base">
+              Coasty is the best computer use AI agent — ranked #1 on OSWorld with 82% accuracy.
+              It controls desktops, browsers, and terminals like a human, automating any task you can do on a computer.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+              <Link href="/auth" className={PRIMARY_PILL + " px-7 py-3 text-[14.5px]"}>
+                Try Computer Use Free
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+              </Link>
+              <Link href="/results" className={OUTLINE_PILL + " px-6 py-3 text-[14px]"}>
+                Watch Demos
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ─── Capabilities ─────────────────────────────────────────────── */}
+        <section className="px-5 py-20 sm:px-10 sm:py-24 lg:py-28">
+          <div className="mx-auto max-w-6xl">
+            <SectionHeading title="What Can Computer Use Do?" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {CAPABILITIES.map((cap) => (
+                <div key={cap.label} className={CARD_CHROME + " p-5 sm:p-6"}>
+                  <TopSheen />
+                  <cap.icon
+                    className="h-5 w-5 text-foreground/40 transition-colors duration-500 group-hover:text-foreground/70"
+                    strokeWidth={1.8}
+                  />
+                  <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">{cap.label}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground/70">{cap.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Dynamic SEO pages grid ───────────────────────────────────── */}
+        {seoPages.length > 0 && (
+          <>
+            <SectionDivider />
+            <section className="px-5 py-20 sm:px-10 sm:py-24 lg:py-28">
+              <div className="mx-auto max-w-6xl">
+                <SectionHeading
+                  title="Computer Use for Every Task"
+                  subtitle="Explore how Coasty's computer use agent handles specific tasks across industries and workflows."
+                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {seoPages.map((page) => (
+                    <Link key={page.slug} href={`/computer-use/${page.slug}`} className={CARD_CHROME + " block p-5 sm:p-6"}>
+                      <TopSheen />
+                      <div className="mb-3 flex items-center justify-between">
+                        {page.hero_stat && (
+                          <span className="text-2xl font-semibold tracking-tight tabular-nums text-foreground/90">
+                            {page.hero_stat}
+                          </span>
+                        )}
+                        <ArrowUpRight className="ml-auto h-4 w-4 text-foreground/25 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground/60" />
+                      </div>
+                      <h3 className="text-sm font-semibold tracking-tight text-foreground transition-colors group-hover:text-foreground/80">
+                        {page.title}
+                      </h3>
+                      {page.hero_stat_label && (
+                        <p className="mt-1 text-xs text-muted-foreground/55">{page.hero_stat_label}</p>
                       )}
-                      <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/20 group-hover:text-foreground/50 transition-colors" />
-                    </div>
-                    <h3 className="font-semibold text-sm mb-1 group-hover:text-foreground/70 transition-colors">
-                      {page.title}
-                    </h3>
-                    {page.hero_stat_label && (
-                      <p className="text-xs text-muted-foreground/50">{page.hero_stat_label}</p>
-                    )}
-                  </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        <SectionDivider />
+
+        {/* ─── Comparison links ─────────────────────────────────────────── */}
+        <section className="px-5 py-20 sm:px-10 sm:py-24 lg:py-28">
+          <div className="mx-auto max-w-5xl">
+            <SectionHeading
+              title="Best Computer Use Agent Comparison"
+              subtitle="See how Coasty compares to other computer use and AI agent platforms."
+            />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {COMPARE_LINKS.map((comp) => (
+                <Link
+                  key={comp.slug}
+                  href={`/compare/${comp.slug}`}
+                  className="group flex items-center justify-between rounded-xl border border-foreground/10 bg-card/40 px-4 py-3 backdrop-blur-[2px] transition-[border-color,background-color] duration-300 hover:border-foreground/20 hover:bg-foreground/[0.02]"
+                >
+                  <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
+                    Coasty vs {comp.label}
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-foreground/30 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-foreground/60" />
                 </Link>
               ))}
             </div>
           </div>
-        )}
+        </section>
 
-        {/* Comparison links */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-20">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-            Best Computer Use Agent Comparison
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-xl">
-            See how Coasty compares to other computer use and AI agent platforms.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {COMPARE_LINKS.map((comp) => (
-              <Link
-                key={comp.slug}
-                href={`/compare/${comp.slug}`}
-                className="flex items-center justify-between rounded-lg border border-border/30 hover:border-border/60 px-4 py-3 transition-colors group"
-              >
-                <span className="text-sm text-foreground/70 group-hover:text-foreground transition-colors">
-                  Coasty vs {comp.label}
-                </span>
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-foreground/50 transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </div>
+        <SectionDivider />
 
-        {/* CTA */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10">
-          <div className="border-t border-border/30 pt-16 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+        {/* ─── Final CTA ────────────────────────────────────────────────── */}
+        <section className="px-5 py-20 sm:px-10 sm:py-28">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2
+              className={
+                "font-semibold tracking-[-0.03em] text-balance pb-1 sm:pb-2 " +
+                "bg-clip-text text-transparent " +
+                "bg-gradient-to-b from-foreground to-foreground/85 dark:from-white dark:to-white/82 " +
+                "text-[1.75rem] leading-[1.15] sm:text-4xl"
+              }
+            >
               Start Using AI Computer Use Today
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            <p className="mx-auto mt-4 max-w-lg text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base">
               Join thousands of teams using Coasty to automate desktop, browser, and terminal tasks with the #1 ranked computer use AI agent.
             </p>
-            <Link
-              href="/auth"
-              className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
-            >
-              Try Coasty Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <p className="text-[11px] text-muted-foreground/30 mt-4">No credit card required</p>
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <Link href="/auth" className={PRIMARY_PILL + " px-8 py-3 text-[14.5px]"}>
+                Try Coasty Free
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+              </Link>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/35">
+                No credit card required
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
 
       <LandingFooter />

@@ -11,7 +11,39 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { formatDistanceToNow, parseISO, isValid } from "date-fns";
-import { useTranslations } from "next-intl";
+import type { Locale } from "date-fns";
+import {
+  ar as dfArabic,
+  cs as dfCzech,
+  da as dfDanish,
+  de as dfGerman,
+  el as dfGreek,
+  enUS as dfEnglish,
+  es as dfSpanish,
+  fi as dfFinnish,
+  fr as dfFrench,
+  he as dfHebrew,
+  hi as dfHindi,
+  hu as dfHungarian,
+  id as dfIndonesian,
+  it as dfItalian,
+  ja as dfJapanese,
+  ko as dfKorean,
+  ms as dfMalay,
+  nl as dfDutch,
+  nb as dfNorwegian,
+  pl as dfPolish,
+  pt as dfPortuguese,
+  ro as dfRomanian,
+  ru as dfRussian,
+  sv as dfSwedish,
+  th as dfThai,
+  tr as dfTurkish,
+  uk as dfUkrainian,
+  vi as dfVietnamese,
+  zhCN as dfChinese,
+} from "date-fns/locale";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -196,7 +228,7 @@ function ConnectionThumbnail({
       )}
 
       {/* Toolkit logo with letter-tile fallback */}
-      <div className="absolute top-3 left-4 flex items-center gap-2">
+      <div className="absolute top-3 start-4 flex items-center gap-2">
         <div
           className={cn(
             "h-9 w-9 rounded-xl bg-background/80 backdrop-blur-sm border border-border/40 flex items-center justify-center overflow-hidden",
@@ -235,12 +267,58 @@ function ConnectionThumbnail({
 }
 
 // ── Time helpers ────────────────────────────────────────────────────────────
-function formatRelative(input?: string | null): string | null {
+// Map next-intl locale codes to date-fns Locale objects so relative-time
+// strings ("5 minutes ago") render in the user's language. Filipino has no
+// date-fns equivalent and falls through to the English default.
+const DATE_FNS_LOCALES: Record<string, Locale> = {
+  ar: dfArabic,
+  cs: dfCzech,
+  da: dfDanish,
+  de: dfGerman,
+  el: dfGreek,
+  en: dfEnglish,
+  es: dfSpanish,
+  fi: dfFinnish,
+  fr: dfFrench,
+  he: dfHebrew,
+  hi: dfHindi,
+  hu: dfHungarian,
+  id: dfIndonesian,
+  it: dfItalian,
+  ja: dfJapanese,
+  ko: dfKorean,
+  ms: dfMalay,
+  nl: dfDutch,
+  no: dfNorwegian,
+  pl: dfPolish,
+  pt: dfPortuguese,
+  ro: dfRomanian,
+  ru: dfRussian,
+  sv: dfSwedish,
+  th: dfThai,
+  tr: dfTurkish,
+  uk: dfUkrainian,
+  vi: dfVietnamese,
+  zh: dfChinese,
+};
+
+function resolveDateFnsLocale(locale: string): Locale {
+  return (
+    DATE_FNS_LOCALES[locale] ||
+    DATE_FNS_LOCALES[locale.split("-")[0]] ||
+    dfEnglish
+  );
+}
+
+function formatRelative(
+  input?: string | null,
+  locale?: Locale,
+): string | null {
   if (!input) return null;
   try {
     const d = typeof input === "string" ? parseISO(input) : (input as Date);
     if (!isValid(d)) return null;
-    return formatDistanceToNow(d, { addSuffix: true });
+    return formatDistanceToNow(d, { addSuffix: true, locale });
   } catch {
     return null;
   }
@@ -295,6 +373,8 @@ const STATUS_PRESENT: Record<
 
 export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps) {
   const t = useTranslations("connections");
+  const locale = useLocale();
+  const dateLocale = useMemo(() => resolveDateFnsLocale(locale), [locale]);
   const { data: toolkits } = useComposioToolkits();
   const { connect } = useConnectApp();
   const [busy, setBusy] = useState<"disconnect" | "reconnect" | null>(null);
@@ -321,7 +401,7 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
     connection.app_name ||
     t("card.fallbackAccountLabel");
   const connectedOn = formatDate(connection.created_at);
-  const lastUsed = formatRelative(connection.last_used_at);
+  const lastUsed = formatRelative(connection.last_used_at, dateLocale);
 
   const handleReconnect = async () => {
     setBusy("reconnect");
@@ -386,10 +466,12 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
                 disabled={busy !== null}
                 className={cn(
                   "h-7 rounded-lg px-2.5 text-[11px] font-medium gap-1 shrink-0",
+                  "whitespace-nowrap overflow-hidden",
                   "bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300",
                   "hover:bg-amber-500/15 hover:border-amber-500/50",
                 )}
                 variant="ghost"
+                data-testid="card-action-reconnect"
               >
                 {busy === "reconnect" ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -408,6 +490,7 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
                     size="sm"
                     className="h-7 w-7 p-0 rounded-lg text-muted-foreground/30 hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0"
                     aria-label={t("card.actions.menuAriaLabel")}
+                    data-testid="card-action-menu-trigger"
                   >
                     <MoreVertical className="h-3.5 w-3.5" />
                   </Button>
@@ -416,8 +499,9 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
                   <DropdownMenuItem
                     onClick={handleReconnect}
                     disabled={busy !== null || connection.status === "INITIATED"}
+                    data-testid="menu-action-reconnect"
                   >
-                    <RefreshCw className="mr-2 h-4 w-4" />
+                    <RefreshCw className="me-2 h-4 w-4" />
                     {t("card.actions.reconnect")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -425,8 +509,9 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
                     onClick={() => setShowDisconnect(true)}
                     disabled={busy !== null}
                     className="text-destructive focus:text-destructive"
+                    data-testid="menu-action-disconnect"
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="me-2 h-4 w-4" />
                     {t("card.actions.disconnect")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -435,12 +520,15 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
           </div>
 
           {/* Status meta line */}
-          <div className="flex items-center gap-1.5 text-[11px] mb-4">
-            <span className={cn("font-medium", status.text)}>
+          <div className="flex items-center gap-1.5 text-[11px] mb-4 min-w-0">
+            <span
+              className={cn("font-medium shrink-0", status.text)}
+              data-testid={`status-pill-${connection.status.toLowerCase()}`}
+            >
               {t(status.labelKey as any)}
             </span>
-            <span className="text-muted-foreground/20">·</span>
-            <span className="text-muted-foreground/40 truncate">
+            <span className="text-muted-foreground/20 shrink-0">·</span>
+            <span className="text-muted-foreground/40 truncate min-w-0">
               {accountLabel}
             </span>
           </div>
@@ -497,7 +585,7 @@ export function ConnectionCard({ connection, onDisconnect }: ConnectionCardProps
 
           {/* Heading */}
           <div className="px-6 pt-5 pb-4">
-            <AlertDialogHeader className="gap-1.5 text-left space-y-0">
+            <AlertDialogHeader className="gap-1.5 text-start space-y-0">
               <AlertDialogTitle className="text-[17px] font-semibold tracking-[-0.01em]">
                 {t("card.disconnectDialog.title", {
                   appName: connection.app_name,

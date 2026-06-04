@@ -3,12 +3,13 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useComposio } from "@/lib/composio-store/provider"
-import type { ComposioConnection } from "@/lib/composio-store/types"
+import type { ComposioConnection, ComposioToolkit } from "@/lib/composio-store/types"
 import { ConnectAppDialog } from "@/app/connections/connect-app-dialog"
+import { ToolkitLogo } from "@/app/connections/toolkit-logo"
 import { ArrowRight, Loader2, Plug, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 type StatusToken = "ACTIVE" | "INITIATED" | "EXPIRED" | "FAILED" | "INACTIVE"
 
@@ -32,7 +33,7 @@ function StatusPill({ status }: { status: string }) {
   const t = useTranslations("connections")
   const token = (STATUS_KEY[status as StatusToken] ? (status as StatusToken) : "INACTIVE")
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.04] dark:bg-white/[0.06] px-2 py-0.5 text-[10.5px] font-medium tracking-[0.01em] text-foreground/65">
+    <span data-testid="settings-integration-row-status-pill" className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.04] dark:bg-white/[0.06] px-2 py-0.5 text-[10.5px] font-medium tracking-[0.01em] text-foreground/65">
       <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_DOT[token])} />
       {t(`status.${STATUS_KEY[token]}`)}
     </span>
@@ -41,10 +42,14 @@ function StatusPill({ status }: { status: string }) {
 
 function ConnectionRow({
   connection,
+  toolkits,
   onDisconnect,
   pending,
 }: {
   connection: ComposioConnection
+  /** Catalog snapshot used to resolve the per-app logo when the connection
+   *  itself doesn't carry one (older backends omit the field). */
+  toolkits: ComposioToolkit[]
   onDisconnect: (id: string) => void
   pending: boolean
 }) {
@@ -52,11 +57,30 @@ function ConnectionRow({
   // Belt-and-suspenders: both fields are optional on the wire; provide a
   // generic fallback so aria labels never receive `undefined`.
   const displayName = connection.toolkitName || connection.toolkitSlug || "app"
+  // Same 3-tier resolve the /connections card uses (connection-card.tsx:393-394):
+  // (1) connection.logo_url, (2) connection.logo, (3) catalog join via slug.
+  // The slug field on connections is either toolkitSlug (canonical) or app_slug
+  // (legacy alias) — mirror useComposio's normalization.
+  const slug = connection.toolkitSlug ?? connection.app_slug
+  const toolkitLogoUrl = useMemo(() => {
+    if (connection.logo_url) return connection.logo_url
+    if (connection.logo) return connection.logo
+    const tk = slug
+      ? toolkits.find(
+          (t: ComposioToolkit) => t.slug === slug || t.slug === connection.app_slug,
+        )
+      : undefined
+    return tk?.logo_url ?? tk?.logo ?? null
+  }, [connection.logo_url, connection.logo, connection.app_slug, slug, toolkits])
   return (
     <div className="group flex items-center gap-3 px-2 py-2.5 rounded-md hover:bg-foreground/[0.025] dark:hover:bg-white/[0.03] transition-colors">
-      <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground/[0.04] dark:bg-white/[0.06] shrink-0">
-        <Plug className="h-3.5 w-3.5 text-foreground/55" strokeWidth={1.75} />
-      </div>
+      <ToolkitLogo
+        src={toolkitLogoUrl}
+        name={displayName}
+        alt={displayName}
+        size="sm"
+        variant="dialog"
+      />
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-medium leading-tight text-foreground/90 truncate">
           {connection.toolkitName || connection.toolkitSlug}
@@ -67,6 +91,7 @@ function ConnectionRow({
       </div>
       <StatusPill status={connection.status} />
       <Button
+        data-testid="settings-integration-row-disconnect"
         type="button"
         variant="ghost"
         size="sm"
@@ -79,7 +104,7 @@ function ConnectionRow({
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         ) : (
           <>
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            <Trash2 className="h-3.5 w-3.5 me-1" />
             {t("disconnect")}
           </>
         )}
@@ -110,7 +135,7 @@ export function ComposioSection() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-[13px] font-medium text-foreground/70">{tSettings("heading")}</h3>
+        <h3 data-testid="settings-integrations-heading" className="text-[13px] font-medium text-foreground/70">{tSettings("heading")}</h3>
         <p className="mt-1 text-[12.5px] text-muted-foreground/55 leading-snug">
           {tSettings("subheading")}
         </p>
@@ -137,6 +162,7 @@ export function ComposioSection() {
               <ConnectionRow
                 key={c.id}
                 connection={c}
+                toolkits={toolkits ?? []}
                 onDisconnect={handleDisconnect}
                 pending={pendingId === c.id}
               />
@@ -145,12 +171,12 @@ export function ComposioSection() {
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className="h-8 rounded-lg gap-1.5 px-3 text-[12px] font-medium"
+          className="h-8 rounded-lg gap-1.5 px-3 text-[12px] font-medium whitespace-nowrap"
           onClick={() => setDialogOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -158,12 +184,13 @@ export function ComposioSection() {
         </Button>
 
         <button
+          data-testid="settings-integrations-manage-cta"
           type="button"
           onClick={() => router.push("/connections")}
-          className="inline-flex items-center gap-1 text-[11.5px] text-muted-foreground/55 hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 whitespace-nowrap text-[11.5px] text-muted-foreground/55 hover:text-foreground transition-colors"
         >
           {tSettings("manageOnFullPage")}
-          <ArrowRight className="h-3 w-3" />
+          <ArrowRight className="h-3 w-3 rtl:rotate-180" />
         </button>
       </div>
 

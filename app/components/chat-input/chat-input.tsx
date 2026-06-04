@@ -20,6 +20,7 @@ import { themeConfig } from "@/lib/theme-config"
 // File upload imports
 import { ButtonVMFileUpload } from "./button-vm-file-upload"
 import { ButtonViewScreen } from "./button-view-screen"
+import { ButtonConnections } from "./button-connections"
 import { FileList } from "./file-list"
 
 type ChatInputProps = {
@@ -700,6 +701,11 @@ export function ChatInput({
                   vmName={machineName || undefined}
                 />
               )}
+              {/* Connections — Composio connected-apps teaser (facepile + "+").
+                  Sits last in the cluster, after the file-attachment button.
+                  Auth-gated here so its queries never fire for signed-out
+                  users; not shown in swarm mode to keep that row focused. */}
+              {isUserAuthenticated && !swarmMode && <ButtonConnections />}
             </div>
             <PromptInputAction
               tooltip={

@@ -7,11 +7,15 @@ import {
   CaretDown,
   Monitor,
 } from "@phosphor-icons/react"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
 import { useTranslations } from "next-intl"
 import { useProjectNavigator } from "@/lib/project-navigator-store/provider"
+import {
+  parseComposioToolName,
+  composioToolLabel,
+} from "@/lib/composio-store/tool-format"
 import { useState, useMemo, useEffect } from "react"
 
 interface ToolInvocationProps {
@@ -64,14 +68,16 @@ export function ToolInvocation({
       return isActive ? 'Navigating through web pages to gather information' : 'Successfully retrieved web content'
     }
 
-    // Composio tools
-    if (toolName.startsWith('composio_')) {
-      const rest = toolName.slice('composio_'.length)
-      const underscoreIdx = rest.indexOf('_')
-      const toolkit = underscoreIdx > 0 ? rest.slice(0, underscoreIdx) : rest
-      const action = underscoreIdx > 0 ? rest.slice(underscoreIdx + 1) : ''
-      const capitalizedToolkit = toolkit.charAt(0).toUpperCase() + toolkit.slice(1)
-      return tConnections("toolInvocation.calling", { toolkit: capitalizedToolkit, action })
+    // Composio / connection tools — render the connected app + a humanized
+    // action ("Gmail · Send email"); never surface the raw name or "composio".
+    const composioParsed = parseComposioToolName(toolName)
+    if (composioParsed) {
+      return composioParsed.actionLabel
+        ? tConnections("toolInvocation.calling", {
+            toolkit: composioParsed.toolkitLabel,
+            action: composioParsed.actionLabel,
+          })
+        : composioParsed.toolkitLabel
     }
 
     // Terminal tools
@@ -228,8 +234,17 @@ export function ToolInvocation({
             target = 'VM action'
           }
           break
-        default:
-          target = toolName
+        default: {
+          // Composio / connection calls: show "Gmail · Send email", never the
+          // raw composio_* name.
+          const composioParsed = parseComposioToolName(toolName)
+          if (composioParsed) {
+            action = state === 'result' ? 'Used' : 'Using'
+            target = composioToolLabel(toolName) ?? composioParsed.toolkitLabel
+          } else {
+            target = toolName
+          }
+        }
       }
 
       // Check for results count
@@ -562,6 +577,7 @@ export function ToolInvocation({
               "text-amber-700 dark:text-amber-300"
             )}
             role="alert"
+            data-testid="tool-invocation-reauth-alert"
           >
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <p className="text-xs flex-1 min-w-0">
@@ -571,13 +587,15 @@ export function ToolInvocation({
               href={`/connections?reconnect=${encodeURIComponent(reauthInfo.appSlug)}`}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "text-xs font-medium whitespace-nowrap",
+                "text-xs font-medium whitespace-nowrap inline-flex items-center",
                 "text-amber-700 dark:text-amber-300",
                 "hover:text-amber-800 dark:hover:text-amber-200",
                 "underline-offset-2 hover:underline"
               )}
+              data-testid="tool-invocation-reauth-reconnect-link"
             >
               {tChat("composioReauth.reconnectLink")}
+              <ArrowRight className="rtl:rotate-180 ms-1 inline h-3.5 w-3.5" />
             </Link>
           </div>
         )}

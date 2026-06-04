@@ -96,15 +96,8 @@ export function EmptyState({ onConnect, popularToolkits = [] }: EmptyStateProps)
       <div className="relative px-4 py-10 sm:px-8 sm:py-14 lg:py-16">
         {/* Hero block */}
         <div className="text-center mb-10 sm:mb-12">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
-            className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-border/40 bg-background/70 backdrop-blur-sm mb-6 shadow-sm"
-          >
-            <Sparkles className="h-7 w-7 text-foreground/70" strokeWidth={1.5} />
-          </motion.div>
           <motion.h2
+            data-testid="connections-empty-headline"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.18, ease: EASE }}
@@ -113,6 +106,7 @@ export function EmptyState({ onConnect, popularToolkits = [] }: EmptyStateProps)
             {t("emptyState.headline")}
           </motion.h2>
           <motion.p
+            data-testid="connections-empty-subheadline"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.22, ease: EASE }}
@@ -127,12 +121,13 @@ export function EmptyState({ onConnect, popularToolkits = [] }: EmptyStateProps)
             tightest layout. */}
         <div className="max-w-3xl mx-auto mb-10 sm:mb-12">
           <motion.p
+            data-testid="connections-empty-eyebrow"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.28, ease: EASE }}
-            className="text-[10px] sm:text-[10.5px] font-medium uppercase tracking-[0.2em] text-muted-foreground/55 text-center mb-5"
+            className="text-[10px] sm:text-[10.5px] font-medium uppercase tracking-[0.2em] rtl:tracking-[0.08em] [:lang(zh)_&]:tracking-[0.08em] [:lang(ja)_&]:tracking-[0.08em] [:lang(ko)_&]:tracking-[0.08em] text-muted-foreground/55 text-center mb-5"
           >
-            Popular integrations
+            {t("emptyState.popularIntegrationsEyebrow")}
           </motion.p>
           <div className="grid grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3">
             {tiles.map((tile, i) => (
@@ -175,7 +170,7 @@ export function EmptyState({ onConnect, popularToolkits = [] }: EmptyStateProps)
                 delay: 0.55 + i * 0.06,
                 ease: EASE,
               }}
-              className="rounded-xl border border-border/30 bg-background/30 backdrop-blur-sm px-4 py-3.5 text-left"
+              className="rounded-xl border border-border/30 bg-background/30 backdrop-blur-sm px-4 py-3.5 text-start"
             >
               <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.05]">
                 <Icon
@@ -199,12 +194,13 @@ export function EmptyState({ onConnect, popularToolkits = [] }: EmptyStateProps)
           className="flex justify-center"
         >
           <Button
+            data-testid="connections-empty-browse-apps-cta"
             onClick={() => onConnect()}
             size="lg"
             className="group gap-2 rounded-xl h-11 px-6 w-full sm:w-auto max-w-xs"
           >
             {t("emptyState.browseAppsCta")}
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
           </Button>
         </motion.div>
       </div>
@@ -238,7 +234,9 @@ function ShowcaseTile({
         delay: 0.32 + index * 0.04,
         ease: EASE,
       }}
-      whileHover={disabled ? undefined : { y: -2 }}
+      // Hover lift moved to CSS (`hover:-translate-y-0.5`) so Tailwind v4's
+      // `@media (hover: hover)` gate keeps it from firing on iOS touch.
+      // whileTap stays — it's a press, not a hover.
       whileTap={disabled ? undefined : { scale: 0.96 }}
       onClick={onSelect}
       disabled={disabled}
@@ -247,10 +245,10 @@ function ShowcaseTile({
       className={cn(
         "group relative aspect-square rounded-2xl border border-border/40 bg-background/60 backdrop-blur-sm",
         "flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-2 sm:p-3",
-        "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
+        "transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
         !disabled &&
-          "hover:border-border/80 hover:bg-background/90 hover:shadow-[0_4px_18px_-8px_rgba(0,0,0,0.18)] cursor-pointer",
+          "hover:border-border/80 hover:bg-background/90 hover:shadow-[0_4px_18px_-8px_rgba(0,0,0,0.18)] hover:-translate-y-0.5 cursor-pointer",
         disabled && "cursor-default",
       )}
     >
@@ -261,7 +259,7 @@ function ShowcaseTile({
         variant="showcase"
         alt={t("emptyState.toolkitLogoAlt", { name: tile.name })}
       />
-      <span className="text-[10px] sm:text-[10.5px] font-medium text-foreground/75 line-clamp-1 leading-tight px-0.5">
+      <span className="text-[10px] sm:text-[10.5px] [:lang(zh)_&]:text-[11px] [:lang(zh)_&]:sm:text-[11.5px] [:lang(ja)_&]:text-[11px] [:lang(ja)_&]:sm:text-[11.5px] [:lang(ko)_&]:text-[11px] [:lang(ko)_&]:sm:text-[11.5px] font-medium text-foreground/75 line-clamp-1 leading-tight px-0.5">
         {tile.name}
       </span>
     </motion.button>

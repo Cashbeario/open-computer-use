@@ -145,15 +145,15 @@ export function ConnectionsContent() {
     }
   }
 
-  const handleDisconnect = async (id: string, name: string) => {
-    try {
-      await disconnect(id)
-      toast.success(t("toasts.disconnected"), { description: name })
-    } catch (e: any) {
-      toast.error(t("toasts.error"), {
-        description: e?.message ?? t("toasts.disconnectFailed"),
-      })
-    }
+  const handleDisconnect = async (id: string) => {
+    // ConnectionCard owns the disconnect success/error toasts
+    // (connections.card.toast.*, which correctly interpolate {appName}). Here
+    // we only perform the revoke and let any error PROPAGATE so the card's
+    // own catch can surface it — and, critically, skip its success toast on
+    // failure. Previously this also fired t("toasts.disconnected"), which
+    // threw a next-intl FORMATTING_ERROR (the {appName} variable was never
+    // provided) and double-toasted alongside the card on success.
+    await disconnect(id)
   }
 
   return (
@@ -191,19 +191,26 @@ export function ConnectionsContent() {
           >
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">
+                <h1
+                  data-testid="connections-page-title"
+                  className="text-2xl sm:text-3xl font-medium tracking-tight"
+                >
                   {t("title")}
                 </h1>
                 <span className="inline-flex items-center rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
                   {activeCount} {t("connectedSuffix")}
                 </span>
               </div>
-              <p className="mt-1.5 text-muted-foreground text-sm">
+              <p
+                data-testid="connections-page-subtitle"
+                className="mt-1.5 text-muted-foreground text-sm"
+              >
                 {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
+                data-testid="connections-refresh-button"
                 variant="ghost"
                 size="sm"
                 onClick={handleRefresh}
@@ -218,6 +225,7 @@ export function ConnectionsContent() {
                 />
               </Button>
               <Button
+                data-testid="connections-new-connection-cta"
                 onClick={() => setShowConnectDialog(true)}
                 size="sm"
                 className="h-9 rounded-xl gap-2 px-4 font-medium"
@@ -251,7 +259,7 @@ export function ConnectionsContent() {
                 className="h-8 rounded-lg px-3 text-xs"
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 mr-1.5 ${
+                  className={`h-3.5 w-3.5 me-1.5 ${
                     refreshing ? "animate-spin" : ""
                   }`}
                 />
@@ -275,6 +283,7 @@ export function ConnectionsContent() {
               {statusFilters.map((filter) => (
                 <button
                   key={filter.id}
+                  data-testid={`filter-pill-${filter.id.toLowerCase() === 'initiated' ? 'connecting' : filter.id.toLowerCase()}`}
                   onClick={() => setStatusFilter(filter.id)}
                   className={`
                     px-3.5 py-1.5 rounded-lg text-sm transition-all duration-200
@@ -319,23 +328,33 @@ export function ConnectionsContent() {
               }}
             />
           ) : filteredConnections.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="border-border/30 bg-card/30 backdrop-blur-sm">
-                <CardContent className="flex flex-col items-center justify-center py-14">
-                  <Plug className="h-10 w-10 text-muted-foreground/40 mb-4" />
-                  <h3 className="text-base font-medium mb-1.5">
-                    {t("noFilteredConnections", { filter: statusFilter })}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("noFilteredDescription", { filter: statusFilter })}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+            // Use the FRIENDLY filter label (Active / Connecting / Expired /
+            // Failed) instead of the raw enum value (ACTIVE / INITIATED /
+            // EXPIRED / FAILED) so the empty-state copy reads naturally
+            // instead of shouting in all-caps.
+            (() => {
+              const activeFilter = statusFilters.find((f) => f.id === statusFilter)
+              const filterLabel = activeFilter?.label ?? statusFilter
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <Card className="border-border/30 bg-card/30 backdrop-blur-sm">
+                    <CardContent className="flex flex-col items-center justify-center py-14">
+                      <Plug className="h-10 w-10 text-muted-foreground/40 mb-4" />
+                      <h3 className="text-base font-medium mb-1.5">
+                        {t("noFilteredConnections", { filter: filterLabel })}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {t("noFilteredDescription", { filter: filterLabel })}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })()
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredConnections.map((connection: ComposioConnection, i: number) => (
@@ -351,12 +370,7 @@ export function ConnectionsContent() {
                 >
                   <ConnectionCard
                     connection={connection}
-                    onDisconnect={() =>
-                      handleDisconnect(
-                        connection.id,
-                        connection.toolkitName ?? connection.toolkitSlug ?? t("fallbackAppName")
-                      )
-                    }
+                    onDisconnect={() => handleDisconnect(connection.id)}
                   />
                 </motion.div>
               ))}

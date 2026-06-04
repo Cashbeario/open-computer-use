@@ -8,12 +8,12 @@ import {
   IconClockPlay,
   IconBinaryTree,
   IconDeviceDesktop,
-  IconPlug,
+  IconAffiliate,
   IconCalendarClock,
-  IconShieldLock,
+  IconLockPassword,
   IconKey,
-  IconStack2,
-  IconBrain,
+  IconBrandStackoverflow,
+  IconDatabase,
 } from "@tabler/icons-react"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
 import Link from "next/link"
@@ -527,6 +527,7 @@ const NavButton = memo(function NavButton({
   onClick,
   variant = "default",
   id,
+  testId,
   isActive,
   href,
   accentColor,
@@ -540,6 +541,7 @@ const NavButton = memo(function NavButton({
   onClick?: () => void
   variant?: "default" | "primary"
   id?: string
+  testId?: string
   isActive?: boolean
   href?: string
   accentColor?: string
@@ -598,11 +600,11 @@ const NavButton = memo(function NavButton({
   )
 
   const linkOrButton = href ? (
-    <Link id={id} href={href} className="block w-full" onClick={onClick}>
+    <Link id={id} data-testid={testId} href={href} className="block w-full" onClick={onClick}>
       {content}
     </Link>
   ) : (
-    <button id={id} className="w-full" type="button" onClick={onClick}>
+    <button id={id} data-testid={testId} className="w-full" type="button" onClick={onClick}>
       {content}
     </button>
   )
@@ -735,6 +737,7 @@ function SectionHeader({ label, expanded }: { label: string; expanded: boolean }
 // the row's `active` state typically defaults to false (no URL to match).
 type ResourceItem = {
   id: string
+  testId?: string
   icon: ReactNode
   label: string
   count?: number
@@ -823,7 +826,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
         )}
       >
         <span className="relative shrink-0 flex items-center justify-center w-4 h-4">
-          <IconStack2
+          <IconBrandStackoverflow
             size={16}
             stroke={1.5}
             className={cn(
@@ -832,7 +835,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
             )}
           />
           {anyDot && !open && (
-            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
+            <span className="absolute -top-0.5 -end-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
           )}
         </span>
         <span className="flex-1 text-left truncate text-[12.5px] font-medium tracking-[-0.01em]">
@@ -851,11 +854,11 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <div key={mountKey} className="relative pl-4 pr-0 pt-1 pb-0.5 space-y-[1px]">
+          <div key={mountKey} className="relative ps-4 pe-0 pt-1 pb-0.5 space-y-[1px]">
             {/* Gradient rail — fades at the endpoints so it doesn't
                 bleed into the trigger above or the sibling row below. */}
             <div
-              className="pointer-events-none absolute left-[15px] top-0 bottom-0 w-px
+              className="pointer-events-none absolute start-[15px] top-0 bottom-0 w-px
                          bg-gradient-to-b from-transparent via-foreground/15 to-transparent
                          dark:via-white/[0.09]"
             />
@@ -865,7 +868,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
               const inner = (
                 <span
                   className={cn(
-                    "group/item relative flex w-full items-center gap-2.5 pl-3 pr-2 h-[28px] rounded-md",
+                    "group/item relative flex w-full items-center gap-2.5 ps-3 pe-2 h-[28px] rounded-md",
                     "transition-[background-color,color] duration-150",
                     item.active
                       ? "bg-foreground/[0.06] text-foreground dark:bg-white/[0.07]"
@@ -874,12 +877,12 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                 >
                   {/* Active caret bar sits exactly on the rail axis. */}
                   {item.active && (
-                    <span className="absolute left-[-1px] top-[7px] bottom-[7px] w-[2px] rounded-full bg-foreground/55" />
+                    <span className="absolute start-[-1px] top-[7px] bottom-[7px] w-[2px] rounded-full bg-foreground/55" />
                   )}
                   <span className="relative shrink-0 flex items-center justify-center w-4 h-4">
                     {item.icon}
                     {item.dot && (
-                      <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
+                      <span className="absolute -top-0.5 -end-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
                     )}
                   </span>
                   <span className="flex-1 truncate text-[12px] font-medium tracking-[-0.01em] text-left">
@@ -912,6 +915,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                   <button
                     key={item.id}
                     id={item.id}
+                    data-testid={item.testId}
                     type="button"
                     className={rowClass}
                     style={rowStyle}
@@ -928,6 +932,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
                 <Link
                   key={item.id}
                   id={item.id}
+                  data-testid={item.testId}
                   href={item.href}
                   className={rowClass}
                   style={rowStyle}
@@ -946,7 +951,7 @@ function ResourceDropdown({ items, label }: { items: ResourceItem[]; label: stri
 
 // ─── ResourcesFlyout ─────────────────────────────────────────────
 //   Collapsed-sidebar affordance for the resources group. A single
-//   IconStack2 button with an emerald dot if anything is live; on
+//   IconBrandStackoverflow button with an emerald dot if anything is live; on
 //   click, a compact popover reveals the same three destinations.
 //   Matches the visual language of the inline dropdown so the two
 //   modes feel like the same component at different scales.
@@ -959,6 +964,9 @@ function ResourcesFlyout({
   dot: boolean
   anyActive: boolean
 }) {
+  // Localized group label — "Resources" internally, displayed as the
+  // translated "Agent" (see the `sidebar.resources` message key).
+  const t = useTranslations("sidebar")
   const [open, setOpen] = useState(false)
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -968,7 +976,7 @@ function ResourcesFlyout({
             <button
               id="sidebar-resources-collapsed"
               type="button"
-              aria-label="Resources"
+              aria-label={t("resources")}
               className={cn(
                 "group/trig relative flex w-full items-center gap-2.5 px-2 h-[30px] rounded-lg",
                 "transition-[background-color,color] duration-200 ease-out",
@@ -979,7 +987,7 @@ function ResourcesFlyout({
               )}
             >
               <span className="relative shrink-0 flex items-center justify-center w-4 h-4">
-                <IconStack2 size={16} stroke={1.5} />
+                <IconBrandStackoverflow size={16} stroke={1.5} />
                 {dot && (
                   <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-[1.5px] ring-sidebar dark:bg-emerald-400" />
                 )}
@@ -989,7 +997,7 @@ function ResourcesFlyout({
         </TooltipTrigger>
         {!open && (
           <TooltipContent side="right" sideOffset={8}>
-            <span className="font-medium text-[12px]">Resources</span>
+            <span className="font-medium text-[12px]">{t("resources")}</span>
           </TooltipContent>
         )}
       </Tooltip>
@@ -1001,7 +1009,7 @@ function ResourcesFlyout({
       >
         <div className="px-2.5 pt-2 pb-1.5">
           <span className="text-[10px] font-semibold tracking-[0.08em] uppercase text-muted-foreground">
-            Resources
+            {t("resources")}
           </span>
         </div>
         <div className="h-px bg-border/40 dark:bg-white/[0.05] mx-1 mb-1" />
@@ -1049,6 +1057,7 @@ function ResourcesFlyout({
               return (
                 <button
                   key={item.id}
+                  data-testid={item.testId}
                   type="button"
                   className={rowClass}
                   style={rowStyle}
@@ -1065,6 +1074,7 @@ function ResourcesFlyout({
             return (
               <Link
                 key={item.id}
+                data-testid={item.testId}
                 href={item.href}
                 className={rowClass}
                 style={rowStyle}
@@ -1202,17 +1212,32 @@ export const SidebarNavSection = memo(function SidebarNavSection({
 
       <SectionHeader label="Workspace" expanded={expanded} />
 
-      {/* ── Group 2 · Resources ───────────────────────────────────
-          Expanded: a collapsible "Resources" row with a rotating
-          caret that expands inline to show Computers / Schedules /
-          Credentials along a gradient rail. Defaults closed so the
-          caret is an obvious affordance; auto-opens on child routes
-          and remembers manual toggles in localStorage.
-          Collapsed: a single IconStack2 button that opens a popover
-          flyout with the same three destinations — so no items are
-          hidden in the narrow rail. Developers stays as its own
-          row below — it's a distinct destination, not a resource. */}
       <div className="space-y-0.5">
+        {/* Connections — promoted out of the Resources group to its own
+            top-level row, above the dropdown. It's the integration hub
+            users reach for most, so it earns a one-click destination
+            instead of sitting two clicks deep inside Resources. */}
+        <NavButton
+          id="sidebar-connections-link"
+          testId="sidebar-nav-connections"
+          icon={<IconAffiliate size={16} stroke={1.5} className="shrink-0" />}
+          label={t("connections")}
+          href="/connections"
+          isActive={isItemActive("/connections")}
+          accentColor="text-emerald-500 dark:text-emerald-400"
+          onClick={closeMobileIfNeeded}
+        />
+
+        {/* ── Resources ─────────────────────────────────────────────
+            Expanded: a collapsible "Resources" row whose caret expands
+            inline to show Computers / Workforce / Credentials / Memory
+            along a gradient rail. Defaults closed so the caret is an
+            obvious affordance; auto-opens on child routes and remembers
+            manual toggles in localStorage.
+            Collapsed: a single IconBrandStackoverflow button that opens a popover
+            flyout with the same destinations — so nothing is hidden in
+            the narrow rail. Developers stays as its own row below — a
+            distinct destination, not a resource. */}
         {(() => {
           const resourceItems: ResourceItem[] = [
             {
@@ -1226,14 +1251,6 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               onNavigate: closeMobileIfNeeded,
             },
             {
-              id: "sidebar-connections-link",
-              icon: <IconPlug size={16} stroke={1.5} />,
-              label: t("connections"),
-              href: "/connections",
-              active: isItemActive("/connections"),
-              onNavigate: closeMobileIfNeeded,
-            },
-            {
               id: "sidebar-schedules-link",
               icon: <IconCalendarClock size={16} stroke={1.5} />,
               label: t("workforce"),
@@ -1243,7 +1260,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             },
             {
               id: "sidebar-secrets-link",
-              icon: <IconShieldLock size={16} stroke={1.5} />,
+              icon: <IconLockPassword size={16} stroke={1.5} />,
               label: t("credentials"),
               href: "/secrets",
               active: isItemActive("/secrets"),
@@ -1256,7 +1273,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             // dialog's footer link.
             {
               id: "sidebar-memory-action",
-              icon: <IconBrain size={16} stroke={1.5} />,
+              icon: <IconDatabase size={16} stroke={1.5} />,
               // Localized via the dedicated memory namespace so the
               // sidebar label switches with the user's language.
               label: tMemory("sidebarLabel"),
@@ -1270,7 +1287,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           ]
           const anyResourceActive = resourceItems.some((r) => r.active)
           return expanded ? (
-            <ResourceDropdown label="Resources" items={resourceItems} />
+            <ResourceDropdown label={t("resources")} items={resourceItems} />
           ) : (
             <ResourcesFlyout
               items={resourceItems}

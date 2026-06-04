@@ -254,7 +254,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* ─── Footer ─────────────────────────────────────── */}
-        <SidebarFooter className="relative pt-0 border-t border-sidebar-border/15">
+        <SidebarFooter className="relative pt-0">
           <SidebarFooterSection
             user={user}
             expanded={expanded}

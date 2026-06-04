@@ -43,6 +43,15 @@ const ASANA: ComposioToolkit = {
   auth_type: "OAUTH2",
 }
 
+// `connectFetch` is the channel under test — every `mockResolvedValueOnce` /
+// `toHaveBeenCalledWith` assertion in this suite is about the connect POST
+// (`/api/composio/connect/<slug>`). It is fed by the URL-aware router below.
+let connectFetch: Mock
+// `fetchMock` is the umbrella spy installed on `globalThis.fetch`. It routes
+// known auxiliary endpoints (toolkit-info enrichment) to benign success stubs
+// and forwards everything else to `connectFetch`. Tests retain it only for
+// "was anything fetched at all" debugging — the real assertions go through
+// `connectFetch`.
 let fetchMock: Mock
 const originalFetch = globalThis.fetch
 
@@ -71,8 +80,42 @@ function fakeTab() {
   return { location: { href: "" }, opener: {} as unknown, close: vi.fn() }
 }
 
+// Benign success stub for `GET /api/composio/toolkit-info/<slug>`. The dialog
+// fires this lazy auth-scheme enrichment request the moment the user lands on
+// the confirm view (see `useToolkitInfo` in lib/composio-store/use-composio.ts).
+// These tests pin OAuth-only behaviour via Asana's `auth_type: "OAUTH2"`, so
+// the enrichment payload only needs to be well-formed — the dialog also
+// gracefully falls back to catalog data if the fetch fails.
+function toolkitInfoOk(slug: string): Response {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      enabled: true,
+      slug,
+      rawSlug: slug,
+      name: slug,
+      authScheme: "OAUTH2",
+      authSchemes: [
+        { mode: "OAUTH2", fields: [], composioManaged: true },
+      ],
+    }),
+  } as unknown as Response
+}
+
 beforeEach(() => {
-  fetchMock = vi.fn()
+  connectFetch = vi.fn()
+  fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input.toString()
+    // Route the lazy auth-scheme enrichment to a benign stub — every test
+    // here lives on OAuth toolkits and doesn't care about the payload.
+    if (url.includes("/api/composio/toolkit-info/")) {
+      const slug = url.split("/api/composio/toolkit-info/")[1] ?? ""
+      return Promise.resolve(toolkitInfoOk(decodeURIComponent(slug)))
+    }
+    // Everything else (the connect POST) is the channel under test.
+    return connectFetch(input, init) as Promise<Response>
+  })
   globalThis.fetch = fetchMock as unknown as typeof globalThis.fetch
 })
 
@@ -102,12 +145,15 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
     fireEvent.click(screen.getByRole("button", { name: "Connect Asana" }))
 
     // We land on the confirm panel, with the app name in the headline and the
-    // Composio brand tile present — and NO fetch has fired yet.
+    // Composio brand tile present — and NO connect POST has fired yet. (A
+    // benign GET to /api/composio/toolkit-info/<slug> fires on confirm-view
+    // mount as best-effort auth-scheme enrichment; it is *not* an OAuth
+    // hand-off and is intentionally excluded from this assertion.)
     const panel = await screen.findByTestId("connect-confirm")
     expect(panel).toBeTruthy()
     expect(screen.getByTestId("connect-confirm-title").textContent).toContain("Asana")
     expect(screen.getByTestId("composio-wordmark")).toBeTruthy()
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(connectFetch).not.toHaveBeenCalled()
   })
 
   it("Connect opens the authorization in a NEW TAB and closes the dialog", async () => {
@@ -115,7 +161,7 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
     const openSpy = vi
       .spyOn(window, "open")
       .mockReturnValue(tab as unknown as Window)
-    fetchMock.mockResolvedValueOnce({
+    connectFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
       json: async () => ({
@@ -135,7 +181,7 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
 
     await waitFor(() => {
       // The POST went to the canonical connect route…
-      expect(fetchMock).toHaveBeenCalledWith(
+      expect(connectFetch).toHaveBeenCalledWith(
         "/api/composio/connect/asana",
         expect.objectContaining({ method: "POST" }),
       )
@@ -154,7 +200,7 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
   it("a backend failure keeps the confirm panel open and surfaces the error", async () => {
     const tab = fakeTab()
     vi.spyOn(window, "open").mockReturnValue(tab as unknown as Window)
-    fetchMock.mockResolvedValueOnce({
+    connectFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
       clone() {

@@ -253,6 +253,7 @@ describe('captureScreenshot — overlay hide & JPEG encode', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
   })
 
@@ -260,6 +261,8 @@ describe('captureScreenshot — overlay hide & JPEG encode', () => {
     h.captureState.sources = [makeMockSource({ width: 1920, height: 1080 })]
     const result = await captureScreenshot()
 
+    expect(result.success).toBe(true)
+    if (!result.success) return
     expect(typeof result.screenshot).toBe('string')
     expect(result.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
     // No accidental file:// or absolute path leak
@@ -289,6 +292,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(false)
+    if (result.success) return
     expect(String(result.error)).toMatch(/Empty screenshot/i)
     expect(String(result.error)).toMatch(/Screen Recording/i)
   })
@@ -297,6 +301,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     h.captureState.sources = []
     const result = await captureScreenshot()
     expect(result.success).toBe(false)
+    if (result.success) return
     expect(String(result.error)).toMatch(/No screen sources/i)
   })
 
@@ -328,6 +333,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
   })
 })
@@ -369,6 +375,7 @@ describe('captureScreenshot — concurrent requests', () => {
 
     expect(a.success).toBe(true)
     expect(b.success).toBe(true)
+    if (!a.success || !b.success) return
     // Both must produce well-formed data URLs
     expect(a.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
     expect(b.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
@@ -389,6 +396,7 @@ describe('captureScreenshot — fallback chain', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
     // desktopCapturer must NOT be invoked when native succeeds
     expect(h.captureState.callCount).toBe(0)

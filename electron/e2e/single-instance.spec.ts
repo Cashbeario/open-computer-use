@@ -49,7 +49,9 @@ test('second launch with the same userData exits quickly', async () => {
   // false → ``app.quit()`` fires immediately in index.ts. The child process
   // should exit on its own without us calling close().
   const sharedDir = launched.userDataDir
-  const env = {
+  // Annotate as Record<string, string> so the `delete env.ELECTRON_RUN_AS_NODE`
+  // below typechecks (matches the same pattern in fixtures/launch.ts).
+  const env: Record<string, string> = {
     ...process.env as Record<string, string>,
     COASTY_TEST_MODE: '1',
   }

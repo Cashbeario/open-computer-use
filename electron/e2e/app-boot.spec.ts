@@ -77,7 +77,10 @@ test('does not crash within 3 seconds of boot', async () => {
   // first fire (e.g. the bridge reconnect loop arming too aggressively).
   launched = await launchApp()
   await waitForMainWindow(launched)
-  const stillAlive = await launched.app.evaluate(({ app }) => !app.isQuitting?.())
+  // `app.isReady()` is a real, typed Electron App method that flips false on
+  // teardown; used here as the "did we crash on boot?" signal. (Previously
+  // this called `!app.isQuitting?.()`, but `isQuitting` is not on App.)
+  const stillAlive = await launched.app.evaluate(({ app }) => app.isReady())
   expect(stillAlive).toBe(true)
 
   // Give the post-boot timers a chance to fire.

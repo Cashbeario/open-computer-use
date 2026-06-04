@@ -1588,7 +1588,6 @@ export function FeaturedStrip({
             const isClone = i >= toolkits.length;
             return (
               <FeaturedTile
-                // eslint-disable-next-line react/no-array-index-key
                 key={`${tk.slug}-${i}`}
                 tk={tk}
                 isConnected={isConnected}

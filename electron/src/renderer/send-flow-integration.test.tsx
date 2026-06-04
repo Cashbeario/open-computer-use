@@ -73,7 +73,11 @@ import { useWindowStore } from './stores/window-store'
 interface CoastyMock {
   checkMachineBusy: ReturnType<typeof vi.fn>
   stopMachine: ReturnType<typeof vi.fn>
-  sendChatMessage: ReturnType<typeof vi.fn>
+  // Tightened from bare `ReturnType<typeof vi.fn>` to a callable-procedure
+  // Mock so direct invocations (`origSend(...args)` at lines 336/420)
+  // typecheck under Vitest 4 — without this, the inferred type collapses to
+  // the constructor-only arm and TS2348 fires.
+  sendChatMessage: ReturnType<typeof vi.fn<(...args: any[]) => Promise<any>>>
   abortChat: ReturnType<typeof vi.fn>
   onChatSSEEvent: ReturnType<typeof vi.fn>
   createChat: ReturnType<typeof vi.fn>

@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { verifyBearerToken } from "@/lib/supabase/bearer-auth"
+import { logApiAccess } from "@/lib/observability/api-access-log"
 
 const PYTHON_BACKEND_URL =
   process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
@@ -37,98 +38,116 @@ export async function DELETE(
   req: NextRequest,
   { params }: RouteParams
 ): Promise<NextResponse> {
-  // Authenticate user — cookies first (web), then Bearer token (Electron).
-  let authUser: { id: string; email?: string } | null = null
-
-  const supabase = await createClient()
-  if (supabase) {
-    const { data: authData, error: authError } = await supabase.auth.getUser()
-    if (!authError && authData?.user) {
-      authUser = {
-        id: authData.user.id,
-        email: authData.user.email ?? undefined,
-      }
-    }
-  }
-
-  if (!authUser) {
-    const bearer = await verifyBearerToken(req)
-    if (bearer.user) {
-      authUser = bearer.user
-    }
-  }
-
-  if (!authUser) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401, headers: { "Cache-Control": "no-store" } }
-    )
-  }
-
-  const userId = authUser.id
-
-  const { id } = await params
-  if (!id || !VALID_ID.test(id)) {
-    return NextResponse.json(
-      { error: "Invalid connection id" },
-      { status: 400, headers: { "Cache-Control": "no-store" } }
-    )
-  }
-
+  const t0 = Date.now()
+  let status = 500
+  let userIdForLog: string | undefined
+  let idForLog: string | undefined
   try {
-    const upstream = new URL(
-      `/api/composio/connections/${encodeURIComponent(id)}`,
-      PYTHON_BACKEND_URL
-    )
-    const res = await fetch(upstream.toString(), {
-      method: "DELETE",
-      headers: {
-        "X-User-ID": userId,
-        ...(INTERNAL_API_KEY && { "X-Internal-Key": INTERNAL_API_KEY }),
-      },
-      signal: AbortSignal.timeout(10_000),
-      cache: "no-store",
-    })
+    // Authenticate user — cookies first (web), then Bearer token (Electron).
+    let authUser: { id: string; email?: string } | null = null
 
-    if (!res.ok) {
-      let detail = ""
-      try {
-        const body = (await res.clone().json()) as BackendErrorBody
-        detail = body?.detail || body?.error || ""
-      } catch {
-        detail = await res.text().catch(() => "")
+    const supabase = await createClient()
+    if (supabase) {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (!authError && authData?.user) {
+        authUser = {
+          id: authData.user.id,
+          email: authData.user.email ?? undefined,
+        }
       }
+    }
+
+    if (!authUser) {
+      const bearer = await verifyBearerToken(req)
+      if (bearer.user) {
+        authUser = bearer.user
+      }
+    }
+
+    if (!authUser) {
+      status = 401
       return NextResponse.json(
-        { error: detail || "Backend error" },
-        { status: res.status, headers: { "Cache-Control": "no-store" } }
+        { error: "Unauthorized" },
+        { status, headers: { "Cache-Control": "no-store" } }
       )
     }
 
-    // Backend returns { status: "ok" } or 204; normalize either to { status: "ok" }.
-    let body: unknown = { status: "ok" }
-    if (res.status !== 204) {
-      try {
-        body = await res.json()
-      } catch {
-        body = { status: "ok" }
-      }
+    userIdForLog = authUser.id
+
+    const { id } = await params
+    idForLog = id
+    if (!id || !VALID_ID.test(id)) {
+      status = 400
+      return NextResponse.json(
+        { error: "Invalid connection id" },
+        { status, headers: { "Cache-Control": "no-store" } }
+      )
     }
 
-    return NextResponse.json(body, {
-      status: 200,
-      headers: { "Cache-Control": "no-store" },
+    try {
+      const upstream = new URL(
+        `/api/composio/connections/${encodeURIComponent(id)}`,
+        PYTHON_BACKEND_URL
+      )
+      const res = await fetch(upstream.toString(), {
+        method: "DELETE",
+        headers: {
+          "X-User-ID": userIdForLog,
+          ...(INTERNAL_API_KEY && { "X-Internal-Key": INTERNAL_API_KEY }),
+        },
+        signal: AbortSignal.timeout(10_000),
+        cache: "no-store",
+      })
+
+      if (!res.ok) {
+        let detail = ""
+        try {
+          const body = (await res.clone().json()) as BackendErrorBody
+          detail = body?.detail || body?.error || ""
+        } catch {
+          detail = await res.text().catch(() => "")
+        }
+        status = res.status
+        return NextResponse.json(
+          { error: detail || "Backend error" },
+          { status, headers: { "Cache-Control": "no-store" } }
+        )
+      }
+
+      // Backend returns { status: "ok" } or 204; normalize either to { status: "ok" }.
+      let body: unknown = { status: "ok" }
+      if (res.status !== 204) {
+        try {
+          body = await res.json()
+        } catch {
+          body = { status: "ok" }
+        }
+      }
+
+      status = 200
+      return NextResponse.json(body, {
+        status,
+        headers: { "Cache-Control": "no-store" },
+      })
+    } catch (err: unknown) {
+      const name = err instanceof Error ? err.name : ""
+      const message =
+        err instanceof Error ? err.message : "Failed to reach backend"
+      const msg =
+        name === "TimeoutError" || name === "AbortError"
+          ? "Backend timeout"
+          : message
+      status = 502
+      return NextResponse.json(
+        { error: msg },
+        { status, headers: { "Cache-Control": "no-store" } }
+      )
+    }
+  } finally {
+    logApiAccess(req, status, Date.now() - t0, {
+      op: "composio.disconnect",
+      connection_id: idForLog,
+      user_id: userIdForLog,
     })
-  } catch (err: unknown) {
-    const name = err instanceof Error ? err.name : ""
-    const message =
-      err instanceof Error ? err.message : "Failed to reach backend"
-    const msg =
-      name === "TimeoutError" || name === "AbortError"
-        ? "Backend timeout"
-        : message
-    return NextResponse.json(
-      { error: msg },
-      { status: 502, headers: { "Cache-Control": "no-store" } }
-    )
   }
 }

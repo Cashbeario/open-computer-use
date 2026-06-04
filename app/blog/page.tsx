@@ -49,7 +49,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-background text-foreground">
+    <div className="relative isolate min-h-screen overflow-x-clip bg-background text-foreground">
       <JsonLd data={blogJsonLd} />
       <LandingHeader />
 

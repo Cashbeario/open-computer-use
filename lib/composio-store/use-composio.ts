@@ -25,12 +25,16 @@ import {
 import { useTranslations } from "next-intl"
 import { useCallback, useMemo } from "react"
 import { useComposioContext } from "./provider"
-import type {
-  ComposioConnection,
-  ComposioConnectionsResponse,
-  ComposioConnectResponse,
-  ComposioToolkit,
-  ComposioToolkitsResponse,
+import {
+  ComposioConnectError,
+  type ComposioConnectCredentials,
+  type ComposioConnectErrorCode,
+  type ComposioConnection,
+  type ComposioConnectionsResponse,
+  type ComposioConnectResponse,
+  type ComposioRequiredField,
+  type ComposioToolkit,
+  type ComposioToolkitsResponse,
 } from "./types"
 
 const CONNECTIONS_KEY = ["composio", "connections"] as const
@@ -47,9 +51,91 @@ const STALE_TOOLKITS_MS = 60_000
 // `useTranslations` and memoise the resulting fetcher.
 
 type ErrorsT = (
-  key: "loadConnectionsFailed" | "loadToolkitsFailed" | "startConnectionFailed" | "disconnectFailedHttp",
+  key:
+    | "loadConnectionsFailed"
+    | "loadToolkitsFailed"
+    | "startConnectionFailed"
+    | "disconnectFailedHttp"
+    | "unknownToolkit"
+    | "unsupportedAuthScheme"
+    | "missingCredentials"
+    | "invalidCredentials"
+    | "credentialValidationFailed",
   values?: Record<string, string | number>
 ) => string
+
+/**
+ * Backend FastAPI error payloads come back as either the FastAPI default
+ * `{ detail: "..." | { code, message, requiredFields? } }` or the Next.js
+ * proxy wrapper `{ error: "..." }`. This helper parses both into a typed
+ * shape without throwing on malformed JSON.
+ */
+async function parseConnectErrorBody(res: Response): Promise<{
+  code?: ComposioConnectErrorCode
+  message?: string
+  requiredFields?: ComposioRequiredField[]
+}> {
+  try {
+    const body = (await res.json()) as {
+      error?: string
+      detail?:
+        | string
+        | {
+            code?: ComposioConnectErrorCode
+            message?: string
+            required_fields?: ComposioRequiredField[]
+            requiredFields?: ComposioRequiredField[]
+          }
+    }
+    if (typeof body.detail === "object" && body.detail !== null) {
+      const d = body.detail
+      return {
+        code: d.code,
+        message: d.message ?? body.error,
+        requiredFields: d.requiredFields ?? d.required_fields,
+      }
+    }
+    return {
+      message:
+        (typeof body.detail === "string" ? body.detail : undefined) ??
+        body.error,
+    }
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * Translate a backend `code` + status into a localised error message
+ * using the `connections.errors.*` namespace. Falls back to the raw
+ * backend message, then to a generic HTTP message.
+ */
+function localizeConnectError(
+  t: ErrorsT,
+  code: ComposioConnectErrorCode | undefined,
+  status: number,
+  backendMessage: string | undefined,
+  requiredFields: ComposioRequiredField[] | undefined
+): string {
+  switch (code) {
+    case "unknown_toolkit":
+      return t("unknownToolkit")
+    case "unsupported_auth_scheme":
+      return t("unsupportedAuthScheme")
+    case "missing_credentials": {
+      const fields = (requiredFields ?? [])
+        .map((f) => f.label || f.name)
+        .join(", ")
+      return t("missingCredentials", { fields: fields || "" })
+    }
+    case "invalid_credentials":
+      return t("invalidCredentials")
+    case "credential_validation_failed":
+      return t("credentialValidationFailed")
+    default:
+      return backendMessage || t("startConnectionFailed", { status })
+  }
+}
 
 function makeFetchConnections(t: ErrorsT) {
   return async function fetchConnections(): Promise<ComposioConnection[]> {
@@ -143,9 +229,18 @@ function makeFetchToolkits(t: ErrorsT) {
 
 function makePostConnect(t: ErrorsT) {
   return async function postConnect(
-    toolkitSlug: string
+    toolkitSlug: string,
+    extra?: { credentials?: ComposioConnectCredentials }
   ): Promise<ComposioConnectResponse> {
     const slug = toolkitSlug.trim().toLowerCase().replace(/-/g, "_")
+    // Send `{ credentials }` only when the caller supplies them, so the
+    // OAuth path remains a literal `{}` body — preserves byte-identical
+    // wire shape for OAuth toolkits, and lets the Next.js proxy
+    // (`app/api/composio/connect/[app]/route.ts`) decide whether to
+    // forward credentials to FastAPI.
+    const hasCreds =
+      extra?.credentials &&
+      Object.keys(extra.credentials).length > 0
     const res = await fetch(
       `/api/composio/connect/${encodeURIComponent(slug)}`,
       {
@@ -154,20 +249,26 @@ function makePostConnect(t: ErrorsT) {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(
+          hasCreds ? { credentials: extra!.credentials } : {}
+        ),
       }
     )
     if (!res.ok) {
-      let detail = ""
-      try {
-        const body = (await res.json()) as { error?: string; detail?: string }
-        detail = body?.error || body?.detail || ""
-      } catch {
-        // swallow
-      }
-      throw new Error(
-        detail || t("startConnectionFailed", { status: res.status })
-      )
+      const parsed = await parseConnectErrorBody(res)
+      const code: ComposioConnectErrorCode = parsed.code ?? "unknown"
+      throw new ComposioConnectError({
+        code,
+        status: res.status,
+        message: localizeConnectError(
+          t,
+          parsed.code,
+          res.status,
+          parsed.message,
+          parsed.requiredFields
+        ),
+        requiredFields: parsed.requiredFields,
+      })
     }
     return (await res.json()) as ComposioConnectResponse
   }
@@ -175,25 +276,29 @@ function makePostConnect(t: ErrorsT) {
 
 function makeDeleteConnection(t: ErrorsT) {
   return async function deleteConnection(connectionId: string): Promise<void> {
-    const res = await fetch("/api/composio/connections", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ connectedAccountId: connectionId }),
-    })
-    if (!res.ok) {
-      let detail = ""
-      try {
-        const body = (await res.json()) as { error?: string; detail?: string }
-        detail = body?.error || body?.detail || ""
-      } catch {
-        // swallow
+    // Revoke via the path-param route `DELETE /api/composio/disconnect/{id}`,
+    // which validates the id against `/^[a-zA-Z0-9_-]{1,64}$/` and proxies to
+    // the FastAPI backend `DELETE /api/composio/connections/{id}`. The id is
+    // the Composio connected_account_id (a nanoid) and is already URL-safe,
+    // but we encodeURIComponent it defensively so a malformed id can never
+    // escape its path segment. The id travels entirely in the URL — there is
+    // no request body (the disconnect route reads only the path param).
+    const res = await fetch(
+      `/api/composio/disconnect/${encodeURIComponent(connectionId)}`,
+      {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
       }
-      throw new Error(
-        detail || t("disconnectFailedHttp", { status: res.status })
-      )
+    )
+    if (!res.ok) {
+      const parsed = await parseConnectErrorBody(res)
+      const code: ComposioConnectErrorCode = parsed.code ?? "upstream"
+      throw new ComposioConnectError({
+        code,
+        status: res.status,
+        message:
+          parsed.message ?? t("disconnectFailedHttp", { status: res.status }),
+      })
     }
   }
 }
@@ -244,35 +349,91 @@ export function useComposioToolkits() {
 }
 
 /**
- * Initiate an OAuth connection for the given toolkit. On success,
- * navigates the browser to the Composio-provided redirect URL.
+ * Initiate a Composio connection for the given toolkit.
  *
- * Returns:
- *   - connect(toolkit_slug): kicks off the flow; throws on backend error.
+ * Supports both OAuth (redirect-based) and credential-based flows
+ * (API_KEY, BEARER_TOKEN, BASIC, NO_AUTH, …). The mutation itself does
+ * not navigate; the surrounding callbacks below decide whether to:
+ *   - navigate to `redirect_url` for OAuth toolkits, OR
+ *   - invalidate the connections query for synchronously-created
+ *     connections (`status === 'connected'`, `connection_created`).
+ *
+ * Public surface:
+ *   - connect(toolkit_slug): redirects the CURRENT tab to the Composio
+ *     authorisation URL (OAuth) or resolves once the connection is
+ *     created (credential-based). Used by the connection-card
+ *     "reconnect" action. Throws `ComposioConnectError` on backend
+ *     error.
+ *   - startConnect(toolkit_slug, credentials?): resolves with the
+ *     full discriminated response WITHOUT navigating, so a caller can
+ *     pop it open in a new tab (OAuth) or render a success state
+ *     inline (credential-based) without yanking the dialog out from
+ *     under an in-progress submission. Throws `ComposioConnectError`
+ *     on backend error.
+ *   - submitCredentials(toolkit_slug, credentials): semantic alias of
+ *     startConnect for credential-form callers — same behaviour,
+ *     clearer intent at the call site.
  *   - isConnecting: true while the mutation is in flight.
+ *   - error: the last `ComposioConnectError` (or null).
  */
 export function useConnectApp() {
   const t = useTranslations("connections.errors")
+  const queryClient = useQueryClient()
   const mutationFn = useMemo(() => makePostConnect(t as ErrorsT), [t])
 
-  const mutation = useMutation<ComposioConnectResponse, Error, string>({
-    mutationFn,
+  const mutation = useMutation<
+    ComposioConnectResponse,
+    ComposioConnectError,
+    { slug: string; credentials?: ComposioConnectCredentials }
+  >({
+    mutationFn: ({ slug, credentials }) => mutationFn(slug, { credentials }),
     onSuccess: (data) => {
-      if (typeof window !== "undefined" && data?.redirect_url) {
-        window.location.href = data.redirect_url
+      // For credential-based schemes the backend has already created the
+      // connection; invalidate the connections list so it shows up
+      // immediately in the UI without waiting for the 30s stale window
+      // or a focus refetch.
+      if (data.status === "connected" && data.connection_created) {
+        queryClient.invalidateQueries({ queryKey: CONNECTIONS_KEY })
       }
     },
   })
 
   const connect = useCallback(
     async (toolkit_slug: string): Promise<void> => {
-      await mutation.mutateAsync(toolkit_slug)
+      const data = await mutation.mutateAsync({ slug: toolkit_slug })
+      if (data.status === "redirect" && data.redirect_url) {
+        if (typeof window !== "undefined") {
+          window.location.href = data.redirect_url
+        }
+        return
+      }
+      // status === "connected" — onSuccess already invalidated the list.
     },
+    [mutation]
+  )
+
+  const startConnect = useCallback(
+    (
+      toolkit_slug: string,
+      credentials?: ComposioConnectCredentials
+    ): Promise<ComposioConnectResponse> =>
+      mutation.mutateAsync({ slug: toolkit_slug, credentials }),
+    [mutation]
+  )
+
+  const submitCredentials = useCallback(
+    (
+      toolkit_slug: string,
+      credentials: ComposioConnectCredentials
+    ): Promise<ComposioConnectResponse> =>
+      mutation.mutateAsync({ slug: toolkit_slug, credentials }),
     [mutation]
   )
 
   return {
     connect,
+    startConnect,
+    submitCredentials,
     isConnecting: mutation.isPending,
     error: mutation.error,
   }
@@ -287,7 +448,7 @@ export function useDisconnectApp() {
   const t = useTranslations("connections.errors")
   const mutationFn = useMemo(() => makeDeleteConnection(t as ErrorsT), [t])
 
-  const mutation = useMutation<void, Error, string>({
+  const mutation = useMutation<void, ComposioConnectError, string>({
     mutationFn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CONNECTIONS_KEY })
@@ -320,7 +481,13 @@ export function useComposio() {
   const queryClient = useQueryClient()
   const connectionsQ = useComposioConnections()
   const toolkitsQ = useComposioToolkits()
-  const { connect, isConnecting, error: connectError } = useConnectApp()
+  const {
+    connect,
+    startConnect,
+    submitCredentials,
+    isConnecting,
+    error: connectError,
+  } = useConnectApp()
   const {
     disconnect,
     isDisconnecting,
@@ -346,6 +513,8 @@ export function useComposio() {
       null,
     refresh,
     connect,
+    startConnect,
+    submitCredentials,
     disconnect,
     isConnecting,
     isDisconnecting,

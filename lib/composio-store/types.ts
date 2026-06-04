@@ -18,6 +18,47 @@ export type ConnectionStatus =
   | "INACTIVE"
 
 /**
+ * Composio-supported authentication scheme identifiers. Mirrors the
+ * `auth_schemes[]` strings emitted by the backend
+ * (`backend/app/services/composio_tools.py`), which in turn come from
+ * the Composio SDK's `toolkit.auth_schemes`.
+ *
+ * Frontend treats unknown strings as `"UNKNOWN"` at the use-site; the
+ * type itself is intentionally not widened with `| string` so explicit
+ * narrowing is forced on every consumer.
+ */
+export type AuthScheme =
+  | "OAUTH2"
+  | "OAUTH1"
+  | "OAUTH1A"
+  | "API_KEY"
+  | "BEARER_TOKEN"
+  | "BASIC"
+  | "BASIC_WITH_JWT"
+  | "NO_AUTH"
+  | "GOOGLE_SERVICE_ACCOUNT"
+
+/**
+ * Whitelisted credential field names accepted by
+ * `POST /api/composio/connect/{slug}`. The Next.js proxy
+ * (`app/api/composio/connect/[app]/route.ts`) drops any key not in this
+ * set before forwarding to FastAPI. Values are always strings on the
+ * wire — JSON blobs (e.g. service-account JSON) are passed as a single
+ * stringified field.
+ */
+export type ComposioConnectCredentials = Partial<{
+  api_key: string
+  token: string
+  bearer_token: string
+  username: string
+  password: string
+  jwt_token: string
+  service_account_json: string
+  client_id: string
+  client_secret: string
+}>
+
+/**
  * A user's connected third-party account (e.g. their Gmail or Slack
  * authorization). Returned by `GET /api/composio/connections`.
  */
@@ -60,6 +101,13 @@ export interface ComposioConnection {
   createdAt?: string | null
   /** camelCase alias of `last_used_at` for UI consumers. */
   updatedAt?: string | null
+  /**
+   * Authentication scheme this connection was created with. Allows the
+   * connections UI to render different "reconnect" affordances for OAuth
+   * (popup / redirect) vs. API_KEY / BEARER_TOKEN / BASIC (inline form).
+   * Optional because older payloads may pre-date the field.
+   */
+  auth_scheme?: AuthScheme
 }
 
 /**
@@ -86,18 +134,63 @@ export interface ComposioToolkit {
    * with `Array.isArray()` before iterating.
    */
   categories?: string[]
-  /** Auth flow this toolkit uses (e.g. "OAUTH2", "API_KEY"). */
-  auth_type?: string | null
+  /**
+   * Preferred / first authentication scheme this toolkit advertises.
+   * Used by the connect dialog to decide between the OAuth popup flow
+   * and an inline credentials form. `null` / `undefined` means the
+   * backend did not surface a scheme (treat as `UNKNOWN`).
+   */
+  auth_type?: AuthScheme | null
+  /**
+   * Full list of authentication schemes the toolkit supports, in the
+   * order the backend reported them. A toolkit may legitimately advertise
+   * more than one (e.g. Linear supports both OAUTH2 and BEARER_TOKEN).
+   * Empty / missing means only `auth_type` is known.
+   */
+  auth_schemes?: AuthScheme[]
 }
 
 /**
- * Shape returned by `POST /api/composio/connect/{slug}`. The client is
- * expected to navigate the browser to `redirect_url` to complete OAuth.
+ * Discriminator for `POST /api/composio/connect/{slug}` responses.
+ *
+ * - `"redirect"`: the toolkit uses OAuth (1/1a/2) and the caller must
+ *   navigate the browser to `redirect_url` to complete authorisation.
+ * - `"connected"`: the toolkit uses a credential-based scheme
+ *   (API_KEY / BEARER_TOKEN / BASIC / NO_AUTH / …); the connection
+ *   was created synchronously and no navigation is required.
  */
-export interface ComposioConnectResponse {
-  redirect_url: string
-  connected_account_id: string
-}
+export type ComposioConnectStatus = "redirect" | "connected"
+
+/**
+ * Discriminated union returned by `POST /api/composio/connect/{slug}`.
+ *
+ * For OAuth toolkits the response carries an absolute `redirect_url` the
+ * caller must navigate to. For credential-based toolkits the response
+ * has `redirect_url: null`, `connection_created: true`, and the
+ * connection appears immediately in the connections list after a
+ * `CONNECTIONS_KEY` invalidation.
+ *
+ * Callers should branch on `status` before reading `redirect_url`.
+ */
+export type ComposioConnectResponse =
+  | {
+      status: "redirect"
+      auth_scheme: "OAUTH2" | "OAUTH1" | "OAUTH1A"
+      redirect_url: string
+      connected_account_id: string
+      /** Always `false` for the redirect branch — the OAuth callback
+       *  is what eventually creates the connection. */
+      connection_created?: false
+    }
+  | {
+      status: "connected"
+      auth_scheme: Exclude<AuthScheme, "OAUTH2" | "OAUTH1" | "OAUTH1A">
+      redirect_url: null
+      connected_account_id: string
+      /** Always `true` for the connected branch — the backend created
+       *  the connection synchronously and it is now active. */
+      connection_created: true
+    }
 
 /**
  * Envelope shape for the list endpoints, including the `enabled` flag
@@ -111,4 +204,98 @@ export interface ComposioConnectionsResponse {
 export interface ComposioToolkitsResponse {
   enabled: boolean
   toolkits: ComposioToolkit[]
+}
+
+/**
+ * Backend error taxonomy for the connect flow. Codes are emitted by
+ * `backend/app/api/routes/composio.py` in the FastAPI HTTPException
+ * detail under `detail.code`. The UI matches on `code` (not free-text)
+ * so localised error messages don't drift with copy edits.
+ */
+export type ComposioConnectErrorCode =
+  | "unknown_toolkit"
+  | "unsupported_auth_scheme"
+  | "missing_credentials"
+  | "invalid_credentials"
+  | "credential_validation_failed"
+  | "invalid_credential_field"
+  | "composio_disabled"
+  | "rate_limited"
+  | "upstream"
+  | "unknown"
+
+/**
+ * Per-field descriptor surfaced alongside a `missing_credentials` error.
+ * Mirrors the backend `required_fields` array element shape.
+ */
+export interface ComposioRequiredField {
+  name: string
+  label: string
+  type: string
+  required: boolean
+}
+
+/**
+ * Typed error thrown by `useConnectApp` / `useDisconnectApp` mutations.
+ * UI consumers branch on `code` to render inline form errors vs. toast
+ * banners. `retryable: true` flags transient backend states (rate
+ * limit, upstream, composio_disabled) so callers can offer a "try
+ * again" affordance without re-parsing the message.
+ */
+export class ComposioConnectError extends Error {
+  readonly code: ComposioConnectErrorCode
+  readonly status: number
+  readonly requiredFields?: ComposioRequiredField[]
+  readonly retryable: boolean
+
+  constructor(params: {
+    code: ComposioConnectErrorCode
+    status: number
+    message?: string
+    requiredFields?: ComposioRequiredField[]
+    retryable?: boolean
+  }) {
+    super(params.message ?? params.code)
+    this.name = "ComposioConnectError"
+    this.code = params.code
+    this.status = params.status
+    this.requiredFields = params.requiredFields
+    // Parens required: TS/oxc forbid mixing `??` with `||` without explicit
+    // grouping. Default to the transient-error heuristic when retryable is
+    // not supplied; otherwise honour the caller's choice.
+    this.retryable =
+      params.retryable ??
+      (params.code === "rate_limited" ||
+        params.code === "upstream" ||
+        params.code === "composio_disabled")
+  }
+}
+
+/**
+ * Field shape returned by `GET /api/composio/toolkits/{slug}/auth-schema`.
+ * Only fetched lazily for niche schemes (BASIC_WITH_JWT,
+ * GOOGLE_SERVICE_ACCOUNT, UNKNOWN) — the common
+ * API_KEY/BEARER_TOKEN/BASIC fast paths have fixed shapes the UI
+ * knows statically.
+ */
+export interface ComposioAuthSchemaField {
+  name: string
+  label: string
+  type: "text" | "password" | "url" | "textarea"
+  required: boolean
+  description?: string
+  placeholder?: string
+  secret?: boolean
+}
+
+export interface ComposioAuthSchemaEntry {
+  mode: AuthScheme
+  fields: ComposioAuthSchemaField[]
+  composio_managed: boolean
+}
+
+export interface ComposioAuthSchema {
+  canonical: string
+  raw_slug: string
+  auth_schemes: ComposioAuthSchemaEntry[]
 }

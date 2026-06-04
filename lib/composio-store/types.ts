@@ -299,3 +299,30 @@ export interface ComposioAuthSchema {
   raw_slug: string
   auth_schemes: ComposioAuthSchemaEntry[]
 }
+
+/**
+ * Shape of the lazy /api/composio/toolkit-info/{slug} response.
+ *
+ * The backend route emits camelCase per its Pydantic alias config
+ * (`response_model_by_alias=True`), so we mirror that here rather than
+ * snake-case-normalising in the hook. The dialog reads `auth_scheme` /
+ * `auth_schemes[].mode` directly to overlay onto the catalog data when
+ * the lightweight `toolkits.list()` response didn't carry per-scheme
+ * info — which is the common case for non-OAuth toolkits like Perplexity.
+ */
+export interface ComposioToolkitInfoSchemeDescriptor {
+  mode: AuthScheme
+  fields: ComposioAuthSchemaField[]
+  composioManaged: boolean
+}
+
+export interface ComposioToolkitInfo {
+  enabled: boolean
+  slug: string
+  rawSlug?: string
+  name?: string
+  /** Primary scheme — OAuth-preferring per backend sort. */
+  authScheme?: AuthScheme | null
+  /** Full advertised set with per-scheme credential fields. */
+  authSchemes: ComposioToolkitInfoSchemeDescriptor[]
+}

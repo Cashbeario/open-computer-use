@@ -83,6 +83,17 @@ function IconMagnifyingGlass({ className }: { className?: string }) {
   )
 }
 
+function IconPlug({ className }: { className?: string }) {
+  // Plug icon — fallback for the Composio Integration pill when the
+  // toolkit logo CDN fails (404 / network error). Sized to fit the
+  // 16px logo tile, so it draws at 10px inside an inset rounded square.
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 7V3h-2v4h-4V3H8v4H6v5c0 2.97 2.16 5.43 5 5.91V22h2v-4.09c2.84-.48 5-2.94 5-5.91V7h-2z" />
+    </svg>
+  )
+}
+
 
 // ── Types ──
 
@@ -497,6 +508,65 @@ function extractCodeAgentTask(code: string): string | null {
   return match[1].replace(/\\n/g, ' ').trim()
 }
 
+// Composio (Integration) action parser — mirrors the web renderer at
+// app/components/chat/cua-section-renderer.tsx. Only the toolkit slug
+// is surfaced; the natural-language line above the pill already conveys
+// the query / action verbatim.
+type IntegrationKind = 'search' | 'call' | 'actions'
+interface IntegrationAction {
+  method: IntegrationKind
+  toolkit: string
+}
+
+function extractIntegrationAction(code: string): IntegrationAction | null {
+  if (/agent\.composio_search\s*\(/.test(code)) {
+    let toolkit = ''
+    const tk = code.match(/toolkits\s*=\s*\[\s*([^\]]*)\]/)
+    if (tk) {
+      const first = tk[1].match(/["']([^"']+)["']/)
+      if (first) toolkit = first[1].toUpperCase()
+    }
+    return { method: 'search', toolkit }
+  }
+
+  const callMatch = code.match(/agent\.composio_call\s*\(\s*["']([A-Z0-9_]+)["']/)
+  if (callMatch) {
+    const toolkit = callMatch[1].split('_')[0] || ''
+    return { method: 'call', toolkit }
+  }
+
+  const actionsMatch = code.match(/agent\.composio_actions\s*\(\s*["']([^"']+)["']/)
+  if (actionsMatch) {
+    return { method: 'actions', toolkit: actionsMatch[1].toUpperCase() }
+  }
+
+  return null
+}
+
+// IntegrationLogo — natural-size SVG from logos.composio.dev. No tile,
+// no ring — sits relaxed inside the chip the way IconTerminal sits next
+// to "Code Agent". Plug fallback on 404/network error.
+function IntegrationLogo({ toolkit }: { toolkit: string }) {
+  const slug = toolkit.trim().toLowerCase()
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    setFailed(false)
+  }, [slug])
+
+  if (!slug || failed) {
+    return <IconPlug className="w-2.5 h-2.5 shrink-0" />
+  }
+
+  return (
+    <img
+      src={`https://logos.composio.dev/api/${slug}`}
+      alt=""
+      className="h-3 w-3 shrink-0 object-contain"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 /** Check if grounded action code is an agent function call (code_agent, wait, etc.) */
 function extractAgentAction(code: string): { type: string; label: string; detail?: string } | null {
   const codeAgentTask = extractCodeAgentTask(code)
@@ -526,7 +596,11 @@ function StepCard({
       ? 'success'
       : 'pending'
   const hasScreenshot = !!screenshot
-  const agentAction = step.code ? extractAgentAction(step.code) : null
+  // Integration pill wins over the Code Agent pill — see the web
+  // renderer for the rationale (same parser, same precedence).
+  const integrationAction = step.code ? extractIntegrationAction(step.code) : null
+  const agentAction =
+    !integrationAction && step.code ? extractAgentAction(step.code) : null
 
   return (
     // Bottom padding intentionally omitted — the parent timeline uses a
@@ -544,6 +618,27 @@ function StepCard({
         <p className="text-[15px] leading-relaxed text-neutral-100/90 break-words overflow-hidden">
           {truncateText(actionText, 200)}
         </p>
+      )}
+
+      {/* Integration badge — same dimensions as inline result badges
+          below. text-[11px], px-1.5 py-0.5, rounded-full, sky tone. */}
+      {integrationAction && (
+        <div className="mt-1">
+          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-1.5 py-0.5 rounded-full bg-sky-500/8 text-sky-400/70">
+            <IntegrationLogo toolkit={integrationAction.toolkit} />
+            integration
+            {integrationAction.toolkit && (
+              <>
+                {' · '}
+                {integrationAction.toolkit.toLowerCase()}
+              </>
+            )}
+            {' · '}
+            {integrationAction.method === 'search' && 'search'}
+            {integrationAction.method === 'call' && 'run'}
+            {integrationAction.method === 'actions' && 'browse'}
+          </span>
+        </div>
       )}
 
       {/* Agent function call pill + prompt card (e.g. code_agent) */}

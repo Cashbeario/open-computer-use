@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useComposio } from "@/lib/composio-store/provider";
+import { useToolkitInfo } from "@/lib/composio-store/use-composio";
 import { openAuthTab } from "@/lib/composio-store/open-auth-tab";
 import type {
   ComposioToolkit,
@@ -137,10 +138,12 @@ const FEATURED_SLUGS = [
 // **Never returns UNKNOWN.** Composio-managed OAuth is *always* preferred
 // when the toolkit supports it (the backend sorts auth_schemes so OAuth is
 // position 0). When the toolkit only supports non-OAuth schemes, we map to
-// the cleanest inline form. When everything else fails, we default to
-// API_KEY — the most universal credential — so the user can always paste
-// SOMETHING and get a real backend response (success or actionable error),
-// instead of a dead-end "we haven't wired this up" message.
+// the cleanest inline form. When the catalog is silent (both auth_schemes
+// and auth_type missing — should not happen in practice, but defensive)
+// we default to **OAUTH**: the original Composio-managed behaviour the
+// product was built around. The backend's initiate_connection raises an
+// actionable error when the toolkit truly cannot do OAuth, so the user
+// still gets a real response — never a dead-end "we haven't wired up" UI.
 export type AuthKind =
   | "OAUTH"
   | "API_KEY"
@@ -174,10 +177,15 @@ export function authKind(tk: ComposioToolkit | null | undefined): AuthKind {
   // Fall back to the legacy single-value auth_type field.
   const fromLegacy = mapSchemeToKind(tk?.auth_type ?? null);
   if (fromLegacy) return fromLegacy;
-  // Final default: API_KEY. The user gets a single input, the backend
-  // attempts the connection and surfaces a real, actionable error if the
-  // scheme actually requires something else. Never a dead-end message.
-  return "API_KEY";
+  // Final default: OAUTH. The Composio-managed path is the right
+  // assumption whenever the catalog doesn't tell us otherwise — that's
+  // the behaviour the product was built around. If a toolkit truly
+  // cannot do OAuth, the backend's initiate_connection will reject with
+  // a specific error and the UI surfaces it. We do NOT default to a
+  // credential form here, because asking every user for an API key when
+  // the toolkit might actually be OAuth-capable is the regression the
+  // user just flagged.
+  return "OAUTH";
 }
 
 // Returns true when the locally-collected credential shape is non-empty and
@@ -299,13 +307,60 @@ export function ConnectAppDialog({
     }
   }, [open]);
 
-  const selectedToolkit = useMemo(
+  const selectedToolkitRaw = useMemo(
     () =>
       selectedSlug
         ? toolkits.find((t: ComposioToolkit) => t.slug === selectedSlug) ?? null
         : null,
     [toolkits, selectedSlug],
   );
+
+  // Lazy per-toolkit auth-scheme fetch — only fires on the confirm step
+  // for a single toolkit, so it stays out of the browse-grid render path.
+  // The catalog's `auth_schemes` field is often empty for non-OAuth
+  // toolkits (Perplexity, OpenAI, …) because Composio's lightweight
+  // `toolkits.list()` SDK call doesn't always populate it. The lazy
+  // backend route calls `get_toolkit_auth_scheme(slug)` which hits the
+  // per-toolkit detail endpoint, so the response is authoritative.
+  const toolkitInfoSlug =
+    view === "confirm" && selectedToolkitRaw ? selectedToolkitRaw.slug : "";
+  const toolkitInfo = useToolkitInfo(toolkitInfoSlug);
+
+  // Overlay the lazily-fetched auth scheme info on the catalog snapshot
+  // so authKind() reads from the authoritative source whenever the lazy
+  // fetch has resolved. We never STRIP catalog-side schemes — only add
+  // schemes the catalog didn't surface, so failure modes (network blip,
+  // backend 503) gracefully fall back to whatever the catalog knew.
+  const selectedToolkit: ComposioToolkit | null = useMemo(() => {
+    if (!selectedToolkitRaw) return null;
+    const fetched = toolkitInfo.data;
+    if (!fetched) return selectedToolkitRaw;
+    const fetchedModes = (fetched.authSchemes ?? [])
+      .map((s) => (s.mode || "").toString().toUpperCase().trim())
+      .filter((m): m is string => m.length > 0);
+    const fetchedAuthScheme =
+      typeof fetched.authScheme === "string" && fetched.authScheme.trim()
+        ? fetched.authScheme.toUpperCase().trim()
+        : null;
+    const catalogModes = (selectedToolkitRaw.auth_schemes ?? []).map((m) =>
+      (m || "").toString().toUpperCase().trim(),
+    );
+    const merged = [
+      ...catalogModes,
+      ...fetchedModes.filter((m) => !catalogModes.includes(m)),
+    ];
+    return {
+      ...selectedToolkitRaw,
+      // Cast through unknown — the AuthScheme union narrows on string match;
+      // any future scheme the SDK adds will still flow through as `string`
+      // and the authKind() default catches it.
+      auth_schemes: merged as ComposioToolkit["auth_schemes"],
+      auth_type:
+        (selectedToolkitRaw.auth_type ??
+          (fetchedAuthScheme as ComposioToolkit["auth_type"]) ??
+          null) || null,
+    };
+  }, [selectedToolkitRaw, toolkitInfo.data]);
 
   // When opened with a pre-selected slug, scroll to it once it renders.
   useEffect(() => {

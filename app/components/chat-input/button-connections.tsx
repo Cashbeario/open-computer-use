@@ -53,7 +53,7 @@ function AppLogo({ app }: { app: TeaserApp }) {
   const src = typeof app.logo === "string" ? app.logo.trim() : ""
   if (!src || failed) {
     return (
-      <span className="text-[10px] font-semibold text-neutral-500" aria-hidden>
+      <span className="text-[10px] font-semibold text-neutral-500 dark:text-neutral-300" aria-hidden>
         {app.name.slice(0, 1).toUpperCase()}
       </span>
     )
@@ -133,8 +133,10 @@ export function ButtonConnections({ className }: { className?: string }) {
           aria-label={hasConnections ? "Connected apps" : "Connect apps"}
           className={cn(
             "group h-9 inline-flex shrink-0 items-center rounded-full pl-1 pr-1.5",
-            "transition-colors hover:bg-foreground/[0.05] dark:hover:bg-white/[0.05]",
-            "data-[state=open]:bg-foreground/[0.06] dark:data-[state=open]:bg-white/[0.06]",
+            // Grey highlight from the same neutral family as the chips/card
+            // (theme-aware), instead of a foreground/white tint.
+            "transition-colors hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50",
+            "data-[state=open]:bg-neutral-200/80 dark:data-[state=open]:bg-neutral-700/60",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
             className,
           )}
@@ -145,7 +147,7 @@ export function ButtonConnections({ className }: { className?: string }) {
                 key={app.slug}
                 style={{ zIndex: i }}
                 className={cn(
-                  "inline-flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-white",
+                  "inline-flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700",
                   "ring-2 ring-neutral-100 dark:ring-neutral-800",
                   i > 0 && "-ml-2",
                   // Trim the facepile to two logos on the smallest screens
@@ -212,7 +214,7 @@ export function ButtonConnections({ className }: { className?: string }) {
                 key={app.slug}
                 className="flex items-center gap-2.5 rounded-lg px-2 py-1.5"
               >
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-border/50">
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-neutral-200 dark:bg-neutral-700 ring-1 ring-border/50">
                   <AppLogo app={app} />
                 </span>
                 <span className="flex-1 truncate text-[12.5px] font-medium capitalize text-foreground">
@@ -233,7 +235,7 @@ export function ButtonConnections({ className }: { className?: string }) {
                   key={app.slug}
                   style={{ zIndex: i }}
                   className={cn(
-                    "inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-white",
+                    "inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700",
                     "ring-2 ring-popover",
                     i > 0 && "-ml-2.5",
                   )}

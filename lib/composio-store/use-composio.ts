@@ -34,14 +34,22 @@ import {
   type ComposioConnectResponse,
   type ComposioRequiredField,
   type ComposioToolkit,
+  type ComposioToolkitInfo,
   type ComposioToolkitsResponse,
 } from "./types"
 
 const CONNECTIONS_KEY = ["composio", "connections"] as const
 const TOOLKITS_KEY = ["composio", "toolkits"] as const
+const TOOLKIT_INFO_KEY = (slug: string) =>
+  ["composio", "toolkit-info", slug.toLowerCase()] as const
 
 const STALE_CONNECTIONS_MS = 30_000
 const STALE_TOOLKITS_MS = 60_000
+// Toolkit-info responses are stable (auth scheme rarely changes for a
+// given app), so 5 min keeps the lazy fetches cheap. The dialog only
+// fetches when the user actually opens the confirm step, so the cache is
+// warm by the time they click Connect.
+const STALE_TOOLKIT_INFO_MS = 5 * 60_000
 
 // ── Internal fetchers ──────────────────────────────────────────────
 //
@@ -344,6 +352,77 @@ export function useComposioToolkits() {
   return {
     data: query.data ?? [],
     isLoading: query.isLoading,
+    error: query.error,
+  }
+}
+
+/**
+ * Lazy-fetch a toolkit's auth scheme detail when the connect dialog needs
+ * authoritative per-scheme info.
+ *
+ * Why this exists: Composio's lightweight `toolkits.list()` catalog often
+ * omits `auth_schemes[]` on the per-item record — that data is only
+ * populated by the per-toolkit detail endpoint inside the SDK. Without
+ * this, non-OAuth toolkits (Perplexity, OpenAI, Anthropic, …) end up in
+ * the catalog with an empty schemes array and the dialog can't tell that
+ * they need an API key input. This hook hits the lazy backend endpoint
+ * GET /api/composio/toolkit-info/{slug} which calls the SDK's per-toolkit
+ * lookup (`get_toolkit_auth_scheme`) and returns the full descriptor.
+ *
+ * The hook is GATED via `enabled` so it only fires when the dialog is on
+ * the confirm step for a specific toolkit — not for every card on the
+ * browse grid (which would be 100s of requests). Stale time is generous
+ * (5 min) because auth schemes don't churn.
+ */
+export function useToolkitInfo(slug: string | null | undefined) {
+  const t = useTranslations("connections.errors")
+  const normSlug = (slug ?? "").trim().toLowerCase()
+
+  const queryFn = useMemo(
+    () => async () => {
+      const res = await fetch(
+        `/api/composio/toolkit-info/${encodeURIComponent(normSlug)}`,
+        { headers: { Accept: "application/json" } }
+      )
+      if (!res.ok) {
+        // Surface a friendly error but don't throw — the dialog falls back
+        // to the catalog auth_schemes when this fetch fails.
+        let detail = ""
+        try {
+          const body: { error?: string } = await res.clone().json()
+          detail = body?.error || ""
+        } catch {
+          /* not JSON */
+        }
+        const tFn = t as unknown as (
+          k: string,
+          v?: Record<string, string | number>
+        ) => string
+        throw new Error(
+          detail ||
+            tFn("loadToolkitsFailed", { status: res.status }) ||
+            `Failed to load toolkit info (HTTP ${res.status})`
+        )
+      }
+      return (await res.json()) as ComposioToolkitInfo
+    },
+    [normSlug, t]
+  )
+
+  const query = useQuery<ComposioToolkitInfo, Error>({
+    queryKey: TOOLKIT_INFO_KEY(normSlug),
+    queryFn,
+    staleTime: STALE_TOOLKIT_INFO_MS,
+    enabled: normSlug.length > 0,
+    // The fetch is best-effort enrichment — don't retry on transient
+    // errors; the dialog falls back to catalog data without noise.
+    retry: false,
+  })
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading && normSlug.length > 0,
+    isFetching: query.isFetching,
     error: query.error,
   }
 }

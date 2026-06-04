@@ -53,10 +53,16 @@ export function ConnectionsContent() {
   const [dialogPreselect, setDialogPreselect] = useState<string | null>(null)
 
   // ── Query-param handling (toasts + cleanup) ───────────────────────────────
-  // ?connected=<app>             → success toast + refresh
+  // ?connected=<app>             → success toast + refresh + auto-close
+  //                                (this tab is the throwaway auth tab the
+  //                                connect dialog opened; close it so the
+  //                                user isn't left on /connections in a
+  //                                duplicate / dev-host URL like
+  //                                0.0.0.0:3000)
   // ?error=<reason>&app=<app>    → error toast
   // ?reconnect=<toolkit>         → auto-open connect dialog
-  // After handling, strip params via router.replace.
+  // After handling, strip params via router.replace (only matters when the
+  // auto-close didn't fire — fallback path for non-script-opened tabs).
   useEffect(() => {
     const connectedApp = searchParams.get("connected")
     const errorReason = searchParams.get("error")
@@ -65,6 +71,7 @@ export function ConnectionsContent() {
     const pending = searchParams.get("pending")
 
     let dirty = false
+    let closeTimer: ReturnType<typeof setTimeout> | null = null
 
     if (connectedApp) {
       toast.success(t("toasts.connected", { app: connectedApp }))
@@ -72,6 +79,32 @@ export function ConnectionsContent() {
       refresh().catch(() => {
         /* refresh swallows its own errors */
       })
+      // Notify any other open tab on the same origin (most often the tab
+      // that opened the connect dialog in the first place — it might be a
+      // chat or the connections page itself) so it can invalidate its
+      // connections cache immediately rather than waiting for window focus.
+      try {
+        const ch = new BroadcastChannel("composio:connections")
+        ch.postMessage({ type: "connected", app: connectedApp })
+        ch.close()
+      } catch {
+        /* BroadcastChannel unsupported — opener will refetch on focus. */
+      }
+      // This tab was opened by `window.open()` from openAuthTab() inside
+      // the connect dialog click handler, and navigated through Composio →
+      // /api/composio/callback → here. Browsers permit window.close() for
+      // script-opened windows even after cross-origin navigations, so close
+      // ourselves after a brief moment so the toast is readable. If the
+      // close is denied for any reason (some embedded webviews, or a tab
+      // the user opened manually with the URL), the router.replace below
+      // strips the param and the user lands on a clean /connections page.
+      closeTimer = setTimeout(() => {
+        try {
+          window.close()
+        } catch {
+          /* not allowed — fall back to staying on /connections */
+        }
+      }, 1200)
       dirty = true
     }
 
@@ -97,8 +130,35 @@ export function ConnectionsContent() {
     if (dirty) {
       router.replace("/connections", { scroll: false })
     }
+
+    return () => {
+      if (closeTimer) clearTimeout(closeTimer)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
+
+  // ── Cross-tab refresh from a sibling OAuth completion ────────────────────
+  // Listen for the broadcast posted from the auth-completion tab above so
+  // the *original* tab (where the user clicked Connect) refreshes the moment
+  // OAuth finishes, not when the user happens to refocus the window. Cheap,
+  // best-effort; silently no-ops when BroadcastChannel is unsupported.
+  useEffect(() => {
+    let ch: BroadcastChannel | null = null
+    try {
+      ch = new BroadcastChannel("composio:connections")
+      ch.onmessage = (ev) => {
+        if (ev?.data?.type === "connected") {
+          refresh().catch(() => {})
+        }
+      }
+    } catch {
+      /* not supported */
+    }
+    return () => {
+      try { ch?.close() } catch { /* already closed */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Derived filter chip counts ────────────────────────────────────────────
   const counts = useMemo(() => {

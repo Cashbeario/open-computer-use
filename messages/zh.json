@@ -2320,10 +2320,10 @@
     "home": {
       "title": "Coasty — 排名第一的计算机操控AI代理 | 桌面和浏览器自动化的最佳选择",
       "titleTemplate": "{title} | Coasty — AI计算机操控代理",
-      "description": "Coasty是排名第一的计算机操控AI代理 — OSWorld基准测试82% — 也是市场上唯一的$99/月定额无限制计算机操控方案（比Devin Team $500+ACU、有速率限制的OpenAI Operator $200，以及有积分上限的竞品都便宜）。像人类一样操控完整桌面：浏览器、表单、邮件、电子表格。VM级别隔离。Starter $19/月或Unlimited $99/月起。",
+      "description": "Coasty是排名第一的计算机操控AI代理（OSWorld 82%），也是唯一拥有 1,000+ 原生应用集成的计算机操控平台 — Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用 — 在每次对话中均可调用。定额 Unlimited 方案 {unlimitedPriceLong}（比 Devin Team $500+ACU 和有速率限制的 OpenAI Operator $200 都更便宜）。像人类一样操控完整桌面，配备 VM 级别隔离。Starter {starterPrice} 或 Unlimited {unlimitedPrice} 起。",
       "ogTitle": "Coasty — OSWorld 82% + $99/月无限制（最便宜的计算机操控代理）",
-      "ogDescription": "OSWorld排名第一（82%）。$99/月定额无限制 — 以更高基准成绩比Devin Team（$500+ACU）更便宜。浏览器、桌面、终端自动化。每个会话VM隔离。跨平台原生应用 + REST API + MCP服务器。",
-      "twitterDescription": "操控真实桌面的AI代理。OSWorld 82%（排名第一）。$99/月无限制 — 该品类中最便宜的定额方案。Starter $19/月起。VM隔离 + 26工具MCP服务器。"
+      "ogDescription": "OSWorld 排名第一（82%）+ 1,000+ 集成（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）+ {unlimitedPrice} 定额 Unlimited。唯一拥有真正集成目录的计算机操控代理。VM 隔离，跨平台原生应用，REST API，MCP 服务器。",
+      "twitterDescription": "运行真实桌面、同时接入 1,000+ 应用（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）的 AI 代理。OSWorld 82%（排名第一）。{unlimitedPrice} Unlimited，该品类中最便宜的定额方案。Starter 从 {starterPrice} 起。"
     },
     "compare": {
       "title": "Coasty对比 — AI代理替代方案与竞品比较",
@@ -2381,7 +2381,7 @@
     },
     "pricing": {
       "title": "价格 — Coasty AI代理方案与定价",
-      "description": "Coasty定价：Starter $19/月（200积分）或Unlimited $99/月（市场上最便宜的定额无限制计算机操控方案 — 比Devin Team $500+ACU、有积分上限的Genspark Pro $249、有上限的Manus Extended $200都便宜）。替代月费$3,000以上的人工虚拟助手。无隐藏费用。",
+      "description": "Coasty 定价：Starter {starterPrice}（200 积分）或 Unlimited {unlimitedPrice} — 市场上最便宜的定额无限制计算机操控方案（比 Devin Team $500+ACU、有积分上限的 Genspark Pro $249、有上限的 Manus Extended $200 都便宜）。每个方案都包含 1,000+ 原生应用集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Stripe、Shopify 及另外 990+ 应用），可替代月费 $3,000+ 的人工虚拟助手。无隐藏费用。",
       "ogTitle": "Coasty价格 — Starter $19/月，Unlimited $99/月",
       "ogDescription": "$99/月定额无限制 — 市场上最便宜的无限制计算机操控方案。或个人版Starter $19/月。相比人工VA每年节省$36,000。"
     },
@@ -2405,14 +2405,16 @@
       "q9": "Coasty与OpenAI Operator相比如何？",
       "a9": "Coasty在OSWorld基准测试中超越OpenAI Operator（82% vs ~40%），为每个会话提供真正的虚拟机级别隔离，支持多种AI模型，包括浏览器之外的完整桌面控制，并提供开源框架。",
       "q10": "Coasty能破解CAPTCHA吗？",
-      "a10": "能。Coasty有内置的CAPTCHA破解流水线，不会像竞品AI代理那样被阻止。这对于网站上常见CAPTCHA的真实自动化至关重要。"
+      "a10": "能。Coasty有内置的CAPTCHA破解流水线，不会像竞品AI代理那样被阻止。这对于网站上常见CAPTCHA的真实自动化至关重要。",
+      "q11": "Coasty 可以接入哪些应用和服务？",
+      "a11": "Coasty 通过内置的 Composio 集成层连接 1,000+ 应用，包括 Gmail、Outlook、Slack、Microsoft Teams、Notion、Linear、Jira、Asana、monday.com、GitHub、GitLab、Google Drive、Google Calendar、Google Sheets、Salesforce、HubSpot、Pipedrive、Stripe、Shopify、Intercom、Zendesk、Airtable、Figma、Calendly、Zoom、Dropbox、OneDrive、Sentry、Datadog、Vercel、Supabase 和 Twilio。在设置中通过 OAuth 授权一次，Coasty 即可在每一次对话中代您调用 — 代理永远看不到密码。当应用提供 API 时，Coasty 会直接调用以实现亚秒级响应；当应用没有 API（如 SAP GUI、LinkedIn Sales Navigator、传统网银门户、企业内部管理工具）时，同一个代理会通过计算机操控直接驱动 UI。Coasty 是唯一同时具备这两种能力的计算机操控平台 — 既有以 API 为先的集成目录，又有操作系统级的桌面控制，全部集成在一个代理中。"
     },
     "structuredData": {
-      "appDescription": "排名第一的计算机操控AI代理，也是市场上最便宜的$99/月定额无限制计算机操控方案。Coasty像人类一样操控完整桌面 — 自主地打开浏览器、点击、输入、填写表单、发送邮件和管理电子表格。在369项真实任务的OSWorld基准测试中达到82%。每个会话真正的VM级别隔离。内置CAPTCHA破解。方案：Starter $19/月或Unlimited $99/月。",
-      "orgDescription": "Coasty打造排名第一的计算机操控AI代理（OSWorld 82%），并推出市场上唯一的$99/月定额无限制计算机操控方案 — 比同价位的Devin Team、OpenAI Operator和有积分上限的竞品都便宜。我们的平台提供自主桌面控制、浏览器自动化以及真正VM级别隔离的多代理编排。",
-      "productDescription": "像人类一样操控桌面的AI计算机操控代理。OSWorld基准测试排名第一（82%）。$99/月的Unlimited方案是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、邮件发送、表单填写和电子表格管理，配备真正的VM级别隔离。",
-      "websiteDescription": "排名第一的计算机操控AI代理平台 — OSWorld基准测试82%，市场上最便宜的$99/月定额无限制方案。VM隔离的自主浏览器、桌面和终端自动化。Starter $19/月或Unlimited $99/月起。",
-      "softwareDescription": "像人类一样操控完整桌面的AI计算机操控代理。在369项真实任务中以82%完成率获得OSWorld基准测试第一名。$99/月的Unlimited方案是市场上最便宜的定额无限制计算机操控方案。自主浏览器自动化、桌面控制、终端操作、邮件发送、表单填写和电子表格管理。",
+      "appDescription": "排名第一的计算机操控 AI 代理，也是唯一拥有 1,000+ 原生应用集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用）的计算机操控平台。在 369 项真实任务的 OSWorld 基准测试中达到 82%。市场上最便宜的定额 Unlimited 方案 {unlimitedPriceLong}。像人类一样操控完整桌面，每个会话真正的 VM 级别隔离，内置 CAPTCHA 破解。方案：Starter {starterPrice} 或 Unlimited {unlimitedPrice}。",
+      "orgDescription": "Coasty 打造排名第一的计算机操控 AI 代理（OSWorld 82%），配备 1,000+ 经 OAuth 安全授权的应用集成（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear），并推出唯一的定额 Unlimited 计算机操控方案 {unlimitedPriceLong} — 比 Devin Team、OpenAI Operator 和有积分上限的竞品都更便宜。我们的平台将计算机操控、多代理编排、原生集成和 VM 级别隔离整合为一款产品。",
+      "productDescription": "像人类一样操控桌面、同时原生接入 1,000+ 应用（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify）的 AI 计算机操控代理。OSWorld 基准测试排名第一（82%）。{unlimitedPrice} Unlimited 是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器、桌面、邮件、表单填写和电子表格自动化，配备 VM 级别隔离。",
+      "websiteDescription": "排名第一的计算机操控 AI 代理平台（OSWorld 82%），配备 1,000+ 原生集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Stripe），以及最便宜的定额 Unlimited 方案 {unlimitedPriceLong}。VM 隔离的自主浏览器、桌面和终端自动化。Starter {starterPrice} 或 Unlimited {unlimitedPrice} 起。",
+      "softwareDescription": "像人类一样操控完整桌面、并配备 1,000+ 经 OAuth 安全授权应用集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用）的 AI 计算机操控代理。在 369 项真实任务中以 82% 完成率获得 OSWorld 基准测试第一名。{unlimitedPriceLong} Unlimited 方案是市场上最便宜的定额无限制计算机操控方案。一个代理内集成浏览器、桌面、终端、邮件、表单和电子表格自动化。",
       "breadcrumbs": {
         "home": "首页",
         "caseStudies": "AI代理案例研究",

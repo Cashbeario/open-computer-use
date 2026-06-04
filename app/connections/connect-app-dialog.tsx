@@ -18,7 +18,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -126,27 +125,59 @@ const FEATURED_SLUGS = [
 // (OAUTH2, OAUTH1, OAUTH1A, API_KEY, BEARER_TOKEN, BASIC, BASIC_WITH_JWT,
 // NO_AUTH, GOOGLE_SERVICE_ACCOUNT). The confirm panel only branches on a
 // small visual vocabulary, so we collapse the wire value into a `AuthKind`:
-//   - All OAuth variants → 'OAUTH' (popup hand-off, no inline form)
-//   - API_KEY, BEARER_TOKEN, BASIC, NO_AUTH → render inline credential UI
-//   - Anything else (BASIC_WITH_JWT / GOOGLE_SERVICE_ACCOUNT / undefined /
-//     unrecognised string) → 'UNKNOWN' which renders a graceful
-//     "Manage from Composio dashboard" message.
+//   - All OAuth variants → 'OAUTH' (Composio-managed popup hand-off)
+//   - API_KEY → render single `api_key` input
+//   - BEARER_TOKEN → render single `token` input
+//   - BASIC / BASIC_WITH_JWT → render username + password inputs
+//   - NO_AUTH → one-click confirm, no inputs
+//   - GOOGLE_SERVICE_ACCOUNT → render single `api_key` input (the user pastes
+//     the service-account JSON as one blob; the backend forwards it via
+//     credentials.api_key when the scheme is non-canonical)
+//
+// **Never returns UNKNOWN.** Composio-managed OAuth is *always* preferred
+// when the toolkit supports it (the backend sorts auth_schemes so OAuth is
+// position 0). When the toolkit only supports non-OAuth schemes, we map to
+// the cleanest inline form. When everything else fails, we default to
+// API_KEY — the most universal credential — so the user can always paste
+// SOMETHING and get a real backend response (success or actionable error),
+// instead of a dead-end "we haven't wired this up" message.
 export type AuthKind =
   | "OAUTH"
   | "API_KEY"
   | "BEARER_TOKEN"
   | "BASIC"
-  | "NO_AUTH"
-  | "UNKNOWN";
+  | "NO_AUTH";
 
-export function authKind(tk: ComposioToolkit | null | undefined): AuthKind {
-  const raw = (tk?.auth_type ?? "").toString().toUpperCase().trim();
+function mapSchemeToKind(scheme: string | null | undefined): AuthKind | null {
+  const raw = (scheme ?? "").toString().toUpperCase().trim();
+  if (!raw) return null;
   if (raw === "OAUTH2" || raw === "OAUTH1" || raw === "OAUTH1A") return "OAUTH";
   if (raw === "API_KEY") return "API_KEY";
   if (raw === "BEARER_TOKEN") return "BEARER_TOKEN";
-  if (raw === "BASIC") return "BASIC";
+  if (raw === "BASIC" || raw === "BASIC_WITH_JWT") return "BASIC";
   if (raw === "NO_AUTH") return "NO_AUTH";
-  return "UNKNOWN";
+  // GOOGLE_SERVICE_ACCOUNT (single JSON blob) is handled as API_KEY at the
+  // UX layer — one input, the backend forwards via credentials.api_key.
+  if (raw === "GOOGLE_SERVICE_ACCOUNT") return "API_KEY";
+  return null;
+}
+
+export function authKind(tk: ComposioToolkit | null | undefined): AuthKind {
+  // Prefer auth_schemes[0] — the backend sorts so OAuth (Composio-managed)
+  // is always first when the toolkit supports it. This matches the product
+  // intent: use Composio-managed auth wherever possible; only ask the user
+  // for a credential when no OAuth path exists.
+  const fromSchemes = (tk?.auth_schemes ?? [])
+    .map(mapSchemeToKind)
+    .find((k): k is AuthKind => k !== null);
+  if (fromSchemes) return fromSchemes;
+  // Fall back to the legacy single-value auth_type field.
+  const fromLegacy = mapSchemeToKind(tk?.auth_type ?? null);
+  if (fromLegacy) return fromLegacy;
+  // Final default: API_KEY. The user gets a single input, the backend
+  // attempts the connection and surfaces a real, actionable error if the
+  // scheme actually requires something else. Never a dead-end message.
+  return "API_KEY";
 }
 
 // Returns true when the locally-collected credential shape is non-empty and
@@ -172,10 +203,6 @@ export function credentialsValid(
       );
     case "NO_AUTH":
       return true;
-    case "UNKNOWN":
-      // For UNKNOWN the user can either configure on the dashboard or supply
-      // a single api_key as a defensive fallback.
-      return !!creds.api_key && creds.api_key.trim().length > 0;
   }
 }
 
@@ -389,17 +416,17 @@ export function ConnectAppDialog({
   //   - OAUTH: synchronously open a blank tab inside the click (so popup
   //     blockers see a genuine user gesture), POST, then point that tab at
   //     the Composio URL. If blocked, fall back to a manual anchor.
-  //   - API_KEY / BEARER_TOKEN / BASIC / NO_AUTH / UNKNOWN-with-key: skip the
-  //     popup entirely, validate the local credential shape, POST credentials
-  //     synchronously. Success → toast + close. Failure → inline error
-  //     (or field-level errors if the backend returned `missing_credentials`).
+  //   - API_KEY / BEARER_TOKEN / BASIC / NO_AUTH: skip the popup entirely,
+  //     validate the local credential shape, POST credentials synchronously.
+  //     Success → toast + close. Failure → inline error (or field-level
+  //     errors if the backend returned `missing_credentials`).
   const handleConfirmConnect = async () => {
     if (connecting || !selectedToolkit) return;
     const kind = authKind(selectedToolkit);
 
-    // Non-OAuth (and UNKNOWN-with-credentials) branches first — they skip the
-    // popup machinery entirely so a non-OAuth flow never spawns a stray blank
-    // tab that the user would have to close manually.
+    // Non-OAuth branches first — they skip the popup machinery entirely so a
+    // non-OAuth flow never spawns a stray blank tab that the user would have
+    // to close manually.
     if (kind !== "OAUTH") {
       // Local pre-flight: surface field-level errors before any roundtrip so
       // the user gets immediate feedback on a missing required field.
@@ -414,9 +441,6 @@ export function ConnectAppDialog({
         if (kind === "BASIC") {
           if (!credentials.username?.trim()) next.username = t("errors.failedToStart");
           if (!credentials.password?.trim()) next.password = t("errors.failedToStart");
-        }
-        if (kind === "UNKNOWN" && !credentials.api_key?.trim()) {
-          next.api_key = t("errors.failedToStart");
         }
         setCredentialErrors(next);
         return;
@@ -781,8 +805,7 @@ export function ConnectAppDialog({
 // Shown after the user picks an app, BEFORE anything opens: a focused panel
 // that makes the Composio brokerage explicit (app logo ↔ Composio) and then
 // either hands off to a NEW TAB (OAUTH) or collects credentials inline
-// (API_KEY / BEARER_TOKEN / BASIC / NO_AUTH / UNKNOWN). Exported for unit
-// testing.
+// (API_KEY / BEARER_TOKEN / BASIC / NO_AUTH). Exported for unit testing.
 export function ConnectConfirm({
   toolkit,
   connecting,
@@ -826,7 +849,7 @@ export function ConnectConfirm({
   };
   const kind = authKind(toolkit);
   const helpLink =
-    kind === "API_KEY" || kind === "UNKNOWN"
+    kind === "API_KEY"
       ? API_KEY_HELP_LINKS[toolkit.slug.toLowerCase()] ?? null
       : null;
 
@@ -939,9 +962,10 @@ export function ConnectConfirm({
             The form is rendered for every non-OAUTH kind that needs input
             and is animated in alongside the existing hand-off graphics so
             the visual cohesion of the panel survives the branch. NO_AUTH
-            renders no inputs (the subtitle copy handles it). UNKNOWN
-            renders a single api_key as a defensive fallback PLUS a link
-            out to the Composio dashboard so the user is never stuck. */}
+            renders no inputs (the subtitle copy handles it). Truly novel
+            schemes are mapped to API_KEY at the authKind layer, so the
+            single-input form is always rendered for anything we don't
+            recognise — never a dead-end "manage from dashboard" message. */}
         <AnimatePresence initial={false} mode="wait">
           {kind !== "OAUTH" && kind !== "NO_AUTH" && (
             <motion.form
@@ -1019,52 +1043,6 @@ export function ConnectConfirm({
                     revealLabel={tHas("confirm.fields.revealSecret") ? t("confirm.fields.revealSecret") : "Show"}
                     hideLabel={tHas("confirm.fields.hideSecret") ? t("confirm.fields.hideSecret") : "Hide"}
                   />
-                </div>
-              )}
-
-              {kind === "UNKNOWN" && (
-                <div
-                  className="flex flex-col gap-3"
-                  data-testid="connect-confirm-unsupported"
-                >
-                  <div className="flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/[0.04] px-3 py-2 text-start">
-                    <Info
-                      className="h-3.5 w-3.5 text-amber-500/80 shrink-0 mt-0.5"
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                    <p className="text-[11.5px] leading-relaxed text-amber-700/85 dark:text-amber-300/85">
-                      {tHas("confirm.unsupported.body")
-                        ? t("confirm.unsupported.body", {
-                            name: toolkit.name,
-                            scheme: (toolkit.auth_type ?? "custom").toString(),
-                          })
-                        : `${toolkit.name} uses a custom authentication flow. You can paste an API key here, or finish setup on the Composio dashboard.`}
-                    </p>
-                  </div>
-                  <CredentialField
-                    testId="connect-confirm-field-api-key"
-                    name="api_key"
-                    label={tHas("confirm.fields.apiKeyLabel") ? t("confirm.fields.apiKeyLabel") : "API key"}
-                    placeholder={tHas("confirm.fields.apiKeyPlaceholder") ? t("confirm.fields.apiKeyPlaceholder") : "Paste your API key"}
-                    value={credentials.api_key ?? ""}
-                    onChange={(v) => setField("api_key", v)}
-                    error={credentialErrors.api_key}
-                    secret
-                    revealLabel={tHas("confirm.fields.revealSecret") ? t("confirm.fields.revealSecret") : "Show"}
-                    hideLabel={tHas("confirm.fields.hideSecret") ? t("confirm.fields.hideSecret") : "Hide"}
-                  />
-                  <a
-                    href="https://app.composio.dev/connections"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 self-start text-[11.5px] font-medium text-foreground/70 hover:text-foreground transition-colors"
-                  >
-                    <ExternalLink className="h-3 w-3" aria-hidden />
-                    {tHas("confirm.unsupported.openComposioDashboard")
-                      ? t("confirm.unsupported.openComposioDashboard")
-                      : "Open Composio dashboard"}
-                  </a>
                 </div>
               )}
 
@@ -1215,7 +1193,9 @@ export function ConnectConfirm({
                 ? t("confirm.cta.connectNoAuth")
                 : t("confirm.cta");
             }
-            // UNKNOWN
+            // Defensive fallback for any future AuthKind variant added
+            // without updating this switch. Never reached today because
+            // authKind() maps everything to one of the 5 handled kinds.
             return tHas("confirm.cta.connect")
               ? t("confirm.cta.connect")
               : t("confirm.cta");

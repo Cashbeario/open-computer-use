@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
-import { priceMonthlyLong, i18nPriceVars } from "@/lib/pricing/format"
+import { priceMonthly, priceMonthlyLong } from "@/lib/pricing/format"
 import { PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
 
 export async function FAQSchema({ locale }: { locale: string }) {
@@ -117,7 +117,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": "Coasty AI Employee",
-    "description": t("structuredData.productDescription", i18nPriceVars()),
+    "description": `AI computer-using agent that controls a desktop like a human AND connects natively to 1,000+ apps (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 on OSWorld benchmark (82%). ${priceMonthly("unlimited")} Unlimited is the cheapest flat-rate unlimited computer-use plan available. Autonomous browser, desktop, email, form filling, and spreadsheet automation with VM-level isolation.`,
     "brand": { "@type": "Brand", "name": "Coasty" },
     "category": "Software > Productivity > AI Automation",
     "image": PRODUCT_IMAGES,
@@ -133,6 +133,7 @@ export async function LocalizedSEOSchemas({ locale }: { locale: string }) {
     "award": [
       "#1 Ranked on OSWorld Benchmark — 82% completion rate across 369 real-world computer tasks",
       `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")} (vs Devin Team $500 + ACU, OpenAI Operator $200 rate-limited, Genspark Pro $249 credit-capped)`,
+      "Largest integration catalog in the computer-use category — 1,000+ OAuth-secured native app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, and 990+ more) callable in every chat, the only computer-use agent to ship both computer use and a 1,000+ app integration layer",
     ],
   }
 

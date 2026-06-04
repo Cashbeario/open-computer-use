@@ -73,7 +73,7 @@ const competitors: Record<string, CompetitorData> = {
       "More flexibility for developers building custom solutions",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "API usage-based pricing" },
-    unlimitedZinger: `Anthropic's Computer Use is a raw token-billed API. Every screenshot meters against your spend. Coasty Unlimited at ${UNLIMITED_PRICE} flat bundles VMs, 50+ tools, and the same Claude models with no token meter spinning.`,
+    unlimitedZinger: `Anthropic's Computer Use is a raw token-billed API. Every screenshot meters against your spend. Coasty Unlimited at ${UNLIMITED_PRICE} flat bundles VMs, 50+ tools, and the same Claude models with no token meter spinning. Anthropic ships Computer Use as a raw API and MCP as a separate product surface, you pick one. Coasty ships both in one agent: 82% on OSWorld plus 1,000+ pre-authorized OAuth integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot) callable in every chat.`,
   },
   "openai-operator": {
     name: "OpenAI Operator",
@@ -105,7 +105,7 @@ const competitors: Record<string, CompetitorData> = {
       "Simple consumer-friendly interface",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "ChatGPT Pro ($200/month)" },
-    unlimitedZinger: `ChatGPT Pro at $200/mo is rate-limited general AI that scored 38% on OSWorld. Coasty Unlimited at ${UNLIMITED_PRICE} is purpose-built for computer use, runs in isolated VMs, and scores 82% on OSWorld, over 2× the success rate for $49/mo more.`,
+    unlimitedZinger: `ChatGPT Pro at $200/mo is rate-limited general AI that scored 38% on OSWorld. Coasty Unlimited at ${UNLIMITED_PRICE} is purpose-built for computer use, runs in isolated VMs, and scores 82% on OSWorld, over 2× the success rate for $49/mo more. OpenAI sunset Operator and folded it into ChatGPT Apps with roughly 15 connectors (Google Drive, Gmail, SharePoint, Slack, GitHub). Coasty kept its computer-use surface AND ships 1,000+ integrations, the same Gmail and Slack plus 985 more like Salesforce, HubSpot, Linear, Stripe, and Shopify.`,
   },
   "adept-ai": {
     name: "Adept AI",
@@ -135,7 +135,7 @@ const competitors: Record<string, CompetitorData> = {
       "Custom model training for specific tasks",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "Enterprise pricing (not public)" },
-    unlimitedZinger: `Adept's founders left for Amazon in 2024 and the consumer product is dormant. Coasty Unlimited at ${UNLIMITED_PRICE} ships production-grade computer use today, with public pricing and an 82% OSWorld benchmark, no waitlist, no sales call.`,
+    unlimitedZinger: `Adept's founders left for Amazon in 2024 and the consumer product is dormant. Coasty Unlimited at ${UNLIMITED_PRICE} ships production-grade computer use today, with public pricing and an 82% OSWorld benchmark, no waitlist, no sales call. Adept was acquired and never shipped a real integration catalog. Coasty ships 1,000+ OAuth-secured apps today (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear) plus the #1 OSWorld score Adept was chasing.`,
   },
   "multion": {
     name: "Multion",
@@ -165,7 +165,7 @@ const competitors: Record<string, CompetitorData> = {
       "API for developer integrations",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $30/month" },
-    unlimitedZinger: `Multion pivoted from web computer use to a mobile-only personal assistant in 2025. Coasty Unlimited at ${UNLIMITED_PRICE} keeps investing in the category Multion left, with full desktop + browser + terminal control and no credit caps.`,
+    unlimitedZinger: `Multion pivoted from web computer use to a mobile-only personal assistant in 2025. Coasty Unlimited at ${UNLIMITED_PRICE} keeps investing in the category Multion left, with full desktop + browser + terminal control and no credit caps. MultiOn focused on browser-only agents with no native integration layer. Coasty adds 1,000+ first-party app connectors on top of full computer use, so it calls Gmail, Slack, HubSpot, and Stripe through APIs when faster and drives the UI when it has to.`,
   },
   "browserbase": {
     name: "Browserbase",
@@ -196,7 +196,7 @@ const competitors: Record<string, CompetitorData> = {
       "Developer-focused API and SDKs",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $99/month + hourly overage" },
-    unlimitedZinger: `Browserbase is infrastructure. You bring your own agent, model, and orchestration, with hourly overages on every tier. Coasty Unlimited at ${UNLIMITED_PRICE} is the complete product: VMs, agents, multi-tool orchestration, and an Electron desktop client all included with zero overage charges.`,
+    unlimitedZinger: `Browserbase is infrastructure. You bring your own agent, model, and orchestration, with hourly overages on every tier. Coasty Unlimited at ${UNLIMITED_PRICE} is the complete product: VMs, agents, multi-tool orchestration, and an Electron desktop client all included with zero overage charges. Browserbase is browser infrastructure with zero app catalog. Coasty is a product on top of computer use that also ships 1,000+ native integrations (Gmail, Slack, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify), not just headless Chrome.`,
   },
   "induced-ai": {
     name: "Induced AI",
@@ -225,7 +225,7 @@ const competitors: Record<string, CompetitorData> = {
       "Enterprise workflow templates",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "Contact for pricing" },
-    unlimitedZinger: `Induced AI hides pricing behind enterprise sales calls and bills by browser-minute. Coasty Unlimited posts ${UNLIMITED_PRICE} flat on the pricing page. Sign up in 60 seconds with no sales call, no quote, no per-minute meter.`,
+    unlimitedZinger: `Induced AI hides pricing behind enterprise sales calls and bills by browser-minute. Coasty Unlimited posts ${UNLIMITED_PRICE} flat on the pricing page. Sign up in 60 seconds with no sales call, no quote, no per-minute meter. Induced AI shipped browser RPA without an integration catalog. Coasty ships 1,000+ OAuth integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear) AND drives any UI a human can, on the #1-ranked OSWorld engine.`,
   },
   "uipath": {
     name: "UiPath",
@@ -258,7 +258,7 @@ const competitors: Record<string, CompetitorData> = {
       "Dedicated account management and support",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $420/month per robot" },
-    unlimitedZinger: `UiPath's enterprise tier commonly runs $8K–$10K per robot per year. Coasty Unlimited at ${UNLIMITED_PRICE} flat costs less than a single UiPath robot's monthly add-on fee. One Coasty seat replaces what UiPath licenses bot-by-bot, with no scripting required.`,
+    unlimitedZinger: `UiPath's enterprise tier commonly runs $8K–$10K per robot per year. Coasty Unlimited at ${UNLIMITED_PRICE} flat costs less than a single UiPath robot's monthly add-on fee. One Coasty seat replaces what UiPath licenses bot-by-bot, with no scripting required. UiPath needs brittle scripts per connector and a multi-week implementation. Coasty ships 1,000+ pre-auth OAuth integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear) that work in minutes, plus AI computer use for anything without an API.`,
   },
   "automation-anywhere": {
     name: "Automation Anywhere",
@@ -288,7 +288,7 @@ const competitors: Record<string, CompetitorData> = {
       "Dedicated support for regulated industries",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "Enterprise pricing (contact sales)" },
-    unlimitedZinger: `Automation Anywhere Cloud Starter is $750/user/month, about $9,000/year per seat, plus implementation consulting fees. Coasty Unlimited is ${UNLIMITED_PRICE} flat: roughly 1/3 the cost, with no separate bot licenses and no scripted workflows.`,
+    unlimitedZinger: `Automation Anywhere Cloud Starter is $750/user/month, about $9,000/year per seat, plus implementation consulting fees. Coasty Unlimited is ${UNLIMITED_PRICE} flat: roughly 1/3 the cost, with no separate bot licenses and no scripted workflows. Automation Anywhere requires per-app bot development and enterprise services. Coasty gives you 1,000+ OAuth integrations out of the box (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) plus full computer use, at $249 flat Unlimited instead of six-figure annual contracts.`,
   },
   "virtual-assistant": {
     name: "Human Virtual Assistant",
@@ -322,7 +322,7 @@ const competitors: Record<string, CompetitorData> = {
       "Handling truly novel or ambiguous situations",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "$2,000–$5,000/month" },
-    unlimitedZinger: `A human virtual assistant costs $3,000+/month and works 8 hours a day. Coasty Unlimited at ${UNLIMITED_PRICE} is 92% cheaper, works 24/7/365 with no sick days, runs unlimited parallel agents, and produces a full audit log of every action.`,
+    unlimitedZinger: `A human virtual assistant costs $3,000+/month and works 8 hours a day. Coasty Unlimited at ${UNLIMITED_PRICE} is 92% cheaper, works 24/7/365 with no sick days, runs unlimited parallel agents, and produces a full audit log of every action. A human VA costs $3,000+/month and has to log into apps one at a time. Coasty Unlimited at $249/month logs into all 1,000+ apps once via OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify) and works 24/7 across every chat.`,
   },
   "devin-ai": {
     name: "Devin AI",
@@ -357,7 +357,7 @@ const competitors: Record<string, CompetitorData> = {
       "Code review and debugging capabilities",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $200/month + ACU overages (Max)" },
-    unlimitedZinger: `Devin Max is $200/mo plus ACU overages for coding-only work. Coasty Unlimited at ${UNLIMITED_PRICE} flat has zero overages and handles browser, terminal, AND desktop, not just IDE work, while scoring 82% on OSWorld (a real-world general computer-use benchmark, not just SWE-bench).`,
+    unlimitedZinger: `Devin Max is $200/mo plus ACU overages for coding-only work. Coasty Unlimited at ${UNLIMITED_PRICE} flat has zero overages and handles browser, terminal, AND desktop, not just IDE work, while scoring 82% on OSWorld (a real-world general computer-use benchmark, not just SWE-bench). Devin has 12 first-party integrations and only talks to engineers (GitHub, GitLab, Bitbucket, Jira, Linear, Slack). Coasty has 1,000+ integrations and talks to your whole company, Sales (Salesforce, HubSpot, Pipedrive), Ops (Notion, Asana, monday.com), Finance (Stripe, QuickBooks), plus everything Devin does.`,
   },
 }
 

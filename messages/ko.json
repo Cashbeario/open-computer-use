@@ -2320,10 +2320,10 @@
     "home": {
       "title": "Coasty — 컴퓨터 사용 AI 에이전트 1위 | 데스크톱 및 브라우저 자동화에 최적",
       "titleTemplate": "{title} | Coasty — AI 컴퓨터 사용 에이전트",
-      "description": "Coasty는 컴퓨터 사용 AI 에이전트 1위 — OSWorld 벤치마크 82% — 그리고 월 $99의 정액 무제한 컴퓨터 사용 플랜은 시장에서 유일한 무제한 정액제(Devin Team $500+ACU, 속도 제한이 있는 OpenAI Operator $200, 크레딧 상한이 있는 경쟁사보다 저렴). 사람처럼 전체 데스크톱을 조작: 브라우저, 양식, 이메일, 스프레드시트. VM 수준 격리. 스타터 $19/월 또는 무제한 $99/월부터.",
+      "description": "Coasty는 컴퓨터 사용 AI 에이전트 1위(OSWorld 82%)이자, 1,000+ 네이티브 앱 통합(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify 외 990+개)을 모든 채팅에서 호출할 수 있는 유일한 컴퓨터 사용 플랫폼입니다. 정액 무제한 플랜 {unlimitedPriceLong}(Devin Team $500+ACU 및 속도 제한이 있는 OpenAI Operator $200보다 저렴). 사람처럼 전체 데스크톱을 조작하며 VM 수준 격리를 제공합니다. 스타터 {starterPrice} 또는 무제한 {unlimitedPrice}부터.",
       "ogTitle": "Coasty — OSWorld 82% + $99/월 무제한(컴퓨터 사용 에이전트 최저가)",
-      "ogDescription": "OSWorld 1위(82%). $99/월 정액 무제한 — 더 높은 벤치마크에서 Devin Team($500+ACU)보다 저렴. 브라우저, 데스크톱, 터미널 자동화. 세션별 VM 격리. 크로스플랫폼 네이티브 + REST API + MCP 서버.",
-      "twitterDescription": "실제 데스크톱을 조작하는 AI 에이전트. OSWorld 82%(1위). $99/월 무제한 — 카테고리 내 최저가 정액 플랜. 스타터 $19/월부터. VM 격리 + 26개 도구 MCP 서버."
+      "ogDescription": "OSWorld 1위(82%) + 1,000+ 통합(Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + 정액 무제한 {unlimitedPrice}. 실제 통합 카탈로그를 갖춘 유일한 컴퓨터 사용 에이전트. VM 격리, 크로스플랫폼 네이티브 앱, REST API, MCP 서버.",
+      "twitterDescription": "실제 데스크톱을 조작하는 동시에 1,000+ 앱(Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear)에 연결되는 AI 에이전트. OSWorld 82%(1위). 무제한 {unlimitedPrice}, 카테고리 내 최저가 정액 플랜. 스타터 {starterPrice}부터."
     },
     "compare": {
       "title": "Coasty 비교 — AI 에이전트 대안 및 경쟁사 비교",
@@ -2381,7 +2381,7 @@
     },
     "pricing": {
       "title": "요금제 — Coasty AI 에이전트 플랜 및 가격",
-      "description": "Coasty 요금제: 스타터 $19/월(200 크레딧) 또는 무제한 $99/월(시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜 — Devin Team $500+ACU, 크레딧 상한이 있는 Genspark Pro $249, 상한이 있는 Manus Extended $200보다 저렴). 월 $3,000 이상의 인간 가상 비서를 대체. 숨은 수수료 없음.",
+      "description": "Coasty 요금제: 스타터 {starterPrice}(200 크레딧) 또는 무제한 {unlimitedPrice} — 시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜(Devin Team $500+ACU, 크레딧 상한이 있는 Genspark Pro $249, 상한이 있는 Manus Extended $200보다 저렴). 모든 플랜에 1,000+ 네이티브 앱 통합(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify 외 990+개)이 포함되며, 월 $3,000 이상의 인간 가상 비서를 대체합니다. 숨은 수수료 없음.",
       "ogTitle": "Coasty 요금제 — 스타터 $19/월, 무제한 $99/월",
       "ogDescription": "$99/월 정액 무제한 — 시장에서 가장 저렴한 무제한 컴퓨터 사용 플랜. 또는 개인용 스타터 $19/월. 인간 VA 대비 연간 $36,000 절약."
     },
@@ -2405,14 +2405,16 @@
       "q9": "Coasty는 OpenAI Operator와 어떻게 비교되나요?",
       "a9": "Coasty는 OSWorld 벤치마크에서 OpenAI Operator를 앞서며(82% 대 ~40%), 모든 세션에 진정한 VM 수준 격리를 제공하고, 여러 AI 모델을 지원하며, 브라우저를 넘어 전체 데스크톱 제어를 포함하고, 오픈소스 프레임워크를 제공합니다.",
       "q10": "Coasty는 CAPTCHA를 해결할 수 있나요?",
-      "a10": "네. Coasty에는 내장 CAPTCHA 해결 파이프라인이 있어 경쟁 AI 에이전트처럼 차단되지 않습니다. 웹사이트에서 CAPTCHA가 흔한 실제 자동화에 이것은 필수적입니다."
+      "a10": "네. Coasty에는 내장 CAPTCHA 해결 파이프라인이 있어 경쟁 AI 에이전트처럼 차단되지 않습니다. 웹사이트에서 CAPTCHA가 흔한 실제 자동화에 이것은 필수적입니다.",
+      "q11": "Coasty는 어떤 앱 및 서비스와 통합되나요?",
+      "a11": "Coasty는 내장된 Composio 통합 레이어를 통해 1,000+ 앱에 연결됩니다. 여기에는 Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase, Twilio가 포함됩니다. 설정에서 OAuth로 앱을 한 번만 연결하면, Coasty가 모든 채팅에서 사용자를 대신해 해당 앱을 사용합니다 — 비밀번호는 에이전트에게 절대 노출되지 않습니다. 앱에 API가 있는 경우 Coasty는 이를 직접 호출하여 1초 미만의 지연 시간을 제공합니다. API가 없는 경우(SAP GUI, LinkedIn Sales Navigator, 레거시 뱅킹 포털, 내부 관리 도구 등)에는 동일한 에이전트가 컴퓨터 사용으로 UI를 직접 조작합니다. Coasty는 API 우선 통합 카탈로그와 OS 수준 데스크톱 제어, 두 가지 표면을 하나의 에이전트로 제공하는 유일한 컴퓨터 사용 플랫폼입니다."
     },
     "structuredData": {
-      "appDescription": "컴퓨터 사용 AI 에이전트 1위이자 월 $99의 시장 최저가 정액 무제한 컴퓨터 사용 플랜. Coasty는 사람처럼 데스크톱을 조작 — 브라우저 열기, 클릭, 입력, 양식 작성, 이메일 전송, 스프레드시트 관리를 자율적으로 수행. 369개의 실제 작업에 걸쳐 OSWorld 벤치마크 82%. 세션별 진정한 VM 수준 격리. 내장 CAPTCHA 해결. 플랜: 스타터 $19/월 또는 무제한 $99/월.",
-      "orgDescription": "Coasty는 1위 컴퓨터 사용 AI 에이전트(OSWorld 82%)를 개발하고, 월 $99의 유일한 정액 무제한 컴퓨터 사용 플랜 — 동일 가격대의 Devin Team, OpenAI Operator, 크레딧 상한 경쟁사보다 저렴 — 을 출시합니다. 당사 플랫폼은 자율적인 데스크톱 제어, 브라우저 자동화, 진정한 VM 수준 격리를 통한 멀티 에이전트 오케스트레이션을 제공합니다.",
-      "productDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. OSWorld 벤치마크 1위(82%). $99/월 무제한 플랜은 이용 가능한 가장 저렴한 정액 무제한 컴퓨터 사용 플랜. 자율 브라우저 자동화, 데스크톱 제어, 이메일 전송, 양식 작성, 스프레드시트 관리를 진정한 VM 수준 격리로 제공.",
-      "websiteDescription": "컴퓨터 사용 AI 에이전트 플랫폼 1위 — OSWorld 벤치마크 82%, 월 $99의 시장 최저가 정액 무제한 플랜. VM 격리를 통한 자율 브라우저, 데스크톱, 터미널 자동화. 스타터 $19/월 또는 무제한 $99/월부터.",
-      "softwareDescription": "사람처럼 데스크톱을 조작하는 AI 컴퓨터 사용 에이전트. 369개의 실제 작업에서 82% 완료율로 OSWorld 벤치마크 1위. $99/월 무제한 플랜은 시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜. 자율 브라우저 자동화, 데스크톱 제어, 터미널 작업, 이메일 전송, 양식 작성, 스프레드시트 관리.",
+      "appDescription": "컴퓨터 사용 AI 에이전트 1위이자, 1,000+ 네이티브 앱 통합(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify 외 990+개)을 갖춘 유일한 컴퓨터 사용 플랫폼. 369개의 실제 작업에서 OSWorld 82%. 시장 최저가 정액 무제한 플랜 {unlimitedPriceLong}. 사람처럼 전체 데스크톱을 조작하며, 세션별 진정한 VM 수준 격리와 내장 CAPTCHA 해결을 제공합니다. 플랜: 스타터 {starterPrice} 또는 무제한 {unlimitedPrice}.",
+      "orgDescription": "Coasty는 1위 컴퓨터 사용 AI 에이전트(OSWorld 82%)를 1,000+ OAuth 보안 앱 통합(Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear)과 함께 개발하며, Devin Team, OpenAI Operator 및 크레딧 상한이 있는 경쟁사보다 저렴한 유일한 정액 무제한 컴퓨터 사용 플랜 {unlimitedPriceLong}을 출시합니다. 당사 플랫폼은 컴퓨터 사용, 멀티 에이전트 오케스트레이션, 네이티브 통합, VM 수준 격리를 하나의 제품에 결합합니다.",
+      "productDescription": "사람처럼 데스크톱을 조작하는 동시에 1,000+ 앱(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify)에 네이티브로 연결되는 AI 컴퓨터 사용 에이전트. OSWorld 벤치마크 1위(82%). 무제한 {unlimitedPrice}는 이용 가능한 가장 저렴한 정액 무제한 컴퓨터 사용 플랜입니다. 자율 브라우저, 데스크톱, 이메일, 양식 작성, 스프레드시트 자동화를 VM 수준 격리로 제공합니다.",
+      "websiteDescription": "컴퓨터 사용 AI 에이전트 플랫폼 1위(OSWorld 82%), 1,000+ 네이티브 통합(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe)과 시장 최저가 정액 무제한 플랜 {unlimitedPriceLong}. VM 격리를 통한 자율 브라우저, 데스크톱, 터미널 자동화. 스타터 {starterPrice} 또는 무제한 {unlimitedPrice}부터.",
+      "softwareDescription": "사람처럼 전체 데스크톱을 조작하며 1,000+ OAuth 보안 앱 통합(Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify 외 990+개)을 제공하는 AI 컴퓨터 사용 에이전트. 369개의 실제 작업에서 82% 완료율로 OSWorld 1위. 무제한 플랜 {unlimitedPriceLong}는 시장에서 가장 저렴한 정액 무제한 컴퓨터 사용 플랜입니다. 브라우저, 데스크톱, 터미널, 이메일, 양식, 스프레드시트 자동화를 하나의 에이전트로.",
       "breadcrumbs": {
         "home": "홈",
         "caseStudies": "AI 에이전트 사례 연구",

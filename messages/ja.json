@@ -2320,10 +2320,10 @@
     "home": {
       "title": "Coasty — コンピュータ操作AIエージェント第1位 | デスクトップ＆ブラウザ自動化に最適",
       "titleTemplate": "{title} | Coasty — AI コンピュータ操作エージェント",
-      "description": "Coastyはコンピュータ操作AIエージェント第1位 — OSWorldベンチマークで82% — そして月額$99の定額無制限プランは、コンピュータ操作プラン唯一の無制限定額制（Devin Teamの$500+ACU、レート制限付きOpenAI Operatorの$200、クレジット上限付き競合よりも安価）。人間のようにデスクトップを操作：ブラウザ、フォーム、メール、スプレッドシート。VMレベルの分離。スターター$19/月、または無制限$99/月から。",
+      "description": "Coastyは第1位のコンピュータ操作AIエージェント（OSWorldで82%）であり、1,000+のネイティブアプリ連携（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify、その他990+）を備える唯一のコンピュータ操作プラットフォームです。すべてのチャットから呼び出し可能。{unlimitedPriceLong}の定額無制限プランは、Devin Teamの$500+ACUやレート制限付きのOpenAI Operator $200よりも安価。人間のようにフルデスクトップを操作し、VMレベルで分離されます。スターター{starterPrice}または無制限{unlimitedPrice}から。",
       "ogTitle": "Coasty — OSWorld 82% + $99/月で無制限（コンピュータ操作エージェント業界最安値）",
-      "ogDescription": "OSWorld第1位（82%）。$99/月の定額無制限 — より高いベンチマークでDevin Team（$500+ACU）よりも安価。ブラウザ、デスクトップ、ターミナルの自動化。セッションごとのVM分離。クロスプラットフォームネイティブ + REST API + MCPサーバー。",
-      "twitterDescription": "実際のデスクトップを操作するAIエージェント。OSWorld 82%（第1位）。$99/月で無制限 — このカテゴリで最安値の定額プラン。スターター$19/月から。VM分離 + 26ツールのMCPサーバー。"
+      "ogDescription": "OSWorld第1位（82%）+ 1,000+のアプリ連携（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）+ {unlimitedPrice}の定額無制限。本物の連携カタログを備えた唯一のコンピュータ操作エージェント。VM分離、クロスプラットフォームネイティブアプリ、REST API、MCPサーバー。",
+      "twitterDescription": "実際のデスクトップを操作し、さらに1,000+のアプリ（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）に接続できるAIエージェント。OSWorld 82%（第1位）。{unlimitedPrice}の無制限はカテゴリ最安値の定額プラン。スターターは{starterPrice}から。"
     },
     "compare": {
       "title": "Coasty比較 — AIエージェントの代替案と競合比較",
@@ -2381,7 +2381,7 @@
     },
     "pricing": {
       "title": "料金 — Coasty AIエージェントのプラン＆価格",
-      "description": "Coastyの料金：スターター$19/月（200クレジット）または無制限$99/月（業界最安値の定額無制限コンピュータ操作プラン — Devin Teamの$500+ACU、クレジット上限付きGenspark Proの$249、上限付きManus Extendedの$200よりも安価）。月額$3,000以上の人間の仮想アシスタントを置き換え。隠れた費用なし。",
+      "description": "Coastyの料金：スターター{starterPrice}（200クレジット）または無制限{unlimitedPrice} — 市場で最安値の定額無制限コンピュータ操作プラン（Devin Teamの$500+ACU、クレジット上限付きGenspark Proの$249、上限付きManus Extendedの$200よりも安価）。すべてのプランに1,000+のネイティブアプリ連携（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Stripe、Shopify、その他990+）が含まれ、月額$3,000以上の人間の仮想アシスタントを置き換えます。隠れた費用なし。",
       "ogTitle": "Coasty料金 — スターター$19/月、無制限$99/月",
       "ogDescription": "$99/月の定額無制限 — 業界最安値の無制限コンピュータ操作プラン。または個人向けスターター$19/月。人間のVAと比較して年間$36,000の節約。"
     },
@@ -2405,14 +2405,16 @@
       "q9": "CoastyはOpenAI Operatorとどう比較されますか？",
       "a9": "CoastyはOSWorldベンチマークでOpenAI Operatorを上回り（82%対約40%）、各セッションに真のVMレベル分離を提供し、複数のAIモデルをサポートし、ブラウザだけでなく完全なデスクトップ制御を含み、オープンソースフレームワークを提供します。",
       "q10": "CoastyはCAPTCHAを解決できますか？",
-      "a10": "はい。Coastyには組み込みのCAPTCHA解決パイプラインがあり、競合するAIエージェントのようにブロックされません。CAPTCHAがWebサイトで一般的な実世界の自動化には、これが不可欠です。"
+      "a10": "はい。Coastyには組み込みのCAPTCHA解決パイプラインがあり、競合するAIエージェントのようにブロックされません。CAPTCHAがWebサイトで一般的な実世界の自動化には、これが不可欠です。",
+      "q11": "Coastyはどのアプリやサービスと連携しますか？",
+      "a11": "Coastyは組み込みのComposio連携レイヤーを通じて、Gmail、Outlook、Slack、Microsoft Teams、Notion、Linear、Jira、Asana、monday.com、GitHub、GitLab、Google Drive、Google Calendar、Google Sheets、Salesforce、HubSpot、Pipedrive、Stripe、Shopify、Intercom、Zendesk、Airtable、Figma、Calendly、Zoom、Dropbox、OneDrive、Sentry、Datadog、Vercel、Supabase、Twilioを含む1,000+のアプリに接続します。設定画面で各アプリをOAuthで一度接続するだけで、Coastyはすべてのチャットであなたに代わって利用します。パスワードがエージェントに渡ることはありません。アプリにAPIがある場合はCoastyが直接呼び出し、サブ秒のレイテンシを実現します。APIがない場合（SAP GUI、LinkedIn Sales Navigator、レガシーな銀行ポータル、社内管理ツールなど）は、同じエージェントがコンピュータ操作でUIを駆動します。Coastyは、APIファーストの連携カタログとOSレベルのデスクトップ操作という両方の手段を1つのエージェントに備えた、唯一のコンピュータ操作プラットフォームです。"
     },
     "structuredData": {
-      "appDescription": "コンピュータ操作AIエージェント第1位、そして月額$99の業界最安値の定額無制限コンピュータ操作プラン。Coastyは人間のようにデスクトップを操作 — ブラウザを開き、クリック、入力、フォーム記入、メール送信、スプレッドシート管理を自律的に実行。369の実世界タスクにわたるOSWorldベンチマークで82%。セッションごとの真のVMレベル分離。組み込みCAPTCHA解決。プラン：スターター$19/月、または無制限$99/月。",
-      "orgDescription": "Coastyは第1位のコンピュータ操作AIエージェント（OSWorld 82%）を開発し、月額$99の唯一の定額無制限コンピュータ操作プラン — 同価格帯のDevin Team、OpenAI Operator、クレジット上限付き競合よりも安価 — を提供しています。当社のプラットフォームは、自律的なデスクトップ制御、ブラウザ自動化、真のVMレベル分離によるマルチエージェントオーケストレーションを実現します。",
-      "productDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。OSWorldベンチマーク第1位（82%）。$99/月の無制限プランは、入手可能な最安値の定額無制限コンピュータ操作プラン。自律的なブラウザ自動化、デスクトップ制御、メール送信、フォーム記入、スプレッドシート管理を真のVMレベル分離で実現。",
-      "websiteDescription": "コンピュータ操作AIエージェントプラットフォーム第1位 — OSWorldベンチマーク82%、月額$99の業界最安値の定額無制限プラン。VM分離による自律的なブラウザ、デスクトップ、ターミナル自動化。スターター$19/月、または無制限$99/月から。",
-      "softwareDescription": "人間のようにデスクトップを操作するAIコンピュータ操作エージェント。369の実世界タスクで82%の完了率を達成しOSWorldベンチマーク第1位。$99/月の無制限プランは、市場で最安値の定額無制限コンピュータ操作プラン。自律的なブラウザ自動化、デスクトップ制御、ターミナル操作、メール送信、フォーム記入、スプレッドシート管理。",
+      "appDescription": "第1位のコンピュータ操作AIエージェントであり、1,000+のネイティブアプリ連携（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify、その他990+）を備える唯一のコンピュータ操作プラットフォーム。369の実世界タスクにわたるOSWorldで82%。市場で最安値の定額無制限プランを{unlimitedPriceLong}で提供。人間のようにフルデスクトップを操作し、セッションごとに真のVMレベル分離、CAPTCHA解決を組み込み。プラン：スターター{starterPrice}または無制限{unlimitedPrice}。",
+      "orgDescription": "Coastyは第1位のコンピュータ操作AIエージェント（OSWorld 82%）を、1,000+のOAuthで保護されたアプリ連携（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）とともに開発し、Devin Team、OpenAI Operator、クレジット上限付き競合よりも安価な、{unlimitedPriceLong}の唯一の定額無制限コンピュータ操作プランを提供しています。当社のプラットフォームは、コンピュータ操作、マルチエージェントオーケストレーション、ネイティブ連携、VMレベル分離を1つの製品に統合します。",
+      "productDescription": "人間のようにデスクトップを操作し、さらに1,000+のアプリ（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify）にネイティブ接続するAIコンピュータ操作エージェント。OSWorldベンチマーク第1位（82%）。{unlimitedPrice}の無制限プランは、入手可能な最安値の定額無制限コンピュータ操作プラン。自律的なブラウザ、デスクトップ、メール、フォーム記入、スプレッドシート管理をVMレベル分離で実現。",
+      "websiteDescription": "第1位のコンピュータ操作AIエージェントプラットフォーム（OSWorld 82%）、1,000+のネイティブ連携（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Stripe）、そして{unlimitedPriceLong}の最安値の定額無制限プランを備えています。VM分離による自律的なブラウザ、デスクトップ、ターミナル自動化。スターター{starterPrice}または無制限{unlimitedPrice}から。",
+      "softwareDescription": "人間のようにフルデスクトップを操作し、1,000+のOAuthで保護されたアプリ連携（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify、その他990+）を備えるAIコンピュータ操作エージェント。369の実世界タスクで82%の完了率を達成しOSWorld第1位。{unlimitedPriceLong}の無制限プランは、市場で最安値の定額無制限コンピュータ操作プラン。ブラウザ、デスクトップ、ターミナル、メール、フォーム、スプレッドシートの自動化を1つのエージェントで。",
       "breadcrumbs": {
         "home": "ホーム",
         "caseStudies": "AIエージェントケーススタディ",

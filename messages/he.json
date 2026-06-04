@@ -2320,10 +2320,10 @@
     "home": {
       "title": "Coasty - סוכן AI #1 לשימוש במחשב | הכי טוב לאוטומציית שולחן עבודה ודפדפן",
       "titleTemplate": "{title} | Coasty - סוכן AI לשימוש במחשב",
-      "description": "Coasty הוא סוכן ה-AI #1 לשימוש במחשב — 82% במבחן OSWorld — ותוכנית Unlimited היחידה במחיר קבוע של $99/חודש לשימוש במחשב (זולה יותר מ-Devin Team $500+ACU, OpenAI Operator $200 עם הגבלת קצב, ומתחרים עם תקרת קרדיטים). שולט בשולחן עבודה מלא כמו אדם: דפדפנים, טפסים, מיילים, גיליונות אלקטרוניים. בידוד ברמת VM. החל מ-$19/חודש לתוכנית Starter או $99/חודש לתוכנית Unlimited.",
+      "description": "Coasty הוא סוכן ה-AI המדורג #1 לשימוש במחשב (82% ב-OSWorld) ופלטפורמת שימוש המחשב היחידה עם 1,000+ אינטגרציות מקוריות לאפליקציות — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify ועוד 990+ — שניתן להפעיל בכל צ׳אט. תוכנית Unlimited במחיר קבוע של {unlimitedPriceLong} (זולה יותר מ-Devin Team $500+ACU ו-OpenAI Operator $200 עם הגבלת קצב). שולט בשולחן עבודה מלא כמו אדם, עם בידוד ברמת VM. החל מ-{starterPrice} ל-Starter או {unlimitedPrice} ל-Unlimited.",
       "ogTitle": "Coasty — 82% במבחן OSWorld + תוכנית Unlimited ב-$99/חודש (סוכן שימוש במחשב הזול ביותר)",
-      "ogDescription": "#1 במבחן OSWorld (82%). $99/חודש לתוכנית Unlimited במחיר קבוע — זולה יותר מ-Devin Team ($500+ACU) ועם ציון גבוה יותר במבחן. אוטומציית דפדפן, שולחן עבודה וטרמינל. בידוד VM לכל הפעלה. אפליקציה מקורית חוצת פלטפורמות + REST API + שרת MCP.",
-      "twitterDescription": "סוכן AI שמפעיל שולחן עבודה אמיתי. 82% OSWorld (#1). $99/חודש לתוכנית Unlimited — התוכנית במחיר קבוע הזולה ביותר בקטגוריה. Starter החל מ-$19/חודש. בידוד VM + שרת MCP עם 26 כלים."
+      "ogDescription": "#1 ב-OSWorld (82%) + 1,000+ אינטגרציות (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + תוכנית Unlimited במחיר קבוע של {unlimitedPrice}. סוכן שימוש המחשב היחיד עם קטלוג אינטגרציות אמיתי. בידוד VM, אפליקציה מקורית חוצת פלטפורמות, REST API, שרת MCP.",
+      "twitterDescription": "סוכן AI שמפעיל שולחן עבודה אמיתי וגם מתחבר ל-1,000+ אפליקציות (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} ל-Unlimited — התוכנית במחיר קבוע הזולה ביותר בקטגוריה. Starter החל מ-{starterPrice}."
     },
     "compare": {
       "title": "השוואת Coasty - חלופות סוכני AI והשוואת מתחרים",
@@ -2381,7 +2381,7 @@
     },
     "pricing": {
       "title": "תמחור — תוכניות ומחירים של Coasty סוכן AI",
-      "description": "תמחור Coasty: Starter ב-$19/חודש (200 קרדיטים) או Unlimited ב-$99/חודש (תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב — זולה יותר מ-Devin Team $500+ACU, Genspark Pro $249 עם תקרת קרדיטים, ו-Manus Extended $200 עם תקרה). מחליפה עוזרים וירטואליים אנושיים בעלות $3,000+/חודש. ללא עלויות נסתרות.",
+      "description": "תמחור Coasty: Starter {starterPrice} (200 קרדיטים) או Unlimited {unlimitedPrice} — תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב (זולה יותר מ-Devin Team $500+ACU, Genspark Pro $249 עם תקרת קרדיטים ו-Manus Extended $200 עם תקרה). כל תוכנית כוללת 1,000+ אינטגרציות מקוריות לאפליקציות (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify ועוד 990+) ומחליפה עוזרים וירטואליים אנושיים בעלות $3,000+/חודש. ללא עלויות נסתרות.",
       "ogTitle": "תמחור Coasty — Starter $19/חודש, Unlimited $99/חודש",
       "ogDescription": "$99/חודש לתוכנית Unlimited במחיר קבוע — תוכנית ה-Unlimited הזולה ביותר בשוק לשימוש במחשב. או $19/חודש ל-Starter ליחידים. חיסכון של $36k בשנה לעומת עוזר אנושי."
     },
@@ -2405,14 +2405,16 @@
       "q9": "איך Coasty משתווה ל-OpenAI Operator?",
       "a9": "Coasty עולה על OpenAI Operator במבחן OSWorld (82% מול ~40%), מציע בידוד אמיתי ברמת VM לכל הפעלה, תומך במספר מודלים של AI, כולל שליטה מלאה בשולחן עבודה מעבר לדפדפן בלבד ומספק מסגרת קוד פתוח.",
       "q10": "האם Coasty יכול לפתור CAPTCHA?",
-      "a10": "כן. ל-Coasty יש צינור מובנה לפתרון CAPTCHA, כך שהוא לא נחסם כמו סוכני AI מתחרים. זה קריטי לאוטומציה בעולם האמיתי שבו CAPTCHA נפוצים באתרי אינטרנט."
+      "a10": "כן. ל-Coasty יש צינור מובנה לפתרון CAPTCHA, כך שהוא לא נחסם כמו סוכני AI מתחרים. זה קריטי לאוטומציה בעולם האמיתי שבו CAPTCHA נפוצים באתרי אינטרנט.",
+      "q11": "לאילו אפליקציות ושירותים Coasty מתחבר?",
+      "a11": "Coasty מתחבר ל-1,000+ אפליקציות דרך שכבת האינטגרציה המובנית מבית Composio, כולל Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase ו-Twilio. מחברים כל אפליקציה פעם אחת עם OAuth בהגדרות, ואז Coasty משתמש בה בכל צ׳אט בשמכם — אף סיסמה לא נחשפת לסוכן. כשלאפליקציה יש API, Coasty קורא אליו ישירות עבור השהיה של פחות משנייה. כשאין (SAP GUI, LinkedIn Sales Navigator, פורטלי בנקאות ישנים, כלי ניהול פנימיים), אותו סוכן מפעיל את הממשק באמצעות שימוש במחשב. Coasty היא פלטפורמת שימוש המחשב היחידה שמשלבת את שני המשטחים — קטלוג אינטגרציות API-first וגם שליטה ברמת מערכת ההפעלה בשולחן העבודה — בסוכן אחד."
     },
     "structuredData": {
-      "appDescription": "סוכן ה-AI #1 לשימוש במחשב ותוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב ב-$99/חודש. Coasty שולט בשולחן עבודה מלא כמו אדם — פותח דפדפנים, לוחץ, מקליד, ממלא טפסים, שולח מיילים ומנהל גיליונות אלקטרוניים באופן אוטונומי. 82% במבחן OSWorld על 369 משימות מהעולם האמיתי. בידוד אמיתי ברמת VM לכל הפעלה. פתרון CAPTCHA מובנה. תוכניות: $19/חודש ל-Starter או $99/חודש ל-Unlimited.",
-      "orgDescription": "Coasty בונה את סוכן ה-AI #1 לשימוש במחשב (82% OSWorld) ומשיקה את תוכנית ה-Unlimited היחידה במחיר קבוע של $99/חודש — זולה יותר מ-Devin Team, OpenAI Operator ומתחרים עם תקרת קרדיטים באותה רמת מחיר. הפלטפורמה שלנו מספקת שליטה אוטונומית בשולחן עבודה, אוטומציית דפדפן ותזמור מרובה סוכנים עם בידוד אמיתי ברמת VM.",
-      "productDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה כמו אדם. #1 במבחן OSWorld (82%). תוכנית Unlimited ב-$99/חודש היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר לשימוש במחשב הזמינה. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים עם בידוד אמיתי ברמת VM.",
-      "websiteDescription": "פלטפורמת סוכן AI #1 לשימוש במחשב — 82% במבחן OSWorld ותוכנית ה-Unlimited במחיר קבוע הזולה ביותר ב-$99/חודש. אוטומציית דפדפן, שולחן עבודה וטרמינל אוטונומית עם בידוד VM. החל מ-$19/חודש ל-Starter או $99/חודש ל-Unlimited.",
-      "softwareDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה מלא כמו אדם. #1 במבחן OSWorld עם שיעור השלמה של 82% ב-369 משימות מהעולם האמיתי. תוכנית Unlimited ב-$99/חודש היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, פעולות טרמינל, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים.",
+      "appDescription": "סוכן ה-AI המדורג #1 לשימוש במחשב ופלטפורמת שימוש המחשב היחידה עם 1,000+ אינטגרציות מקוריות לאפליקציות (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, ועוד 990+). 82% ב-OSWorld על 369 משימות מהעולם האמיתי. תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק ב-{unlimitedPriceLong}. שולט בשולחן עבודה מלא כמו אדם, בידוד אמיתי ברמת VM לכל הפעלה, פתרון CAPTCHA מובנה. תוכניות: Starter {starterPrice} או Unlimited {unlimitedPrice}.",
+      "orgDescription": "Coasty בונה את סוכן ה-AI #1 לשימוש במחשב (82% OSWorld) עם 1,000+ אינטגרציות אפליקציות מאובטחות ב-OAuth (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) ומשיקה את תוכנית ה-Unlimited היחידה במחיר קבוע לשימוש במחשב ב-{unlimitedPriceLong} — זולה יותר מ-Devin Team, OpenAI Operator ומתחרים עם תקרת קרדיטים. הפלטפורמה שלנו משלבת שימוש במחשב, תזמור מרובה סוכנים, אינטגרציות מקוריות ובידוד ברמת VM במוצר אחד.",
+      "productDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה כמו אדם וגם מתחבר באופן מקורי ל-1,000+ אפליקציות (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 במבחן OSWorld (82%). תוכנית Unlimited ב-{unlimitedPrice} היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר לשימוש במחשב הזמינה. אוטומציית דפדפן אוטונומית, שליטה בשולחן עבודה, שליחת מיילים, מילוי טפסים וניהול גיליונות אלקטרוניים עם בידוד ברמת VM.",
+      "websiteDescription": "פלטפורמת סוכן AI #1 לשימוש במחשב (82% OSWorld) עם 1,000+ אינטגרציות מקוריות (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) ותוכנית ה-Unlimited במחיר קבוע הזולה ביותר ב-{unlimitedPriceLong}. אוטומציית דפדפן, שולחן עבודה וטרמינל אוטונומית עם בידוד VM. החל מ-{starterPrice} ל-Starter או {unlimitedPrice} ל-Unlimited.",
+      "softwareDescription": "סוכן AI לשימוש במחשב ששולט בשולחן עבודה מלא כמו אדם ומשיק 1,000+ אינטגרציות אפליקציות מאובטחות ב-OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify ועוד 990+). #1 ב-OSWorld עם שיעור השלמה של 82% ב-369 משימות מהעולם האמיתי. תוכנית Unlimited ב-{unlimitedPriceLong} היא תוכנית ה-Unlimited במחיר קבוע הזולה ביותר בשוק לשימוש במחשב. אוטומציית דפדפן, שולחן עבודה, טרמינל, מיילים, טפסים וגיליונות אלקטרוניים בסוכן אחד.",
       "breadcrumbs": {
         "home": "דף הבית",
         "caseStudies": "מקרי בוחן של סוכן AI",

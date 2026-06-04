@@ -868,6 +868,11 @@
       "npsVeryLikely": "น่าจะใช่อย่างยิ่ง",
       "thanks": "ขอบคุณสำหรับความคิดเห็น",
       "creditsLabel": "เครดิต"
+    },
+    "composioReauth": {
+      "fallbackAppName": "แอป",
+      "expiredMessage": "การเชื่อมต่อ {appName} ของคุณหมดอายุแล้ว",
+      "reconnectLink": "เชื่อมต่อใหม่"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "ใน {count} นาที",
     "inHours": "ใน {count} ชม.",
     "today": "วันนี้",
-    "yesterday": "เมื่อวาน"
+    "yesterday": "เมื่อวาน",
+    "connections": "แอป",
+    "resources": "เอเจนต์"
   },
   "appHeader": {
     "login": "เข้าสู่ระบบ",
@@ -2413,6 +2420,13 @@
         "download": "ดาวน์โหลดแอปเดสก์ท็อป",
         "compare": "เปรียบเทียบตัวแทน AI"
       }
+    },
+    "connections": {
+      "title": "การเชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion, GitHub และอีกหลายร้อยแอป พร้อมใช้งานในทุกแชท",
+      "ogTitle": "Connections — เชื่อมต่อแอปกว่า 250 รายการกับ AI Coasty",
+      "ogDescription": "นำ Gmail, Slack, GitHub, Notion, Google Calendar, Linear และแอปอีกหลายร้อยรายการเข้ามาในทุกแชต ปลอดภัยด้วย OAuth พร้อมใช้งานตลอดเวลา ให้ตัวแทน Coasty ใช้แทนคุณ",
+      "twitterDescription": "เชื่อมต่อ Gmail, Slack, GitHub, Notion และแอปกว่า 250 รายการเข้ากับ Coasty OAuth ครั้งเดียว ตัวแทนของคุณใช้ในทุกแชต"
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "การแนะนำ",
         "description": "ชวนเพื่อนและรับเครดิต"
+      },
+      "integrations": {
+        "label": "การเชื่อมต่อ",
+        "description": "เชื่อมต่อแอปจากผู้ให้บริการอื่น"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "การแนะนำ",
       "description": "แชร์ Coasty หารายได้ร่วมกัน"
+    },
+    "connections": {
+      "title": "Connections ของคุณ",
+      "description": "กำลังดึงแอปและ toolkit ที่คุณเชื่อมต่อไว้"
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 ระหว่างการส่ง",
     "trustAtRest": "AES-256-GCM ขณะจัดเก็บ",
     "trustNoTraining": "ไม่นำข้อมูลของคุณไปฝึกโมเดล"
+  },
+  "connections": {
+    "page": {
+      "title": "การเชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion, GitHub และอีกหลายร้อยแอป พร้อมใช้งานในทุกแชท"
+    },
+    "fallbackAppName": "แอป",
+    "status": {
+      "active": "ทำงานอยู่",
+      "initiated": "กำลังเชื่อม",
+      "expired": "หมดอายุ",
+      "failed": "ถูกเพิกถอน",
+      "failedShort": "ล้มเหลว",
+      "inactive": "ไม่ได้ใช้งาน"
+    },
+    "toasts": {
+      "disconnectFailed": "ยกเลิกการเชื่อมต่อไม่สำเร็จ",
+      "disconnected": "ยกเลิกการเชื่อมต่อ {appName} แล้ว",
+      "reconnectFailed": "เริ่มการเชื่อมต่อใหม่ไม่สำเร็จ",
+      "connected": "เชื่อมต่อ {app} แล้ว",
+      "error": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง"
+    },
+    "card": {
+      "logoAlt": "โลโก้ {appName}",
+      "fallbackAccountLabel": "เชื่อมต่อแล้ว",
+      "connectedOn": "เชื่อมต่อเมื่อ {date}",
+      "lastUsed": "ใช้งานล่าสุด {time}",
+      "actions": {
+        "reconnect": "เชื่อมใหม่",
+        "disconnect": "ยกเลิกการเชื่อมต่อ",
+        "menuAriaLabel": "การจัดการการเชื่อมต่อ"
+      },
+      "error": {
+        "expired": "การอนุญาตหมดอายุแล้ว เชื่อมต่อใหม่เพื่อใช้งานเครื่องมือต่อ",
+        "revoked": "การเชื่อมต่อถูกเพิกถอน เชื่อมต่อใหม่เพื่อใช้งานเครื่องมือต่อ"
+      },
+      "disconnectDialog": {
+        "title": "ยกเลิกการเชื่อมต่อ {appName} ใช่ไหม?",
+        "connectedOn": "เชื่อมต่อเมื่อ {date}",
+        "consequence": {
+          "revokeOauth": "Composio จะเพิกถอนสิทธิ์ OAuth",
+          "toolsStop": "เครื่องมือที่ใช้การเชื่อมต่อนี้จะหยุดทำงาน"
+        },
+        "confirm": "ยกเลิกการเชื่อมต่อ",
+        "cancel": "เก็บการเชื่อมต่อไว้"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "โลโก้ {name}",
+      "headline": "เชื่อมต่อแอปแรกของคุณ",
+      "subheadline": "อนุญาตเพียงครั้งเดียว แล้ว AI ของคุณจะอ่านอีเมล โพสต์ลง Slack อัปเดตเอกสาร และอื่น ๆ อีกมากมาย โดยอัตโนมัติในทุกแชท",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "เครื่องมือพร้อมใช้ในทุกแชท",
+          "desc": "เมื่อเชื่อมต่อแล้ว AI ของคุณจะใช้งานให้อัตโนมัติ"
+        },
+        "secureOauth": {
+          "title": "OAuth ที่ปลอดภัย",
+          "desc": "อนุญาตครั้งเดียว เพิกถอนได้ทุกเมื่อ"
+        },
+        "hundredsOfApps": {
+          "title": "หลายร้อยแอป",
+          "desc": "อีเมล ปฏิทิน CRM เอกสาร โค้ด และอีกมากมาย"
+        }
+      },
+      "browseAppsCta": "ดูแอปทั้งหมด"
+    },
+    "connectDialog": {
+      "title": "เชื่อมต่อแอป",
+      "description": "เลือกจากการเชื่อมต่อหลายร้อยรายการที่ขับเคลื่อนโดย Composio",
+      "searchPlaceholder": "ค้นหาแอป…",
+      "clearSearchAria": "ล้างการค้นหา",
+      "categories": {
+        "all": "ทั้งหมด",
+        "communication": "การสื่อสาร",
+        "productivity": "ประสิทธิภาพ",
+        "calendar": "ปฏิทิน",
+        "developer": "นักพัฒนา",
+        "crmSales": "CRM และการขาย"
+      },
+      "sections": {
+        "featured": "แนะนำ",
+        "allApps": "แอปทั้งหมด"
+      },
+      "card": {
+        "logoAlt": "โลโก้ {name}",
+        "alreadyConnectedTooltip": "เชื่อมต่อแล้ว จัดการได้จากหน้าการเชื่อมต่อ",
+        "connectedLabel": "เชื่อมต่อแล้ว",
+        "connectFallbackDescription": "เชื่อมต่อ {name} เข้ากับ AI ของคุณ"
+      },
+      "footer": {
+        "poweredBy": "ขับเคลื่อนโดย Composio",
+        "cancel": "ยกเลิก"
+      },
+      "empty": {
+        "noMatchTitle": "ไม่พบแอปที่ตรงกับ \"{query}\"",
+        "noAppsTitle": "ยังไม่มีแอปให้เลือก",
+        "noMatchBody": "ลองใช้คำค้นที่สั้นลง หรือเปลี่ยนหมวดหมู่",
+        "noAppsBody": "การเชื่อมต่อ Composio จะปรากฏที่นี่เมื่อตั้งค่าเรียบร้อย"
+      },
+      "errors": {
+        "failedToStart": "เริ่มการเชื่อมต่อไม่สำเร็จ"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "เชื่อมต่อกับ Composio",
+          "connectWithApiKey": "บันทึกและเชื่อมต่อ",
+          "connectWithBearerToken": "บันทึกและเชื่อมต่อ",
+          "connectWithBasic": "บันทึกและเชื่อมต่อ",
+          "connectNoAuth": "เปิดใช้งาน",
+          "connecting": "กำลังเชื่อมต่อ..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "คีย์ API",
+          "apiKeyPlaceholder": "วางคีย์ API ของคุณ",
+          "bearerTokenLabel": "โทเค็น Bearer",
+          "bearerTokenPlaceholder": "วางโทเค็น Bearer ของคุณ",
+          "basicAuthUsername": "ชื่อผู้ใช้",
+          "basicAuthPassword": "รหัสผ่าน",
+          "basicAuthUsernamePlaceholder": "ชื่อผู้ใช้บัญชีของคุณ",
+          "basicAuthPasswordPlaceholder": "รหัสผ่านบัญชีของคุณ",
+          "revealSecret": "แสดง",
+          "hideSecret": "ซ่อน"
+        },
+        "noAuthHint": "{name} ไม่ต้องการข้อมูลรับรอง คลิกเปิดใช้งานเพื่อเพิ่มลงในพื้นที่ทำงานของคุณ",
+        "apiKeyHelp": "หาสิ่งนี้ได้ที่ไหน?",
+        "connectedToast": "เชื่อมต่อกับ {name} แล้ว",
+        "unsupported": {
+          "title": "ประเภทการเชื่อมต่อนี้ยังไม่รองรับ",
+          "body": "{name} ใช้กระบวนการตรวจสอบสิทธิ์ {scheme} ที่เรายังไม่ได้รองรับในแอป คุณสามารถเชื่อมต่อโดยตรงในแดชบอร์ด Composio และจะปรากฏที่นี่เมื่อเชื่อมโยงแล้ว",
+          "openComposioDashboard": "เปิดแดชบอร์ด Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "ยกเลิกการเชื่อมต่อ {name}",
+      "disconnect": "ยกเลิก"
+    },
+    "empty": {
+      "title": "ยังไม่มีแอปที่เชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion และอื่น ๆ เพื่อให้ Coasty ใช้งานได้ในทุกแชท"
+    },
+    "toolInvocation": {
+      "calling": "กำลังเรียกใช้ {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "แอป",
+      "expiredMessage": "การเชื่อมต่อ {appName} ของคุณหมดอายุแล้ว",
+      "reconnectLink": "เชื่อมต่อใหม่"
+    },
+    "errors": {
+      "loadConnectionsFailed": "โหลดการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "loadToolkitsFailed": "โหลด toolkits ไม่สำเร็จ (HTTP {status})",
+      "startConnectionFailed": "เริ่มการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "disconnectFailedHttp": "ยกเลิกการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "credentialsRequired": "โปรดกรอกข้อมูลในช่องที่จำเป็นทั้งหมดเพื่อดำเนินการต่อ",
+      "credentialsErrorPrefix": "การเชื่อมต่อล้มเหลว:",
+      "unknownToolkit": "เราไม่รู้จักแอปนี้ โปรดรีเฟรชแคตตาล็อกแล้วลองอีกครั้ง",
+      "unsupportedAuthScheme": "ยังไม่รองรับวิธีตรวจสอบสิทธิ์นี้ในแอป",
+      "missingCredentials": "ข้อมูลที่จำเป็นหายไป: {fields}",
+      "invalidCredentials": "ข้อมูลรับรองถูกปฏิเสธ โปรดตรวจสอบและลองอีกครั้ง",
+      "credentialValidationFailed": "ไม่สามารถตรวจสอบข้อมูลรับรองของคุณได้ โปรดลองอีกครั้ง",
+      "apiKeyRequired": "ต้องระบุคีย์ API",
+      "tokenRequired": "ต้องระบุโทเค็น Bearer",
+      "basicRequired": "ต้องระบุชื่อผู้ใช้และรหัสผ่าน"
+    },
+    "title": "Connections",
+    "subtitle": "เชื่อมต่อแอปที่ Coasty สามารถใช้งานแทนคุณในทุกแชต",
+    "connectedSuffix": "เชื่อมต่อแล้ว",
+    "refresh": "รีเฟรช",
+    "newConnection": "เชื่อมต่อใหม่",
+    "retry": "ลองอีกครั้ง",
+    "noFilteredConnections": "ยังไม่มีแอปที่{filter}",
+    "noFilteredDescription": "ลองตัวกรองอื่น หรือเชื่อมต่อแอปใหม่เพื่อเริ่มต้น",
+    "filters": {
+      "all": "ทั้งหมด",
+      "active": "ใช้งานอยู่",
+      "connecting": "กำลังเชื่อมต่อ",
+      "expired": "หมดอายุ",
+      "failed": "ล้มเหลว"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "แอปที่เชื่อมต่อ",
+      "subheading": "Coasty สามารถใช้แอปเหล่านี้แทนคุณได้ในทุกแชท",
+      "connectNewApp": "เชื่อมต่อแอปใหม่",
+      "manageOnFullPage": "จัดการในหน้าเต็ม"
+    }
   }
 }

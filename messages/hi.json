@@ -868,6 +868,11 @@
       "npsVeryLikely": "बहुत संभावना",
       "thanks": "फीडबैक के लिए धन्यवाद",
       "creditsLabel": "क्रेडिट"
+    },
+    "composioReauth": {
+      "fallbackAppName": "ऐप",
+      "expiredMessage": "आपका {appName} कनेक्शन एक्सपायर हो गया।",
+      "reconnectLink": "रीकनेक्ट करें"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "{count} मिनट में",
     "inHours": "{count} घंटे में",
     "today": "आज",
-    "yesterday": "कल"
+    "yesterday": "कल",
+    "connections": "ऐप्स",
+    "resources": "एजेंट"
   },
   "appHeader": {
     "login": "लॉग इन",
@@ -2413,6 +2420,13 @@
         "download": "डेस्कटॉप ऐप डाउनलोड करें",
         "compare": "AI एजेंटों की तुलना करें"
       }
+    },
+    "connections": {
+      "title": "कनेक्शन",
+      "description": "Gmail, Slack, Notion, GitHub और सैकड़ों ऐप्स कनेक्ट करें। हर चैट में उपलब्ध।",
+      "ogTitle": "कनेक्शन — अपने Coasty AI एजेंट से 250+ ऐप्स कनेक्ट करें",
+      "ogDescription": "Gmail, Slack, GitHub, Notion, Google Calendar, Linear और सैकड़ों अन्य ऐप्स को हर चैट में लाएँ। OAuth-सुरक्षित, हमेशा चालू, Coasty एजेंट आपकी ओर से इस्तेमाल करते हैं।",
+      "twitterDescription": "Gmail, Slack, GitHub, Notion और 250+ ऐप्स Coasty से कनेक्ट करें। एक OAuth, हर चैट में आपके एजेंट द्वारा इस्तेमाल।"
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "रेफरल",
         "description": "दोस्तों को आमंत्रित करें और क्रेडिट कमाएं"
+      },
+      "integrations": {
+        "label": "इंटीग्रेशन",
+        "description": "थर्ड-पार्टी ऐप्स कनेक्ट करें"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "रेफरल",
       "description": "Coasty साझा करें। साथ कमाएं।"
+    },
+    "connections": {
+      "title": "आपके कनेक्शन",
+      "description": "आपके कनेक्टेड ऐप्स और टूलकिट्स लाए जा रहे हैं।"
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "ट्रांज़िट में TLS 1.3",
     "trustAtRest": "स्थिर डेटा पर AES-256-GCM",
     "trustNoTraining": "आपके डेटा पर कोई प्रशिक्षण नहीं"
+  },
+  "connections": {
+    "page": {
+      "title": "कनेक्शन",
+      "description": "Gmail, Slack, Notion, GitHub और सैकड़ों ऐप्स कनेक्ट करें। हर चैट में उपलब्ध।"
+    },
+    "fallbackAppName": "ऐप",
+    "status": {
+      "active": "कनेक्टेड",
+      "initiated": "कनेक्टिंग",
+      "expired": "एक्सपायर",
+      "failed": "रद्द",
+      "failedShort": "विफल",
+      "inactive": "निष्क्रिय"
+    },
+    "toasts": {
+      "disconnectFailed": "डिस्कनेक्ट नहीं हो सका",
+      "disconnected": "{appName} डिस्कनेक्ट हो गया",
+      "reconnectFailed": "रीकनेक्ट शुरू नहीं हो सका",
+      "connected": "{app} कनेक्ट हो गया",
+      "error": "कुछ गड़बड़ हो गई। कृपया फिर कोशिश करें।"
+    },
+    "card": {
+      "logoAlt": "{appName} लोगो",
+      "fallbackAccountLabel": "कनेक्टेड",
+      "connectedOn": "{date} को कनेक्ट हुआ",
+      "lastUsed": "अंतिम बार उपयोग {time}",
+      "actions": {
+        "reconnect": "रीकनेक्ट",
+        "disconnect": "डिस्कनेक्ट करें",
+        "menuAriaLabel": "कनेक्शन क्रियाएं"
+      },
+      "error": {
+        "expired": "अनुमति एक्सपायर हो गई। टूल एक्सेस फिर से चालू करने के लिए रीकनेक्ट करें।",
+        "revoked": "कनेक्शन रद्द कर दिया गया। टूल एक्सेस फिर से चालू करने के लिए रीकनेक्ट करें।"
+      },
+      "disconnectDialog": {
+        "title": "{appName} डिस्कनेक्ट करें?",
+        "connectedOn": "{date} को कनेक्ट हुआ",
+        "consequence": {
+          "revokeOauth": "Composio OAuth अनुमति रद्द कर देगा",
+          "toolsStop": "इस कनेक्शन का उपयोग करने वाले टूल काम करना बंद कर देंगे"
+        },
+        "confirm": "डिस्कनेक्ट करें",
+        "cancel": "कनेक्शन रखें"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} लोगो",
+      "headline": "अपना पहला ऐप कनेक्ट करें",
+      "subheadline": "एक बार अनुमति दें और आपका AI आपके ईमेल पढ़ सकता है, Slack पर पोस्ट कर सकता है, डॉक्स अपडेट कर सकता है, और बहुत कुछ। हर चैट में अपने आप।",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "हर चैट में टूल",
+          "desc": "एक बार कनेक्ट होने पर, आपका AI उन्हें अपने आप उपयोग करता है।"
+        },
+        "secureOauth": {
+          "title": "सुरक्षित OAuth",
+          "desc": "एक बार अनुमति दें, कभी भी रद्द करें।"
+        },
+        "hundredsOfApps": {
+          "title": "सैकड़ों ऐप्स",
+          "desc": "ईमेल, कैलेंडर, CRM, डॉक्स, कोड और बहुत कुछ।"
+        }
+      },
+      "browseAppsCta": "ऐप्स ब्राउज़ करें"
+    },
+    "connectDialog": {
+      "title": "एक ऐप कनेक्ट करें",
+      "description": "Composio द्वारा संचालित सैकड़ों इंटीग्रेशन ब्राउज़ करें।",
+      "searchPlaceholder": "ऐप्स खोजें…",
+      "clearSearchAria": "खोज साफ़ करें",
+      "categories": {
+        "all": "सभी",
+        "communication": "कम्युनिकेशन",
+        "productivity": "प्रोडक्टिविटी",
+        "calendar": "कैलेंडर",
+        "developer": "डेवलपर",
+        "crmSales": "CRM और सेल्स"
+      },
+      "sections": {
+        "featured": "विशेष",
+        "allApps": "सभी ऐप्स"
+      },
+      "card": {
+        "logoAlt": "{name} लोगो",
+        "alreadyConnectedTooltip": "पहले से कनेक्टेड। Connections पेज से मैनेज करें",
+        "connectedLabel": "कनेक्टेड",
+        "connectFallbackDescription": "{name} को अपने AI से कनेक्ट करें"
+      },
+      "footer": {
+        "poweredBy": "Composio द्वारा संचालित",
+        "cancel": "रद्द करें"
+      },
+      "empty": {
+        "noMatchTitle": "\"{query}\" से मेल खाने वाला कोई ऐप नहीं",
+        "noAppsTitle": "कोई ऐप उपलब्ध नहीं",
+        "noMatchBody": "एक छोटा खोज शब्द या अलग कैटेगरी आज़माएं।",
+        "noAppsBody": "कॉन्फ़िगर होने के बाद Composio इंटीग्रेशन यहां दिखेंगे।"
+      },
+      "errors": {
+        "failedToStart": "कनेक्शन शुरू नहीं हो सका"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Composio से कनेक्ट करें",
+          "connectWithApiKey": "सहेजें और कनेक्ट करें",
+          "connectWithBearerToken": "सहेजें और कनेक्ट करें",
+          "connectWithBasic": "सहेजें और कनेक्ट करें",
+          "connectNoAuth": "सक्षम करें",
+          "connecting": "कनेक्ट हो रहा है..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API कुंजी",
+          "apiKeyPlaceholder": "अपनी API कुंजी पेस्ट करें",
+          "bearerTokenLabel": "Bearer टोकन",
+          "bearerTokenPlaceholder": "अपना bearer टोकन पेस्ट करें",
+          "basicAuthUsername": "उपयोगकर्ता नाम",
+          "basicAuthPassword": "पासवर्ड",
+          "basicAuthUsernamePlaceholder": "आपके खाते का उपयोगकर्ता नाम",
+          "basicAuthPasswordPlaceholder": "आपके खाते का पासवर्ड",
+          "revealSecret": "दिखाएँ",
+          "hideSecret": "छुपाएँ"
+        },
+        "noAuthHint": "{name} को क्रेडेंशियल्स की आवश्यकता नहीं है। इसे अपने कार्यस्थान में जोड़ने के लिए सक्षम करें पर क्लिक करें।",
+        "apiKeyHelp": "यह कहाँ मिलेगा?",
+        "connectedToast": "{name} से कनेक्ट हो गया",
+        "unsupported": {
+          "title": "यह कनेक्शन प्रकार अभी समर्थित नहीं है",
+          "body": "{name} एक {scheme} प्रमाणीकरण फ्लो का उपयोग करता है जिसे हमने अभी तक ऐप में नहीं जोड़ा है। आप इसे सीधे Composio डैशबोर्ड पर कनेक्ट कर सकते हैं और लिंक होने पर यह यहाँ दिखाई देगा।",
+          "openComposioDashboard": "Composio डैशबोर्ड खोलें"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} डिस्कनेक्ट करें",
+      "disconnect": "डिस्कनेक्ट"
+    },
+    "empty": {
+      "title": "कोई ऐप कनेक्टेड नहीं",
+      "description": "Gmail, Slack, Notion और बहुत कुछ कनेक्ट करें ताकि Coasty उन्हें किसी भी चैट में उपयोग कर सके।"
+    },
+    "toolInvocation": {
+      "calling": "{toolkit} को कॉल कर रहे हैं: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "ऐप",
+      "expiredMessage": "आपका {appName} कनेक्शन एक्सपायर हो गया।",
+      "reconnectLink": "रीकनेक्ट करें"
+    },
+    "errors": {
+      "loadConnectionsFailed": "कनेक्शन लोड नहीं हो सके (HTTP {status})",
+      "loadToolkitsFailed": "टूलकिट लोड नहीं हो सके (HTTP {status})",
+      "startConnectionFailed": "कनेक्शन शुरू नहीं हो सका (HTTP {status})",
+      "disconnectFailedHttp": "डिस्कनेक्ट नहीं हो सका (HTTP {status})",
+      "credentialsRequired": "कृपया जारी रखने के लिए सभी आवश्यक फ़ील्ड भरें।",
+      "credentialsErrorPrefix": "कनेक्शन विफल:",
+      "unknownToolkit": "हम इस ऐप को नहीं पहचानते। कृपया कैटलॉग रीफ्रेश करें और पुनः प्रयास करें।",
+      "unsupportedAuthScheme": "यह प्रमाणीकरण विधि अभी तक ऐप में समर्थित नहीं है।",
+      "missingCredentials": "आवश्यक फ़ील्ड गायब हैं: {fields}",
+      "invalidCredentials": "क्रेडेंशियल्स अस्वीकृत हो गए। कृपया जाँचें और पुनः प्रयास करें।",
+      "credentialValidationFailed": "आपके क्रेडेंशियल्स की पुष्टि नहीं की जा सकी। कृपया पुनः प्रयास करें।",
+      "apiKeyRequired": "API कुंजी आवश्यक है।",
+      "tokenRequired": "Bearer टोकन आवश्यक है।",
+      "basicRequired": "उपयोगकर्ता नाम और पासवर्ड आवश्यक हैं।"
+    },
+    "title": "कनेक्शन",
+    "subtitle": "वे ऐप्स कनेक्ट करें जिन्हें Coasty किसी भी चैट में आपकी ओर से इस्तेमाल कर सके।",
+    "connectedSuffix": "कनेक्टेड",
+    "refresh": "रिफ्रेश",
+    "newConnection": "नया कनेक्शन",
+    "retry": "फिर कोशिश करें",
+    "noFilteredConnections": "अभी कोई {filter} ऐप नहीं",
+    "noFilteredDescription": "कोई दूसरा फ़िल्टर आज़माएँ या नया ऐप कनेक्ट करें।",
+    "filters": {
+      "all": "सभी",
+      "active": "सक्रिय",
+      "connecting": "कनेक्ट हो रहा",
+      "expired": "एक्सपायर",
+      "failed": "विफल"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "कनेक्टेड ऐप्स",
+      "subheading": "Coasty आपकी ओर से किसी भी चैट में इन ऐप्स का उपयोग कर सकता है।",
+      "connectNewApp": "नया ऐप कनेक्ट करें",
+      "manageOnFullPage": "पूरे पेज पर मैनेज करें"
+    }
   }
 }

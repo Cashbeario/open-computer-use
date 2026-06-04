@@ -868,6 +868,11 @@
       "npsVeryLikely": "Malamang na malamang",
       "thanks": "Salamat sa feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Nag-expire ang iyong koneksyon sa {appName}.",
+      "reconnectLink": "I-reconnect"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "sa {count}m",
     "inHours": "sa {count}h",
     "today": "ngayon",
-    "yesterday": "kahapon"
+    "yesterday": "kahapon",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Mag-login",
@@ -2413,6 +2420,13 @@
         "download": "I-download ang Desktop App",
         "compare": "Ihambing ang mga AI Agent"
       }
+    },
+    "connections": {
+      "title": "Mga Koneksyon",
+      "description": "I-connect ang Gmail, Slack, Notion, GitHub, at daan-daang iba pang apps. Available sa bawat chat.",
+      "ogTitle": "Mga Koneksyon — Ikonekta 250+ Apps sa Coasty AI Agent",
+      "ogDescription": "Dalhin ang Gmail, Slack, GitHub, Notion, Google Calendar, Linear at daan-daang iba pang apps sa bawat chat. OAuth-secured, palaging available, ginagamit ng mga Coasty agent sa ngalan mo.",
+      "twitterDescription": "Ikonekta ang Gmail, Slack, GitHub, Notion at 250+ apps sa Coasty. Isang OAuth, ginagamit sa bawat chat ng iyong agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Referral",
         "description": "Mag-imbita ng kaibigan at kumita ng credits"
+      },
+      "integrations": {
+        "label": "Mga Integration",
+        "description": "Mag-connect ng third-party apps"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Mga referral",
       "description": "I-share ang Coasty. Sama-samang kumita."
+    },
+    "connections": {
+      "title": "Iyong mga koneksyon",
+      "description": "Kinukuha ang iyong mga naka-connect na apps at toolkits."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 sa transit",
     "trustAtRest": "AES-256-GCM nakaimbak",
     "trustNoTraining": "Walang training sa data mo"
+  },
+  "connections": {
+    "page": {
+      "title": "Mga Koneksyon",
+      "description": "I-connect ang Gmail, Slack, Notion, GitHub, at daan-daang iba pang apps. Available sa bawat chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Naka-connect",
+      "initiated": "Kinokonekta",
+      "expired": "Nag-expire",
+      "failed": "Binawi",
+      "failedShort": "Nabigo",
+      "inactive": "Hindi aktibo"
+    },
+    "toasts": {
+      "disconnectFailed": "Hindi na-disconnect",
+      "disconnected": "Na-disconnect ang {appName}",
+      "reconnectFailed": "Hindi nasimulan ang reconnect",
+      "connected": "Na-connect ang {app}",
+      "error": "May nangyaring mali. Subukan ulit."
+    },
+    "card": {
+      "logoAlt": "Logo ng {appName}",
+      "fallbackAccountLabel": "Naka-connect",
+      "connectedOn": "Na-connect noong {date}",
+      "lastUsed": "Huling ginamit {time}",
+      "actions": {
+        "reconnect": "I-reconnect",
+        "disconnect": "I-disconnect",
+        "menuAriaLabel": "Mga aksyon sa koneksyon"
+      },
+      "error": {
+        "expired": "Nag-expire ang authorization. I-reconnect para ibalik ang access sa tools.",
+        "revoked": "Binawi ang koneksyon. I-reconnect para ibalik ang access sa tools."
+      },
+      "disconnectDialog": {
+        "title": "I-disconnect ang {appName}?",
+        "connectedOn": "na-connect {date}",
+        "consequence": {
+          "revokeOauth": "Babawiin ng Composio ang OAuth grant",
+          "toolsStop": "Hihinto sa paggana ang mga tool na gumagamit ng koneksyong ito"
+        },
+        "confirm": "I-disconnect",
+        "cancel": "Huwag i-disconnect"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo ng {name}",
+      "headline": "I-connect ang iyong unang app",
+      "subheadline": "Mag-authorize nang isang beses at maaari nang basahin ng iyong AI ang email mo, mag-post sa Slack, mag-update ng mga docs, at marami pang iba, awtomatiko, sa bawat chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Mga tool sa bawat chat",
+          "desc": "Kapag naka-connect na, awtomatiko itong gagamitin ng iyong AI."
+        },
+        "secureOauth": {
+          "title": "Secure na OAuth",
+          "desc": "Mag-authorize minsan, bawiin anumang oras."
+        },
+        "hundredsOfApps": {
+          "title": "Daan-daang apps",
+          "desc": "Email, calendars, CRMs, docs, code, at marami pa."
+        }
+      },
+      "browseAppsCta": "Mag-browse ng apps"
+    },
+    "connectDialog": {
+      "title": "Mag-connect ng app",
+      "description": "Mag-browse ng daan-daang integrations na pinapagana ng Composio.",
+      "searchPlaceholder": "Maghanap ng apps…",
+      "clearSearchAria": "I-clear ang paghahanap",
+      "categories": {
+        "all": "Lahat",
+        "communication": "Komunikasyon",
+        "productivity": "Produktibidad",
+        "calendar": "Kalendaryo",
+        "developer": "Developer",
+        "crmSales": "CRM at Sales"
+      },
+      "sections": {
+        "featured": "Tampok",
+        "allApps": "Lahat ng app"
+      },
+      "card": {
+        "logoAlt": "Logo ng {name}",
+        "alreadyConnectedTooltip": "Naka-connect na, i-manage mula sa Connections page",
+        "connectedLabel": "Naka-connect",
+        "connectFallbackDescription": "I-connect ang {name} sa iyong AI"
+      },
+      "footer": {
+        "poweredBy": "pinapagana ng Composio",
+        "cancel": "Kanselahin"
+      },
+      "empty": {
+        "noMatchTitle": "Walang app na tumutugma sa \"{query}\"",
+        "noAppsTitle": "Walang available na apps",
+        "noMatchBody": "Subukan ang mas maikling search term o ibang kategorya.",
+        "noAppsBody": "Lalabas dito ang mga Composio integration kapag na-configure na."
+      },
+      "errors": {
+        "failedToStart": "Hindi nasimulan ang koneksyon"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Kumonekta gamit ang Composio",
+          "connectWithApiKey": "I-save at kumonekta",
+          "connectWithBearerToken": "I-save at kumonekta",
+          "connectWithBasic": "I-save at kumonekta",
+          "connectNoAuth": "I-enable",
+          "connecting": "Kumokonekta..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API key",
+          "apiKeyPlaceholder": "I-paste ang iyong API key",
+          "bearerTokenLabel": "Bearer token",
+          "bearerTokenPlaceholder": "I-paste ang iyong bearer token",
+          "basicAuthUsername": "Username",
+          "basicAuthPassword": "Password",
+          "basicAuthUsernamePlaceholder": "Username ng iyong account",
+          "basicAuthPasswordPlaceholder": "Password ng iyong account",
+          "revealSecret": "Ipakita",
+          "hideSecret": "Itago"
+        },
+        "noAuthHint": "Hindi nangangailangan ng credentials ang {name}. I-click ang I-enable para idagdag ito sa iyong workspace.",
+        "apiKeyHelp": "Saan ko ito makikita?",
+        "connectedToast": "Nakakonekta sa {name}",
+        "unsupported": {
+          "title": "Hindi pa suportado ang ganitong uri ng koneksyon",
+          "body": "Gumagamit ang {name} ng {scheme} authentication flow na hindi pa namin na-set up sa app. Maaari mong ikonekta ito direkta sa Composio dashboard at lalabas dito kapag na-link na.",
+          "openComposioDashboard": "Buksan ang Composio dashboard"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "I-disconnect ang {name}",
+      "disconnect": "I-disconnect"
+    },
+    "empty": {
+      "title": "Walang naka-connect na apps",
+      "description": "I-connect ang Gmail, Slack, Notion, at iba pa para magamit ng Coasty sa anumang chat."
+    },
+    "toolInvocation": {
+      "calling": "Tinatawag ang {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Nag-expire ang iyong koneksyon sa {appName}.",
+      "reconnectLink": "I-reconnect"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Hindi na-load ang mga koneksyon (HTTP {status})",
+      "loadToolkitsFailed": "Hindi na-load ang mga toolkit (HTTP {status})",
+      "startConnectionFailed": "Hindi nasimulan ang koneksyon (HTTP {status})",
+      "disconnectFailedHttp": "Hindi na-disconnect (HTTP {status})",
+      "credentialsRequired": "Pakipunan ang lahat ng kinakailangang field upang magpatuloy.",
+      "credentialsErrorPrefix": "Nabigo ang koneksyon:",
+      "unknownToolkit": "Hindi namin nakikilala ang app na ito. I-refresh ang catalog at subukan muli.",
+      "unsupportedAuthScheme": "Hindi pa suportado sa app ang authentication method na ito.",
+      "missingCredentials": "May kulang na mga field: {fields}",
+      "invalidCredentials": "Tinanggihan ang credentials. Pakisuri at subukan muli.",
+      "credentialValidationFailed": "Hindi ma-validate ang iyong credentials. Pakisubukan muli.",
+      "apiKeyRequired": "Kinakailangan ang API key.",
+      "tokenRequired": "Kinakailangan ang bearer token.",
+      "basicRequired": "Kinakailangan ang username at password."
+    },
+    "title": "Mga Koneksyon",
+    "subtitle": "Ikonekta ang mga apps na magagamit ng Coasty sa ngalan mo sa bawat chat.",
+    "connectedSuffix": "naka-connect",
+    "refresh": "I-refresh",
+    "newConnection": "Bagong koneksyon",
+    "retry": "Subukan ulit",
+    "noFilteredConnections": "Wala pang {filter} na apps",
+    "noFilteredDescription": "Subukan ang ibang filter, o magkonekta ng bagong app para magsimula.",
+    "filters": {
+      "all": "Lahat",
+      "active": "Aktibo",
+      "connecting": "Kinokonekta",
+      "expired": "Nag-expire",
+      "failed": "Nabigo"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Mga naka-connect na app",
+      "subheading": "Magagamit ng Coasty ang mga app na ito sa anumang chat para sa iyo.",
+      "connectNewApp": "Magdagdag ng app",
+      "manageOnFullPage": "I-manage sa full page"
+    }
   }
 }

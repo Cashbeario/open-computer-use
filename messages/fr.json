@@ -868,6 +868,11 @@
       "npsVeryLikely": "Très probable",
       "thanks": "Merci pour le retour",
       "creditsLabel": "crédits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Application",
+      "expiredMessage": "Votre connexion {appName} a expiré.",
+      "reconnectLink": "Reconnecter"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "dans {count}m",
     "inHours": "dans {count}h",
     "today": "aujourd'hui",
-    "yesterday": "hier"
+    "yesterday": "hier",
+    "connections": "Applications",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Connexion",
@@ -2413,6 +2420,13 @@
         "download": "Télécharger l'Application Bureau",
         "compare": "Comparer les Agents IA"
       }
+    },
+    "connections": {
+      "title": "Connexions",
+      "description": "Connectez Gmail, Slack, Notion, GitHub et des centaines d'autres applications. Disponibles dans chaque conversation.",
+      "ogTitle": "Connexions : 250+ applications pour votre agent Coasty",
+      "ogDescription": "Intégrez Gmail, Slack, GitHub, Notion, Google Calendar, Linear et des centaines d'autres applications dans chaque conversation. Sécurisé par OAuth, toujours actif, utilisé par les agents Coasty en votre nom.",
+      "twitterDescription": "Reliez Gmail, Slack, GitHub, Notion et plus de 250 applications à Coasty. Un seul OAuth, utilisé dans chaque conversation par votre agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Parrainage",
         "description": "Invite des amis et gagne des crédits"
+      },
+      "integrations": {
+        "label": "Intégrations",
+        "description": "Connectez des applications tierces"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Parrainages",
       "description": "Partage Coasty. Gagnez ensemble."
+    },
+    "connections": {
+      "title": "Vos connexions",
+      "description": "Récupération de vos applications et boîtes à outils connectées."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 en transit",
     "trustAtRest": "AES-256-GCM au repos",
     "trustNoTraining": "Aucun entraînement sur vos données"
+  },
+  "connections": {
+    "page": {
+      "title": "Connexions",
+      "description": "Connectez Gmail, Slack, Notion, GitHub et des centaines d'autres applications. Disponibles dans chaque conversation."
+    },
+    "fallbackAppName": "application",
+    "status": {
+      "active": "Connectée",
+      "initiated": "En cours",
+      "expired": "Expirée",
+      "failed": "Révoquée",
+      "failedShort": "Échec",
+      "inactive": "Inactive"
+    },
+    "toasts": {
+      "disconnectFailed": "Échec de la déconnexion",
+      "disconnected": "{appName} déconnecté",
+      "reconnectFailed": "Impossible de lancer la reconnexion",
+      "connected": "{app} connectée",
+      "error": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "card": {
+      "logoAlt": "Logo {appName}",
+      "fallbackAccountLabel": "Connectée",
+      "connectedOn": "Connectée le {date}",
+      "lastUsed": "Dernière utilisation {time}",
+      "actions": {
+        "reconnect": "Reconnecter",
+        "disconnect": "Déconnecter",
+        "menuAriaLabel": "Actions de la connexion"
+      },
+      "error": {
+        "expired": "Autorisation expirée. Reconnectez-vous pour rétablir l'accès aux outils.",
+        "revoked": "Connexion révoquée. Reconnectez-vous pour rétablir l'accès aux outils."
+      },
+      "disconnectDialog": {
+        "title": "Déconnecter {appName} ?",
+        "connectedOn": "connectée le {date}",
+        "consequence": {
+          "revokeOauth": "Composio révoquera l'autorisation OAuth",
+          "toolsStop": "Les outils utilisant cette connexion cesseront de fonctionner"
+        },
+        "confirm": "Déconnecter",
+        "cancel": "Garder la connexion"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo {name}",
+      "headline": "Connectez votre première application",
+      "subheadline": "Autorisez une fois et votre IA peut lire vos e-mails, publier sur Slack, mettre à jour vos documents et bien plus, automatiquement, dans chaque conversation.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Des outils dans chaque conversation",
+          "desc": "Une fois connectés, votre IA les utilise automatiquement."
+        },
+        "secureOauth": {
+          "title": "OAuth sécurisé",
+          "desc": "Autorisez une fois, révoquez à tout moment."
+        },
+        "hundredsOfApps": {
+          "title": "Des centaines d'applications",
+          "desc": "E-mails, agendas, CRM, documents, code et bien plus."
+        }
+      },
+      "browseAppsCta": "Voir les applications"
+    },
+    "connectDialog": {
+      "title": "Connecter une application",
+      "description": "Parcourez des centaines d'intégrations propulsées par Composio.",
+      "searchPlaceholder": "Rechercher des applications…",
+      "clearSearchAria": "Effacer la recherche",
+      "categories": {
+        "all": "Toutes",
+        "communication": "Communication",
+        "productivity": "Productivité",
+        "calendar": "Agenda",
+        "developer": "Développeur",
+        "crmSales": "CRM et ventes"
+      },
+      "sections": {
+        "featured": "À la une",
+        "allApps": "Toutes les apps"
+      },
+      "card": {
+        "logoAlt": "Logo {name}",
+        "alreadyConnectedTooltip": "Déjà connectée. Gérez-la depuis la page Connexions.",
+        "connectedLabel": "Connectée",
+        "connectFallbackDescription": "Connectez {name} à votre IA"
+      },
+      "footer": {
+        "poweredBy": "propulsé par Composio",
+        "cancel": "Annuler"
+      },
+      "empty": {
+        "noMatchTitle": "Aucune application ne correspond à \"{query}\"",
+        "noAppsTitle": "Aucune application disponible",
+        "noMatchBody": "Essayez un terme plus court ou une autre catégorie.",
+        "noAppsBody": "Les intégrations Composio apparaîtront ici une fois configurées."
+      },
+      "errors": {
+        "failedToStart": "Impossible de lancer la connexion"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Se connecter avec Composio",
+          "connectWithApiKey": "Enregistrer et connecter",
+          "connectWithBearerToken": "Enregistrer et connecter",
+          "connectWithBasic": "Enregistrer et connecter",
+          "connectNoAuth": "Activer",
+          "connecting": "Connexion..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Clé API",
+          "apiKeyPlaceholder": "Collez votre clé API",
+          "bearerTokenLabel": "Jeton Bearer",
+          "bearerTokenPlaceholder": "Collez votre jeton Bearer",
+          "basicAuthUsername": "Nom d'utilisateur",
+          "basicAuthPassword": "Mot de passe",
+          "basicAuthUsernamePlaceholder": "Nom d'utilisateur de votre compte",
+          "basicAuthPasswordPlaceholder": "Mot de passe de votre compte",
+          "revealSecret": "Afficher",
+          "hideSecret": "Masquer"
+        },
+        "noAuthHint": "{name} ne nécessite aucun identifiant. Cliquez sur Activer pour l'ajouter à votre espace de travail.",
+        "apiKeyHelp": "Où trouver ceci ?",
+        "connectedToast": "Connecté à {name}",
+        "unsupported": {
+          "title": "Ce type de connexion n'est pas encore pris en charge",
+          "body": "{name} utilise un flux d'authentification {scheme} que nous n'avons pas encore intégré dans l'application. Vous pouvez le connecter directement depuis le tableau de bord Composio et il apparaîtra ici une fois lié.",
+          "openComposioDashboard": "Ouvrir le tableau de bord Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Déconnecter {name}",
+      "disconnect": "Déconnecter"
+    },
+    "empty": {
+      "title": "Aucune application connectée",
+      "description": "Connectez Gmail, Slack, Notion et bien d'autres pour que Coasty puisse les utiliser dans chaque conversation."
+    },
+    "toolInvocation": {
+      "calling": "Appel de {toolkit} : {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Application",
+      "expiredMessage": "Votre connexion {appName} a expiré.",
+      "reconnectLink": "Reconnecter"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Échec du chargement des connexions (HTTP {status})",
+      "loadToolkitsFailed": "Échec du chargement des intégrations (HTTP {status})",
+      "startConnectionFailed": "Impossible de lancer la connexion (HTTP {status})",
+      "disconnectFailedHttp": "Échec de la déconnexion (HTTP {status})",
+      "credentialsRequired": "Veuillez remplir tous les champs obligatoires pour continuer.",
+      "credentialsErrorPrefix": "Échec de la connexion :",
+      "unknownToolkit": "Nous ne reconnaissons pas cette application. Veuillez actualiser le catalogue et réessayer.",
+      "unsupportedAuthScheme": "Cette méthode d'authentification n'est pas encore prise en charge dans l'application.",
+      "missingCredentials": "Champs obligatoires manquants : {fields}",
+      "invalidCredentials": "Les identifiants ont été refusés. Vérifiez-les et réessayez.",
+      "credentialValidationFailed": "Impossible de valider vos identifiants. Veuillez réessayer.",
+      "apiKeyRequired": "Une clé API est requise.",
+      "tokenRequired": "Un jeton Bearer est requis.",
+      "basicRequired": "Le nom d'utilisateur et le mot de passe sont requis."
+    },
+    "title": "Connexions",
+    "subtitle": "Connectez les applications que Coasty peut utiliser en votre nom dans n'importe quelle conversation.",
+    "connectedSuffix": "connectées",
+    "refresh": "Actualiser",
+    "newConnection": "Nouvelle connexion",
+    "retry": "Réessayer",
+    "noFilteredConnections": "Aucune application {filter}",
+    "noFilteredDescription": "Essayez un autre filtre ou connectez une nouvelle application.",
+    "filters": {
+      "all": "Toutes",
+      "active": "Actives",
+      "connecting": "En cours",
+      "expired": "Expirées",
+      "failed": "Échouées"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Applications connectées",
+      "subheading": "Coasty peut utiliser ces applications en votre nom dans chaque conversation.",
+      "connectNewApp": "Nouvelle connexion",
+      "manageOnFullPage": "Gérer en pleine page"
+    }
   }
 }

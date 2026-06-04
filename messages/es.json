@@ -868,6 +868,11 @@
       "npsVeryLikely": "Muy probable",
       "thanks": "Gracias por los comentarios",
       "creditsLabel": "créditos"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Tu conexión con {appName} expiró.",
+      "reconnectLink": "Reconectar"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "en {count}m",
     "inHours": "en {count}h",
     "today": "hoy",
-    "yesterday": "ayer"
+    "yesterday": "ayer",
+    "connections": "Aplicaciones",
+    "resources": "Agente"
   },
   "appHeader": {
     "login": "Iniciar sesión",
@@ -2413,6 +2420,13 @@
         "download": "Descargar App de Escritorio",
         "compare": "Comparar Agentes IA"
       }
+    },
+    "connections": {
+      "title": "Conexiones",
+      "description": "Conecta Gmail, Slack, Notion, GitHub y cientos de apps más. Disponibles en cada chat.",
+      "ogTitle": "Conexiones — Conecta 250+ apps a tu agente IA Coasty",
+      "ogDescription": "Trae Gmail, Slack, GitHub, Notion, Google Calendar, Linear y cientos de apps más a cada chat. Aseguradas con OAuth, siempre activas y usadas por los agentes de Coasty en tu nombre.",
+      "twitterDescription": "Conecta Gmail, Slack, GitHub, Notion y más de 250 apps a Coasty. Un solo OAuth, usado en cada chat por tu agente."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Referidos",
         "description": "Invita amigos y gana créditos"
+      },
+      "integrations": {
+        "label": "Integraciones",
+        "description": "Conecta apps de terceros"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Referidos",
       "description": "Comparte Coasty. Ganen juntos."
+    },
+    "connections": {
+      "title": "Tus conexiones",
+      "description": "Obteniendo tus apps y herramientas conectadas."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,206 @@
     "trustTransit": "TLS 1.3 en tránsito",
     "trustAtRest": "AES-256-GCM en reposo",
     "trustNoTraining": "Sin entrenamiento con tus datos"
+  },
+  "connections": {
+    "page": {
+      "title": "Conexiones",
+      "description": "Conecta Gmail, Slack, Notion, GitHub y cientos de apps más. Disponibles en cada chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Conectado",
+      "initiated": "Conectando",
+      "expired": "Expirado",
+      "failed": "Revocado",
+      "failedShort": "Falló",
+      "inactive": "Inactivo"
+    },
+    "toasts": {
+      "disconnectFailed": "No se pudo desconectar",
+      "disconnected": "Se desconectó {appName}",
+      "reconnectFailed": "No se pudo iniciar la reconexión",
+      "connected": "{app} conectada",
+      "error": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "card": {
+      "logoAlt": "Logo de {appName}",
+      "fallbackAccountLabel": "Conectado",
+      "connectedOn": "Conectado el {date}",
+      "lastUsed": "Usado por última vez {time}",
+      "actions": {
+        "reconnect": "Reconectar",
+        "disconnect": "Desconectar",
+        "menuAriaLabel": "Acciones de conexión"
+      },
+      "toast": {
+        "reconnectFailed": "No se pudo reconectar",
+        "disconnected": "Se desconectó {appName}",
+        "disconnectFailed": "No se pudo desconectar"
+      },
+      "error": {
+        "expired": "La autorización expiró. Reconecta para restaurar el acceso a las herramientas.",
+        "revoked": "La conexión fue revocada. Reconecta para restaurar el acceso a las herramientas."
+      },
+      "disconnectDialog": {
+        "title": "¿Desconectar {appName}?",
+        "connectedOn": "conectado el {date}",
+        "consequence": {
+          "revokeOauth": "Composio revocará la concesión de OAuth",
+          "toolsStop": "Las herramientas que usan esta conexión dejarán de funcionar"
+        },
+        "confirm": "Desconectar",
+        "cancel": "Mantener conexión"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo de {name}",
+      "headline": "Conecta tu primera app",
+      "subheadline": "Autoriza una sola vez y tu IA podrá leer tu correo, publicar en Slack, actualizar documentos y mucho más, automáticamente, en cada chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Herramientas en cada chat",
+          "desc": "Una vez conectadas, tu IA las usa automáticamente."
+        },
+        "secureOauth": {
+          "title": "OAuth seguro",
+          "desc": "Autoriza una vez, revoca cuando quieras."
+        },
+        "hundredsOfApps": {
+          "title": "Cientos de apps",
+          "desc": "Correo, calendarios, CRMs, documentos, código y más."
+        }
+      },
+      "browseAppsCta": "Explorar apps"
+    },
+    "connectDialog": {
+      "title": "Conectar una app",
+      "description": "Explora cientos de integraciones impulsadas por Composio.",
+      "searchPlaceholder": "Buscar apps…",
+      "clearSearchAria": "Limpiar búsqueda",
+      "categories": {
+        "all": "Todas",
+        "communication": "Comunicación",
+        "productivity": "Productividad",
+        "calendar": "Calendario",
+        "developer": "Desarrollo",
+        "crmSales": "CRM y ventas"
+      },
+      "sections": {
+        "featured": "Destacados",
+        "allApps": "Todas las apps"
+      },
+      "card": {
+        "logoAlt": "Logo de {name}",
+        "alreadyConnectedTooltip": "Ya está conectada. Gestiónala desde la página de Conexiones",
+        "connectedLabel": "Conectado",
+        "connectFallbackDescription": "Conecta {name} a tu IA"
+      },
+      "footer": {
+        "poweredBy": "con tecnología de Composio",
+        "cancel": "Cancelar"
+      },
+      "empty": {
+        "noMatchTitle": "Ninguna app coincide con \"{query}\"",
+        "noAppsTitle": "No hay apps disponibles",
+        "noMatchBody": "Prueba con un término más corto o con otra categoría.",
+        "noAppsBody": "Las integraciones de Composio aparecerán aquí una vez configuradas."
+      },
+      "errors": {
+        "failedToStart": "No se pudo iniciar la conexión"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Conectar con Composio",
+          "connectWithApiKey": "Guardar y conectar",
+          "connectWithBearerToken": "Guardar y conectar",
+          "connectWithBasic": "Guardar y conectar",
+          "connectNoAuth": "Activar",
+          "connecting": "Conectando..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Clave de API",
+          "apiKeyPlaceholder": "Pega tu clave de API",
+          "bearerTokenLabel": "Token Bearer",
+          "bearerTokenPlaceholder": "Pega tu token Bearer",
+          "basicAuthUsername": "Nombre de usuario",
+          "basicAuthPassword": "Contraseña",
+          "basicAuthUsernamePlaceholder": "Nombre de usuario de tu cuenta",
+          "basicAuthPasswordPlaceholder": "Contraseña de tu cuenta",
+          "revealSecret": "Mostrar",
+          "hideSecret": "Ocultar"
+        },
+        "noAuthHint": "{name} no requiere credenciales. Haz clic en Activar para añadirlo a tu espacio de trabajo.",
+        "apiKeyHelp": "¿Dónde encuentro esto?",
+        "connectedToast": "Conectado a {name}",
+        "unsupported": {
+          "title": "Este tipo de conexión aún no es compatible",
+          "body": "{name} utiliza un flujo de autenticación {scheme} que aún no hemos integrado en la app. Puedes conectarlo directamente en el panel de Composio y aparecerá aquí una vez vinculado.",
+          "openComposioDashboard": "Abrir panel de Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Desconectar {name}",
+      "disconnect": "Desconectar"
+    },
+    "empty": {
+      "title": "No hay apps conectadas",
+      "description": "Conecta Gmail, Slack, Notion y más para que Coasty pueda usarlas en cualquier chat."
+    },
+    "toolInvocation": {
+      "calling": "Llamando a {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Tu conexión con {appName} expiró.",
+      "reconnectLink": "Reconectar"
+    },
+    "errors": {
+      "loadConnectionsFailed": "No se pudieron cargar las conexiones (HTTP {status})",
+      "loadToolkitsFailed": "No se pudieron cargar los toolkits (HTTP {status})",
+      "startConnectionFailed": "No se pudo iniciar la conexión (HTTP {status})",
+      "disconnectFailedHttp": "No se pudo desconectar (HTTP {status})",
+      "credentialsRequired": "Rellena todos los campos obligatorios para continuar.",
+      "credentialsErrorPrefix": "Conexión fallida:",
+      "unknownToolkit": "No reconocemos esta app. Actualiza el catálogo e inténtalo de nuevo.",
+      "unsupportedAuthScheme": "Este método de autenticación aún no es compatible con la app.",
+      "missingCredentials": "Faltan campos obligatorios: {fields}",
+      "invalidCredentials": "Las credenciales fueron rechazadas. Compruébalas e inténtalo de nuevo.",
+      "credentialValidationFailed": "No se pudieron validar tus credenciales. Inténtalo de nuevo.",
+      "apiKeyRequired": "Se requiere una clave de API.",
+      "tokenRequired": "Se requiere un token Bearer.",
+      "basicRequired": "Se requieren nombre de usuario y contraseña."
+    },
+    "title": "Conexiones",
+    "subtitle": "Conecta las apps que Coasty puede usar en tu nombre en cualquier chat.",
+    "connectedSuffix": "conectadas",
+    "refresh": "Actualizar",
+    "newConnection": "Nueva conexión",
+    "retry": "Reintentar",
+    "noFilteredConnections": "Aún no hay apps {filter}",
+    "noFilteredDescription": "Prueba otro filtro o conecta una nueva app para empezar.",
+    "filters": {
+      "all": "Todas",
+      "active": "Activas",
+      "connecting": "Conectando",
+      "expired": "Expiradas",
+      "failed": "Fallidas"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Apps conectadas",
+      "subheading": "Coasty puede usar estas apps en cualquier chat en tu nombre.",
+      "connectNewApp": "Conectar nueva app",
+      "manageOnFullPage": "Ver página completa"
+    }
   }
 }

@@ -868,6 +868,11 @@
       "npsVeryLikely": "Zeer waarschijnlijk",
       "thanks": "Bedankt voor de feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Uw verbinding met {appName} is verlopen.",
+      "reconnectLink": "Opnieuw verbinden"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "over {count}m",
     "inHours": "over {count}u",
     "today": "vandaag",
-    "yesterday": "gisteren"
+    "yesterday": "gisteren",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Inloggen",
@@ -2413,6 +2420,13 @@
         "download": "Desktop App Downloaden",
         "compare": "AI-Agenten Vergelijken"
       }
+    },
+    "connections": {
+      "title": "Verbindingen",
+      "description": "Verbind Gmail, Slack, Notion, GitHub en honderden andere apps. Beschikbaar in elke chat.",
+      "ogTitle": "Connecties — Koppel 250+ apps aan uw Coasty AI-agent",
+      "ogDescription": "Breng Gmail, Slack, GitHub, Notion, Google Calendar, Linear en honderden andere apps in elke chat. Beveiligd met OAuth, altijd actief, namens u gebruikt door Coasty-agents.",
+      "twitterDescription": "Koppel Gmail, Slack, GitHub, Notion en 250+ apps aan Coasty. Eén OAuth, in elke chat gebruikt door uw agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Verwijzing",
         "description": "Nodig vrienden uit en verdien credits"
+      },
+      "integrations": {
+        "label": "Integraties",
+        "description": "Verbind apps van derden"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Verwijzingen",
       "description": "Deel Coasty. Verdien samen."
+    },
+    "connections": {
+      "title": "Uw connecties",
+      "description": "Uw gekoppelde apps en toolkits ophalen."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 tijdens transport",
     "trustAtRest": "AES-256-GCM in rust",
     "trustNoTraining": "Geen training op jouw data"
+  },
+  "connections": {
+    "page": {
+      "title": "Verbindingen",
+      "description": "Verbind Gmail, Slack, Notion, GitHub en honderden andere apps. Beschikbaar in elke chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Verbonden",
+      "initiated": "Verbinden",
+      "expired": "Verlopen",
+      "failed": "Ingetrokken",
+      "failedShort": "Mislukt",
+      "inactive": "Inactief"
+    },
+    "toasts": {
+      "disconnectFailed": "Verbreken mislukt",
+      "disconnected": "{appName} losgekoppeld",
+      "reconnectFailed": "Opnieuw verbinden starten mislukt",
+      "connected": "{app} gekoppeld",
+      "error": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "card": {
+      "logoAlt": "{appName}-logo",
+      "fallbackAccountLabel": "Verbonden",
+      "connectedOn": "Verbonden op {date}",
+      "lastUsed": "Laatst gebruikt {time}",
+      "actions": {
+        "reconnect": "Herverbind",
+        "disconnect": "Verbreken",
+        "menuAriaLabel": "Acties voor verbinding"
+      },
+      "error": {
+        "expired": "Autorisatie verlopen. Maak opnieuw verbinding om toegang tot tools te herstellen.",
+        "revoked": "Verbinding ingetrokken. Maak opnieuw verbinding om toegang tot tools te herstellen."
+      },
+      "disconnectDialog": {
+        "title": "{appName} loskoppelen?",
+        "connectedOn": "verbonden op {date}",
+        "consequence": {
+          "revokeOauth": "Composio trekt de OAuth-toegang in",
+          "toolsStop": "Tools die deze verbinding gebruiken stoppen met werken"
+        },
+        "confirm": "Verbreken",
+        "cancel": "Verbinding behouden"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logo",
+      "headline": "Verbind uw eerste app",
+      "subheadline": "Eén keer autoriseren en uw AI kan uw e-mail lezen, op Slack posten, documenten bijwerken en meer. Automatisch, in elke chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Tools in elke chat",
+          "desc": "Eenmaal verbonden gebruikt uw AI ze automatisch."
+        },
+        "secureOauth": {
+          "title": "Veilige OAuth",
+          "desc": "Eén keer autoriseren, op elk moment intrekken."
+        },
+        "hundredsOfApps": {
+          "title": "Honderden apps",
+          "desc": "E-mail, agenda's, CRM's, documenten, code en meer."
+        }
+      },
+      "browseAppsCta": "Apps bekijken"
+    },
+    "connectDialog": {
+      "title": "Verbind een app",
+      "description": "Verken honderden integraties aangeboden door Composio.",
+      "searchPlaceholder": "Zoek apps…",
+      "clearSearchAria": "Zoekopdracht wissen",
+      "categories": {
+        "all": "Alles",
+        "communication": "Communicatie",
+        "productivity": "Productiviteit",
+        "calendar": "Agenda",
+        "developer": "Ontwikkelaar",
+        "crmSales": "CRM en sales"
+      },
+      "sections": {
+        "featured": "Aanbevolen",
+        "allApps": "Alle apps"
+      },
+      "card": {
+        "logoAlt": "{name}-logo",
+        "alreadyConnectedTooltip": "Al verbonden. Beheer dit op de Verbindingen-pagina",
+        "connectedLabel": "Verbonden",
+        "connectFallbackDescription": "Verbind {name} met uw AI"
+      },
+      "footer": {
+        "poweredBy": "mogelijk gemaakt door Composio",
+        "cancel": "Annuleren"
+      },
+      "empty": {
+        "noMatchTitle": "Geen apps gevonden voor \"{query}\"",
+        "noAppsTitle": "Geen apps beschikbaar",
+        "noMatchBody": "Probeer een kortere zoekterm of een andere categorie.",
+        "noAppsBody": "Composio-integraties verschijnen hier zodra ze zijn geconfigureerd."
+      },
+      "errors": {
+        "failedToStart": "Verbinding starten mislukt"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Verbinden met Composio",
+          "connectWithApiKey": "Opslaan & verbinden",
+          "connectWithBearerToken": "Opslaan & verbinden",
+          "connectWithBasic": "Opslaan & verbinden",
+          "connectNoAuth": "Inschakelen",
+          "connecting": "Verbinden..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-sleutel",
+          "apiKeyPlaceholder": "Plak je API-sleutel",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Plak je bearer-token",
+          "basicAuthUsername": "Gebruikersnaam",
+          "basicAuthPassword": "Wachtwoord",
+          "basicAuthUsernamePlaceholder": "Gebruikersnaam van je account",
+          "basicAuthPasswordPlaceholder": "Wachtwoord van je account",
+          "revealSecret": "Tonen",
+          "hideSecret": "Verbergen"
+        },
+        "noAuthHint": "{name} vereist geen inloggegevens. Klik op Inschakelen om het aan je werkruimte toe te voegen.",
+        "apiKeyHelp": "Waar vind ik dit?",
+        "connectedToast": "Verbonden met {name}",
+        "unsupported": {
+          "title": "Dit verbindingstype wordt nog niet ondersteund",
+          "body": "{name} gebruikt een {scheme}-authenticatieflow die we nog niet in de app hebben ingebouwd. Je kunt het direct verbinden via het Composio-dashboard en het verschijnt hier zodra het is gekoppeld.",
+          "openComposioDashboard": "Composio-dashboard openen"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} loskoppelen",
+      "disconnect": "Verbreken"
+    },
+    "empty": {
+      "title": "Geen apps verbonden",
+      "description": "Verbind Gmail, Slack, Notion en meer, zodat Coasty ze in elke chat kan gebruiken."
+    },
+    "toolInvocation": {
+      "calling": "{toolkit} aanroepen: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Uw verbinding met {appName} is verlopen.",
+      "reconnectLink": "Herverbinden →"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Laden van verbindingen mislukt (HTTP {status})",
+      "loadToolkitsFailed": "Laden van toolkits mislukt (HTTP {status})",
+      "startConnectionFailed": "Verbinding starten mislukt (HTTP {status})",
+      "disconnectFailedHttp": "Verbreken mislukt (HTTP {status})",
+      "credentialsRequired": "Vul alle verplichte velden in om door te gaan.",
+      "credentialsErrorPrefix": "Verbinding mislukt:",
+      "unknownToolkit": "We herkennen deze app niet. Vernieuw de catalogus en probeer het opnieuw.",
+      "unsupportedAuthScheme": "Deze authenticatiemethode wordt nog niet ondersteund in de app.",
+      "missingCredentials": "Verplichte velden ontbreken: {fields}",
+      "invalidCredentials": "De inloggegevens zijn afgewezen. Controleer ze en probeer opnieuw.",
+      "credentialValidationFailed": "Kan je inloggegevens niet valideren. Probeer het opnieuw.",
+      "apiKeyRequired": "Een API-sleutel is vereist.",
+      "tokenRequired": "Een bearer-token is vereist.",
+      "basicRequired": "Gebruikersnaam en wachtwoord zijn vereist."
+    },
+    "title": "Connecties",
+    "subtitle": "Koppel de apps die Coasty namens u in elke chat mag gebruiken.",
+    "connectedSuffix": "gekoppeld",
+    "refresh": "Vernieuwen",
+    "newConnection": "Nieuwe connectie",
+    "retry": "Opnieuw proberen",
+    "noFilteredConnections": "Nog geen {filter}-apps",
+    "noFilteredDescription": "Probeer een ander filter of verbind een nieuwe app om te beginnen.",
+    "filters": {
+      "all": "Alle",
+      "active": "Actief",
+      "connecting": "Bezig",
+      "expired": "Verlopen",
+      "failed": "Mislukt"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Verbonden apps",
+      "subheading": "Coasty kan deze apps namens u gebruiken in elke chat.",
+      "connectNewApp": "App verbinden",
+      "manageOnFullPage": "Beheren op hele pagina"
+    }
   }
 }

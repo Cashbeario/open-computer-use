@@ -868,6 +868,11 @@
       "npsVeryLikely": "Hyvin todennäköistä",
       "thanks": "Kiitos palautteesta",
       "creditsLabel": "krediittiä"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Sovellus",
+      "expiredMessage": "{appName}-yhteytesi on vanhentunut.",
+      "reconnectLink": "Yhdistä uudelleen"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "{count} min päästä",
     "inHours": "{count} t päästä",
     "today": "tänään",
-    "yesterday": "eilen"
+    "yesterday": "eilen",
+    "connections": "Sovellukset",
+    "resources": "Agentti"
   },
   "appHeader": {
     "login": "Kirjaudu",
@@ -2413,6 +2420,13 @@
         "download": "Lataa työpöytäsovellus",
         "compare": "Vertaa tekoälyagentteja"
       }
+    },
+    "connections": {
+      "title": "Yhteydet",
+      "description": "Yhdistä Gmail, Slack, Notion, GitHub ja satoja muita sovelluksia. Käytettävissä jokaisessa chatissa.",
+      "ogTitle": "Integraatiot — 250+ sovellusta Coasty-tekoälyagentille",
+      "ogDescription": "Tuo Gmail, Slack, GitHub, Notion, Google Calendar, Linear ja sadat muut sovellukset jokaiseen keskusteluun. OAuth-suojattu, aina käytössä, Coasty-agenttien käyttämä puolestasi.",
+      "twitterDescription": "Yhdistä Gmail, Slack, GitHub, Notion ja yli 250 sovellusta Coastyyn. Yksi OAuth, jota agenttisi käyttää jokaisessa keskustelussa."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Suosittelu",
         "description": "Kutsu kavereita ja ansaitse krediittejä"
+      },
+      "integrations": {
+        "label": "Integraatiot",
+        "description": "Yhdistä kolmannen osapuolen sovelluksia"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Suositukset",
       "description": "Jaa Coasty. Ansaitkaa yhdessä."
+    },
+    "connections": {
+      "title": "Integraatiosi",
+      "description": "Haetaan yhdistettyjä sovelluksiasi ja työkalupakkejasi."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 siirrossa",
     "trustAtRest": "AES-256-GCM lepotilassa",
     "trustNoTraining": "Ei koulutusta datallasi"
+  },
+  "connections": {
+    "page": {
+      "title": "Yhteydet",
+      "description": "Yhdistä Gmail, Slack, Notion, GitHub ja satoja muita sovelluksia. Käytettävissä jokaisessa chatissa."
+    },
+    "fallbackAppName": "sovellus",
+    "status": {
+      "active": "Yhdistetty",
+      "initiated": "Yhdistetään",
+      "expired": "Vanhentunut",
+      "failed": "Peruutettu",
+      "failedShort": "Virhe",
+      "inactive": "Ei käytössä"
+    },
+    "toasts": {
+      "disconnectFailed": "Yhteyden katkaisu epäonnistui",
+      "disconnected": "{appName} irrotettu",
+      "reconnectFailed": "Uudelleenyhdistämisen aloittaminen epäonnistui",
+      "connected": "{app} yhdistetty",
+      "error": "Jotain meni pieleen. Yritä uudelleen."
+    },
+    "card": {
+      "logoAlt": "{appName}-logo",
+      "fallbackAccountLabel": "Yhdistetty",
+      "connectedOn": "Yhdistetty {date}",
+      "lastUsed": "Viimeksi käytetty {time}",
+      "actions": {
+        "reconnect": "Yhdistä",
+        "disconnect": "Katkaise yhteys",
+        "menuAriaLabel": "Yhteyden toiminnot"
+      },
+      "error": {
+        "expired": "Valtuutus vanhentunut. Yhdistä uudelleen palauttaaksesi työkalujen käytön.",
+        "revoked": "Yhteys peruutettu. Yhdistä uudelleen palauttaaksesi työkalujen käytön."
+      },
+      "disconnectDialog": {
+        "title": "Katkaistaanko yhteys sovellukseen {appName}?",
+        "connectedOn": "yhdistetty {date}",
+        "consequence": {
+          "revokeOauth": "Composio peruuttaa OAuth-valtuutuksen",
+          "toolsStop": "Tätä yhteyttä käyttävät työkalut lakkaavat toimimasta"
+        },
+        "confirm": "Katkaise yhteys",
+        "cancel": "Säilytä yhteys"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logo",
+      "headline": "Yhdistä ensimmäinen sovelluksesi",
+      "subheadline": "Valtuuta kerran, niin tekoäly voi lukea sähköpostisi, lähettää viestejä Slackissa, päivittää dokumentteja ja paljon muuta. Automaattisesti, jokaisessa chatissa.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Työkalut jokaisessa chatissa",
+          "desc": "Kun yhteys on muodostettu, tekoäly käyttää niitä automaattisesti."
+        },
+        "secureOauth": {
+          "title": "Turvallinen OAuth",
+          "desc": "Valtuuta kerran, peruuta milloin tahansa."
+        },
+        "hundredsOfApps": {
+          "title": "Satoja sovelluksia",
+          "desc": "Sähköposti, kalenterit, CRM-järjestelmät, dokumentit, koodi ja paljon muuta."
+        }
+      },
+      "browseAppsCta": "Selaa sovelluksia"
+    },
+    "connectDialog": {
+      "title": "Yhdistä sovellus",
+      "description": "Selaa satoja Composion tarjoamia integraatioita.",
+      "searchPlaceholder": "Etsi sovelluksia…",
+      "clearSearchAria": "Tyhjennä haku",
+      "categories": {
+        "all": "Kaikki",
+        "communication": "Viestintä",
+        "productivity": "Tuottavuus",
+        "calendar": "Kalenteri",
+        "developer": "Kehittäjä",
+        "crmSales": "CRM ja myynti"
+      },
+      "sections": {
+        "featured": "Suositellut",
+        "allApps": "Kaikki sovellukset"
+      },
+      "card": {
+        "logoAlt": "{name}-logo",
+        "alreadyConnectedTooltip": "Jo yhdistetty. Hallinnoi Yhteydet-sivulta.",
+        "connectedLabel": "Yhdistetty",
+        "connectFallbackDescription": "Yhdistä {name} tekoälyysi"
+      },
+      "footer": {
+        "poweredBy": "Composion tarjoama",
+        "cancel": "Peruuta"
+      },
+      "empty": {
+        "noMatchTitle": "Hakua \"{query}\" vastaavia sovelluksia ei löytynyt",
+        "noAppsTitle": "Ei sovelluksia saatavilla",
+        "noMatchBody": "Kokeile lyhyempää hakusanaa tai toista kategoriaa.",
+        "noAppsBody": "Composio-integraatiot näkyvät täällä, kun ne on määritetty."
+      },
+      "errors": {
+        "failedToStart": "Yhteyden aloittaminen epäonnistui"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Yhdistä Composiolla",
+          "connectWithApiKey": "Tallenna ja yhdistä",
+          "connectWithBearerToken": "Tallenna ja yhdistä",
+          "connectWithBasic": "Tallenna ja yhdistä",
+          "connectNoAuth": "Ota käyttöön",
+          "connecting": "Yhdistetään..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-avain",
+          "apiKeyPlaceholder": "Liitä API-avaimesi",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Liitä bearer-tokenisi",
+          "basicAuthUsername": "Käyttäjänimi",
+          "basicAuthPassword": "Salasana",
+          "basicAuthUsernamePlaceholder": "Tilisi käyttäjänimi",
+          "basicAuthPasswordPlaceholder": "Tilisi salasana",
+          "revealSecret": "Näytä",
+          "hideSecret": "Piilota"
+        },
+        "noAuthHint": "{name} ei vaadi kirjautumistietoja. Napsauta Ota käyttöön lisätäksesi sen työtilaasi.",
+        "apiKeyHelp": "Mistä löydän tämän?",
+        "connectedToast": "Yhdistetty palveluun {name}",
+        "unsupported": {
+          "title": "Tätä yhteystyyppiä ei vielä tueta",
+          "body": "{name} käyttää {scheme}-todennustapaa, jota emme ole vielä toteuttaneet sovelluksessa. Voit yhdistää sen suoraan Composio-hallintapaneelista, ja se ilmestyy tänne, kun yhteys on luotu.",
+          "openComposioDashboard": "Avaa Composio-hallintapaneeli"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Katkaise yhteys sovellukseen {name}",
+      "disconnect": "Katkaise"
+    },
+    "empty": {
+      "title": "Ei yhdistettyjä sovelluksia",
+      "description": "Yhdistä Gmail, Slack, Notion ja muita, niin Coasty voi käyttää niitä missä tahansa chatissa."
+    },
+    "toolInvocation": {
+      "calling": "Kutsutaan: {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Sovellus",
+      "expiredMessage": "{appName}-yhteytesi on vanhentunut.",
+      "reconnectLink": "Yhdistä →"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Yhteyksien lataaminen epäonnistui (HTTP {status})",
+      "loadToolkitsFailed": "Työkalupakkien lataaminen epäonnistui (HTTP {status})",
+      "startConnectionFailed": "Yhteyden aloittaminen epäonnistui (HTTP {status})",
+      "disconnectFailedHttp": "Yhteyden katkaisu epäonnistui (HTTP {status})",
+      "credentialsRequired": "Täytä kaikki pakolliset kentät jatkaaksesi.",
+      "credentialsErrorPrefix": "Yhteyden muodostaminen epäonnistui:",
+      "unknownToolkit": "Emme tunnista tätä sovellusta. Päivitä luettelo ja yritä uudelleen.",
+      "unsupportedAuthScheme": "Tätä todennustapaa ei vielä tueta sovelluksessa.",
+      "missingCredentials": "Puuttuvat pakolliset kentät: {fields}",
+      "invalidCredentials": "Kirjautumistiedot hylättiin. Tarkista ne ja yritä uudelleen.",
+      "credentialValidationFailed": "Kirjautumistietojasi ei voitu vahvistaa. Yritä uudelleen.",
+      "apiKeyRequired": "API-avain vaaditaan.",
+      "tokenRequired": "Bearer-token vaaditaan.",
+      "basicRequired": "Käyttäjänimi ja salasana vaaditaan."
+    },
+    "title": "Integraatiot",
+    "subtitle": "Yhdistä sovellukset, joita Coasty voi käyttää puolestasi missä tahansa keskustelussa.",
+    "connectedSuffix": "yhdistetty",
+    "refresh": "Päivitä",
+    "newConnection": "Uusi integraatio",
+    "retry": "Yritä uudelleen",
+    "noFilteredConnections": "Ei vielä {filter}-sovelluksia",
+    "noFilteredDescription": "Kokeile toista suodatinta tai yhdistä uusi sovellus.",
+    "filters": {
+      "all": "Kaikki",
+      "active": "Aktiivinen",
+      "connecting": "Yhdistetään",
+      "expired": "Vanhentunut",
+      "failed": "Epäonnistunut"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Yhdistetyt sovellukset",
+      "subheading": "Coasty voi käyttää näitä sovelluksia puolestasi missä tahansa chatissa.",
+      "connectNewApp": "Uusi sovellus",
+      "manageOnFullPage": "Hallinnoi koko sivulla"
+    }
   }
 }

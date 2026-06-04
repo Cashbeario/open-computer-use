@@ -868,6 +868,11 @@
       "npsVeryLikely": "Nagyon valószínű",
       "thanks": "Köszi a visszajelzést",
       "creditsLabel": "kredit"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Alkalmazás",
+      "expiredMessage": "A(z) {appName} kapcsolatod lejárt.",
+      "reconnectLink": "Újracsatlakozás"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "{count} perc múlva",
     "inHours": "{count} óra múlva",
     "today": "ma",
-    "yesterday": "tegnap"
+    "yesterday": "tegnap",
+    "connections": "Alkalmazások",
+    "resources": "Ügynök"
   },
   "appHeader": {
     "login": "Bejelentkezés",
@@ -2413,6 +2420,13 @@
         "download": "Asztali alkalmazás letöltése",
         "compare": "AI ügynökök összehasonlítása"
       }
+    },
+    "connections": {
+      "title": "Kapcsolatok",
+      "description": "Csatlakoztasd a Gmailt, Slacket, Notiont, GitHubot és további több száz alkalmazást. Minden chatben elérhető.",
+      "ogTitle": "Kapcsolatok: 250+ alkalmazás a Coasty AI ügynökhöz",
+      "ogDescription": "Hozd be a Gmailt, Slacket, GitHubot, Notiont, Google Calendart, Lineart és további több száz alkalmazást minden chatbe. OAuth-védett, mindig elérhető, a Coasty ügynökei a nevedben használják.",
+      "twitterDescription": "Csatlakoztasd a Gmailt, Slacket, GitHubot, Notiont és 250+ alkalmazást a Coastyhoz. Egy OAuth, amit az ügynököd minden chatben használ."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Ajánlás",
         "description": "Hívj meg barátokat és szerezz kreditet"
+      },
+      "integrations": {
+        "label": "Integrációk",
+        "description": "Külső alkalmazások csatlakoztatása"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Ajánlások",
       "description": "Oszd meg a Coastyt. Keressetek együtt."
+    },
+    "connections": {
+      "title": "Kapcsolataid",
+      "description": "Csatlakoztatott alkalmazások és eszközkészletek lekérése."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 átvitel közben",
     "trustAtRest": "AES-256-GCM nyugalomban",
     "trustNoTraining": "Nincs tréning az adataidon"
+  },
+  "connections": {
+    "page": {
+      "title": "Kapcsolatok",
+      "description": "Csatlakoztasd a Gmailt, Slacket, Notiont, GitHubot és további több száz alkalmazást. Minden chatben elérhető."
+    },
+    "fallbackAppName": "alkalmazás",
+    "status": {
+      "active": "Aktív",
+      "initiated": "Csatlakozás",
+      "expired": "Lejárt",
+      "failed": "Visszavonva",
+      "failedShort": "Sikertelen",
+      "inactive": "Inaktív"
+    },
+    "toasts": {
+      "disconnectFailed": "A leválasztás sikertelen",
+      "disconnected": "{appName} leválasztva",
+      "reconnectFailed": "Az újracsatlakozás indítása sikertelen",
+      "connected": "{app} csatlakoztatva",
+      "error": "Valami hiba történt. Próbáld újra."
+    },
+    "card": {
+      "logoAlt": "{appName} logó",
+      "fallbackAccountLabel": "Csatlakoztatva",
+      "connectedOn": "Csatlakoztatva: {date}",
+      "lastUsed": "Utolsó használat: {time}",
+      "actions": {
+        "reconnect": "Újrakapcs.",
+        "disconnect": "Leválasztás",
+        "menuAriaLabel": "Kapcsolat műveletei"
+      },
+      "error": {
+        "expired": "A hitelesítés lejárt. Csatlakozz újra az eszközök helyreállításához.",
+        "revoked": "A kapcsolat visszavonva. Csatlakozz újra az eszközök helyreállításához."
+      },
+      "disconnectDialog": {
+        "title": "Leválasztod a(z) {appName} alkalmazást?",
+        "connectedOn": "csatlakoztatva: {date}",
+        "consequence": {
+          "revokeOauth": "A Composio visszavonja az OAuth engedélyt",
+          "toolsStop": "Az ezt a kapcsolatot használó eszközök leállnak"
+        },
+        "confirm": "Leválasztás",
+        "cancel": "Kapcsolat megtartása"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} logó",
+      "headline": "Csatlakoztasd az első alkalmazásod",
+      "subheadline": "Engedélyezd egyszer, és az AI olvashatja az e-mailjeid, posztolhat a Slackre, frissítheti a dokumentumaid és még sok mást — automatikusan, minden chatben.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Eszközök minden chatben",
+          "desc": "A csatlakoztatás után az AI automatikusan használja őket."
+        },
+        "secureOauth": {
+          "title": "Biztonságos OAuth",
+          "desc": "Engedélyezd egyszer, vond vissza bármikor."
+        },
+        "hundredsOfApps": {
+          "title": "Több száz alkalmazás",
+          "desc": "E-mail, naptár, CRM, dokumentumok, kód és még sok más."
+        }
+      },
+      "browseAppsCta": "Alkalmazások tallózása"
+    },
+    "connectDialog": {
+      "title": "Alkalmazás csatlakoztatása",
+      "description": "Böngéssz több száz integrációt, amelyeket a Composio működtet.",
+      "searchPlaceholder": "Alkalmazások keresése…",
+      "clearSearchAria": "Keresés törlése",
+      "categories": {
+        "all": "Összes",
+        "communication": "Kommunikáció",
+        "productivity": "Produktivitás",
+        "calendar": "Naptár",
+        "developer": "Fejlesztői",
+        "crmSales": "CRM és sales"
+      },
+      "sections": {
+        "featured": "Kiemelt",
+        "allApps": "Összes alkalmazás"
+      },
+      "card": {
+        "logoAlt": "{name} logó",
+        "alreadyConnectedTooltip": "Már csatlakoztatva. Kezelheted a Kapcsolatok oldalon",
+        "connectedLabel": "Csatlakoztatva",
+        "connectFallbackDescription": "{name} csatlakoztatása az AI-hoz"
+      },
+      "footer": {
+        "poweredBy": "a Composio biztosítja",
+        "cancel": "Mégse"
+      },
+      "empty": {
+        "noMatchTitle": "Nincs „{query}” keresésre illeszkedő alkalmazás",
+        "noAppsTitle": "Nincs elérhető alkalmazás",
+        "noMatchBody": "Próbálj rövidebb keresőkifejezést vagy másik kategóriát.",
+        "noAppsBody": "A Composio integrációk a beállítás után itt jelennek meg."
+      },
+      "errors": {
+        "failedToStart": "A kapcsolat indítása sikertelen"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Csatlakozás a Composioval",
+          "connectWithApiKey": "Mentés és csatlakozás",
+          "connectWithBearerToken": "Mentés és csatlakozás",
+          "connectWithBasic": "Mentés és csatlakozás",
+          "connectNoAuth": "Engedélyezés",
+          "connecting": "Csatlakozás..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-kulcs",
+          "apiKeyPlaceholder": "Illessze be az API-kulcsát",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Illessze be a bearer-tokenjét",
+          "basicAuthUsername": "Felhasználónév",
+          "basicAuthPassword": "Jelszó",
+          "basicAuthUsernamePlaceholder": "Fiókja felhasználóneve",
+          "basicAuthPasswordPlaceholder": "Fiókja jelszava",
+          "revealSecret": "Megjelenítés",
+          "hideSecret": "Elrejtés"
+        },
+        "noAuthHint": "A {name} nem igényel hitelesítő adatokat. Kattintson az Engedélyezésre, hogy hozzáadja a munkaterületéhez.",
+        "apiKeyHelp": "Hol találom ezt?",
+        "connectedToast": "Csatlakoztatva: {name}",
+        "unsupported": {
+          "title": "Ez a kapcsolódási típus még nem támogatott",
+          "body": "A {name} {scheme} hitelesítési folyamatot használ, amelyet még nem építettünk be az alkalmazásba. Csatlakoztathatja közvetlenül a Composio irányítópultján, és itt megjelenik, miután összekapcsolta.",
+          "openComposioDashboard": "Composio irányítópult megnyitása"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} leválasztása",
+      "disconnect": "Leválasztás"
+    },
+    "empty": {
+      "title": "Nincs csatlakoztatott alkalmazás",
+      "description": "Csatlakoztasd a Gmailt, Slacket, Notiont és továbbiakat, hogy a Coasty bármelyik chatben használhassa őket."
+    },
+    "toolInvocation": {
+      "calling": "Hívás: {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Alkalmazás",
+      "expiredMessage": "A(z) {appName} kapcsolatod lejárt.",
+      "reconnectLink": "Csatlakozás →"
+    },
+    "errors": {
+      "loadConnectionsFailed": "A kapcsolatok betöltése sikertelen (HTTP {status})",
+      "loadToolkitsFailed": "Az eszközkészletek betöltése sikertelen (HTTP {status})",
+      "startConnectionFailed": "A kapcsolat indítása sikertelen (HTTP {status})",
+      "disconnectFailedHttp": "A leválasztás sikertelen (HTTP {status})",
+      "credentialsRequired": "A folytatáshoz töltsön ki minden kötelező mezőt.",
+      "credentialsErrorPrefix": "A kapcsolódás sikertelen:",
+      "unknownToolkit": "Nem ismerjük fel ezt az alkalmazást. Frissítse a katalógust, és próbálja újra.",
+      "unsupportedAuthScheme": "Ez a hitelesítési módszer még nem támogatott az alkalmazásban.",
+      "missingCredentials": "Hiányzó kötelező mezők: {fields}",
+      "invalidCredentials": "A hitelesítő adatokat elutasították. Ellenőrizze őket, és próbálja újra.",
+      "credentialValidationFailed": "Nem sikerült érvényesíteni a hitelesítő adatait. Próbálja újra.",
+      "apiKeyRequired": "API-kulcs szükséges.",
+      "tokenRequired": "Bearer-token szükséges.",
+      "basicRequired": "Felhasználónév és jelszó szükséges."
+    },
+    "title": "Kapcsolatok",
+    "subtitle": "Csatlakoztasd azokat az alkalmazásokat, amelyeket a Coasty bármelyik chatben a nevedben használhat.",
+    "connectedSuffix": "csatlakoztatva",
+    "refresh": "Frissítés",
+    "newConnection": "Új kapcsolat",
+    "retry": "Próbáld újra",
+    "noFilteredConnections": "Még nincs {filter} alkalmazás",
+    "noFilteredDescription": "Próbáljon másik szűrőt, vagy csatlakoztasson egy új alkalmazást.",
+    "filters": {
+      "all": "Összes",
+      "active": "Aktív",
+      "connecting": "Csatlakozás",
+      "expired": "Lejárt",
+      "failed": "Sikertelen"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Csatlakoztatott alkalmazások",
+      "subheading": "A Coasty bármelyik chatben használhatja ezeket az alkalmazásokat a nevedben.",
+      "connectNewApp": "Új csatlakoztatása",
+      "manageOnFullPage": "Kezelés a teljes oldalon"
+    }
   }
 }

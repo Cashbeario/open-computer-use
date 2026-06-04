@@ -868,6 +868,11 @@
       "npsVeryLikely": "Rất có khả năng",
       "thanks": "Cảm ơn phản hồi",
       "creditsLabel": "tín dụng"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Ứng dụng",
+      "expiredMessage": "Kết nối {appName} của bạn đã hết hạn.",
+      "reconnectLink": "Kết nối lại"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "trong {count} phut",
     "inHours": "trong {count} gio",
     "today": "hom nay",
-    "yesterday": "hom qua"
+    "yesterday": "hom qua",
+    "connections": "Ứng dụng",
+    "resources": "Tác tử"
   },
   "appHeader": {
     "login": "Dang nhap",
@@ -2413,6 +2420,13 @@
         "download": "Tải ứng dụng máy tính",
         "compare": "So sánh trợ lý AI"
       }
+    },
+    "connections": {
+      "title": "Kết nối",
+      "description": "Kết nối Gmail, Slack, Notion, GitHub và hàng trăm ứng dụng khác. Sẵn sàng trong mọi cuộc trò chuyện.",
+      "ogTitle": "Kết nối — 250+ ứng dụng với trợ lý AI Coasty",
+      "ogDescription": "Đưa Gmail, Slack, GitHub, Notion, Google Calendar, Linear và hàng trăm ứng dụng khác vào mọi cuộc trò chuyện. Bảo mật bằng OAuth, luôn sẵn sàng, được agent Coasty sử dụng thay bạn.",
+      "twitterDescription": "Kết nối Gmail, Slack, GitHub, Notion và hơn 250 ứng dụng vào Coasty. Một lần OAuth, agent dùng trong mọi cuộc trò chuyện."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Giới thiệu",
         "description": "Mời bạn bè và nhận tín dụng"
+      },
+      "integrations": {
+        "label": "Tích hợp",
+        "description": "Kết nối ứng dụng bên thứ ba"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Giới thiệu",
       "description": "Chia sẻ Coasty. Cùng kiếm tiền."
+    },
+    "connections": {
+      "title": "Kết nối của bạn",
+      "description": "Đang lấy các ứng dụng và bộ công cụ đã kết nối."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 khi truyền",
     "trustAtRest": "AES-256-GCM khi lưu trữ",
     "trustNoTraining": "Không huấn luyện trên dữ liệu của bạn"
+  },
+  "connections": {
+    "page": {
+      "title": "Kết nối",
+      "description": "Kết nối Gmail, Slack, Notion, GitHub và hàng trăm ứng dụng khác. Sẵn sàng trong mọi cuộc trò chuyện."
+    },
+    "fallbackAppName": "ứng dụng",
+    "status": {
+      "active": "Đã kết nối",
+      "initiated": "Đang kết nối",
+      "expired": "Đã hết hạn",
+      "failed": "Đã thu hồi",
+      "failedShort": "Thất bại",
+      "inactive": "Ngừng"
+    },
+    "toasts": {
+      "disconnectFailed": "Không thể ngắt kết nối",
+      "disconnected": "Đã ngắt kết nối {appName}",
+      "reconnectFailed": "Không thể bắt đầu kết nối lại",
+      "connected": "Đã kết nối {app}",
+      "error": "Có lỗi xảy ra. Vui lòng thử lại."
+    },
+    "card": {
+      "logoAlt": "Biểu trưng {appName}",
+      "fallbackAccountLabel": "Đã kết nối",
+      "connectedOn": "Kết nối vào {date}",
+      "lastUsed": "Sử dụng lần cuối {time}",
+      "actions": {
+        "reconnect": "Kết nối lại",
+        "disconnect": "Ngắt kết nối",
+        "menuAriaLabel": "Tác vụ kết nối"
+      },
+      "error": {
+        "expired": "Phân quyền đã hết hạn. Kết nối lại để khôi phục quyền truy cập công cụ.",
+        "revoked": "Kết nối đã bị thu hồi. Kết nối lại để khôi phục quyền truy cập công cụ."
+      },
+      "disconnectDialog": {
+        "title": "Ngắt kết nối {appName}?",
+        "connectedOn": "kết nối {date}",
+        "consequence": {
+          "revokeOauth": "Composio sẽ thu hồi quyền OAuth",
+          "toolsStop": "Các công cụ dùng kết nối này sẽ ngừng hoạt động"
+        },
+        "confirm": "Ngắt kết nối",
+        "cancel": "Giữ kết nối"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Biểu trưng {name}",
+      "headline": "Kết nối ứng dụng đầu tiên của bạn",
+      "subheadline": "Phân quyền một lần và AI có thể đọc email, đăng bài lên Slack, cập nhật tài liệu và nhiều hơn nữa, tự động trong mọi cuộc trò chuyện.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Công cụ trong mọi cuộc trò chuyện",
+          "desc": "Sau khi kết nối, AI sẽ dùng chúng một cách tự động."
+        },
+        "secureOauth": {
+          "title": "OAuth an toàn",
+          "desc": "Phân quyền một lần, thu hồi bất cứ lúc nào."
+        },
+        "hundredsOfApps": {
+          "title": "Hàng trăm ứng dụng",
+          "desc": "Email, lịch, CRM, tài liệu, mã nguồn và nhiều hơn nữa."
+        }
+      },
+      "browseAppsCta": "Duyệt ứng dụng"
+    },
+    "connectDialog": {
+      "title": "Kết nối một ứng dụng",
+      "description": "Duyệt hàng trăm tích hợp được cung cấp bởi Composio.",
+      "searchPlaceholder": "Tìm ứng dụng…",
+      "clearSearchAria": "Xóa tìm kiếm",
+      "categories": {
+        "all": "Tất cả",
+        "communication": "Giao tiếp",
+        "productivity": "Năng suất",
+        "calendar": "Lịch",
+        "developer": "Lập trình",
+        "crmSales": "CRM & Bán hàng"
+      },
+      "sections": {
+        "featured": "Nổi bật",
+        "allApps": "Tất cả ứng dụng"
+      },
+      "card": {
+        "logoAlt": "Biểu trưng {name}",
+        "alreadyConnectedTooltip": "Đã kết nối. Quản lý từ trang Kết nối",
+        "connectedLabel": "Đã kết nối",
+        "connectFallbackDescription": "Kết nối {name} với AI của bạn"
+      },
+      "footer": {
+        "poweredBy": "cung cấp bởi Composio",
+        "cancel": "Hủy"
+      },
+      "empty": {
+        "noMatchTitle": "Không có ứng dụng nào khớp \"{query}\"",
+        "noAppsTitle": "Không có ứng dụng nào",
+        "noMatchBody": "Thử từ khóa ngắn hơn hoặc một danh mục khác.",
+        "noAppsBody": "Các tích hợp Composio sẽ xuất hiện ở đây sau khi được cấu hình."
+      },
+      "errors": {
+        "failedToStart": "Không thể bắt đầu kết nối"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Kết nối với Composio",
+          "connectWithApiKey": "Lưu và kết nối",
+          "connectWithBearerToken": "Lưu và kết nối",
+          "connectWithBasic": "Lưu và kết nối",
+          "connectNoAuth": "Bật",
+          "connecting": "Đang kết nối..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Khóa API",
+          "apiKeyPlaceholder": "Dán khóa API của bạn",
+          "bearerTokenLabel": "Mã thông báo Bearer",
+          "bearerTokenPlaceholder": "Dán mã thông báo Bearer của bạn",
+          "basicAuthUsername": "Tên người dùng",
+          "basicAuthPassword": "Mật khẩu",
+          "basicAuthUsernamePlaceholder": "Tên người dùng tài khoản của bạn",
+          "basicAuthPasswordPlaceholder": "Mật khẩu tài khoản của bạn",
+          "revealSecret": "Hiện",
+          "hideSecret": "Ẩn"
+        },
+        "noAuthHint": "{name} không yêu cầu thông tin xác thực. Nhấn Bật để thêm vào không gian làm việc của bạn.",
+        "apiKeyHelp": "Tôi có thể tìm cái này ở đâu?",
+        "connectedToast": "Đã kết nối với {name}",
+        "unsupported": {
+          "title": "Loại kết nối này chưa được hỗ trợ",
+          "body": "{name} sử dụng luồng xác thực {scheme} mà chúng tôi chưa tích hợp trong ứng dụng. Bạn có thể kết nối trực tiếp trên bảng điều khiển Composio và nó sẽ xuất hiện ở đây sau khi liên kết.",
+          "openComposioDashboard": "Mở bảng điều khiển Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Ngắt kết nối {name}",
+      "disconnect": "Ngắt kết nối"
+    },
+    "empty": {
+      "title": "Chưa có ứng dụng nào được kết nối",
+      "description": "Kết nối Gmail, Slack, Notion và nhiều hơn nữa để Coasty có thể dùng chúng trong mọi cuộc trò chuyện."
+    },
+    "toolInvocation": {
+      "calling": "Đang gọi {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Ứng dụng",
+      "expiredMessage": "Kết nối {appName} của bạn đã hết hạn.",
+      "reconnectLink": "Kết nối lại"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Không thể tải kết nối (HTTP {status})",
+      "loadToolkitsFailed": "Không thể tải bộ công cụ (HTTP {status})",
+      "startConnectionFailed": "Không thể bắt đầu kết nối (HTTP {status})",
+      "disconnectFailedHttp": "Không thể ngắt kết nối (HTTP {status})",
+      "credentialsRequired": "Vui lòng điền tất cả các trường bắt buộc để tiếp tục.",
+      "credentialsErrorPrefix": "Kết nối thất bại:",
+      "unknownToolkit": "Chúng tôi không nhận ra ứng dụng này. Làm mới danh mục và thử lại.",
+      "unsupportedAuthScheme": "Phương thức xác thực này chưa được hỗ trợ trong ứng dụng.",
+      "missingCredentials": "Thiếu các trường bắt buộc: {fields}",
+      "invalidCredentials": "Thông tin xác thực bị từ chối. Vui lòng kiểm tra lại và thử lại.",
+      "credentialValidationFailed": "Không thể xác thực thông tin của bạn. Vui lòng thử lại.",
+      "apiKeyRequired": "Cần có khóa API.",
+      "tokenRequired": "Cần có mã thông báo Bearer.",
+      "basicRequired": "Cần có tên người dùng và mật khẩu."
+    },
+    "title": "Kết nối",
+    "subtitle": "Kết nối các ứng dụng mà Coasty có thể sử dụng thay bạn trong mọi cuộc trò chuyện.",
+    "connectedSuffix": "đã kết nối",
+    "refresh": "Làm mới",
+    "newConnection": "Kết nối mới",
+    "retry": "Thử lại",
+    "noFilteredConnections": "Chưa có ứng dụng {filter} nào",
+    "noFilteredDescription": "Hãy thử bộ lọc khác hoặc kết nối ứng dụng mới để bắt đầu.",
+    "filters": {
+      "all": "Tất cả",
+      "active": "Hoạt động",
+      "connecting": "Đang kết nối",
+      "expired": "Hết hạn",
+      "failed": "Thất bại"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Ứng dụng đã kết nối",
+      "subheading": "Coasty có thể dùng các ứng dụng này thay bạn trong mọi cuộc trò chuyện.",
+      "connectNewApp": "Kết nối mới",
+      "manageOnFullPage": "Quản lý tất cả"
+    }
   }
 }

@@ -868,6 +868,11 @@
       "npsVeryLikely": "Meget sandsynligt",
       "thanks": "Tak for feedback",
       "creditsLabel": "kreditter"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Din {appName}-forbindelse er udløbet.",
+      "reconnectLink": "Genforbind"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "om {count}m",
     "inHours": "om {count}t",
     "today": "i dag",
-    "yesterday": "i gar"
+    "yesterday": "i gar",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Log ind",
@@ -2413,6 +2420,13 @@
         "download": "Download desktopappen",
         "compare": "Sammenlign AI-agenter"
       }
+    },
+    "connections": {
+      "title": "Forbindelser",
+      "description": "Forbind Gmail, Slack, Notion, GitHub og hundredvis af andre apps. Tilgængelig i hver chat.",
+      "ogTitle": "Forbindelser — Forbind 250+ apps til din Coasty AI-agent",
+      "ogDescription": "Tag Gmail, Slack, GitHub, Notion, Google Calendar, Linear og hundredvis af andre apps med ind i hver chat. OAuth-sikret, altid aktiv, brugt af Coasty-agenter på dine vegne.",
+      "twitterDescription": "Forbind Gmail, Slack, GitHub, Notion og 250+ apps til Coasty. Én OAuth, brugt i hver chat af din agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Henvisning",
         "description": "Inviter venner og tjen kreditter"
+      },
+      "integrations": {
+        "label": "Integrationer",
+        "description": "Forbind tredjepartsapps"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Henvisninger",
       "description": "Del Coasty. Tjen sammen."
+    },
+    "connections": {
+      "title": "Dine forbindelser",
+      "description": "Henter dine forbundne apps og værktøjssæt."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 under overførsel",
     "trustAtRest": "AES-256-GCM i hvile",
     "trustNoTraining": "Ingen træning på dine data"
+  },
+  "connections": {
+    "page": {
+      "title": "Forbindelser",
+      "description": "Forbind Gmail, Slack, Notion, GitHub og hundredvis af andre apps. Tilgængelig i hver chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Forbundet",
+      "initiated": "Forbinder",
+      "expired": "Udløbet",
+      "failed": "Tilbagekaldt",
+      "failedShort": "Fejlet",
+      "inactive": "Inaktiv"
+    },
+    "toasts": {
+      "disconnectFailed": "Kunne ikke afbryde forbindelsen",
+      "disconnected": "Afbrød forbindelsen til {appName}",
+      "reconnectFailed": "Kunne ikke starte genforbindelse",
+      "connected": "{app} forbundet",
+      "error": "Noget gik galt. Prøv venligst igen."
+    },
+    "card": {
+      "logoAlt": "{appName}-logo",
+      "fallbackAccountLabel": "Forbundet",
+      "connectedOn": "Forbundet den {date}",
+      "lastUsed": "Sidst brugt {time}",
+      "actions": {
+        "reconnect": "Genforbind",
+        "disconnect": "Afbryd forbindelse",
+        "menuAriaLabel": "Forbindelseshandlinger"
+      },
+      "error": {
+        "expired": "Autorisationen er udløbet. Genforbind for at gendanne adgang til værktøjer.",
+        "revoked": "Forbindelsen er tilbagekaldt. Genforbind for at gendanne adgang til værktøjer."
+      },
+      "disconnectDialog": {
+        "title": "Afbryd forbindelsen til {appName}?",
+        "connectedOn": "forbundet {date}",
+        "consequence": {
+          "revokeOauth": "Composio tilbagekalder OAuth-tilladelsen",
+          "toolsStop": "Værktøjer der bruger denne forbindelse, holder op med at virke"
+        },
+        "confirm": "Afbryd forbindelse",
+        "cancel": "Behold forbindelse"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logo",
+      "headline": "Forbind din første app",
+      "subheadline": "Giv tilladelse én gang, og din AI kan læse din e-mail, poste i Slack, opdatere dokumenter og meget mere, automatisk, i hver chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Værktøjer i hver chat",
+          "desc": "Når de er forbundet, bruger din AI dem automatisk."
+        },
+        "secureOauth": {
+          "title": "Sikker OAuth",
+          "desc": "Giv tilladelse én gang, tilbagekald når som helst."
+        },
+        "hundredsOfApps": {
+          "title": "Hundredvis af apps",
+          "desc": "E-mail, kalendere, CRM-systemer, dokumenter, kode og meget mere."
+        }
+      },
+      "browseAppsCta": "Gennemse apps"
+    },
+    "connectDialog": {
+      "title": "Forbind en app",
+      "description": "Gennemse hundredvis af integrationer drevet af Composio.",
+      "searchPlaceholder": "Søg i apps…",
+      "clearSearchAria": "Ryd søgning",
+      "categories": {
+        "all": "Alle",
+        "communication": "Kommunikation",
+        "productivity": "Produktivitet",
+        "calendar": "Kalender",
+        "developer": "Udvikler",
+        "crmSales": "CRM og salg"
+      },
+      "sections": {
+        "featured": "Anbefalet",
+        "allApps": "Alle apps"
+      },
+      "card": {
+        "logoAlt": "{name}-logo",
+        "alreadyConnectedTooltip": "Allerede forbundet. Administrer fra Forbindelser-siden",
+        "connectedLabel": "Forbundet",
+        "connectFallbackDescription": "Forbind {name} til din AI"
+      },
+      "footer": {
+        "poweredBy": "drevet af Composio",
+        "cancel": "Annuller"
+      },
+      "empty": {
+        "noMatchTitle": "Ingen apps matcher \"{query}\"",
+        "noAppsTitle": "Ingen apps tilgængelige",
+        "noMatchBody": "Prøv en kortere søgning eller en anden kategori.",
+        "noAppsBody": "Composio-integrationer vises her, når de er konfigureret."
+      },
+      "errors": {
+        "failedToStart": "Kunne ikke starte forbindelsen"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Tilslut med Composio",
+          "connectWithApiKey": "Gem og tilslut",
+          "connectWithBearerToken": "Gem og tilslut",
+          "connectWithBasic": "Gem og tilslut",
+          "connectNoAuth": "Aktivér",
+          "connecting": "Tilslutter..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-nøgle",
+          "apiKeyPlaceholder": "Indsæt din API-nøgle",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Indsæt din bearer-token",
+          "basicAuthUsername": "Brugernavn",
+          "basicAuthPassword": "Adgangskode",
+          "basicAuthUsernamePlaceholder": "Din kontos brugernavn",
+          "basicAuthPasswordPlaceholder": "Din kontos adgangskode",
+          "revealSecret": "Vis",
+          "hideSecret": "Skjul"
+        },
+        "noAuthHint": "{name} kræver ingen legitimationsoplysninger. Klik på Aktivér for at føje den til dit arbejdsområde.",
+        "apiKeyHelp": "Hvor finder jeg denne?",
+        "connectedToast": "Tilsluttet til {name}",
+        "unsupported": {
+          "title": "Denne forbindelsestype understøttes endnu ikke",
+          "body": "{name} bruger et {scheme}-autentificeringsflow, som vi endnu ikke har sat op i appen. Du kan tilslutte den direkte i Composio-dashboardet, og den vises her, når den er forbundet.",
+          "openComposioDashboard": "Åbn Composio-dashboard"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Afbryd forbindelse til {name}",
+      "disconnect": "Afbryd"
+    },
+    "empty": {
+      "title": "Ingen apps forbundet",
+      "description": "Forbind Gmail, Slack, Notion og flere, så Coasty kan bruge dem i enhver chat."
+    },
+    "toolInvocation": {
+      "calling": "Kalder {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Din {appName}-forbindelse er udløbet.",
+      "reconnectLink": "Genforbind"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Kunne ikke indlæse forbindelser (HTTP {status})",
+      "loadToolkitsFailed": "Kunne ikke indlæse værktøjssæt (HTTP {status})",
+      "startConnectionFailed": "Kunne ikke starte forbindelsen (HTTP {status})",
+      "disconnectFailedHttp": "Kunne ikke afbryde forbindelsen (HTTP {status})",
+      "credentialsRequired": "Udfyld alle påkrævede felter for at fortsætte.",
+      "credentialsErrorPrefix": "Forbindelse mislykkedes:",
+      "unknownToolkit": "Vi genkender ikke denne app. Opdater kataloget, og prøv igen.",
+      "unsupportedAuthScheme": "Denne godkendelsesmetode understøttes endnu ikke i appen.",
+      "missingCredentials": "Manglende påkrævede felter: {fields}",
+      "invalidCredentials": "Legitimationsoplysningerne blev afvist. Tjek dem, og prøv igen.",
+      "credentialValidationFailed": "Kunne ikke validere dine legitimationsoplysninger. Prøv igen.",
+      "apiKeyRequired": "En API-nøgle er påkrævet.",
+      "tokenRequired": "En bearer-token er påkrævet.",
+      "basicRequired": "Brugernavn og adgangskode er påkrævet."
+    },
+    "title": "Forbindelser",
+    "subtitle": "Forbind de apps Coasty kan bruge på dine vegne i enhver chat.",
+    "connectedSuffix": "forbundet",
+    "refresh": "Opdater",
+    "newConnection": "Ny forbindelse",
+    "retry": "Prøv igen",
+    "noFilteredConnections": "Ingen {filter}-apps endnu",
+    "noFilteredDescription": "Prøv et andet filter, eller forbind en ny app for at komme i gang.",
+    "filters": {
+      "all": "Alle",
+      "active": "Aktive",
+      "connecting": "Forbinder",
+      "expired": "Udløbet",
+      "failed": "Fejlet"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Forbundne apps",
+      "subheading": "Coasty kan bruge disse apps i enhver chat på dine vegne.",
+      "connectNewApp": "Forbind ny app",
+      "manageOnFullPage": "Administrer på fuld side"
+    }
   }
 }

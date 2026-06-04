@@ -868,6 +868,11 @@
       "npsVeryLikely": "Πολύ πιθανό",
       "thanks": "Ευχαριστούμε για τα σχόλια",
       "creditsLabel": "μονάδες"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Εφαρμογή",
+      "expiredMessage": "Η σύνδεσή σας με το {appName} έληξε.",
+      "reconnectLink": "Επανασύνδεση"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "σε {count}λ",
     "inHours": "σε {count}ώ",
     "today": "σήμερα",
-    "yesterday": "χθες"
+    "yesterday": "χθες",
+    "connections": "Εφαρμογές",
+    "resources": "Πράκτορας"
   },
   "appHeader": {
     "login": "Σύνδεση",
@@ -2413,6 +2420,13 @@
         "download": "Λήψη Εφαρμογής Desktop",
         "compare": "Σύγκριση AI Agents"
       }
+    },
+    "connections": {
+      "title": "Συνδέσεις",
+      "description": "Συνδέστε Gmail, Slack, Notion, GitHub και εκατοντάδες ακόμη εφαρμογές. Διαθέσιμες σε κάθε συνομιλία.",
+      "ogTitle": "Συνδέσεις — 250+ Εφαρμογές με AI Agent Coasty",
+      "ogDescription": "Φέρτε Gmail, Slack, GitHub, Notion, Google Calendar, Linear και εκατοντάδες ακόμη εφαρμογές σε κάθε συνομιλία. Με ασφάλεια OAuth, πάντα ενεργές, χρησιμοποιούνται από τους agents του Coasty για λογαριασμό σας.",
+      "twitterDescription": "Συνδέστε Gmail, Slack, GitHub, Notion και 250+ εφαρμογές με το Coasty. Ένα OAuth, χρήση σε κάθε συνομιλία από τον agent σας."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Παραπομπή",
         "description": "Πρόσκαλε φίλους και κέρδισε μονάδες"
+      },
+      "integrations": {
+        "label": "Ενσωματώσεις",
+        "description": "Συνδέστε εφαρμογές τρίτων"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Παραπομπές",
       "description": "Μοιράσου το Coasty. Κερδίστε μαζί."
+    },
+    "connections": {
+      "title": "Οι συνδέσεις σας",
+      "description": "Ανάκτηση των συνδεδεμένων εφαρμογών και εργαλείων σας."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 κατά τη μεταφορά",
     "trustAtRest": "AES-256-GCM σε ηρεμία",
     "trustNoTraining": "Καμία εκπαίδευση με τα δεδομένα σου"
+  },
+  "connections": {
+    "page": {
+      "title": "Συνδέσεις",
+      "description": "Συνδέστε Gmail, Slack, Notion, GitHub και εκατοντάδες ακόμη εφαρμογές. Διαθέσιμες σε κάθε συνομιλία."
+    },
+    "fallbackAppName": "εφαρμογή",
+    "status": {
+      "active": "Συνδεδεμένο",
+      "initiated": "Σε σύνδεση",
+      "expired": "Έληξε",
+      "failed": "Ανακλήθηκε",
+      "failedShort": "Απέτυχε",
+      "inactive": "Ανενεργό"
+    },
+    "toasts": {
+      "disconnectFailed": "Η αποσύνδεση απέτυχε",
+      "disconnected": "Αποσυνδέθηκε το {appName}",
+      "reconnectFailed": "Η εκκίνηση επανασύνδεσης απέτυχε",
+      "connected": "Συνδέθηκε το {app}",
+      "error": "Κάτι πήγε στραβά. Παρακαλούμε δοκιμάστε ξανά."
+    },
+    "card": {
+      "logoAlt": "Λογότυπο {appName}",
+      "fallbackAccountLabel": "Συνδεδεμένο",
+      "connectedOn": "Συνδέθηκε στις {date}",
+      "lastUsed": "Τελευταία χρήση {time}",
+      "actions": {
+        "reconnect": "Επανασύνδεση",
+        "disconnect": "Αποσύνδεση",
+        "menuAriaLabel": "Ενέργειες σύνδεσης"
+      },
+      "error": {
+        "expired": "Η εξουσιοδότηση έληξε. Κάντε επανασύνδεση για να αποκαταστήσετε την πρόσβαση στα εργαλεία.",
+        "revoked": "Η σύνδεση ανακλήθηκε. Κάντε επανασύνδεση για να αποκαταστήσετε την πρόσβαση στα εργαλεία."
+      },
+      "disconnectDialog": {
+        "title": "Αποσύνδεση του {appName};",
+        "connectedOn": "συνδέθηκε στις {date}",
+        "consequence": {
+          "revokeOauth": "Το Composio θα ανακαλέσει την παραχώρηση OAuth",
+          "toolsStop": "Τα εργαλεία που χρησιμοποιούν αυτή τη σύνδεση θα σταματήσουν να λειτουργούν"
+        },
+        "confirm": "Αποσύνδεση",
+        "cancel": "Διατήρηση σύνδεσης"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Λογότυπο {name}",
+      "headline": "Συνδέστε την πρώτη σας εφαρμογή",
+      "subheadline": "Εξουσιοδοτήστε μία φορά και το AI σας μπορεί να διαβάζει τα email σας, να δημοσιεύει στο Slack, να ενημερώνει έγγραφα και πολλά άλλα, αυτόματα, σε κάθε συνομιλία.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Εργαλεία σε κάθε συνομιλία",
+          "desc": "Μόλις συνδεθούν, το AI σας τα χρησιμοποιεί αυτόματα."
+        },
+        "secureOauth": {
+          "title": "Ασφαλές OAuth",
+          "desc": "Εξουσιοδοτήστε μία φορά, ανακαλέστε όποτε θέλετε."
+        },
+        "hundredsOfApps": {
+          "title": "Εκατοντάδες εφαρμογές",
+          "desc": "Email, ημερολόγια, CRM, έγγραφα, κώδικας και πολλά άλλα."
+        }
+      },
+      "browseAppsCta": "Δείτε τις εφαρμογές"
+    },
+    "connectDialog": {
+      "title": "Συνδέστε μια εφαρμογή",
+      "description": "Περιηγηθείτε σε εκατοντάδες ενσωματώσεις που υποστηρίζονται από το Composio.",
+      "searchPlaceholder": "Αναζήτηση εφαρμογών…",
+      "clearSearchAria": "Καθαρισμός αναζήτησης",
+      "categories": {
+        "all": "Όλες",
+        "communication": "Επικοινωνία",
+        "productivity": "Παραγωγικότητα",
+        "calendar": "Ημερολόγιο",
+        "developer": "Ανάπτυξη",
+        "crmSales": "CRM & Πωλήσεις"
+      },
+      "sections": {
+        "featured": "Προτεινόμενα",
+        "allApps": "Όλες οι εφαρμογές"
+      },
+      "card": {
+        "logoAlt": "Λογότυπο {name}",
+        "alreadyConnectedTooltip": "Ήδη συνδεδεμένο. Διαχειριστείτε το από τη σελίδα Συνδέσεις",
+        "connectedLabel": "Συνδεδεμένο",
+        "connectFallbackDescription": "Συνδέστε το {name} με το AI σας"
+      },
+      "footer": {
+        "poweredBy": "με την υποστήριξη του Composio",
+        "cancel": "Άκυρο"
+      },
+      "empty": {
+        "noMatchTitle": "Καμία εφαρμογή δεν ταιριάζει με «{query}»",
+        "noAppsTitle": "Δεν υπάρχουν διαθέσιμες εφαρμογές",
+        "noMatchBody": "Δοκιμάστε μια πιο σύντομη αναζήτηση ή μια διαφορετική κατηγορία.",
+        "noAppsBody": "Οι ενσωματώσεις του Composio θα εμφανιστούν εδώ μόλις ρυθμιστούν."
+      },
+      "errors": {
+        "failedToStart": "Η εκκίνηση σύνδεσης απέτυχε"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Σύνδεση μέσω Composio",
+          "connectWithApiKey": "Αποθήκευση & σύνδεση",
+          "connectWithBearerToken": "Αποθήκευση & σύνδεση",
+          "connectWithBasic": "Αποθήκευση & σύνδεση",
+          "connectNoAuth": "Ενεργοποίηση",
+          "connecting": "Σύνδεση..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Κλειδί API",
+          "apiKeyPlaceholder": "Επικολλήστε το κλειδί API σας",
+          "bearerTokenLabel": "Διακριτικό Bearer",
+          "bearerTokenPlaceholder": "Επικολλήστε το διακριτικό Bearer",
+          "basicAuthUsername": "Όνομα χρήστη",
+          "basicAuthPassword": "Κωδικός πρόσβασης",
+          "basicAuthUsernamePlaceholder": "Όνομα χρήστη του λογαριασμού σας",
+          "basicAuthPasswordPlaceholder": "Κωδικός πρόσβασης του λογαριασμού σας",
+          "revealSecret": "Εμφάνιση",
+          "hideSecret": "Απόκρυψη"
+        },
+        "noAuthHint": "Το {name} δεν απαιτεί διαπιστευτήρια. Κάντε κλικ στην Ενεργοποίηση για να το προσθέσετε στον χώρο εργασίας σας.",
+        "apiKeyHelp": "Πού θα το βρω αυτό;",
+        "connectedToast": "Συνδέθηκε με {name}",
+        "unsupported": {
+          "title": "Αυτός ο τύπος σύνδεσης δεν υποστηρίζεται ακόμη",
+          "body": "Το {name} χρησιμοποιεί ροή ελέγχου ταυτότητας {scheme} που δεν έχουμε ενσωματώσει ακόμη στην εφαρμογή. Μπορείτε να το συνδέσετε απευθείας από τον πίνακα ελέγχου του Composio και θα εμφανιστεί εδώ μόλις συνδεθεί.",
+          "openComposioDashboard": "Άνοιγμα πίνακα ελέγχου Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Αποσύνδεση του {name}",
+      "disconnect": "Αποσύνδεση"
+    },
+    "empty": {
+      "title": "Δεν υπάρχουν συνδεδεμένες εφαρμογές",
+      "description": "Συνδέστε Gmail, Slack, Notion και άλλες, ώστε το Coasty να μπορεί να τις χρησιμοποιεί σε κάθε συνομιλία."
+    },
+    "toolInvocation": {
+      "calling": "Κλήση {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Εφαρμογή",
+      "expiredMessage": "Η σύνδεσή σας με το {appName} έληξε.",
+      "reconnectLink": "Επανασύνδεση"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Η φόρτωση των συνδέσεων απέτυχε (HTTP {status})",
+      "loadToolkitsFailed": "Η φόρτωση των toolkits απέτυχε (HTTP {status})",
+      "startConnectionFailed": "Η εκκίνηση σύνδεσης απέτυχε (HTTP {status})",
+      "disconnectFailedHttp": "Η αποσύνδεση απέτυχε (HTTP {status})",
+      "credentialsRequired": "Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε.",
+      "credentialsErrorPrefix": "Η σύνδεση απέτυχε:",
+      "unknownToolkit": "Δεν αναγνωρίζουμε αυτή την εφαρμογή. Ανανεώστε τον κατάλογο και δοκιμάστε ξανά.",
+      "unsupportedAuthScheme": "Αυτή η μέθοδος ελέγχου ταυτότητας δεν υποστηρίζεται ακόμη στην εφαρμογή.",
+      "missingCredentials": "Λείπουν υποχρεωτικά πεδία: {fields}",
+      "invalidCredentials": "Τα διαπιστευτήρια απορρίφθηκαν. Ελέγξτε τα και δοκιμάστε ξανά.",
+      "credentialValidationFailed": "Δεν ήταν δυνατή η επαλήθευση των διαπιστευτηρίων σας. Δοκιμάστε ξανά.",
+      "apiKeyRequired": "Απαιτείται κλειδί API.",
+      "tokenRequired": "Απαιτείται διακριτικό Bearer.",
+      "basicRequired": "Απαιτούνται όνομα χρήστη και κωδικός πρόσβασης."
+    },
+    "title": "Συνδέσεις",
+    "subtitle": "Συνδέστε τις εφαρμογές που μπορεί να χρησιμοποιεί το Coasty για λογαριασμό σας σε κάθε συνομιλία.",
+    "connectedSuffix": "συνδεδεμένες",
+    "refresh": "Ανανέωση",
+    "newConnection": "Νέα σύνδεση",
+    "retry": "Δοκιμάστε ξανά",
+    "noFilteredConnections": "Δεν υπάρχουν εφαρμογές με κατάσταση {filter}",
+    "noFilteredDescription": "Δοκιμάστε άλλο φίλτρο ή συνδέστε μια νέα εφαρμογή.",
+    "filters": {
+      "all": "Όλες",
+      "active": "Ενεργές",
+      "connecting": "Σε σύνδεση",
+      "expired": "Έληξαν",
+      "failed": "Απέτυχαν"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Συνδεδεμένες εφαρμογές",
+      "subheading": "Το Coasty μπορεί να χρησιμοποιεί αυτές τις εφαρμογές σε κάθε συνομιλία εκ μέρους σας.",
+      "connectNewApp": "Νέα σύνδεση",
+      "manageOnFullPage": "Διαχείριση όλων"
+    }
   }
 }

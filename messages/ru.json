@@ -868,6 +868,11 @@
       "npsVeryLikely": "Очень вероятно",
       "thanks": "Спасибо за отзыв",
       "creditsLabel": "кредитов"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Приложение",
+      "expiredMessage": "Срок подключения {appName} истёк.",
+      "reconnectLink": "Переподключить"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "через {count} мин",
     "inHours": "через {count} ч",
     "today": "сегодня",
-    "yesterday": "вчера"
+    "yesterday": "вчера",
+    "connections": "Приложения",
+    "resources": "Агент"
   },
   "appHeader": {
     "login": "Войти",
@@ -2413,6 +2420,13 @@
         "download": "Скачать десктопное приложение",
         "compare": "Сравнить ИИ-агентов"
       }
+    },
+    "connections": {
+      "title": "Подключения",
+      "description": "Подключите Gmail, Slack, Notion, GitHub и сотни других приложений. Доступны в любом чате.",
+      "ogTitle": "Интеграции — подключите 250+ приложений к ИИ-агенту Coasty",
+      "ogDescription": "Подключите Gmail, Slack, GitHub, Notion, Google Calendar, Linear и сотни других приложений к каждому чату. Безопасная авторизация через OAuth, всегда на связи, агенты Coasty работают от вашего имени.",
+      "twitterDescription": "Подключите Gmail, Slack, GitHub, Notion и 250+ приложений к Coasty. Один раз OAuth — и агент использует их в каждом чате."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Реферал",
         "description": "Приглашайте друзей и получайте кредиты"
+      },
+      "integrations": {
+        "label": "Интеграции",
+        "description": "Подключение сторонних приложений"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Рефералы",
       "description": "Делитесь Coasty. Зарабатывайте вместе."
+    },
+    "connections": {
+      "title": "Ваши интеграции",
+      "description": "Получаем список подключённых приложений и наборов инструментов."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 при передаче",
     "trustAtRest": "AES-256-GCM при хранении",
     "trustNoTraining": "Без обучения на ваших данных"
+  },
+  "connections": {
+    "page": {
+      "title": "Подключения",
+      "description": "Подключите Gmail, Slack, Notion, GitHub и сотни других приложений. Доступны в любом чате."
+    },
+    "fallbackAppName": "приложение",
+    "status": {
+      "active": "Подключено",
+      "initiated": "Подключение",
+      "expired": "Истёк срок",
+      "failed": "Отозвано",
+      "failedShort": "Ошибка",
+      "inactive": "Неактивно"
+    },
+    "toasts": {
+      "disconnectFailed": "Не удалось отключить",
+      "disconnected": "Отключено: {appName}",
+      "reconnectFailed": "Не удалось переподключиться",
+      "connected": "{app} подключено",
+      "error": "Что-то пошло не так. Попробуйте ещё раз."
+    },
+    "card": {
+      "logoAlt": "Логотип {appName}",
+      "fallbackAccountLabel": "Подключено",
+      "connectedOn": "Подключено {date}",
+      "lastUsed": "Использовалось {time}",
+      "actions": {
+        "reconnect": "Подключить",
+        "disconnect": "Отключить",
+        "menuAriaLabel": "Действия с подключением"
+      },
+      "error": {
+        "expired": "Срок авторизации истёк. Переподключитесь, чтобы восстановить доступ к инструментам.",
+        "revoked": "Подключение отозвано. Переподключитесь, чтобы восстановить доступ к инструментам."
+      },
+      "disconnectDialog": {
+        "title": "Отключить {appName}?",
+        "connectedOn": "подключено {date}",
+        "consequence": {
+          "revokeOauth": "Composio отзовёт OAuth-доступ",
+          "toolsStop": "Инструменты, использующие это подключение, перестанут работать"
+        },
+        "confirm": "Отключить",
+        "cancel": "Оставить подключение"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Логотип {name}",
+      "headline": "Подключите первое приложение",
+      "subheadline": "Авторизуйтесь один раз, и ИИ сможет читать вашу почту, писать в Slack, обновлять документы и многое другое. Автоматически, в каждом чате.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Инструменты в каждом чате",
+          "desc": "После подключения ИИ использует их автоматически."
+        },
+        "secureOauth": {
+          "title": "Безопасный OAuth",
+          "desc": "Авторизуйтесь один раз, отзовите доступ когда угодно."
+        },
+        "hundredsOfApps": {
+          "title": "Сотни приложений",
+          "desc": "Почта, календари, CRM, документы, код и многое другое."
+        }
+      },
+      "browseAppsCta": "Просмотреть приложения"
+    },
+    "connectDialog": {
+      "title": "Подключить приложение",
+      "description": "Просмотрите сотни интеграций на платформе Composio.",
+      "searchPlaceholder": "Поиск приложений…",
+      "clearSearchAria": "Очистить поиск",
+      "categories": {
+        "all": "Все",
+        "communication": "Общение",
+        "productivity": "Продуктивность",
+        "calendar": "Календарь",
+        "developer": "Разработка",
+        "crmSales": "CRM и продажи"
+      },
+      "sections": {
+        "featured": "Рекомендуемые",
+        "allApps": "Все приложения"
+      },
+      "card": {
+        "logoAlt": "Логотип {name}",
+        "alreadyConnectedTooltip": "Уже подключено. Управляйте на странице «Подключения»",
+        "connectedLabel": "Подключено",
+        "connectFallbackDescription": "Подключите {name} к ИИ"
+      },
+      "footer": {
+        "poweredBy": "на платформе Composio",
+        "cancel": "Отмена"
+      },
+      "empty": {
+        "noMatchTitle": "Нет приложений по запросу «{query}»",
+        "noAppsTitle": "Нет доступных приложений",
+        "noMatchBody": "Попробуйте более короткий запрос или другую категорию.",
+        "noAppsBody": "Интеграции Composio появятся здесь после настройки."
+      },
+      "errors": {
+        "failedToStart": "Не удалось запустить подключение"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Подключить через Composio",
+          "connectWithApiKey": "Сохранить и подключить",
+          "connectWithBearerToken": "Сохранить и подключить",
+          "connectWithBasic": "Сохранить и подключить",
+          "connectNoAuth": "Включить",
+          "connecting": "Подключение..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-ключ",
+          "apiKeyPlaceholder": "Вставьте свой API-ключ",
+          "bearerTokenLabel": "Bearer-токен",
+          "bearerTokenPlaceholder": "Вставьте свой bearer-токен",
+          "basicAuthUsername": "Имя пользователя",
+          "basicAuthPassword": "Пароль",
+          "basicAuthUsernamePlaceholder": "Имя пользователя вашей учётной записи",
+          "basicAuthPasswordPlaceholder": "Пароль вашей учётной записи",
+          "revealSecret": "Показать",
+          "hideSecret": "Скрыть"
+        },
+        "noAuthHint": "{name} не требует учётных данных. Нажмите Включить, чтобы добавить в рабочее пространство.",
+        "apiKeyHelp": "Где это найти?",
+        "connectedToast": "Подключено к {name}",
+        "unsupported": {
+          "title": "Этот тип подключения пока не поддерживается",
+          "body": "{name} использует поток аутентификации {scheme}, который мы ещё не реализовали в приложении. Вы можете подключить его напрямую через панель Composio, и он появится здесь после привязки.",
+          "openComposioDashboard": "Открыть панель Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Отключить {name}",
+      "disconnect": "Отключить"
+    },
+    "empty": {
+      "title": "Нет подключённых приложений",
+      "description": "Подключите Gmail, Slack, Notion и другие приложения, чтобы Coasty мог использовать их в любом чате."
+    },
+    "toolInvocation": {
+      "calling": "Вызов {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Приложение",
+      "expiredMessage": "Срок подключения {appName} истёк.",
+      "reconnectLink": "Переподключить"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Не удалось загрузить подключения (HTTP {status})",
+      "loadToolkitsFailed": "Не удалось загрузить наборы инструментов (HTTP {status})",
+      "startConnectionFailed": "Не удалось запустить подключение (HTTP {status})",
+      "disconnectFailedHttp": "Не удалось отключить (HTTP {status})",
+      "credentialsRequired": "Заполните все обязательные поля, чтобы продолжить.",
+      "credentialsErrorPrefix": "Сбой подключения:",
+      "unknownToolkit": "Мы не распознаём это приложение. Обновите каталог и попробуйте снова.",
+      "unsupportedAuthScheme": "Этот метод аутентификации пока не поддерживается в приложении.",
+      "missingCredentials": "Отсутствуют обязательные поля: {fields}",
+      "invalidCredentials": "Учётные данные отклонены. Проверьте их и попробуйте снова.",
+      "credentialValidationFailed": "Не удалось проверить ваши учётные данные. Попробуйте снова.",
+      "apiKeyRequired": "Требуется API-ключ.",
+      "tokenRequired": "Требуется bearer-токен.",
+      "basicRequired": "Требуются имя пользователя и пароль."
+    },
+    "title": "Интеграции",
+    "subtitle": "Подключите приложения, которые Coasty сможет использовать от вашего имени в любом чате.",
+    "connectedSuffix": "подключено",
+    "refresh": "Обновить",
+    "newConnection": "Новая интеграция",
+    "retry": "Повторить",
+    "noFilteredConnections": "Пока нет приложений со статусом {filter}",
+    "noFilteredDescription": "Попробуйте другой фильтр или подключите новое приложение.",
+    "filters": {
+      "all": "Все",
+      "active": "Активные",
+      "connecting": "Подключаются",
+      "expired": "Истекли",
+      "failed": "С ошибкой"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Подключённые приложения",
+      "subheading": "Coasty может использовать эти приложения в любом чате от Вашего имени.",
+      "connectNewApp": "Новое приложение",
+      "manageOnFullPage": "Открыть всю страницу"
+    }
   }
 }

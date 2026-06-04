@@ -868,6 +868,11 @@
       "npsVeryLikely": "Mycket troligt",
       "thanks": "Tack för feedbacken",
       "creditsLabel": "krediter"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Din anslutning till {appName} har gått ut.",
+      "reconnectLink": "Återanslut"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "om {count}m",
     "inHours": "om {count}h",
     "today": "idag",
-    "yesterday": "igar"
+    "yesterday": "igar",
+    "connections": "Appar",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Logga in",
@@ -2413,6 +2420,13 @@
         "download": "Ladda ner skrivbordsappen",
         "compare": "Jämför AI-agenter"
       }
+    },
+    "connections": {
+      "title": "Anslutningar",
+      "description": "Anslut Gmail, Slack, Notion, GitHub och hundratals andra appar. Tillgängliga i varje chatt.",
+      "ogTitle": "Integrationer – koppla 250+ appar till din Coasty-agent",
+      "ogDescription": "Ta in Gmail, Slack, GitHub, Notion, Google Calendar, Linear och hundratals andra appar i varje chatt. Säkrat med OAuth, alltid på, används av Coasty-agenter åt dig.",
+      "twitterDescription": "Koppla Gmail, Slack, GitHub, Notion och 250+ appar till Coasty. En OAuth, som din agent använder i varje chatt."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Hänvisning",
         "description": "Bjud in vänner och tjäna krediter"
+      },
+      "integrations": {
+        "label": "Integrationer",
+        "description": "Anslut tredjepartsappar"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Hänvisningar",
       "description": "Dela Coasty. Tjäna tillsammans."
+    },
+    "connections": {
+      "title": "Dina integrationer",
+      "description": "Hämtar dina kopplade appar och verktyg."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 vid överföring",
     "trustAtRest": "AES-256-GCM i vila",
     "trustNoTraining": "Ingen träning på dina data"
+  },
+  "connections": {
+    "page": {
+      "title": "Anslutningar",
+      "description": "Anslut Gmail, Slack, Notion, GitHub och hundratals andra appar. Tillgängliga i varje chatt."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Ansluten",
+      "initiated": "Ansluter",
+      "expired": "Utgången",
+      "failed": "Återkallad",
+      "failedShort": "Fel",
+      "inactive": "Inaktiv"
+    },
+    "toasts": {
+      "disconnectFailed": "Kunde inte koppla från",
+      "disconnected": "Kopplade från {appName}",
+      "reconnectFailed": "Kunde inte starta återanslutning",
+      "connected": "{app} kopplad",
+      "error": "Något gick fel. Försök igen."
+    },
+    "card": {
+      "logoAlt": "{appName}-logotyp",
+      "fallbackAccountLabel": "Ansluten",
+      "connectedOn": "Ansluten den {date}",
+      "lastUsed": "Senast använd {time}",
+      "actions": {
+        "reconnect": "Återanslut",
+        "disconnect": "Koppla från",
+        "menuAriaLabel": "Anslutningsåtgärder"
+      },
+      "error": {
+        "expired": "Behörigheten har gått ut. Återanslut för att återställa verktygsåtkomsten.",
+        "revoked": "Anslutningen har återkallats. Återanslut för att återställa verktygsåtkomsten."
+      },
+      "disconnectDialog": {
+        "title": "Koppla från {appName}?",
+        "connectedOn": "ansluten {date}",
+        "consequence": {
+          "revokeOauth": "Composio återkallar OAuth-behörigheten",
+          "toolsStop": "Verktyg som använder den här anslutningen slutar fungera"
+        },
+        "confirm": "Koppla från",
+        "cancel": "Behåll anslutningen"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logotyp",
+      "headline": "Anslut din första app",
+      "subheadline": "Auktorisera en gång och din AI kan läsa din e-post, posta i Slack, uppdatera dokument och mycket mer, automatiskt, i varje chatt.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Verktyg i varje chatt",
+          "desc": "När du anslutit dem använder din AI dem automatiskt."
+        },
+        "secureOauth": {
+          "title": "Säker OAuth",
+          "desc": "Auktorisera en gång, återkalla när du vill."
+        },
+        "hundredsOfApps": {
+          "title": "Hundratals appar",
+          "desc": "E-post, kalendrar, CRM-system, dokument, kod och mycket mer."
+        }
+      },
+      "browseAppsCta": "Bläddra bland appar"
+    },
+    "connectDialog": {
+      "title": "Anslut en app",
+      "description": "Bläddra bland hundratals integrationer som drivs av Composio.",
+      "searchPlaceholder": "Sök bland appar…",
+      "clearSearchAria": "Rensa sökning",
+      "categories": {
+        "all": "Alla",
+        "communication": "Kommunikation",
+        "productivity": "Produktivitet",
+        "calendar": "Kalender",
+        "developer": "Utvecklare",
+        "crmSales": "CRM och sälj"
+      },
+      "sections": {
+        "featured": "Utvalda",
+        "allApps": "Alla appar"
+      },
+      "card": {
+        "logoAlt": "{name}-logotyp",
+        "alreadyConnectedTooltip": "Redan ansluten. Hantera från sidan Anslutningar",
+        "connectedLabel": "Ansluten",
+        "connectFallbackDescription": "Anslut {name} till din AI"
+      },
+      "footer": {
+        "poweredBy": "drivs av Composio",
+        "cancel": "Avbryt"
+      },
+      "empty": {
+        "noMatchTitle": "Inga appar matchar \"{query}\"",
+        "noAppsTitle": "Inga appar tillgängliga",
+        "noMatchBody": "Försök med en kortare sökterm eller en annan kategori.",
+        "noAppsBody": "Composio-integrationer visas här när de har konfigurerats."
+      },
+      "errors": {
+        "failedToStart": "Kunde inte starta anslutningen"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Anslut med Composio",
+          "connectWithApiKey": "Spara och anslut",
+          "connectWithBearerToken": "Spara och anslut",
+          "connectWithBasic": "Spara och anslut",
+          "connectNoAuth": "Aktivera",
+          "connecting": "Ansluter..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-nyckel",
+          "apiKeyPlaceholder": "Klistra in din API-nyckel",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Klistra in din bearer-token",
+          "basicAuthUsername": "Användarnamn",
+          "basicAuthPassword": "Lösenord",
+          "basicAuthUsernamePlaceholder": "Kontots användarnamn",
+          "basicAuthPasswordPlaceholder": "Kontots lösenord",
+          "revealSecret": "Visa",
+          "hideSecret": "Dölj"
+        },
+        "noAuthHint": "{name} kräver inga inloggningsuppgifter. Klicka på Aktivera för att lägga till det i din arbetsyta.",
+        "apiKeyHelp": "Var hittar jag detta?",
+        "connectedToast": "Ansluten till {name}",
+        "unsupported": {
+          "title": "Den här anslutningstypen stöds inte ännu",
+          "body": "{name} använder ett {scheme}-autentiseringsflöde som vi ännu inte har kopplat upp i appen. Du kan ansluta det direkt i Composio-panelen så visas det här när det har länkats.",
+          "openComposioDashboard": "Öppna Composio-panelen"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Koppla från {name}",
+      "disconnect": "Koppla från"
+    },
+    "empty": {
+      "title": "Inga appar anslutna",
+      "description": "Anslut Gmail, Slack, Notion och fler så att Coasty kan använda dem i alla chattar."
+    },
+    "toolInvocation": {
+      "calling": "Anropar {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Din anslutning till {appName} har gått ut.",
+      "reconnectLink": "Återanslut"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Kunde inte ladda anslutningar (HTTP {status})",
+      "loadToolkitsFailed": "Kunde inte ladda verktygspaket (HTTP {status})",
+      "startConnectionFailed": "Kunde inte starta anslutningen (HTTP {status})",
+      "disconnectFailedHttp": "Kunde inte koppla från (HTTP {status})",
+      "credentialsRequired": "Fyll i alla obligatoriska fält för att fortsätta.",
+      "credentialsErrorPrefix": "Anslutningen misslyckades:",
+      "unknownToolkit": "Vi känner inte igen den här appen. Uppdatera katalogen och försök igen.",
+      "unsupportedAuthScheme": "Den här autentiseringsmetoden stöds inte ännu i appen.",
+      "missingCredentials": "Obligatoriska fält saknas: {fields}",
+      "invalidCredentials": "Inloggningsuppgifterna avvisades. Kontrollera dem och försök igen.",
+      "credentialValidationFailed": "Det gick inte att validera dina inloggningsuppgifter. Försök igen.",
+      "apiKeyRequired": "En API-nyckel krävs.",
+      "tokenRequired": "En bearer-token krävs.",
+      "basicRequired": "Användarnamn och lösenord krävs."
+    },
+    "title": "Integrationer",
+    "subtitle": "Koppla apparna som Coasty får använda åt dig i alla chattar.",
+    "connectedSuffix": "kopplade",
+    "refresh": "Uppdatera",
+    "newConnection": "Ny integration",
+    "retry": "Försök igen",
+    "noFilteredConnections": "Inga {filter}-appar ännu",
+    "noFilteredDescription": "Prova ett annat filter eller anslut en ny app för att komma igång.",
+    "filters": {
+      "all": "Alla",
+      "active": "Aktiva",
+      "connecting": "Kopplar",
+      "expired": "Utgångna",
+      "failed": "Misslyckade"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Anslutna appar",
+      "subheading": "Coasty kan använda dessa appar åt dig i alla chattar.",
+      "connectNewApp": "Anslut ny app",
+      "manageOnFullPage": "Hantera på hela sidan"
+    }
   }
 }

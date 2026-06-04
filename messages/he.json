@@ -868,6 +868,11 @@
       "npsVeryLikely": "סביר מאוד",
       "thanks": "תודה על המשוב",
       "creditsLabel": "קרדיטים"
+    },
+    "composioReauth": {
+      "fallbackAppName": "אפליקציה",
+      "expiredMessage": "תוקף החיבור ל־{appName} פג.",
+      "reconnectLink": "חבר מחדש"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "בעוד {count} דק'",
     "inHours": "בעוד {count} שע'",
     "today": "היום",
-    "yesterday": "אתמול"
+    "yesterday": "אתמול",
+    "connections": "אפליקציות",
+    "resources": "סוכן"
   },
   "appHeader": {
     "login": "התחבר",
@@ -2413,6 +2420,13 @@
         "download": "הורדת אפליקציית שולחן עבודה",
         "compare": "השוואת סוכני AI"
       }
+    },
+    "connections": {
+      "title": "חיבורים",
+      "description": "חברו את Gmail, Slack, Notion, GitHub ומאות אפליקציות נוספות. זמין בכל צ׳אט.",
+      "ogTitle": "חיבורים — חברו 250+ אפליקציות לסוכן ה-AI של Coasty",
+      "ogDescription": "הכניסו את Gmail, Slack, GitHub, Notion, Google Calendar, Linear ומאות אפליקציות נוספות לכל שיחה. מאובטח ב-OAuth, פעיל תמיד, ובשימוש סוכני Coasty בשמכם.",
+      "twitterDescription": "חברו את Gmail, Slack, GitHub, Notion ועוד 250+ אפליקציות ל-Coasty. OAuth אחד, בשימוש הסוכן שלכם בכל שיחה."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "הפניה",
         "description": "הזמן חברים והרווח קרדיטים"
+      },
+      "integrations": {
+        "label": "אינטגרציות",
+        "description": "חיבור אפליקציות צד שלישי"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "הפניות",
       "description": "שתף את Coasty. הרוויחו ביחד."
+    },
+    "connections": {
+      "title": "החיבורים שלכם",
+      "description": "מושך את האפליקציות וערכות הכלים המחוברות שלכם."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 בהעברה",
     "trustAtRest": "AES-256-GCM במנוחה",
     "trustNoTraining": "ללא אימון על הנתונים שלך"
+  },
+  "connections": {
+    "page": {
+      "title": "חיבורים",
+      "description": "חברו את Gmail, Slack, Notion, GitHub ומאות אפליקציות נוספות. זמין בכל צ׳אט."
+    },
+    "fallbackAppName": "אפליקציה",
+    "status": {
+      "active": "מחובר",
+      "initiated": "מתחבר",
+      "expired": "פג תוקף",
+      "failed": "בוטל",
+      "failedShort": "נכשל",
+      "inactive": "לא פעיל"
+    },
+    "toasts": {
+      "disconnectFailed": "ניתוק נכשל",
+      "disconnected": "{appName} נותק",
+      "reconnectFailed": "התחלת חיבור מחדש נכשלה",
+      "connected": "{app} חובר בהצלחה",
+      "error": "משהו השתבש. אנא נסו שוב."
+    },
+    "card": {
+      "logoAlt": "לוגו של {appName}",
+      "fallbackAccountLabel": "מחובר",
+      "connectedOn": "חובר ב־{date}",
+      "lastUsed": "שימוש אחרון {time}",
+      "actions": {
+        "reconnect": "חבר מחדש",
+        "disconnect": "נתק",
+        "menuAriaLabel": "פעולות חיבור"
+      },
+      "error": {
+        "expired": "ההרשאה פגה. חברו מחדש כדי לשחזר את הגישה לכלים.",
+        "revoked": "החיבור בוטל. חברו מחדש כדי לשחזר את הגישה לכלים."
+      },
+      "disconnectDialog": {
+        "title": "לנתק את {appName}?",
+        "connectedOn": "חובר ב־{date}",
+        "consequence": {
+          "revokeOauth": "Composio תבטל את הרשאת ה־OAuth",
+          "toolsStop": "כלים שמשתמשים בחיבור הזה יפסיקו לפעול"
+        },
+        "confirm": "נתק",
+        "cancel": "השאר את החיבור"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "לוגו של {name}",
+      "headline": "חברו את האפליקציה הראשונה שלכם",
+      "subheadline": "אשרו פעם אחת וה־AI שלכם יוכל לקרוא את האימייל, לפרסם ב־Slack, לעדכן מסמכים ועוד, באופן אוטומטי, בכל צ׳אט.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "כלים בכל צ׳אט",
+          "desc": "ברגע שמתחברים, ה־AI משתמש בהם אוטומטית."
+        },
+        "secureOauth": {
+          "title": "OAuth מאובטח",
+          "desc": "אשרו פעם אחת, בטלו בכל רגע."
+        },
+        "hundredsOfApps": {
+          "title": "מאות אפליקציות",
+          "desc": "אימייל, יומנים, מערכות CRM, מסמכים, קוד ועוד."
+        }
+      },
+      "browseAppsCta": "עיון באפליקציות"
+    },
+    "connectDialog": {
+      "title": "חיבור אפליקציה",
+      "description": "עיינו במאות אינטגרציות המופעלות על ידי Composio.",
+      "searchPlaceholder": "חיפוש אפליקציות…",
+      "clearSearchAria": "ניקוי החיפוש",
+      "categories": {
+        "all": "הכול",
+        "communication": "תקשורת",
+        "productivity": "פרודוקטיביות",
+        "calendar": "יומן",
+        "developer": "מפתחים",
+        "crmSales": "CRM ומכירות"
+      },
+      "sections": {
+        "featured": "מומלצים",
+        "allApps": "כל האפליקציות"
+      },
+      "card": {
+        "logoAlt": "לוגו של {name}",
+        "alreadyConnectedTooltip": "כבר מחובר. לניהול עברו לעמוד החיבורים",
+        "connectedLabel": "מחובר",
+        "connectFallbackDescription": "חברו את {name} ל־AI שלכם"
+      },
+      "footer": {
+        "poweredBy": "מופעל על ידי Composio",
+        "cancel": "ביטול"
+      },
+      "empty": {
+        "noMatchTitle": "אין אפליקציות שתואמות ל־\"{query}\"",
+        "noAppsTitle": "אין אפליקציות זמינות",
+        "noMatchBody": "נסו מונח חיפוש קצר יותר או קטגוריה אחרת.",
+        "noAppsBody": "אינטגרציות Composio יופיעו כאן לאחר ההגדרה."
+      },
+      "errors": {
+        "failedToStart": "התחלת החיבור נכשלה"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "התחבר עם Composio",
+          "connectWithApiKey": "שמור והתחבר",
+          "connectWithBearerToken": "שמור והתחבר",
+          "connectWithBasic": "שמור והתחבר",
+          "connectNoAuth": "הפעל",
+          "connecting": "מתחבר..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "מפתח API",
+          "apiKeyPlaceholder": "הדבק את מפתח ה-API שלך",
+          "bearerTokenLabel": "אסימון Bearer",
+          "bearerTokenPlaceholder": "הדבק את אסימון ה-Bearer שלך",
+          "basicAuthUsername": "שם משתמש",
+          "basicAuthPassword": "סיסמה",
+          "basicAuthUsernamePlaceholder": "שם המשתמש של חשבונך",
+          "basicAuthPasswordPlaceholder": "הסיסמה של חשבונך",
+          "revealSecret": "הצג",
+          "hideSecret": "הסתר"
+        },
+        "noAuthHint": "{name} אינו דורש אישורים. לחץ על הפעל כדי להוסיף אותו למרחב העבודה שלך.",
+        "apiKeyHelp": "היכן ניתן למצוא זאת?",
+        "connectedToast": "חובר אל {name}",
+        "unsupported": {
+          "title": "סוג חיבור זה אינו נתמך עדיין",
+          "body": "{name} משתמש בזרימת אימות מסוג {scheme} שעדיין לא חיברנו באפליקציה. ניתן לחבר אותו ישירות בלוח הבקרה של Composio והוא יופיע כאן לאחר החיבור.",
+          "openComposioDashboard": "פתח את לוח הבקרה של Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "ניתוק {name}",
+      "disconnect": "נתק"
+    },
+    "empty": {
+      "title": "אין אפליקציות מחוברות",
+      "description": "חברו את Gmail, Slack, Notion ועוד כדי ש־Coasty יוכל להשתמש בהן בכל צ׳אט."
+    },
+    "toolInvocation": {
+      "calling": "מפעיל את {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "אפליקציה",
+      "expiredMessage": "תוקף החיבור ל־{appName} פג.",
+      "reconnectLink": "חבר מחדש"
+    },
+    "errors": {
+      "loadConnectionsFailed": "טעינת החיבורים נכשלה (HTTP {status})",
+      "loadToolkitsFailed": "טעינת ערכות הכלים נכשלה (HTTP {status})",
+      "startConnectionFailed": "התחלת החיבור נכשלה (HTTP {status})",
+      "disconnectFailedHttp": "ניתוק נכשל (HTTP {status})",
+      "credentialsRequired": "אנא מלא את כל השדות הנדרשים כדי להמשיך.",
+      "credentialsErrorPrefix": "החיבור נכשל:",
+      "unknownToolkit": "אנו לא מזהים את האפליקציה הזו. רענן את הקטלוג ונסה שוב.",
+      "unsupportedAuthScheme": "שיטת אימות זו אינה נתמכת עדיין באפליקציה.",
+      "missingCredentials": "שדות חובה חסרים: {fields}",
+      "invalidCredentials": "האישורים נדחו. אנא בדוק שוב ונסה שוב.",
+      "credentialValidationFailed": "לא ניתן היה לאמת את האישורים שלך. נסה שוב.",
+      "apiKeyRequired": "נדרש מפתח API.",
+      "tokenRequired": "נדרש אסימון Bearer.",
+      "basicRequired": "נדרשים שם משתמש וסיסמה."
+    },
+    "title": "חיבורים",
+    "subtitle": "חברו את האפליקציות ש-Coasty יוכל להשתמש בהן בשמכם בכל שיחה.",
+    "connectedSuffix": "מחוברים",
+    "refresh": "רענון",
+    "newConnection": "חיבור חדש",
+    "retry": "נסו שוב",
+    "noFilteredConnections": "אין עדיין אפליקציות במצב {filter}",
+    "noFilteredDescription": "נסו סינון אחר או חברו אפליקציה חדשה כדי להתחיל.",
+    "filters": {
+      "all": "הכול",
+      "active": "פעילים",
+      "connecting": "מתחברים",
+      "expired": "פגי תוקף",
+      "failed": "נכשלו"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "אפליקציות מחוברות",
+      "subheading": "Coasty יכול להשתמש באפליקציות האלה בכל צ׳אט בשמכם.",
+      "connectNewApp": "חברו אפליקציה",
+      "manageOnFullPage": "ניהול בעמוד מלא"
+    }
   }
 }

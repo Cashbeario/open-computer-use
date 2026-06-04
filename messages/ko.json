@@ -868,6 +868,11 @@
       "npsVeryLikely": "가능성 높음",
       "thanks": "피드백 감사합니다",
       "creditsLabel": "크레딧"
+    },
+    "composioReauth": {
+      "fallbackAppName": "앱",
+      "expiredMessage": "{appName} 연결이 만료되었습니다.",
+      "reconnectLink": "다시 연결"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "{count}분 후",
     "inHours": "{count}시간 후",
     "today": "오늘",
-    "yesterday": "어제"
+    "yesterday": "어제",
+    "connections": "앱",
+    "resources": "에이전트"
   },
   "appHeader": {
     "login": "로그인",
@@ -2413,6 +2420,13 @@
         "download": "데스크톱 앱 다운로드",
         "compare": "AI 에이전트 비교"
       }
+    },
+    "connections": {
+      "title": "연결",
+      "description": "Gmail, Slack, Notion, GitHub 등 수백 개의 앱을 연결하세요. 모든 채팅에서 바로 사용할 수 있습니다.",
+      "ogTitle": "Coasty에 250개 이상의 앱 연결",
+      "ogDescription": "Gmail, Slack, GitHub, Notion 등 수백 개의 앱을 모든 채팅에 연결하세요. OAuth로 안전하게, 에이전트가 대신 사용합니다.",
+      "twitterDescription": "Gmail, Slack, GitHub, Notion 등 250개 이상의 앱을 Coasty에 연결하세요. 한 번의 OAuth로 모든 채팅에서 에이전트가 사용합니다."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "추천",
         "description": "친구를 초대하고 크레딧을 받으세요"
+      },
+      "integrations": {
+        "label": "통합",
+        "description": "외부 앱 연결"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "추천",
       "description": "Coasty를 공유하세요. 함께 적립하세요."
+    },
+    "connections": {
+      "title": "내 Connections",
+      "description": "연결된 앱과 툴킷을 가져오고 있습니다."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "전송 중 TLS 1.3",
     "trustAtRest": "저장 시 AES-256-GCM",
     "trustNoTraining": "귀하의 데이터로 학습 안 함"
+  },
+  "connections": {
+    "page": {
+      "title": "연결",
+      "description": "Gmail, Slack, Notion, GitHub 등 수백 개의 앱을 연결하세요. 모든 채팅에서 바로 사용할 수 있습니다."
+    },
+    "fallbackAppName": "앱",
+    "status": {
+      "active": "연결됨",
+      "initiated": "연결 중",
+      "expired": "만료됨",
+      "failed": "권한 취소됨",
+      "failedShort": "실패",
+      "inactive": "비활성"
+    },
+    "toasts": {
+      "disconnectFailed": "연결 해제에 실패했습니다",
+      "disconnected": "{appName} 연결을 해제했습니다",
+      "reconnectFailed": "재연결을 시작하지 못했습니다",
+      "connected": "{app} 연결됨",
+      "error": "문제가 발생했습니다. 다시 시도해 주세요."
+    },
+    "card": {
+      "logoAlt": "{appName} 로고",
+      "fallbackAccountLabel": "연결됨",
+      "connectedOn": "{date}에 연결됨",
+      "lastUsed": "마지막 사용: {time}",
+      "actions": {
+        "reconnect": "다시 연결",
+        "disconnect": "연결 해제",
+        "menuAriaLabel": "연결 작업"
+      },
+      "error": {
+        "expired": "인증이 만료되었습니다. 다시 연결하여 도구 사용을 복구하세요.",
+        "revoked": "연결 권한이 취소되었습니다. 다시 연결하여 도구 사용을 복구하세요."
+      },
+      "disconnectDialog": {
+        "title": "{appName} 연결을 해제할까요?",
+        "connectedOn": "{date}에 연결됨",
+        "consequence": {
+          "revokeOauth": "Composio가 OAuth 권한을 취소합니다",
+          "toolsStop": "이 연결을 사용하는 도구가 작동을 멈춥니다"
+        },
+        "confirm": "연결 해제",
+        "cancel": "연결 유지"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} 로고",
+      "headline": "첫 번째 앱을 연결해 보세요",
+      "subheadline": "한 번만 인증하면 AI가 이메일을 읽고, Slack에 글을 올리고, 문서를 업데이트하는 등 모든 채팅에서 자동으로 작업을 처리합니다."
+    },
+    "features": {
+      "toolsInEveryChat": {
+        "title": "모든 채팅에서 사용 가능한 도구",
+        "desc": "한 번 연결하면 AI가 자동으로 사용합니다."
+      },
+      "secureOauth": {
+        "title": "안전한 OAuth",
+        "desc": "한 번 인증하고 언제든 권한을 취소할 수 있습니다."
+      },
+      "hundredsOfApps": {
+        "title": "수백 개의 앱",
+        "desc": "이메일, 캘린더, CRM, 문서, 코드 등."
+      }
+    },
+    "browseAppsCta": "앱 둘러보기",
+    "connectDialog": {
+      "title": "앱 연결",
+      "description": "Composio가 제공하는 수백 개의 통합을 둘러보세요.",
+      "searchPlaceholder": "앱 검색…",
+      "clearSearchAria": "검색어 지우기",
+      "categories": {
+        "all": "전체",
+        "communication": "커뮤니케이션",
+        "productivity": "생산성",
+        "calendar": "캘린더",
+        "developer": "개발자",
+        "crmSales": "CRM 및 영업"
+      },
+      "sections": {
+        "featured": "추천",
+        "allApps": "모든 앱"
+      },
+      "card": {
+        "logoAlt": "{name} 로고",
+        "alreadyConnectedTooltip": "이미 연결됨 — 연결 페이지에서 관리할 수 있습니다",
+        "connectedLabel": "연결됨",
+        "connectFallbackDescription": "{name}을(를) AI에 연결합니다"
+      },
+      "footer": {
+        "poweredBy": "powered by Composio",
+        "cancel": "취소"
+      },
+      "empty": {
+        "noMatchTitle": "\"{query}\"에 해당하는 앱이 없습니다",
+        "noAppsTitle": "사용 가능한 앱이 없습니다",
+        "noMatchBody": "더 짧은 검색어를 시도하거나 다른 카테고리를 선택해 보세요.",
+        "noAppsBody": "Composio 통합이 구성되면 여기에 표시됩니다."
+      },
+      "errors": {
+        "failedToStart": "연결을 시작하지 못했습니다"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Composio로 연결",
+          "connectWithApiKey": "저장 및 연결",
+          "connectWithBearerToken": "저장 및 연결",
+          "connectWithBasic": "저장 및 연결",
+          "connectNoAuth": "활성화",
+          "connecting": "연결 중..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API 키",
+          "apiKeyPlaceholder": "API 키를 붙여넣으세요",
+          "bearerTokenLabel": "Bearer 토큰",
+          "bearerTokenPlaceholder": "Bearer 토큰을 붙여넣으세요",
+          "basicAuthUsername": "사용자 이름",
+          "basicAuthPassword": "비밀번호",
+          "basicAuthUsernamePlaceholder": "계정 사용자 이름",
+          "basicAuthPasswordPlaceholder": "계정 비밀번호",
+          "revealSecret": "표시",
+          "hideSecret": "숨기기"
+        },
+        "noAuthHint": "{name}은(는) 자격 증명이 필요하지 않습니다. 활성화를 클릭하여 워크스페이스에 추가하세요.",
+        "apiKeyHelp": "이것은 어디서 찾을 수 있나요?",
+        "connectedToast": "{name}에 연결됨",
+        "unsupported": {
+          "title": "이 연결 유형은 아직 지원되지 않습니다",
+          "body": "{name}은(는) 앱에 아직 연결되지 않은 {scheme} 인증 흐름을 사용합니다. Composio 대시보드에서 직접 연결할 수 있으며 연결되면 여기에 표시됩니다.",
+          "openComposioDashboard": "Composio 대시보드 열기"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} 연결 해제",
+      "disconnect": "연결 해제"
+    },
+    "empty": {
+      "title": "연결된 앱이 없습니다",
+      "description": "Gmail, Slack, Notion 등을 연결하면 Coasty가 모든 채팅에서 활용할 수 있습니다."
+    },
+    "toolInvocation": {
+      "calling": "{toolkit} 호출 중: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "앱",
+      "expiredMessage": "{appName} 연결이 만료되었습니다.",
+      "reconnectLink": "다시 연결"
+    },
+    "errors": {
+      "loadConnectionsFailed": "연결을 불러오지 못했습니다 (HTTP {status})",
+      "loadToolkitsFailed": "툴킷을 불러오지 못했습니다 (HTTP {status})",
+      "startConnectionFailed": "연결을 시작하지 못했습니다 (HTTP {status})",
+      "disconnectFailedHttp": "연결 해제에 실패했습니다 (HTTP {status})",
+      "credentialsRequired": "계속하려면 모든 필수 항목을 입력하세요.",
+      "credentialsErrorPrefix": "연결 실패:",
+      "unknownToolkit": "이 앱을 인식할 수 없습니다. 카탈로그를 새로고침하고 다시 시도하세요.",
+      "unsupportedAuthScheme": "이 인증 방식은 아직 앱에서 지원되지 않습니다.",
+      "missingCredentials": "필수 항목이 누락되었습니다: {fields}",
+      "invalidCredentials": "자격 증명이 거부되었습니다. 다시 확인하고 시도하세요.",
+      "credentialValidationFailed": "자격 증명을 확인할 수 없습니다. 다시 시도해 주세요.",
+      "apiKeyRequired": "API 키가 필요합니다.",
+      "tokenRequired": "Bearer 토큰이 필요합니다.",
+      "basicRequired": "사용자 이름과 비밀번호가 필요합니다."
+    },
+    "title": "Connections",
+    "subtitle": "Coasty가 모든 채팅에서 사용자 대신 사용할 앱을 연결하세요.",
+    "connectedSuffix": "개 연결됨",
+    "refresh": "새로고침",
+    "newConnection": "새 연결",
+    "retry": "다시 시도",
+    "noFilteredConnections": "{filter} 앱이 아직 없습니다",
+    "noFilteredDescription": "다른 필터를 선택하거나 새 앱을 연결해 보세요.",
+    "filters": {
+      "all": "전체",
+      "active": "활성",
+      "connecting": "연결 중",
+      "expired": "만료됨",
+      "failed": "실패"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "연결된 앱",
+      "subheading": "Coasty가 모든 채팅에서 이 앱들을 대신 사용할 수 있습니다.",
+      "connectNewApp": "새 앱 연결",
+      "manageOnFullPage": "전체 페이지에서 관리"
+    }
   }
 }

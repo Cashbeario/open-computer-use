@@ -868,6 +868,11 @@
       "npsVeryLikely": "Sangat mungkin",
       "thanks": "Terima kasih atas maklum balas",
       "creditsLabel": "kredit"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Aplikasi",
+      "expiredMessage": "Sambungan {appName} anda telah tamat tempoh.",
+      "reconnectLink": "Sambung semula"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "dalam {count}m",
     "inHours": "dalam {count}j",
     "today": "hari ini",
-    "yesterday": "semalam"
+    "yesterday": "semalam",
+    "connections": "Aplikasi",
+    "resources": "Ejen"
   },
   "appHeader": {
     "login": "Log Masuk",
@@ -2413,6 +2420,13 @@
         "download": "Muat Turun Aplikasi Desktop",
         "compare": "Bandingkan Ejen AI"
       }
+    },
+    "connections": {
+      "title": "Sambungan",
+      "description": "Sambungkan Gmail, Slack, Notion, GitHub dan ratusan aplikasi lain. Tersedia dalam setiap perbualan.",
+      "ogTitle": "Sambungan — Hubungkan 250+ Aplikasi ke Ejen AI Coasty Anda",
+      "ogDescription": "Bawa Gmail, Slack, GitHub, Notion, Google Calendar, Linear dan ratusan aplikasi lain ke dalam setiap perbualan. Dilindungi OAuth, sentiasa aktif, digunakan oleh ejen Coasty bagi pihak anda.",
+      "twitterDescription": "Sambungkan Gmail, Slack, GitHub, Notion dan 250+ aplikasi ke Coasty. Satu OAuth, digunakan dalam setiap perbualan oleh ejen anda."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Rujukan",
         "description": "Jemput kawan dan dapatkan kredit"
+      },
+      "integrations": {
+        "label": "Integrasi",
+        "description": "Sambungkan aplikasi pihak ketiga"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Rujukan",
       "description": "Kongsi Coasty. Dapatkan bersama."
+    },
+    "connections": {
+      "title": "Sambungan Anda",
+      "description": "Mengambil aplikasi dan toolkit yang anda sambungkan."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 semasa transit",
     "trustAtRest": "AES-256-GCM semasa tersimpan",
     "trustNoTraining": "Tiada latihan pada data anda"
+  },
+  "connections": {
+    "page": {
+      "title": "Sambungan",
+      "description": "Sambungkan Gmail, Slack, Notion, GitHub dan ratusan aplikasi lain. Tersedia dalam setiap perbualan."
+    },
+    "fallbackAppName": "aplikasi",
+    "status": {
+      "active": "Disambungkan",
+      "initiated": "Menyambung",
+      "expired": "Tamat tempoh",
+      "failed": "Dibatalkan",
+      "failedShort": "Gagal",
+      "inactive": "Tidak aktif"
+    },
+    "toasts": {
+      "disconnectFailed": "Gagal memutuskan sambungan",
+      "disconnected": "{appName} diputuskan",
+      "reconnectFailed": "Gagal memulakan sambungan semula",
+      "connected": "{app} disambungkan",
+      "error": "Sesuatu tidak kena. Sila cuba lagi."
+    },
+    "card": {
+      "logoAlt": "Logo {appName}",
+      "fallbackAccountLabel": "Disambungkan",
+      "connectedOn": "Disambungkan pada {date}",
+      "lastUsed": "Terakhir digunakan {time}",
+      "actions": {
+        "reconnect": "Sambung",
+        "disconnect": "Putuskan sambungan",
+        "menuAriaLabel": "Tindakan sambungan"
+      },
+      "error": {
+        "expired": "Kebenaran tamat tempoh. Sambung semula untuk memulihkan akses alat.",
+        "revoked": "Sambungan dibatalkan. Sambung semula untuk memulihkan akses alat."
+      },
+      "disconnectDialog": {
+        "title": "Putuskan sambungan {appName}?",
+        "connectedOn": "disambungkan {date}",
+        "consequence": {
+          "revokeOauth": "Composio akan membatalkan kebenaran OAuth",
+          "toolsStop": "Alat yang menggunakan sambungan ini akan berhenti berfungsi"
+        },
+        "confirm": "Putuskan sambungan",
+        "cancel": "Kekalkan sambungan"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo {name}",
+      "headline": "Sambungkan aplikasi pertama anda",
+      "subheadline": "Beri kebenaran sekali sahaja dan AI anda boleh membaca e-mel, menyiarkan ke Slack, mengemas kini dokumen, dan banyak lagi, secara automatik, dalam setiap perbualan.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Alat dalam setiap perbualan",
+          "desc": "Setelah disambungkan, AI anda menggunakannya secara automatik."
+        },
+        "secureOauth": {
+          "title": "OAuth selamat",
+          "desc": "Beri kebenaran sekali, batalkan bila-bila masa."
+        },
+        "hundredsOfApps": {
+          "title": "Ratusan aplikasi",
+          "desc": "E-mel, kalendar, CRM, dokumen, kod dan banyak lagi."
+        }
+      },
+      "browseAppsCta": "Lihat aplikasi"
+    },
+    "connectDialog": {
+      "title": "Sambungkan aplikasi",
+      "description": "Lihat ratusan integrasi dikuasakan oleh Composio.",
+      "searchPlaceholder": "Cari aplikasi…",
+      "clearSearchAria": "Kosongkan carian",
+      "categories": {
+        "all": "Semua",
+        "communication": "Komunikasi",
+        "productivity": "Produktiviti",
+        "calendar": "Kalendar",
+        "developer": "Pembangun",
+        "crmSales": "CRM & Jualan"
+      },
+      "sections": {
+        "featured": "Pilihan",
+        "allApps": "Semua apl"
+      },
+      "card": {
+        "logoAlt": "Logo {name}",
+        "alreadyConnectedTooltip": "Telah disambungkan, urus dari halaman Sambungan",
+        "connectedLabel": "Disambungkan",
+        "connectFallbackDescription": "Sambungkan {name} ke AI anda"
+      },
+      "footer": {
+        "poweredBy": "dikuasakan oleh Composio",
+        "cancel": "Batal"
+      },
+      "empty": {
+        "noMatchTitle": "Tiada aplikasi sepadan dengan \"{query}\"",
+        "noAppsTitle": "Tiada aplikasi tersedia",
+        "noMatchBody": "Cuba istilah carian yang lebih pendek atau kategori lain.",
+        "noAppsBody": "Integrasi Composio akan muncul di sini setelah dikonfigurasikan."
+      },
+      "errors": {
+        "failedToStart": "Gagal memulakan sambungan"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Sambung dengan Composio",
+          "connectWithApiKey": "Simpan & sambung",
+          "connectWithBearerToken": "Simpan & sambung",
+          "connectWithBasic": "Simpan & sambung",
+          "connectNoAuth": "Dayakan",
+          "connecting": "Menyambung..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Kunci API",
+          "apiKeyPlaceholder": "Tampal kunci API anda",
+          "bearerTokenLabel": "Token Bearer",
+          "bearerTokenPlaceholder": "Tampal token Bearer anda",
+          "basicAuthUsername": "Nama pengguna",
+          "basicAuthPassword": "Kata laluan",
+          "basicAuthUsernamePlaceholder": "Nama pengguna akaun anda",
+          "basicAuthPasswordPlaceholder": "Kata laluan akaun anda",
+          "revealSecret": "Tunjuk",
+          "hideSecret": "Sembunyi"
+        },
+        "noAuthHint": "{name} tidak memerlukan kelayakan. Klik Dayakan untuk menambahkannya ke ruang kerja anda.",
+        "apiKeyHelp": "Di manakah saya boleh dapatkan ini?",
+        "connectedToast": "Disambungkan ke {name}",
+        "unsupported": {
+          "title": "Jenis sambungan ini belum disokong",
+          "body": "{name} menggunakan aliran pengesahan {scheme} yang belum kami siapkan dalam apl. Anda boleh menyambungkannya terus di papan pemuka Composio dan ia akan muncul di sini selepas dipautkan.",
+          "openComposioDashboard": "Buka papan pemuka Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Putuskan sambungan {name}",
+      "disconnect": "Putuskan"
+    },
+    "empty": {
+      "title": "Tiada aplikasi disambungkan",
+      "description": "Sambungkan Gmail, Slack, Notion dan banyak lagi supaya Coasty boleh menggunakannya dalam mana-mana perbualan."
+    },
+    "toolInvocation": {
+      "calling": "Memanggil {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Aplikasi",
+      "expiredMessage": "Sambungan {appName} anda telah tamat tempoh.",
+      "reconnectLink": "Sambung semula"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Gagal memuatkan sambungan (HTTP {status})",
+      "loadToolkitsFailed": "Gagal memuatkan kit alat (HTTP {status})",
+      "startConnectionFailed": "Gagal memulakan sambungan (HTTP {status})",
+      "disconnectFailedHttp": "Gagal memutuskan sambungan (HTTP {status})",
+      "credentialsRequired": "Sila isi semua medan yang diperlukan untuk meneruskan.",
+      "credentialsErrorPrefix": "Sambungan gagal:",
+      "unknownToolkit": "Kami tidak mengenali apl ini. Sila segarkan katalog dan cuba lagi.",
+      "unsupportedAuthScheme": "Kaedah pengesahan ini belum disokong dalam apl.",
+      "missingCredentials": "Medan yang diperlukan tiada: {fields}",
+      "invalidCredentials": "Kelayakan ditolak. Sila semak semula dan cuba lagi.",
+      "credentialValidationFailed": "Tidak dapat mengesahkan kelayakan anda. Sila cuba lagi.",
+      "apiKeyRequired": "Kunci API diperlukan.",
+      "tokenRequired": "Token Bearer diperlukan.",
+      "basicRequired": "Nama pengguna dan kata laluan diperlukan."
+    },
+    "title": "Sambungan",
+    "subtitle": "Sambungkan aplikasi yang boleh digunakan Coasty bagi pihak anda dalam setiap perbualan.",
+    "connectedSuffix": "disambungkan",
+    "refresh": "Muat semula",
+    "newConnection": "Sambungan baharu",
+    "retry": "Cuba lagi",
+    "noFilteredConnections": "Belum ada apl {filter}",
+    "noFilteredDescription": "Cuba penapis lain, atau sambungkan apl baharu untuk bermula.",
+    "filters": {
+      "all": "Semua",
+      "active": "Aktif",
+      "connecting": "Menyambung",
+      "expired": "Tamat tempoh",
+      "failed": "Gagal"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Aplikasi disambungkan",
+      "subheading": "Coasty boleh menggunakan aplikasi ini dalam mana-mana perbualan bagi pihak anda.",
+      "connectNewApp": "Tambah aplikasi",
+      "manageOnFullPage": "Urus pada halaman penuh"
+    }
   }
 }

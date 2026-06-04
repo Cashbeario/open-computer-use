@@ -868,6 +868,11 @@
       "npsVeryLikely": "Velmi pravděpodobné",
       "thanks": "Děkujeme za zpětnou vazbu",
       "creditsLabel": "kreditů"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Aplikace",
+      "expiredMessage": "Vaše připojení {appName} vypršelo.",
+      "reconnectLink": "Připojit znovu"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "za {count}m",
     "inHours": "za {count}h",
     "today": "dnes",
-    "yesterday": "včera"
+    "yesterday": "včera",
+    "connections": "Aplikace",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Přihlásit se",
@@ -2413,6 +2420,13 @@
         "download": "Stáhnout desktopovou aplikaci",
         "compare": "Porovnat AI agenty"
       }
+    },
+    "connections": {
+      "title": "Připojení",
+      "description": "Připojte Gmail, Slack, Notion, GitHub a stovky dalších aplikací. Dostupné v každém chatu.",
+      "ogTitle": "Připojení — Propojte 250+ aplikací s vaším AI agentem Coasty",
+      "ogDescription": "Přidejte Gmail, Slack, GitHub, Notion, Google Calendar, Linear a stovky dalších aplikací do každého chatu. Zabezpečené přes OAuth, vždy připravené a používané agenty Coasty vaším jménem.",
+      "twitterDescription": "Propojte Gmail, Slack, GitHub, Notion a více než 250 aplikací s Coasty. Jedno OAuth, které váš agent využívá v každém chatu."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Doporučení",
         "description": "Pozvi přátele a získej kredity"
+      },
+      "integrations": {
+        "label": "Integrace",
+        "description": "Připojte aplikace třetích stran"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Doporučení",
       "description": "Sdílej Coasty. Vydělávejte společně."
+    },
+    "connections": {
+      "title": "Vaše připojení",
+      "description": "Získáváme vaše propojené aplikace a sady nástrojů."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,201 @@
     "trustTransit": "TLS 1.3 při přenosu",
     "trustAtRest": "AES-256-GCM v klidu",
     "trustNoTraining": "Žádné trénování na vašich datech"
+  },
+  "connections": {
+    "page": {
+      "title": "Připojení",
+      "description": "Připojte Gmail, Slack, Notion, GitHub a stovky dalších aplikací. Dostupné v každém chatu."
+    },
+    "fallbackAppName": "aplikace",
+    "status": {
+      "active": "Připojeno",
+      "initiated": "Připojování",
+      "expired": "Vypršelo",
+      "failed": "Zrušeno",
+      "failedShort": "Selhalo",
+      "inactive": "Neaktivní"
+    },
+    "toasts": {
+      "disconnectFailed": "Odpojení se nezdařilo",
+      "disconnected": "Aplikace {appName} odpojena",
+      "reconnectFailed": "Nepodařilo se zahájit opětovné připojení",
+      "connected": "Připojeno: {app}",
+      "error": "Něco se nepovedlo. Zkuste to prosím znovu."
+    },
+    "card": {
+      "logoAlt": "Logo {appName}",
+      "fallbackAccountLabel": "Připojeno",
+      "connectedOn": "Připojeno {date}",
+      "lastUsed": "Naposledy použito {time}",
+      "actions": {
+        "reconnect": "Obnovit",
+        "disconnect": "Odpojit",
+        "menuAriaLabel": "Akce připojení"
+      },
+      "error": {
+        "expired": "Autorizace vypršela. Připojte se znovu, abyste obnovili přístup k nástrojům.",
+        "revoked": "Připojení bylo zrušeno. Připojte se znovu, abyste obnovili přístup k nástrojům."
+      },
+      "disconnectDialog": {
+        "title": "Odpojit {appName}?",
+        "connectedOn": "připojeno {date}",
+        "consequence": {
+          "revokeOauth": "Composio zruší udělení OAuth",
+          "toolsStop": "Nástroje využívající toto připojení přestanou fungovat"
+        },
+        "confirm": "Odpojit",
+        "cancel": "Ponechat připojení"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo {name}",
+      "headline": "Připojte svou první aplikaci",
+      "subheadline": "Stačí jednou autorizovat a vaše AI může číst e-maily, posílat zprávy na Slack, aktualizovat dokumenty a další, automaticky, v každém chatu.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Nástroje v každém chatu",
+          "desc": "Jakmile je připojíte, vaše AI je používá automaticky."
+        },
+        "secureOauth": {
+          "title": "Bezpečné OAuth",
+          "desc": "Autorizujte jednou, zrušte kdykoli."
+        },
+        "hundredsOfApps": {
+          "title": "Stovky aplikací",
+          "desc": "E-mail, kalendáře, CRM, dokumenty, kód a další."
+        }
+      },
+      "browseAppsCta": "Procházet aplikace"
+    },
+    "connectDialog": {
+      "title": "Připojit aplikaci",
+      "description": "Procházejte stovky integrací poháněných Composio.",
+      "searchPlaceholder": "Hledat aplikace…",
+      "clearSearchAria": "Smazat hledání",
+      "categories": {
+        "all": "Vše",
+        "communication": "Komunikace",
+        "productivity": "Produktivita",
+        "calendar": "Kalendář",
+        "developer": "Vývojáři",
+        "crmSales": "CRM a prodej"
+      },
+      "sections": {
+        "featured": "Doporučeno",
+        "allApps": "Všechny aplikace"
+      },
+      "card": {
+        "logoAlt": "Logo {name}",
+        "alreadyConnectedTooltip": "Již připojeno, spravujte na stránce Připojení",
+        "connectedLabel": "Připojeno",
+        "connectFallbackDescription": "Připojte {name} ke své AI"
+      },
+      "footer": {
+        "poweredBy": "poháněno Composio",
+        "cancel": "Zrušit"
+      },
+      "empty": {
+        "noMatchTitle": "Žádné aplikace neodpovídají dotazu „{query}“",
+        "noAppsTitle": "Žádné aplikace nejsou k dispozici",
+        "noMatchBody": "Zkuste kratší výraz nebo jinou kategorii.",
+        "noAppsBody": "Integrace Composio se zde objeví po nastavení."
+      },
+      "errors": {
+        "failedToStart": "Nepodařilo se zahájit připojení"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Připojit přes Composio",
+          "connectWithApiKey": "Uložit a připojit",
+          "connectWithBearerToken": "Uložit a připojit",
+          "connectWithBasic": "Uložit a připojit",
+          "connectNoAuth": "Povolit",
+          "connecting": "Připojování..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API klíč",
+          "apiKeyPlaceholder": "Vložte svůj API klíč",
+          "bearerTokenLabel": "Bearer token",
+          "bearerTokenPlaceholder": "Vložte svůj bearer token",
+          "basicAuthUsername": "Uživatelské jméno",
+          "basicAuthPassword": "Heslo",
+          "basicAuthUsernamePlaceholder": "Uživatelské jméno vašeho účtu",
+          "basicAuthPasswordPlaceholder": "Heslo vašeho účtu",
+          "revealSecret": "Zobrazit",
+          "hideSecret": "Skrýt"
+        },
+        "noAuthHint": "{name} nevyžaduje přihlašovací údaje. Kliknutím na Povolit jej přidáte do svého pracovního prostoru.",
+        "apiKeyHelp": "Kde to najdu?",
+        "connectedToast": "Připojeno k {name}",
+        "unsupported": {
+          "title": "Tento typ připojení zatím není podporován",
+          "body": "{name} používá autentizační tok {scheme}, který v aplikaci zatím nemáme zapojený. Můžete jej připojit přímo v ovládacím panelu Composio a po propojení se zobrazí zde.",
+          "openComposioDashboard": "Otevřít panel Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Odpojit {name}",
+      "disconnect": "Odpojit"
+    },
+    "empty": {
+      "title": "Žádné připojené aplikace",
+      "description": "Připojte Gmail, Slack, Notion a další, aby je Coasty mohl používat v kterémkoli chatu."
+    },
+    "toolInvocation": {
+      "calling": "Volání {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Aplikace",
+      "expiredMessage": "Vaše připojení {appName} vypršelo.",
+      "reconnectLink": "Připojit znovu"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Nepodařilo se načíst připojení (HTTP {status})",
+      "loadToolkitsFailed": "Nepodařilo se načíst sady nástrojů (HTTP {status})",
+      "startConnectionFailed": "Nepodařilo se zahájit připojení (HTTP {status})",
+      "disconnectFailedHttp": "Odpojení se nezdařilo (HTTP {status})",
+      "credentialsRequired": "Pro pokračování vyplňte všechna povinná pole.",
+      "credentialsErrorPrefix": "Připojení selhalo:",
+      "unknownToolkit": "Tuto aplikaci neznáme. Obnovte katalog a zkuste to znovu.",
+      "unsupportedAuthScheme": "Tato metoda ověřování zatím není v aplikaci podporována.",
+      "missingCredentials": "Chybí povinná pole: {fields}",
+      "invalidCredentials": "Přihlašovací údaje byly odmítnuty. Zkontrolujte je a zkuste to znovu.",
+      "credentialValidationFailed": "Nepodařilo se ověřit vaše přihlašovací údaje. Zkuste to prosím znovu.",
+      "apiKeyRequired": "API klíč je povinný.",
+      "tokenRequired": "Bearer token je povinný.",
+      "basicRequired": "Uživatelské jméno a heslo jsou povinné."
+    },
+    "title": "Připojení",
+    "subtitle": "Propojte aplikace, které může Coasty používat vaším jménem v každém chatu.",
+    "connectedSuffix": "propojeno",
+    "refresh": "Obnovit",
+    "newConnection": "Nové připojení",
+    "retry": "Zkusit znovu",
+    "noFilteredConnections": "Žádné aplikace ve stavu {filter}",
+    "noFilteredDescription": "Zkuste jiný filtr nebo připojte novou aplikaci.",
+    "filters": {
+      "all": "Vše",
+      "active": "Aktivní",
+      "connecting": "Připojuje se",
+      "expired": "Vypršelo",
+      "failed": "Selhalo"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Připojené aplikace",
+      "subheading": "Coasty může tyto aplikace používat ve vašem zastoupení v kterémkoli chatu.",
+      "connectNewApp": "Přidat aplikaci",
+      "manageOnFullPage": "Spravovat vše"
+    }
   }
 }

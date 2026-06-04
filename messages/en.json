@@ -882,6 +882,11 @@
       "npsVeryLikely": "Very likely",
       "thanks": "Thanks for the feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Your {appName} connection expired.",
+      "reconnectLink": "Reconnect"
     }
   },
   "chatMessages": {
@@ -1020,7 +1025,9 @@
     "today": "today",
     "yesterday": "yesterday",
     "talkToUsDesc": "Book a 15-min call",
-    "inviteEarnDesc": "Get free credits"
+    "inviteEarnDesc": "Get free credits",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Login",
@@ -2427,6 +2434,13 @@
         "download": "Download Desktop App",
         "compare": "Compare AI Agents"
       }
+    },
+    "connections": {
+      "title": "Connections",
+      "description": "Connect Gmail, Slack, Notion, GitHub, and hundreds more apps. Available in every chat.",
+      "ogTitle": "Connections — Connect 250+ Apps to Your Coasty AI Agent",
+      "ogDescription": "Bring Gmail, Slack, GitHub, Notion, Google Calendar, Linear and hundreds more apps into every chat. OAuth-secured, always-on, used by Coasty agents on your behalf.",
+      "twitterDescription": "Connect Gmail, Slack, GitHub, Notion and 250+ apps to Coasty. One OAuth, used in every chat by your agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Referral",
         "description": "Invite friends and earn credits"
+      },
+      "integrations": {
+        "label": "Integrations",
+        "description": "Connect third-party apps"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Referrals",
       "description": "Share Coasty. Earn together."
+    },
+    "connections": {
+      "title": "Your Connections",
+      "description": "Fetching your connected apps and toolkits."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,202 @@
     "trustTransit": "TLS 1.3 in transit",
     "trustAtRest": "AES-256-GCM at rest",
     "trustNoTraining": "No training on your data"
+  },
+  "connections": {
+    "page": {
+      "title": "Connections",
+      "description": "Connect Gmail, Slack, Notion, GitHub, and hundreds more apps. Available in every chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Connected",
+      "initiated": "Connecting",
+      "expired": "Expired",
+      "failed": "Revoked",
+      "failedShort": "Failed",
+      "inactive": "Inactive"
+    },
+    "toasts": {
+      "disconnectFailed": "Failed to disconnect",
+      "disconnected": "Disconnected {appName}",
+      "reconnectFailed": "Failed to start reconnect",
+      "connected": "Connected {app}",
+      "error": "Something went wrong. Please try again."
+    },
+    "card": {
+      "logoAlt": "{appName} logo",
+      "fallbackAccountLabel": "Connected",
+      "connectedOn": "Connected on {date}",
+      "lastUsed": "Last used {time}",
+      "actions": {
+        "reconnect": "Reconnect",
+        "disconnect": "Disconnect",
+        "menuAriaLabel": "Connection actions"
+      },
+      "error": {
+        "expired": "Authorization expired. Reconnect to restore tool access.",
+        "revoked": "Connection revoked. Reconnect to restore tool access."
+      },
+      "disconnectDialog": {
+        "title": "Disconnect {appName}?",
+        "connectedOn": "connected {date}",
+        "consequence": {
+          "revokeOauth": "Composio will revoke the OAuth grant",
+          "toolsStop": "Tools using this connection will stop working"
+        },
+        "confirm": "Disconnect",
+        "cancel": "Keep connection"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} logo",
+      "headline": "Connect your first app",
+      "subheadline": "Authorize once and your AI can read your email, post to Slack, update docs, and more — automatically, in every chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Tools in every chat",
+          "desc": "Once connected, your AI uses them automatically."
+        },
+        "secureOauth": {
+          "title": "Secure OAuth",
+          "desc": "Authorize once, revoke any time."
+        },
+        "hundredsOfApps": {
+          "title": "Hundreds of apps",
+          "desc": "Email, calendars, CRMs, docs, code, and more."
+        }
+      },
+      "browseAppsCta": "Browse apps",
+      "popularIntegrationsEyebrow": "Popular integrations"
+    },
+    "connectDialog": {
+      "title": "Connect an app",
+      "description": "Browse hundreds of integrations powered by Composio.",
+      "searchPlaceholder": "Search apps…",
+      "clearSearchAria": "Clear search",
+      "categories": {
+        "all": "All",
+        "communication": "Communication",
+        "productivity": "Productivity",
+        "calendar": "Calendar",
+        "developer": "Developer",
+        "crmSales": "CRM & Sales"
+      },
+      "sections": {
+        "featured": "Featured",
+        "allApps": "All apps"
+      },
+      "card": {
+        "logoAlt": "{name} logo",
+        "alreadyConnectedTooltip": "Already connected — manage from the Connections page",
+        "connectedLabel": "Connected",
+        "connectFallbackDescription": "Connect {name} to your AI"
+      },
+      "footer": {
+        "poweredBy": "powered by Composio",
+        "cancel": "Cancel"
+      },
+      "empty": {
+        "noMatchTitle": "No apps match \"{query}\"",
+        "noAppsTitle": "No apps available",
+        "noMatchBody": "Try a shorter search term or a different category.",
+        "noAppsBody": "Composio integrations will appear here once configured."
+      },
+      "errors": {
+        "failedToStart": "Failed to start connection"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Connect with Composio",
+          "connectWithApiKey": "Save & connect",
+          "connectWithBearerToken": "Save & connect",
+          "connectWithBasic": "Save & connect",
+          "connectNoAuth": "Enable",
+          "connecting": "Connecting..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API key",
+          "apiKeyPlaceholder": "Paste your API key",
+          "bearerTokenLabel": "Bearer token",
+          "bearerTokenPlaceholder": "Paste your bearer token",
+          "basicAuthUsername": "Username",
+          "basicAuthPassword": "Password",
+          "basicAuthUsernamePlaceholder": "Your account username",
+          "basicAuthPasswordPlaceholder": "Your account password",
+          "revealSecret": "Show",
+          "hideSecret": "Hide"
+        },
+        "noAuthHint": "{name} does not require credentials. Click Enable to add it to your workspace.",
+        "apiKeyHelp": "Where do I find this?",
+        "connectedToast": "Connected to {name}",
+        "unsupported": {
+          "title": "This connection type is not supported yet",
+          "body": "{name} uses a {scheme} authentication flow we have not wired up in the app yet. You can connect it directly on the Composio dashboard and it will appear here once linked.",
+          "openComposioDashboard": "Open Composio dashboard"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Disconnect {name}",
+      "disconnect": "Disconnect"
+    },
+    "empty": {
+      "title": "No apps connected",
+      "description": "Connect Gmail, Slack, Notion, and more so Coasty can use them in any chat."
+    },
+    "toolInvocation": {
+      "calling": "Calling {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Your {appName} connection expired.",
+      "reconnectLink": "Reconnect"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Failed to load connections (HTTP {status})",
+      "loadToolkitsFailed": "Failed to load toolkits (HTTP {status})",
+      "startConnectionFailed": "Failed to start connection (HTTP {status})",
+      "disconnectFailedHttp": "Failed to disconnect (HTTP {status})",
+      "credentialsRequired": "Please fill in all required fields to continue.",
+      "credentialsErrorPrefix": "Connection failed:",
+      "unknownToolkit": "We do not recognise this app. Please refresh the catalog and try again.",
+      "unsupportedAuthScheme": "This authentication method is not supported in the app yet.",
+      "missingCredentials": "Missing required fields: {fields}",
+      "invalidCredentials": "The credentials were rejected. Please double-check and try again.",
+      "credentialValidationFailed": "Could not validate your credentials. Please try again.",
+      "apiKeyRequired": "An API key is required.",
+      "tokenRequired": "A bearer token is required.",
+      "basicRequired": "Username and password are required."
+    },
+    "title": "Connections",
+    "subtitle": "Connect the apps Coasty can use on your behalf in any chat.",
+    "connectedSuffix": "connected",
+    "refresh": "Refresh",
+    "newConnection": "New connection",
+    "retry": "Try again",
+    "noFilteredConnections": "No {filter} apps yet",
+    "noFilteredDescription": "Try a different filter, or connect a new app to get started.",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "connecting": "Connecting",
+      "expired": "Expired",
+      "failed": "Failed"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Connected apps",
+      "subheading": "Coasty can use these apps in any chat on your behalf.",
+      "connectNewApp": "Connect new app",
+      "manageOnFullPage": "Manage on full page"
+    }
   }
 }

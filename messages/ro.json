@@ -868,6 +868,11 @@
       "npsVeryLikely": "Foarte probabil",
       "thanks": "Mulțumim pentru feedback",
       "creditsLabel": "credite"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Aplicație",
+      "expiredMessage": "Conexiunea ta {appName} a expirat.",
+      "reconnectLink": "Reconectează"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "in {count}m",
     "inHours": "in {count}h",
     "today": "astazi",
-    "yesterday": "ieri"
+    "yesterday": "ieri",
+    "connections": "Aplicații",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Autentificare",
@@ -2413,6 +2420,13 @@
         "download": "Descărcați aplicația desktop",
         "compare": "Comparați agenți AI"
       }
+    },
+    "connections": {
+      "title": "Conexiuni",
+      "description": "Conectează Gmail, Slack, Notion, GitHub și sute de alte aplicații. Disponibile în fiecare conversație.",
+      "ogTitle": "Conexiuni — 250+ aplicații cu agentul AI Coasty",
+      "ogDescription": "Aduceți Gmail, Slack, GitHub, Notion, Google Calendar, Linear și sute de alte aplicații în fiecare conversație. Securizate prin OAuth, mereu active, folosite de agenții Coasty în numele dumneavoastră.",
+      "twitterDescription": "Conectați Gmail, Slack, GitHub, Notion și peste 250 de aplicații la Coasty. Un singur OAuth, folosit în fiecare conversație de agentul dumneavoastră."
     }
   },
   "errorPages": {
@@ -3087,6 +3101,10 @@
       "referral": {
         "label": "Recomandare",
         "description": "Invită prieteni și câștigă credite"
+      },
+      "integrations": {
+        "label": "Integrări",
+        "description": "Conectează aplicații externe"
       }
     },
     "appearance": {
@@ -3150,6 +3168,10 @@
     "referral": {
       "title": "Recomandări",
       "description": "Recomandă Coasty. Câștigați împreună."
+    },
+    "connections": {
+      "title": "Conexiunile tale",
+      "description": "Se preiau aplicațiile și toolkit-urile conectate."
     }
   },
   "dataSection": {
@@ -3158,5 +3180,206 @@
     "trustTransit": "TLS 1.3 în tranzit",
     "trustAtRest": "AES-256-GCM în repaus",
     "trustNoTraining": "Fără antrenament pe datele tale"
+  },
+  "connections": {
+    "page": {
+      "title": "Conexiuni",
+      "description": "Conectează Gmail, Slack, Notion, GitHub și sute de alte aplicații. Disponibile în fiecare conversație."
+    },
+    "fallbackAppName": "aplicație",
+    "status": {
+      "active": "Conectat",
+      "initiated": "Conectează",
+      "expired": "Expirat",
+      "failed": "Revocat",
+      "failedShort": "Eșuat",
+      "inactive": "Inactiv"
+    },
+    "toasts": {
+      "disconnectFailed": "Deconectarea a eșuat",
+      "disconnected": "{appName} a fost deconectat",
+      "reconnectFailed": "Reconectarea nu a putut fi inițiată",
+      "connected": "{app} conectat",
+      "error": "Ceva nu a funcționat. Vă rugăm să încercați din nou."
+    },
+    "card": {
+      "logoAlt": "Logo {appName}",
+      "fallbackAccountLabel": "Conectat",
+      "connectedOn": "Conectat pe {date}",
+      "lastUsed": "Folosit ultima dată {time}",
+      "actions": {
+        "reconnect": "Reconectează",
+        "disconnect": "Deconectează",
+        "menuAriaLabel": "Acțiuni pentru conexiune"
+      },
+      "toast": {
+        "reconnectFailed": "Reconectarea aplicației {appName} a eșuat",
+        "disconnected": "{appName} a fost deconectat",
+        "disconnectFailed": "Deconectarea aplicației {appName} a eșuat"
+      },
+      "error": {
+        "expired": "Autorizarea a expirat. Reconectează pentru a restabili accesul la instrumente.",
+        "revoked": "Conexiunea a fost revocată. Reconectează pentru a restabili accesul la instrumente."
+      },
+      "disconnectDialog": {
+        "title": "Deconectezi {appName}?",
+        "connectedOn": "conectat {date}",
+        "consequence": {
+          "revokeOauth": "Composio va revoca autorizația OAuth",
+          "toolsStop": "Instrumentele care folosesc această conexiune nu vor mai funcționa"
+        },
+        "confirm": "Deconectează",
+        "cancel": "Păstrează conexiunea"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo {name}",
+      "headline": "Conectează prima ta aplicație",
+      "subheadline": "Autorizează o singură dată și AI-ul tău poate citi e-mailuri, posta pe Slack, actualiza documente și multe altele, automat, în fiecare conversație.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Instrumente în fiecare conversație",
+          "desc": "Odată conectate, AI-ul le folosește automat."
+        },
+        "secureOauth": {
+          "title": "OAuth sigur",
+          "desc": "Autorizezi o dată, revoci oricând."
+        },
+        "hundredsOfApps": {
+          "title": "Sute de aplicații",
+          "desc": "E-mail, calendare, CRM-uri, documente, cod și altele."
+        }
+      },
+      "browseAppsCta": "Explorează aplicațiile"
+    },
+    "connectDialog": {
+      "title": "Conectează o aplicație",
+      "description": "Explorează sute de integrări oferite de Composio.",
+      "searchPlaceholder": "Caută aplicații…",
+      "clearSearchAria": "Șterge căutarea",
+      "categories": {
+        "all": "Toate",
+        "communication": "Comunicare",
+        "productivity": "Productivitate",
+        "calendar": "Calendar",
+        "developer": "Dezvoltatori",
+        "crmSales": "CRM și vânzări"
+      },
+      "sections": {
+        "featured": "Recomandate",
+        "allApps": "Toate aplicațiile"
+      },
+      "card": {
+        "logoAlt": "Logo {name}",
+        "alreadyConnectedTooltip": "Deja conectat. Gestionează din pagina Conexiuni.",
+        "connectedLabel": "Conectat",
+        "connectFallbackDescription": "Conectează {name} la AI-ul tău"
+      },
+      "footer": {
+        "poweredBy": "oferit de Composio",
+        "cancel": "Anulează"
+      },
+      "empty": {
+        "noMatchTitle": "Nicio aplicație nu corespunde căutării „{query}”",
+        "noAppsTitle": "Nicio aplicație disponibilă",
+        "noMatchBody": "Încearcă un termen mai scurt sau o altă categorie.",
+        "noAppsBody": "Integrările Composio vor apărea aici după configurare."
+      },
+      "errors": {
+        "failedToStart": "Conexiunea nu a putut fi inițiată"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Conectează cu Composio",
+          "connectWithApiKey": "Salvează și conectează",
+          "connectWithBearerToken": "Salvează și conectează",
+          "connectWithBasic": "Salvează și conectează",
+          "connectNoAuth": "Activează",
+          "connecting": "Se conectează..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Cheie API",
+          "apiKeyPlaceholder": "Lipește cheia ta API",
+          "bearerTokenLabel": "Token Bearer",
+          "bearerTokenPlaceholder": "Lipește tokenul Bearer",
+          "basicAuthUsername": "Nume utilizator",
+          "basicAuthPassword": "Parolă",
+          "basicAuthUsernamePlaceholder": "Numele de utilizator al contului tău",
+          "basicAuthPasswordPlaceholder": "Parola contului tău",
+          "revealSecret": "Afișează",
+          "hideSecret": "Ascunde"
+        },
+        "noAuthHint": "{name} nu necesită credențiale. Apasă pe Activează pentru a-l adăuga în spațiul tău de lucru.",
+        "apiKeyHelp": "Unde găsesc asta?",
+        "connectedToast": "Conectat la {name}",
+        "unsupported": {
+          "title": "Acest tip de conexiune nu este încă acceptat",
+          "body": "{name} folosește un flux de autentificare {scheme} pe care nu l-am integrat încă în aplicație. Îl poți conecta direct din panoul Composio și va apărea aici după ce este conectat.",
+          "openComposioDashboard": "Deschide panoul Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Deconectează {name}",
+      "disconnect": "Deconectează"
+    },
+    "empty": {
+      "title": "Nicio aplicație conectată",
+      "description": "Conectează Gmail, Slack, Notion și altele pentru ca Coasty să le poată folosi în orice conversație."
+    },
+    "toolInvocation": {
+      "calling": "Se apelează {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Aplicație",
+      "expiredMessage": "Conexiunea ta {appName} a expirat.",
+      "reconnectLink": "Reconectează"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Conexiunile nu au putut fi încărcate (HTTP {status})",
+      "loadToolkitsFailed": "Setul de instrumente nu a putut fi încărcat (HTTP {status})",
+      "startConnectionFailed": "Conexiunea nu a putut fi inițiată (HTTP {status})",
+      "disconnectFailedHttp": "Deconectarea a eșuat (HTTP {status})",
+      "credentialsRequired": "Completează toate câmpurile obligatorii pentru a continua.",
+      "credentialsErrorPrefix": "Conexiune eșuată:",
+      "unknownToolkit": "Nu recunoaștem această aplicație. Reîmprospătează catalogul și încearcă din nou.",
+      "unsupportedAuthScheme": "Această metodă de autentificare nu este încă acceptată în aplicație.",
+      "missingCredentials": "Câmpuri obligatorii lipsă: {fields}",
+      "invalidCredentials": "Credențialele au fost respinse. Verifică-le și încearcă din nou.",
+      "credentialValidationFailed": "Nu am putut valida credențialele tale. Te rugăm încearcă din nou.",
+      "apiKeyRequired": "Este necesară o cheie API.",
+      "tokenRequired": "Este necesar un token Bearer.",
+      "basicRequired": "Sunt necesare numele de utilizator și parola."
+    },
+    "title": "Conexiuni",
+    "subtitle": "Conectați aplicațiile pe care Coasty le poate folosi în numele dumneavoastră în orice conversație.",
+    "connectedSuffix": "conectate",
+    "refresh": "Reîmprospătare",
+    "newConnection": "Conexiune nouă",
+    "retry": "Încercați din nou",
+    "noFilteredConnections": "Nu există încă aplicații {filter}",
+    "noFilteredDescription": "Încearcă alt filtru sau conectează o aplicație nouă pentru a începe.",
+    "filters": {
+      "all": "Toate",
+      "active": "Active",
+      "connecting": "În curs",
+      "expired": "Expirate",
+      "failed": "Eșuate"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Aplicații conectate",
+      "subheading": "Coasty poate folosi aceste aplicații în numele tău, în orice conversație.",
+      "connectNewApp": "Adaugă aplicație",
+      "manageOnFullPage": "Vezi pagina completă"
+    }
   }
 }

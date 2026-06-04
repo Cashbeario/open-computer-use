@@ -1,5 +1,6 @@
 import WebSocket from 'ws'
 import { BrowserWindow, screen } from 'electron'
+import { randomUUID } from 'node:crypto'
 import * as os from 'os'
 import { LocalExecutor } from './local-executor'
 import { ApprovalManager } from './approval-manager'
@@ -600,7 +601,11 @@ export class WebSocketBridge {
 
             // Notify backend about the pending approval so the web/phone UI
             // can also show the prompt and respond remotely.
-            const approvalId = `approval_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+            // Use UUID v4 for the remote-approval correlation id — see the
+            // matching fix in approval-manager.ts. Date.now()+4-char random
+            // collapses to ~17 bits of entropy per millisecond and can
+            // collide; UUIDs are 122 bits and never collide in practice.
+            const approvalId = `approval_${randomUUID()}`
             this.send({
               type: 'approval_request',
               data: { id: approvalId, command, parameters },

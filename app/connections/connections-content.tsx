@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { motion } from "framer-motion"
@@ -52,6 +52,13 @@ export function ConnectionsContent() {
   // that toolkit's slug pre-seeded so the user lands on a focused view.
   const [dialogPreselect, setDialogPreselect] = useState<string | null>(null)
 
+  // Holds the pending window.close() timeout. We use a ref (not a let inside
+  // the effect) so the timer survives across re-renders — specifically the
+  // re-render triggered by router.replace below. If the timer lived inside
+  // the effect's closure, the effect cleanup would clearTimeout() it on the
+  // searchParams flip, cancelling window.close() before it ever fires.
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // ── Query-param handling (toasts + cleanup) ───────────────────────────────
   // ?connected=<app>             → success toast + refresh + auto-close
   //                                (this tab is the throwaway auth tab the
@@ -61,8 +68,9 @@ export function ConnectionsContent() {
   //                                0.0.0.0:3000)
   // ?error=<reason>&app=<app>    → error toast
   // ?reconnect=<toolkit>         → auto-open connect dialog
-  // After handling, strip params via router.replace (only matters when the
-  // auto-close didn't fire — fallback path for non-script-opened tabs).
+  // After handling, strip params via router.replace. Note: NO effect cleanup
+  // is returned here — the close-timer outlives this effect intentionally.
+  // The unmount cleanup is owned by the separate effect below.
   useEffect(() => {
     const connectedApp = searchParams.get("connected")
     const errorReason = searchParams.get("error")
@@ -71,7 +79,6 @@ export function ConnectionsContent() {
     const pending = searchParams.get("pending")
 
     let dirty = false
-    let closeTimer: ReturnType<typeof setTimeout> | null = null
 
     if (connectedApp) {
       toast.success(t("toasts.connected", { app: connectedApp }))
@@ -83,6 +90,8 @@ export function ConnectionsContent() {
       // that opened the connect dialog in the first place — it might be a
       // chat or the connections page itself) so it can invalidate its
       // connections cache immediately rather than waiting for window focus.
+      // Posted from a one-shot channel instance; the listener below — in
+      // peer tabs — has its own instance and is the one that receives it.
       try {
         const ch = new BroadcastChannel("composio:connections")
         ch.postMessage({ type: "connected", app: connectedApp })
@@ -90,15 +99,23 @@ export function ConnectionsContent() {
       } catch {
         /* BroadcastChannel unsupported — opener will refetch on focus. */
       }
+      // Schedule the tab-close. Stored on a ref so the timer survives this
+      // effect's re-run when router.replace flips searchParams below — if
+      // we stored it on a `let` and cleared it in cleanup, the close would
+      // be cancelled by React tearing the effect down on the dep change.
+      //
       // This tab was opened by `window.open()` from openAuthTab() inside
       // the connect dialog click handler, and navigated through Composio →
-      // /api/composio/callback → here. Browsers permit window.close() for
-      // script-opened windows even after cross-origin navigations, so close
-      // ourselves after a brief moment so the toast is readable. If the
-      // close is denied for any reason (some embedded webviews, or a tab
-      // the user opened manually with the URL), the router.replace below
-      // strips the param and the user lands on a clean /connections page.
-      closeTimer = setTimeout(() => {
+      // /api/composio/callback → here. Browsers generally permit
+      // window.close() for script-opened windows even after cross-origin
+      // navigations; if it is denied (some embedded webviews, opener-null
+      // policies, or a tab the user opened manually with the URL), the
+      // router.replace below has already stripped the param so the user
+      // is parked on a clean /connections page rather than the raw
+      // callback URL — strictly fallback, not the happy path.
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = setTimeout(() => {
+        closeTimerRef.current = null
         try {
           window.close()
         } catch {
@@ -130,19 +147,35 @@ export function ConnectionsContent() {
     if (dirty) {
       router.replace("/connections", { scroll: false })
     }
-
-    return () => {
-      if (closeTimer) clearTimeout(closeTimer)
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
+
+  // ── Unmount cleanup ───────────────────────────────────────────────────────
+  // Owns the close-timer's lifetime so it's only cleared on real unmount
+  // (e.g. user navigates away), not on every searchParams change.
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current)
+        closeTimerRef.current = null
+      }
+    }
+  }, [])
 
   // ── Cross-tab refresh from a sibling OAuth completion ────────────────────
   // Listen for the broadcast posted from the auth-completion tab above so
   // the *original* tab (where the user clicked Connect) refreshes the moment
   // OAuth finishes, not when the user happens to refocus the window. Cheap,
   // best-effort; silently no-ops when BroadcastChannel is unsupported.
+  //
+  // GUARD: if THIS tab itself just landed on ?connected=<app>, it is the
+  // sender, not a peer — skip subscribing so we don't trigger a redundant
+  // refresh inside the throwaway tab that's about to close. (BroadcastChannel
+  // never echoes within a single instance, but the two effects in this file
+  // create two distinct instances in the same document, which would otherwise
+  // see each other's posts.)
   useEffect(() => {
+    if (searchParams.get("connected")) return
     let ch: BroadcastChannel | null = null
     try {
       ch = new BroadcastChannel("composio:connections")
@@ -158,7 +191,7 @@ export function ConnectionsContent() {
       try { ch?.close() } catch { /* already closed */ }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   // ── Derived filter chip counts ────────────────────────────────────────────
   const counts = useMemo(() => {

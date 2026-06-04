@@ -68,7 +68,8 @@ type ErrorsT = (
     | "unsupportedAuthScheme"
     | "missingCredentials"
     | "invalidCredentials"
-    | "credentialValidationFailed",
+    | "credentialValidationFailed"
+    | "composioUnavailable",
   values?: Record<string, string | number>
 ) => string
 
@@ -83,6 +84,28 @@ async function parseConnectErrorBody(res: Response): Promise<{
   message?: string
   requiredFields?: ComposioRequiredField[]
 }> {
+  const synthesizeFor5xx = (
+    parsed: {
+      code?: ComposioConnectErrorCode
+      message?: string
+      requiredFields?: ComposioRequiredField[]
+    },
+  ): {
+    code?: ComposioConnectErrorCode
+    message?: string
+    requiredFields?: ComposioRequiredField[]
+  } => {
+    // Defence in depth: if the backend regressed and forwarded raw upstream
+    // HTML (e.g. a Cloudflare 520 page) without a structured code, refuse
+    // to bubble it. Synthesize `upstream_unavailable` so the localized
+    // friendly copy + Retry button kicks in regardless. Status-code-based,
+    // so this triggers for the Cloudflare 520→ Next.js proxy 502/503 chain
+    // even if the body has no type tag.
+    if (!parsed.code && res.status >= 500) {
+      return { ...parsed, code: "upstream_unavailable", message: undefined }
+    }
+    return parsed
+  }
   try {
     const body = (await res.json()) as {
       error?: string
@@ -91,25 +114,36 @@ async function parseConnectErrorBody(res: Response): Promise<{
         | {
             code?: ComposioConnectErrorCode
             message?: string
+            error?: string
+            type?: string
             required_fields?: ComposioRequiredField[]
             requiredFields?: ComposioRequiredField[]
           }
     }
     if (typeof body.detail === "object" && body.detail !== null) {
       const d = body.detail
-      return {
-        code: d.code,
-        message: d.message ?? body.error,
+      // The backend's structured detail uses `type` as the discriminator
+      // (`_detail(error, type_)` in backend/app/api/routes/composio.py).
+      // The Next.js proxy at app/api/composio/connect/[app]/route.ts
+      // forwards the body unchanged in some paths, so we must read BOTH
+      // `code` and `type` to find the discriminator, and BOTH `message`
+      // and `error` to find the human-readable string.
+      const parsed = {
+        code: (d.code ?? (d.type as ComposioConnectErrorCode | undefined)),
+        message: d.message ?? d.error ?? body.error,
         requiredFields: d.requiredFields ?? d.required_fields,
       }
+      return synthesizeFor5xx(parsed)
     }
-    return {
+    return synthesizeFor5xx({
       message:
         (typeof body.detail === "string" ? body.detail : undefined) ??
         body.error,
-    }
+    })
   } catch {
-    return {}
+    // JSON parse failed — likely raw HTML body. Synthesize the same
+    // structured code so the user gets the friendly message, not [object Object].
+    return synthesizeFor5xx({})
   }
 }
 
@@ -140,9 +174,40 @@ function localizeConnectError(
       return t("invalidCredentials")
     case "credential_validation_failed":
       return t("credentialValidationFailed")
+    case "upstream_unavailable":
+    case "composio_unavailable":
+      // ALWAYS use the localized friendly copy for upstream outages —
+      // never `backendMessage`, which on a Cloudflare 520 leak path could
+      // contain raw HTML body text from Composio's edge error page.
+      return t("composioUnavailable")
     default:
+      // Belt-and-braces: even with no structured code, a 5xx status means
+      // the failure is on the upstream side and the user shouldn't see
+      // whatever string the backend forwarded. (parseConnectErrorBody
+      // synthesizes `upstream_unavailable` for this case, so this default
+      // branch is essentially dead — kept for paranoia.)
+      if (status >= 500) {
+        return t("composioUnavailable")
+      }
       return backendMessage || t("startConnectionFailed", { status })
   }
+}
+
+/**
+ * Strip HTML tags and clamp length on an error string. Last-line defence
+ * against any future code path that forwards raw upstream HTML (e.g. a
+ * Cloudflare 520 body) into the user-facing error pill. We render the
+ * result as plain JSX text (React escapes anyway), so this is purely a
+ * UX guard against multi-KB walls of HTML showing up in a 12px red pill.
+ */
+function sanitizeErrorForDisplay(raw: string): string {
+  if (!raw) return raw
+  // Drop anything that looks like an HTML tag — Cloudflare 520 bodies
+  // include <html>, <head>, <body>, <h1>, etc. as inline text.
+  const stripped = raw.replace(/<[^>]*>/g, "").trim()
+  // Clamp at 280 chars — toast-friendly. Anything longer is almost
+  // certainly an upstream HTML body or a stack trace.
+  return stripped.length > 280 ? stripped.slice(0, 277) + "..." : stripped
 }
 
 function makeFetchConnections(t: ErrorsT) {
@@ -265,16 +330,17 @@ function makePostConnect(t: ErrorsT) {
     if (!res.ok) {
       const parsed = await parseConnectErrorBody(res)
       const code: ComposioConnectErrorCode = parsed.code ?? "unknown"
+      const localized = localizeConnectError(
+        t,
+        parsed.code,
+        res.status,
+        parsed.message,
+        parsed.requiredFields
+      )
       throw new ComposioConnectError({
         code,
         status: res.status,
-        message: localizeConnectError(
-          t,
-          parsed.code,
-          res.status,
-          parsed.message,
-          parsed.requiredFields
-        ),
+        message: sanitizeErrorForDisplay(localized),
         requiredFields: parsed.requiredFields,
       })
     }

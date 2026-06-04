@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { logApiAccess } from "@/lib/observability/api-access-log"
+import { resolveRequestOrigin } from "@/lib/origin"
 
 const PYTHON_BACKEND_URL = process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || ""
@@ -28,8 +29,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const { app } = await params
     const toolkitSlug = (app || "").toLowerCase().replace(/-/g, "_")
     toolkitForLog = toolkitSlug
-    // Origin is derived from the request URL — NEVER from user-supplied headers.
-    const base = new URL(req.url).origin
+    // Resolve the public origin via the hardened helper. Precedence:
+    // NEXT_PUBLIC_APP_URL -> x-forwarded-host (ALB/CloudFront) -> host
+    // header -> req.url -> APP_DOMAIN safety net. Without this, behind an
+    // ALB the user-visible 307 redirect leaked the container bind address
+    // (https://0.0.0.0:3000/connections?connected=outlook) into the browser
+    // bar. See lib/origin.ts for the full rationale and security analysis.
+    const base = resolveRequestOrigin(req)
 
     if (!VALID_SLUG.test(toolkitSlug)) {
       outcomeForLog = "invalid_toolkit"

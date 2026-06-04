@@ -222,6 +222,23 @@ export type ComposioConnectErrorCode =
   | "composio_disabled"
   | "rate_limited"
   | "upstream"
+  /**
+   * Composio's edge / origin returned an upstream 5xx (e.g. Cloudflare 520
+   * from `backend.composio.dev` when their managed OAuth credentials for
+   * a toolkit are broken — X/Twitter is the canonical case). Emitted by
+   * the backend's `_is_upstream_outage` detector. UI should render a
+   * "Composio is temporarily unavailable — please try again" message and
+   * offer a Retry button. ALWAYS retryable.
+   */
+  | "upstream_unavailable"
+  /**
+   * Generic upstream Composio failure (non-transient or unclassified).
+   * Older code emitted this when 5xx detection wasn't in place; new code
+   * emits `upstream_unavailable` instead, but we keep this code mapped
+   * for backwards compatibility with cached deploys. Treated as
+   * retryable so the UI still offers the same affordance.
+   */
+  | "composio_unavailable"
   | "unknown"
 
 /**
@@ -267,6 +284,8 @@ export class ComposioConnectError extends Error {
       params.retryable ??
       (params.code === "rate_limited" ||
         params.code === "upstream" ||
+        params.code === "upstream_unavailable" ||
+        params.code === "composio_unavailable" ||
         params.code === "composio_disabled")
   }
 }

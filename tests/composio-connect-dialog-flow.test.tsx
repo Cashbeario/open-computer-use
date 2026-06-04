@@ -197,7 +197,16 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
     expect(window.location.href).not.toContain("oauth.composio.dev")
   })
 
-  it("a backend failure keeps the confirm panel open and surfaces the error", async () => {
+  it("a 5xx backend failure shows the localized upstream-unavailable message (NOT raw upstream text), offers a Retry button, and keeps the dialog open", async () => {
+    // The mock returns a 500 with an upstream-flavored error string. The
+    // dialog used to render this raw — leaking Cloudflare 520 HTML body
+    // text into the red error pill when Composio's edge fell over for
+    // toolkits like X/Twitter. The fix:
+    //   1. parseConnectErrorBody synthesizes code='upstream_unavailable'
+    //      for any 5xx without a structured code.
+    //   2. localizeConnectError ALWAYS uses the localized friendly copy
+    //      for upstream_unavailable, never backendMessage.
+    //   3. ComposioConnectError.retryable=true triggers the Retry button.
     const tab = fakeTab()
     vi.spyOn(window, "open").mockReturnValue(tab as unknown as Window)
     connectFetch.mockResolvedValueOnce({
@@ -216,10 +225,16 @@ describe("ConnectAppDialog — pick → confirm → new tab", () => {
     fireEvent.click(screen.getByTestId("connect-confirm-cta"))
 
     await waitFor(() => {
-      expect(screen.getByTestId("connect-confirm-error").textContent).toContain(
-        "Composio is down",
-      )
+      const errEl = screen.getByTestId("connect-confirm-error")
+      // The localized key (next-intl test mock returns the key verbatim)
+      // is shown — NOT the raw upstream message.
+      expect(errEl.textContent).toContain("composioUnavailable")
+      expect(errEl.textContent).not.toContain("Composio is down")
     })
+
+    // Retryable: a "Try again" button is rendered next to the dismiss X.
+    expect(screen.getByTestId("connect-confirm-retry")).toBeTruthy()
+
     // The dangling blank tab was closed, and the dialog stayed open.
     expect(tab.close).toHaveBeenCalled()
     expect(onOpenChange).not.toHaveBeenCalledWith(false)

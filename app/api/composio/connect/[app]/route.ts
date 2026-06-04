@@ -10,11 +10,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { verifyBearerToken } from "@/lib/supabase/bearer-auth"
 import { logApiAccess } from "@/lib/observability/api-access-log"
+import { resolveRequestOrigin } from "@/lib/origin"
 
 const PYTHON_BACKEND_URL =
   process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || ""
-const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL || ""
 const VALID_APP = /^[a-z0-9_]+$/
 
 if (!INTERNAL_API_KEY && process.env.NODE_ENV === "production") {
@@ -30,11 +30,6 @@ interface BackendErrorBody {
 
 interface RouteParams {
   params: Promise<{ app: string }>
-}
-
-function resolveBaseUrl(req: NextRequest): string {
-  if (NEXT_PUBLIC_APP_URL) return NEXT_PUBLIC_APP_URL.replace(/\/+$/, "")
-  return new URL(req.url).origin
 }
 
 export async function POST(
@@ -89,7 +84,10 @@ export async function POST(
     }
 
     // Build server-side callback URL. Caller cannot tamper with it.
-    const baseUrl = resolveBaseUrl(req)
+    // The origin is resolved via the hardened helper — NEXT_PUBLIC_APP_URL
+    // first (operator-pinned), then ALB / CloudFront forwarded headers,
+    // then APP_DOMAIN as a production safety net. See lib/origin.ts.
+    const baseUrl = resolveRequestOrigin(req)
     const callbackUrl = `${baseUrl}/api/composio/callback/${encodeURIComponent(app)}`
 
     try {

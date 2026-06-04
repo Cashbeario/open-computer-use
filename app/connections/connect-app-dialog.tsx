@@ -37,6 +37,7 @@ import type {
   ComposioToolkit,
   ComposioConnection,
 } from "@/lib/composio-store/types";
+import { ComposioConnectError } from "@/lib/composio-store/types";
 import { ToolkitLogo } from "./toolkit-logo";
 
 interface ConnectAppDialogProps {
@@ -275,6 +276,11 @@ export function ConnectAppDialog({
   const [view, setView] = useState<"browse" | "confirm">("browse");
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tracks whether the last connect attempt's error is transient (e.g. an
+  // upstream Composio outage like the Cloudflare 520 their X/Twitter
+  // toolkit currently throws). When true, the inline error pill renders a
+  // "Try again" button that re-invokes handleConfirmConnect.
+  const [errorRetryable, setErrorRetryable] = useState(false);
   // Set only when the browser blocked the synchronously-opened auth tab; the
   // confirm panel then surfaces a manual "Open authorization" anchor.
   const [blockedUrl, setBlockedUrl] = useState<string | null>(null);
@@ -300,6 +306,7 @@ export function ConnectAppDialog({
       setSelectedSlug(null);
       setView("browse");
       setError(null);
+      setErrorRetryable(false);
       setBlockedUrl(null);
       setConnecting(false);
       setCredentials({});
@@ -451,6 +458,7 @@ export function ConnectAppDialog({
     if (connecting) return;
     setSelectedSlug(slug);
     setError(null);
+    setErrorRetryable(false);
     setBlockedUrl(null);
     setCredentials({});
     setCredentialErrors({});
@@ -462,6 +470,7 @@ export function ConnectAppDialog({
     setView("browse");
     setSelectedSlug(null);
     setError(null);
+    setErrorRetryable(false);
     setBlockedUrl(null);
     setCredentials({});
     setCredentialErrors({});
@@ -503,6 +512,7 @@ export function ConnectAppDialog({
 
       setConnecting(true);
       setError(null);
+      setErrorRetryable(false);
       setCredentialErrors({});
       try {
         // `startConnect` will be extended in lib/composio-store/use-composio.ts
@@ -532,7 +542,9 @@ export function ConnectAppDialog({
       } catch (err: unknown) {
         const msg =
           err instanceof Error ? err.message : t("errors.failedToStart");
+        const retryable = err instanceof ComposioConnectError && err.retryable;
         setError(msg);
+        setErrorRetryable(retryable);
         toast.error(msg);
       } finally {
         setConnecting(false);
@@ -545,6 +557,7 @@ export function ConnectAppDialog({
     // and the popup blocker rejects the open.
     setConnecting(true);
     setError(null);
+    setErrorRetryable(false);
     setBlockedUrl(null);
     const authTab = openAuthTab();
     try {
@@ -561,7 +574,9 @@ export function ConnectAppDialog({
       authTab.close();
       const msg =
         err instanceof Error ? err.message : t("errors.failedToStart");
+      const retryable = err instanceof ComposioConnectError && err.retryable;
       setError(msg);
+      setErrorRetryable(retryable);
       toast.error(msg);
     } finally {
       setConnecting(false);
@@ -606,7 +621,11 @@ export function ConnectAppDialog({
             onConnect={handleConfirmConnect}
             onBack={handleBack}
             onCancel={() => onOpenChange(false)}
-            onDismissError={() => setError(null)}
+            onDismissError={() => {
+              setError(null);
+              setErrorRetryable(false);
+            }}
+            onRetry={errorRetryable ? handleConfirmConnect : undefined}
           />
         ) : (
           <>
@@ -873,6 +892,7 @@ export function ConnectConfirm({
   onBack,
   onCancel,
   onDismissError,
+  onRetry,
 }: {
   toolkit: ComposioToolkit;
   connecting: boolean;
@@ -887,8 +907,15 @@ export function ConnectConfirm({
   onBack: () => void;
   onCancel: () => void;
   onDismissError: () => void;
+  /** Provided only when the current error is transient (upstream Composio
+   *  outage like the X/Twitter Cloudflare 520). Renders a "Try again"
+   *  button next to the dismiss X that re-invokes the connect flow. */
+  onRetry?: () => void;
 }) {
   const t = useTranslations("connections.connectDialog");
+  // Parent-namespace translator for keys shared with the surrounding
+  // connections page (e.g. "retry" used by the Try Again button).
+  const tConn = useTranslations("connections");
   // next-intl 3.x's translator function exposes a `.has(key)` predicate, but
   // test mocks frequently provide a plain `(key, values) => string` stub.
   // Wrap the check so missing locale keys gracefully fall back to the
@@ -1153,6 +1180,17 @@ export function ConnectConfirm({
             >
               {error}
             </p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                disabled={connecting}
+                data-testid="connect-confirm-retry"
+                type="button"
+                className="shrink-0 rounded-md border border-red-500/25 bg-red-500/5 px-2 py-0.5 text-[11px] font-medium text-red-500/90 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {tConn("retry")}
+              </button>
+            )}
             <button
               onClick={onDismissError}
               aria-label={t("clearSearchAria")}

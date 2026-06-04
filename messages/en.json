@@ -3352,6 +3352,7 @@
       "missingCredentials": "Missing required fields: {fields}",
       "invalidCredentials": "The credentials were rejected. Please double-check and try again.",
       "credentialValidationFailed": "Could not validate your credentials. Please try again.",
+      "composioUnavailable": "Composio is temporarily unavailable for this app. This is an upstream service issue — please try again in a minute.",
       "apiKeyRequired": "An API key is required.",
       "tokenRequired": "A bearer token is required.",
       "basicRequired": "Username and password are required."

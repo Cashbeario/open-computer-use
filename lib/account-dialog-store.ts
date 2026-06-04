@@ -4,6 +4,7 @@ import { create } from "zustand"
 
 export type AccountSectionType =
   | "account"
+  | "integrations"
   | "billing"
   | "privacy"
   | "appearance"

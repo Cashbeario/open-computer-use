@@ -7,7 +7,10 @@ import {
   CaretDown,
   Monitor,
 } from "@phosphor-icons/react"
+import { AlertCircle } from "lucide-react"
+import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { useProjectNavigator } from "@/lib/project-navigator-store/provider"
 import { useState, useMemo, useEffect } from "react"
 
@@ -23,6 +26,8 @@ export function ToolInvocation({
   fullyRounded,
 }: ToolInvocationProps) {
   const { isOpen, setIsOpen } = useProjectNavigator()
+  const tConnections = useTranslations("connections")
+  const tChat = useTranslations("chat")
   const [previousScreenshot, setPreviousScreenshot] = useState<string | null>(null)
 
   // Check environment variable for showing additional info
@@ -57,6 +62,16 @@ export function ToolInvocation({
     // Browser tools
     if (toolName.toLowerCase().startsWith('browser')) {
       return isActive ? 'Navigating through web pages to gather information' : 'Successfully retrieved web content'
+    }
+
+    // Composio tools
+    if (toolName.startsWith('composio_')) {
+      const rest = toolName.slice('composio_'.length)
+      const underscoreIdx = rest.indexOf('_')
+      const toolkit = underscoreIdx > 0 ? rest.slice(0, underscoreIdx) : rest
+      const action = underscoreIdx > 0 ? rest.slice(underscoreIdx + 1) : ''
+      const capitalizedToolkit = toolkit.charAt(0).toUpperCase() + toolkit.slice(1)
+      return tConnections("toolInvocation.calling", { toolkit: capitalizedToolkit, action })
     }
 
     // Terminal tools
@@ -340,6 +355,23 @@ export function ToolInvocation({
     }
   }, [latestScreenshot, previousScreenshot])
 
+  // Detect reauth_required state from any composio tool result
+  const reauthInfo = useMemo(() => {
+    for (let i = toolInvocationsData.length - 1; i >= 0; i--) {
+      const invocation = toolInvocationsData[i].toolInvocation as any
+      const reauthRequired =
+        invocation.state === "result" && invocation.result?.reauth_required
+      if (reauthRequired) {
+        const appSlug: string = invocation.result?.app_slug || invocation.result?.toolkit || ""
+        const appName = appSlug
+          ? appSlug.charAt(0).toUpperCase() + appSlug.slice(1).replace(/_/g, " ")
+          : tChat("composioReauth.fallbackAppName")
+        return { appSlug, appName }
+      }
+    }
+    return null
+  }, [toolInvocationsData, tChat])
+
   // Determine the thumbnail source and extra count for web search
   const thumbnailSrc = webSearchThumbnails?.[0] || latestScreenshot || null
   const webSearchExtra = webSearchThumbnails && webSearchThumbnails.length > 1 ? webSearchThumbnails.length - 1 : 0
@@ -520,6 +552,35 @@ export function ToolInvocation({
             </div>
           </div>
         </motion.button>
+
+        {/* Reauth required inline alert */}
+        {reauthInfo && (
+          <div
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5",
+              "border-t border-amber-500/20 bg-amber-500/10",
+              "text-amber-700 dark:text-amber-300"
+            )}
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <p className="text-xs flex-1 min-w-0">
+              {tChat("composioReauth.expiredMessage", { appName: reauthInfo.appName })}
+            </p>
+            <Link
+              href={`/connections?reconnect=${encodeURIComponent(reauthInfo.appSlug)}`}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "text-xs font-medium whitespace-nowrap",
+                "text-amber-700 dark:text-amber-300",
+                "hover:text-amber-800 dark:hover:text-amber-200",
+                "underline-offset-2 hover:underline"
+              )}
+            >
+              {tChat("composioReauth.reconnectLink")}
+            </Link>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )

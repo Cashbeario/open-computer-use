@@ -146,6 +146,14 @@ const ENABLE_CINEMATIC_INTRO = false
 //   3. Edge vignette — gentle radial darken so the centre content sits
 //      anchored and the corners recede
 //   4. Bottom fade — linear handoff into the next section
+// ── Cinematic color grade ───────────────────────────────────────────
+// Applied to BOTH the poster and the video so the look is identical from
+// first paint. A gentle contrast + brightness bump gives the footage a
+// filmic, lit depth and richer colour. One knob — tweak here to re-grade
+// the whole hero media at once (drop this entirely for the pristine
+// original, or add `grayscale` back for the monochrome look).
+const HERO_MEDIA_GRADE = "contrast-[1.15] brightness-[1.05]"
+
 function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [videoReady, setVideoReady] = useState(false)
@@ -190,7 +198,7 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className={cn("object-cover", HERO_MEDIA_GRADE)}
         />
 
         {/* Video — desktop only, fades in once `canplay` fires. */}
@@ -206,6 +214,7 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
             onCanPlay={() => setVideoReady(true)}
             className={cn(
               "absolute inset-0 w-full h-full object-cover motion-reduce:hidden",
+              HERO_MEDIA_GRADE,
               "transition-opacity duration-700 ease-out",
               videoReady ? "opacity-100" : "opacity-0",
             )}
@@ -219,6 +228,47 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
           the moving media. Dark mode gets a slightly heavier veil because
           the page bg is near-black and contrast budgets are tighter. */}
       <div className="absolute inset-0 bg-background/55 dark:bg-background/65" />
+
+      {/* ─── Cinematic light over the footage ──────────────────────────
+          Two neutral, white-only layers that give the video a lit, filmic
+          depth. Both blend with `soft-light`, so they lift the midtones
+          into a gentle glow and never blow out highlights — and both sit
+          BELOW the z-10 text overlay, so the headline is never washed. The
+          vignette below still darkens the edges over them. */}
+
+      {/* Key light — a soft static bloom pooling from above, as if the room
+          is lit from the top. Pure atmosphere, no motion. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 mix-blend-soft-light opacity-70 dark:opacity-100"
+        style={{
+          background:
+            "radial-gradient(115% 80% at 50% -12%, rgba(255,255,255,0.18), transparent 62%)",
+        }}
+      />
+
+      {/* Sheen — a slow, wide diagonal gleam that drifts across the frame,
+          reading as cinematic light passing through the room rather than a
+          hard scanner line. Desktop + motion only. */}
+      {!isMobile && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 mix-blend-soft-light opacity-85 dark:opacity-100 motion-reduce:hidden"
+          style={{
+            background:
+              "linear-gradient(108deg, transparent 24%, rgba(255,255,255,0.11) 44%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.11) 56%, transparent 76%)",
+            backgroundSize: "230% 100%",
+            animation: "hero-sheen 12s ease-in-out infinite",
+          }}
+        />
+      )}
+
+      <style jsx global>{`
+        @keyframes hero-sheen {
+          0% { background-position: 210% 0; }
+          100% { background-position: -110% 0; }
+        }
+      `}</style>
 
       {/* Edge vignette — soft radial darken that pushes the corners back
           and anchors the centre content. Quiet enough to read as lighting,

@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils"
 import { ReferralPopup } from "../../referral/referral-popup"
 import { SidebarNavSection } from "./sidebar-nav-section"
 import { SidebarFooterSection } from "./sidebar-footer-section"
+import { PlatformModeSwitcher } from "./platform-mode-switcher"
+import { PLATFORM_MODE_SWITCHER_ENABLED } from "@/lib/feature-flags"
 import { MemoryDialog } from "@/app/components/layout/settings/general/memory-dialog"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
 
@@ -148,29 +150,28 @@ export function AppSidebar() {
         } as React.CSSProperties}
       >
         {/* ─── Header ───────────────────────────────────────
-            Same padding & layout in both modes so the logo never
-            shifts horizontally. Logo center anchored at sidebar-x=24
-            (parent px-2 + button px-1 + logo-half 12), matching the
-            nav icon column below. Wordmark uses gap-1.5 so its left
-            edge lands at x=42 — same as nav item labels.
+            Same padding in both modes so the logo never shifts: its
+            center stays at sidebar-x=24 (parent px-2 + button px-1 +
+            logo-half 12), matching the nav icon column below.
 
-            The pin button only renders when expanded — it would have
-            no room in the 48px collapsed rail. Logo button takes
-            `flex-1 min-w-0` so it shrinks gracefully when the pin
-            button shows, instead of pushing it offscreen. */}
+            Expanded layout (left→right): logo (home) · platform-mode
+            switcher (flex-1) · pin. The switcher and pin are expanded-
+            only — neither fits the 48px collapsed rail; collapsed shows
+            just the logo icon. */}
         <SidebarHeader className="p-0">
-          <div className="flex items-center min-h-[44px] px-2 pt-2 pb-1 gap-0.5">
+          <div className="flex items-center min-h-[44px] px-2 pt-2 pb-1 gap-1">
             <button
               onClick={() => {
                 setLogoClicks(c => c + 1)
                 handleNavigation(() => router.push("/"))
               }}
               className={cn(
-                "flex flex-1 min-w-0 items-center gap-1.5 px-1 py-1.5 rounded-lg transition-colors duration-150",
+                "flex shrink-0 items-center justify-center px-1 py-1.5 rounded-lg transition-colors duration-150",
                 "hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
                 "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
               )}
               title="Coasty"
+              aria-label="Coasty — home"
             >
               <div className={cn(
                 "flex h-6 w-6 items-center justify-center shrink-0 transition-transform duration-500",
@@ -178,12 +179,18 @@ export function AppSidebar() {
               )}>
                 <CoastyIcon className="h-6 w-6 text-sidebar-primary" />
               </div>
-              {expanded && (
-                <span className="text-[13.5px] font-semibold text-foreground/90 tracking-[-0.015em] leading-tight truncate">
-                  Coasty
-                </span>
-              )}
             </button>
+
+            {/* Platform mode switcher — the "text box next to the logo"
+                naming the current platform (Consumer / Developer) and
+                letting the user switch. Expanded-only, behind a flag. */}
+            {expanded && PLATFORM_MODE_SWITCHER_ENABLED && (
+              // Compact (shrink-to-content) so it reads as a tidy label beside
+              // the logo at every width, instead of stretching across the wider
+              // mobile sheet. `min-w-0` lets it truncate if the row ever gets
+              // tight; the pin's `ml-auto` keeps it pinned right.
+              <PlatformModeSwitcher className="min-w-0" />
+            )}
 
             {/* ── Keep-open toggle ──
                 Desktop-only — on mobile the sidebar is a sheet drawer
@@ -203,7 +210,7 @@ export function AppSidebar() {
                     aria-label={pinned ? "Unpin sidebar" : "Keep sidebar open"}
                     aria-pressed={pinned}
                     className={cn(
-                      "group flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
+                      "group ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
                       "transition-all duration-150 ease-out active:scale-90",
                       "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
                       pinned

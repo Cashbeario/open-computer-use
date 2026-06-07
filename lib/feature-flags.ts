@@ -20,3 +20,11 @@
  * change.
  */
 export const DEVELOPERS_API_ENABLED = false
+
+/**
+ * Gates the sidebar platform-mode switcher (Consumer ↔ Developer) shown next
+ * to the logo. Turning it off hides the switcher entirely; the user's
+ * persisted mode is left untouched, so flipping it back on restores their
+ * last choice.
+ */
+export const PLATFORM_MODE_SWITCHER_ENABLED = true

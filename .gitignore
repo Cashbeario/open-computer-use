@@ -179,3 +179,11 @@ temp/*
 # OSWorld showcase artifacts — pushed to the dedicated coasty-ai/coasty-osworld
 results/
 logs/
+docs/
+
+# Playwright (visual-fit / i18n-overflow tests)
+playwright-report/
+test-results/
+/e2e/.auth/
+e2e/storage/e2e-auth.json
+playwright/.cache/

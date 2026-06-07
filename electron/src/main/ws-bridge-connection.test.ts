@@ -3,9 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Hoisted shared state ──────────────────────────────────────────
 
 const h = vi.hoisted(() => {
-  const mockShowRainbow = vi.fn()
-  const mockHideRainbow = vi.fn()
-  const mockInitRainbow = vi.fn()
   const mockExecuteCommand = vi.fn().mockResolvedValue({ success: true })
 
   type WSHandler = (...args: any[]) => void
@@ -42,9 +39,6 @@ const h = vi.hoisted(() => {
   }
 
   return {
-    mockShowRainbow,
-    mockHideRainbow,
-    mockInitRainbow,
     mockExecuteCommand,
     FakeWebSocket,
     get currentWs() { return currentWs },
@@ -52,12 +46,6 @@ const h = vi.hoisted(() => {
 })
 
 // ── Mocks ──────────────────────────────────────────────────────────
-
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: h.mockShowRainbow,
-  hideRainbowBorder: h.mockHideRainbow,
-  initRainbowBorder: h.mockInitRainbow,
-}))
 
 const mockSend = vi.fn()
 vi.mock('electron', () => ({

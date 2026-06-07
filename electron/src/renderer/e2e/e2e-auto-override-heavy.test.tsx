@@ -157,9 +157,9 @@ describe('Auto-override — multi-turn', () => {
 
     const chatIdT1 = backend.capturedSends[0].chatId
 
-    // Machine is now not busy (auto-recovery worked).
-    expect(backend.busyMachinesSize?.()).toBeFalsy?.()  // can't easily inspect; rely on next send
-
+    // Machine is now not busy (auto-recovery worked) — verified implicitly
+    // by the next send dispatching cleanly and stopMachineCallCount staying
+    // at 1 in the assertions below.
     backend.scriptNextResponse({ textChunks: ['turn 2 done'] })
     await user.type(getInput(), 'second turn{Enter}')
     await waitFor(() => expect(backend.sendCallCount).toBeGreaterThanOrEqual(2), { timeout: 3000 })

@@ -315,6 +315,15 @@ html, body {
 }
 .breathe-emerald { animation: breathe-emerald 2s ease-out infinite; }
 
+/* Connection status, shown ON the brand mark instead of a status dot: a soft
+   brightness pulse while connecting. (Connected = full + calm; offline =
+   dimmed, both handled inline on the logo.) */
+@keyframes logo-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.logo-pulse { animation: logo-pulse 1.6s ease-in-out infinite; }
+
 /* ── Shining beam border ── */
 @property --beam-angle {
   syntax: '<angle>';
@@ -356,6 +365,91 @@ html, body {
 @keyframes beam-spin {
   to { --beam-angle: 360deg; }
 }
+
+/* ─── Working-state smoke / fog ──────────────────────────────────────────
+   Volumetric cobalt smoke behind the overlay content, shown in BOTH compact
+   and expanded modes. Three layered radial-gradient blobs whose motion is
+   driven by a single requestAnimationFrame loop in <SmokeLayer> (Overlay.tsx):
+   it advances an accumulated time by `dt * speed`, where `speed` eases 0↔1
+   with the task-running state. Velocity is proportional to speed, so the drift
+   accelerates in smoothly when a task starts and DECELERATES to a frozen still
+   when it ends — never a hard snap. The layer stays visible at all times; it
+   just settles to a calmer static haze when idle. Only transform + opacity are
+   written each frame (GPU compositor — no paint/layout); the soft "blur" is
+   baked into the gradient falloff + a static edge mask, not an animated filter.
+
+   z-index -5: above the three -z-10 backing layers (so the glass
+   backdrop-filter blur(40px) never washes it out) but below the chat content
+   (z-index auto). isolation:isolate on the overlay root keeps it local. */
+.smoke {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  border-radius: inherit;
+  overflow: hidden;          /* clip blobs to the rounded card */
+  pointer-events: none;
+  opacity: 0.45;             /* idle baseline; SmokeLayer eases it up while running */
+  will-change: opacity;
+  /* Isolate so the blobs' `screen` blend mixes among THEMSELVES over a
+     transparent base (luminous overlaps), never with the desktop behind. */
+  isolation: isolate;
+}
+
+/* The whole layer is BLURRED so the individual drifting blobs melt into one
+   continuous, flowing light field — aurora/smoke structure, not discrete
+   dots. (Re-rasterised only while the motion loop runs; idle parks.) */
+
+/* Expanded: a soft blur for billowing curtains, held in the LOWER HALF and
+   faded out toward the top so the content area above stays clean. */
+.smoke--expanded {
+  filter: blur(20px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 38%, rgba(0, 0, 0, 0.4) 62%, transparent 85%);
+          mask-image: linear-gradient(to top, #000 0%, #000 38%, rgba(0, 0, 0, 0.4) 62%, transparent 85%);
+}
+
+/* Compact: a lighter blur (the pill is only 56px tall) + a centred feather so
+   the flowing band melts into the pill's edges. */
+.smoke--compact {
+  filter: blur(6px);
+  -webkit-mask-image: radial-gradient(135% 150% at 50% 50%, #000 34%, transparent 100%);
+          mask-image: radial-gradient(135% 150% at 50% 50%, #000 34%, transparent 100%);
+}
+
+.smoke-blob {
+  position: absolute;
+  /* `screen` adds light where the curtains overlap (aurora glow). transform +
+     opacity are written per-frame by SmokeLayer. */
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Colour per blob — soft elongated (aspect-matched) gradients that overlap
+   into a continuous field once blurred. A gentle blue → cyan → violet shift
+   across the layers gives an aurora shimmer while staying in the brand family.
+   Size + anchor are per-mode below. */
+.smoke-blob-1 { background: radial-gradient(farthest-side, rgba(18, 92, 185, 0.30) 0%, rgba(14, 70, 150, 0.14) 46%, transparent 100%); }
+.smoke-blob-2 { background: radial-gradient(farthest-side, rgba(22, 130, 226, 0.32) 0%, rgba(16, 104, 195, 0.15) 48%, transparent 100%); }
+.smoke-blob-3 { background: radial-gradient(farthest-side, rgba(32, 172, 232, 0.34) 0%, rgba(22, 140, 215, 0.15) 50%, transparent 100%); }
+.smoke-blob-4 { background: radial-gradient(farthest-side, rgba(72, 198, 250, 0.34) 0%, rgba(40, 165, 235, 0.15) 52%, transparent 100%); }
+.smoke-blob-5 { background: radial-gradient(farthest-side, rgba(120, 145, 255, 0.32) 0%, rgba(80, 120, 240, 0.14) 54%, transparent 100%); }
+
+/* ── Expanded geometry: large, heavily overlapping layers in the LOWER HALF,
+   so the blur fuses them into a continuous aurora rising from the bottom. ── */
+.smoke--expanded .smoke-blob-1 { width: 170%; height: 110%; left: -35%; bottom: -45%; }
+.smoke--expanded .smoke-blob-2 { width: 115%; height: 92%;  right: -28%; bottom: -32%; }
+.smoke--expanded .smoke-blob-3 { width: 92%;  height: 76%;  left: -10%; bottom: -18%; }
+.smoke--expanded .smoke-blob-4 { width: 76%;  height: 66%;  right: -6%; bottom: -8%; }
+.smoke--expanded .smoke-blob-5 { width: 60%;  height: 56%;  left: 18%;  bottom: 0%; }
+
+/* ── Compact geometry: wide, overlapping layers spanning the pill; the blur
+   fuses them into one flowing horizontal band of light. ── */
+.smoke--compact .smoke-blob-1 { width: 95%; height: 200%; left: -8%;  top: -50%; }
+.smoke--compact .smoke-blob-2 { width: 75%; height: 175%; right: -6%; top: -38%; }
+.smoke--compact .smoke-blob-3 { width: 55%; height: 150%; left: 12%;  top: -25%; }
+.smoke--compact .smoke-blob-4 { width: 45%; height: 135%; right: 14%; top: -18%; }
+.smoke--compact .smoke-blob-5 { width: 36%; height: 120%; left: 40%;  top: -10%; }
 
 /* ── Permission toast slide-in ── */
 @keyframes slide-down {

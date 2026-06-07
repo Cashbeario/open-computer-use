@@ -1073,7 +1073,7 @@ export default function ApiDocsPage() {
                 Give your code
                 <br />
                 <span className="relative inline-block">
-                  <span className="bg-gradient-to-r from-foreground via-foreground/60 to-foreground/40 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-foreground via-foreground/60 to-foreground/40 bg-clip-text text-transparent pb-1 sm:pb-2">
                     eyes and hands.
                   </span>
                   <motion.span

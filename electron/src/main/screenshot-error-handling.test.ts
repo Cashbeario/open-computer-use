@@ -114,11 +114,6 @@ vi.mock('./window-manager', () => ({
   getMainWindow: () => null,
 }))
 
-vi.mock('./rainbow-border', () => ({
-  hideRainbowForScreenshot: vi.fn(),
-  showRainbowAfterScreenshot: vi.fn(),
-}))
-
 vi.mock('./display-manager', () => ({
   getActiveDisplay: vi.fn(() => ({
     id: 1,

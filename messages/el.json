@@ -868,6 +868,11 @@
       "npsVeryLikely": "Πολύ πιθανό",
       "thanks": "Ευχαριστούμε για τα σχόλια",
       "creditsLabel": "μονάδες"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Εφαρμογή",
+      "expiredMessage": "Η σύνδεσή σας με το {appName} έληξε.",
+      "reconnectLink": "Επανασύνδεση"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "σε {count}λ",
     "inHours": "σε {count}ώ",
     "today": "σήμερα",
-    "yesterday": "χθες"
+    "yesterday": "χθες",
+    "connections": "Εφαρμογές",
+    "resources": "Πράκτορας"
   },
   "appHeader": {
     "login": "Σύνδεση",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - #1 AI Agent Χρήσης Υπολογιστή | Καλύτερο για Αυτοματοποίηση Επιφάνειας Εργασίας & Προγράμματος Περιήγησης",
       "titleTemplate": "{title} | Coasty - AI Agent Χρήσης Υπολογιστή",
-      "description": "Το Coasty είναι ο #1 κατατασσόμενος AI agent χρήσης υπολογιστή — 82% στο benchmark OSWorld — και το μοναδικό πλάνο Απεριόριστο με σταθερή χρέωση για χρήση υπολογιστή στα {unlimitedPrice} (φθηνότερο από το Devin Team $500+ACU, το OpenAI Operator $200 με όριο αιτημάτων και τους ανταγωνιστές με όριο πιστωτικών μονάδων). Ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος: προγράμματα περιήγησης, φόρμες, email, υπολογιστικά φύλλα. Απομόνωση σε επίπεδο VM. Από {starterPrice} με το Starter ή {unlimitedPrice} Απεριόριστο.",
+      "description": "Το Coasty είναι ο #1 κατατασσόμενος AI agent χρήσης υπολογιστή (82% στο OSWorld) και η μοναδική πλατφόρμα χρήσης υπολογιστή με 1,000+ εγγενείς ενσωματώσεις εφαρμογών — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify και 990+ ακόμη — διαθέσιμες σε κάθε συνομιλία. Σταθερή χρέωση Απεριόριστο στα {unlimitedPriceLong} (φθηνότερο από το Devin Team $500+ACU και το OpenAI Operator $200 με όριο αιτημάτων). Ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος, με απομόνωση σε επίπεδο VM. Από {starterPrice} Starter ή {unlimitedPrice} Απεριόριστο.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Απεριόριστο (Ο Φθηνότερος Agent Χρήσης Υπολογιστή)",
-      "ogDescription": "#1 στο OSWorld (82%). Σταθερή χρέωση {unlimitedPrice} Απεριόριστο — φθηνότερο από το Devin Team ($500+ACU) με υψηλότερο σκορ benchmark. Αυτοματοποίηση προγράμματος περιήγησης, επιφάνειας εργασίας και τερματικού. Απομόνωση VM ανά συνεδρία. Εγγενής εφαρμογή πολλαπλών πλατφορμών + REST API + MCP server.",
-      "twitterDescription": "AI agent που λειτουργεί έναν πραγματικό υπολογιστή. 82% OSWorld (#1). {unlimitedPrice} Απεριόριστο — το φθηνότερο πλάνο σταθερής χρέωσης στην κατηγορία. Starter από {starterPrice}. Απομόνωση VM + MCP server με 26 εργαλεία."
+      "ogDescription": "#1 στο OSWorld (82%) + 1,000+ ενσωματώσεις (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} σταθερή χρέωση Απεριόριστο. Ο μοναδικός agent χρήσης υπολογιστή με πραγματικό κατάλογο ενσωματώσεων. Απομόνωση VM, εγγενής εφαρμογή πολλαπλών πλατφορμών, REST API, MCP server.",
+      "twitterDescription": "AI agent που λειτουργεί έναν πραγματικό υπολογιστή ΚΑΙ συνδέεται με 1,000+ εφαρμογές (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Απεριόριστο, το φθηνότερο πλάνο σταθερής χρέωσης στην κατηγορία. Starter από {starterPrice}."
     },
     "compare": {
       "title": "Σύγκριση Coasty - Εναλλακτικές AI Agent & Σύγκριση Ανταγωνιστών",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Τιμολόγηση — Πλάνα & Τιμές Coasty AI Agent",
-      "description": "Τιμολόγηση Coasty: Starter {starterPrice} (200 πιστωτικές μονάδες) ή Απεριόριστο {unlimitedPrice} (το φθηνότερο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή στην αγορά — φθηνότερο από το Devin Team $500+ACU, το Genspark Pro $249 με όριο πιστωτικών μονάδων και το Manus Extended $200 με όριο). Αντικαθιστά ανθρώπινους εικονικούς βοηθούς $3.000+/mo. Χωρίς κρυφές χρεώσεις.",
+      "description": "Τιμολόγηση Coasty: Starter {starterPrice} (200 πιστωτικές μονάδες) ή Απεριόριστο {unlimitedPrice}, το φθηνότερο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή στην αγορά (φθηνότερο από το Devin Team $500+ACU, το Genspark Pro $249 με όριο πιστωτικών μονάδων και το Manus Extended $200 με όριο). Κάθε πλάνο περιλαμβάνει 1,000+ εγγενείς ενσωματώσεις εφαρμογών (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify και 990+ ακόμη) και αντικαθιστά ανθρώπινους εικονικούς βοηθούς $3.000+/mo. Χωρίς κρυφές χρεώσεις.",
       "ogTitle": "Τιμολόγηση Coasty — {starterPrice} Starter, {unlimitedPrice} Απεριόριστο",
       "ogDescription": "Σταθερή χρέωση {unlimitedPrice} Απεριόριστο — το φθηνότερο πλάνο απεριόριστης χρήσης υπολογιστή στην αγορά. Ή {starterPrice} Starter για ιδιώτες. Εξοικονομεί $36.000/έτος έναντι ανθρώπινων βοηθών."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Πώς συγκρίνεται το Coasty με το OpenAI Operator;",
       "a9": "Το Coasty ξεπερνά τo OpenAI Operator στο benchmark OSWorld (82% vs ~40%), προσφέρει πραγματική απομόνωση σε επίπεδο VM για κάθε συνεδρία, υποστηρίζει πολλαπλά AI μοντέλα, περιλαμβάνει πλήρη έλεγχο επιφάνειας εργασίας πέρα από μόνο τον browser και παρέχει ένα open-source framework.",
       "q10": "Μπορεί το Coasty να λύσει CAPTCHA;",
-      "a10": "Ναι. Το Coasty διαθέτει ενσωματωμένο pipeline επίλυσης CAPTCHA, ώστε να μην μπλοκάρεται όπως οι ανταγωνιστικοί AI agents. Αυτό είναι κρίσιμο για πραγματική αυτοματοποίηση όπου τα CAPTCHA είναι συνηθισμένα στους ιστότοπους."
+      "a10": "Ναι. Το Coasty διαθέτει ενσωματωμένο pipeline επίλυσης CAPTCHA, ώστε να μην μπλοκάρεται όπως οι ανταγωνιστικοί AI agents. Αυτό είναι κρίσιμο για πραγματική αυτοματοποίηση όπου τα CAPTCHA είναι συνηθισμένα στους ιστότοπους.",
+      "q11": "Με ποιες εφαρμογές και υπηρεσίες συνδέεται το Coasty;",
+      "a11": "Το Coasty συνδέεται με 1,000+ εφαρμογές μέσω του ενσωματωμένου επιπέδου ενσωματώσεων Composio, όπως Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase και Twilio. Συνδέετε οποιαδήποτε εφαρμογή μία φορά με OAuth από τις Ρυθμίσεις και μετά το Coasty τη χρησιμοποιεί σε κάθε συνομιλία για λογαριασμό σας — κανένας κωδικός δεν φτάνει ποτέ στον agent. Όταν μια εφαρμογή διαθέτει API, το Coasty το καλεί απευθείας για καθυστέρηση κάτω του δευτερολέπτου. Όταν δεν διαθέτει (SAP GUI, LinkedIn Sales Navigator, παλιότερα τραπεζικά portals, εσωτερικά εργαλεία διαχείρισης), ο ίδιος agent οδηγεί τη διεπαφή με χρήση υπολογιστή. Το Coasty είναι η μοναδική πλατφόρμα χρήσης υπολογιστή που προσφέρει και τις δύο επιφάνειες — κατάλογο ενσωματώσεων με προτεραιότητα στο API ΚΑΙ έλεγχο επιφάνειας εργασίας σε επίπεδο OS — σε έναν agent."
     },
     "structuredData": {
-      "appDescription": "Ο #1 κατατασσόμενος AI agent χρήσης υπολογιστή και το φθηνότερο πλάνο Απεριόριστο σταθερής χρέωσης για χρήση υπολογιστή στην αγορά, στα {unlimitedPrice}. Το Coasty ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος — ανοίγει προγράμματα περιήγησης, κάνει κλικ, πληκτρολογεί, συμπληρώνει φόρμες, στέλνει email και διαχειρίζεται υπολογιστικά φύλλα αυτόνομα. 82% στο benchmark OSWorld σε 369 πραγματικές εργασίες. Πραγματική απομόνωση σε επίπεδο VM ανά συνεδρία. Ενσωματωμένη επίλυση CAPTCHA. Πλάνα: {starterPrice} Starter ή {unlimitedPrice} Απεριόριστο.",
-      "orgDescription": "Το Coasty κατασκευάζει τον #1 AI agent χρήσης υπολογιστή (82% OSWorld) και προσφέρει το μοναδικό πλάνο Απεριόριστο σταθερής χρέωσης για χρήση υπολογιστή στα {unlimitedPrice} — φθηνότερο από το Devin Team, το OpenAI Operator και τους ανταγωνιστές με όριο πιστωτικών μονάδων στην ίδια κατηγορία τιμής. Η πλατφόρμα μας παρέχει αυτόνομο έλεγχο επιφάνειας εργασίας, αυτοματοποίηση προγράμματος περιήγησης και ενορχήστρωση πολλαπλών agents με πραγματική απομόνωση σε επίπεδο VM.",
-      "productDescription": "AI agent χρήσης υπολογιστή που ελέγχει μια επιφάνεια εργασίας σαν άνθρωπος. #1 στο benchmark OSWorld (82%). Το πλάνο Απεριόριστο των {unlimitedPrice} είναι το φθηνότερο διαθέσιμο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή. Αυτόνομη αυτοματοποίηση προγράμματος περιήγησης, έλεγχος επιφάνειας εργασίας, αποστολή email, συμπλήρωση φορμών και διαχείριση υπολογιστικών φύλλων με πραγματική απομόνωση σε επίπεδο VM.",
-      "websiteDescription": "#1 πλατφόρμα AI agent χρήσης υπολογιστή — 82% OSWorld benchmark και το φθηνότερο πλάνο Απεριόριστο σταθερής χρέωσης στα {unlimitedPrice}. Αυτόνομη αυτοματοποίηση προγράμματος περιήγησης, επιφάνειας εργασίας και τερματικού με απομόνωση VM. Από {starterPrice} με Starter ή {unlimitedPrice} Απεριόριστο.",
-      "softwareDescription": "AI agent χρήσης υπολογιστή που ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος. #1 στο benchmark OSWorld με ποσοστό ολοκλήρωσης 82% σε 369 πραγματικές εργασίες. Το πλάνο Απεριόριστο των {unlimitedPrice} είναι το φθηνότερο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή στην αγορά. Αυτόνομη αυτοματοποίηση προγράμματος περιήγησης, έλεγχος επιφάνειας εργασίας, λειτουργίες τερματικού, αποστολή email, συμπλήρωση φορμών και διαχείριση υπολογιστικών φύλλων.",
+      "appDescription": "Ο #1 κατατασσόμενος AI agent χρήσης υπολογιστή και η μοναδική πλατφόρμα χρήσης υπολογιστή με 1,000+ εγγενείς ενσωματώσεις εφαρμογών (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, καθώς και 990+ ακόμη). 82% στο OSWorld σε 369 πραγματικές εργασίες. Το φθηνότερο πλάνο Απεριόριστο σταθερής χρέωσης στην αγορά, στα {unlimitedPriceLong}. Ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος, με πραγματική απομόνωση σε επίπεδο VM ανά συνεδρία και ενσωματωμένη επίλυση CAPTCHA. Πλάνα: {starterPrice} Starter ή {unlimitedPrice} Απεριόριστο.",
+      "orgDescription": "Το Coasty κατασκευάζει τον #1 AI agent χρήσης υπολογιστή (82% OSWorld) με 1,000+ ενσωματώσεις εφαρμογών μέσω OAuth (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) και προσφέρει το μοναδικό πλάνο Απεριόριστο σταθερής χρέωσης για χρήση υπολογιστή στα {unlimitedPriceLong}, φθηνότερο από το Devin Team, το OpenAI Operator και τους ανταγωνιστές με όριο πιστωτικών μονάδων. Η πλατφόρμα μας συνδυάζει χρήση υπολογιστή, ενορχήστρωση πολλαπλών agents, εγγενείς ενσωματώσεις και απομόνωση σε επίπεδο VM σε ένα προϊόν.",
+      "productDescription": "AI agent χρήσης υπολογιστή που ελέγχει μια επιφάνεια εργασίας σαν άνθρωπος ΚΑΙ συνδέεται εγγενώς με 1,000+ εφαρμογές (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 στο benchmark OSWorld (82%). Το πλάνο {unlimitedPrice} Απεριόριστο είναι το φθηνότερο διαθέσιμο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή. Αυτόνομη αυτοματοποίηση προγράμματος περιήγησης, επιφάνειας εργασίας, email, συμπλήρωσης φορμών και υπολογιστικών φύλλων με απομόνωση σε επίπεδο VM.",
+      "websiteDescription": "#1 πλατφόρμα AI agent χρήσης υπολογιστή (82% OSWorld) με 1,000+ εγγενείς ενσωματώσεις (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) και το φθηνότερο πλάνο Απεριόριστο σταθερής χρέωσης στα {unlimitedPriceLong}. Αυτόνομη αυτοματοποίηση προγράμματος περιήγησης, επιφάνειας εργασίας και τερματικού με απομόνωση VM. Από {starterPrice} Starter ή {unlimitedPrice} Απεριόριστο.",
+      "softwareDescription": "AI agent χρήσης υπολογιστή που ελέγχει μια πλήρη επιφάνεια εργασίας σαν άνθρωπος και προσφέρει 1,000+ ενσωματώσεις εφαρμογών μέσω OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, καθώς και 990+ ακόμη). #1 στο OSWorld με 82% ποσοστό ολοκλήρωσης σε 369 πραγματικές εργασίες. Το πλάνο {unlimitedPriceLong} Απεριόριστο είναι το φθηνότερο πλάνο σταθερής χρέωσης για απεριόριστη χρήση υπολογιστή στην αγορά. Αυτοματοποίηση προγράμματος περιήγησης, επιφάνειας εργασίας, τερματικού, email, φορμών και υπολογιστικών φύλλων σε έναν agent.",
       "breadcrumbs": {
         "home": "Αρχική",
         "caseStudies": "Μελέτες Περιπτώσεων AI Agent",
@@ -2413,6 +2422,13 @@
         "download": "Λήψη Εφαρμογής Desktop",
         "compare": "Σύγκριση AI Agents"
       }
+    },
+    "connections": {
+      "title": "Συνδέσεις",
+      "description": "Συνδέστε Gmail, Slack, Notion, GitHub και εκατοντάδες ακόμη εφαρμογές. Διαθέσιμες σε κάθε συνομιλία.",
+      "ogTitle": "Συνδέσεις — 250+ Εφαρμογές με AI Agent Coasty",
+      "ogDescription": "Φέρτε Gmail, Slack, GitHub, Notion, Google Calendar, Linear και εκατοντάδες ακόμη εφαρμογές σε κάθε συνομιλία. Με ασφάλεια OAuth, πάντα ενεργές, χρησιμοποιούνται από τους agents του Coasty για λογαριασμό σας.",
+      "twitterDescription": "Συνδέστε Gmail, Slack, GitHub, Notion και 250+ εφαρμογές με το Coasty. Ένα OAuth, χρήση σε κάθε συνομιλία από τον agent σας."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Παραπομπή",
         "description": "Πρόσκαλε φίλους και κέρδισε μονάδες"
+      },
+      "integrations": {
+        "label": "Ενσωματώσεις",
+        "description": "Συνδέστε εφαρμογές τρίτων"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Παραπομπές",
       "description": "Μοιράσου το Coasty. Κερδίστε μαζί."
+    },
+    "connections": {
+      "title": "Οι συνδέσεις σας",
+      "description": "Ανάκτηση των συνδεδεμένων εφαρμογών και εργαλείων σας."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 κατά τη μεταφορά",
     "trustAtRest": "AES-256-GCM σε ηρεμία",
     "trustNoTraining": "Καμία εκπαίδευση με τα δεδομένα σου"
+  },
+  "connections": {
+    "page": {
+      "title": "Συνδέσεις",
+      "description": "Συνδέστε Gmail, Slack, Notion, GitHub και εκατοντάδες ακόμη εφαρμογές. Διαθέσιμες σε κάθε συνομιλία."
+    },
+    "fallbackAppName": "εφαρμογή",
+    "status": {
+      "active": "Συνδεδεμένο",
+      "initiated": "Σε σύνδεση",
+      "expired": "Έληξε",
+      "failed": "Ανακλήθηκε",
+      "failedShort": "Απέτυχε",
+      "inactive": "Ανενεργό"
+    },
+    "toasts": {
+      "disconnectFailed": "Η αποσύνδεση απέτυχε",
+      "disconnected": "Αποσυνδέθηκε το {appName}",
+      "reconnectFailed": "Η εκκίνηση επανασύνδεσης απέτυχε",
+      "connected": "Συνδέθηκε το {app}",
+      "error": "Κάτι πήγε στραβά. Παρακαλούμε δοκιμάστε ξανά."
+    },
+    "card": {
+      "logoAlt": "Λογότυπο {appName}",
+      "fallbackAccountLabel": "Συνδεδεμένο",
+      "connectedOn": "Συνδέθηκε στις {date}",
+      "lastUsed": "Τελευταία χρήση {time}",
+      "actions": {
+        "reconnect": "Επανασύνδεση",
+        "disconnect": "Αποσύνδεση",
+        "menuAriaLabel": "Ενέργειες σύνδεσης"
+      },
+      "error": {
+        "expired": "Η εξουσιοδότηση έληξε. Κάντε επανασύνδεση για να αποκαταστήσετε την πρόσβαση στα εργαλεία.",
+        "revoked": "Η σύνδεση ανακλήθηκε. Κάντε επανασύνδεση για να αποκαταστήσετε την πρόσβαση στα εργαλεία."
+      },
+      "disconnectDialog": {
+        "title": "Αποσύνδεση του {appName};",
+        "connectedOn": "συνδέθηκε στις {date}",
+        "consequence": {
+          "revokeOauth": "Το Composio θα ανακαλέσει την παραχώρηση OAuth",
+          "toolsStop": "Τα εργαλεία που χρησιμοποιούν αυτή τη σύνδεση θα σταματήσουν να λειτουργούν"
+        },
+        "confirm": "Αποσύνδεση",
+        "cancel": "Διατήρηση σύνδεσης"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Λογότυπο {name}",
+      "headline": "Συνδέστε την πρώτη σας εφαρμογή",
+      "subheadline": "Εξουσιοδοτήστε μία φορά και το AI σας μπορεί να διαβάζει τα email σας, να δημοσιεύει στο Slack, να ενημερώνει έγγραφα και πολλά άλλα, αυτόματα, σε κάθε συνομιλία.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Εργαλεία σε κάθε συνομιλία",
+          "desc": "Μόλις συνδεθούν, το AI σας τα χρησιμοποιεί αυτόματα."
+        },
+        "secureOauth": {
+          "title": "Ασφαλές OAuth",
+          "desc": "Εξουσιοδοτήστε μία φορά, ανακαλέστε όποτε θέλετε."
+        },
+        "hundredsOfApps": {
+          "title": "Εκατοντάδες εφαρμογές",
+          "desc": "Email, ημερολόγια, CRM, έγγραφα, κώδικας και πολλά άλλα."
+        }
+      },
+      "browseAppsCta": "Δείτε τις εφαρμογές"
+    },
+    "connectDialog": {
+      "title": "Συνδέστε μια εφαρμογή",
+      "description": "Περιηγηθείτε σε εκατοντάδες ενσωματώσεις που υποστηρίζονται από το Composio.",
+      "searchPlaceholder": "Αναζήτηση εφαρμογών…",
+      "clearSearchAria": "Καθαρισμός αναζήτησης",
+      "categories": {
+        "all": "Όλες",
+        "communication": "Επικοινωνία",
+        "productivity": "Παραγωγικότητα",
+        "calendar": "Ημερολόγιο",
+        "developer": "Ανάπτυξη",
+        "crmSales": "CRM & Πωλήσεις"
+      },
+      "sections": {
+        "featured": "Προτεινόμενα",
+        "allApps": "Όλες οι εφαρμογές"
+      },
+      "card": {
+        "logoAlt": "Λογότυπο {name}",
+        "alreadyConnectedTooltip": "Ήδη συνδεδεμένο. Διαχειριστείτε το από τη σελίδα Συνδέσεις",
+        "connectedLabel": "Συνδεδεμένο",
+        "connectFallbackDescription": "Συνδέστε το {name} με το AI σας"
+      },
+      "footer": {
+        "poweredBy": "με την υποστήριξη του Composio",
+        "cancel": "Άκυρο"
+      },
+      "empty": {
+        "noMatchTitle": "Καμία εφαρμογή δεν ταιριάζει με «{query}»",
+        "noAppsTitle": "Δεν υπάρχουν διαθέσιμες εφαρμογές",
+        "noMatchBody": "Δοκιμάστε μια πιο σύντομη αναζήτηση ή μια διαφορετική κατηγορία.",
+        "noAppsBody": "Οι ενσωματώσεις του Composio θα εμφανιστούν εδώ μόλις ρυθμιστούν."
+      },
+      "errors": {
+        "failedToStart": "Η εκκίνηση σύνδεσης απέτυχε"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Σύνδεση μέσω Composio",
+          "connectWithApiKey": "Αποθήκευση & σύνδεση",
+          "connectWithBearerToken": "Αποθήκευση & σύνδεση",
+          "connectWithBasic": "Αποθήκευση & σύνδεση",
+          "connectNoAuth": "Ενεργοποίηση",
+          "connecting": "Σύνδεση..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Κλειδί API",
+          "apiKeyPlaceholder": "Επικολλήστε το κλειδί API σας",
+          "bearerTokenLabel": "Διακριτικό Bearer",
+          "bearerTokenPlaceholder": "Επικολλήστε το διακριτικό Bearer",
+          "basicAuthUsername": "Όνομα χρήστη",
+          "basicAuthPassword": "Κωδικός πρόσβασης",
+          "basicAuthUsernamePlaceholder": "Όνομα χρήστη του λογαριασμού σας",
+          "basicAuthPasswordPlaceholder": "Κωδικός πρόσβασης του λογαριασμού σας",
+          "revealSecret": "Εμφάνιση",
+          "hideSecret": "Απόκρυψη"
+        },
+        "noAuthHint": "Το {name} δεν απαιτεί διαπιστευτήρια. Κάντε κλικ στην Ενεργοποίηση για να το προσθέσετε στον χώρο εργασίας σας.",
+        "apiKeyHelp": "Πού θα το βρω αυτό;",
+        "connectedToast": "Συνδέθηκε με {name}",
+        "unsupported": {
+          "title": "Αυτός ο τύπος σύνδεσης δεν υποστηρίζεται ακόμη",
+          "body": "Το {name} χρησιμοποιεί ροή ελέγχου ταυτότητας {scheme} που δεν έχουμε ενσωματώσει ακόμη στην εφαρμογή. Μπορείτε να το συνδέσετε απευθείας από τον πίνακα ελέγχου του Composio και θα εμφανιστεί εδώ μόλις συνδεθεί.",
+          "openComposioDashboard": "Άνοιγμα πίνακα ελέγχου Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Αποσύνδεση του {name}",
+      "disconnect": "Αποσύνδεση"
+    },
+    "empty": {
+      "title": "Δεν υπάρχουν συνδεδεμένες εφαρμογές",
+      "description": "Συνδέστε Gmail, Slack, Notion και άλλες, ώστε το Coasty να μπορεί να τις χρησιμοποιεί σε κάθε συνομιλία."
+    },
+    "toolInvocation": {
+      "calling": "Κλήση {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Εφαρμογή",
+      "expiredMessage": "Η σύνδεσή σας με το {appName} έληξε.",
+      "reconnectLink": "Επανασύνδεση"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Η φόρτωση των συνδέσεων απέτυχε (HTTP {status})",
+      "loadToolkitsFailed": "Η φόρτωση των toolkits απέτυχε (HTTP {status})",
+      "startConnectionFailed": "Η εκκίνηση σύνδεσης απέτυχε (HTTP {status})",
+      "disconnectFailedHttp": "Η αποσύνδεση απέτυχε (HTTP {status})",
+      "credentialsRequired": "Συμπληρώστε όλα τα υποχρεωτικά πεδία για να συνεχίσετε.",
+      "credentialsErrorPrefix": "Η σύνδεση απέτυχε:",
+      "unknownToolkit": "Δεν αναγνωρίζουμε αυτή την εφαρμογή. Ανανεώστε τον κατάλογο και δοκιμάστε ξανά.",
+      "unsupportedAuthScheme": "Αυτή η μέθοδος ελέγχου ταυτότητας δεν υποστηρίζεται ακόμη στην εφαρμογή.",
+      "missingCredentials": "Λείπουν υποχρεωτικά πεδία: {fields}",
+      "invalidCredentials": "Τα διαπιστευτήρια απορρίφθηκαν. Ελέγξτε τα και δοκιμάστε ξανά.",
+      "credentialValidationFailed": "Δεν ήταν δυνατή η επαλήθευση των διαπιστευτηρίων σας. Δοκιμάστε ξανά.",
+      "apiKeyRequired": "Απαιτείται κλειδί API.",
+      "tokenRequired": "Απαιτείται διακριτικό Bearer.",
+      "basicRequired": "Απαιτούνται όνομα χρήστη και κωδικός πρόσβασης."
+    },
+    "title": "Συνδέσεις",
+    "subtitle": "Συνδέστε τις εφαρμογές που μπορεί να χρησιμοποιεί το Coasty για λογαριασμό σας σε κάθε συνομιλία.",
+    "connectedSuffix": "συνδεδεμένες",
+    "refresh": "Ανανέωση",
+    "newConnection": "Νέα σύνδεση",
+    "retry": "Δοκιμάστε ξανά",
+    "noFilteredConnections": "Δεν υπάρχουν εφαρμογές με κατάσταση {filter}",
+    "noFilteredDescription": "Δοκιμάστε άλλο φίλτρο ή συνδέστε μια νέα εφαρμογή.",
+    "filters": {
+      "all": "Όλες",
+      "active": "Ενεργές",
+      "connecting": "Σε σύνδεση",
+      "expired": "Έληξαν",
+      "failed": "Απέτυχαν"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Συνδεδεμένες εφαρμογές",
+      "subheading": "Το Coasty μπορεί να χρησιμοποιεί αυτές τις εφαρμογές σε κάθε συνομιλία εκ μέρους σας.",
+      "connectNewApp": "Νέα σύνδεση",
+      "manageOnFullPage": "Διαχείριση όλων"
+    }
   }
 }

@@ -868,6 +868,11 @@
       "npsVeryLikely": "Zeer waarschijnlijk",
       "thanks": "Bedankt voor de feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Uw verbinding met {appName} is verlopen.",
+      "reconnectLink": "Opnieuw verbinden"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "over {count}m",
     "inHours": "over {count}u",
     "today": "vandaag",
-    "yesterday": "gisteren"
+    "yesterday": "gisteren",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Inloggen",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - #1 AI-Agent voor Computergebruik | Beste voor Desktop- en Browserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-Agent voor Computergebruik",
-      "description": "Coasty is de #1 gerangschikte AI-agent voor computergebruik — 82% op de OSWorld-benchmark — en het enige flatrate Onbeperkte computergebruik-abonnement voor {unlimitedPrice} (goedkoper dan Devin Team $500+ACU, OpenAI Operator $200 met snelheidslimiet en credit-gelimiteerde concurrenten). Bestuurt een volledig bureaublad zoals een mens: browsers, formulieren, e-mails, spreadsheets. VM-isolatie. Vanaf {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
+      "description": "Coasty is de #1 gerangschikte AI-agent voor computergebruik (82% op OSWorld) en het enige computergebruik-platform met 1,000+ native app-integraties — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify en nog 990+ andere, oproepbaar in elke chat. Flatrate Onbeperkt voor {unlimitedPriceLong} (goedkoper dan Devin Team $500+ACU en OpenAI Operator $200 met snelheidslimiet). Bestuurt een volledig bureaublad zoals een mens, met VM-isolatie. Vanaf {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Onbeperkt (Goedkoopste Computergebruik-Agent)",
-      "ogDescription": "#1 op OSWorld (82%). {unlimitedPrice} flatrate Onbeperkt — goedkoper dan Devin Team ($500+ACU) bij een hogere benchmark. Browser-, desktop- en terminalautomatisering. VM-isolatie per sessie. Cross-platform native + REST API + MCP-server.",
-      "twitterDescription": "AI-agent die een echt bureaublad bestuurt. 82% OSWorld (#1). {unlimitedPrice} Onbeperkt — het goedkoopste flatrate-abonnement in de categorie. Starter vanaf {starterPrice}. VM-isolatie + 26-tool MCP-server."
+      "ogDescription": "#1 op OSWorld (82%) + 1,000+ integraties (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} flatrate Onbeperkt. De enige computergebruik-agent met een echte integratiecatalogus. VM-isolatie, cross-platform native app, REST API, MCP-server.",
+      "twitterDescription": "AI-agent die een echt bureaublad bestuurt EN koppelt aan 1,000+ apps (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Onbeperkt, het goedkoopste flatrate-abonnement in de categorie. Starter vanaf {starterPrice}."
     },
     "compare": {
       "title": "Vergelijk Coasty - AI-Agent Alternatieven en Concurrentievergelijking",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Prijzen — Coasty AI-Agent Plannen en Prijzen",
-      "description": "Coasty-prijzen: Starter {starterPrice} (200 credits) of Onbeperkt {unlimitedPrice} (het goedkoopste flatrate onbeperkte computergebruik-abonnement in de markt — goedkoper dan Devin Team $500+ACU, Genspark Pro $249 credit-gelimiteerd en Manus Extended $200 gelimiteerd). Vervangt menselijke virtuele assistenten van $3,000+/mo. Geen verborgen kosten.",
+      "description": "Coasty-prijzen: Starter {starterPrice} (200 credits) of Onbeperkt {unlimitedPrice}, het goedkoopste flatrate onbeperkte computergebruik-abonnement in de markt (goedkoper dan Devin Team $500+ACU, Genspark Pro $249 credit-gelimiteerd en Manus Extended $200 gelimiteerd). Elk abonnement omvat 1,000+ native app-integraties (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify en nog 990+ andere) en vervangt menselijke virtuele assistenten van $3,000+/mo. Geen verborgen kosten.",
       "ogTitle": "Coasty Prijzen — {starterPrice} Starter, {unlimitedPrice} Onbeperkt",
       "ogDescription": "{unlimitedPrice} flatrate Onbeperkt — het goedkoopste onbeperkte computergebruik-abonnement in de markt. Of {starterPrice} Starter voor individuen. Bespaart $36,000/jaar t.o.v. menselijke VA's."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Hoe verhoudt Coasty zich tot OpenAI Operator?",
       "a9": "Coasty presteert beter dan OpenAI Operator op de OSWorld-benchmark (82% vs ~40%), biedt echte VM-isolatie voor elke sessie, ondersteunt meerdere AI-modellen, bevat volledige desktopbesturing buiten de browser en biedt een open-source framework.",
       "q10": "Kan Coasty CAPTCHAs oplossen?",
-      "a10": "Ja. Coasty heeft een ingebouwde CAPTCHA-oplossingspipeline, dus het wordt niet geblokkeerd zoals concurrerende AI-agenten. Dit is cruciaal voor automatisering in de echte wereld waar CAPTCHAs gebruikelijk zijn op websites."
+      "a10": "Ja. Coasty heeft een ingebouwde CAPTCHA-oplossingspipeline, dus het wordt niet geblokkeerd zoals concurrerende AI-agenten. Dit is cruciaal voor automatisering in de echte wereld waar CAPTCHAs gebruikelijk zijn op websites.",
+      "q11": "Met welke apps en diensten integreert Coasty?",
+      "a11": "Coasty koppelt aan 1,000+ apps via zijn ingebouwde Composio-integratielaag, waaronder Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase en Twilio. Koppel een app één keer met OAuth in Instellingen en Coasty gebruikt deze vervolgens in elke chat namens jou, zonder dat een wachtwoord ooit door de agent wordt gezien. Wanneer een app een API heeft, roept Coasty die direct aan voor subseconde-latentie. Wanneer dat niet kan (SAP GUI, LinkedIn Sales Navigator, oudere bankportalen, interne admin-tools), bestuurt dezelfde agent de UI met computergebruik. Coasty is het enige computergebruik-platform dat beide oppervlakken levert — een API-first integratiecatalogus EN besturing op OS-niveau — in één agent."
     },
     "structuredData": {
-      "appDescription": "De #1 gerangschikte AI-agent voor computergebruik en het goedkoopste flatrate Onbeperkt computergebruik-abonnement in de markt voor {unlimitedPrice}. Coasty bestuurt een volledig bureaublad zoals een mens — opent browsers, klikt, typt, vult formulieren in, verstuurt e-mails en beheert spreadsheets autonoom. 82% op de OSWorld-benchmark over 369 taken uit de echte wereld. Echte VM-isolatie per sessie. Ingebouwde CAPTCHA-oplossing. Abonnementen: {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
-      "orgDescription": "Coasty bouwt de #1 AI-agent voor computergebruik (82% OSWorld) en levert het enige flatrate Onbeperkt computergebruik-abonnement voor {unlimitedPrice} — goedkoper dan Devin Team, OpenAI Operator en credit-gelimiteerde concurrenten in dezelfde prijsklasse. Ons platform biedt autonome desktopbesturing, browserautomatisering en multi-agent orchestratie met echte VM-isolatie.",
-      "productDescription": "AI-agent voor computergebruik die een bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark (82%). Het Onbeperkt-abonnement van {unlimitedPrice} is het goedkoopste flatrate onbeperkte computergebruik-abonnement dat beschikbaar is. Autonome browserautomatisering, desktopbesturing, e-mail verzenden, formulieren invullen en spreadsheetbeheer met echte VM-isolatie.",
-      "websiteDescription": "#1 AI-agent platform voor computergebruik — 82% OSWorld-benchmark en het goedkoopste flatrate Onbeperkt-abonnement voor {unlimitedPrice}. Autonome browser-, desktop- en terminalautomatisering met VM-isolatie. Vanaf {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
-      "softwareDescription": "AI-agent voor computergebruik die een volledig bureaublad bestuurt zoals een mens. #1 op de OSWorld-benchmark met een voltooiingspercentage van 82% over 369 taken uit de echte wereld. Het Onbeperkt-abonnement van {unlimitedPrice} is het goedkoopste flatrate onbeperkte computergebruik-abonnement op de markt. Autonome browserautomatisering, desktopbesturing, terminaloperaties, e-mail verzenden, formulieren invullen en spreadsheetbeheer.",
+      "appDescription": "De #1 gerangschikte AI-agent voor computergebruik en het enige computergebruik-platform met 1,000+ native app-integraties (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, plus 990+ andere). 82% op OSWorld over 369 taken uit de echte wereld. Het goedkoopste flatrate Onbeperkt-abonnement in de markt voor {unlimitedPriceLong}. Bestuurt een volledig bureaublad zoals een mens, echte VM-isolatie per sessie, ingebouwde CAPTCHA-oplossing. Abonnementen: {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
+      "orgDescription": "Coasty bouwt de #1 AI-agent voor computergebruik (82% OSWorld) met 1,000+ OAuth-beveiligde app-integraties (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) en levert het enige flatrate Onbeperkt computergebruik-abonnement voor {unlimitedPriceLong}, goedkoper dan Devin Team, OpenAI Operator en credit-gelimiteerde concurrenten. Ons platform combineert computergebruik, multi-agent orchestratie, native integraties en VM-isolatie in één product.",
+      "productDescription": "AI-agent voor computergebruik die een bureaublad bestuurt zoals een mens EN native koppelt aan 1,000+ apps (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 op de OSWorld-benchmark (82%). Het Onbeperkt-abonnement van {unlimitedPrice} is het goedkoopste flatrate onbeperkte computergebruik-abonnement dat beschikbaar is. Autonome browser-, desktop-, e-mail-, formulier- en spreadsheetautomatisering met VM-isolatie.",
+      "websiteDescription": "#1 AI-agent platform voor computergebruik (82% OSWorld) met 1,000+ native integraties (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) en het goedkoopste flatrate Onbeperkt-abonnement voor {unlimitedPriceLong}. Autonome browser-, desktop- en terminalautomatisering met VM-isolatie. Vanaf {starterPrice} Starter of {unlimitedPrice} Onbeperkt.",
+      "softwareDescription": "AI-agent voor computergebruik die een volledig bureaublad bestuurt zoals een mens en 1,000+ OAuth-beveiligde app-integraties levert (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, plus 990+ andere). #1 op OSWorld met 82% voltooiing over 369 taken uit de echte wereld. Het {unlimitedPriceLong} Onbeperkt-abonnement is het goedkoopste flatrate onbeperkte computergebruik-abonnement op de markt. Browser-, desktop-, terminal-, e-mail-, formulier- en spreadsheetautomatisering in één agent.",
       "breadcrumbs": {
         "home": "Home",
         "caseStudies": "AI-Agent Casestudies",
@@ -2413,6 +2422,13 @@
         "download": "Desktop App Downloaden",
         "compare": "AI-Agenten Vergelijken"
       }
+    },
+    "connections": {
+      "title": "Verbindingen",
+      "description": "Verbind Gmail, Slack, Notion, GitHub en honderden andere apps. Beschikbaar in elke chat.",
+      "ogTitle": "Connecties — Koppel 250+ apps aan uw Coasty AI-agent",
+      "ogDescription": "Breng Gmail, Slack, GitHub, Notion, Google Calendar, Linear en honderden andere apps in elke chat. Beveiligd met OAuth, altijd actief, namens u gebruikt door Coasty-agents.",
+      "twitterDescription": "Koppel Gmail, Slack, GitHub, Notion en 250+ apps aan Coasty. Eén OAuth, in elke chat gebruikt door uw agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Verwijzing",
         "description": "Nodig vrienden uit en verdien credits"
+      },
+      "integrations": {
+        "label": "Integraties",
+        "description": "Verbind apps van derden"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Verwijzingen",
       "description": "Deel Coasty. Verdien samen."
+    },
+    "connections": {
+      "title": "Uw connecties",
+      "description": "Uw gekoppelde apps en toolkits ophalen."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 tijdens transport",
     "trustAtRest": "AES-256-GCM in rust",
     "trustNoTraining": "Geen training op jouw data"
+  },
+  "connections": {
+    "page": {
+      "title": "Verbindingen",
+      "description": "Verbind Gmail, Slack, Notion, GitHub en honderden andere apps. Beschikbaar in elke chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Verbonden",
+      "initiated": "Verbinden",
+      "expired": "Verlopen",
+      "failed": "Ingetrokken",
+      "failedShort": "Mislukt",
+      "inactive": "Inactief"
+    },
+    "toasts": {
+      "disconnectFailed": "Verbreken mislukt",
+      "disconnected": "{appName} losgekoppeld",
+      "reconnectFailed": "Opnieuw verbinden starten mislukt",
+      "connected": "{app} gekoppeld",
+      "error": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "card": {
+      "logoAlt": "{appName}-logo",
+      "fallbackAccountLabel": "Verbonden",
+      "connectedOn": "Verbonden op {date}",
+      "lastUsed": "Laatst gebruikt {time}",
+      "actions": {
+        "reconnect": "Herverbind",
+        "disconnect": "Verbreken",
+        "menuAriaLabel": "Acties voor verbinding"
+      },
+      "error": {
+        "expired": "Autorisatie verlopen. Maak opnieuw verbinding om toegang tot tools te herstellen.",
+        "revoked": "Verbinding ingetrokken. Maak opnieuw verbinding om toegang tot tools te herstellen."
+      },
+      "disconnectDialog": {
+        "title": "{appName} loskoppelen?",
+        "connectedOn": "verbonden op {date}",
+        "consequence": {
+          "revokeOauth": "Composio trekt de OAuth-toegang in",
+          "toolsStop": "Tools die deze verbinding gebruiken stoppen met werken"
+        },
+        "confirm": "Verbreken",
+        "cancel": "Verbinding behouden"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logo",
+      "headline": "Verbind uw eerste app",
+      "subheadline": "Eén keer autoriseren en uw AI kan uw e-mail lezen, op Slack posten, documenten bijwerken en meer. Automatisch, in elke chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Tools in elke chat",
+          "desc": "Eenmaal verbonden gebruikt uw AI ze automatisch."
+        },
+        "secureOauth": {
+          "title": "Veilige OAuth",
+          "desc": "Eén keer autoriseren, op elk moment intrekken."
+        },
+        "hundredsOfApps": {
+          "title": "Honderden apps",
+          "desc": "E-mail, agenda's, CRM's, documenten, code en meer."
+        }
+      },
+      "browseAppsCta": "Apps bekijken"
+    },
+    "connectDialog": {
+      "title": "Verbind een app",
+      "description": "Verken honderden integraties aangeboden door Composio.",
+      "searchPlaceholder": "Zoek apps…",
+      "clearSearchAria": "Zoekopdracht wissen",
+      "categories": {
+        "all": "Alles",
+        "communication": "Communicatie",
+        "productivity": "Productiviteit",
+        "calendar": "Agenda",
+        "developer": "Ontwikkelaar",
+        "crmSales": "CRM en sales"
+      },
+      "sections": {
+        "featured": "Aanbevolen",
+        "allApps": "Alle apps"
+      },
+      "card": {
+        "logoAlt": "{name}-logo",
+        "alreadyConnectedTooltip": "Al verbonden. Beheer dit op de Verbindingen-pagina",
+        "connectedLabel": "Verbonden",
+        "connectFallbackDescription": "Verbind {name} met uw AI"
+      },
+      "footer": {
+        "poweredBy": "mogelijk gemaakt door Composio",
+        "cancel": "Annuleren"
+      },
+      "empty": {
+        "noMatchTitle": "Geen apps gevonden voor \"{query}\"",
+        "noAppsTitle": "Geen apps beschikbaar",
+        "noMatchBody": "Probeer een kortere zoekterm of een andere categorie.",
+        "noAppsBody": "Composio-integraties verschijnen hier zodra ze zijn geconfigureerd."
+      },
+      "errors": {
+        "failedToStart": "Verbinding starten mislukt"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Verbinden met Composio",
+          "connectWithApiKey": "Opslaan & verbinden",
+          "connectWithBearerToken": "Opslaan & verbinden",
+          "connectWithBasic": "Opslaan & verbinden",
+          "connectNoAuth": "Inschakelen",
+          "connecting": "Verbinden..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-sleutel",
+          "apiKeyPlaceholder": "Plak je API-sleutel",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Plak je bearer-token",
+          "basicAuthUsername": "Gebruikersnaam",
+          "basicAuthPassword": "Wachtwoord",
+          "basicAuthUsernamePlaceholder": "Gebruikersnaam van je account",
+          "basicAuthPasswordPlaceholder": "Wachtwoord van je account",
+          "revealSecret": "Tonen",
+          "hideSecret": "Verbergen"
+        },
+        "noAuthHint": "{name} vereist geen inloggegevens. Klik op Inschakelen om het aan je werkruimte toe te voegen.",
+        "apiKeyHelp": "Waar vind ik dit?",
+        "connectedToast": "Verbonden met {name}",
+        "unsupported": {
+          "title": "Dit verbindingstype wordt nog niet ondersteund",
+          "body": "{name} gebruikt een {scheme}-authenticatieflow die we nog niet in de app hebben ingebouwd. Je kunt het direct verbinden via het Composio-dashboard en het verschijnt hier zodra het is gekoppeld.",
+          "openComposioDashboard": "Composio-dashboard openen"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} loskoppelen",
+      "disconnect": "Verbreken"
+    },
+    "empty": {
+      "title": "Geen apps verbonden",
+      "description": "Verbind Gmail, Slack, Notion en meer, zodat Coasty ze in elke chat kan gebruiken."
+    },
+    "toolInvocation": {
+      "calling": "{toolkit} aanroepen: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Uw verbinding met {appName} is verlopen.",
+      "reconnectLink": "Herverbinden →"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Laden van verbindingen mislukt (HTTP {status})",
+      "loadToolkitsFailed": "Laden van toolkits mislukt (HTTP {status})",
+      "startConnectionFailed": "Verbinding starten mislukt (HTTP {status})",
+      "disconnectFailedHttp": "Verbreken mislukt (HTTP {status})",
+      "credentialsRequired": "Vul alle verplichte velden in om door te gaan.",
+      "credentialsErrorPrefix": "Verbinding mislukt:",
+      "unknownToolkit": "We herkennen deze app niet. Vernieuw de catalogus en probeer het opnieuw.",
+      "unsupportedAuthScheme": "Deze authenticatiemethode wordt nog niet ondersteund in de app.",
+      "missingCredentials": "Verplichte velden ontbreken: {fields}",
+      "invalidCredentials": "De inloggegevens zijn afgewezen. Controleer ze en probeer opnieuw.",
+      "credentialValidationFailed": "Kan je inloggegevens niet valideren. Probeer het opnieuw.",
+      "apiKeyRequired": "Een API-sleutel is vereist.",
+      "tokenRequired": "Een bearer-token is vereist.",
+      "basicRequired": "Gebruikersnaam en wachtwoord zijn vereist."
+    },
+    "title": "Connecties",
+    "subtitle": "Koppel de apps die Coasty namens u in elke chat mag gebruiken.",
+    "connectedSuffix": "gekoppeld",
+    "refresh": "Vernieuwen",
+    "newConnection": "Nieuwe connectie",
+    "retry": "Opnieuw proberen",
+    "noFilteredConnections": "Nog geen {filter}-apps",
+    "noFilteredDescription": "Probeer een ander filter of verbind een nieuwe app om te beginnen.",
+    "filters": {
+      "all": "Alle",
+      "active": "Actief",
+      "connecting": "Bezig",
+      "expired": "Verlopen",
+      "failed": "Mislukt"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Verbonden apps",
+      "subheading": "Coasty kan deze apps namens u gebruiken in elke chat.",
+      "connectNewApp": "App verbinden",
+      "manageOnFullPage": "Beheren op hele pagina"
+    }
   }
 }

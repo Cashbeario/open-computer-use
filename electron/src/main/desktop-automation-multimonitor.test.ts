@@ -31,13 +31,17 @@ const h = vi.hoisted(() => ({
     getMousePos: vi.fn(() => ({ x: 0, y: 0 })),
     getScreenSize: vi.fn(() => ({ width: 1920, height: 1080 })),
   },
-  // Mutable display state — tests flip between primary and non-primary
+  // Mutable display state — tests flip between primary and non-primary.
+  // `scaleFactor` is seeded here so the hoisted type includes it, which lets
+  // all 15+ per-test reassignments (each carrying a `scaleFactor`) typecheck.
+  // Initial value mirrors the immediate beforeEach reset, so runtime is a no-op.
   display: {
     id: 1,
     bounds: { x: 0, y: 0, width: 1920, height: 1080 },
     workArea: { x: 0, y: 0, width: 1920, height: 1040 },
     workAreaSize: { width: 1920, height: 1040 },
     size: { width: 1920, height: 1080 },
+    scaleFactor: 1.0,
   },
   execFileCalls: [] as Array<{ cmd: string; args: string[] }>,
 }))

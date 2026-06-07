@@ -868,6 +868,11 @@
       "npsVeryLikely": "Sangat mungkin",
       "thanks": "Terima kasih atas maklum balas",
       "creditsLabel": "kredit"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Aplikasi",
+      "expiredMessage": "Sambungan {appName} anda telah tamat tempoh.",
+      "reconnectLink": "Sambung semula"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "dalam {count}m",
     "inHours": "dalam {count}j",
     "today": "hari ini",
-    "yesterday": "semalam"
+    "yesterday": "semalam",
+    "connections": "Aplikasi",
+    "resources": "Ejen"
   },
   "appHeader": {
     "login": "Log Masuk",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - Ejen AI #1 Penggunaan Komputer | Terbaik untuk Automasi Desktop & Pelayar",
       "titleTemplate": "{title} | Coasty - Ejen AI Penggunaan Komputer",
-      "description": "Coasty ialah ejen AI #1 yang menggunakan komputer — 82% pada penanda aras OSWorld — dan satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada {unlimitedPrice} (lebih murah daripada Devin Team $500+ACU, OpenAI Operator $200 yang dihadkan kadar, dan pesaing yang dihadkan kredit). Mengawal desktop penuh seperti manusia: pelayar, borang, e-mel, hamparan. Pengasingan tahap VM. Dari Starter {starterPrice} atau Unlimited {unlimitedPrice}.",
+      "description": "Coasty ialah ejen AI #1 yang menggunakan komputer (82% pada OSWorld) dan satu-satunya platform penggunaan komputer dengan 1,000+ integrasi aplikasi natif — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify dan 990+ lagi — boleh dipanggil dalam setiap perbualan. Unlimited kadar tetap pada {unlimitedPriceLong} (lebih murah daripada Devin Team $500+ACU dan OpenAI Operator $200 yang dihadkan kadar). Mengawal desktop penuh seperti manusia, dengan pengasingan tahap VM. Dari Starter {starterPrice} atau Unlimited {unlimitedPrice}.",
       "ogTitle": "Coasty — 82% OSWorld + Unlimited {unlimitedPrice} (Ejen Penggunaan Komputer Termurah)",
-      "ogDescription": "#1 pada OSWorld (82%). Unlimited kadar tetap {unlimitedPrice} — lebih murah daripada Devin Team ($500+ACU) pada penanda aras yang lebih tinggi. Automasi pelayar, desktop, terminal. Pengasingan VM setiap sesi. Natif merentas platform + REST API + MCP server.",
-      "twitterDescription": "Ejen AI yang menjalankan desktop sebenar. 82% OSWorld (#1). Unlimited {unlimitedPrice} — pelan kadar tetap termurah dalam kategori ini. Starter dari {starterPrice}. Pengasingan VM + MCP server 26 alat."
+      "ogDescription": "#1 pada OSWorld (82%) + 1,000+ integrasi (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + Unlimited kadar tetap {unlimitedPrice}. Satu-satunya ejen penggunaan komputer dengan katalog integrasi sebenar. Pengasingan VM, aplikasi natif merentas platform, REST API, MCP server.",
+      "twitterDescription": "Ejen AI yang menjalankan desktop sebenar DAN menyambung ke 1,000+ aplikasi (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). Unlimited {unlimitedPrice}, pelan kadar tetap termurah dalam kategori ini. Starter dari {starterPrice}."
     },
     "compare": {
       "title": "Bandingkan Coasty - Alternatif Ejen AI & Perbandingan Pesaing",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Harga — Pelan & Harga Ejen AI Coasty",
-      "description": "Harga Coasty: Starter {starterPrice} (200 kredit) atau Unlimited {unlimitedPrice} (pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran — lebih murah daripada Devin Team $500+ACU, Genspark Pro $249 yang dihadkan kredit, dan Manus Extended $200 yang dihadkan). Menggantikan pembantu maya manusia $3,000+/mo. Tiada caj tersembunyi.",
+      "description": "Harga Coasty: Starter {starterPrice} (200 kredit) atau Unlimited {unlimitedPrice}, pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran (lebih murah daripada Devin Team $500+ACU, Genspark Pro $249 yang dihadkan kredit, Manus Extended $200 yang dihadkan). Setiap pelan termasuk 1,000+ integrasi aplikasi natif (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify dan 990+ lagi) dan menggantikan pembantu maya manusia $3,000+/bulan. Tiada caj tersembunyi.",
       "ogTitle": "Harga Coasty — Starter {starterPrice}, Unlimited {unlimitedPrice}",
       "ogDescription": "Unlimited kadar tetap {unlimitedPrice} — pelan penggunaan komputer tanpa had termurah di pasaran. Atau Starter {starterPrice} untuk individu. Menjimatkan $36k/tahun berbanding VA manusia."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Bagaimana Coasty berbanding dengan OpenAI Operator?",
       "a9": "Coasty mengatasi OpenAI Operator pada penanda aras OSWorld (82% vs ~40%), menawarkan pengasingan tahap VM sebenar untuk setiap sesi, menyokong pelbagai model AI, termasuk kawalan desktop penuh selain pelayar sahaja dan menyediakan rangka kerja sumber terbuka.",
       "q10": "Bolehkah Coasty menyelesaikan CAPTCHA?",
-      "a10": "Ya. Coasty mempunyai saluran penyelesaian CAPTCHA terbina dalam, jadi ia tidak disekat seperti ejen AI pesaing. Ini kritikal untuk automasi dunia sebenar di mana CAPTCHA adalah biasa di laman web."
+      "a10": "Ya. Coasty mempunyai saluran penyelesaian CAPTCHA terbina dalam, jadi ia tidak disekat seperti ejen AI pesaing. Ini kritikal untuk automasi dunia sebenar di mana CAPTCHA adalah biasa di laman web.",
+      "q11": "Apakah aplikasi dan perkhidmatan yang Coasty integrasikan?",
+      "a11": "Coasty bersambung ke 1,000+ aplikasi melalui lapisan integrasi Composio terbina dalamnya, termasuk Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase dan Twilio. Sambungkan mana-mana aplikasi sekali sahaja dengan OAuth dalam Tetapan, kemudian Coasty menggunakannya merentasi setiap perbualan bagi pihak anda, tiada kata laluan sekalipun dilihat oleh ejen. Apabila sesebuah aplikasi mempunyai API, Coasty memanggilnya secara terus untuk latensi sub-saat. Apabila ia tiada (SAP GUI, LinkedIn Sales Navigator, portal perbankan lama, alat admin dalaman), ejen yang sama memandu UI dengan penggunaan komputer. Coasty ialah satu-satunya platform penggunaan komputer yang menghantar kedua-dua permukaan, katalog integrasi API-first DAN kawalan desktop pada tahap OS, dalam satu ejen."
     },
     "structuredData": {
-      "appDescription": "Ejen AI #1 yang menggunakan komputer dan pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran pada {unlimitedPriceLong}. Coasty mengawal desktop penuh seperti manusia — membuka pelayar, mengklik, menaip, mengisi borang, menghantar e-mel dan menguruskan hamparan secara autonomi. 82% pada penanda aras OSWorld merentasi 369 tugas dunia sebenar. Pengasingan tahap VM sebenar setiap sesi. Penyelesaian CAPTCHA terbina dalam. Pelan: {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
-      "orgDescription": "Coasty membina ejen AI #1 yang menggunakan komputer (82% OSWorld) dan menghantar satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada {unlimitedPriceLong} — lebih murah daripada Devin Team, OpenAI Operator dan pesaing yang dihadkan kredit pada tahap harga yang sama. Platform kami menyediakan kawalan desktop autonomi, automasi pelayar dan orkestrasi pelbagai ejen dengan pengasingan tahap VM sebenar.",
-      "productDescription": "Ejen AI penggunaan komputer yang mengawal desktop seperti manusia. #1 pada penanda aras OSWorld (82%). Pelan Unlimited {unlimitedPrice} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada. Automasi pelayar autonomi, kawalan desktop, penghantaran e-mel, pengisian borang dan pengurusan hamparan dengan pengasingan tahap VM sebenar.",
-      "websiteDescription": "Platform ejen AI #1 penggunaan komputer — 82% penanda aras OSWorld dan pelan Unlimited kadar tetap termurah pada {unlimitedPriceLong}. Automasi pelayar, desktop dan terminal autonomi dengan pengasingan VM. Dari {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
-      "softwareDescription": "Ejen AI penggunaan komputer yang mengawal desktop penuh seperti manusia. #1 pada penanda aras OSWorld dengan kadar penyelesaian 82% merentasi 369 tugas dunia sebenar. Pelan Unlimited {unlimitedPriceLong} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran. Automasi pelayar autonomi, kawalan desktop, operasi terminal, penghantaran e-mel, pengisian borang dan pengurusan hamparan.",
+      "appDescription": "Ejen AI #1 yang menggunakan komputer dan satu-satunya platform penggunaan komputer dengan 1,000+ integrasi aplikasi natif (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, serta 990+ lagi). 82% pada OSWorld merentasi 369 tugas dunia sebenar. Pelan Unlimited kadar tetap termurah di pasaran pada {unlimitedPriceLong}. Mengawal desktop penuh seperti manusia, pengasingan tahap VM sebenar setiap sesi, penyelesaian CAPTCHA terbina dalam. Pelan: {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty membina ejen AI #1 yang menggunakan komputer (82% OSWorld) dengan 1,000+ integrasi aplikasi terlindung OAuth (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) dan menghantar satu-satunya pelan Unlimited kadar tetap untuk penggunaan komputer pada {unlimitedPriceLong}, lebih murah daripada Devin Team, OpenAI Operator dan pesaing yang dihadkan kredit. Platform kami menggabungkan penggunaan komputer, orkestrasi pelbagai ejen, integrasi natif dan pengasingan tahap VM dalam satu produk.",
+      "productDescription": "Ejen AI penggunaan komputer yang mengawal desktop seperti manusia DAN menyambung secara natif ke 1,000+ aplikasi (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 pada penanda aras OSWorld (82%). Unlimited {unlimitedPrice} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah yang ada. Automasi pelayar autonomi, desktop, e-mel, pengisian borang dan hamparan dengan pengasingan tahap VM.",
+      "websiteDescription": "Platform ejen AI #1 penggunaan komputer (82% OSWorld) dengan 1,000+ integrasi natif (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) dan pelan Unlimited kadar tetap termurah pada {unlimitedPriceLong}. Automasi pelayar, desktop dan terminal autonomi dengan pengasingan VM. Dari {starterPrice} Starter atau {unlimitedPrice} Unlimited.",
+      "softwareDescription": "Ejen AI penggunaan komputer yang mengawal desktop penuh seperti manusia dan menghantar 1,000+ integrasi aplikasi terlindung OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, serta 990+ lagi). #1 pada OSWorld dengan kadar penyelesaian 82% merentasi 369 tugas dunia sebenar. Pelan Unlimited {unlimitedPriceLong} ialah pelan Unlimited kadar tetap untuk penggunaan komputer termurah di pasaran. Automasi pelayar, desktop, terminal, e-mel, borang dan hamparan dalam satu ejen.",
       "breadcrumbs": {
         "home": "Laman Utama",
         "caseStudies": "Kajian Kes Ejen AI",
@@ -2413,6 +2422,13 @@
         "download": "Muat Turun Aplikasi Desktop",
         "compare": "Bandingkan Ejen AI"
       }
+    },
+    "connections": {
+      "title": "Sambungan",
+      "description": "Sambungkan Gmail, Slack, Notion, GitHub dan ratusan aplikasi lain. Tersedia dalam setiap perbualan.",
+      "ogTitle": "Sambungan — Hubungkan 250+ Aplikasi ke Ejen AI Coasty Anda",
+      "ogDescription": "Bawa Gmail, Slack, GitHub, Notion, Google Calendar, Linear dan ratusan aplikasi lain ke dalam setiap perbualan. Dilindungi OAuth, sentiasa aktif, digunakan oleh ejen Coasty bagi pihak anda.",
+      "twitterDescription": "Sambungkan Gmail, Slack, GitHub, Notion dan 250+ aplikasi ke Coasty. Satu OAuth, digunakan dalam setiap perbualan oleh ejen anda."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Rujukan",
         "description": "Jemput kawan dan dapatkan kredit"
+      },
+      "integrations": {
+        "label": "Integrasi",
+        "description": "Sambungkan aplikasi pihak ketiga"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Rujukan",
       "description": "Kongsi Coasty. Dapatkan bersama."
+    },
+    "connections": {
+      "title": "Sambungan Anda",
+      "description": "Mengambil aplikasi dan toolkit yang anda sambungkan."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 semasa transit",
     "trustAtRest": "AES-256-GCM semasa tersimpan",
     "trustNoTraining": "Tiada latihan pada data anda"
+  },
+  "connections": {
+    "page": {
+      "title": "Sambungan",
+      "description": "Sambungkan Gmail, Slack, Notion, GitHub dan ratusan aplikasi lain. Tersedia dalam setiap perbualan."
+    },
+    "fallbackAppName": "aplikasi",
+    "status": {
+      "active": "Disambungkan",
+      "initiated": "Menyambung",
+      "expired": "Tamat tempoh",
+      "failed": "Dibatalkan",
+      "failedShort": "Gagal",
+      "inactive": "Tidak aktif"
+    },
+    "toasts": {
+      "disconnectFailed": "Gagal memutuskan sambungan",
+      "disconnected": "{appName} diputuskan",
+      "reconnectFailed": "Gagal memulakan sambungan semula",
+      "connected": "{app} disambungkan",
+      "error": "Sesuatu tidak kena. Sila cuba lagi."
+    },
+    "card": {
+      "logoAlt": "Logo {appName}",
+      "fallbackAccountLabel": "Disambungkan",
+      "connectedOn": "Disambungkan pada {date}",
+      "lastUsed": "Terakhir digunakan {time}",
+      "actions": {
+        "reconnect": "Sambung",
+        "disconnect": "Putuskan sambungan",
+        "menuAriaLabel": "Tindakan sambungan"
+      },
+      "error": {
+        "expired": "Kebenaran tamat tempoh. Sambung semula untuk memulihkan akses alat.",
+        "revoked": "Sambungan dibatalkan. Sambung semula untuk memulihkan akses alat."
+      },
+      "disconnectDialog": {
+        "title": "Putuskan sambungan {appName}?",
+        "connectedOn": "disambungkan {date}",
+        "consequence": {
+          "revokeOauth": "Composio akan membatalkan kebenaran OAuth",
+          "toolsStop": "Alat yang menggunakan sambungan ini akan berhenti berfungsi"
+        },
+        "confirm": "Putuskan sambungan",
+        "cancel": "Kekalkan sambungan"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo {name}",
+      "headline": "Sambungkan aplikasi pertama anda",
+      "subheadline": "Beri kebenaran sekali sahaja dan AI anda boleh membaca e-mel, menyiarkan ke Slack, mengemas kini dokumen, dan banyak lagi, secara automatik, dalam setiap perbualan.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Alat dalam setiap perbualan",
+          "desc": "Setelah disambungkan, AI anda menggunakannya secara automatik."
+        },
+        "secureOauth": {
+          "title": "OAuth selamat",
+          "desc": "Beri kebenaran sekali, batalkan bila-bila masa."
+        },
+        "hundredsOfApps": {
+          "title": "Ratusan aplikasi",
+          "desc": "E-mel, kalendar, CRM, dokumen, kod dan banyak lagi."
+        }
+      },
+      "browseAppsCta": "Lihat aplikasi"
+    },
+    "connectDialog": {
+      "title": "Sambungkan aplikasi",
+      "description": "Lihat ratusan integrasi dikuasakan oleh Composio.",
+      "searchPlaceholder": "Cari aplikasi…",
+      "clearSearchAria": "Kosongkan carian",
+      "categories": {
+        "all": "Semua",
+        "communication": "Komunikasi",
+        "productivity": "Produktiviti",
+        "calendar": "Kalendar",
+        "developer": "Pembangun",
+        "crmSales": "CRM & Jualan"
+      },
+      "sections": {
+        "featured": "Pilihan",
+        "allApps": "Semua apl"
+      },
+      "card": {
+        "logoAlt": "Logo {name}",
+        "alreadyConnectedTooltip": "Telah disambungkan, urus dari halaman Sambungan",
+        "connectedLabel": "Disambungkan",
+        "connectFallbackDescription": "Sambungkan {name} ke AI anda"
+      },
+      "footer": {
+        "poweredBy": "dikuasakan oleh Composio",
+        "cancel": "Batal"
+      },
+      "empty": {
+        "noMatchTitle": "Tiada aplikasi sepadan dengan \"{query}\"",
+        "noAppsTitle": "Tiada aplikasi tersedia",
+        "noMatchBody": "Cuba istilah carian yang lebih pendek atau kategori lain.",
+        "noAppsBody": "Integrasi Composio akan muncul di sini setelah dikonfigurasikan."
+      },
+      "errors": {
+        "failedToStart": "Gagal memulakan sambungan"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Sambung dengan Composio",
+          "connectWithApiKey": "Simpan & sambung",
+          "connectWithBearerToken": "Simpan & sambung",
+          "connectWithBasic": "Simpan & sambung",
+          "connectNoAuth": "Dayakan",
+          "connecting": "Menyambung..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Kunci API",
+          "apiKeyPlaceholder": "Tampal kunci API anda",
+          "bearerTokenLabel": "Token Bearer",
+          "bearerTokenPlaceholder": "Tampal token Bearer anda",
+          "basicAuthUsername": "Nama pengguna",
+          "basicAuthPassword": "Kata laluan",
+          "basicAuthUsernamePlaceholder": "Nama pengguna akaun anda",
+          "basicAuthPasswordPlaceholder": "Kata laluan akaun anda",
+          "revealSecret": "Tunjuk",
+          "hideSecret": "Sembunyi"
+        },
+        "noAuthHint": "{name} tidak memerlukan kelayakan. Klik Dayakan untuk menambahkannya ke ruang kerja anda.",
+        "apiKeyHelp": "Di manakah saya boleh dapatkan ini?",
+        "connectedToast": "Disambungkan ke {name}",
+        "unsupported": {
+          "title": "Jenis sambungan ini belum disokong",
+          "body": "{name} menggunakan aliran pengesahan {scheme} yang belum kami siapkan dalam apl. Anda boleh menyambungkannya terus di papan pemuka Composio dan ia akan muncul di sini selepas dipautkan.",
+          "openComposioDashboard": "Buka papan pemuka Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Putuskan sambungan {name}",
+      "disconnect": "Putuskan"
+    },
+    "empty": {
+      "title": "Tiada aplikasi disambungkan",
+      "description": "Sambungkan Gmail, Slack, Notion dan banyak lagi supaya Coasty boleh menggunakannya dalam mana-mana perbualan."
+    },
+    "toolInvocation": {
+      "calling": "Memanggil {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Aplikasi",
+      "expiredMessage": "Sambungan {appName} anda telah tamat tempoh.",
+      "reconnectLink": "Sambung semula"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Gagal memuatkan sambungan (HTTP {status})",
+      "loadToolkitsFailed": "Gagal memuatkan kit alat (HTTP {status})",
+      "startConnectionFailed": "Gagal memulakan sambungan (HTTP {status})",
+      "disconnectFailedHttp": "Gagal memutuskan sambungan (HTTP {status})",
+      "credentialsRequired": "Sila isi semua medan yang diperlukan untuk meneruskan.",
+      "credentialsErrorPrefix": "Sambungan gagal:",
+      "unknownToolkit": "Kami tidak mengenali apl ini. Sila segarkan katalog dan cuba lagi.",
+      "unsupportedAuthScheme": "Kaedah pengesahan ini belum disokong dalam apl.",
+      "missingCredentials": "Medan yang diperlukan tiada: {fields}",
+      "invalidCredentials": "Kelayakan ditolak. Sila semak semula dan cuba lagi.",
+      "credentialValidationFailed": "Tidak dapat mengesahkan kelayakan anda. Sila cuba lagi.",
+      "apiKeyRequired": "Kunci API diperlukan.",
+      "tokenRequired": "Token Bearer diperlukan.",
+      "basicRequired": "Nama pengguna dan kata laluan diperlukan."
+    },
+    "title": "Sambungan",
+    "subtitle": "Sambungkan aplikasi yang boleh digunakan Coasty bagi pihak anda dalam setiap perbualan.",
+    "connectedSuffix": "disambungkan",
+    "refresh": "Muat semula",
+    "newConnection": "Sambungan baharu",
+    "retry": "Cuba lagi",
+    "noFilteredConnections": "Belum ada apl {filter}",
+    "noFilteredDescription": "Cuba penapis lain, atau sambungkan apl baharu untuk bermula.",
+    "filters": {
+      "all": "Semua",
+      "active": "Aktif",
+      "connecting": "Menyambung",
+      "expired": "Tamat tempoh",
+      "failed": "Gagal"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Aplikasi disambungkan",
+      "subheading": "Coasty boleh menggunakan aplikasi ini dalam mana-mana perbualan bagi pihak anda.",
+      "connectNewApp": "Tambah aplikasi",
+      "manageOnFullPage": "Urus pada halaman penuh"
+    }
   }
 }

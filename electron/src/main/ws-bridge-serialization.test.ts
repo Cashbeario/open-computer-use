@@ -28,10 +28,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Hoisted shared state ──────────────────────────────────────────
 
 const h = vi.hoisted(() => {
-  const mockShowRainbow = vi.fn()
-  const mockHideRainbow = vi.fn()
-  const mockInitRainbow = vi.fn()
-
   // Tracks invocations so we can assert order, overlap, and counts.
   type Call = { command: string; startedAt: number; finishedAt?: number }
   const invocations: Call[] = []
@@ -93,9 +89,6 @@ const h = vi.hoisted(() => {
   }
 
   return {
-    mockShowRainbow,
-    mockHideRainbow,
-    mockInitRainbow,
     mockExecuteCommand,
     invocations,
     customDelay,
@@ -107,12 +100,6 @@ const h = vi.hoisted(() => {
 })
 
 // ── Mocks ──────────────────────────────────────────────────────────
-
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: h.mockShowRainbow,
-  hideRainbowBorder: h.mockHideRainbow,
-  initRainbowBorder: h.mockInitRainbow,
-}))
 
 vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => [{ webContents: { send: vi.fn() } }]) },

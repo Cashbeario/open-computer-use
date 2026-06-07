@@ -868,6 +868,11 @@
       "npsVeryLikely": "น่าจะใช่อย่างยิ่ง",
       "thanks": "ขอบคุณสำหรับความคิดเห็น",
       "creditsLabel": "เครดิต"
+    },
+    "composioReauth": {
+      "fallbackAppName": "แอป",
+      "expiredMessage": "การเชื่อมต่อ {appName} ของคุณหมดอายุแล้ว",
+      "reconnectLink": "เชื่อมต่อใหม่"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "ใน {count} นาที",
     "inHours": "ใน {count} ชม.",
     "today": "วันนี้",
-    "yesterday": "เมื่อวาน"
+    "yesterday": "เมื่อวาน",
+    "connections": "แอป",
+    "resources": "เอเจนต์"
   },
   "appHeader": {
     "login": "เข้าสู่ระบบ",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - ตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 | ดีที่สุดสำหรับระบบอัตโนมัติเดสก์ท็อปและเบราว์เซอร์",
       "titleTemplate": "{title} | Coasty - ตัวแทน AI ใช้คอมพิวเตอร์",
-      "description": "Coasty คือตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 — 82% บน OSWorld benchmark — และเป็นแผนไม่จำกัดแบบเหมาจ่ายเพียงรายเดียวที่ {unlimitedPrice} (ถูกกว่า Devin Team $500+ACU, OpenAI Operator $200 ที่จำกัดอัตรา และคู่แข่งที่จำกัดเครดิต) ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์: เบราว์เซอร์ แบบฟอร์ม อีเมล สเปรดชีต แยก VM ระดับลึก เริ่มต้นที่ Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
+      "description": "Coasty คือตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 (82% บน OSWorld) และเป็นแพลตฟอร์มใช้คอมพิวเตอร์เพียงรายเดียวที่มีอินทิเกรชันแอปเนทีฟกว่า 1,000+ รายการ — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify และอีกกว่า 990+ — เรียกใช้ได้ในทุกแชต แผนไม่จำกัดแบบเหมาจ่ายที่ {unlimitedPriceLong} (ถูกกว่า Devin Team $500+ACU และ OpenAI Operator $200 ที่จำกัดอัตรา) ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์ พร้อมแยก VM ระดับลึก เริ่มต้นที่ Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
       "ogTitle": "Coasty — 82% OSWorld + ไม่จำกัด {unlimitedPrice} (ตัวแทนใช้คอมพิวเตอร์ที่ถูกที่สุด)",
-      "ogDescription": "อันดับ 1 บน OSWorld (82%) ไม่จำกัดแบบเหมาจ่าย {unlimitedPrice} — ถูกกว่า Devin Team ($500+ACU) ที่ benchmark สูงกว่า ระบบอัตโนมัติเบราว์เซอร์ เดสก์ท็อป เทอร์มินัล แยก VM ต่อเซสชัน เนทีฟข้ามแพลตฟอร์ม + REST API + MCP server",
-      "twitterDescription": "ตัวแทน AI ที่ใช้งานเดสก์ท็อปจริง 82% OSWorld (อันดับ 1) ไม่จำกัด {unlimitedPrice} — แผนเหมาจ่ายที่ถูกที่สุดในหมวดหมู่นี้ Starter เริ่มต้นที่ {starterPrice} แยก VM + MCP server 26 เครื่องมือ"
+      "ogDescription": "อันดับ 1 บน OSWorld (82%) + อินทิเกรชันกว่า 1,000+ รายการ (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + ไม่จำกัดแบบเหมาจ่าย {unlimitedPrice} ตัวแทนใช้คอมพิวเตอร์รายเดียวที่มีแคตตาล็อกอินทิเกรชันจริง แยก VM, แอปเนทีฟข้ามแพลตฟอร์ม, REST API, MCP server",
+      "twitterDescription": "ตัวแทน AI ที่ใช้งานเดสก์ท็อปจริง และเชื่อมต่อกับแอปกว่า 1,000+ รายการ (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) 82% OSWorld (อันดับ 1) ไม่จำกัด {unlimitedPrice} แผนเหมาจ่ายที่ถูกที่สุดในหมวดหมู่นี้ Starter เริ่มต้นที่ {starterPrice}"
     },
     "compare": {
       "title": "เปรียบเทียบ Coasty - ทางเลือกตัวแทน AI และการเปรียบเทียบคู่แข่ง",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "ราคา — แผนและราคาตัวแทน AI Coasty",
-      "description": "ราคา Coasty: Starter {starterPrice} (200 เครดิต) หรือไม่จำกัด {unlimitedPrice} (แผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาด — ถูกกว่า Devin Team $500+ACU, Genspark Pro $249 ที่จำกัดเครดิต และ Manus Extended $200 ที่จำกัด) แทนที่ผู้ช่วยเสมือนที่เป็นมนุษย์ราคา $3,000+/mo ไม่มีค่าธรรมเนียมแอบแฝง",
+      "description": "ราคา Coasty: Starter {starterPrice} (200 เครดิต) หรือไม่จำกัด {unlimitedPrice} แผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาด (ถูกกว่า Devin Team $500+ACU, Genspark Pro $249 ที่จำกัดเครดิต และ Manus Extended $200 ที่จำกัด) ทุกแผนรวมอินทิเกรชันแอปเนทีฟกว่า 1,000+ รายการ (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify และอีกกว่า 990+) และทดแทนผู้ช่วยเสมือนที่เป็นมนุษย์ราคา $3,000+/เดือน ไม่มีค่าธรรมเนียมแอบแฝง",
       "ogTitle": "ราคา Coasty — Starter {starterPrice}, ไม่จำกัด {unlimitedPrice}",
       "ogDescription": "ไม่จำกัดแบบเหมาจ่าย {unlimitedPrice} — แผนใช้คอมพิวเตอร์ไม่จำกัดที่ถูกที่สุดในตลาด หรือ Starter {starterPrice} สำหรับบุคคล ประหยัด $36k/ปี เทียบกับ VA มนุษย์"
     },
@@ -2398,14 +2405,16 @@
       "q9": "Coasty เปรียบเทียบกับ OpenAI Operator อย่างไร?",
       "a9": "Coasty ทำได้ดีกว่า OpenAI Operator บน OSWorld benchmark (82% เทียบกับ ~40%) ให้การแยก VM จริงทุกเซสชัน รองรับหลายโมเดล AI ควบคุมเดสก์ท็อปเต็มรูปแบบไม่ใช่แค่เบราว์เซอร์ และเป็นเฟรมเวิร์กโอเพนซอร์ส",
       "q10": "Coasty แก้ CAPTCHA ได้ไหม?",
-      "a10": "ได้ Coasty มีระบบแก้ CAPTCHA ในตัว จึงไม่ถูกบล็อกเหมือนตัวแทน AI คู่แข่ง นี่สำคัญมากสำหรับระบบอัตโนมัติในโลกจริงที่เว็บไซต์มักมี CAPTCHA"
+      "a10": "ได้ Coasty มีระบบแก้ CAPTCHA ในตัว จึงไม่ถูกบล็อกเหมือนตัวแทน AI คู่แข่ง นี่สำคัญมากสำหรับระบบอัตโนมัติในโลกจริงที่เว็บไซต์มักมี CAPTCHA",
+      "q11": "Coasty เชื่อมต่อกับแอปและบริการอะไรบ้าง?",
+      "a11": "Coasty เชื่อมต่อกับแอปกว่า 1,000+ รายการผ่านชั้นอินทิเกรชัน Composio ในตัว เช่น Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase และ Twilio เชื่อมต่อแอปใดก็ได้ครั้งเดียวด้วย OAuth ในหน้า Settings จากนั้น Coasty จะใช้แอปนั้นในทุกแชตแทนคุณ โดยที่ตัวแทนไม่เห็นรหัสผ่านเลย เมื่อแอปมี API, Coasty จะเรียก API โดยตรงเพื่อความหน่วงระดับต่ำกว่าวินาที เมื่อไม่มี API (เช่น SAP GUI, LinkedIn Sales Navigator, พอร์ทัลธนาคารแบบเก่า, เครื่องมือผู้ดูแลภายใน) ตัวแทนเดียวกันจะขับเคลื่อน UI ด้วยการใช้คอมพิวเตอร์ Coasty เป็นแพลตฟอร์มใช้คอมพิวเตอร์รายเดียวที่ส่งมอบทั้งสองพื้นผิว — แคตตาล็อกอินทิเกรชันแบบ API-first และการควบคุมเดสก์ท็อประดับ OS — ในตัวแทนเดียว"
     },
     "structuredData": {
-      "appDescription": "ตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 และเป็นแผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาดที่ {unlimitedPriceLong} Coasty ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์ — เปิดเบราว์เซอร์ คลิก พิมพ์ กรอกแบบฟอร์ม ส่งอีเมล และจัดการสเปรดชีตโดยอัตโนมัติ 82% บน OSWorld benchmark จาก 369 งานในโลกจริง แยก VM จริงต่อเซสชัน แก้ CAPTCHA ในตัว แผน: Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
-      "orgDescription": "Coasty สร้างตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 (82% OSWorld) และเป็นเจ้าเดียวที่เปิดแผนไม่จำกัดแบบเหมาจ่ายที่ {unlimitedPriceLong} — ถูกกว่า Devin Team, OpenAI Operator และคู่แข่งที่จำกัดเครดิตในระดับราคาเดียวกัน แพลตฟอร์มของเราให้การควบคุมเดสก์ท็อปอัตโนมัติ ระบบอัตโนมัติเบราว์เซอร์ และการจัดการหลายตัวแทนพร้อมแยก VM จริง",
-      "productDescription": "ตัวแทน AI ใช้คอมพิวเตอร์ที่ควบคุมเดสก์ท็อปเหมือนมนุษย์ อันดับ 1 บน OSWorld benchmark (82%) แผนไม่จำกัด {unlimitedPrice} เป็นแผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดที่มี ระบบอัตโนมัติเบราว์เซอร์ ควบคุมเดสก์ท็อป ส่งอีเมล กรอกแบบฟอร์ม และจัดการสเปรดชีตด้วยแยก VM จริง",
-      "websiteDescription": "แพลตฟอร์มตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 — 82% OSWorld benchmark และเป็นแผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดที่ {unlimitedPriceLong} ระบบอัตโนมัติเบราว์เซอร์ เดสก์ท็อป และเทอร์มินัลพร้อมแยก VM เริ่มต้นที่ Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
-      "softwareDescription": "ตัวแทน AI ใช้คอมพิวเตอร์ที่ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์ อันดับ 1 บน OSWorld benchmark ด้วยอัตราสำเร็จ 82% จาก 369 งานในโลกจริง แผนไม่จำกัด {unlimitedPriceLong} เป็นแผนใช้คอมพิวเตอร์ไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาด ระบบอัตโนมัติเบราว์เซอร์ ควบคุมเดสก์ท็อป ดำเนินการเทอร์มินัล ส่งอีเมล กรอกแบบฟอร์ม และจัดการสเปรดชีต",
+      "appDescription": "ตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 และเป็นแพลตฟอร์มใช้คอมพิวเตอร์รายเดียวที่มีอินทิเกรชันแอปเนทีฟกว่า 1,000+ รายการ (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify และอีกกว่า 990+) 82% บน OSWorld จาก 369 งานในโลกจริง แผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาดที่ {unlimitedPriceLong} ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์ แยก VM จริงต่อเซสชัน แก้ CAPTCHA ในตัว แผน: Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
+      "orgDescription": "Coasty สร้างตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 (82% OSWorld) พร้อมอินทิเกรชันแอปที่ป้องกันด้วย OAuth กว่า 1,000+ รายการ (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) และเป็นเจ้าเดียวที่เปิดแผนไม่จำกัดแบบเหมาจ่ายแบบใช้คอมพิวเตอร์ที่ {unlimitedPriceLong} ถูกกว่า Devin Team, OpenAI Operator และคู่แข่งที่จำกัดเครดิต แพลตฟอร์มของเรารวมการใช้คอมพิวเตอร์ การจัดการหลายตัวแทน อินทิเกรชันเนทีฟ และการแยก VM จริงไว้ในผลิตภัณฑ์เดียว",
+      "productDescription": "ตัวแทน AI ใช้คอมพิวเตอร์ที่ควบคุมเดสก์ท็อปเหมือนมนุษย์ และเชื่อมต่อเนทีฟกับแอปกว่า 1,000+ รายการ (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify) อันดับ 1 บน OSWorld benchmark (82%) แผนไม่จำกัด {unlimitedPrice} เป็นแผนไม่จำกัดแบบเหมาจ่ายแบบใช้คอมพิวเตอร์ที่ถูกที่สุดที่มี ระบบอัตโนมัติเบราว์เซอร์ เดสก์ท็อป อีเมล การกรอกแบบฟอร์ม และสเปรดชีตด้วยการแยก VM จริง",
+      "websiteDescription": "แพลตฟอร์มตัวแทน AI ใช้คอมพิวเตอร์อันดับ 1 (82% OSWorld) พร้อมอินทิเกรชันเนทีฟกว่า 1,000+ รายการ (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) และเป็นแผนไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดที่ {unlimitedPriceLong} ระบบอัตโนมัติเบราว์เซอร์ เดสก์ท็อป และเทอร์มินัลพร้อมแยก VM เริ่มต้นที่ Starter {starterPrice} หรือไม่จำกัด {unlimitedPrice}",
+      "softwareDescription": "ตัวแทน AI ใช้คอมพิวเตอร์ที่ควบคุมเดสก์ท็อปเต็มรูปแบบเหมือนมนุษย์ และมาพร้อมอินทิเกรชันแอปที่ป้องกันด้วย OAuth กว่า 1,000+ รายการ (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify และอีกกว่า 990+) อันดับ 1 บน OSWorld ด้วยอัตราสำเร็จ 82% จาก 369 งานในโลกจริง แผนไม่จำกัด {unlimitedPriceLong} เป็นแผนใช้คอมพิวเตอร์ไม่จำกัดแบบเหมาจ่ายที่ถูกที่สุดในตลาด ระบบอัตโนมัติเบราว์เซอร์ เดสก์ท็อป เทอร์มินัล อีเมล แบบฟอร์ม และสเปรดชีตในตัวแทนเดียว",
       "breadcrumbs": {
         "home": "หน้าแรก",
         "caseStudies": "กรณีศึกษาตัวแทน AI",
@@ -2413,6 +2422,13 @@
         "download": "ดาวน์โหลดแอปเดสก์ท็อป",
         "compare": "เปรียบเทียบตัวแทน AI"
       }
+    },
+    "connections": {
+      "title": "การเชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion, GitHub และอีกหลายร้อยแอป พร้อมใช้งานในทุกแชท",
+      "ogTitle": "Connections — เชื่อมต่อแอปกว่า 250 รายการกับ AI Coasty",
+      "ogDescription": "นำ Gmail, Slack, GitHub, Notion, Google Calendar, Linear และแอปอีกหลายร้อยรายการเข้ามาในทุกแชต ปลอดภัยด้วย OAuth พร้อมใช้งานตลอดเวลา ให้ตัวแทน Coasty ใช้แทนคุณ",
+      "twitterDescription": "เชื่อมต่อ Gmail, Slack, GitHub, Notion และแอปกว่า 250 รายการเข้ากับ Coasty OAuth ครั้งเดียว ตัวแทนของคุณใช้ในทุกแชต"
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "การแนะนำ",
         "description": "ชวนเพื่อนและรับเครดิต"
+      },
+      "integrations": {
+        "label": "การเชื่อมต่อ",
+        "description": "เชื่อมต่อแอปจากผู้ให้บริการอื่น"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "การแนะนำ",
       "description": "แชร์ Coasty หารายได้ร่วมกัน"
+    },
+    "connections": {
+      "title": "Connections ของคุณ",
+      "description": "กำลังดึงแอปและ toolkit ที่คุณเชื่อมต่อไว้"
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 ระหว่างการส่ง",
     "trustAtRest": "AES-256-GCM ขณะจัดเก็บ",
     "trustNoTraining": "ไม่นำข้อมูลของคุณไปฝึกโมเดล"
+  },
+  "connections": {
+    "page": {
+      "title": "การเชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion, GitHub และอีกหลายร้อยแอป พร้อมใช้งานในทุกแชท"
+    },
+    "fallbackAppName": "แอป",
+    "status": {
+      "active": "ทำงานอยู่",
+      "initiated": "กำลังเชื่อม",
+      "expired": "หมดอายุ",
+      "failed": "ถูกเพิกถอน",
+      "failedShort": "ล้มเหลว",
+      "inactive": "ไม่ได้ใช้งาน"
+    },
+    "toasts": {
+      "disconnectFailed": "ยกเลิกการเชื่อมต่อไม่สำเร็จ",
+      "disconnected": "ยกเลิกการเชื่อมต่อ {appName} แล้ว",
+      "reconnectFailed": "เริ่มการเชื่อมต่อใหม่ไม่สำเร็จ",
+      "connected": "เชื่อมต่อ {app} แล้ว",
+      "error": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง"
+    },
+    "card": {
+      "logoAlt": "โลโก้ {appName}",
+      "fallbackAccountLabel": "เชื่อมต่อแล้ว",
+      "connectedOn": "เชื่อมต่อเมื่อ {date}",
+      "lastUsed": "ใช้งานล่าสุด {time}",
+      "actions": {
+        "reconnect": "เชื่อมใหม่",
+        "disconnect": "ยกเลิกการเชื่อมต่อ",
+        "menuAriaLabel": "การจัดการการเชื่อมต่อ"
+      },
+      "error": {
+        "expired": "การอนุญาตหมดอายุแล้ว เชื่อมต่อใหม่เพื่อใช้งานเครื่องมือต่อ",
+        "revoked": "การเชื่อมต่อถูกเพิกถอน เชื่อมต่อใหม่เพื่อใช้งานเครื่องมือต่อ"
+      },
+      "disconnectDialog": {
+        "title": "ยกเลิกการเชื่อมต่อ {appName} ใช่ไหม?",
+        "connectedOn": "เชื่อมต่อเมื่อ {date}",
+        "consequence": {
+          "revokeOauth": "Composio จะเพิกถอนสิทธิ์ OAuth",
+          "toolsStop": "เครื่องมือที่ใช้การเชื่อมต่อนี้จะหยุดทำงาน"
+        },
+        "confirm": "ยกเลิกการเชื่อมต่อ",
+        "cancel": "เก็บการเชื่อมต่อไว้"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "โลโก้ {name}",
+      "headline": "เชื่อมต่อแอปแรกของคุณ",
+      "subheadline": "อนุญาตเพียงครั้งเดียว แล้ว AI ของคุณจะอ่านอีเมล โพสต์ลง Slack อัปเดตเอกสาร และอื่น ๆ อีกมากมาย โดยอัตโนมัติในทุกแชท",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "เครื่องมือพร้อมใช้ในทุกแชท",
+          "desc": "เมื่อเชื่อมต่อแล้ว AI ของคุณจะใช้งานให้อัตโนมัติ"
+        },
+        "secureOauth": {
+          "title": "OAuth ที่ปลอดภัย",
+          "desc": "อนุญาตครั้งเดียว เพิกถอนได้ทุกเมื่อ"
+        },
+        "hundredsOfApps": {
+          "title": "หลายร้อยแอป",
+          "desc": "อีเมล ปฏิทิน CRM เอกสาร โค้ด และอีกมากมาย"
+        }
+      },
+      "browseAppsCta": "ดูแอปทั้งหมด"
+    },
+    "connectDialog": {
+      "title": "เชื่อมต่อแอป",
+      "description": "เลือกจากการเชื่อมต่อหลายร้อยรายการที่ขับเคลื่อนโดย Composio",
+      "searchPlaceholder": "ค้นหาแอป…",
+      "clearSearchAria": "ล้างการค้นหา",
+      "categories": {
+        "all": "ทั้งหมด",
+        "communication": "การสื่อสาร",
+        "productivity": "ประสิทธิภาพ",
+        "calendar": "ปฏิทิน",
+        "developer": "นักพัฒนา",
+        "crmSales": "CRM และการขาย"
+      },
+      "sections": {
+        "featured": "แนะนำ",
+        "allApps": "แอปทั้งหมด"
+      },
+      "card": {
+        "logoAlt": "โลโก้ {name}",
+        "alreadyConnectedTooltip": "เชื่อมต่อแล้ว จัดการได้จากหน้าการเชื่อมต่อ",
+        "connectedLabel": "เชื่อมต่อแล้ว",
+        "connectFallbackDescription": "เชื่อมต่อ {name} เข้ากับ AI ของคุณ"
+      },
+      "footer": {
+        "poweredBy": "ขับเคลื่อนโดย Composio",
+        "cancel": "ยกเลิก"
+      },
+      "empty": {
+        "noMatchTitle": "ไม่พบแอปที่ตรงกับ \"{query}\"",
+        "noAppsTitle": "ยังไม่มีแอปให้เลือก",
+        "noMatchBody": "ลองใช้คำค้นที่สั้นลง หรือเปลี่ยนหมวดหมู่",
+        "noAppsBody": "การเชื่อมต่อ Composio จะปรากฏที่นี่เมื่อตั้งค่าเรียบร้อย"
+      },
+      "errors": {
+        "failedToStart": "เริ่มการเชื่อมต่อไม่สำเร็จ"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "เชื่อมต่อกับ Composio",
+          "connectWithApiKey": "บันทึกและเชื่อมต่อ",
+          "connectWithBearerToken": "บันทึกและเชื่อมต่อ",
+          "connectWithBasic": "บันทึกและเชื่อมต่อ",
+          "connectNoAuth": "เปิดใช้งาน",
+          "connecting": "กำลังเชื่อมต่อ..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "คีย์ API",
+          "apiKeyPlaceholder": "วางคีย์ API ของคุณ",
+          "bearerTokenLabel": "โทเค็น Bearer",
+          "bearerTokenPlaceholder": "วางโทเค็น Bearer ของคุณ",
+          "basicAuthUsername": "ชื่อผู้ใช้",
+          "basicAuthPassword": "รหัสผ่าน",
+          "basicAuthUsernamePlaceholder": "ชื่อผู้ใช้บัญชีของคุณ",
+          "basicAuthPasswordPlaceholder": "รหัสผ่านบัญชีของคุณ",
+          "revealSecret": "แสดง",
+          "hideSecret": "ซ่อน"
+        },
+        "noAuthHint": "{name} ไม่ต้องการข้อมูลรับรอง คลิกเปิดใช้งานเพื่อเพิ่มลงในพื้นที่ทำงานของคุณ",
+        "apiKeyHelp": "หาสิ่งนี้ได้ที่ไหน?",
+        "connectedToast": "เชื่อมต่อกับ {name} แล้ว",
+        "unsupported": {
+          "title": "ประเภทการเชื่อมต่อนี้ยังไม่รองรับ",
+          "body": "{name} ใช้กระบวนการตรวจสอบสิทธิ์ {scheme} ที่เรายังไม่ได้รองรับในแอป คุณสามารถเชื่อมต่อโดยตรงในแดชบอร์ด Composio และจะปรากฏที่นี่เมื่อเชื่อมโยงแล้ว",
+          "openComposioDashboard": "เปิดแดชบอร์ด Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "ยกเลิกการเชื่อมต่อ {name}",
+      "disconnect": "ยกเลิก"
+    },
+    "empty": {
+      "title": "ยังไม่มีแอปที่เชื่อมต่อ",
+      "description": "เชื่อมต่อ Gmail, Slack, Notion และอื่น ๆ เพื่อให้ Coasty ใช้งานได้ในทุกแชท"
+    },
+    "toolInvocation": {
+      "calling": "กำลังเรียกใช้ {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "แอป",
+      "expiredMessage": "การเชื่อมต่อ {appName} ของคุณหมดอายุแล้ว",
+      "reconnectLink": "เชื่อมต่อใหม่"
+    },
+    "errors": {
+      "loadConnectionsFailed": "โหลดการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "loadToolkitsFailed": "โหลด toolkits ไม่สำเร็จ (HTTP {status})",
+      "startConnectionFailed": "เริ่มการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "disconnectFailedHttp": "ยกเลิกการเชื่อมต่อไม่สำเร็จ (HTTP {status})",
+      "credentialsRequired": "โปรดกรอกข้อมูลในช่องที่จำเป็นทั้งหมดเพื่อดำเนินการต่อ",
+      "credentialsErrorPrefix": "การเชื่อมต่อล้มเหลว:",
+      "unknownToolkit": "เราไม่รู้จักแอปนี้ โปรดรีเฟรชแคตตาล็อกแล้วลองอีกครั้ง",
+      "unsupportedAuthScheme": "ยังไม่รองรับวิธีตรวจสอบสิทธิ์นี้ในแอป",
+      "missingCredentials": "ข้อมูลที่จำเป็นหายไป: {fields}",
+      "invalidCredentials": "ข้อมูลรับรองถูกปฏิเสธ โปรดตรวจสอบและลองอีกครั้ง",
+      "credentialValidationFailed": "ไม่สามารถตรวจสอบข้อมูลรับรองของคุณได้ โปรดลองอีกครั้ง",
+      "apiKeyRequired": "ต้องระบุคีย์ API",
+      "tokenRequired": "ต้องระบุโทเค็น Bearer",
+      "basicRequired": "ต้องระบุชื่อผู้ใช้และรหัสผ่าน"
+    },
+    "title": "Connections",
+    "subtitle": "เชื่อมต่อแอปที่ Coasty สามารถใช้งานแทนคุณในทุกแชต",
+    "connectedSuffix": "เชื่อมต่อแล้ว",
+    "refresh": "รีเฟรช",
+    "newConnection": "เชื่อมต่อใหม่",
+    "retry": "ลองอีกครั้ง",
+    "noFilteredConnections": "ยังไม่มีแอปที่{filter}",
+    "noFilteredDescription": "ลองตัวกรองอื่น หรือเชื่อมต่อแอปใหม่เพื่อเริ่มต้น",
+    "filters": {
+      "all": "ทั้งหมด",
+      "active": "ใช้งานอยู่",
+      "connecting": "กำลังเชื่อมต่อ",
+      "expired": "หมดอายุ",
+      "failed": "ล้มเหลว"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "แอปที่เชื่อมต่อ",
+      "subheading": "Coasty สามารถใช้แอปเหล่านี้แทนคุณได้ในทุกแชท",
+      "connectNewApp": "เชื่อมต่อแอปใหม่",
+      "manageOnFullPage": "จัดการในหน้าเต็ม"
+    }
   }
 }

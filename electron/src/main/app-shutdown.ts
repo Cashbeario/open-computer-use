@@ -1,5 +1,4 @@
 import type { Tray } from 'electron'
-import { destroyRainbowBorder } from './rainbow-border'
 import type { WebSocketBridge } from './ws-bridge'
 import type { ElectronAuth } from './auth'
 
@@ -19,24 +18,20 @@ let shuttingDown = false
 /**
  * Idempotent full-shutdown routine.
  *
- * Why this exists: the app leaks a second `BrowserWindow` (the rainbow-border
- * overlay) that is only ever `.hide()`d, never `.destroy()`d. While that
- * window is alive, Electron's `window-all-closed` event does not fire when
- * the user closes the main overlay (Alt+F4 on Windows, ⌘W on macOS, the new
- * in-app close button), so `app.quit()` is never reached and the process
- * lingers in the background.
- *
- * This function tears down every resource that can block a clean exit:
+ * Tears down every long-lived resource that can block a clean exit so that
+ * `window-all-closed` fires and the process actually quits (Alt+F4 on
+ * Windows, ⌘W on macOS, the in-app close button, the tray Quit item):
  *
  *  1. WebSocket bridge  — stops heartbeat, clears reconnect timer, cancels
  *                         pending approvals, closes the socket.
- *  2. Rainbow border    — destroys the ghost BrowserWindow. THIS is the
- *                         critical fix — without it `window-all-closed`
- *                         never fires.
- *  3. Auth              — clears the token-refresh timer and any in-flight
+ *  2. Auth              — clears the token-refresh timer and any in-flight
  *                         OAuth/magic-link HTTP callback server.
- *  4. Tray              — removes the system-tray icon so there's no ghost
+ *  3. Tray              — removes the system-tray icon so there's no ghost
  *                         icon between `close` and `quit`.
+ *
+ * (The app used to also leak a second `BrowserWindow` — the rainbow-border
+ * desktop glow — which is why this routine existed; that window has since
+ * been removed entirely, so there is nothing left to destroy for it.)
  *
  * Called from two places:
  *  - `mainWindow.on('close')` — user-initiated close path. Cleans up BEFORE
@@ -59,21 +54,14 @@ export function performFullShutdown(deps: ShutdownDeps): void {
     console.error('[Shutdown] ws bridge disconnect failed:', err)
   }
 
-  // 2. Rainbow border — the leaked BrowserWindow that blocks quit.
-  try {
-    destroyRainbowBorder()
-  } catch (err) {
-    console.error('[Shutdown] rainbow border destroy failed:', err)
-  }
-
-  // 3. Auth — refresh timer + pending callback server.
+  // 2. Auth — refresh timer + pending callback server.
   try {
     deps.auth?.dispose()
   } catch (err) {
     console.error('[Shutdown] auth dispose failed:', err)
   }
 
-  // 4. Tray icon.
+  // 3. Tray icon.
   try {
     if (deps.tray && !deps.tray.isDestroyed()) {
       deps.tray.destroy()

@@ -1,4 +1,5 @@
 import { BrowserWindow, app } from 'electron'
+import { randomUUID } from 'node:crypto'
 import * as fs from 'fs'
 import * as path from 'path'
 import { bringToFront } from './window-manager'
@@ -87,7 +88,13 @@ export class ApprovalManager {
    * Resolves with { approved, reason? }.
    */
   requestApproval(command: string, parameters: any): Promise<ApprovalResult> {
-    const id = `approval_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    // crypto.randomUUID() — 122 bits of entropy, guaranteed unique across the
+    // process. The previous `${Date.now()}_${Math.random().slice(2,6)}` scheme
+    // collapsed to only 4 base-36 chars of entropy when many requests landed
+    // inside the same millisecond, with a ~30% collision rate per 1000 calls.
+    // That's a real correctness bug — two near-simultaneous approvals could
+    // collide and an approval response could route to the wrong pending promise.
+    const id = `approval_${randomUUID()}`
 
     return new Promise((resolve) => {
       this.pending.set(id, { id, command, parameters, resolve })

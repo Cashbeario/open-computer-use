@@ -27,10 +27,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ── Hoisted shared state ──────────────────────────────────────────
 
 const h = vi.hoisted(() => {
-  const mockShowRainbow = vi.fn()
-  const mockHideRainbow = vi.fn()
-  const mockInitRainbow = vi.fn()
-
   type Resolver = (value: { success: boolean }) => void
   // The bridge serializes execution: only ONE command is in the executor
   // at a time. Each invocation of the mocked executor returns a deferred
@@ -113,9 +109,6 @@ const h = vi.hoisted(() => {
   }
 
   return {
-    mockShowRainbow,
-    mockHideRainbow,
-    mockInitRainbow,
     mockExecuteCommand,
     pendingResolvers,
     releaseAll,
@@ -128,12 +121,6 @@ const h = vi.hoisted(() => {
 })
 
 // ── Module mocks ──────────────────────────────────────────────────
-
-vi.mock('../rainbow-border', () => ({
-  showRainbowBorder: h.mockShowRainbow,
-  hideRainbowBorder: h.mockHideRainbow,
-  initRainbowBorder: h.mockInitRainbow,
-}))
 
 vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => [{ webContents: { send: vi.fn() } }]) },
@@ -982,15 +969,12 @@ describe('WebSocketBridge — reauth edge cases', () => {
 
     // Now send a task_end. Pre-fix bugs (e.g. an unhandled exception
     // from the reauth_ack branch) would leave the handler in a bad
-    // state. We assert the rainbow turns off as proof the task_end
-    // handler ran.
-    h.mockHideRainbow.mockClear()
-    // Force rainbow on so we can observe stopRainbow firing
+    // state. We assert the bridge stays connected after task_end as
+    // proof the message handler still runs normally.
     bridge.setTaskActive(true)
     h.currentWs.simulateMessage({ type: 'task_end' })
     await flush(10)
 
-    expect(h.mockHideRainbow).toHaveBeenCalled()
     expect(bridge.getState()).toBe('connected')
   })
 
@@ -1064,9 +1048,7 @@ describe('WebSocketBridge — reauth edge cases', () => {
     await flush(10)
     getToken.mockClear()
 
-    // Force rainbow on so we can observe task_end taking effect
     bridge.setTaskActive(true)
-    h.mockHideRainbow.mockClear()
 
     // 1. Trigger reauth_required — handler blocks on getToken
     h.currentWs.simulateMessage({ type: 'reauth_required', deadline_ms: Date.now() + 60_000 })
@@ -1078,8 +1060,10 @@ describe('WebSocketBridge — reauth edge cases', () => {
     h.currentWs.simulateMessage({ type: 'task_end' })
     await flush(10)
 
-    // task_end was processed even though reauth is still awaiting
-    expect(h.mockHideRainbow).toHaveBeenCalled()
+    // task_end was processed even though reauth is still awaiting — the
+    // bridge stays connected and the still-pending reauth handler is
+    // unaffected.
+    expect(bridge.getState()).toBe('connected')
 
     // Finally resolve getToken to let the reauth complete cleanly
     resolveToken!('belated-token')
@@ -1511,12 +1495,12 @@ describe('WebSocketBridge — reauth: malformed inputs and message shape', () =>
     expect(h.currentWs.sent.length).toBe(beforeAck)
     expect(bridge.getState()).toBe('connected')
 
-    // Verify the handler still works — send a follow-up task_end
+    // Verify the handler still works — a follow-up task_end is processed
+    // and the bridge remains connected (no leftover bad state).
     bridge.setTaskActive(true)
-    h.mockHideRainbow.mockClear()
     h.currentWs.simulateMessage({ type: 'task_end' })
     await flush(10)
-    expect(h.mockHideRainbow).toHaveBeenCalled()
+    expect(bridge.getState()).toBe('connected')
   })
 
   // ── B5. getToken returning empty string ────────────────────────────

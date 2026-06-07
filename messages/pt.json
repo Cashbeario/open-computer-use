@@ -868,6 +868,11 @@
       "npsVeryLikely": "Muito provável",
       "thanks": "Obrigado pelo feedback",
       "creditsLabel": "créditos"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Sua conexão com {appName} expirou.",
+      "reconnectLink": "Reconectar"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "em {count}m",
     "inHours": "em {count}h",
     "today": "hoje",
-    "yesterday": "ontem"
+    "yesterday": "ontem",
+    "connections": "Apps",
+    "resources": "Agente"
   },
   "appHeader": {
     "login": "Login",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - Agente IA de Uso de Computador #1 | O Melhor para Automação de Desktop e Navegador",
       "titleTemplate": "{title} | Coasty - Agente IA de Uso de Computador",
-      "description": "Coasty é o agente IA de uso de computador #1 — 82% no benchmark OSWorld — e o único plano Unlimited de tarifa plana para uso de computador a $99/mês (mais barato que Devin Team $500+ACU, OpenAI Operator $200 com limite de requisições e concorrentes com teto de créditos). Controla um desktop completo como um humano: navegadores, formulários, e-mails, planilhas. Isolamento a nível de VM. A partir de {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
+      "description": "Coasty é o agente IA de uso de computador classificado em #1 (82% no OSWorld) e a única plataforma de uso de computador com 1,000+ integrações nativas de aplicativos — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify e mais 990+ — disponíveis em todo chat. Tarifa plana Unlimited a {unlimitedPriceLong} (mais barato que Devin Team $500+ACU e OpenAI Operator $200 com limite de requisições). Controla um desktop completo como um humano, com isolamento a nível de VM. A partir de {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (o agente de uso de computador mais barato)",
-      "ogDescription": "#1 no OSWorld (82%). {unlimitedPrice} Unlimited de tarifa plana — mais barato que Devin Team ($500+ACU) e com melhor pontuação no benchmark. Automação de navegador, desktop e terminal. Isolamento de VM por sessão. Nativo multiplataforma + REST API + servidor MCP.",
-      "twitterDescription": "Agente IA que opera um desktop real. 82% OSWorld (#1). {unlimitedPrice} Unlimited — o plano de tarifa plana mais barato da categoria. Starter a partir de {starterPrice}. Isolamento de VM + servidor MCP com 26 ferramentas."
+      "ogDescription": "#1 no OSWorld (82%) + 1,000+ integrações (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} Unlimited de tarifa plana. O único agente de uso de computador com um catálogo de integrações de verdade. Isolamento de VM, app nativo multiplataforma, REST API, servidor MCP.",
+      "twitterDescription": "Agente IA que opera um desktop real E conecta a 1,000+ apps (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Unlimited, o plano de tarifa plana mais barato da categoria. Starter a partir de {starterPrice}."
     },
     "compare": {
       "title": "Comparar Coasty - Alternativas de Agentes IA e Comparação de Concorrentes",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Preços — Planos e Preços do Agente IA Coasty",
-      "description": "Preços do Coasty: Starter {starterPrice} (200 créditos) ou Unlimited {unlimitedPrice} (o plano de tarifa plana ilimitado para uso de computador mais barato do mercado — mais barato que Devin Team $500+ACU, Genspark Pro $249 com teto de créditos e Manus Extended $200 com teto). Substitui assistentes virtuais humanos de $3,000+/mo. Sem custos ocultos.",
+      "description": "Preços do Coasty: Starter {starterPrice} (200 créditos) ou Unlimited {unlimitedPrice}, o plano de tarifa plana ilimitado para uso de computador mais barato do mercado (mais barato que Devin Team $500+ACU, Genspark Pro $249 com teto de créditos e Manus Extended $200 com teto). Cada plano inclui 1,000+ integrações nativas de aplicativos (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify e mais 990+) e substitui assistentes virtuais humanos de $3,000+/mês. Sem custos ocultos.",
       "ogTitle": "Preços Coasty — {starterPrice} Starter, {unlimitedPrice} Unlimited",
       "ogDescription": "{unlimitedPrice} Unlimited de tarifa plana — o plano ilimitado para uso de computador mais barato do mercado. Ou {starterPrice} Starter para indivíduos. Economiza $36k por ano em relação a um assistente virtual humano."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Como o Coasty se compara com o OpenAI Operator?",
       "a9": "O Coasty supera o OpenAI Operator no benchmark OSWorld (82% vs ~40%), oferece verdadeiro isolamento a nível de VM para cada sessão, suporta múltiplos modelos de IA, inclui controle completo do desktop além do navegador e fornece um framework de código aberto.",
       "q10": "O Coasty pode resolver CAPTCHAs?",
-      "a10": "Sim. O Coasty tem um pipeline de resolução de CAPTCHA integrado, então não é bloqueado como os agentes IA concorrentes. Isso é fundamental para a automação do mundo real onde CAPTCHAs são comuns em sites."
+      "a10": "Sim. O Coasty tem um pipeline de resolução de CAPTCHA integrado, então não é bloqueado como os agentes IA concorrentes. Isso é fundamental para a automação do mundo real onde CAPTCHAs são comuns em sites.",
+      "q11": "Com quais aplicativos e serviços o Coasty se integra?",
+      "a11": "O Coasty conecta-se a 1,000+ aplicativos através de sua camada de integração Composio integrada, incluindo Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase e Twilio. Conecte qualquer app uma única vez com OAuth nas Configurações, e o Coasty o utilizará em todo chat em seu nome — nenhuma senha jamais é vista pelo agente. Quando um app tem uma API, o Coasty a chama diretamente para latência sub-segundo. Quando não tem (SAP GUI, LinkedIn Sales Navigator, portais bancários legados, ferramentas administrativas internas), o mesmo agente conduz a UI com uso de computador. O Coasty é a única plataforma de uso de computador que entrega ambas as superfícies — um catálogo de integrações API-first E controle de desktop a nível de SO — em um único agente."
     },
     "structuredData": {
-      "appDescription": "O agente IA de uso de computador #1 e o plano Unlimited de tarifa plana para uso de computador mais barato do mercado a $99/mês. Coasty controla um desktop completo como um humano — abre navegadores, clica, digita, preenche formulários, envia e-mails e gerencia planilhas de forma autônoma. 82% no benchmark OSWorld em 369 tarefas do mundo real. Verdadeiro isolamento a nível de VM por sessão. Resolução de CAPTCHA integrada. Planos: {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
-      "orgDescription": "Coasty desenvolve o agente IA de uso de computador #1 (82% OSWorld) e lança o único plano Unlimited de tarifa plana para uso de computador a $99/mês — mais barato que Devin Team, OpenAI Operator e concorrentes com teto de créditos na mesma faixa de preço. Nossa plataforma fornece controle autônomo de desktop, automação de navegador e orquestração multi-agente com verdadeiro isolamento a nível de VM.",
-      "productDescription": "Agente IA de uso de computador que controla um desktop como um humano. #1 no benchmark OSWorld (82%). O plano Unlimited de {unlimitedPrice} é o plano de tarifa plana ilimitado para uso de computador mais barato disponível. Automação autônoma de navegador, controle de desktop, envio de e-mails, preenchimento de formulários e gerenciamento de planilhas com verdadeiro isolamento a nível de VM.",
-      "websiteDescription": "Plataforma de agente IA de uso de computador #1 — 82% no benchmark OSWorld e o plano Unlimited de tarifa plana mais barato a $99/mês. Automação autônoma de navegador, desktop e terminal com isolamento de VM. A partir de {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
-      "softwareDescription": "Agente IA de uso de computador que controla um desktop completo como um humano. #1 no benchmark OSWorld com uma taxa de conclusão de 82% em 369 tarefas do mundo real. O plano Unlimited de $99/mês é o plano de tarifa plana ilimitado para uso de computador mais barato do mercado. Automação autônoma de navegador, controle de desktop, operações de terminal, envio de e-mails, preenchimento de formulários e gerenciamento de planilhas.",
+      "appDescription": "O agente IA de uso de computador classificado em #1 e a única plataforma de uso de computador com 1,000+ integrações nativas de aplicativos (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify e mais 990+). 82% no OSWorld em 369 tarefas do mundo real. O plano Unlimited de tarifa plana mais barato do mercado a {unlimitedPriceLong}. Controla um desktop completo como um humano, verdadeiro isolamento a nível de VM por sessão, resolução de CAPTCHA integrada. Planos: {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty desenvolve o agente IA de uso de computador #1 (82% OSWorld) com 1,000+ integrações de aplicativos protegidas por OAuth (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) e lança o único plano Unlimited de tarifa plana para uso de computador a {unlimitedPriceLong}, mais barato que Devin Team, OpenAI Operator e concorrentes com teto de créditos. Nossa plataforma combina uso de computador, orquestração multi-agente, integrações nativas e isolamento a nível de VM em um único produto.",
+      "productDescription": "Agente IA de uso de computador que controla um desktop como um humano E conecta nativamente a 1,000+ apps (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 no benchmark OSWorld (82%). O plano Unlimited de {unlimitedPrice} é o plano de tarifa plana ilimitado para uso de computador mais barato disponível. Automação autônoma de navegador, desktop, e-mail, preenchimento de formulários e planilhas com isolamento a nível de VM.",
+      "websiteDescription": "Plataforma de agente IA de uso de computador #1 (82% OSWorld) com 1,000+ integrações nativas (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) e o plano Unlimited de tarifa plana mais barato a {unlimitedPriceLong}. Automação autônoma de navegador, desktop e terminal com isolamento de VM. A partir de {starterPrice} Starter ou {unlimitedPrice} Unlimited.",
+      "softwareDescription": "Agente IA de uso de computador que controla um desktop completo como um humano e oferece 1,000+ integrações de aplicativos protegidas por OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify e mais 990+). #1 no OSWorld com 82% de taxa de conclusão em 369 tarefas do mundo real. O plano Unlimited de {unlimitedPriceLong} é o plano de tarifa plana ilimitado para uso de computador mais barato do mercado. Automação de navegador, desktop, terminal, e-mail, formulários e planilhas em um único agente.",
       "breadcrumbs": {
         "home": "Início",
         "caseStudies": "Estudos de Caso de Agentes IA",
@@ -2413,6 +2422,13 @@
         "download": "Baixar App Desktop",
         "compare": "Comparar Agentes IA"
       }
+    },
+    "connections": {
+      "title": "Conexões",
+      "description": "Conecte Gmail, Slack, Notion, GitHub e centenas de outros apps. Disponível em todo chat.",
+      "ogTitle": "Conexões — Conecte mais de 250 apps ao seu agente IA Coasty",
+      "ogDescription": "Traga Gmail, Slack, GitHub, Notion, Google Calendar, Linear e centenas de outros apps para cada chat. Protegidos por OAuth, sempre ativos, usados pelos agentes Coasty em seu nome.",
+      "twitterDescription": "Conecte Gmail, Slack, GitHub, Notion e mais de 250 apps ao Coasty. Um OAuth, usado em cada chat pelo seu agente."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Indicação",
         "description": "Convide amigos e ganhe créditos"
+      },
+      "integrations": {
+        "label": "Integrações",
+        "description": "Conecte apps de terceiros"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Indicações",
       "description": "Compartilhe o Coasty. Ganhem juntos."
+    },
+    "connections": {
+      "title": "Suas conexões",
+      "description": "Buscando seus apps e toolkits conectados."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 em trânsito",
     "trustAtRest": "AES-256-GCM em repouso",
     "trustNoTraining": "Sem treinamento com seus dados"
+  },
+  "connections": {
+    "page": {
+      "title": "Conexões",
+      "description": "Conecte Gmail, Slack, Notion, GitHub e centenas de outros apps. Disponível em todo chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Conectado",
+      "initiated": "Conectando",
+      "expired": "Expirado",
+      "failed": "Revogado",
+      "failedShort": "Falhou",
+      "inactive": "Inativo"
+    },
+    "toasts": {
+      "disconnectFailed": "Falha ao desconectar",
+      "disconnected": "{appName} desconectado",
+      "reconnectFailed": "Falha ao iniciar a reconexão",
+      "connected": "{app} conectado",
+      "error": "Algo deu errado. Tente novamente."
+    },
+    "card": {
+      "logoAlt": "Logo do {appName}",
+      "fallbackAccountLabel": "Conectado",
+      "connectedOn": "Conectado em {date}",
+      "lastUsed": "Usado por último {time}",
+      "actions": {
+        "reconnect": "Reconectar",
+        "disconnect": "Desconectar",
+        "menuAriaLabel": "Ações da conexão"
+      },
+      "error": {
+        "expired": "Autorização expirada. Reconecte para restaurar o acesso às ferramentas.",
+        "revoked": "Conexão revogada. Reconecte para restaurar o acesso às ferramentas."
+      },
+      "disconnectDialog": {
+        "title": "Desconectar {appName}?",
+        "connectedOn": "conectado em {date}",
+        "consequence": {
+          "revokeOauth": "A Composio vai revogar a autorização OAuth",
+          "toolsStop": "Ferramentas que usam essa conexão vão parar de funcionar"
+        },
+        "confirm": "Desconectar",
+        "cancel": "Manter conexão"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo do {name}",
+      "headline": "Conecte seu primeiro app",
+      "subheadline": "Autorize uma vez e sua IA pode ler seu e-mail, postar no Slack, atualizar documentos e muito mais, automaticamente, em todo chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Ferramentas em todo chat",
+          "desc": "Depois de conectar, sua IA usa tudo automaticamente."
+        },
+        "secureOauth": {
+          "title": "OAuth seguro",
+          "desc": "Autorize uma vez, revogue quando quiser."
+        },
+        "hundredsOfApps": {
+          "title": "Centenas de apps",
+          "desc": "E-mail, calendários, CRMs, documentos, código e muito mais."
+        }
+      },
+      "browseAppsCta": "Explorar apps"
+    },
+    "connectDialog": {
+      "title": "Conectar um app",
+      "description": "Explore centenas de integrações oferecidas pela Composio.",
+      "searchPlaceholder": "Buscar apps…",
+      "clearSearchAria": "Limpar busca",
+      "categories": {
+        "all": "Todos",
+        "communication": "Comunicação",
+        "productivity": "Produtividade",
+        "calendar": "Calendário",
+        "developer": "Desenvolvedor",
+        "crmSales": "CRM e Vendas"
+      },
+      "sections": {
+        "featured": "Destaques",
+        "allApps": "Todos os apps"
+      },
+      "card": {
+        "logoAlt": "Logo do {name}",
+        "alreadyConnectedTooltip": "Já conectado. Gerencie pela página Conexões",
+        "connectedLabel": "Conectado",
+        "connectFallbackDescription": "Conecte {name} à sua IA"
+      },
+      "footer": {
+        "poweredBy": "powered by Composio",
+        "cancel": "Cancelar"
+      },
+      "empty": {
+        "noMatchTitle": "Nenhum app corresponde a \"{query}\"",
+        "noAppsTitle": "Nenhum app disponível",
+        "noMatchBody": "Tente um termo de busca mais curto ou outra categoria.",
+        "noAppsBody": "As integrações da Composio aparecerão aqui depois de configuradas."
+      },
+      "errors": {
+        "failedToStart": "Falha ao iniciar a conexão"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Conectar com Composio",
+          "connectWithApiKey": "Salvar e conectar",
+          "connectWithBearerToken": "Salvar e conectar",
+          "connectWithBasic": "Salvar e conectar",
+          "connectNoAuth": "Ativar",
+          "connecting": "Conectando..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Chave de API",
+          "apiKeyPlaceholder": "Cole sua chave de API",
+          "bearerTokenLabel": "Token Bearer",
+          "bearerTokenPlaceholder": "Cole seu token Bearer",
+          "basicAuthUsername": "Nome de usuário",
+          "basicAuthPassword": "Senha",
+          "basicAuthUsernamePlaceholder": "Nome de usuário da sua conta",
+          "basicAuthPasswordPlaceholder": "Senha da sua conta",
+          "revealSecret": "Mostrar",
+          "hideSecret": "Ocultar"
+        },
+        "noAuthHint": "{name} não exige credenciais. Clique em Ativar para adicioná-lo ao seu espaço de trabalho.",
+        "apiKeyHelp": "Onde encontro isso?",
+        "connectedToast": "Conectado a {name}",
+        "unsupported": {
+          "title": "Este tipo de conexão ainda não é suportado",
+          "body": "{name} usa um fluxo de autenticação {scheme} que ainda não integramos no app. Você pode conectá-lo diretamente no painel do Composio e ele aparecerá aqui quando vinculado.",
+          "openComposioDashboard": "Abrir painel do Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Desconectar {name}",
+      "disconnect": "Desconectar"
+    },
+    "empty": {
+      "title": "Nenhum app conectado",
+      "description": "Conecte Gmail, Slack, Notion e mais para que a Coasty possa usá-los em qualquer chat."
+    },
+    "toolInvocation": {
+      "calling": "Chamando {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Sua conexão com {appName} expirou.",
+      "reconnectLink": "Reconectar"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Falha ao carregar conexões (HTTP {status})",
+      "loadToolkitsFailed": "Falha ao carregar toolkits (HTTP {status})",
+      "startConnectionFailed": "Falha ao iniciar a conexão (HTTP {status})",
+      "disconnectFailedHttp": "Falha ao desconectar (HTTP {status})",
+      "credentialsRequired": "Preencha todos os campos obrigatórios para continuar.",
+      "credentialsErrorPrefix": "Falha na conexão:",
+      "unknownToolkit": "Não reconhecemos este app. Atualize o catálogo e tente novamente.",
+      "unsupportedAuthScheme": "Este método de autenticação ainda não é suportado no app.",
+      "missingCredentials": "Campos obrigatórios ausentes: {fields}",
+      "invalidCredentials": "As credenciais foram rejeitadas. Verifique-as e tente novamente.",
+      "credentialValidationFailed": "Não foi possível validar suas credenciais. Tente novamente.",
+      "apiKeyRequired": "É necessária uma chave de API.",
+      "tokenRequired": "É necessário um token Bearer.",
+      "basicRequired": "Nome de usuário e senha são obrigatórios."
+    },
+    "title": "Conexões",
+    "subtitle": "Conecte os apps que o Coasty pode usar em seu nome em qualquer chat.",
+    "connectedSuffix": "conectados",
+    "refresh": "Atualizar",
+    "newConnection": "Nova conexão",
+    "retry": "Tentar novamente",
+    "noFilteredConnections": "Ainda não há apps {filter}",
+    "noFilteredDescription": "Tente outro filtro ou conecte um novo app para começar.",
+    "filters": {
+      "all": "Todas",
+      "active": "Ativas",
+      "connecting": "Conectando",
+      "expired": "Expiradas",
+      "failed": "Com falha"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Apps conectados",
+      "subheading": "A Coasty pode usar esses apps em qualquer chat em seu nome.",
+      "connectNewApp": "Conectar novo app",
+      "manageOnFullPage": "Abrir página completa"
+    }
   }
 }

@@ -422,9 +422,12 @@ describe('UI cannot be bypassed', () => {
 
     // All distinct
     expect(new Set(ids).size).toBe(ids.length)
-    // Format from approval-manager.ts:90 — `approval_{ts}_{4chars}`
+    // Format from approval-manager.ts — `approval_<uuid-v4>` (8-4-4-4-12 hex).
+    // Switched from the legacy `approval_{ts}_{4chars}` scheme because that
+    // collapsed to only ~17 bits of entropy inside a single millisecond and
+    // collided on tight-loop generation.
     for (const id of ids) {
-      expect(id).toMatch(/^approval_\d+_[0-9a-z]{4}$/)
+      expect(id).toMatch(/^approval_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
     }
   })
 })

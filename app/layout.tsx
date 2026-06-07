@@ -6,6 +6,7 @@ import { ConditionalLayout } from "./conditional-layout"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
+import { ComposioProvider } from "@/lib/composio-store/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
 import { TanstackQueryProvider } from "@/lib/tanstack-query/tanstack-query-provider"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
@@ -244,11 +245,13 @@ export default async function RootLayout({
             },
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark (369 real-world tasks)",
-              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`
+              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`,
+              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)"
             ],
             "featureList": [
               "82% OSWorld Benchmark — #1 in production",
               `${priceMonthly("unlimited")} Unlimited plan — flat-rate, no credit caps`,
+              "1,000+ native integrations via Composio (Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, and more)",
               "Autonomous Browser Automation",
               "Desktop Application Control",
               "Terminal & Command Execution",
@@ -349,7 +352,8 @@ export default async function RootLayout({
             "description": seoT("structuredData.softwareDescription", i18nPriceVars()),
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark",
-              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`
+              `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`,
+              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)"
             ],
             "isAccessibleForFree": true,
             "offers": {
@@ -379,6 +383,7 @@ export default async function RootLayout({
             "featureList": [
               "82% OSWorld Benchmark Score (#1 in production)",
               `${priceMonthlyLong("unlimited")} Unlimited plan — flat-rate, no credit caps (cheapest in market)`,
+              "1,000+ native integrations via Composio (Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, and more)",
               "Autonomous Browser Automation",
               "Full Desktop Control",
               "Built-in CAPTCHA Solving",
@@ -406,8 +411,9 @@ export default async function RootLayout({
             <TanstackQueryProvider>
               <LayoutClient />
               <UserProvider initialUser={userProfile}>
-                <ModelProvider>
-                  <ChatsProvider userId={userProfile?.id}>
+                <ComposioProvider>
+                  <ModelProvider>
+                    <ChatsProvider userId={userProfile?.id}>
                     <ChatSessionProvider>
                       <UserPreferencesProvider
                         userId={userProfile?.id}
@@ -430,6 +436,7 @@ export default async function RootLayout({
                     </ChatSessionProvider>
                   </ChatsProvider>
                 </ModelProvider>
+                </ComposioProvider>
               </UserProvider>
             </TanstackQueryProvider>
           </PostHogProvider>

@@ -868,6 +868,11 @@
       "npsVeryLikely": "Veldig sannsynlig",
       "thanks": "Takk for tilbakemeldingen",
       "creditsLabel": "kreditter"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Tilkoblingen til {appName} er utløpt.",
+      "reconnectLink": "Koble til på nytt"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "om {count}m",
     "inHours": "om {count}t",
     "today": "i dag",
-    "yesterday": "i gar"
+    "yesterday": "i gar",
+    "connections": "Apper",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Logg inn",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - #1 AI-agent for datamaskinbruk | Best for skrivebords- og nettleserautomatisering",
       "titleTemplate": "{title} | Coasty - AI-agent for datamaskinbruk",
-      "description": "Coasty er den #1-rangerte AI-agenten for datamaskinbruk — 82% på OSWorld benchmark — og den eneste Ubegrensede datamaskinbruksplanen med fastpris på {unlimitedPrice} (billigere enn Devin Team $500+ACU, OpenAI Operator $200 med hastighetsbegrensning og kredittbegrensede konkurrenter). Styrer et helt skrivebord som et menneske: nettlesere, skjemaer, e-post, regneark. VM-isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
+      "description": "Coasty er den #1-rangerte AI-agenten for datamaskinbruk (82% på OSWorld) og den eneste datamaskinbruksplattformen med 1,000+ native app-integrasjoner — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify og 990+ flere, tilgjengelig i hver chat. Fastpris Ubegrenset på {unlimitedPriceLong} (billigere enn Devin Team $500+ACU og OpenAI Operator $200 med hastighetsbegrensning). Styrer et helt skrivebord som et menneske, med VM-nivå isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Ubegrenset (Billigste datamaskinbruksagent)",
-      "ogDescription": "#1 på OSWorld (82%). {unlimitedPrice} fast Ubegrenset — billigere enn Devin Team ($500+ACU) på en høyere benchmark. Nettleser-, skrivebords- og terminalautomatisering. VM-isolering per økt. Plattformsuavhengig native + REST API + MCP-server.",
-      "twitterDescription": "AI-agent som kjører et ekte skrivebord. 82% OSWorld (#1). {unlimitedPrice} Ubegrenset — billigste planen med fastpris i kategorien. Starter fra {starterPrice}. VM-isolering + 26-tool MCP-server."
+      "ogDescription": "#1 på OSWorld (82%) + 1,000+ integrasjoner (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} fast Ubegrenset. Den eneste datamaskinbruksagenten med en ekte integrasjonskatalog. VM-isolering, plattformsuavhengig native app, REST API, MCP-server.",
+      "twitterDescription": "AI-agent som kjører et ekte skrivebord OG kobler til 1,000+ apper (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Ubegrenset, billigste planen med fastpris i kategorien. Starter fra {starterPrice}."
     },
     "compare": {
       "title": "Sammenlign Coasty - AI-agentalternativer og konkurrentsammenligning",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Priser — Coasty AI-agentplaner og priser",
-      "description": "Coasty-priser: Starter {starterPrice} (200 kreditter) eller Ubegrenset {unlimitedPrice} (den billigste Ubegrensede datamaskinbruksplanen med fastpris i markedet — billigere enn Devin Team $500+ACU, Genspark Pro $249 kredittbegrenset og Manus Extended $200 begrenset). Erstatter menneskelige virtuelle assistenter til $3,000+/mo. Ingen skjulte avgifter.",
+      "description": "Coasty-priser: Starter {starterPrice} (200 kreditter) eller Ubegrenset {unlimitedPrice}, den billigste Ubegrensede datamaskinbruksplanen med fastpris i markedet (billigere enn Devin Team $500+ACU, Genspark Pro $249 kredittbegrenset, Manus Extended $200 begrenset). Hver plan inkluderer 1,000+ native app-integrasjoner (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify og 990+ flere) og erstatter menneskelige virtuelle assistenter til $3,000+/mo. Ingen skjulte avgifter.",
       "ogTitle": "Coasty-priser — {starterPrice} Starter, {unlimitedPrice} Ubegrenset",
       "ogDescription": "{unlimitedPrice} fast Ubegrenset — den billigste ubegrensede datamaskinbruksplanen i markedet. Eller {starterPrice} Starter for enkeltpersoner. Sparer $36,000/år mot menneskelige VA-er."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Hvordan sammenligner Coasty seg med OpenAI Operator?",
       "a9": "Coasty overgår OpenAI Operator på OSWorld benchmark (82% mot ~40%), tilbyr ekte VM-nivå isolering for hver økt, støtter flere AI-modeller, inkluderer full skrivebordskontroll utover bare nettleseren og tilbyr et rammeverk med åpen kildekode.",
       "q10": "Kan Coasty løse CAPTCHA-er?",
-      "a10": "Ja. Coasty har en innebygd CAPTCHA-løsningspipeline, så den blir ikke blokkert slik konkurrerende AI-agenter gjør. Dette er avgjørende for automatisering i den virkelige verden der CAPTCHA-er er vanlige på nettsider."
+      "a10": "Ja. Coasty har en innebygd CAPTCHA-løsningspipeline, så den blir ikke blokkert slik konkurrerende AI-agenter gjør. Dette er avgjørende for automatisering i den virkelige verden der CAPTCHA-er er vanlige på nettsider.",
+      "q11": "Hvilke apper og tjenester integrerer Coasty med?",
+      "a11": "Coasty kobler seg til 1,000+ apper gjennom det innebygde Composio-integrasjonslaget, inkludert Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase og Twilio. Koble en app én gang med OAuth i Innstillinger, så bruker Coasty den i hver chat på dine vegne — ingen passord ser noen gang agenten. Når en app har et API, kaller Coasty det direkte for latens under ett sekund. Når den ikke gjør det (SAP GUI, LinkedIn Sales Navigator, gamle bankportaler, interne adminverktøy), styrer den samme agenten brukergrensesnittet med datamaskinbruk. Coasty er den eneste datamaskinbruksplattformen som leverer begge flater — en API-først integrasjonskatalog OG OS-nivå skrivebordskontroll — i én agent."
     },
     "structuredData": {
-      "appDescription": "Den #1-rangerte AI-agenten for datamaskinbruk og den billigste Ubegrensede datamaskinbruksplanen med fastpris i markedet for {unlimitedPrice}. Coasty styrer et helt skrivebord som et menneske — åpner nettlesere, klikker, skriver, fyller ut skjemaer, sender e-post og administrerer regneark autonomt. 82% på OSWorld benchmark over 369 virkelige oppgaver. Ekte VM-nivå isolering per økt. Innebygd CAPTCHA-løsning. Planer: {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
-      "orgDescription": "Coasty bygger den #1-rangerte AI-agenten for datamaskinbruk (82% OSWorld) og leverer den eneste Ubegrensede datamaskinbruksplanen med fastpris på {unlimitedPrice} — billigere enn Devin Team, OpenAI Operator og kredittbegrensede konkurrenter i samme prisklasse. Vår plattform tilbyr autonom skrivebordskontroll, nettleserautomatisering og orkestrering av flere agenter med ekte VM-nivå isolering.",
-      "productDescription": "AI-datamaskinbruksagent som styrer et skrivebord som et menneske. #1 på OSWorld benchmark (82%). {unlimitedPrice} Ubegrenset-planen er den billigste Ubegrensede datamaskinbruksplanen med fastpris som finnes. Autonom nettleserautomatisering, skrivebordskontroll, e-postsending, skjemautfylling og regnearkhåndtering med ekte VM-nivå isolering.",
-      "websiteDescription": "#1 AI-agentplattform for datamaskinbruk — 82% OSWorld benchmark og den billigste Ubegrensede planen med fastpris på {unlimitedPrice}. Autonom nettleser-, skrivebords- og terminalautomatisering med VM-isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
-      "softwareDescription": "AI-datamaskinbruksagent som styrer et helt skrivebord som et menneske. #1 på OSWorld benchmark med 82% fullføringsrate over 369 virkelige oppgaver. {unlimitedPrice} Ubegrenset-planen er den billigste Ubegrensede datamaskinbruksplanen med fastpris i markedet. Autonom nettleserautomatisering, skrivebordskontroll, terminaloperasjoner, e-postsending, skjemautfylling og regnearkhåndtering.",
+      "appDescription": "Den #1-rangerte AI-agenten for datamaskinbruk og den eneste datamaskinbruksplattformen med 1,000+ native app-integrasjoner (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, pluss 990+ flere). 82% på OSWorld over 369 virkelige oppgaver. Den billigste Ubegrensede planen med fastpris i markedet på {unlimitedPriceLong}. Styrer et helt skrivebord som et menneske, ekte VM-nivå isolering per økt, innebygd CAPTCHA-løsning. Planer: {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
+      "orgDescription": "Coasty bygger den #1-rangerte AI-agenten for datamaskinbruk (82% OSWorld) med 1,000+ OAuth-sikrede app-integrasjoner (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) og leverer den eneste Ubegrensede datamaskinbruksplanen med fastpris på {unlimitedPriceLong}, billigere enn Devin Team, OpenAI Operator og kredittbegrensede konkurrenter. Vår plattform kombinerer datamaskinbruk, orkestrering av flere agenter, native integrasjoner og VM-nivå isolering i ett produkt.",
+      "productDescription": "AI-datamaskinbruksagent som styrer et skrivebord som et menneske OG kobler seg native til 1,000+ apper (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 på OSWorld benchmark (82%). {unlimitedPrice} Ubegrenset er den billigste Ubegrensede datamaskinbruksplanen med fastpris som finnes. Autonom nettleser-, skrivebords-, e-post-, skjemautfyllings- og regnearkautomatisering med VM-nivå isolering.",
+      "websiteDescription": "#1 AI-agentplattform for datamaskinbruk (82% OSWorld) med 1,000+ native integrasjoner (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) og den billigste Ubegrensede planen med fastpris på {unlimitedPriceLong}. Autonom nettleser-, skrivebords- og terminalautomatisering med VM-isolering. Fra {starterPrice} Starter eller {unlimitedPrice} Ubegrenset.",
+      "softwareDescription": "AI-datamaskinbruksagent som styrer et helt skrivebord som et menneske og leverer 1,000+ OAuth-sikrede app-integrasjoner (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, pluss 990+ flere). #1 på OSWorld med 82% fullføringsrate over 369 virkelige oppgaver. {unlimitedPriceLong} Ubegrenset-planen er den billigste Ubegrensede datamaskinbruksplanen med fastpris på markedet. Nettleser-, skrivebords-, terminal-, e-post-, skjema- og regnearkautomatisering i én agent.",
       "breadcrumbs": {
         "home": "Hjem",
         "caseStudies": "AI-agent casestudier",
@@ -2413,6 +2422,13 @@
         "download": "Last ned skrivebordsappen",
         "compare": "Sammenlign AI-agenter"
       }
+    },
+    "connections": {
+      "title": "Tilkoblinger",
+      "description": "Koble til Gmail, Slack, Notion, GitHub og hundrevis av andre apper. Tilgjengelig i hver chat.",
+      "ogTitle": "Tilkoblinger — Koble 250+ apper til Coasty AI-agenten din",
+      "ogDescription": "Ta med Gmail, Slack, GitHub, Notion, Google Calendar, Linear og hundrevis av andre apper inn i hver chat. Sikret med OAuth, alltid på, brukt av Coasty-agenter på dine vegne.",
+      "twitterDescription": "Koble Gmail, Slack, GitHub, Notion og 250+ apper til Coasty. Én OAuth, brukt i hver chat av agenten din."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Henvisning",
         "description": "Inviter venner og tjen kreditter"
+      },
+      "integrations": {
+        "label": "Integrasjoner",
+        "description": "Koble til tredjepartsapper"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Henvisninger",
       "description": "Del Coasty. Tjen sammen."
+    },
+    "connections": {
+      "title": "Dine tilkoblinger",
+      "description": "Henter de tilkoblede appene og verktøyene dine."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 under overføring",
     "trustAtRest": "AES-256-GCM i hvile",
     "trustNoTraining": "Ingen trening på dataene dine"
+  },
+  "connections": {
+    "page": {
+      "title": "Tilkoblinger",
+      "description": "Koble til Gmail, Slack, Notion, GitHub og hundrevis av andre apper. Tilgjengelig i hver chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Tilkoblet",
+      "initiated": "Kobler til",
+      "expired": "Utløpt",
+      "failed": "Tilbakekalt",
+      "failedShort": "Mislyktes",
+      "inactive": "Inaktiv"
+    },
+    "toasts": {
+      "disconnectFailed": "Kunne ikke koble fra",
+      "disconnected": "Koblet fra {appName}",
+      "reconnectFailed": "Kunne ikke starte ny tilkobling",
+      "connected": "Koblet til {app}",
+      "error": "Noe gikk galt. Prøv igjen."
+    },
+    "card": {
+      "logoAlt": "{appName}-logo",
+      "fallbackAccountLabel": "Tilkoblet",
+      "connectedOn": "Tilkoblet {date}",
+      "lastUsed": "Sist brukt {time}",
+      "actions": {
+        "reconnect": "Koble til",
+        "disconnect": "Koble fra",
+        "menuAriaLabel": "Tilkoblingshandlinger"
+      },
+      "error": {
+        "expired": "Autorisasjonen er utløpt. Koble til på nytt for å gjenopprette verktøytilgang.",
+        "revoked": "Tilkoblingen er tilbakekalt. Koble til på nytt for å gjenopprette verktøytilgang."
+      },
+      "disconnectDialog": {
+        "title": "Koble fra {appName}?",
+        "connectedOn": "tilkoblet {date}",
+        "consequence": {
+          "revokeOauth": "Composio vil tilbakekalle OAuth-tilgangen",
+          "toolsStop": "Verktøy som bruker denne tilkoblingen, vil slutte å fungere"
+        },
+        "confirm": "Koble fra",
+        "cancel": "Behold tilkobling"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name}-logo",
+      "headline": "Koble til din første app",
+      "subheadline": "Autoriser én gang, så kan AI-en din lese e-post, poste i Slack, oppdatere dokumenter og mer, automatisk, i hver chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Verktøy i hver chat",
+          "desc": "Når de er tilkoblet, bruker AI-en din dem automatisk."
+        },
+        "secureOauth": {
+          "title": "Sikker OAuth",
+          "desc": "Autoriser én gang, tilbakekall når du vil."
+        },
+        "hundredsOfApps": {
+          "title": "Hundrevis av apper",
+          "desc": "E-post, kalendere, CRM-er, dokumenter, kode og mer."
+        }
+      },
+      "browseAppsCta": "Bla gjennom apper"
+    },
+    "connectDialog": {
+      "title": "Koble til en app",
+      "description": "Bla gjennom hundrevis av integrasjoner drevet av Composio.",
+      "searchPlaceholder": "Søk i apper…",
+      "clearSearchAria": "Tøm søk",
+      "categories": {
+        "all": "Alle",
+        "communication": "Kommunikasjon",
+        "productivity": "Produktivitet",
+        "calendar": "Kalender",
+        "developer": "Utvikler",
+        "crmSales": "CRM og salg"
+      },
+      "sections": {
+        "featured": "Anbefalt",
+        "allApps": "Alle apper"
+      },
+      "card": {
+        "logoAlt": "{name}-logo",
+        "alreadyConnectedTooltip": "Allerede tilkoblet. Administrer fra Tilkoblinger-siden",
+        "connectedLabel": "Tilkoblet",
+        "connectFallbackDescription": "Koble {name} til AI-en din"
+      },
+      "footer": {
+        "poweredBy": "drevet av Composio",
+        "cancel": "Avbryt"
+      },
+      "empty": {
+        "noMatchTitle": "Ingen apper matcher \"{query}\"",
+        "noAppsTitle": "Ingen apper tilgjengelig",
+        "noMatchBody": "Prøv et kortere søkeord eller en annen kategori.",
+        "noAppsBody": "Composio-integrasjoner vil vises her når de er konfigurert."
+      },
+      "errors": {
+        "failedToStart": "Kunne ikke starte tilkobling"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Koble til med Composio",
+          "connectWithApiKey": "Lagre og koble til",
+          "connectWithBearerToken": "Lagre og koble til",
+          "connectWithBasic": "Lagre og koble til",
+          "connectNoAuth": "Aktiver",
+          "connecting": "Kobler til..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-nøkkel",
+          "apiKeyPlaceholder": "Lim inn API-nøkkelen din",
+          "bearerTokenLabel": "Bearer-token",
+          "bearerTokenPlaceholder": "Lim inn bearer-tokenet ditt",
+          "basicAuthUsername": "Brukernavn",
+          "basicAuthPassword": "Passord",
+          "basicAuthUsernamePlaceholder": "Kontoens brukernavn",
+          "basicAuthPasswordPlaceholder": "Kontoens passord",
+          "revealSecret": "Vis",
+          "hideSecret": "Skjul"
+        },
+        "noAuthHint": "{name} krever ingen påloggingsinformasjon. Klikk på Aktiver for å legge det til arbeidsområdet ditt.",
+        "apiKeyHelp": "Hvor finner jeg dette?",
+        "connectedToast": "Koblet til {name}",
+        "unsupported": {
+          "title": "Denne tilkoblingstypen støttes ikke ennå",
+          "body": "{name} bruker en {scheme}-autentiseringsflyt vi ennå ikke har koblet opp i appen. Du kan koble den til direkte i Composio-dashbordet, og den vil vises her når den er koblet til.",
+          "openComposioDashboard": "Åpne Composio-dashbord"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Koble fra {name}",
+      "disconnect": "Koble fra"
+    },
+    "empty": {
+      "title": "Ingen apper tilkoblet",
+      "description": "Koble til Gmail, Slack, Notion og mer, så Coasty kan bruke dem i enhver chat."
+    },
+    "toolInvocation": {
+      "calling": "Kaller {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Tilkoblingen til {appName} er utløpt.",
+      "reconnectLink": "Koble til →"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Kunne ikke laste tilkoblinger (HTTP {status})",
+      "loadToolkitsFailed": "Kunne ikke laste verktøysett (HTTP {status})",
+      "startConnectionFailed": "Kunne ikke starte tilkobling (HTTP {status})",
+      "disconnectFailedHttp": "Kunne ikke koble fra (HTTP {status})",
+      "credentialsRequired": "Fyll inn alle påkrevde felt for å fortsette.",
+      "credentialsErrorPrefix": "Tilkobling mislyktes:",
+      "unknownToolkit": "Vi gjenkjenner ikke denne appen. Oppdater katalogen og prøv igjen.",
+      "unsupportedAuthScheme": "Denne autentiseringsmetoden støttes ikke ennå i appen.",
+      "missingCredentials": "Manglende påkrevde felt: {fields}",
+      "invalidCredentials": "Påloggingsinformasjonen ble avvist. Sjekk den og prøv igjen.",
+      "credentialValidationFailed": "Kunne ikke validere påloggingsinformasjonen din. Prøv igjen.",
+      "apiKeyRequired": "En API-nøkkel er påkrevd.",
+      "tokenRequired": "Et bearer-token er påkrevd.",
+      "basicRequired": "Brukernavn og passord er påkrevd."
+    },
+    "title": "Tilkoblinger",
+    "subtitle": "Koble til appene Coasty kan bruke på dine vegne i en hvilken som helst chat.",
+    "connectedSuffix": "tilkoblet",
+    "refresh": "Oppdater",
+    "newConnection": "Ny tilkobling",
+    "retry": "Prøv igjen",
+    "noFilteredConnections": "Ingen {filter}-apper enda",
+    "noFilteredDescription": "Prøv et annet filter, eller koble til en ny app for å komme i gang.",
+    "filters": {
+      "all": "Alle",
+      "active": "Aktive",
+      "connecting": "Kobler til",
+      "expired": "Utløpt",
+      "failed": "Mislyktes"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Tilkoblede apper",
+      "subheading": "Coasty kan bruke disse appene på dine vegne i enhver chat.",
+      "connectNewApp": "Koble til ny app",
+      "manageOnFullPage": "Administrer på fullside"
+    }
   }
 }

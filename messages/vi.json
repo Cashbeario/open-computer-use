@@ -868,6 +868,11 @@
       "npsVeryLikely": "Rất có khả năng",
       "thanks": "Cảm ơn phản hồi",
       "creditsLabel": "tín dụng"
+    },
+    "composioReauth": {
+      "fallbackAppName": "Ứng dụng",
+      "expiredMessage": "Kết nối {appName} của bạn đã hết hạn.",
+      "reconnectLink": "Kết nối lại"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "trong {count} phut",
     "inHours": "trong {count} gio",
     "today": "hom nay",
-    "yesterday": "hom qua"
+    "yesterday": "hom qua",
+    "connections": "Ứng dụng",
+    "resources": "Tác tử"
   },
   "appHeader": {
     "login": "Dang nhap",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - Trợ lý AI sử dụng máy tính số 1 | Tốt nhất cho tự động hóa máy tính và trình duyệt",
       "titleTemplate": "{title} | Coasty - Trợ lý AI sử dụng máy tính",
-      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 — 82% trên OSWorld benchmark — và là gói Không giới hạn trọn gói duy nhất trên thị trường với {unlimitedPrice} (rẻ hơn Devin Team $500+ACU, OpenAI Operator $200 bị giới hạn tốc độ, và các đối thủ bị giới hạn tín dụng). Điều khiển toàn bộ máy tính như con người: trình duyệt, biểu mẫu, email, bảng tính. Cách ly cấp VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "description": "Coasty là trợ lý AI sử dụng máy tính xếp hạng số 1 (82% trên OSWorld) và là nền tảng sử dụng máy tính duy nhất với hơn 1,000+ tích hợp ứng dụng gốc — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify cùng 990+ ứng dụng khác — có thể gọi trong mọi cuộc trò chuyện. Gói Không giới hạn trọn gói {unlimitedPriceLong} (rẻ hơn Devin Team $500+ACU và OpenAI Operator $200 bị giới hạn tốc độ). Điều khiển toàn bộ máy tính như con người, với cách ly cấp VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
       "ogTitle": "Coasty — 82% OSWorld + Không giới hạn {unlimitedPrice} (Trợ lý sử dụng máy tính rẻ nhất)",
-      "ogDescription": "Số 1 trên OSWorld (82%). Không giới hạn trọn gói {unlimitedPrice} — rẻ hơn Devin Team ($500+ACU) ở điểm benchmark cao hơn. Tự động hóa trình duyệt, máy tính, terminal. Cách ly VM mỗi phiên. Ứng dụng native đa nền tảng + REST API + MCP server.",
-      "twitterDescription": "Trợ lý AI vận hành máy tính thật. 82% OSWorld (số 1). Không giới hạn {unlimitedPrice} — gói trọn gói rẻ nhất trong danh mục. Starter từ {starterPrice}. Cách ly VM + MCP server 26 công cụ."
+      "ogDescription": "Số 1 trên OSWorld (82%) + hơn 1,000+ tích hợp (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + Không giới hạn trọn gói {unlimitedPrice}. Nền tảng sử dụng máy tính duy nhất với danh mục tích hợp thực sự. Cách ly VM, ứng dụng native đa nền tảng, REST API, MCP server.",
+      "twitterDescription": "Trợ lý AI vận hành máy tính thật VÀ kết nối với hơn 1,000+ ứng dụng (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (số 1). Không giới hạn {unlimitedPrice} — gói trọn gói rẻ nhất trong danh mục. Starter từ {starterPrice}."
     },
     "compare": {
       "title": "So sánh Coasty - Các giải pháp thay thế trợ lý AI và so sánh đối thủ",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Bảng giá — Gói và giá trợ lý AI Coasty",
-      "description": "Bảng giá Coasty: Starter {starterPrice} (200 tín dụng) hoặc Không giới hạn {unlimitedPrice} (gói Không giới hạn trọn gói rẻ nhất trên thị trường — rẻ hơn Devin Team $500+ACU, Genspark Pro $249 bị giới hạn tín dụng, và Manus Extended $200 bị giới hạn). Thay thế trợ lý ảo con người $3,000+/mo. Không có phí ẩn.",
+      "description": "Bảng giá Coasty: Starter {starterPrice} (200 tín dụng) hoặc Không giới hạn {unlimitedPrice} — gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường (rẻ hơn Devin Team $500+ACU, Genspark Pro $249 bị giới hạn tín dụng, Manus Extended $200 bị giới hạn). Mọi gói đều bao gồm hơn 1,000+ tích hợp ứng dụng gốc (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify cùng 990+ ứng dụng khác) và thay thế trợ lý ảo con người trị giá $3,000+/mo. Không có phí ẩn.",
       "ogTitle": "Bảng giá Coasty — {starterPrice} Starter, {unlimitedPrice} Không giới hạn",
       "ogDescription": "Không giới hạn trọn gói {unlimitedPrice} — gói sử dụng máy tính không giới hạn rẻ nhất trên thị trường. Hoặc Starter {starterPrice} cho cá nhân. Tiết kiệm $36k/năm so với VA con người."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Coasty so với OpenAI Operator như thế nào?",
       "a9": "Coasty vượt trội hơn OpenAI Operator trên OSWorld benchmark (82% so với ~40%), cung cấp cách ly VM thực sự cho mỗi phiên, hỗ trợ nhiều mô hình AI, điều khiển máy tính đầy đủ không chỉ trình duyệt và là framework mã nguồn mở.",
       "q10": "Coasty có giải được CAPTCHA không?",
-      "a10": "Có. Coasty có hệ thống giải CAPTCHA tích hợp, nên không bị chặn như các trợ lý AI cạnh tranh. Điều này rất quan trọng cho tự động hóa thực tế khi CAPTCHA phổ biến trên các trang web."
+      "a10": "Có. Coasty có hệ thống giải CAPTCHA tích hợp, nên không bị chặn như các trợ lý AI cạnh tranh. Điều này rất quan trọng cho tự động hóa thực tế khi CAPTCHA phổ biến trên các trang web.",
+      "q11": "Coasty tích hợp với những ứng dụng và dịch vụ nào?",
+      "a11": "Coasty kết nối với hơn 1,000+ ứng dụng thông qua lớp tích hợp Composio tích hợp sẵn, bao gồm Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase và Twilio. Kết nối bất kỳ ứng dụng nào một lần bằng OAuth trong phần Cài đặt, sau đó Coasty sử dụng nó trong mọi cuộc trò chuyện thay bạn — không mật khẩu nào tới tay trợ lý. Khi một ứng dụng có API, Coasty gọi trực tiếp để đạt độ trễ dưới một giây. Khi không có (SAP GUI, LinkedIn Sales Navigator, cổng ngân hàng cũ, công cụ quản trị nội bộ), cùng trợ lý đó điều khiển giao diện bằng tính năng sử dụng máy tính. Coasty là nền tảng sử dụng máy tính duy nhất cung cấp cả hai bề mặt — danh mục tích hợp ưu tiên API VÀ điều khiển máy tính cấp hệ điều hành — trong một trợ lý."
     },
     "structuredData": {
-      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1 và gói Không giới hạn trọn gói rẻ nhất trên thị trường với {unlimitedPriceLong}. Coasty điều khiển toàn bộ máy tính như con người — mở trình duyệt, nhấp chuột, gõ phím, điền biểu mẫu, gửi email và quản lý bảng tính tự động. 82% trên OSWorld benchmark qua 369 tác vụ thực tế. Cách ly cấp VM thực sự mỗi phiên. Giải CAPTCHA tích hợp. Gói: {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
-      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) và phát hành gói Không giới hạn trọn gói duy nhất ở mức {unlimitedPriceLong} — rẻ hơn Devin Team, OpenAI Operator và các đối thủ bị giới hạn tín dụng ở cùng phân khúc giá. Nền tảng của chúng tôi cung cấp điều khiển máy tính tự động, tự động hóa trình duyệt và điều phối đa trợ lý với cách ly cấp VM thực sự.",
-      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người. Số 1 trên OSWorld benchmark (82%). Gói Không giới hạn {unlimitedPrice} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có. Tự động hóa trình duyệt, điều khiển máy tính, gửi email, điền biểu mẫu và quản lý bảng tính tự động với cách ly cấp VM thực sự.",
-      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1 — 82% OSWorld benchmark và gói Không giới hạn trọn gói rẻ nhất ở mức {unlimitedPriceLong}. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
-      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người. Số 1 trên OSWorld benchmark với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Gói Không giới hạn {unlimitedPriceLong} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường. Tự động hóa trình duyệt, điều khiển máy tính, thao tác terminal, gửi email, điền biểu mẫu và quản lý bảng tính.",
+      "appDescription": "Trợ lý AI sử dụng máy tính xếp hạng số 1 và là nền tảng sử dụng máy tính duy nhất với hơn 1,000+ tích hợp ứng dụng gốc (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify cùng 990+ ứng dụng khác). 82% trên OSWorld qua 369 tác vụ thực tế. Gói Không giới hạn trọn gói rẻ nhất trên thị trường ở mức {unlimitedPriceLong}. Điều khiển toàn bộ máy tính như con người, cách ly cấp VM thực sự mỗi phiên, giải CAPTCHA tích hợp. Gói: {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "orgDescription": "Coasty xây dựng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) với hơn 1,000+ tích hợp ứng dụng được bảo mật bằng OAuth (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) và phát hành gói Không giới hạn trọn gói duy nhất ở mức {unlimitedPriceLong} — rẻ hơn Devin Team, OpenAI Operator và các đối thủ bị giới hạn tín dụng. Nền tảng của chúng tôi kết hợp sử dụng máy tính, điều phối đa trợ lý, tích hợp gốc và cách ly cấp VM trong một sản phẩm.",
+      "productDescription": "Trợ lý AI sử dụng máy tính điều khiển máy tính như con người VÀ kết nối gốc với hơn 1,000+ ứng dụng (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). Số 1 trên OSWorld benchmark (82%). Gói Không giới hạn {unlimitedPrice} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất hiện có. Tự động hóa trình duyệt, máy tính, gửi email, điền biểu mẫu và quản lý bảng tính tự động với cách ly cấp VM.",
+      "websiteDescription": "Nền tảng trợ lý AI sử dụng máy tính số 1 (82% OSWorld) với hơn 1,000+ tích hợp gốc (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) và gói Không giới hạn trọn gói rẻ nhất ở mức {unlimitedPriceLong}. Tự động hóa trình duyệt, máy tính và terminal với cách ly VM. Từ {starterPrice} Starter hoặc {unlimitedPrice} Không giới hạn.",
+      "softwareDescription": "Trợ lý AI sử dụng máy tính điều khiển toàn bộ máy tính như con người và phát hành hơn 1,000+ tích hợp ứng dụng được bảo mật bằng OAuth (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify cùng 990+ ứng dụng khác). Số 1 trên OSWorld với tỷ lệ hoàn thành 82% trên 369 tác vụ thực tế. Gói Không giới hạn {unlimitedPriceLong} là gói sử dụng máy tính không giới hạn trọn gói rẻ nhất trên thị trường. Tự động hóa trình duyệt, máy tính, terminal, email, biểu mẫu và bảng tính trong một trợ lý.",
       "breadcrumbs": {
         "home": "Trang chủ",
         "caseStudies": "Nghiên cứu tình huống trợ lý AI",
@@ -2413,6 +2422,13 @@
         "download": "Tải ứng dụng máy tính",
         "compare": "So sánh trợ lý AI"
       }
+    },
+    "connections": {
+      "title": "Kết nối",
+      "description": "Kết nối Gmail, Slack, Notion, GitHub và hàng trăm ứng dụng khác. Sẵn sàng trong mọi cuộc trò chuyện.",
+      "ogTitle": "Kết nối — 250+ ứng dụng với trợ lý AI Coasty",
+      "ogDescription": "Đưa Gmail, Slack, GitHub, Notion, Google Calendar, Linear và hàng trăm ứng dụng khác vào mọi cuộc trò chuyện. Bảo mật bằng OAuth, luôn sẵn sàng, được agent Coasty sử dụng thay bạn.",
+      "twitterDescription": "Kết nối Gmail, Slack, GitHub, Notion và hơn 250 ứng dụng vào Coasty. Một lần OAuth, agent dùng trong mọi cuộc trò chuyện."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Giới thiệu",
         "description": "Mời bạn bè và nhận tín dụng"
+      },
+      "integrations": {
+        "label": "Tích hợp",
+        "description": "Kết nối ứng dụng bên thứ ba"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Giới thiệu",
       "description": "Chia sẻ Coasty. Cùng kiếm tiền."
+    },
+    "connections": {
+      "title": "Kết nối của bạn",
+      "description": "Đang lấy các ứng dụng và bộ công cụ đã kết nối."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 khi truyền",
     "trustAtRest": "AES-256-GCM khi lưu trữ",
     "trustNoTraining": "Không huấn luyện trên dữ liệu của bạn"
+  },
+  "connections": {
+    "page": {
+      "title": "Kết nối",
+      "description": "Kết nối Gmail, Slack, Notion, GitHub và hàng trăm ứng dụng khác. Sẵn sàng trong mọi cuộc trò chuyện."
+    },
+    "fallbackAppName": "ứng dụng",
+    "status": {
+      "active": "Đã kết nối",
+      "initiated": "Đang kết nối",
+      "expired": "Đã hết hạn",
+      "failed": "Đã thu hồi",
+      "failedShort": "Thất bại",
+      "inactive": "Ngừng"
+    },
+    "toasts": {
+      "disconnectFailed": "Không thể ngắt kết nối",
+      "disconnected": "Đã ngắt kết nối {appName}",
+      "reconnectFailed": "Không thể bắt đầu kết nối lại",
+      "connected": "Đã kết nối {app}",
+      "error": "Có lỗi xảy ra. Vui lòng thử lại."
+    },
+    "card": {
+      "logoAlt": "Biểu trưng {appName}",
+      "fallbackAccountLabel": "Đã kết nối",
+      "connectedOn": "Kết nối vào {date}",
+      "lastUsed": "Sử dụng lần cuối {time}",
+      "actions": {
+        "reconnect": "Kết nối lại",
+        "disconnect": "Ngắt kết nối",
+        "menuAriaLabel": "Tác vụ kết nối"
+      },
+      "error": {
+        "expired": "Phân quyền đã hết hạn. Kết nối lại để khôi phục quyền truy cập công cụ.",
+        "revoked": "Kết nối đã bị thu hồi. Kết nối lại để khôi phục quyền truy cập công cụ."
+      },
+      "disconnectDialog": {
+        "title": "Ngắt kết nối {appName}?",
+        "connectedOn": "kết nối {date}",
+        "consequence": {
+          "revokeOauth": "Composio sẽ thu hồi quyền OAuth",
+          "toolsStop": "Các công cụ dùng kết nối này sẽ ngừng hoạt động"
+        },
+        "confirm": "Ngắt kết nối",
+        "cancel": "Giữ kết nối"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Biểu trưng {name}",
+      "headline": "Kết nối ứng dụng đầu tiên của bạn",
+      "subheadline": "Phân quyền một lần và AI có thể đọc email, đăng bài lên Slack, cập nhật tài liệu và nhiều hơn nữa, tự động trong mọi cuộc trò chuyện.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Công cụ trong mọi cuộc trò chuyện",
+          "desc": "Sau khi kết nối, AI sẽ dùng chúng một cách tự động."
+        },
+        "secureOauth": {
+          "title": "OAuth an toàn",
+          "desc": "Phân quyền một lần, thu hồi bất cứ lúc nào."
+        },
+        "hundredsOfApps": {
+          "title": "Hàng trăm ứng dụng",
+          "desc": "Email, lịch, CRM, tài liệu, mã nguồn và nhiều hơn nữa."
+        }
+      },
+      "browseAppsCta": "Duyệt ứng dụng"
+    },
+    "connectDialog": {
+      "title": "Kết nối một ứng dụng",
+      "description": "Duyệt hàng trăm tích hợp được cung cấp bởi Composio.",
+      "searchPlaceholder": "Tìm ứng dụng…",
+      "clearSearchAria": "Xóa tìm kiếm",
+      "categories": {
+        "all": "Tất cả",
+        "communication": "Giao tiếp",
+        "productivity": "Năng suất",
+        "calendar": "Lịch",
+        "developer": "Lập trình",
+        "crmSales": "CRM & Bán hàng"
+      },
+      "sections": {
+        "featured": "Nổi bật",
+        "allApps": "Tất cả ứng dụng"
+      },
+      "card": {
+        "logoAlt": "Biểu trưng {name}",
+        "alreadyConnectedTooltip": "Đã kết nối. Quản lý từ trang Kết nối",
+        "connectedLabel": "Đã kết nối",
+        "connectFallbackDescription": "Kết nối {name} với AI của bạn"
+      },
+      "footer": {
+        "poweredBy": "cung cấp bởi Composio",
+        "cancel": "Hủy"
+      },
+      "empty": {
+        "noMatchTitle": "Không có ứng dụng nào khớp \"{query}\"",
+        "noAppsTitle": "Không có ứng dụng nào",
+        "noMatchBody": "Thử từ khóa ngắn hơn hoặc một danh mục khác.",
+        "noAppsBody": "Các tích hợp Composio sẽ xuất hiện ở đây sau khi được cấu hình."
+      },
+      "errors": {
+        "failedToStart": "Không thể bắt đầu kết nối"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Kết nối với Composio",
+          "connectWithApiKey": "Lưu và kết nối",
+          "connectWithBearerToken": "Lưu và kết nối",
+          "connectWithBasic": "Lưu và kết nối",
+          "connectNoAuth": "Bật",
+          "connecting": "Đang kết nối..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "Khóa API",
+          "apiKeyPlaceholder": "Dán khóa API của bạn",
+          "bearerTokenLabel": "Mã thông báo Bearer",
+          "bearerTokenPlaceholder": "Dán mã thông báo Bearer của bạn",
+          "basicAuthUsername": "Tên người dùng",
+          "basicAuthPassword": "Mật khẩu",
+          "basicAuthUsernamePlaceholder": "Tên người dùng tài khoản của bạn",
+          "basicAuthPasswordPlaceholder": "Mật khẩu tài khoản của bạn",
+          "revealSecret": "Hiện",
+          "hideSecret": "Ẩn"
+        },
+        "noAuthHint": "{name} không yêu cầu thông tin xác thực. Nhấn Bật để thêm vào không gian làm việc của bạn.",
+        "apiKeyHelp": "Tôi có thể tìm cái này ở đâu?",
+        "connectedToast": "Đã kết nối với {name}",
+        "unsupported": {
+          "title": "Loại kết nối này chưa được hỗ trợ",
+          "body": "{name} sử dụng luồng xác thực {scheme} mà chúng tôi chưa tích hợp trong ứng dụng. Bạn có thể kết nối trực tiếp trên bảng điều khiển Composio và nó sẽ xuất hiện ở đây sau khi liên kết.",
+          "openComposioDashboard": "Mở bảng điều khiển Composio"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Ngắt kết nối {name}",
+      "disconnect": "Ngắt kết nối"
+    },
+    "empty": {
+      "title": "Chưa có ứng dụng nào được kết nối",
+      "description": "Kết nối Gmail, Slack, Notion và nhiều hơn nữa để Coasty có thể dùng chúng trong mọi cuộc trò chuyện."
+    },
+    "toolInvocation": {
+      "calling": "Đang gọi {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "Ứng dụng",
+      "expiredMessage": "Kết nối {appName} của bạn đã hết hạn.",
+      "reconnectLink": "Kết nối lại"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Không thể tải kết nối (HTTP {status})",
+      "loadToolkitsFailed": "Không thể tải bộ công cụ (HTTP {status})",
+      "startConnectionFailed": "Không thể bắt đầu kết nối (HTTP {status})",
+      "disconnectFailedHttp": "Không thể ngắt kết nối (HTTP {status})",
+      "credentialsRequired": "Vui lòng điền tất cả các trường bắt buộc để tiếp tục.",
+      "credentialsErrorPrefix": "Kết nối thất bại:",
+      "unknownToolkit": "Chúng tôi không nhận ra ứng dụng này. Làm mới danh mục và thử lại.",
+      "unsupportedAuthScheme": "Phương thức xác thực này chưa được hỗ trợ trong ứng dụng.",
+      "missingCredentials": "Thiếu các trường bắt buộc: {fields}",
+      "invalidCredentials": "Thông tin xác thực bị từ chối. Vui lòng kiểm tra lại và thử lại.",
+      "credentialValidationFailed": "Không thể xác thực thông tin của bạn. Vui lòng thử lại.",
+      "apiKeyRequired": "Cần có khóa API.",
+      "tokenRequired": "Cần có mã thông báo Bearer.",
+      "basicRequired": "Cần có tên người dùng và mật khẩu."
+    },
+    "title": "Kết nối",
+    "subtitle": "Kết nối các ứng dụng mà Coasty có thể sử dụng thay bạn trong mọi cuộc trò chuyện.",
+    "connectedSuffix": "đã kết nối",
+    "refresh": "Làm mới",
+    "newConnection": "Kết nối mới",
+    "retry": "Thử lại",
+    "noFilteredConnections": "Chưa có ứng dụng {filter} nào",
+    "noFilteredDescription": "Hãy thử bộ lọc khác hoặc kết nối ứng dụng mới để bắt đầu.",
+    "filters": {
+      "all": "Tất cả",
+      "active": "Hoạt động",
+      "connecting": "Đang kết nối",
+      "expired": "Hết hạn",
+      "failed": "Thất bại"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Ứng dụng đã kết nối",
+      "subheading": "Coasty có thể dùng các ứng dụng này thay bạn trong mọi cuộc trò chuyện.",
+      "connectNewApp": "Kết nối mới",
+      "manageOnFullPage": "Quản lý tất cả"
+    }
   }
 }

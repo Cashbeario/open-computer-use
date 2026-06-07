@@ -90,5 +90,9 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: await loadMessages(locale),
+    // Pin a deterministic timeZone so next-intl doesn't fall back to the
+    // server's local zone (which differs between Playwright's webServer
+    // and CI/dev environments and causes SSR/CSR markup mismatches).
+    timeZone: 'UTC',
   }
 })

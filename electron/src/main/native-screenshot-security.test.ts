@@ -9,7 +9,7 @@
  *   - The renderer should never be able to acquire the screen via getUserMedia
  *     or any other path that bypasses our hide-overlay-then-capture sequence.
  *   - Captured pixels should never be persisted to disk by default.
- *   - The overlay (and its rainbow border) must NOT appear in any screenshot.
+ *   - The overlay must NOT appear in any screenshot.
  *   - Hangs in the hide-step must not block the bridge forever.
  *   - On macOS without Screen Recording permission, capture must surface a
  *     diagnosable error rather than silently emit a blank/black image.
@@ -44,12 +44,6 @@ const h = vi.hoisted(() => {
     contentProtectionReliable: false,
   }
 
-  // Rainbow-border mock state — same overlap concern
-  const rb = {
-    hideCalled: 0,
-    showCalled: 0,
-  }
-
   // Native helper mock — null means it failed / unsupported
   const nativeState = {
     returnValue: null as { base64: string; resolution: string } | null,
@@ -73,15 +67,13 @@ const h = vi.hoisted(() => {
     wm.hideDelayMs = 0
     wm.overlayVisibleDuringCapture = false
     wm.contentProtectionReliable = false
-    rb.hideCalled = 0
-    rb.showCalled = 0
     nativeState.returnValue = null
     nativeState.callCount = 0
     jpegState.qualityArgs = []
     consoleBuffer.length = 0
   }
 
-  return { display, captureState, wm, rb, nativeState, jpegState, consoleBuffer, reset }
+  return { display, captureState, wm, nativeState, jpegState, consoleBuffer, reset }
 })
 
 // ── Mocks ──────────────────────────────────────────────────────────────
@@ -117,11 +109,6 @@ vi.mock('./window-manager', () => ({
     h.wm.overlayVisibleDuringCapture = true
   }),
   getMainWindow: () => null,
-}))
-
-vi.mock('./rainbow-border', () => ({
-  hideRainbowForScreenshot: vi.fn(() => { h.rb.hideCalled++ }),
-  showRainbowAfterScreenshot: vi.fn(() => { h.rb.showCalled++ }),
 }))
 
 vi.mock('./display-manager', () => ({
@@ -241,18 +228,16 @@ describe('capture surface — no alternatives to desktopCapturer/native helper',
 // ═══════════════════════════════════════════════════════════════════════
 
 describe('captureScreenshot — overlay hide & JPEG encode', () => {
-  it('hides overlay and rainbow before invoking desktopCapturer when content protection is unreliable', async () => {
+  it('hides overlay before invoking desktopCapturer when content protection is unreliable', async () => {
     h.wm.contentProtectionReliable = false
     h.captureState.sources = [makeMockSource({ width: 1920, height: 1080 })]
 
     await captureScreenshot()
 
     expect(h.wm.hideCalled).toBeGreaterThanOrEqual(1)
-    expect(h.rb.hideCalled).toBeGreaterThanOrEqual(1)
     expect(h.captureState.callCount).toBe(1)
     // Overlay was reshown after capture
     expect(h.wm.showCalled).toBe(1)
-    expect(h.rb.showCalled).toBe(1)
   })
 
   it('encodes the result as JPEG quality 70', async () => {
@@ -268,6 +253,7 @@ describe('captureScreenshot — overlay hide & JPEG encode', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
   })
 
@@ -275,6 +261,8 @@ describe('captureScreenshot — overlay hide & JPEG encode', () => {
     h.captureState.sources = [makeMockSource({ width: 1920, height: 1080 })]
     const result = await captureScreenshot()
 
+    expect(result.success).toBe(true)
+    if (!result.success) return
     expect(typeof result.screenshot).toBe('string')
     expect(result.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
     // No accidental file:// or absolute path leak
@@ -290,7 +278,6 @@ describe('captureScreenshot — overlay hide & JPEG encode', () => {
     await captureScreenshot()
 
     expect(h.wm.hideCalled).toBe(0)
-    expect(h.rb.hideCalled).toBe(0)
     expect(h.wm.showCalled).toBe(0)
   })
 })
@@ -305,6 +292,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(false)
+    if (result.success) return
     expect(String(result.error)).toMatch(/Empty screenshot/i)
     expect(String(result.error)).toMatch(/Screen Recording/i)
   })
@@ -313,6 +301,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     h.captureState.sources = []
     const result = await captureScreenshot()
     expect(result.success).toBe(false)
+    if (result.success) return
     expect(String(result.error)).toMatch(/No screen sources/i)
   })
 
@@ -322,7 +311,6 @@ describe('captureScreenshot — denied/blank capture handling', () => {
 
     expect(result.success).toBe(false)
     expect(h.wm.showCalled).toBe(1)
-    expect(h.rb.showCalled).toBe(1)
   })
 
   it('does not log raw screenshot bytes to console', async () => {
@@ -345,6 +333,7 @@ describe('captureScreenshot — denied/blank capture handling', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
   })
 })
@@ -386,6 +375,7 @@ describe('captureScreenshot — concurrent requests', () => {
 
     expect(a.success).toBe(true)
     expect(b.success).toBe(true)
+    if (!a.success || !b.success) return
     // Both must produce well-formed data URLs
     expect(a.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
     expect(b.screenshot.startsWith('data:image/jpeg;base64,')).toBe(true)
@@ -406,6 +396,7 @@ describe('captureScreenshot — fallback chain', () => {
     const result = await captureScreenshot()
 
     expect(result.success).toBe(true)
+    if (!result.success) return
     expect(result.resolution).toBe('1920x1080')
     // desktopCapturer must NOT be invoked when native succeeds
     expect(h.captureState.callCount).toBe(0)

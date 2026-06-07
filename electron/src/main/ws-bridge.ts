@@ -1,9 +1,9 @@
 import WebSocket from 'ws'
 import { BrowserWindow, screen } from 'electron'
+import { randomUUID } from 'node:crypto'
 import * as os from 'os'
 import { LocalExecutor } from './local-executor'
 import { ApprovalManager } from './approval-manager'
-import { showRainbowBorder, hideRainbowBorder, initRainbowBorder } from './rainbow-border'
 import { errorReporter, reportError } from './error-reporter'
 
 // 'error'      → transient connection error (TLS/DNS/5xx/network); keeps retrying
@@ -221,8 +221,6 @@ export class WebSocketBridge {
   private approvalManager: ApprovalManager
   // Remote approval tracking: approval_id → { resolve }
   private pendingRemoteApprovals = new Map<string, { resolve: (result: { approved: boolean; reason?: string }) => void }>()
-  // Rainbow border: on for the entire task, off on task_end / disconnect
-  private rainbowActive = false
   // When true, reject all incoming commands (user clicked Stop)
   private taskStopped = false
   /**
@@ -275,20 +273,6 @@ export class WebSocketBridge {
   /** Provide a callback to fetch a fresh token on reconnect. */
   setTokenProvider(fn: () => Promise<string | null>): void {
     this.getToken = fn
-  }
-
-  /** Turn on the rainbow aura for the duration of the task. */
-  private startRainbow(): void {
-    if (this.rainbowActive) return
-    this.rainbowActive = true
-    showRainbowBorder()
-  }
-
-  /** Turn off the rainbow (task_end / disconnect). */
-  private stopRainbow(): void {
-    if (!this.rainbowActive) return
-    this.rainbowActive = false
-    hideRainbowBorder()
   }
 
   /**
@@ -477,19 +461,15 @@ export class WebSocketBridge {
   }
 
   /**
-   * External task-active sync — driven by the renderer's `isStreaming`
-   * state via IPC. The backend's `task_end` WebSocket message is a
-   * fire-and-forget send and isn't always delivered (network blip,
-   * backend exception, missing is_electron flag, etc.), so we can't
-   * rely on it alone. The renderer is the source of truth: when its
-   * SSE stream finishes, this method ensures the rainbow follows.
-   * Both `startRainbow`/`stopRainbow` are guarded by `rainbowActive`,
-   * so this is idempotent and safe to interleave with the bridge's
-   * own task-end / disconnect handlers.
+   * External task-active sync — retained as a no-op. It used to drive the
+   * (now-removed) desktop rainbow window from the renderer's `isStreaming`
+   * edge via IPC. The running indicator is now the in-overlay smoke, which
+   * the renderer drives directly off `isStreaming`, so there is nothing to
+   * do here. The IPC hook (`bridge:set-task-active`) is kept wired for any
+   * future task-active use.
    */
-  setTaskActive(active: boolean): void {
-    if (active) this.startRainbow()
-    else this.stopRainbow()
+  setTaskActive(_active: boolean): void {
+    /* no-op — desktop rainbow removed; smoke is renderer-driven */
   }
 
   /** Signal that the user stopped the current task. Tells the backend to
@@ -499,7 +479,6 @@ export class WebSocketBridge {
     if (this.taskStopped) return
     this.taskStopped = true
     this.send({ type: 'task_stop' })
-    this.stopRainbow()
     this.approvalManager.cancelAll()
     this.cancelAllRemoteApprovals()
     console.log('[WS Bridge] Task stopped by user')
@@ -606,7 +585,6 @@ export class WebSocketBridge {
             })
           } else if (this.approvalManager.shouldAutoApprove(command)) {
             console.log(`[WS Bridge] Auto-approved: ${command}`)
-            this.startRainbow()
             try {
               // Route through the serial queue — never call executor directly.
               // See comment on `commandQueue` for why this MUST be serialized.
@@ -623,7 +601,11 @@ export class WebSocketBridge {
 
             // Notify backend about the pending approval so the web/phone UI
             // can also show the prompt and respond remotely.
-            const approvalId = `approval_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+            // Use UUID v4 for the remote-approval correlation id — see the
+            // matching fix in approval-manager.ts. Date.now()+4-char random
+            // collapses to ~17 bits of entropy per millisecond and can
+            // collide; UUIDs are 122 bits and never collide in practice.
+            const approvalId = `approval_${randomUUID()}`
             this.send({
               type: 'approval_request',
               data: { id: approvalId, command, parameters },
@@ -643,7 +625,6 @@ export class WebSocketBridge {
 
             if (approved) {
               console.log(`[WS Bridge] Approved: ${command}`)
-              this.startRainbow()
               try {
                 // Route through the serial queue — never call executor directly.
                 const result = await this.executeSerially(command, parameters)
@@ -666,7 +647,6 @@ export class WebSocketBridge {
         } else if (message.type === 'task_end') {
           console.log('[WS Bridge] Task ended')
           this.taskStopped = false
-          this.stopRainbow()
         } else if (message.type === 'approval_response') {
           // Remote approval response from web/phone UI (forwarded by backend)
           const { id, approved, reason } = message.data || {}
@@ -679,8 +659,6 @@ export class WebSocketBridge {
           this.reconnectAttempts = 0
           this.setState('connected')
           this.startHeartbeat()
-          // Pre-create rainbow border so first show is instant
-          initRainbowBorder()
           // Wire the error reporter so future errors flow over THIS WS.
           // Identity propagates the user_id/machine_id into every report.
           errorReporter.setIdentity(this.machineId, this.userId)
@@ -822,7 +800,6 @@ export class WebSocketBridge {
       console.log(`[WS Bridge] Disconnected: ${code} ${reason}`)
       this.disarmConnectWatchdog()
       this.stopHeartbeat()
-      this.stopRainbow()
       // Cancel all pending approvals (local + remote) so promises don't hang
       this.approvalManager.cancelAll()
       this.cancelAllRemoteApprovals()
@@ -852,7 +829,6 @@ export class WebSocketBridge {
     this.intentionalClose = true
     this.disarmConnectWatchdog()
     this.stopHeartbeat()
-    this.stopRainbow()
     this.clearReconnectTimer()
     this.approvalManager.cancelAll()
     this.cancelAllRemoteApprovals()

@@ -84,6 +84,17 @@ certificate_arn = ""
 # -----------------------------------------------------------------------------
 
 frontend_env_vars = {
+  # REQUIRED for any non-localhost deploy: public origin used to build OAuth
+  # callback URLs (Composio, Supabase) and other absolute redirects. The
+  # frontend container binds to HOSTNAME=0.0.0.0:3000 (see Dockerfile +
+  # infra/aws/ecs.tf) so without this, server-side `new URL(req.url).origin`
+  # resolves to `http://0.0.0.0:3000`, which leaks into OAuth redirect URIs
+  # and into the post-OAuth 307 the user sees in their browser bar
+  # (e.g. `https://0.0.0.0:3000/connections?connected=outlook`). The
+  # `lib/origin.ts` helper has an `APP_DOMAIN` (`https://coasty.ai`) safety
+  # net that catches this in production, but setting this var explicitly is
+  # the right long-term fix.
+  NEXT_PUBLIC_APP_URL        = "https://your-public-domain.com"
   ENCRYPTION_KEY             = "your-encryption-key"
   CSRF_SECRET                = "your-csrf-secret"
   NEXT_PUBLIC_SUPABASE_URL   = "https://xxxxx.supabase.co"

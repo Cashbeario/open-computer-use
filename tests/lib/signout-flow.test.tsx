@@ -16,14 +16,22 @@
  * What we now guarantee
  * ---------------------
  * 1. `useUser().signOut()` calls `signOutUser()` (Supabase auth signOut),
- *    fires the analytics signal, clears React state, kicks off the
- *    IndexedDB cleanup, AND triggers a hard navigation to `/`.
- * 2. The hard navigation is `window.location.replace("/")` — not `assign`
+ *    fires the analytics signal, kicks off the IndexedDB cleanup, AND
+ *    triggers a hard navigation to `/`.
+ * 2. We DELIBERATELY do NOT clear the React `user` state in the happy
+ *    path. The hard reload below wipes the entire tree, and clearing
+ *    state in-place re-renders protected descendants with `user=null`
+ *    in the brief window before the navigation lands — anything that
+ *    assumes `user` is non-null then crashes mid-render, which mounts
+ *    Next.js's app/error.tsx as a full-page "Something went wrong"
+ *    flash. (Reported symptom: "click logout → see error message →
+ *    redirect to landing.")
+ * 3. The hard navigation is `window.location.replace("/")` — not `assign`
  *    — so the protected URL is wiped from history and the user can't
  *    press Back into a now-broken authenticated route.
- * 3. If `signOutUser()` returns `false` (Supabase unavailable / network),
+ * 4. If `signOutUser()` returns `false` (Supabase unavailable / network),
  *    we DON'T navigate or wipe state — the user can retry.
- * 4. The IndexedDB cleanup is fire-and-forget (no await) so a stale tab
+ * 5. The IndexedDB cleanup is fire-and-forget (no await) so a stale tab
  *    without IDB access doesn't block sign-out.
  *
  * The test mocks Supabase, IndexedDB, and PostHog so the suite stays
@@ -165,11 +173,20 @@ describe("useUser().signOut — happy path", () => {
     expect(resetUserMock).toHaveBeenCalledTimes(1)
   })
 
-  it("clears React state (user becomes null)", async () => {
+  it("leaves React user state untouched and lets the hard reload wipe it", async () => {
+    // We deliberately do NOT call setUser(null) in the happy sign-out path.
+    // If we did, every protected-tree descendant would re-render with
+    // user=null in the brief window before the hard reload lands; any of
+    // them that assumes user is non-null throws during that render, which
+    // mounts Next.js's app/error.tsx as a full-page "Something went wrong"
+    // UI for 50–300ms before the navigation completes. The hard reload
+    // discards the entire component tree anyway, so there's nothing to
+    // gain from re-rendering with user=null first. This test pins that
+    // invariant so a well-meaning refactor doesn't put setUser(null) back.
     const h = makeHarness()
     expect(h.getUser()).toMatchObject({ id: "u-test-1" })
     await act(async () => { await h.callSignOut() })
-    expect(h.getUser()).toBeNull()
+    expect(h.getUser()).toMatchObject({ id: "u-test-1" })
   })
 
   it("kicks off IndexedDB cleanup (fire-and-forget)", async () => {
@@ -219,8 +236,10 @@ describe("useUser().signOut — ordering guarantees", () => {
     expect(locationReplaceSpy).toHaveBeenCalledWith("/")
   })
 
-  it("React state is cleared before navigation fires", async () => {
-    // Same pattern — pause Supabase, observe state, resume.
+  it("does NOT clear React user state before navigation (avoids error-boundary flash)", async () => {
+    // Companion to the "leaves React user state untouched" happy-path test:
+    // pin the invariant under an explicit ordering harness so a regression
+    // that reintroduces `setUser(null)` is caught immediately.
     let signOutResolve: (v: boolean) => void = () => {}
     signOutUserMock.mockImplementationOnce(
       () => new Promise<boolean>((res) => { signOutResolve = res }),
@@ -238,8 +257,11 @@ describe("useUser().signOut — ordering guarantees", () => {
       signOutResolve(true)
       await signOutPromise!
     })
-    // After: user cleared, redirect fired.
-    expect(h.getUser()).toBeNull()
+    // After: redirect fired, but user state is INTENTIONALLY still set —
+    // the hard reload below will wipe the entire React tree, so we avoid
+    // a transient user=null re-render that could crash an authed-only
+    // descendant and trip app/error.tsx into a full-page flash.
+    expect(h.getUser()).toMatchObject({ id: "u-test-1" })
     expect(locationReplaceSpy).toHaveBeenCalledTimes(1)
   })
 })

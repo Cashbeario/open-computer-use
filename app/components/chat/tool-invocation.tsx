@@ -7,8 +7,15 @@ import {
   CaretDown,
   Monitor,
 } from "@phosphor-icons/react"
+import { AlertCircle, ArrowRight } from "lucide-react"
+import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { useProjectNavigator } from "@/lib/project-navigator-store/provider"
+import {
+  parseComposioToolName,
+  composioToolLabel,
+} from "@/lib/composio-store/tool-format"
 import { useState, useMemo, useEffect } from "react"
 
 interface ToolInvocationProps {
@@ -23,6 +30,8 @@ export function ToolInvocation({
   fullyRounded,
 }: ToolInvocationProps) {
   const { isOpen, setIsOpen } = useProjectNavigator()
+  const tConnections = useTranslations("connections")
+  const tChat = useTranslations("chat")
   const [previousScreenshot, setPreviousScreenshot] = useState<string | null>(null)
 
   // Check environment variable for showing additional info
@@ -57,6 +66,18 @@ export function ToolInvocation({
     // Browser tools
     if (toolName.toLowerCase().startsWith('browser')) {
       return isActive ? 'Navigating through web pages to gather information' : 'Successfully retrieved web content'
+    }
+
+    // Composio / connection tools — render the connected app + a humanized
+    // action ("Gmail · Send email"); never surface the raw name or "composio".
+    const composioParsed = parseComposioToolName(toolName)
+    if (composioParsed) {
+      return composioParsed.actionLabel
+        ? tConnections("toolInvocation.calling", {
+            toolkit: composioParsed.toolkitLabel,
+            action: composioParsed.actionLabel,
+          })
+        : composioParsed.toolkitLabel
     }
 
     // Terminal tools
@@ -213,8 +234,17 @@ export function ToolInvocation({
             target = 'VM action'
           }
           break
-        default:
-          target = toolName
+        default: {
+          // Composio / connection calls: show "Gmail · Send email", never the
+          // raw composio_* name.
+          const composioParsed = parseComposioToolName(toolName)
+          if (composioParsed) {
+            action = state === 'result' ? 'Used' : 'Using'
+            target = composioToolLabel(toolName) ?? composioParsed.toolkitLabel
+          } else {
+            target = toolName
+          }
+        }
       }
 
       // Check for results count
@@ -339,6 +369,23 @@ export function ToolInvocation({
       }, 50)
     }
   }, [latestScreenshot, previousScreenshot])
+
+  // Detect reauth_required state from any composio tool result
+  const reauthInfo = useMemo(() => {
+    for (let i = toolInvocationsData.length - 1; i >= 0; i--) {
+      const invocation = toolInvocationsData[i].toolInvocation as any
+      const reauthRequired =
+        invocation.state === "result" && invocation.result?.reauth_required
+      if (reauthRequired) {
+        const appSlug: string = invocation.result?.app_slug || invocation.result?.toolkit || ""
+        const appName = appSlug
+          ? appSlug.charAt(0).toUpperCase() + appSlug.slice(1).replace(/_/g, " ")
+          : tChat("composioReauth.fallbackAppName")
+        return { appSlug, appName }
+      }
+    }
+    return null
+  }, [toolInvocationsData, tChat])
 
   // Determine the thumbnail source and extra count for web search
   const thumbnailSrc = webSearchThumbnails?.[0] || latestScreenshot || null
@@ -520,6 +567,38 @@ export function ToolInvocation({
             </div>
           </div>
         </motion.button>
+
+        {/* Reauth required inline alert */}
+        {reauthInfo && (
+          <div
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5",
+              "border-t border-amber-500/20 bg-amber-500/10",
+              "text-amber-700 dark:text-amber-300"
+            )}
+            role="alert"
+            data-testid="tool-invocation-reauth-alert"
+          >
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <p className="text-xs flex-1 min-w-0">
+              {tChat("composioReauth.expiredMessage", { appName: reauthInfo.appName })}
+            </p>
+            <Link
+              href={`/connections?reconnect=${encodeURIComponent(reauthInfo.appSlug)}`}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "text-xs font-medium whitespace-nowrap inline-flex items-center",
+                "text-amber-700 dark:text-amber-300",
+                "hover:text-amber-800 dark:hover:text-amber-200",
+                "underline-offset-2 hover:underline"
+              )}
+              data-testid="tool-invocation-reauth-reconnect-link"
+            >
+              {tChat("composioReauth.reconnectLink")}
+              <ArrowRight className="rtl:rotate-180 ms-1 inline h-3.5 w-3.5" />
+            </Link>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )

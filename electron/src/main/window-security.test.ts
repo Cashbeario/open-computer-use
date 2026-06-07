@@ -3,7 +3,6 @@
  *
  * Validates the BrowserWindow webPreferences configured by:
  *   - electron/src/main/index.ts        (mainWindow — overlay)
- *   - electron/src/main/rainbow-border.ts (borderWindow — particle layer)
  *
  * Strategy: read the source as text and assert that dangerous flags either
  * don't appear or are pinned to safe values. This is intentionally a static
@@ -12,7 +11,6 @@
  *
  * Also covers:
  *   - display-manager: confirms display-info IPC doesn't leak serial / EDID
- *   - rainbow-border IPC: only on/off/flash semantics, no CSS injection
  *   - window:* IPC: positions/sizes are clamped before reaching the OS
  */
 
@@ -21,7 +19,6 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 
 const INDEX_TS = readFileSync(join(__dirname, 'index.ts'), 'utf8')
-const RAINBOW_TS = readFileSync(join(__dirname, 'rainbow-border.ts'), 'utf8')
 const WM_TS = readFileSync(join(__dirname, 'window-manager.ts'), 'utf8')
 const DM_TS = readFileSync(join(__dirname, 'display-manager.ts'), 'utf8')
 const IPC_TS = readFileSync(join(__dirname, 'ipc-handlers.ts'), 'utf8')
@@ -127,44 +124,6 @@ describe('main overlay BrowserWindow construction args (index.ts)', () => {
 })
 
 // ═══════════════════════════════════════════════════════════════════════
-// RAINBOW BORDER — separate BrowserWindow, also hardened
-// ═══════════════════════════════════════════════════════════════════════
-
-describe('rainbow-border BrowserWindow webPreferences', () => {
-  const blocks = extractWebPreferences(RAINBOW_TS)
-  const rb = blocks[0] || ''
-
-  it('locates the rainbow-border webPreferences block', () => {
-    expect(rb.length).toBeGreaterThan(0)
-  })
-
-  it('contextIsolation is true', () => {
-    expect(rb).toMatch(/contextIsolation\s*:\s*true/)
-  })
-
-  it('nodeIntegration is false', () => {
-    expect(rb).toMatch(/nodeIntegration\s*:\s*false/)
-  })
-
-  it('does not disable webSecurity', () => {
-    expect(rb).not.toMatch(/webSecurity\s*:\s*false/)
-  })
-
-  it('content is loaded as a data: URL with hand-authored HTML — no remote origin', () => {
-    expect(RAINBOW_TS).toMatch(/loadURL\(`data:text\/html/)
-  })
-
-  it('rainbow window is non-focusable + ignores mouse events (cannot steal input)', () => {
-    expect(RAINBOW_TS).toMatch(/focusable\s*:\s*false/)
-    expect(RAINBOW_TS).toMatch(/setIgnoreMouseEvents\(true\)/)
-  })
-
-  it('skipTaskbar is true (no taskbar entry to right-click)', () => {
-    expect(RAINBOW_TS).toMatch(/skipTaskbar\s*:\s*true/)
-  })
-})
-
-// ═══════════════════════════════════════════════════════════════════════
 // MENU + DEVTOOLS in production
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -186,14 +145,10 @@ describe('production hardening — menu + devtools', () => {
     }
     expect(true).toBe(true) // explicit pass when no openDevTools at all
   })
-
-  it('does not auto-open devtools on the rainbow window', () => {
-    expect(RAINBOW_TS).not.toMatch(/openDevTools/)
-  })
 })
 
 // ═══════════════════════════════════════════════════════════════════════
-// IPC SURFACE — window:* and rainbow:*
+// IPC SURFACE — window:*
 // ═══════════════════════════════════════════════════════════════════════
 
 describe('window:* IPC handlers — bounds clamping', () => {
@@ -225,49 +180,6 @@ describe('window:* IPC handlers — bounds clamping', () => {
 
   it('moveToDisplay clamps to the destination display work area', () => {
     expect(WM_TS).toMatch(/Clamp to work area/)
-  })
-})
-
-// ═══════════════════════════════════════════════════════════════════════
-// Rainbow-border IPC — no CSS injection
-// ═══════════════════════════════════════════════════════════════════════
-
-describe('rainbow-border IPC — bounded inputs, no CSS injection', () => {
-  it('only bridge:set-task-active controls rainbow visibility (boolean only)', () => {
-    expect(IPC_TS).toMatch(/['"]bridge:set-task-active['"]/)
-    // Boolean-coerced — the body should NOT splice arbitrary strings.
-    expect(IPC_TS).toMatch(/setTaskActive\(\s*!!active\s*\)/)
-  })
-
-  it('no IPC handler accepts arbitrary CSS for the rainbow', () => {
-    expect(INDEX_TS).not.toMatch(/['"]rainbow:set-style['"]/)
-    expect(INDEX_TS).not.toMatch(/['"]rainbow:set-css['"]/)
-    expect(IPC_TS).not.toMatch(/['"]rainbow:set-style['"]/)
-    expect(IPC_TS).not.toMatch(/['"]rainbow:set-css['"]/)
-  })
-
-  it('rainbow particle origin pushes pre-validated numeric coords (rounded to 1 decimal)', () => {
-    // pushOrigin in rainbow-border.ts uses cx.toFixed(1)/cy.toFixed(1) before
-    // splicing into executeJavaScript — prevents code injection via the coord
-    // path.
-    expect(RAINBOW_TS).toMatch(/setOrigin\(\$\{cx\.toFixed\(1\)\}, \$\{cy\.toFixed\(1\)\}\)/)
-  })
-
-  it('intensity executeJavaScript splices a JSON-stringified number, not raw input', () => {
-    // setIntensity uses JSON.stringify(opacityVal) — a number always serializes
-    // to a numeric literal; nothing string-quoted gets through to the canvas.
-    expect(RAINBOW_TS).toMatch(/setIntensity\(\$\{JSON\.stringify\(opacityVal\)\}\)/)
-  })
-
-  it('intensity values are 0.15 (ambient) or 1.0 (full) — bounded enum', () => {
-    expect(RAINBOW_TS).toMatch(/intensity === 'ambient' \? 0\.15 : 1\.0/)
-  })
-
-  it('renderer-side window.setOrigin only stores coords; does not eval/exec strings', () => {
-    expect(RAINBOW_TS).toMatch(/window\.setOrigin\s*=\s*function\s*\(x,\s*y\)\s*\{[^}]*originX\s*=\s*x[^}]*originY\s*=\s*y/s)
-    // The canvas inline script must not eval or new Function
-    expect(RAINBOW_TS).not.toMatch(/eval\(/)
-    expect(RAINBOW_TS).not.toMatch(/new Function\(/)
   })
 })
 

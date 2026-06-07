@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { SVG_SYSTEM_STACK } from "@/lib/fonts"
+import { isSigningOut } from "@/lib/user-store/sign-out-state"
 
 export default function GlobalError({
   error,
@@ -13,6 +14,17 @@ export default function GlobalError({
   useEffect(() => {
     console.error("Global error:", error)
   }, [error])
+
+  // Same sign-out kill switch as app/error.tsx. global-error replaces the
+  // entire <html>, so a flash here would be the most jarring failure mode.
+  // See app/error.tsx for the full rationale.
+  if (isSigningOut()) {
+    return (
+      <html lang="en">
+        <body style={{ backgroundColor: "#0a0a0a" }} />
+      </html>
+    )
+  }
 
   return (
     <html lang="en">

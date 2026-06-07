@@ -868,6 +868,11 @@
       "npsVeryLikely": "Sehr wahrscheinlich",
       "thanks": "Danke für das Feedback",
       "creditsLabel": "Credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Ihre {appName}-Verbindung ist abgelaufen.",
+      "reconnectLink": "Neu verbinden"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "in {count} Min.",
     "inHours": "in {count} Std.",
     "today": "heute",
-    "yesterday": "gestern"
+    "yesterday": "gestern",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Anmelden",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - #1 KI-Agent für Computernutzung | Beste für Desktop- und Browser-Automatisierung",
       "titleTemplate": "{title} | Coasty - KI-Agent für Computernutzung",
-      "description": "Coasty ist der #1 KI-Agent für Computernutzung — 82% im OSWorld-Benchmark — und der einzige Pauschal-Tarif für unbegrenzte Computernutzung für {unlimitedPrice} (günstiger als Devin Team $500+ACU, OpenAI Operator $200 mit Ratenlimit und kreditgedeckelte Wettbewerber). Steuert einen kompletten Desktop wie ein Mensch: Browser, Formulare, E-Mails, Tabellen. Isolation auf VM-Ebene. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "description": "Coasty ist der #1 KI-Agent für Computernutzung (82% auf OSWorld) und die einzige Computernutzungs-Plattform mit 1,000+ nativen App-Integrationen — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify und 990+ weitere, in jedem Chat abrufbar. Pauschal-Unlimited zu {unlimitedPriceLong} (günstiger als Devin Team $500+ACU und OpenAI Operator $200 mit Ratenlimit). Steuert einen kompletten Desktop wie ein Mensch, mit Isolation auf VM-Ebene. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (günstigster Computernutzungs-Agent)",
-      "ogDescription": "#1 auf OSWorld (82%). {unlimitedPrice} Pauschal-Unlimited — günstiger als Devin Team ($500+ACU) bei höherem Benchmark. Browser-, Desktop- und Terminal-Automatisierung. VM-Isolation pro Sitzung. Plattformübergreifend nativ + REST API + MCP-Server.",
-      "twitterDescription": "KI-Agent, der einen echten Desktop bedient. 82% OSWorld (#1). {unlimitedPrice} Unlimited — der günstigste Pauschal-Tarif in der Kategorie. Starter ab {starterPrice}. VM-Isolation + MCP-Server mit 26 Tools."
+      "ogDescription": "#1 auf OSWorld (82%) + 1,000+ Integrationen (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} Pauschal-Unlimited. Der einzige Computernutzungs-Agent mit einem echten Integrationskatalog. VM-Isolation, plattformübergreifende native App, REST API, MCP-Server.",
+      "twitterDescription": "KI-Agent, der einen echten Desktop bedient UND sich mit 1,000+ Apps verbindet (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Unlimited, der günstigste Pauschal-Tarif in der Kategorie. Starter ab {starterPrice}."
     },
     "compare": {
       "title": "Coasty Vergleichen - KI-Agent-Alternativen und Wettbewerbsvergleich",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Preise — Coasty KI-Agent Pläne und Preise",
-      "description": "Coasty Preise: Starter {starterPrice} (200 Credits) oder Unlimited {unlimitedPrice} (der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — günstiger als Devin Team $500+ACU, Genspark Pro $249 kreditgedeckelt und Manus Extended $200 gedeckelt). Ersetzt menschliche virtuelle Assistenten für $3,000+/mo. Keine versteckten Gebühren.",
+      "description": "Coasty Preise: Starter {starterPrice} (200 Credits) oder Unlimited {unlimitedPrice}, der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt (günstiger als Devin Team $500+ACU, Genspark Pro $249 kreditgedeckelt, Manus Extended $200 gedeckelt). Jeder Plan enthält 1,000+ native App-Integrationen (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify und 990+ weitere) und ersetzt menschliche virtuelle Assistenten für $3,000+/Monat. Keine versteckten Gebühren.",
       "ogTitle": "Coasty Preise — {starterPrice} Starter, {unlimitedPrice} Unlimited",
       "ogDescription": "{unlimitedPrice} Pauschal-Unlimited — der günstigste Tarif für unbegrenzte Computernutzung am Markt. Oder {starterPrice} Starter für Einzelpersonen. Spart $36k pro Jahr gegenüber menschlichen virtuellen Assistenten."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Wie schneidet Coasty im Vergleich zu OpenAI Operator ab?",
       "a9": "Coasty übertrifft OpenAI Operator im OSWorld-Benchmark (82% vs ~40%), bietet echte VM-Isolation für jede Sitzung, unterstützt mehrere KI-Modelle, umfasst vollständige Desktop-Steuerung über den Browser hinaus und bietet ein Open-Source-Framework.",
       "q10": "Kann Coasty CAPTCHAs lösen?",
-      "a10": "Ja. Coasty verfügt über eine integrierte CAPTCHA-Lösungs-Pipeline und wird daher nicht blockiert wie konkurrierende KI-Agenten. Dies ist entscheidend für reale Automatisierung, bei der CAPTCHAs auf Websites häufig vorkommen."
+      "a10": "Ja. Coasty verfügt über eine integrierte CAPTCHA-Lösungs-Pipeline und wird daher nicht blockiert wie konkurrierende KI-Agenten. Dies ist entscheidend für reale Automatisierung, bei der CAPTCHAs auf Websites häufig vorkommen.",
+      "q11": "Mit welchen Apps und Diensten lässt sich Coasty verbinden?",
+      "a11": "Coasty verbindet sich über die integrierte Composio-Integrationsschicht mit 1,000+ Apps, darunter Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase und Twilio. Verbinden Sie eine App einmal per OAuth in den Einstellungen, dann nutzt Coasty sie in jedem Chat in Ihrem Auftrag — kein Passwort gelangt jemals zum Agenten. Wenn eine App eine API hat, ruft Coasty diese direkt für Latenz im Sub-Sekunden-Bereich auf. Wenn nicht (SAP GUI, LinkedIn Sales Navigator, Legacy-Banking-Portale, interne Admin-Tools), steuert derselbe Agent die Oberfläche per Computernutzung. Coasty ist die einzige Computernutzungs-Plattform, die beide Ebenen in einem Agenten liefert — einen API-First-Integrationskatalog UND Desktop-Steuerung auf OS-Ebene."
     },
     "structuredData": {
-      "appDescription": "Der #1 KI-Agent für Computernutzung und der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt — {unlimitedPrice}. Coasty steuert einen kompletten Desktop wie ein Mensch — öffnet Browser, klickt, tippt, füllt Formulare aus, sendet E-Mails und verwaltet Tabellen autonom. 82% im OSWorld-Benchmark bei 369 realen Aufgaben. Echte Isolation auf VM-Ebene pro Sitzung. Integrierte CAPTCHA-Lösung. Pläne: {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
-      "orgDescription": "Coasty entwickelt den #1 KI-Agent für Computernutzung (82% OSWorld) und liefert den einzigen Pauschal-Tarif für unbegrenzte Computernutzung für {unlimitedPrice} — günstiger als Devin Team, OpenAI Operator und kreditgedeckelte Wettbewerber in derselben Preisklasse. Unsere Plattform bietet autonome Desktop-Steuerung, Browser-Automatisierung und Multi-Agent-Orchestrierung mit echter Isolation auf VM-Ebene.",
-      "productDescription": "KI-Computernutzungs-Agent, der einen Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark (82%). Der {unlimitedPrice} Unlimited-Plan ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung. Autonome Browser-Automatisierung, Desktop-Steuerung, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung mit echter Isolation auf VM-Ebene.",
-      "websiteDescription": "#1 KI-Agent-Plattform für Computernutzung — 82% im OSWorld-Benchmark und der günstigste Pauschal-Unlimited-Tarif für {unlimitedPrice}. Autonome Browser-, Desktop- und Terminal-Automatisierung mit VM-Isolation. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
-      "softwareDescription": "KI-Computernutzungs-Agent, der einen kompletten Desktop wie ein Mensch steuert. #1 im OSWorld-Benchmark mit einer Abschlussrate von 82% bei 369 realen Aufgaben. Der {unlimitedPrice} Unlimited-Plan ist der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt. Autonome Browser-Automatisierung, Desktop-Steuerung, Terminal-Operationen, E-Mail-Versand, Formulare ausfüllen und Tabellenverwaltung.",
+      "appDescription": "Der #1 KI-Agent für Computernutzung und die einzige Computernutzungs-Plattform mit 1,000+ nativen App-Integrationen (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify und 990+ weitere). 82% auf OSWorld bei 369 realen Aufgaben. Der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt zu {unlimitedPriceLong}. Steuert einen kompletten Desktop wie ein Mensch, echte Isolation auf VM-Ebene pro Sitzung, integrierte CAPTCHA-Lösung. Pläne: {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty entwickelt den #1 KI-Agent für Computernutzung (82% OSWorld) mit 1,000+ OAuth-gesicherten App-Integrationen (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) und liefert den einzigen Pauschal-Tarif für unbegrenzte Computernutzung zu {unlimitedPriceLong} — günstiger als Devin Team, OpenAI Operator und kreditgedeckelte Wettbewerber. Unsere Plattform vereint Computernutzung, Multi-Agent-Orchestrierung, native Integrationen und Isolation auf VM-Ebene in einem Produkt.",
+      "productDescription": "KI-Computernutzungs-Agent, der einen Desktop wie ein Mensch steuert UND sich nativ mit 1,000+ Apps verbindet (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 im OSWorld-Benchmark (82%). {unlimitedPrice} Unlimited ist der günstigste verfügbare Pauschal-Tarif für unbegrenzte Computernutzung. Autonome Browser-, Desktop-, E-Mail-, Formular- und Tabellen-Automatisierung mit Isolation auf VM-Ebene.",
+      "websiteDescription": "#1 KI-Agent-Plattform für Computernutzung (82% OSWorld) mit 1,000+ nativen Integrationen (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) und dem günstigsten Pauschal-Unlimited-Tarif zu {unlimitedPriceLong}. Autonome Browser-, Desktop- und Terminal-Automatisierung mit VM-Isolation. Ab {starterPrice} Starter oder {unlimitedPrice} Unlimited.",
+      "softwareDescription": "KI-Computernutzungs-Agent, der einen kompletten Desktop wie ein Mensch steuert und 1,000+ OAuth-gesicherte App-Integrationen mitbringt (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify und 990+ weitere). #1 auf OSWorld mit einer Abschlussrate von 82% bei 369 realen Aufgaben. Der {unlimitedPriceLong} Unlimited-Plan ist der günstigste Pauschal-Tarif für unbegrenzte Computernutzung am Markt. Browser-, Desktop-, Terminal-, E-Mail-, Formular- und Tabellen-Automatisierung in einem Agenten.",
       "breadcrumbs": {
         "home": "Startseite",
         "caseStudies": "KI-Agent-Fallstudien",
@@ -2413,6 +2422,13 @@
         "download": "Desktop-App Herunterladen",
         "compare": "KI-Agenten Vergleichen"
       }
+    },
+    "connections": {
+      "title": "Verbindungen",
+      "description": "Verbinden Sie Gmail, Slack, Notion, GitHub und Hunderte weitere Apps. In jedem Chat verfügbar.",
+      "ogTitle": "Verbindungen — 250+ Apps mit Coasty verbinden",
+      "ogDescription": "Bringen Sie Gmail, Slack, GitHub, Notion, Google Calendar, Linear und Hunderte weitere Apps in jeden Chat. Per OAuth abgesichert, immer aktiv, von Coasty-Agenten in Ihrem Auftrag genutzt.",
+      "twitterDescription": "Verbinden Sie Gmail, Slack, GitHub, Notion und über 250 Apps mit Coasty. Ein OAuth, in jedem Chat von Ihrem Agenten genutzt."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Empfehlung",
         "description": "Lade Freunde ein und verdiene Credits"
+      },
+      "integrations": {
+        "label": "Integrationen",
+        "description": "Apps von Drittanbietern verbinden"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Empfehlungen",
       "description": "Teile Coasty. Verdient zusammen."
+    },
+    "connections": {
+      "title": "Ihre Verbindungen",
+      "description": "Verbundene Apps und Toolkits werden abgerufen."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 bei der Übertragung",
     "trustAtRest": "AES-256-GCM im Ruhezustand",
     "trustNoTraining": "Kein Training mit deinen Daten"
+  },
+  "connections": {
+    "page": {
+      "title": "Verbindungen",
+      "description": "Verbinden Sie Gmail, Slack, Notion, GitHub und Hunderte weitere Apps. In jedem Chat verfügbar."
+    },
+    "fallbackAppName": "App",
+    "status": {
+      "active": "Verbunden",
+      "initiated": "Verbindet…",
+      "expired": "Abgelaufen",
+      "failed": "Widerrufen",
+      "failedShort": "Fehler",
+      "inactive": "Inaktiv"
+    },
+    "toasts": {
+      "disconnectFailed": "Trennen fehlgeschlagen",
+      "disconnected": "{appName} getrennt",
+      "reconnectFailed": "Neuverbinden konnte nicht gestartet werden",
+      "connected": "{app} verbunden",
+      "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    },
+    "card": {
+      "logoAlt": "{appName} Logo",
+      "fallbackAccountLabel": "Verbunden",
+      "connectedOn": "Verbunden am {date}",
+      "lastUsed": "Zuletzt verwendet {time}",
+      "actions": {
+        "reconnect": "Verbinden",
+        "disconnect": "Trennen",
+        "menuAriaLabel": "Verbindungsaktionen"
+      },
+      "error": {
+        "expired": "Autorisierung abgelaufen. Verbinden Sie sich neu, um den Tool-Zugriff wiederherzustellen.",
+        "revoked": "Verbindung widerrufen. Verbinden Sie sich neu, um den Tool-Zugriff wiederherzustellen."
+      },
+      "disconnectDialog": {
+        "title": "{appName} trennen?",
+        "connectedOn": "verbunden am {date}",
+        "consequence": {
+          "revokeOauth": "Composio widerruft die OAuth-Berechtigung",
+          "toolsStop": "Tools, die diese Verbindung nutzen, funktionieren nicht mehr"
+        },
+        "confirm": "Trennen",
+        "cancel": "Verbindung behalten"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} Logo",
+      "headline": "Verbinden Sie Ihre erste App",
+      "subheadline": "Einmal autorisieren und Ihre KI kann Ihre E-Mails lesen, in Slack posten, Dokumente aktualisieren und vieles mehr. Automatisch, in jedem Chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Tools in jedem Chat",
+          "desc": "Einmal verbunden, nutzt Ihre KI sie automatisch."
+        },
+        "secureOauth": {
+          "title": "Sicheres OAuth",
+          "desc": "Einmal autorisieren, jederzeit widerrufen."
+        },
+        "hundredsOfApps": {
+          "title": "Hunderte von Apps",
+          "desc": "E-Mail, Kalender, CRMs, Dokumente, Code und mehr."
+        }
+      },
+      "browseAppsCta": "Apps durchsuchen"
+    },
+    "connectDialog": {
+      "title": "App verbinden",
+      "description": "Durchsuchen Sie Hunderte von Integrationen, ermöglicht durch Composio.",
+      "searchPlaceholder": "Apps suchen…",
+      "clearSearchAria": "Suche löschen",
+      "categories": {
+        "all": "Alle",
+        "communication": "Kommunikation",
+        "productivity": "Produktivität",
+        "calendar": "Kalender",
+        "developer": "Entwickler",
+        "crmSales": "CRM & Vertrieb"
+      },
+      "sections": {
+        "featured": "Empfohlen",
+        "allApps": "Alle Apps"
+      },
+      "card": {
+        "logoAlt": "{name} Logo",
+        "alreadyConnectedTooltip": "Bereits verbunden. Verwalten Sie diese Verbindung auf der Verbindungen-Seite.",
+        "connectedLabel": "Verbunden",
+        "connectFallbackDescription": "{name} mit Ihrer KI verbinden"
+      },
+      "footer": {
+        "poweredBy": "ermöglicht durch Composio",
+        "cancel": "Abbrechen"
+      },
+      "empty": {
+        "noMatchTitle": "Keine Apps passen zu \"{query}\"",
+        "noAppsTitle": "Keine Apps verfügbar",
+        "noMatchBody": "Versuchen Sie einen kürzeren Suchbegriff oder eine andere Kategorie.",
+        "noAppsBody": "Composio-Integrationen erscheinen hier, sobald sie konfiguriert sind."
+      },
+      "errors": {
+        "failedToStart": "Verbindung konnte nicht gestartet werden"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Mit Composio verbinden",
+          "connectWithApiKey": "Speichern und verbinden",
+          "connectWithBearerToken": "Speichern und verbinden",
+          "connectWithBasic": "Speichern und verbinden",
+          "connectNoAuth": "Aktivieren",
+          "connecting": "Verbinden..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API-Schlüssel",
+          "apiKeyPlaceholder": "Fügen Sie Ihren API-Schlüssel ein",
+          "bearerTokenLabel": "Bearer-Token",
+          "bearerTokenPlaceholder": "Fügen Sie Ihren Bearer-Token ein",
+          "basicAuthUsername": "Benutzername",
+          "basicAuthPassword": "Passwort",
+          "basicAuthUsernamePlaceholder": "Ihr Konto-Benutzername",
+          "basicAuthPasswordPlaceholder": "Ihr Konto-Passwort",
+          "revealSecret": "Anzeigen",
+          "hideSecret": "Verbergen"
+        },
+        "noAuthHint": "{name} benötigt keine Anmeldedaten. Klicken Sie auf Aktivieren, um es zu Ihrem Arbeitsbereich hinzuzufügen.",
+        "apiKeyHelp": "Wo finde ich das?",
+        "connectedToast": "Mit {name} verbunden",
+        "unsupported": {
+          "title": "Dieser Verbindungstyp wird noch nicht unterstützt",
+          "body": "{name} verwendet einen {scheme}-Authentifizierungsablauf, den wir in der App noch nicht eingerichtet haben. Sie können es direkt im Composio-Dashboard verbinden und es erscheint hier, sobald die Verbindung steht.",
+          "openComposioDashboard": "Composio-Dashboard öffnen"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "{name} trennen",
+      "disconnect": "Trennen"
+    },
+    "empty": {
+      "title": "Keine Apps verbunden",
+      "description": "Verbinden Sie Gmail, Slack, Notion und mehr, damit Coasty sie in jedem Chat nutzen kann."
+    },
+    "toolInvocation": {
+      "calling": "Rufe {toolkit}: {action} auf"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Ihre {appName}-Verbindung ist abgelaufen.",
+      "reconnectLink": "Neu verbinden"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Verbindungen konnten nicht geladen werden (HTTP {status})",
+      "loadToolkitsFailed": "Toolkits konnten nicht geladen werden (HTTP {status})",
+      "startConnectionFailed": "Verbindung konnte nicht gestartet werden (HTTP {status})",
+      "disconnectFailedHttp": "Trennen fehlgeschlagen (HTTP {status})",
+      "credentialsRequired": "Bitte füllen Sie alle erforderlichen Felder aus, um fortzufahren.",
+      "credentialsErrorPrefix": "Verbindung fehlgeschlagen:",
+      "unknownToolkit": "Wir kennen diese App nicht. Bitte aktualisieren Sie den Katalog und versuchen Sie es erneut.",
+      "unsupportedAuthScheme": "Diese Authentifizierungsmethode wird in der App noch nicht unterstützt.",
+      "missingCredentials": "Fehlende Pflichtfelder: {fields}",
+      "invalidCredentials": "Die Anmeldedaten wurden abgelehnt. Bitte überprüfen Sie sie und versuchen Sie es erneut.",
+      "credentialValidationFailed": "Ihre Anmeldedaten konnten nicht validiert werden. Bitte versuchen Sie es erneut.",
+      "apiKeyRequired": "Ein API-Schlüssel ist erforderlich.",
+      "tokenRequired": "Ein Bearer-Token ist erforderlich.",
+      "basicRequired": "Benutzername und Passwort sind erforderlich."
+    },
+    "title": "Verbindungen",
+    "subtitle": "Verbinden Sie die Apps, die Coasty in jedem Chat in Ihrem Auftrag nutzen kann.",
+    "connectedSuffix": "verbunden",
+    "refresh": "Aktualisieren",
+    "newConnection": "Neue Verbindung",
+    "retry": "Erneut versuchen",
+    "noFilteredConnections": "Keine Apps mit Status {filter}",
+    "noFilteredDescription": "Wählen Sie einen anderen Filter oder verbinden Sie eine neue App.",
+    "filters": {
+      "all": "Alle",
+      "active": "Aktiv",
+      "connecting": "Wird verbunden",
+      "expired": "Abgelaufen",
+      "failed": "Fehlgeschlagen"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Verbundene Apps",
+      "subheading": "Coasty kann diese Apps in jedem Chat in Ihrem Namen nutzen.",
+      "connectNewApp": "Neue App verbinden",
+      "manageOnFullPage": "Vollseite verwalten"
+    }
   }
 }

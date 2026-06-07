@@ -12,6 +12,13 @@ interface AuthResult {
   error?: string
 }
 
+interface OssKeyResult {
+  success: boolean
+  error?: string
+  /** Tier returned by /v1/credits on successful validation (e.g. "free"). */
+  tier?: string
+}
+
 interface AuthState {
   isAuthenticated: boolean
   user: AuthUser | null
@@ -32,6 +39,13 @@ interface AuthState {
   signInWithMagicLink: (email: string) => Promise<AuthResult>
   resetPassword: (email: string) => Promise<AuthResult>
   cancelAuth: () => Promise<void>
+  /** OSS first-run: validate a pasted COASTY_API_KEY. The IPC wiring
+   *  (oss:submit-key handler + preload binding) is not yet landed; the
+   *  current implementation is a stub that returns a not-implemented error.
+   *  OssKeyScreen.tsx is not wired into App.tsx yet either, so this never
+   *  runs in practice — present here so the orphan UI typechecks against the
+   *  store and is ready to be wired up. */
+  submitOssKey: (key: string) => Promise<OssKeyResult>
   signOut: () => Promise<void>
   /** Subscribe to the main process's ``auth:session-died`` IPC event.
    *  Returns the cleanup function. Called once at app start from
@@ -168,6 +182,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await window.coasty.cancelAuth()
     set({ waitingForEmail: false })
   },
+
+  // STUB — see the JSDoc on the interface declaration above. The
+  // `oss:submit-key` IPC channel + preload binding + main-process handler
+  // are not landed yet, so any caller (currently only the orphan
+  // OssKeyScreen.tsx) will see a "not implemented" error rather than a
+  // missing-method runtime crash. Replace this with the real impl when the
+  // OSS first-run UI is wired into App.tsx.
+  submitOssKey: async (_key: string) => ({
+    success: false,
+    error: 'OSS key submission is not yet wired up.',
+  }),
 
   signOut: async () => {
     await window.coasty.signOut()

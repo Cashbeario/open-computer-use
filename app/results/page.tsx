@@ -1,13 +1,34 @@
 "use client"
 
-import { useState, useCallback } from "react"
+/**
+ * Results / demos gallery — rebuilt to share the landing page's design
+ * language. Same vocabulary as the landing: Geist Sans + Mono, strict
+ * monochrome (no brand hue, no colored icons), hairline dividers, glass-card
+ * chrome, the signature quint ease, and the landing demo-card treatment.
+ *
+ * Every result/demo entry, video, session transcript, and link is preserved
+ * verbatim from the previous version — this is a restyle, not a content edit.
+ *
+ * Note on motion + clickable cards: framer-motion gesture props
+ * (whileTap/whileHover/drag) intercept the first pointerdown on touch to
+ * disambiguate tap vs drag, which swallows a child Link/onClick on the first
+ * tap. The entrance `motion.div` wrappers below use ONLY initial/whileInView/
+ * transition (no gesture props), so the underlying clicks pass through — the
+ * same pattern the canonical landing demo section uses.
+ */
+
+import { useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
+import { LandingSectionHeader } from "@/app/components/landing/section-shell"
+import { SectionDivider } from "@/app/components/landing/guide-lines"
 import { ArrowRight, ArrowUpRight, Play } from "lucide-react"
-import { motion } from "framer-motion"
+
+const EASE = [0.22, 1, 0.36, 1] as const
 
 const videos = [
   { label: "Marketing", task: "Market your product on Reddit autonomously", videoId: "icxgLDephHE" },
@@ -57,14 +78,12 @@ const sessions = [
   },
 ]
 
-// Stagger between staggered cards (ms). See globals.css `.public-card-enter`.
-// We use CSS keyframes instead of framer-motion variants because wrapping a
-// clickable <Link>/<button> in <motion.*> causes a mobile double-tap bug —
-// motion's gesture detection (whileTap/whileHover/drag) intercepts the first
-// pointerdown to disambiguate tap vs drag, which swallows the click.
-const CARD_STAGGER_MS = 60
+function thumbUrl(id: string) {
+  // 1280x720 — crisp on retina at all card sizes.
+  return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`
+}
 
-function VideoPlayer({
+function VideoCard({
   videoId,
   label,
   task,
@@ -76,30 +95,39 @@ function VideoPlayer({
   featured?: boolean
 }) {
   const [playing, setPlaying] = useState(false)
-
   const handlePlay = useCallback(() => setPlaying(true), [])
 
   return (
-    <div className={cn(
-      "rounded-xl overflow-hidden border bg-card flex flex-col h-full",
-      featured
-        ? "sm:rounded-2xl border-border/40 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_12px_48px_-8px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3),0_12px_48px_-8px_rgba(0,0,0,0.4)] ring-1 ring-white/[0.05] dark:ring-white/[0.03]"
-        : "border-border/30 hover:border-border/50 transition-colors duration-300"
-    )}>
+    <div
+      className={cn(
+        // Glass-card recipe — monochrome chrome, hairline border, hover lift.
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-card/40 backdrop-blur-[2px]",
+        "transition-[border-color,box-shadow,transform] duration-500",
+        "hover:border-foreground/20 hover:-translate-y-0.5",
+        "hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_44px_-22px_rgba(0,0,0,0.18)]",
+        "dark:hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_18px_44px_-22px_rgba(0,0,0,0.5)]",
+      )}
+    >
+      {/* Top sheen hairline */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-6 top-0 z-10 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
+      />
+
       {/* Browser chrome — featured only */}
       {featured && (
-        <div className="flex items-center px-4 py-2 bg-muted/30 dark:bg-white/[0.03] border-b border-border/20">
+        <div className="flex items-center border-b border-foreground/10 bg-foreground/[0.02] px-4 py-2.5 dark:bg-white/[0.02]">
           <div className="flex items-center gap-[6px]">
-            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.08] dark:bg-white/[0.08]" />
-            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.08] dark:bg-white/[0.08]" />
-            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.08] dark:bg-white/[0.08]" />
+            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.10] dark:bg-white/[0.10]" />
+            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.10] dark:bg-white/[0.10]" />
+            <div className="h-[10px] w-[10px] rounded-full bg-foreground/[0.10] dark:bg-white/[0.10]" />
           </div>
-          <div className="flex-1 flex justify-center">
-            <div className="rounded-md bg-foreground/[0.04] dark:bg-white/[0.04] flex items-center justify-center gap-1.5 px-4 py-[3px] max-w-[300px]">
-              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" className="text-muted-foreground/30 shrink-0">
-                <path d="M11.5 7V5a3.5 3.5 0 10-7 0v2M4 7h8a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <div className="flex flex-1 justify-center">
+            <div className="flex max-w-[300px] items-center justify-center gap-1.5 rounded-md bg-foreground/[0.04] px-4 py-[3px] dark:bg-white/[0.04]">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" className="shrink-0 text-foreground/30">
+                <path d="M11.5 7V5a3.5 3.5 0 10-7 0v2M4 7h8a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="text-[11px] text-muted-foreground/35 truncate select-none font-mono">
+              <span className="truncate select-none font-mono text-[11px] tracking-[0.04em] text-foreground/40">
                 coasty.ai/{label.toLowerCase().replace(/[\s-]+/g, "-")}
               </span>
             </div>
@@ -108,12 +136,12 @@ function VideoPlayer({
         </div>
       )}
 
-      {/* Video area */}
-      <div className="relative w-full bg-neutral-950" style={{ paddingTop: "56.25%" }}>
+      {/* Video area — uniform 16:9 */}
+      <div className="relative aspect-video w-full overflow-hidden bg-neutral-950">
         {playing ? (
           <div className="absolute inset-0">
             <iframe
-              className="w-full h-full"
+              className="h-full w-full"
               src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&showinfo=0&autoplay=1`}
               title={`Coasty ${label} Demo`}
               allowFullScreen
@@ -122,94 +150,102 @@ function VideoPlayer({
             />
           </div>
         ) : (
-          <div
-            className="absolute inset-0 cursor-pointer group"
+          <button
+            type="button"
             onClick={handlePlay}
+            aria-label={`Play ${label} demo`}
+            className="absolute inset-0 block cursor-pointer"
           >
             <Image
-              src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+              src={thumbUrl(videoId)}
               alt={`${label} demo`}
               fill
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+              unoptimized
+              className="object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.025]"
               sizes={featured ? "(max-width: 768px) 100vw, 960px" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
             />
 
-            {/* Gradient overlay */}
-            <div className={cn(
-              "absolute inset-0 transition-colors duration-500",
-              featured
-                ? "bg-gradient-to-t from-black/40 via-black/10 to-black/5 group-hover:from-black/50"
-                : "bg-gradient-to-t from-black/35 via-black/5 to-transparent group-hover:from-black/45"
-            )} />
+            {/* Inset hairline border over the thumbnail */}
+            <span className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-foreground/10" />
 
-            {/* Play button — plain <div> with `active:scale-[0.94]` for the
-                press-feedback. Originally `<motion.div whileTap>`, but
-                framer-motion's whileTap intercepts the first pointerdown
-                on touch devices to disambiguate tap vs drag, swallowing
-                the parent's onClick(handlePlay) on the first tap. CSS
-                `:active` fires synchronously and lets the click through. */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className={cn(
-                  "flex items-center justify-center rounded-full",
-                  "bg-white/[0.15] backdrop-blur-md border border-white/20",
-                  "group-hover:bg-white/[0.22] group-hover:border-white/30 transition-all duration-300",
-                  "group-hover:scale-[1.06] active:scale-[0.94]",
-                  featured ? "h-[72px] w-[72px]" : "h-12 w-12"
-                )}
-              >
-                <Play
+            {/* Edge vignette */}
+            <span
+              className="pointer-events-none absolute inset-0 transition-opacity duration-500"
+              style={{
+                background: "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.40) 100%)",
+              }}
+            />
+
+            {/* Play button — monochrome glass, with a pulsing ring */}
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="relative inline-flex items-center justify-center">
+                <span
                   className={cn(
-                    "text-white fill-white ml-[2px] drop-shadow-sm",
-                    featured ? "h-6 w-6" : "h-4 w-4"
+                    "absolute rounded-full border border-foreground/40",
+                    featured ? "h-[72px] w-[72px]" : "h-12 w-12",
                   )}
+                  style={{ animation: "results-play-ring 1.8s ease-out infinite" }}
                 />
-              </div>
-            </div>
+                <span
+                  className={cn(
+                    "relative inline-flex items-center justify-center rounded-full bg-foreground/90 shadow-lg shadow-black/20 transition-transform duration-300 group-hover:scale-[1.04]",
+                    featured ? "h-[72px] w-[72px]" : "h-12 w-12",
+                  )}
+                >
+                  <Play
+                    className={cn(
+                      "translate-x-[1px] fill-background text-background",
+                      featured ? "h-6 w-6" : "h-4 w-4",
+                    )}
+                  />
+                </span>
+              </span>
+            </span>
 
             {/* Label badge — bottom left */}
-            <div className={cn("absolute left-0 bottom-0", featured ? "p-4" : "p-2.5")}>
-              <span className={cn(
-                "inline-flex items-center gap-1.5 text-white/80 font-medium backdrop-blur-sm bg-white/[0.08] rounded-md border border-white/[0.08]",
-                featured ? "text-xs px-2.5 py-1" : "text-[10px] px-2 py-0.5"
-              )}>
+            <span className={cn("absolute bottom-0 left-0", featured ? "p-4" : "p-2.5")}>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border border-white/[0.12] bg-black/30 font-mono uppercase tracking-[0.14em] text-white/80 backdrop-blur-sm",
+                  featured ? "px-2.5 py-1 text-[10px]" : "px-2 py-0.5 text-[9px]",
+                )}
+              >
                 <span className="h-1 w-1 rounded-full bg-white/50" />
                 {label}
               </span>
-            </div>
+            </span>
 
             {/* Watch text — bottom right, featured only */}
             {featured && (
-              <div className="absolute right-0 bottom-0 p-4">
-                <span className="text-xs text-white/40 group-hover:text-white/60 transition-colors duration-300">
+              <span className="absolute bottom-0 right-0 p-4">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45 transition-colors duration-300 group-hover:text-white/70">
                   Watch demo &rarr;
                 </span>
-              </div>
+              </span>
             )}
-          </div>
+          </button>
         )}
       </div>
 
       {/* Caption */}
-      <div className={cn(
-        "flex items-center justify-between",
-        featured ? "px-5 py-4 sm:px-6 sm:py-5" : "px-4 py-3"
-      )}>
+      <div className={cn("flex items-center justify-between", featured ? "px-5 py-4 sm:px-6 sm:py-5" : "px-4 py-3.5")}>
         <div className="min-w-0">
           {!featured && (
-            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/40">
+            <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/40">
               {label}
             </span>
           )}
-          <p className={cn(
-            "text-foreground leading-snug",
-            featured ? "font-medium" : "text-sm text-foreground/80 mt-0.5 line-clamp-2"
-          )}>
+          <p
+            className={cn(
+              "leading-snug text-foreground",
+              featured ? "font-medium" : "mt-1 line-clamp-2 text-sm text-foreground/80",
+            )}
+          >
             {task}
           </p>
         </div>
         {featured && (
-          <span className="hidden sm:block text-[11px] text-muted-foreground/30 font-medium shrink-0 ml-4">
+          <span className="ml-4 hidden shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/40 sm:block">
             Featured
           </span>
         )}
@@ -219,167 +255,229 @@ function VideoPlayer({
 }
 
 export default function ResultsPage() {
+  const [isMobile, setIsMobile] = useState(false)
   const [featured, ...rest] = videos
 
+  // Mirror the landing's mobile gate (<768px) for consistent entrance pacing.
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen overflow-x-clip bg-background text-foreground">
       <LandingHeader />
 
-      <main className="pt-32 sm:pt-36 pb-24">
-        {/* ── Header ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-20">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground/50 mb-4"
-          >
-            Demos
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] mb-5"
-          >
-            Watch it work.{" "}
-            <span className="text-muted-foreground/40">Unscripted.</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-muted-foreground text-lg sm:text-xl max-w-xl leading-relaxed"
-          >
-            Every session below is unscripted. Coasty was given a task and completed it autonomously.browse, click, type, think.
-          </motion.p>
-        </div>
+      {/* Pulsing play-button ring — same motif as the landing demo cards. */}
+      <style jsx global>{`
+        @keyframes results-play-ring {
+          0% {
+            transform: scale(0.85);
+            opacity: 0.7;
+          }
+          100% {
+            transform: scale(1.55);
+            opacity: 0;
+          }
+        }
+      `}</style>
 
-        {/* ── Featured Video ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-6">
-          <div
-            className="public-fade-up"
-            style={{ ["--card-d" as string]: 150 }}
+      <main className="relative">
+        {/* ─── Hero ─────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden px-5 pt-32 pb-12 sm:px-10 sm:pt-40 sm:pb-16">
+          <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute left-1/2 top-0 h-[460px] w-[760px] max-w-[120vw] -translate-x-1/2"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, color-mix(in oklab, var(--foreground) 5%, transparent), transparent 70%)",
+              }}
+            />
+          </div>
+
+          <div className="relative mx-auto max-w-3xl text-center">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EASE }}
+              className="mb-5 font-mono text-[11px] uppercase tracking-[0.24em] text-foreground/45"
+            >
+              Demos
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.95, delay: 0.05, ease: EASE }}
+              className={cn(
+                "font-semibold tracking-[-0.045em] text-balance pb-1 sm:pb-2",
+                "bg-clip-text text-transparent",
+                "bg-gradient-to-b from-foreground to-foreground/85 dark:from-white dark:to-white/82",
+                "text-[2.1rem] leading-[1.1] sm:text-5xl sm:leading-[1.08] lg:text-[3.25rem]",
+              )}
+            >
+              Watch it work. Unscripted.
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.18, ease: EASE }}
+              className="mx-auto mt-5 max-w-xl text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base"
+            >
+              Every session below is unscripted. Coasty was given a task and completed it autonomously. Browse, click, type, think.
+            </motion.p>
+          </div>
+        </section>
+
+        <SectionDivider />
+
+        {/* ─── Featured demo ────────────────────────────────────────────── */}
+        <section className="px-5 pt-16 sm:px-10 sm:pt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="mx-auto max-w-5xl"
           >
-            <VideoPlayer
+            <VideoCard
               videoId={featured.videoId}
               label={featured.label}
               task={featured.task}
               featured
             />
-          </div>
-        </div>
-
-        {/* ── Video Grid ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mb-28">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {rest.map((v, i) => (
-              <div
-                key={v.videoId + v.label}
-                className="public-card-enter"
-                style={{
-                  ["--card-i" as string]: i,
-                  ["--card-stagger-ms" as string]: `${CARD_STAGGER_MS}ms`,
-                }}
-              >
-                <VideoPlayer
-                  videoId={v.videoId}
-                  label={v.label}
-                  task={v.task}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Divider ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10">
-          <div className="border-t border-border/30" />
-        </div>
-
-        {/* ── Sessions ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10 mt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-12"
-          >
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground/50 mb-4">
-              Agent Transcripts
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-              Full session logs
-            </h2>
-            <p className="text-muted-foreground max-w-lg">
-              Read every step the agent took.every click, every decision, every result. Nothing hidden.
-            </p>
           </motion.div>
+        </section>
 
-          <div className="space-y-0">
-            {sessions.map((s, i) => (
-              <div
-                key={s.chatId}
-                className="public-card-enter"
-                style={{
-                  ["--card-i" as string]: i,
-                  ["--card-stagger-ms" as string]: `${CARD_STAGGER_MS}ms`,
-                }}
-              >
-                <Link
-                  href={`/share/${s.chatId}`}
-                  target="_blank"
-                  className="group flex items-start sm:items-center gap-4 sm:gap-6 py-5 sm:py-6 border-b border-border/20 hover:border-border/40 transition-colors duration-300"
+        {/* ─── Demo grid ────────────────────────────────────────────────── */}
+        <section className="px-5 pt-5 pb-20 sm:px-10 sm:pb-24 lg:pb-28">
+          <div className="mx-auto max-w-5xl">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+              {rest.map((v, i) => (
+                <motion.div
+                  key={v.videoId + v.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+                  transition={{ duration: 0.55, ease: EASE, delay: isMobile ? 0 : i * 0.06 }}
                 >
-                  {/* Number */}
-                  <span className="text-2xl sm:text-3xl font-bold text-muted-foreground/15 tabular-nums leading-none pt-0.5 sm:pt-0 w-8 sm:w-10 shrink-0 text-right">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+                  <VideoCard videoId={v.videoId} label={v.label} task={v.task} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2.5 mb-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/40">
+        <SectionDivider />
+
+        {/* ─── Sessions / transcripts ───────────────────────────────────── */}
+        <section className="px-5 py-20 sm:px-10 sm:py-24 lg:py-28">
+          <div className="mx-auto max-w-5xl">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+              transition={{ duration: 0.6, ease: EASE }}
+              className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.24em] text-foreground/45"
+            >
+              Agent Transcripts
+            </motion.p>
+            <LandingSectionHeader
+              title="Full session logs"
+              subtitle="Read every step the agent took. Every click, every decision, every result. Nothing hidden."
+              isMobile={isMobile}
+            />
+
+            <ul className="border-t border-foreground/10" role="list">
+              {sessions.map((s, i) => (
+                <motion.li
+                  key={s.chatId}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+                  transition={{ duration: 0.5, ease: EASE, delay: isMobile ? 0 : i * 0.06 }}
+                  className="border-b border-foreground/10"
+                >
+                  <Link
+                    href={`/share/${s.chatId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-4 py-5 transition-colors duration-300 sm:items-center sm:gap-6 sm:py-6"
+                  >
+                    {/* Number */}
+                    <span className="w-8 shrink-0 pt-0.5 text-right font-mono text-2xl tabular-nums leading-none text-foreground/15 sm:w-10 sm:pt-0 sm:text-3xl">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/40">
                         {s.tag}
                       </span>
+                      <h3 className="mt-1 font-semibold tracking-tight text-foreground transition-colors duration-200 group-hover:text-foreground/70">
+                        {s.title}
+                      </h3>
+                      <p className="mt-0.5 hidden text-sm leading-relaxed text-muted-foreground/70 sm:block">
+                        {s.description}
+                      </p>
                     </div>
-                    <h3 className="font-semibold text-foreground group-hover:text-foreground/70 transition-colors duration-200 mb-0.5">
-                      {s.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground/70 leading-relaxed hidden sm:block">
-                      {s.description}
-                    </p>
-                  </div>
 
-                  {/* Arrow */}
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-foreground/50 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 shrink-0 mt-1 sm:mt-0" />
-                </Link>
-              </div>
-            ))}
+                    {/* Arrow */}
+                    <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-foreground/20 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground/70 sm:mt-0" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
           </div>
-        </div>
+        </section>
 
-        {/* ── CTA ── */}
-        <div className="max-w-5xl mx-auto px-7 sm:px-10">
-          <div
-            className="mt-24 sm:mt-28 text-center public-fade-up"
-            style={{ ["--card-d" as string]: 400 }}
+        <SectionDivider />
+
+        {/* ─── Final CTA ────────────────────────────────────────────────── */}
+        <section className="px-5 py-20 sm:px-10 sm:py-28">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="mx-auto max-w-2xl text-center"
           >
-            <p className="text-muted-foreground/60 text-sm mb-6">
-              Seen enough?
-            </p>
-            <Link
-              href="/auth"
-              className="inline-flex items-center gap-2.5 rounded-full font-semibold text-background bg-foreground px-8 py-3.5 text-[15px] cursor-pointer transition-transform duration-150 hover:scale-[1.02] hover:-translate-y-px active:scale-[0.98]"
+            <h2
+              className={cn(
+                "font-semibold tracking-[-0.03em] text-balance pb-1 sm:pb-2",
+                "bg-clip-text text-transparent",
+                "bg-gradient-to-b from-foreground to-foreground/85 dark:from-white dark:to-white/82",
+                "text-[1.75rem] leading-[1.15] sm:text-4xl",
+              )}
             >
-              Try Coasty Free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <p className="text-[11px] text-muted-foreground/30 mt-4">
-              No credit card required
+              Seen enough?
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-[15px] leading-[1.55] text-foreground/65 dark:text-white/65 sm:text-base">
+              Give Coasty a task and watch it run. No setup, no scripting.
             </p>
-          </div>
-        </div>
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <Link
+                href="/auth"
+                className={cn(
+                  "group inline-flex items-center justify-center gap-2 rounded-full font-medium",
+                  "bg-foreground text-background",
+                  "shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset,0_6px_18px_-10px_rgba(0,0,0,0.22)]",
+                  "dark:shadow-[0_1px_0_0_rgba(0,0,0,0.10)_inset,0_6px_18px_-10px_rgba(0,0,0,0.40)]",
+                  "transition-[box-shadow,transform] duration-300 hover:scale-[1.012] active:scale-[0.985]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "px-7 py-3 text-[14.5px]",
+                )}
+              >
+                Try Coasty Free
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5" />
+              </Link>
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/40">
+                No credit card required
+              </p>
+            </div>
+          </motion.div>
+        </section>
       </main>
 
       <LandingFooter />

@@ -33,6 +33,7 @@ import {
   DotsSixVertical,
   Timer,
   Command,
+  Plug,
 } from "@phosphor-icons/react"
 import { ChevronDown, ChevronUp, ArrowUpRight, MousePointer, Loader2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -43,6 +44,11 @@ import { useMessages } from "@/lib/chat-store/messages/provider"
 import { useChatStreaming } from "@/lib/chat-streaming-store/provider"
 import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 import { toast } from "sonner"
+import {
+  parseComposioToolName,
+  composioToolLabel,
+  composioToolDescription,
+} from "@/lib/composio-store/tool-format"
 import { TaskExecutionDisplay } from "./task-execution-display"
 import { TaskChecklist } from "./task-checklist"
 import { FileExplorer } from "./file-explorer"
@@ -902,7 +908,10 @@ export function ProjectNavigator({ isOpen, onToggle, disableAutoOpen = false }: 
       case 'vmAction':
         return <Desktop className="h-4 w-4" />
       default:
-        return <Wrench className="h-4 w-4" />
+        // Composio / connection tools get a plug icon.
+        return parseComposioToolName(toolName)
+          ? <Plug className="h-4 w-4" />
+          : <Wrench className="h-4 w-4" />
     }
   }
 
@@ -986,7 +995,11 @@ export function ProjectNavigator({ isOpen, onToggle, disableAutoOpen = false }: 
     if (toolName === 'vmAction') {
       return isActive ? 'Performing action on virtual machine...' : 'Virtual machine action completed'
     }
-    
+
+    // Composio / connection tools — "Using Gmail to send email" (no "composio").
+    const composioDesc = composioToolDescription(toolName, isActive)
+    if (composioDesc) return isActive ? `${composioDesc}...` : composioDesc
+
     // Default
     return isActive ? 'Processing action...' : 'Action completed'
   }
@@ -1054,7 +1067,8 @@ export function ProjectNavigator({ isOpen, onToggle, disableAutoOpen = false }: 
       case 'vmAction':
         return isActive ? 'ðŸ–±ï¸ Controlling VM...' : 'âœ“ Executed VM action'
       default:
-        return toolName
+        // Composio / connection tools — "Gmail · Send email", never the raw name.
+        return composioToolLabel(toolName) ?? toolName
     }
   }
 
@@ -1109,6 +1123,11 @@ export function ProjectNavigator({ isOpen, onToggle, disableAutoOpen = false }: 
     }
     if (toolName === 'vmScreenshot') {
       return { icon: <Camera className="h-4 w-4" weight="duotone" />, label: 'Screenshot', detail: null, type: 'screenshot' as const }
+    }
+    // Composio / connection tools — plug icon + "Gmail · Send email" (no "composio").
+    const composioParsed = parseComposioToolName(toolName)
+    if (composioParsed) {
+      return { icon: <Plug className="h-4 w-4" weight="duotone" />, label: composioToolLabel(toolName) ?? composioParsed.toolkitLabel, detail: composioParsed.actionLabel || null, type: 'other' as const }
     }
     return { icon: <Wrench className="h-4 w-4" weight="duotone" />, label: toolName.replace(/_/g, ' '), detail: null, type: 'other' as const }
   }

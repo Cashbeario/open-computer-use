@@ -1445,8 +1445,24 @@ resource "aws_cloudwatch_metric_alarm" "osworld_session_count" {
 # update_subscription_status, but the same shape can occur in ANY PL/pgSQL
 # function with RETURNS TABLE that shadows a real column. The A7 alarm above
 # pins on the specific log line emitted by the billing webhook handler; this
-# alarm fires on the literal SQLSTATE anywhere in /ecs/llmhub so we catch the
-# next occurrence even if it's in a different RPC (e.g. credits, sessions).
+# alarm fires on the SQLSTATE anywhere in /ecs/llmhub so we catch the next
+# occurrence even if it's in a different RPC (e.g. credits, sessions).
+#
+# 2026-05-28 fix: the original pattern was the bare substring "42702", which
+# matched the digits anywhere in a line — including ephemeral TCP source ports
+# in uvicorn access logs (e.g. `10.0.10.210:42702 - "GET /api/health" 200`).
+# Port 42702 sits inside the Linux ephemeral range (32768-60999), so a routine
+# health check that happened to draw that port paged on-call as a phantom P0.
+# This produced 5 false-positive ALARM/OK flaps on 2026-05-28 with zero real
+# DB errors (live function confirmed correct via REST probe; see git history).
+#
+# The pattern now requires the SQLSTATE digits AND the universal PG message
+# fragment "ambiguous" on the same line. Every genuine 42702 error is
+# ambiguous_column, whose message is always `column reference "<col>" is
+# ambiguous`, and PostgREST/supabase serializes the code and message together
+# (`code: '42702', message: '... is ambiguous'`). TCP-port and UUID lines that
+# merely contain the digits 42702 do not contain "ambiguous", so they no longer
+# match. Uses CloudWatch Logs regex filter syntax (the %...% delimiters).
 # =============================================================================
 
 resource "aws_cloudwatch_log_metric_filter" "postgres_42702_errors" {
@@ -1454,7 +1470,7 @@ resource "aws_cloudwatch_log_metric_filter" "postgres_42702_errors" {
 
   name           = "${var.project_name}-postgres-42702-errors"
   log_group_name = aws_cloudwatch_log_group.ecs.name
-  pattern        = "\"42702\"" # Matches the literal SQLSTATE in any log line
+  pattern        = "%42702.*ambiguous|ambiguous.*42702%" # SQLSTATE co-located with the ambiguous_column message
 
   metric_transformation {
     name          = "Postgres42702Errors"

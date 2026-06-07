@@ -1,6 +1,5 @@
 import { desktopCapturer } from 'electron'
 import { hideForScreenshot, showAfterScreenshot, contentProtectionReliable } from './window-manager'
-import { hideRainbowForScreenshot, showRainbowAfterScreenshot } from './rainbow-border'
 import { captureScreenNative } from './native-screenshot'
 import { getActiveDisplay } from './display-manager'
 
@@ -208,7 +207,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
   const needsHiding = !contentProtectionReliable
 
   if (needsHiding) {
-    hideRainbowForScreenshot()
     await hideForScreenshot()
   }
 
@@ -232,7 +230,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
       // Re-show overlay before we return.
       if (needsHiding) {
         showAfterScreenshot()
-        showRainbowAfterScreenshot()
       }
       // On macOS, an `getSources` rejection almost always means TCC
       // denied the request. Surface that with the actionable code even
@@ -268,7 +265,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
     if (thumbSize.width === 0 || thumbSize.height === 0) {
       if (needsHiding) {
         showAfterScreenshot()
-        showRainbowAfterScreenshot()
       }
       return failure(
         new Error('Empty screenshot — check Screen Recording permission'),
@@ -287,7 +283,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
     if (!jpegBuf || jpegBuf.length === 0) {
       if (needsHiding) {
         showAfterScreenshot()
-        showRainbowAfterScreenshot()
       }
       return failure(
         new Error('JPEG encoding produced an empty buffer'),
@@ -299,7 +294,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
 
     if (needsHiding) {
       showAfterScreenshot()
-      showRainbowAfterScreenshot()
     }
 
     return {
@@ -313,7 +307,6 @@ export async function captureScreenshot(): Promise<CaptureScreenshotResult> {
     // Always re-show the overlay even if screenshot fails
     if (needsHiding) {
       showAfterScreenshot()
-      showRainbowAfterScreenshot()
     }
     // The catch-all. Errors from `thumbnail.toJPEG()` or the
     // sources-empty `throw new Error('No screen sources found')` land

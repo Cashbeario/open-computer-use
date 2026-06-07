@@ -102,7 +102,7 @@
       "competitorIntel": {
         "label": "Competitor intel",
         "headline": "monitor every competitor",
-        "outcome": "Full competitor profiles with pricing, features, and positioning gaps — exported as a ready-to-share report."
+        "outcome": "Full competitor profiles with pricing, features, and positioning gaps, exported as a ready-to-share report."
       },
       "qaTesting": {
         "label": "QA testing",
@@ -112,12 +112,12 @@
       "seoAnalysis": {
         "label": "SEO analysis",
         "headline": "uncover keyword gaps",
-        "outcome": "Keyword gaps identified, content briefs drafted, competitor backlink sources mapped — actionable SEO strategy."
+        "outcome": "Keyword gaps identified, content briefs drafted, competitor backlink sources mapped, actionable SEO strategy."
       },
       "dataExtraction": {
         "label": "Data extraction",
         "headline": "scrape and structure any site",
-        "outcome": "Structured data scraped, cleaned, de-duplicated, and exported as CSV — from any website, any format."
+        "outcome": "Structured data scraped, cleaned, de-duplicated, and exported as CSV, from any website, any format."
       },
       "leadGeneration": {
         "label": "Lead generation",
@@ -132,12 +132,12 @@
       "emailOutreach": {
         "label": "Email outreach",
         "headline": "send personalized outreach",
-        "outcome": "Personalized emails referencing each prospect's company, role, and pain points — ready to send."
+        "outcome": "Personalized emails referencing each prospect's company, role, and pain points, ready to send."
       },
       "marketResearch": {
         "label": "Market research",
         "headline": "validate your market fast",
-        "outcome": "TAM calculated, key players profiled, growth trends charted — sourced from dozens of data points."
+        "outcome": "TAM calculated, key players profiled, growth trends charted, sourced from dozens of data points."
       }
     },
     "demoVideos": {
@@ -216,7 +216,7 @@
     "title": "Not a chatbot. Not an RPA script.",
     "worksLikeHuman": {
       "title": "Works like a human",
-      "description": "Sees, clicks, types, navigates — exactly like you"
+      "description": "Sees, clicks, types, navigates, exactly like you"
     },
     "noScripts": {
       "title": "No scripts or setup",
@@ -228,7 +228,7 @@
     },
     "runsInIsolation": {
       "title": "Runs in isolation",
-      "description": "Sandboxed VM per session — nothing leaks"
+      "description": "Sandboxed VM per session, nothing leaks"
     }
   },
   "howItWorks": {
@@ -254,13 +254,13 @@
   },
   "benchmark": {
     "title": "Benchmarked #1 worldwide",
-    "subtitle": "82% on OSWorld — the hardest benchmark for AI agents that use real computers",
+    "subtitle": "82% on OSWorld, the hardest benchmark for AI agents that use real computers",
     "agenticFramework": "Agentic Framework",
     "foundationModel": "Foundation Model"
   },
   "comparison": {
     "title": "Why automate with Coasty?",
-    "subtitle": "The same tasks that take a team hours — Coasty completes in minutes, around the clock.",
+    "subtitle": "The same tasks that take a team hours, Coasty completes in minutes, around the clock.",
     "manual": {
       "title": "Doing It Manually",
       "subtitle": "You or your team, by hand"
@@ -305,7 +305,7 @@
     "sessions": {
       "reddit": {
         "title": "Coasty on Reddit",
-        "description": "Watch Coasty autonomously run a marketing campaign — researching competitors, analyzing trends, and building a strategy deck.",
+        "description": "Watch Coasty autonomously run a marketing campaign, researching competitors, analyzing trends, and building a strategy deck.",
         "tag": "Marketing"
       },
       "prospects": {
@@ -315,22 +315,22 @@
       },
       "qa": {
         "title": "QA Testing Itself",
-        "description": "Coasty runs quality assurance on its own product — navigating flows, catching bugs, and reporting issues autonomously.",
+        "description": "Coasty runs quality assurance on its own product, navigating flows, catching bugs, and reporting issues autonomously.",
         "tag": "QA Testing"
       },
       "email": {
         "title": "Sending an Email on Your Behalf",
-        "description": "From composing to hitting send — an AI agent drafts and delivers an email entirely on its own.",
+        "description": "From composing to hitting send, an AI agent drafts and delivers an email entirely on its own.",
         "tag": "Communication"
       },
       "job": {
         "title": "Applying to a Job",
-        "description": "Coasty finds a matching role, tailors your resume, and submits the application — all on its own.",
+        "description": "Coasty finds a matching role, tailors your resume, and submits the application, all on its own.",
         "tag": "Job Application"
       },
       "hackernews": {
         "title": "Posting on Hacker News",
-        "description": "Coasty creates and publishes a blog post on Hacker News — writing the content and submitting it autonomously.",
+        "description": "Coasty creates and publishes a blog post on Hacker News, writing the content and submitting it autonomously.",
         "tag": "Social Media"
       }
     }
@@ -347,7 +347,7 @@
     },
     "schedule": {
       "title": "Schedule 24/7",
-      "description": "Runs on cron — hourly, daily, weekly"
+      "description": "Runs on cron, hourly, daily, weekly"
     },
     "sandboxed": {
       "title": "Sandboxed & Secure",
@@ -355,7 +355,7 @@
     },
     "benchmark": {
       "title": "#1 on OSWorld",
-      "description": "82% — highest score ever recorded"
+      "description": "82%, highest score ever recorded"
     },
     "swarms": {
       "title": "Agent Swarms",
@@ -394,7 +394,7 @@
       },
       "unlimited": {
         "name": "Unlimited",
-        "description": "No credit limits — ever",
+        "description": "No credit limits, ever",
         "cta": "Go Unlimited",
         "badge": "Best Value"
       }
@@ -406,16 +406,16 @@
     "vmAlwaysOnPlural": "{count} always-on VMs",
     "bargain": {
       "title": "The same work costs {oldPrice} with manual labor",
-      "description": "A virtual assistant costs $2,000–$4,000/mo. A part-time hire costs more. Coasty does the same work 24/7 starting at $0 — with perfect consistency, full audit trails, and zero training time."
+      "description": "A virtual assistant costs $2,000–$4,000/mo. A part-time hire costs more. Coasty does the same work 24/7 starting at $0, with perfect consistency, full audit trails, and zero training time."
     }
   },
   "discover": {
     "badge": "Community",
     "title": "See How People Use It",
-    "subtitle": "From lead research to QA testing — see what the community is automating and get inspired for your next workflow.",
+    "subtitle": "From lead research to QA testing, see what the community is automating and get inspired for your next workflow.",
     "sessionCount": "{count} sessions shared by the community",
     "searchPlaceholder": "Search by task, tool, or outcome...",
-    "emptyTitle": "No one has shared yet — be the first",
+    "emptyTitle": "No one has shared yet, be the first",
     "emptySubtitle": "When users make their sessions public, they show up here",
     "noResultsTitle": "Nothing matches that query",
     "noResultsSubtitle": "Try different keywords",
@@ -429,15 +429,15 @@
     "items": {
       "whatIsCoasty": {
         "question": "What is Coasty?",
-        "answer": "Coasty is the world's best computer-use AI agent. You describe a task — research leads, test a website, fill out forms, post on social media — and Coasty opens a real browser, navigates apps, clicks buttons, types text, and completes the task end-to-end. No APIs, no integrations, no code required."
+        "answer": "Coasty is the world's best computer-use AI agent. You describe a task, research leads, test a website, fill out forms, post on social media, and Coasty opens a real browser, navigates apps, clicks buttons, types text, and completes the task end-to-end. No APIs, no integrations, no code required."
       },
       "howDifferent": {
         "question": "How is this different from ChatGPT or other AI tools?",
-        "answer": "ChatGPT generates text. Coasty uses a computer. It doesn't tell you what to do — it opens a browser, navigates to the website, clicks the buttons, fills the forms, and delivers the completed work. It's the difference between getting instructions and having the task done for you."
+        "answer": "ChatGPT generates text. Coasty uses a computer. It doesn't tell you what to do, it opens a browser, navigates to the website, clicks the buttons, fills the forms, and delivers the completed work. It's the difference between getting instructions and having the task done for you."
       },
       "whatTasks": {
         "question": "What tasks can Coasty automate?",
-        "answer": "Any task you can do on a computer. Web research, lead generation, data entry, form filling, QA testing, social media posting, email outreach, invoice processing, competitive analysis, recruiting — if it involves a browser or desktop app, Coasty can do it."
+        "answer": "Any task you can do on a computer. Web research, lead generation, data entry, form filling, QA testing, social media posting, email outreach, invoice processing, competitive analysis, recruiting, if it involves a browser or desktop app, Coasty can do it."
       },
       "whatAreCredits": {
         "question": "What are credits and how are they used?",
@@ -445,7 +445,7 @@
       },
       "localComputer": {
         "question": "Can Coasty run on my own computer?",
-        "answer": "Yes. Our desktop app runs as a lightweight overlay on your machine, controlling your local browser and applications directly. Alternatively, tasks run on isolated cloud machines — your choice."
+        "answer": "Yes. Our desktop app runs as a lightweight overlay on your machine, controlling your local browser and applications directly. Alternatively, tasks run on isolated cloud machines, your choice."
       },
       "dataSafe": {
         "question": "Is my data safe?",
@@ -508,14 +508,14 @@
     "features": {
       "localControl": {
         "title": "Run locally on your PC",
-        "desc": "Download the desktop app and let AI control your computer directly — no cloud VM needed."
+        "desc": "Download the desktop app and let AI control your computer directly, no cloud VM needed."
       },
       "phoneControl": {
         "title": "Control your PC from your phone",
         "desc": "Start a task from your phone and watch the AI agent work on your computer in real time."
       },
       "cloudOrLocal": {
-        "title": "Cloud or local — your choice",
+        "title": "Cloud or local, your choice",
         "desc": "Use cloud VMs for isolated tasks, or go local for full access to your apps and files."
       }
     },
@@ -526,7 +526,7 @@
       "forgotPassword": "Let's get you back in"
     },
     "viewDescriptions": {
-      "signIn": "Pick up right where you left off — your agents remember",
+      "signIn": "Pick up right where you left off, your agents remember",
       "signUp": "Deploy your first AI agent in under a minute",
       "magicLink": "One click from your inbox and you're in",
       "forgotPassword": "We'll send a reset link to your email"
@@ -621,7 +621,7 @@
       "eyebrowNew": "Let's get acquainted",
       "eyebrowReturning": "Almost there",
       "descriptionReturning": "Just a few more details and Coasty will be fully tuned to the way you work.",
-      "descriptionNew": "Coasty works on real computers — browses, clicks, types, ships. A few quick details so it fits the way you work.",
+      "descriptionNew": "Coasty works on real computers, browses, clicks, types, ships. A few quick details so it fits the way you work.",
       "footerNote": "Takes about a minute. You can change anything later in Settings."
     },
     "nameLabel": "What should we call you?",
@@ -633,7 +633,7 @@
     "websitePlaceholder": "yourcompany.com",
     "roleStep": {
       "title": "What best describes you?",
-      "subtitle": "Select all that apply — this helps us tailor your experience"
+      "subtitle": "Select all that apply, this helps us tailor your experience"
     },
     "roles": {
       "founder": "Founder / CEO",
@@ -670,7 +670,7 @@
     },
     "useCaseStep": {
       "title": "What will you automate first?",
-      "subtitle": "Select all that apply — you can explore everything later"
+      "subtitle": "Select all that apply, you can explore everything later"
     },
     "useCases": {
       "web_scraping": "Web Scraping & Research",
@@ -700,7 +700,7 @@
       },
       "browserAutomation": {
         "title": "Browser Automation",
-        "description": "Forms, tabs, scraping — fully automated"
+        "description": "Forms, tabs, scraping, fully automated"
       },
       "computerVision": {
         "title": "Computer Vision",
@@ -716,7 +716,7 @@
       },
       "autonomous": {
         "title": "24/7 Autonomous",
-        "description": "Set it and forget it — runs while you sleep"
+        "description": "Set it and forget it, runs while you sleep"
       }
     },
     "guideCallout": {
@@ -742,14 +742,14 @@
     "swarm": {
       "title": "Swarm Mode",
       "pro": "PRO",
-      "upgradeLabel": "Swarm mode — upgrade to unlock",
+      "upgradeLabel": "Swarm mode, upgrade to unlock",
       "feature1": "Parallel execution across temporary machines",
       "feature2": "Each machine runs autonomously",
       "feature3": "3x your plan's machine limit per swarm",
-      "description": "Run one prompt across 3x your machine limit in parallel — each tackling the task independently.",
+      "description": "Run one prompt across 3x your machine limit in parallel, each tackling the task independently.",
       "enableLabel": "Enable swarm mode",
       "disableLabel": "Disable swarm mode",
-      "onTooltip": "Swarm mode ON — your prompt will run on multiple machines in parallel",
+      "onTooltip": "Swarm mode ON, your prompt will run on multiple machines in parallel",
       "offTooltip": "Enable swarm mode to run your prompt across multiple machines simultaneously",
       "decreaseMachines": "Decrease machine count",
       "increaseMachines": "Increase machine count",
@@ -767,7 +767,7 @@
     "buttons": {
       "stop": "Stop",
       "sendToSwarm": "Send to swarm",
-      "taskRunning": "Another task is running — click to stop it and run yours",
+      "taskRunning": "Another task is running, click to stop it and run yours",
       "selectComputer": "Select a computer to send messages",
       "waitCreating": "Please wait for VM to be created",
       "waitStarting": "Please wait for VM to start",
@@ -882,6 +882,11 @@
       "npsVeryLikely": "Very likely",
       "thanks": "Thanks for the feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Your {appName} connection expired.",
+      "reconnectLink": "Reconnect"
     }
   },
   "chatMessages": {
@@ -972,10 +977,10 @@
       "windows": "Windows",
       "macos": "macOS",
       "controlRemotely": "Control your computer remotely",
-      "controlDescription": "Install the desktop app and run tasks on your PC from this dashboard — anywhere, anytime."
+      "controlDescription": "Install the desktop app and run tasks on your PC from this dashboard, anywhere, anytime."
     },
     "credits": {
-      "runningLow": "Credits — Running low",
+      "runningLow": "Credits, Running low",
       "remaining": "Credits remaining",
       "buy": "Buy",
       "creditsLeft": "credits left",
@@ -1020,7 +1025,9 @@
     "today": "today",
     "yesterday": "yesterday",
     "talkToUsDesc": "Book a 15-min call",
-    "inviteEarnDesc": "Get free credits"
+    "inviteEarnDesc": "Get free credits",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Login",
@@ -1053,7 +1060,7 @@
       },
       "unlimited": {
         "name": "Unlimited",
-        "description": "No credit limits — ever",
+        "description": "No credit limits, ever",
         "badge": "Best Value"
       }
     },
@@ -1360,23 +1367,23 @@
       "stopped": "Stopped"
     },
     "desktopPromo": {
-      "text": "Skip the cloud — run AI agents on your own computer with the native app. Control your desktop from your phone.",
+      "text": "Skip the cloud, run AI agents on your own computer with the native app. Control your desktop from your phone.",
       "cta": "Get the app"
     },
     "emptyState": {
       "title": "True AI Employee with full computer access",
-      "description": "Spin up an isolated computer and let AI agents browse the web, run terminals, and control the desktop — hands-free.",
+      "description": "Spin up an isolated computer and let AI agents browse the web, run terminals, and control the desktop, hands-free.",
       "feature1": {
         "title": "Full desktop control",
         "description": "AI moves the mouse, types, clicks, and navigates like a real user."
       },
       "feature2": {
         "title": "Any task automated",
-        "description": "Browser, terminal, and UI — all agents work together on one computer."
+        "description": "Browser, terminal, and UI, all agents work together on one computer."
       },
       "feature3": {
         "title": "Isolated & safe",
-        "description": "Each computer runs in its own container — your local system stays untouched."
+        "description": "Each computer runs in its own container, your local system stays untouched."
       },
       "cta": "Create your first computer"
     },
@@ -1394,7 +1401,7 @@
   },
   "createMachine": {
     "title": "New Computer",
-    "subtitle": "Launch a cloud desktop — ready in ~30 seconds",
+    "subtitle": "Launch a cloud desktop, ready in ~30 seconds",
     "freeExpiry": "Free computers expire after ",
     "freeExpiry2": "2 hours",
     "upgrade": "Upgrade",
@@ -1412,7 +1419,7 @@
     "windows": {
       "name": "Windows Server",
       "badge": "BETA",
-      "description": "Windows desktop — expect bugs"
+      "description": "Windows desktop, expect bugs"
     },
     "osHintWindows": "Windows desktop with Chrome (beta). Ready in ~2 minutes.",
     "osHintLinux": "Ubuntu desktop, accessible via browser. Ready in ~30 seconds.",
@@ -1439,7 +1446,7 @@
     "guide": "Guide",
     "import": "Import",
     "addCredential": "Add Credential",
-    "securityNote": "Credentials are never sent to the AI model and are never exposed in chat — the agent fills them in directly without seeing the values",
+    "securityNote": "Credentials are never sent to the AI model and are never exposed in chat, the agent fills them in directly without seeing the values",
     "username": "Username",
     "password": "Password",
     "hide": "Hide",
@@ -1447,10 +1454,10 @@
     "encrypted": "Encrypted",
     "emptyState": {
       "title": "Auto-login, hands-free",
-      "description": "Save credentials once — the AI agent logs in automatically and keeps going without ever interrupting you",
+      "description": "Save credentials once, the AI agent logs in automatically and keeps going without ever interrupting you",
       "feature1": {
         "title": "Zero interruptions",
-        "description": "The agent encounters a login form, fills it in, and continues the task — no prompts, no pauses"
+        "description": "The agent encounters a login form, fills it in, and continues the task, no prompts, no pauses"
       },
       "feature2": {
         "title": "Never seen by AI",
@@ -1458,7 +1465,7 @@
       },
       "feature3": {
         "title": "Any website",
-        "description": "Works with login forms across any site — email, SaaS tools, dashboards, anything"
+        "description": "Works with login forms across any site, email, SaaS tools, dashboards, anything"
       },
       "cta": "Add your first credential"
     },
@@ -1511,7 +1518,7 @@
       },
       "unlimited": {
         "name": "Unlimited",
-        "tagline": "No credit limits — ever",
+        "tagline": "No credit limits, ever",
         "cta": "Go Unlimited",
         "badge": "Best Value"
       }
@@ -1552,7 +1559,7 @@
       }
     },
     "animations": {
-      "agentDescription": "Your agent controls a real computer — browser, files, and terminal",
+      "agentDescription": "Your agent controls a real computer, browser, files, and terminal",
       "fillForm": "Fill out form",
       "searchExtract": "Search & extract",
       "uploadReport": "Upload report",
@@ -1562,7 +1569,7 @@
       "vm": "VM {num}",
       "twoHrLimit": "2hr limit",
       "alwaysOn": "Always on",
-      "tempVmDescription": "Temporary VM — resets after 2 hours",
+      "tempVmDescription": "Temporary VM, resets after 2 hours",
       "persistentVmDescription": "Your files, apps & sessions persist between tasks",
       "sequentialOnly": "Sequential execution only on this plan",
       "yourTask": "Your task",
@@ -1579,11 +1586,11 @@
     "faqs": {
       "credits": {
         "q": "What counts as a credit?",
-        "a": "One credit equals roughly one agent action — a click, a form fill, a search query, or a file operation. A typical multi-step task uses 5–15 credits."
+        "a": "One credit equals roughly one agent action, a click, a form fill, a search query, or a file operation. A typical multi-step task uses 5–15 credits."
       },
       "persistent": {
         "q": "What does 'persistent machine' mean?",
-        "a": "On paid plans, your VM stays running between tasks — your desktop, files, browser sessions, and installed software all persist. Like your own always-on cloud computer."
+        "a": "On paid plans, your VM stays running between tasks, your desktop, files, browser sessions, and installed software all persist. Like your own always-on cloud computer."
       },
       "swarm": {
         "q": "What is swarm mode?",
@@ -1609,16 +1616,16 @@
       "noCreditCard": "No credit card",
       "cancelAnytime": "Cancel anytime",
       "noCreditCardRequired": "No credit card required",
-      "cancelAnytimeNoContracts": "Cancel anytime — no contracts"
+      "cancelAnytimeNoContracts": "Cancel anytime, no contracts"
     },
     "questions": "Questions"
   },
   "guide": {
     "pageTitle": "Guide",
-    "pageSubtitle": "From first setup to advanced features — learn how to get the most out of Coasty",
+    "pageSubtitle": "From first setup to advanced features, learn how to get the most out of Coasty",
     "completeGuide": "The Complete Guide",
     "completeGuideSubtitle": "Everything you need to know about Coasty",
-    "completeGuideDescription": "From first setup to advanced features — learn how to get the most out of your AI agent.",
+    "completeGuideDescription": "From first setup to advanced features, learn how to get the most out of your AI agent.",
     "talkToCofounders": "Talk to Cofounders",
     "tabs": {
       "overview": "Overview",
@@ -1685,7 +1692,7 @@
       "notChatbot": "Not a chatbot. Not an RPA script.",
       "worksLikeHuman": {
         "title": "Works like a human",
-        "desc": "Sees, clicks, types, navigates — exactly like you"
+        "desc": "Sees, clicks, types, navigates, exactly like you"
       },
       "noScripts": {
         "title": "No scripts or setup",
@@ -1697,7 +1704,7 @@
       },
       "runsInIsolation": {
         "title": "Runs in isolation",
-        "desc": "Sandboxed VM per session — nothing leaks"
+        "desc": "Sandboxed VM per session, nothing leaks"
       },
       "ctaTitle": "Pick any task and try it",
       "ctaSubtitle": "Ready to put Coasty to work?",
@@ -1856,7 +1863,7 @@
     "workforceTab": {
       "title": "Workforce",
       "subtitle": "Your AI company, on autopilot",
-      "description": "Employees, teams, triggers — running 24/7.",
+      "description": "Employees, teams, triggers, running 24/7.",
       "myCompany": "My Company",
       "contentOps": "Content Ops",
       "support": "Support",
@@ -1984,7 +1991,7 @@
         },
         "runOut": {
           "q": "What happens when I run out?",
-          "a": "You need at least 20 credits to start a task. Hit 0 and the task pauses — buy an add-on to continue."
+          "a": "You need at least 20 credits to start a task. Hit 0 and the task pauses, buy an add-on to continue."
         },
         "rollOver": {
           "q": "Do unused credits roll over?",
@@ -2074,7 +2081,7 @@
     "heroDescription": "Split any task across multiple isolated environments running simultaneously. Work that takes an hour finishes in minutes.",
     "trySwarmMode": "Try Swarm Mode",
     "seeInAction": "See it in action",
-    "liveExecution": "swarm-tree — live execution",
+    "liveExecution": "swarm-tree, live execution",
     "machineCount": "{count} machines",
     "running": "running",
     "threeSteps": "Three steps to parallel execution",
@@ -2085,7 +2092,7 @@
       },
       "machinesSpinUp": {
         "title": "Machines spin up",
-        "desc": "Each gets a full isolated environment — browser, terminal, desktop."
+        "desc": "Each gets a full isolated environment, browser, terminal, desktop."
       },
       "resultsStream": {
         "title": "Results stream live",
@@ -2099,7 +2106,7 @@
     "run": "Run",
     "reset": "Reset",
     "allCompleted": "All {count} machines completed",
-    "speedComparison": "~{swarmTime} min instead of ~{seqTime} min — {multiplier}x faster",
+    "speedComparison": "~{swarmTime} min instead of ~{seqTime} min, {multiplier}x faster",
     "seqVsSwarm": "Sequential vs Swarm",
     "tableHeaders": {
       "task": "Task",
@@ -2121,7 +2128,7 @@
       },
       "leadGeneration": {
         "title": "Lead Generation",
-        "desc": "Enrich profiles, find emails, and verify social presence — hours of work in minutes."
+        "desc": "Enrich profiles, find emails, and verify social presence, hours of work in minutes."
       },
       "qaTesting": {
         "title": "QA & Regression Testing",
@@ -2183,14 +2190,14 @@
   "downloadPage": {
     "title": "Desktop App",
     "heroTitle": "Let Coasty Run Your Computer",
-    "heroDescription": "Your AI assistant that takes the wheel. Automate your browser, desktop, and terminal — or control your computer from anywhere through our web interface.",
+    "heroDescription": "Your AI assistant that takes the wheel. Automate your browser, desktop, and terminal, or control your computer from anywhere through our web interface.",
     "seeInAction": "See it in action",
-    "overlayDescription": "A lightweight overlay that floats on your desktop. Control it locally or remotely from any browser — your computer, your way.",
+    "overlayDescription": "A lightweight overlay that floats on your desktop. Control it locally or remotely from any browser, your computer, your way.",
     "recommended": "Recommended for your system",
     "coastyFor": "Coasty for {platform}",
     "installerLabel": "{extension} installer",
     "beforeInstall": "Before you install",
-    "beforeInstallDescription": "Coasty Desktop is brand new, so your operating system won't recognize it yet. This is completely normal for newly released apps — here's how to proceed:",
+    "beforeInstallDescription": "Coasty Desktop is brand new, so your operating system won't recognize it yet. This is completely normal for newly released apps, here's how to proceed:",
     "windowsSteps": {
       "step1": "Windows protected your PC",
       "step2": "More info",
@@ -2230,11 +2237,11 @@
   "referralPage": {
     "shareTitle": "Share Coasty.",
     "earnTitle": "Earn together.",
-    "shareDescription": "Give friends 50 free credits to deploy their first AI agent. You get 50 credits too — every time someone joins.",
+    "shareDescription": "Give friends 50 free credits to deploy their first AI agent. You get 50 credits too, every time someone joins.",
     "features": [
-      "AI that actually works — real browser, real clicks, real results",
-      "Isolated & secure — every agent runs in its own sandboxed VM",
-      "Runs while you sleep — schedule tasks and let agents handle the rest"
+      "AI that actually works, real browser, real clicks, real results",
+      "Isolated & secure, every agent runs in its own sandboxed VM",
+      "Runs while you sleep, schedule tasks and let agents handle the rest"
     ],
     "recentActivity": "Your recent activity",
     "friendsCould": "Your friends could be doing this too",
@@ -2327,10 +2334,10 @@
     "home": {
       "title": "Coasty - #1 Computer-Use AI Agent | Best for Desktop & Browser Automation",
       "titleTemplate": "{title} | Coasty - AI Computer-Use Agent",
-      "description": "Coasty is the #1 ranked computer-using AI agent — 82% on the OSWorld benchmark — and the only flat-rate Unlimited computer-use plan at {unlimitedPriceLong} (cheaper than Devin Team $500+ACU, OpenAI Operator $200 rate-limited, and credit-capped competitors). Controls a full desktop like a human: browsers, forms, emails, spreadsheets. VM-level isolation. From {starterPrice} Starter or {unlimitedPrice} Unlimited.",
-      "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (Cheapest Computer-Use Agent)",
-      "ogDescription": "#1 on OSWorld (82%). {unlimitedPrice} flat Unlimited — cheaper than Devin Team ($500+ACU) at a higher benchmark. Browser, desktop, terminal automation. VM isolation per session. Cross-platform native + REST API + MCP server.",
-      "twitterDescription": "AI agent that runs a real desktop. 82% OSWorld (#1). {unlimitedPrice} Unlimited — cheapest flat-rate plan in the category. Starter from {starterPrice}. VM isolation + 26-tool MCP server."
+      "description": "Coasty is the #1 ranked computer-using AI agent (82% on OSWorld) and the only computer-use platform with 1,000+ native app integrations, Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, and 990+ more, callable in every chat. Flat-rate Unlimited at {unlimitedPriceLong} (cheaper than Devin Team $500+ACU and OpenAI Operator $200 rate-limited). Controls a full desktop like a human, with VM-level isolation. From {starterPrice} Starter or {unlimitedPrice} Unlimited.",
+      "ogTitle": "Coasty, 82% OSWorld + {unlimitedPrice} Unlimited (Cheapest Computer-Use Agent)",
+      "ogDescription": "#1 on OSWorld (82%) + 1,000+ integrations (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} flat Unlimited. The only computer-use agent with a real integration catalog. VM isolation, cross-platform native app, REST API, MCP server.",
+      "twitterDescription": "AI agent that runs a real desktop AND connects to 1,000+ apps (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Unlimited, cheapest flat-rate plan in the category. Starter from {starterPrice}."
     },
     "compare": {
       "title": "Compare Coasty - AI Agent Alternatives & Competitor Comparison",
@@ -2339,15 +2346,15 @@
       "ogDescription": "Feature-by-feature comparison of the #1 computer-using AI agent vs competitors. Benchmark scores, pricing, capabilities."
     },
     "download": {
-      "title": "Download Coasty Desktop App — AI Agent for Mac & Windows",
+      "title": "Download Coasty Desktop App, AI Agent for Mac & Windows",
       "description": "Download Coasty Desktop, the #1 computer-using AI agent that controls your local machine. Browser automation, desktop control, terminal access, and file operations. Available for Windows and macOS.",
-      "ogTitle": "Download Coasty Desktop — AI Agent for Mac & Windows",
+      "ogTitle": "Download Coasty Desktop, AI Agent for Mac & Windows",
       "ogDescription": "AI that controls your computer like a human. Browser, desktop, and terminal automation in one native app. #1 on OSWorld benchmark."
     },
     "guide": {
-      "title": "What Can Coasty Do? — The Complete Guide to AI Computer Automation",
+      "title": "What Can Coasty Do?, The Complete Guide to AI Computer Automation",
       "description": "Discover everything Coasty can automate: sales prospecting, email outreach, job applications, QA testing, data entry, social media, recruiting, research, and 100+ more tasks.",
-      "ogTitle": "What Can Coasty Do? — Complete AI Automation Guide",
+      "ogTitle": "What Can Coasty Do?, Complete AI Automation Guide",
       "ogDescription": "Explore 100+ tasks Coasty can automate. From sales outreach to QA testing, see exactly how an AI computer agent handles real-world work."
     },
     "blog": {
@@ -2357,69 +2364,71 @@
       "ogDescription": "Deep dives into autonomous AI agents, computer use technology, and real-world automation case studies from the #1 ranked computer-using agent."
     },
     "results": {
-      "title": "Demos & Results — Watch Coasty AI Agent Work Autonomously",
+      "title": "Demos & Results, Watch Coasty AI Agent Work Autonomously",
       "description": "Watch Coasty autonomously run marketing campaigns, apply to jobs, fill out applications, QA test products, send personalized emails, and more. Real case studies with video demos.",
-      "ogTitle": "Demos — Watch Coasty AI Agent Work Autonomously",
+      "ogTitle": "Demos, Watch Coasty AI Agent Work Autonomously",
       "ogDescription": "Real demos of AI controlling a computer: marketing, job applications, QA testing, email outreach, and more. #1 on OSWorld benchmark."
     },
     "terms": {
       "title": "Terms of Service",
       "description": "Coasty Terms of Service. Read the terms governing use of the Coasty AI employee platform, computer-using agent, and desktop application.",
-      "ogTitle": "Coasty — Terms of Service",
+      "ogTitle": "Coasty, Terms of Service",
       "ogDescription": "Terms governing use of the Coasty AI employee platform, computer-using agent, and desktop application."
     },
     "privacy": {
       "title": "Privacy Policy",
       "description": "Coasty Privacy Policy. Learn how we protect your data with VM-level isolation, encrypted sessions, sandboxed execution environments, and enterprise-grade security.",
-      "ogTitle": "Coasty — Privacy Policy",
+      "ogTitle": "Coasty, Privacy Policy",
       "ogDescription": "How Coasty protects your data with VM-level isolation, encrypted sessions, and enterprise-grade security."
     },
     "useCases": {
       "title": "Use Cases - Coasty AI Agent for Business Operations",
-      "description": "Discover 12 ways Coasty's AI agent automates your operations — competitor research, QA testing, lead generation, email outreach, and more. Real results.",
+      "description": "Discover 12 ways Coasty's AI agent automates your operations, competitor research, QA testing, lead generation, email outreach, and more. Real results.",
       "ogTitle": "Use Cases - Coasty AI Agent",
       "ogDescription": "12 ways to 10x your output on autopilot. Real results, real numbers."
     },
     "computerUse": {
-      "title": "Computer Use AI Agent — #1 Ranked Desktop, Browser & Terminal Automation",
+      "title": "Computer Use AI Agent, #1 Ranked Desktop, Browser & Terminal Automation",
       "description": "Coasty is the best computer use AI agent, ranked #1 on OSWorld (82%). Automate any desktop, browser, or terminal task with autonomous AI that controls computers like a human.",
-      "ogTitle": "Coasty — The #1 Computer Use AI Agent",
+      "ogTitle": "Coasty, The #1 Computer Use AI Agent",
       "ogDescription": "The best computer use agent ranked #1 on OSWorld. Automate any desktop, browser, or terminal task with AI."
     },
     "pricing": {
-      "title": "Pricing — Coasty AI Agent Plans & Pricing",
-      "description": "Coasty pricing: Starter {starterPrice} (200 credits) or Unlimited {unlimitedPrice} (the cheapest flat-rate unlimited computer-use plan in the market — cheaper than Devin Team $500+ACU, Genspark Pro $249 credit-capped, and Manus Extended $200 capped). Replaces $3,000+/mo human virtual assistants. No hidden fees.",
-      "ogTitle": "Coasty Pricing — {starterPrice} Starter, {unlimitedPrice} Unlimited",
-      "ogDescription": "{unlimitedPrice} flat Unlimited — the cheapest unlimited computer-use plan in the market. Or {starterPrice} Starter for individuals. Saves $36k/year vs human VAs."
+      "title": "Pricing, Coasty AI Agent Plans & Pricing",
+      "description": "Coasty pricing: Starter {starterPrice} (200 credits) or Unlimited {unlimitedPrice}, the cheapest flat-rate unlimited computer-use plan in the market (cheaper than Devin Team $500+ACU, Genspark Pro $249 credit-capped, Manus Extended $200 capped). Every plan includes 1,000+ native app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify, and 990+ more) and replaces $3,000+/mo human virtual assistants. No hidden fees.",
+      "ogTitle": "Coasty Pricing, {starterPrice} Starter, {unlimitedPrice} Unlimited",
+      "ogDescription": "{unlimitedPrice} flat Unlimited, the cheapest unlimited computer-use plan in the market. Or {starterPrice} Starter for individuals. Saves $36k/year vs human VAs."
     },
     "faq": {
       "q1": "What is Coasty?",
-      "a1": "Coasty is an AI employee platform — a computer-using agent that controls a desktop like a human. It opens browsers, clicks, types, navigates apps, fills forms, sends emails, and manages spreadsheets autonomously. Ranked #1 on the OSWorld benchmark with 82% completion rate across 369 real-world tasks.",
+      "a1": "Coasty is an AI employee platform, a computer-using agent that controls a desktop like a human. It opens browsers, clicks, types, navigates apps, fills forms, sends emails, and manages spreadsheets autonomously. Ranked #1 on the OSWorld benchmark with 82% completion rate across 369 real-world tasks.",
       "q2": "How does Coasty compare to Anthropic Computer Use?",
-      "a2": "While Anthropic Computer Use provides a raw API for computer control, Coasty is a production-ready platform with managed VM infrastructure, built-in CAPTCHA solving, a desktop app for Mac and Windows, multi-model support, and the highest OSWorld benchmark score (82%). Coasty provides the complete solution — not just the API.",
+      "a2": "While Anthropic Computer Use provides a raw API for computer control, Coasty is a production-ready platform with managed VM infrastructure, built-in CAPTCHA solving, a desktop app for Mac and Windows, multi-model support, and the highest OSWorld benchmark score (82%). Coasty provides the complete solution, not just the API.",
       "q3": "How much does Coasty cost?",
-      "a3": "Coasty has two live plans: Starter at $19/month (200 credits, 1 machine, ideal for individuals) and Unlimited at $99/month with no credit caps. The $99 Unlimited plan is the cheapest flat-rate unlimited computer-use plan available — cheaper than Devin Team ($500/month + ACU overage), OpenAI Operator ChatGPT Pro ($200/month rate-limited), Genspark Pro ($249.99 credit-capped at 125k credits), and Manus Extended ($200 capped at 40k credits). Both replace a $3,000+/month human virtual assistant; Unlimited saves $33,000+/year vs a human VA at 92% cost reduction.",
+      "a3": "Coasty has two live plans: Starter at $19/month (200 credits, 1 machine, ideal for individuals) and Unlimited at $99/month with no credit caps. The $99 Unlimited plan is the cheapest flat-rate unlimited computer-use plan available, cheaper than Devin Team ($500/month + ACU overage), OpenAI Operator ChatGPT Pro ($200/month rate-limited), Genspark Pro ($249.99 credit-capped at 125k credits), and Manus Extended ($200 capped at 40k credits). Both replace a $3,000+/month human virtual assistant; Unlimited saves $33,000+/year vs a human VA at 92% cost reduction.",
       "q4": "Is Coasty safe to use?",
       "a4": "Yes. Every Coasty session runs in its own isolated, sandboxed virtual machine. Your data stays safe, your machine stays untouched, and nothing leaks between sessions. This is true VM-level isolation, not just containers in a shared pool.",
       "q5": "What is the OSWorld benchmark?",
-      "a5": "OSWorld is a benchmark for evaluating AI agents on real-world computer tasks. It tests 369 tasks across browsers, office apps, and system operations. Coasty scored 82%, the highest of any computer-using agent — achieving state-of-the-art performance.",
+      "a5": "OSWorld is a benchmark for evaluating AI agents on real-world computer tasks. It tests 369 tasks across browsers, office apps, and system operations. Coasty scored 82%, the highest of any computer-using agent, achieving state-of-the-art performance.",
       "q6": "How is Coasty different from RPA tools like UiPath?",
       "a6": "Traditional RPA tools like UiPath require brittle scripting and break when interfaces change. Coasty uses AI vision to understand and interact with any interface, adapting in real-time without predefined scripts. It works like a human, not a macro. Setup takes minutes instead of weeks.",
       "q7": "Does Coasty have a desktop app?",
-      "a7": "Yes. Coasty Desktop is available for both Mac and Windows. It runs as a floating overlay on your desktop and can control your local browser, files, terminal, and applications directly — no VM required for local tasks.",
+      "a7": "Yes. Coasty Desktop is available for both Mac and Windows. It runs as a floating overlay on your desktop and can control your local browser, files, terminal, and applications directly, no VM required for local tasks.",
       "q8": "What can Coasty automate?",
       "a8": "Coasty can automate virtually any computer task: web browsing, form filling, email sending, spreadsheet management, data entry, social media posting, job applications, sales prospecting, QA testing, customer support, LinkedIn recruiting, and more. If a human can do it on a computer, Coasty can too.",
       "q9": "How does Coasty compare to OpenAI Operator?",
       "a9": "Coasty outperforms OpenAI Operator on the OSWorld benchmark (82% vs ~40%), offers true VM-level isolation for every session, supports multiple AI models, includes full desktop control beyond just browser, and provides an open-source framework.",
       "q10": "Can Coasty solve CAPTCHAs?",
-      "a10": "Yes. Coasty has a built-in CAPTCHA-solving pipeline, so it doesn't get blocked the way competing AI agents do. This is critical for real-world automation where CAPTCHAs are common on websites."
+      "a10": "Yes. Coasty has a built-in CAPTCHA-solving pipeline, so it doesn't get blocked the way competing AI agents do. This is critical for real-world automation where CAPTCHAs are common on websites.",
+      "q11": "What apps and services does Coasty integrate with?",
+      "a11": "Coasty connects to 1,000+ apps through its built-in Composio integration layer, including Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase, and Twilio. Connect any app once with OAuth in Settings, then Coasty uses it across every chat on your behalf, no password ever sees the agent. When an app has an API, Coasty calls it directly for sub-second latency. When it does not (SAP GUI, LinkedIn Sales Navigator, legacy banking portals, internal admin tools), the same agent drives the UI with computer use. Coasty is the only computer-use platform that ships both surfaces, an API-first integration catalog AND OS-level desktop control, in one agent."
     },
     "structuredData": {
-      "appDescription": "The #1 ranked computer-using AI agent and the cheapest flat-rate Unlimited computer-use plan in the market at {unlimitedPriceLong}. Coasty controls a full desktop like a human — opens browsers, clicks, types, fills forms, sends emails, manages spreadsheets autonomously. 82% on the OSWorld benchmark across 369 real-world tasks. True VM-level isolation per session. Built-in CAPTCHA solving. Plans: {starterPrice} Starter or {unlimitedPrice} Unlimited.",
-      "orgDescription": "Coasty builds the #1 computer-using AI agent (82% OSWorld) and ships the only flat-rate Unlimited computer-use plan at {unlimitedPriceLong} — cheaper than Devin Team, OpenAI Operator, and credit-capped competitors at the same price tier. Our platform provides autonomous desktop control, browser automation, and multi-agent orchestration with true VM-level isolation.",
-      "productDescription": "AI computer-using agent that controls a desktop like a human. #1 on OSWorld benchmark (82%). {unlimitedPrice} Unlimited plan is the cheapest flat-rate unlimited computer-use plan available. Autonomous browser automation, desktop control, email sending, form filling, and spreadsheet management with true VM-level isolation.",
-      "websiteDescription": "#1 computer-using AI agent platform — 82% OSWorld benchmark and the cheapest flat-rate Unlimited plan at {unlimitedPriceLong}. Autonomous browser, desktop, and terminal automation with VM isolation. From {starterPrice} Starter or {unlimitedPrice} Unlimited.",
-      "softwareDescription": "AI computer-using agent that controls a full desktop like a human. #1 on OSWorld benchmark with 82% completion rate across 369 real-world tasks. The {unlimitedPriceLong} Unlimited plan is the cheapest flat-rate unlimited computer-use plan on the market. Autonomous browser automation, desktop control, terminal operations, email sending, form filling, and spreadsheet management.",
+      "appDescription": "The #1 ranked computer-using AI agent and the only computer-use platform with 1,000+ native app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, plus 990+ more). 82% on OSWorld across 369 real-world tasks. The cheapest flat-rate Unlimited plan in the market at {unlimitedPriceLong}. Controls a full desktop like a human, true VM-level isolation per session, built-in CAPTCHA solving. Plans: {starterPrice} Starter or {unlimitedPrice} Unlimited.",
+      "orgDescription": "Coasty builds the #1 computer-using AI agent (82% OSWorld) with 1,000+ OAuth-secured app integrations (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) and ships the only flat-rate Unlimited computer-use plan at {unlimitedPriceLong}, cheaper than Devin Team, OpenAI Operator, and credit-capped competitors. Our platform combines computer use, multi-agent orchestration, native integrations, and VM-level isolation in one product.",
+      "productDescription": "AI computer-using agent that controls a desktop like a human AND connects natively to 1,000+ apps (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 on OSWorld benchmark (82%). {unlimitedPrice} Unlimited is the cheapest flat-rate unlimited computer-use plan available. Autonomous browser, desktop, email, form filling, and spreadsheet automation with VM-level isolation.",
+      "websiteDescription": "#1 computer-using AI agent platform (82% OSWorld) with 1,000+ native integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) and the cheapest flat-rate Unlimited plan at {unlimitedPriceLong}. Autonomous browser, desktop, and terminal automation with VM isolation. From {starterPrice} Starter or {unlimitedPrice} Unlimited.",
+      "softwareDescription": "AI computer-using agent that controls a full desktop like a human and ships 1,000+ OAuth-secured app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, plus 990+ more). #1 on OSWorld with 82% completion across 369 real-world tasks. The {unlimitedPriceLong} Unlimited plan is the cheapest flat-rate unlimited computer-use plan on the market. Browser, desktop, terminal, email, form, and spreadsheet automation in one agent.",
       "breadcrumbs": {
         "home": "Home",
         "caseStudies": "AI Agent Case Studies",
@@ -2427,6 +2436,13 @@
         "download": "Download Desktop App",
         "compare": "Compare AI Agents"
       }
+    },
+    "connections": {
+      "title": "Connections",
+      "description": "Connect Gmail, Slack, Notion, GitHub, and hundreds more apps. Available in every chat.",
+      "ogTitle": "Connections — Connect 250+ Apps to Your Coasty AI Agent",
+      "ogDescription": "Bring Gmail, Slack, GitHub, Notion, Google Calendar, Linear and hundreds more apps into every chat. OAuth-secured, always-on, used by Coasty agents on your behalf.",
+      "twitterDescription": "Connect Gmail, Slack, GitHub, Notion and 250+ apps to Coasty. One OAuth, used in every chat by your agent."
     }
   },
   "errorPages": {
@@ -2464,7 +2480,7 @@
   },
   "schedulesPage": {
     "title": "Workforce",
-    "subtitle": "Your AI workforce — assign tasks and let them handle the rest",
+    "subtitle": "Your AI workforce, assign tasks and let them handle the rest",
     "guide": "Guide",
     "teamsTab": "Teams",
     "hireEmployee": "Hire Employee",
@@ -2500,10 +2516,10 @@
     },
     "emptyWorkforce": {
       "title": "Hire your first employee",
-      "description": "AI employees work on your behalf — assign a task, set a schedule, and they'll execute it automatically",
+      "description": "AI employees work on your behalf, assign a task, set a schedule, and they'll execute it automatically",
       "flexibleShifts": {
         "title": "Flexible shifts",
-        "desc": "Schedule employees hourly, daily, weekly, monthly — or use a custom cron expression"
+        "desc": "Schedule employees hourly, daily, weekly, monthly, or use a custom cron expression"
       },
       "fullAutonomy": {
         "title": "Full autonomy",
@@ -2553,11 +2569,11 @@
       "dragEmployees": "Drag employees onto a team",
       "clickToEdit": "Click to edit schedule & settings",
       "teamsShare": "Teams share memory & guidelines",
-      "dashedLines": "Dashed lines — delegation between employees"
+      "dashedLines": "Dashed lines, delegation between employees"
     },
     "inactive": {
       "title": "{count} employees inactive",
-      "missingMachine": "{count} missing a machine — won't run until activated",
+      "missingMachine": "{count} missing a machine, won't run until activated",
       "wontRun": "Won't run until activated",
       "fixInEmployees": "Fix in Employees"
     },
@@ -2590,11 +2606,11 @@
       "contentOps": {
         "name": "Content Operations",
         "tagline": "Publish consistently without lifting a finger",
-        "description": "A lean content engine — writes, optimizes, and distributes content on autopilot.",
+        "description": "A lean content engine, writes, optimizes, and distributes content on autopilot.",
         "roles": {
-          "atlas": "Content Writer — drafts blog posts, newsletters, and social copy",
-          "echo": "SEO Analyst — audits pages, tracks rankings, suggests keyword opportunities",
-          "nova": "Social Distributor — posts content to platforms and monitors engagement"
+          "atlas": "Content Writer, drafts blog posts, newsletters, and social copy",
+          "echo": "SEO Analyst, audits pages, tracks rankings, suggests keyword opportunities",
+          "nova": "Social Distributor, posts content to platforms and monitors engagement"
         },
         "credentials": {
           "wordpress": "Publish and manage blog posts",
@@ -2608,9 +2624,9 @@
         "tagline": "24/7 support coverage from 3 employees",
         "description": "Monitors inboxes, resolves common issues, and keeps your knowledge base updated.",
         "roles": {
-          "sage": "Inbox Monitor — checks support emails, categorizes and responds to common queries",
-          "iris": "Knowledge Base Manager — updates help docs and FAQs based on recurring issues",
-          "milo": "Feedback Analyst — aggregates reviews and support trends into weekly reports"
+          "sage": "Inbox Monitor, checks support emails, categorizes and responds to common queries",
+          "iris": "Knowledge Base Manager, updates help docs and FAQs based on recurring issues",
+          "milo": "Feedback Analyst, aggregates reviews and support trends into weekly reports"
         },
         "credentials": {
           "gmail": "Monitor and respond to support emails",
@@ -2623,9 +2639,9 @@
         "tagline": "Stay informed without the manual work",
         "description": "Monitors competitors, tracks industry trends, and compiles actionable research briefs.",
         "roles": {
-          "scout": "Competitor Monitor — tracks competitor websites, pricing, and feature changes",
-          "wren": "Trend Researcher — scans industry news, publications, and social media for trends",
-          "quinn": "Brief Compiler — synthesizes findings into structured weekly intelligence reports"
+          "scout": "Competitor Monitor, tracks competitor websites, pricing, and feature changes",
+          "wren": "Trend Researcher, scans industry news, publications, and social media for trends",
+          "quinn": "Brief Compiler, synthesizes findings into structured weekly intelligence reports"
         },
         "credentials": {
           "google": "Web research and search",
@@ -2636,15 +2652,15 @@
       "marketing": {
         "name": "Marketing Department",
         "tagline": "A full marketing team in two machines",
-        "description": "Content creation, social media, SEO, competitor tracking, and campaign analytics — two coordinated squads.",
+        "description": "Content creation, social media, SEO, competitor tracking, and campaign analytics, two coordinated squads.",
         "roles": {
-          "atlas": "Content Strategist — plans content calendar, writes long-form pieces",
-          "nova": "Social Media Manager — posts, engages, and grows social channels",
-          "echo": "SEO Specialist — optimizes pages, builds internal links, tracks keywords",
-          "pixel": "Email Campaign Manager — writes and sends newsletters, tracks opens/clicks",
-          "scout": "Competitor Analyst — monitors competitor marketing moves and reports insights",
-          "dash": "Ad Campaign Monitor — tracks ad spend, ROAS, and optimization opportunities",
-          "iris": "Analytics Reporter — compiles cross-channel performance dashboards"
+          "atlas": "Content Strategist, plans content calendar, writes long-form pieces",
+          "nova": "Social Media Manager, posts, engages, and grows social channels",
+          "echo": "SEO Specialist, optimizes pages, builds internal links, tracks keywords",
+          "pixel": "Email Campaign Manager, writes and sends newsletters, tracks opens/clicks",
+          "scout": "Competitor Analyst, monitors competitor marketing moves and reports insights",
+          "dash": "Ad Campaign Monitor, tracks ad spend, ROAS, and optimization opportunities",
+          "iris": "Analytics Reporter, compiles cross-channel performance dashboards"
         },
         "credentials": {
           "wordpress": "Publish blog content",
@@ -2661,13 +2677,13 @@
         "tagline": "Run your store while you sleep",
         "description": "Product management, pricing intelligence, inventory tracking, review management, and growth marketing for online stores.",
         "roles": {
-          "cleo": "Product Lister — creates and updates product descriptions, images, and metadata",
-          "onyx": "Price Monitor — tracks competitor prices and flags opportunities for adjustments",
-          "luna": "Inventory Tracker — monitors stock levels and alerts on low inventory",
-          "sage": "Review Manager — responds to customer reviews and aggregates sentiment",
-          "dash": "Ad Campaign Optimizer — manages product ads and shopping campaigns",
-          "flux": "Email Marketer — sends abandoned cart, promo, and post-purchase sequences",
-          "wren": "Analytics Reporter — tracks revenue, conversion rates, and growth metrics"
+          "cleo": "Product Lister, creates and updates product descriptions, images, and metadata",
+          "onyx": "Price Monitor, tracks competitor prices and flags opportunities for adjustments",
+          "luna": "Inventory Tracker, monitors stock levels and alerts on low inventory",
+          "sage": "Review Manager, responds to customer reviews and aggregates sentiment",
+          "dash": "Ad Campaign Optimizer, manages product ads and shopping campaigns",
+          "flux": "Email Marketer, sends abandoned cart, promo, and post-purchase sequences",
+          "wren": "Analytics Reporter, tracks revenue, conversion rates, and growth metrics"
         },
         "credentials": {
           "shopify": "Store management and product listings",
@@ -2682,12 +2698,12 @@
         "tagline": "Automate the boring parts of engineering",
         "description": "Automated code reviews, dependency monitoring, documentation, testing, deploy monitoring, and incident response.",
         "roles": {
-          "rune": "Code Reviewer — reviews open PRs, suggests improvements, checks for security issues",
-          "koda": "Dependency Monitor — tracks outdated packages, security advisories, and breaking changes",
-          "aria": "Doc Writer — keeps API docs, READMEs, and changelogs up to date with latest code",
-          "blaze": "Test Monitor — runs test suites, tracks flaky tests, reports coverage trends",
-          "frost": "Deploy Monitor — watches CI/CD pipelines, alerts on failures, tracks deploy frequency",
-          "neon": "Uptime & Log Watcher — monitors services, scans logs for errors, creates incident reports"
+          "rune": "Code Reviewer, reviews open PRs, suggests improvements, checks for security issues",
+          "koda": "Dependency Monitor, tracks outdated packages, security advisories, and breaking changes",
+          "aria": "Doc Writer, keeps API docs, READMEs, and changelogs up to date with latest code",
+          "blaze": "Test Monitor, runs test suites, tracks flaky tests, reports coverage trends",
+          "frost": "Deploy Monitor, watches CI/CD pipelines, alerts on failures, tracks deploy frequency",
+          "neon": "Uptime & Log Watcher, monitors services, scans logs for errors, creates incident reports"
         },
         "credentials": {
           "github": "Repository access, PR reviews, issues",
@@ -2699,19 +2715,19 @@
       "fullBusiness": {
         "name": "Full Business Operations",
         "tagline": "An entire company, fully automated",
-        "description": "Sales, marketing, support, and admin — four departments working in concert across three machines with shared intelligence.",
+        "description": "Sales, marketing, support, and admin, four departments working in concert across three machines with shared intelligence.",
         "roles": {
-          "atlas": "Lead Generator — finds and qualifies potential customers from online sources",
-          "dash": "CRM Manager — updates deals, tracks pipeline, and sends follow-up sequences",
-          "scout": "Proposal Writer — drafts sales proposals and pitch decks from templates",
-          "nova": "Content Marketer — writes blog posts, case studies, and marketing copy",
-          "echo": "Social Media Manager — posts content and engages with audience",
-          "pixel": "Email Campaign Manager — runs drip campaigns and newsletter sequences",
-          "sage": "Support Lead — handles customer inquiries and resolves issues",
-          "iris": "Knowledge Manager — maintains help docs, FAQs, and internal wiki",
-          "milo": "Data Analyst — compiles cross-department reports and KPI dashboards",
-          "wren": "Market Researcher — tracks industry trends and competitive intelligence",
-          "quinn": "Operations Coordinator — runs weekly summaries and cross-team syncs"
+          "atlas": "Lead Generator, finds and qualifies potential customers from online sources",
+          "dash": "CRM Manager, updates deals, tracks pipeline, and sends follow-up sequences",
+          "scout": "Proposal Writer, drafts sales proposals and pitch decks from templates",
+          "nova": "Content Marketer, writes blog posts, case studies, and marketing copy",
+          "echo": "Social Media Manager, posts content and engages with audience",
+          "pixel": "Email Campaign Manager, runs drip campaigns and newsletter sequences",
+          "sage": "Support Lead, handles customer inquiries and resolves issues",
+          "iris": "Knowledge Manager, maintains help docs, FAQs, and internal wiki",
+          "milo": "Data Analyst, compiles cross-department reports and KPI dashboards",
+          "wren": "Market Researcher, tracks industry trends and competitive intelligence",
+          "quinn": "Operations Coordinator, runs weekly summaries and cross-team syncs"
         },
         "credentials": {
           "gmail": "Email communication and support",
@@ -2727,18 +2743,18 @@
       "growth": {
         "name": "Growth & Acquisition",
         "tagline": "Aggressive growth on full autopilot",
-        "description": "Outbound prospecting, inbound marketing, conversion optimization, and analytics — a dedicated growth engine across three machines.",
+        "description": "Outbound prospecting, inbound marketing, conversion optimization, and analytics, a dedicated growth engine across three machines.",
         "roles": {
-          "blaze": "Outbound Prospector — finds decision-makers, researches companies, builds lead lists",
-          "flux": "Email Outreach — sends personalized cold emails, manages follow-up sequences",
-          "orion": "LinkedIn Outreach — connects with prospects and sends personalized messages",
-          "coral": "Content Creator — produces SEO content, landing page copy, and lead magnets",
-          "taro": "Landing Page Optimizer — monitors conversion rates, suggests and tests improvements",
-          "vale": "Ad Campaign Manager — manages Google and Meta ad campaigns end-to-end",
-          "ember": "Lead Scorer — qualifies inbound leads and routes to appropriate follow-up",
-          "haze": "Funnel Analyst — tracks conversion metrics at every stage, identifies bottlenecks",
-          "dune": "Competitor Intel — monitors competitor campaigns, pricing, and positioning changes",
-          "kit": "Growth Reporter — compiles daily/weekly growth metrics and experiment results"
+          "blaze": "Outbound Prospector, finds decision-makers, researches companies, builds lead lists",
+          "flux": "Email Outreach, sends personalized cold emails, manages follow-up sequences",
+          "orion": "LinkedIn Outreach, connects with prospects and sends personalized messages",
+          "coral": "Content Creator, produces SEO content, landing page copy, and lead magnets",
+          "taro": "Landing Page Optimizer, monitors conversion rates, suggests and tests improvements",
+          "vale": "Ad Campaign Manager, manages Google and Meta ad campaigns end-to-end",
+          "ember": "Lead Scorer, qualifies inbound leads and routes to appropriate follow-up",
+          "haze": "Funnel Analyst, tracks conversion metrics at every stage, identifies bottlenecks",
+          "dune": "Competitor Intel, monitors competitor campaigns, pricing, and positioning changes",
+          "kit": "Growth Reporter, compiles daily/weekly growth metrics and experiment results"
         },
         "credentials": {
           "linkedin": "Prospecting and outreach",
@@ -2755,15 +2771,15 @@
         "tagline": "Run your SaaS like a well-oiled machine",
         "description": "Customer success, product analytics, churn prevention, feature tracking, and automated reporting for SaaS businesses.",
         "roles": {
-          "luna": "Customer Success Monitor — tracks user engagement, identifies at-risk accounts",
-          "sage": "Onboarding Assistant — guides new users through setup, monitors activation rates",
-          "ivy": "Churn Preventer — reaches out to disengaging users with re-activation campaigns",
-          "rune": "Feature Request Tracker — aggregates user feedback and feature requests from all channels",
-          "koda": "Product Analytics — tracks feature adoption, user journeys, and engagement metrics",
-          "neon": "Bug & Issue Monitor — watches error logs, user reports, and status page incidents",
-          "aria": "Changelog Writer — documents releases, updates knowledge base and help center",
-          "frost": "Revenue Analyst — tracks MRR, churn rate, LTV, and expansion revenue",
-          "zara": "Competitor Tracker — monitors competitor features, pricing, and market positioning"
+          "luna": "Customer Success Monitor, tracks user engagement, identifies at-risk accounts",
+          "sage": "Onboarding Assistant, guides new users through setup, monitors activation rates",
+          "ivy": "Churn Preventer, reaches out to disengaging users with re-activation campaigns",
+          "rune": "Feature Request Tracker, aggregates user feedback and feature requests from all channels",
+          "koda": "Product Analytics, tracks feature adoption, user journeys, and engagement metrics",
+          "neon": "Bug & Issue Monitor, watches error logs, user reports, and status page incidents",
+          "aria": "Changelog Writer, documents releases, updates knowledge base and help center",
+          "frost": "Revenue Analyst, tracks MRR, churn rate, LTV, and expansion revenue",
+          "zara": "Competitor Tracker, monitors competitor features, pricing, and market positioning"
         },
         "credentials": {
           "stripe": "Subscription and revenue data",
@@ -2990,7 +3006,7 @@
     "section": {
       "title": "Memory",
       "tag": "optional · personal",
-      "description": "A short note about you that travels with every agent run — chat, scheduled tasks, swarm machines, delegated agents."
+      "description": "A short note about you that travels with every agent run, chat, scheduled tasks, swarm machines, delegated agents."
     },
     "presetsLabel": "Try",
     "presets": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Referral",
         "description": "Invite friends and earn credits"
+      },
+      "integrations": {
+        "label": "Integrations",
+        "description": "Connect third-party apps"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Referrals",
       "description": "Share Coasty. Earn together."
+    },
+    "connections": {
+      "title": "Your Connections",
+      "description": "Fetching your connected apps and toolkits."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,203 @@
     "trustTransit": "TLS 1.3 in transit",
     "trustAtRest": "AES-256-GCM at rest",
     "trustNoTraining": "No training on your data"
+  },
+  "connections": {
+    "page": {
+      "title": "Connections",
+      "description": "Connect Gmail, Slack, Notion, GitHub, and hundreds more apps. Available in every chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Connected",
+      "initiated": "Connecting",
+      "expired": "Expired",
+      "failed": "Revoked",
+      "failedShort": "Failed",
+      "inactive": "Inactive"
+    },
+    "toasts": {
+      "disconnectFailed": "Failed to disconnect",
+      "disconnected": "Disconnected {appName}",
+      "reconnectFailed": "Failed to start reconnect",
+      "connected": "Connected {app}",
+      "error": "Something went wrong. Please try again."
+    },
+    "card": {
+      "logoAlt": "{appName} logo",
+      "fallbackAccountLabel": "Connected",
+      "connectedOn": "Connected on {date}",
+      "lastUsed": "Last used {time}",
+      "actions": {
+        "reconnect": "Reconnect",
+        "disconnect": "Disconnect",
+        "menuAriaLabel": "Connection actions"
+      },
+      "error": {
+        "expired": "Authorization expired. Reconnect to restore tool access.",
+        "revoked": "Connection revoked. Reconnect to restore tool access."
+      },
+      "disconnectDialog": {
+        "title": "Disconnect {appName}?",
+        "connectedOn": "connected {date}",
+        "consequence": {
+          "revokeOauth": "Composio will revoke the OAuth grant",
+          "toolsStop": "Tools using this connection will stop working"
+        },
+        "confirm": "Disconnect",
+        "cancel": "Keep connection"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "{name} logo",
+      "headline": "Connect your first app",
+      "subheadline": "Authorize once and your AI can read your email, post to Slack, update docs, and more — automatically, in every chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Tools in every chat",
+          "desc": "Once connected, your AI uses them automatically."
+        },
+        "secureOauth": {
+          "title": "Secure OAuth",
+          "desc": "Authorize once, revoke any time."
+        },
+        "hundredsOfApps": {
+          "title": "Hundreds of apps",
+          "desc": "Email, calendars, CRMs, docs, code, and more."
+        }
+      },
+      "browseAppsCta": "Browse apps",
+      "popularIntegrationsEyebrow": "Popular integrations"
+    },
+    "connectDialog": {
+      "title": "Connect an app",
+      "description": "Browse hundreds of integrations powered by Composio.",
+      "searchPlaceholder": "Search apps…",
+      "clearSearchAria": "Clear search",
+      "categories": {
+        "all": "All",
+        "communication": "Communication",
+        "productivity": "Productivity",
+        "calendar": "Calendar",
+        "developer": "Developer",
+        "crmSales": "CRM & Sales"
+      },
+      "sections": {
+        "featured": "Featured",
+        "allApps": "All apps"
+      },
+      "card": {
+        "logoAlt": "{name} logo",
+        "alreadyConnectedTooltip": "Already connected — manage from the Connections page",
+        "connectedLabel": "Connected",
+        "connectFallbackDescription": "Connect {name} to your AI"
+      },
+      "footer": {
+        "poweredBy": "powered by Composio",
+        "cancel": "Cancel"
+      },
+      "empty": {
+        "noMatchTitle": "No apps match \"{query}\"",
+        "noAppsTitle": "No apps available",
+        "noMatchBody": "Try a shorter search term or a different category.",
+        "noAppsBody": "Composio integrations will appear here once configured."
+      },
+      "errors": {
+        "failedToStart": "Failed to start connection"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Connect with Composio",
+          "connectWithApiKey": "Save & connect",
+          "connectWithBearerToken": "Save & connect",
+          "connectWithBasic": "Save & connect",
+          "connectNoAuth": "Enable",
+          "connecting": "Connecting..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API key",
+          "apiKeyPlaceholder": "Paste your API key",
+          "bearerTokenLabel": "Bearer token",
+          "bearerTokenPlaceholder": "Paste your bearer token",
+          "basicAuthUsername": "Username",
+          "basicAuthPassword": "Password",
+          "basicAuthUsernamePlaceholder": "Your account username",
+          "basicAuthPasswordPlaceholder": "Your account password",
+          "revealSecret": "Show",
+          "hideSecret": "Hide"
+        },
+        "noAuthHint": "{name} does not require credentials. Click Enable to add it to your workspace.",
+        "apiKeyHelp": "Where do I find this?",
+        "connectedToast": "Connected to {name}",
+        "unsupported": {
+          "title": "This connection type is not supported yet",
+          "body": "{name} uses a {scheme} authentication flow we have not wired up in the app yet. You can connect it directly on the Composio dashboard and it will appear here once linked.",
+          "openComposioDashboard": "Open Composio dashboard"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "Disconnect {name}",
+      "disconnect": "Disconnect"
+    },
+    "empty": {
+      "title": "No apps connected",
+      "description": "Connect Gmail, Slack, Notion, and more so Coasty can use them in any chat."
+    },
+    "toolInvocation": {
+      "calling": "Calling {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Your {appName} connection expired.",
+      "reconnectLink": "Reconnect"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Failed to load connections (HTTP {status})",
+      "loadToolkitsFailed": "Failed to load toolkits (HTTP {status})",
+      "startConnectionFailed": "Failed to start connection (HTTP {status})",
+      "disconnectFailedHttp": "Failed to disconnect (HTTP {status})",
+      "credentialsRequired": "Please fill in all required fields to continue.",
+      "credentialsErrorPrefix": "Connection failed:",
+      "unknownToolkit": "We do not recognise this app. Please refresh the catalog and try again.",
+      "unsupportedAuthScheme": "This authentication method is not supported in the app yet.",
+      "missingCredentials": "Missing required fields: {fields}",
+      "invalidCredentials": "The credentials were rejected. Please double-check and try again.",
+      "credentialValidationFailed": "Could not validate your credentials. Please try again.",
+      "composioUnavailable": "Composio is temporarily unavailable for this app. This is an upstream service issue — please try again in a minute.",
+      "apiKeyRequired": "An API key is required.",
+      "tokenRequired": "A bearer token is required.",
+      "basicRequired": "Username and password are required."
+    },
+    "title": "Connections",
+    "subtitle": "Connect the apps Coasty can use on your behalf in any chat.",
+    "connectedSuffix": "connected",
+    "refresh": "Refresh",
+    "newConnection": "New connection",
+    "retry": "Try again",
+    "noFilteredConnections": "No {filter} apps yet",
+    "noFilteredDescription": "Try a different filter, or connect a new app to get started.",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "connecting": "Connecting",
+      "expired": "Expired",
+      "failed": "Failed"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Connected apps",
+      "subheading": "Coasty can use these apps in any chat on your behalf.",
+      "connectNewApp": "Connect new app",
+      "manageOnFullPage": "Manage on full page"
+    }
   }
 }

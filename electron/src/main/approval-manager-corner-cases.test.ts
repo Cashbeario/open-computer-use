@@ -90,7 +90,8 @@ describe('requestApproval / handleResponse', () => {
     const req = sentEvents.find((e) => e.ch === 'approval-request')
     expect(req).toBeDefined()
     const id = req!.payload.id
-    expect(id).toMatch(/^approval_\d+_[a-z0-9]+$/)
+    // Format: `approval_<uuid-v4>` — 8-4-4-4-12 hex with dashes.
+    expect(id).toMatch(/^approval_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
 
     m.handleResponse(id, true)
     const result = await promise

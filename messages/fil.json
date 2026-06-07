@@ -868,6 +868,11 @@
       "npsVeryLikely": "Malamang na malamang",
       "thanks": "Salamat sa feedback",
       "creditsLabel": "credits"
+    },
+    "composioReauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Nag-expire ang iyong koneksyon sa {appName}.",
+      "reconnectLink": "I-reconnect"
     }
   },
   "chatMessages": {
@@ -1006,7 +1011,9 @@
     "inMinutes": "sa {count}m",
     "inHours": "sa {count}h",
     "today": "ngayon",
-    "yesterday": "kahapon"
+    "yesterday": "kahapon",
+    "connections": "Apps",
+    "resources": "Agent"
   },
   "appHeader": {
     "login": "Mag-login",
@@ -2313,10 +2320,10 @@
     "home": {
       "title": "Coasty - #1 AI Agent na Gumagamit ng Computer | Pinakamahusay para sa Desktop at Browser Automation",
       "titleTemplate": "{title} | Coasty - AI Computer-Use Agent",
-      "description": "Ang Coasty ang #1 na naka-rank na computer-using AI agent — 82% sa OSWorld benchmark — at ang tanging flat-rate na Unlimited computer-use plan sa $99/buwan (mas mura kaysa sa Devin Team $500+ACU, rate-limited na OpenAI Operator $200, at mga kakumpitensyang may credit cap). Kinokontrol ang buong desktop tulad ng tao: mga browser, form, email, spreadsheet. VM-level isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
+      "description": "Ang Coasty ang #1 na naka-rank na computer-using AI agent (82% sa OSWorld) at ang tanging computer-use platform na may 1,000+ native app integrations — Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, at 990+ pang iba — na magagamit sa bawat chat. Flat-rate Unlimited sa {unlimitedPriceLong} (mas mura kaysa sa Devin Team $500+ACU at rate-limited na OpenAI Operator $200). Kinokontrol ang buong desktop tulad ng tao, na may VM-level isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
       "ogTitle": "Coasty — 82% OSWorld + {unlimitedPrice} Unlimited (Pinakamurang Computer-Use Agent)",
-      "ogDescription": "#1 sa OSWorld (82%). {unlimitedPrice} flat na Unlimited — mas mura kaysa Devin Team ($500+ACU) sa mas mataas na benchmark. Browser, desktop, terminal automation. VM isolation bawat session. Cross-platform native + REST API + MCP server.",
-      "twitterDescription": "AI agent na nagpapatakbo ng tunay na desktop. 82% OSWorld (#1). {unlimitedPrice} Unlimited — pinakamurang flat-rate plan sa kategorya. Simula sa Starter {starterPrice}. VM isolation + 26-tool MCP server."
+      "ogDescription": "#1 sa OSWorld (82%) + 1,000+ integrations (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) + {unlimitedPrice} flat na Unlimited. Ang tanging computer-use agent na may totoong integration catalog. VM isolation, cross-platform native app, REST API, MCP server.",
+      "twitterDescription": "AI agent na nagpapatakbo ng tunay na desktop AT kumokonekta sa 1,000+ apps (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear). 82% OSWorld (#1). {unlimitedPrice} Unlimited, ang pinakamurang flat-rate plan sa kategorya. Simula sa Starter {starterPrice}."
     },
     "compare": {
       "title": "Ihambing ang Coasty - Mga AI Agent Alternative at Paghahambing ng Kakumpitensya",
@@ -2374,7 +2381,7 @@
     },
     "pricing": {
       "title": "Presyo — Mga Plano at Presyo ng Coasty AI Agent",
-      "description": "Presyo ng Coasty: Starter {starterPrice} (200 credits) o Unlimited {unlimitedPrice} (ang pinakamurang flat-rate na unlimited computer-use plan sa merkado — mas mura kaysa sa Devin Team $500+ACU, sa Genspark Pro $249 na may credit cap, at sa Manus Extended $200 na may cap). Pumapalit sa $3,000+/buwan na human virtual assistant. Walang nakatagong bayarin.",
+      "description": "Presyo ng Coasty: Starter {starterPrice} (200 credits) o Unlimited {unlimitedPrice}, ang pinakamurang flat-rate na unlimited computer-use plan sa merkado (mas mura kaysa sa Devin Team $500+ACU, Genspark Pro $249 na may credit cap, Manus Extended $200 na may cap). Kasama sa bawat plan ang 1,000+ native app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify, at 990+ pang iba) at pumapalit sa $3,000+/buwan na human virtual assistant. Walang nakatagong bayarin.",
       "ogTitle": "Presyo ng Coasty — {starterPrice} Starter, {unlimitedPrice} Unlimited",
       "ogDescription": "{unlimitedPrice} flat na Unlimited — ang pinakamurang unlimited computer-use plan sa merkado. O {starterPrice} Starter para sa mga indibidwal. Nakakatipid ng $36k/taon kumpara sa human VA."
     },
@@ -2398,14 +2405,16 @@
       "q9": "Paano inihahambing ang Coasty sa OpenAI Operator?",
       "a9": "Nalalagpasan ng Coasty ang OpenAI Operator sa OSWorld benchmark (82% vs ~40%), nag-aalok ng tunay na VM-level isolation para sa bawat session, sumusuporta sa maraming AI model, kasama ang buong desktop control bukod sa browser lang, at nagbibigay ng open-source framework.",
       "q10": "Kayang solusyunan ba ng Coasty ang mga CAPTCHA?",
-      "a10": "Oo. Ang Coasty ay may built-in CAPTCHA-solving pipeline, kaya hindi ito naba-block tulad ng mga kakumpitensyang AI agent. Ito ay kritikal para sa totoong automation kung saan karaniwan ang mga CAPTCHA sa mga website."
+      "a10": "Oo. Ang Coasty ay may built-in CAPTCHA-solving pipeline, kaya hindi ito naba-block tulad ng mga kakumpitensyang AI agent. Ito ay kritikal para sa totoong automation kung saan karaniwan ang mga CAPTCHA sa mga website.",
+      "q11": "Anong mga apps at serbisyo ang naka-integrate sa Coasty?",
+      "a11": "Kumokonekta ang Coasty sa 1,000+ apps sa pamamagitan ng built-in Composio integration layer nito, kabilang ang Gmail, Outlook, Slack, Microsoft Teams, Notion, Linear, Jira, Asana, monday.com, GitHub, GitLab, Google Drive, Google Calendar, Google Sheets, Salesforce, HubSpot, Pipedrive, Stripe, Shopify, Intercom, Zendesk, Airtable, Figma, Calendly, Zoom, Dropbox, OneDrive, Sentry, Datadog, Vercel, Supabase, at Twilio. Ikonekta ang anumang app nang isang beses sa pamamagitan ng OAuth sa Settings, pagkatapos ay gagamitin ito ng Coasty sa bawat chat sa ngalan mo, walang password na nakikita ng agent. Kapag may API ang isang app, direktang tinatawag ito ng Coasty para sa sub-second latency. Kapag wala (SAP GUI, LinkedIn Sales Navigator, legacy banking portals, internal admin tools), ang parehong agent ang nagpapatakbo ng UI sa pamamagitan ng computer use. Ang Coasty ang tanging computer-use platform na naghahatid ng parehong surface, isang API-first integration catalog AT OS-level desktop control, sa isang agent."
     },
     "structuredData": {
-      "appDescription": "Ang #1 na naka-rank na computer-using AI agent at ang pinakamurang flat-rate na Unlimited computer-use plan sa merkado sa $99/buwan. Kinokontrol ng Coasty ang buong desktop tulad ng tao — nagbubukas ng browser, nagki-click, nagta-type, nagpupuno ng form, nagpapadala ng email, at namamahala ng spreadsheet nang autonomous. 82% sa OSWorld benchmark sa 369 na totoong gawain. Tunay na VM-level isolation bawat session. Built-in CAPTCHA solving. Mga plan: {starterPrice} Starter o {unlimitedPrice} Unlimited.",
-      "orgDescription": "Binubuo ng Coasty ang #1 computer-using AI agent (82% OSWorld) at inilalabas ang tanging flat-rate na Unlimited computer-use plan sa $99/buwan — mas mura kaysa sa Devin Team, OpenAI Operator, at mga kakumpitensyang may credit cap sa parehong price tier. Nagbibigay ang aming platform ng autonomous desktop control, browser automation, at multi-agent orchestration na may tunay na VM-level isolation.",
-      "productDescription": "Computer-using AI agent na kumokontrol ng desktop tulad ng tao. #1 sa OSWorld benchmark (82%). Ang {unlimitedPrice} Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan na available. Autonomous browser automation, desktop control, email sending, form filling, at spreadsheet management na may tunay na VM-level isolation.",
-      "websiteDescription": "#1 computer-using AI agent platform — 82% OSWorld benchmark at ang pinakamurang flat-rate na Unlimited plan sa $99/buwan. Autonomous browser, desktop, at terminal automation na may VM isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
-      "softwareDescription": "Computer-using AI agent na kumokontrol ng buong desktop tulad ng tao. #1 sa OSWorld benchmark na may 82% completion rate sa 369 na totoong gawain. Ang $99/buwan na Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan sa merkado. Autonomous browser automation, desktop control, terminal operations, email sending, form filling, at spreadsheet management.",
+      "appDescription": "Ang #1 na naka-rank na computer-using AI agent at ang tanging computer-use platform na may 1,000+ native app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, kasama ang 990+ pang iba). 82% sa OSWorld sa 369 na totoong gawain. Ang pinakamurang flat-rate na Unlimited plan sa merkado sa {unlimitedPriceLong}. Kinokontrol ang buong desktop tulad ng tao, tunay na VM-level isolation bawat session, built-in CAPTCHA solving. Mga plan: {starterPrice} Starter o {unlimitedPrice} Unlimited.",
+      "orgDescription": "Binubuo ng Coasty ang #1 computer-using AI agent (82% OSWorld) na may 1,000+ OAuth-secured app integrations (Gmail, Slack, GitHub, Notion, Salesforce, HubSpot, Linear) at inilalabas ang tanging flat-rate na Unlimited computer-use plan sa {unlimitedPriceLong}, mas mura kaysa sa Devin Team, OpenAI Operator, at mga kakumpitensyang may credit cap. Pinagsasama ng aming platform ang computer use, multi-agent orchestration, native integrations, at VM-level isolation sa isang produkto.",
+      "productDescription": "AI computer-using agent na kumokontrol ng desktop tulad ng tao AT kumokonekta nang native sa 1,000+ apps (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify). #1 sa OSWorld benchmark (82%). Ang {unlimitedPrice} Unlimited ang pinakamurang flat-rate na unlimited computer-use plan na available. Autonomous browser, desktop, email, form filling, at spreadsheet automation na may VM-level isolation.",
+      "websiteDescription": "#1 computer-using AI agent platform (82% OSWorld) na may 1,000+ native integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Stripe) at ang pinakamurang flat-rate na Unlimited plan sa {unlimitedPriceLong}. Autonomous browser, desktop, at terminal automation na may VM isolation. Simula sa Starter {starterPrice} o Unlimited {unlimitedPrice}.",
+      "softwareDescription": "AI computer-using agent na kumokontrol ng buong desktop tulad ng tao at inilalabas ang 1,000+ OAuth-secured app integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot, Linear, Jira, Stripe, Shopify, kasama ang 990+ pang iba). #1 sa OSWorld na may 82% completion sa 369 na totoong gawain. Ang {unlimitedPriceLong} na Unlimited plan ang pinakamurang flat-rate na unlimited computer-use plan sa merkado. Browser, desktop, terminal, email, form, at spreadsheet automation sa isang agent.",
       "breadcrumbs": {
         "home": "Home",
         "caseStudies": "Mga AI Agent Case Study",
@@ -2413,6 +2422,13 @@
         "download": "I-download ang Desktop App",
         "compare": "Ihambing ang mga AI Agent"
       }
+    },
+    "connections": {
+      "title": "Mga Koneksyon",
+      "description": "I-connect ang Gmail, Slack, Notion, GitHub, at daan-daang iba pang apps. Available sa bawat chat.",
+      "ogTitle": "Mga Koneksyon — Ikonekta 250+ Apps sa Coasty AI Agent",
+      "ogDescription": "Dalhin ang Gmail, Slack, GitHub, Notion, Google Calendar, Linear at daan-daang iba pang apps sa bawat chat. OAuth-secured, palaging available, ginagamit ng mga Coasty agent sa ngalan mo.",
+      "twitterDescription": "Ikonekta ang Gmail, Slack, GitHub, Notion at 250+ apps sa Coasty. Isang OAuth, ginagamit sa bawat chat ng iyong agent."
     }
   },
   "errorPages": {
@@ -3087,6 +3103,10 @@
       "referral": {
         "label": "Referral",
         "description": "Mag-imbita ng kaibigan at kumita ng credits"
+      },
+      "integrations": {
+        "label": "Mga Integration",
+        "description": "Mag-connect ng third-party apps"
       }
     },
     "appearance": {
@@ -3150,6 +3170,10 @@
     "referral": {
       "title": "Mga referral",
       "description": "I-share ang Coasty. Sama-samang kumita."
+    },
+    "connections": {
+      "title": "Iyong mga koneksyon",
+      "description": "Kinukuha ang iyong mga naka-connect na apps at toolkits."
     }
   },
   "dataSection": {
@@ -3158,5 +3182,201 @@
     "trustTransit": "TLS 1.3 sa transit",
     "trustAtRest": "AES-256-GCM nakaimbak",
     "trustNoTraining": "Walang training sa data mo"
+  },
+  "connections": {
+    "page": {
+      "title": "Mga Koneksyon",
+      "description": "I-connect ang Gmail, Slack, Notion, GitHub, at daan-daang iba pang apps. Available sa bawat chat."
+    },
+    "fallbackAppName": "app",
+    "status": {
+      "active": "Naka-connect",
+      "initiated": "Kinokonekta",
+      "expired": "Nag-expire",
+      "failed": "Binawi",
+      "failedShort": "Nabigo",
+      "inactive": "Hindi aktibo"
+    },
+    "toasts": {
+      "disconnectFailed": "Hindi na-disconnect",
+      "disconnected": "Na-disconnect ang {appName}",
+      "reconnectFailed": "Hindi nasimulan ang reconnect",
+      "connected": "Na-connect ang {app}",
+      "error": "May nangyaring mali. Subukan ulit."
+    },
+    "card": {
+      "logoAlt": "Logo ng {appName}",
+      "fallbackAccountLabel": "Naka-connect",
+      "connectedOn": "Na-connect noong {date}",
+      "lastUsed": "Huling ginamit {time}",
+      "actions": {
+        "reconnect": "I-reconnect",
+        "disconnect": "I-disconnect",
+        "menuAriaLabel": "Mga aksyon sa koneksyon"
+      },
+      "error": {
+        "expired": "Nag-expire ang authorization. I-reconnect para ibalik ang access sa tools.",
+        "revoked": "Binawi ang koneksyon. I-reconnect para ibalik ang access sa tools."
+      },
+      "disconnectDialog": {
+        "title": "I-disconnect ang {appName}?",
+        "connectedOn": "na-connect {date}",
+        "consequence": {
+          "revokeOauth": "Babawiin ng Composio ang OAuth grant",
+          "toolsStop": "Hihinto sa paggana ang mga tool na gumagamit ng koneksyong ito"
+        },
+        "confirm": "I-disconnect",
+        "cancel": "Huwag i-disconnect"
+      }
+    },
+    "emptyState": {
+      "toolkitLogoAlt": "Logo ng {name}",
+      "headline": "I-connect ang iyong unang app",
+      "subheadline": "Mag-authorize nang isang beses at maaari nang basahin ng iyong AI ang email mo, mag-post sa Slack, mag-update ng mga docs, at marami pang iba, awtomatiko, sa bawat chat.",
+      "features": {
+        "toolsInEveryChat": {
+          "title": "Mga tool sa bawat chat",
+          "desc": "Kapag naka-connect na, awtomatiko itong gagamitin ng iyong AI."
+        },
+        "secureOauth": {
+          "title": "Secure na OAuth",
+          "desc": "Mag-authorize minsan, bawiin anumang oras."
+        },
+        "hundredsOfApps": {
+          "title": "Daan-daang apps",
+          "desc": "Email, calendars, CRMs, docs, code, at marami pa."
+        }
+      },
+      "browseAppsCta": "Mag-browse ng apps"
+    },
+    "connectDialog": {
+      "title": "Mag-connect ng app",
+      "description": "Mag-browse ng daan-daang integrations na pinapagana ng Composio.",
+      "searchPlaceholder": "Maghanap ng apps…",
+      "clearSearchAria": "I-clear ang paghahanap",
+      "categories": {
+        "all": "Lahat",
+        "communication": "Komunikasyon",
+        "productivity": "Produktibidad",
+        "calendar": "Kalendaryo",
+        "developer": "Developer",
+        "crmSales": "CRM at Sales"
+      },
+      "sections": {
+        "featured": "Tampok",
+        "allApps": "Lahat ng app"
+      },
+      "card": {
+        "logoAlt": "Logo ng {name}",
+        "alreadyConnectedTooltip": "Naka-connect na, i-manage mula sa Connections page",
+        "connectedLabel": "Naka-connect",
+        "connectFallbackDescription": "I-connect ang {name} sa iyong AI"
+      },
+      "footer": {
+        "poweredBy": "pinapagana ng Composio",
+        "cancel": "Kanselahin"
+      },
+      "empty": {
+        "noMatchTitle": "Walang app na tumutugma sa \"{query}\"",
+        "noAppsTitle": "Walang available na apps",
+        "noMatchBody": "Subukan ang mas maikling search term o ibang kategorya.",
+        "noAppsBody": "Lalabas dito ang mga Composio integration kapag na-configure na."
+      },
+      "errors": {
+        "failedToStart": "Hindi nasimulan ang koneksyon"
+      },
+      "confirm": {
+        "back": "All apps",
+        "composioLabel": "Composio",
+        "title": "Connect {name}",
+        "subtitle": "You'll authorize in a new tab. Coasty connects through Composio and never sees your password.",
+        "secured": "Secured by Composio",
+        "cta": {
+          "connect": "Kumonekta gamit ang Composio",
+          "connectWithApiKey": "I-save at kumonekta",
+          "connectWithBearerToken": "I-save at kumonekta",
+          "connectWithBasic": "I-save at kumonekta",
+          "connectNoAuth": "I-enable",
+          "connecting": "Kumokonekta..."
+        },
+        "popupBlocked": "Your browser blocked the new tab.",
+        "openManually": "Open authorization",
+        "fields": {
+          "apiKeyLabel": "API key",
+          "apiKeyPlaceholder": "I-paste ang iyong API key",
+          "bearerTokenLabel": "Bearer token",
+          "bearerTokenPlaceholder": "I-paste ang iyong bearer token",
+          "basicAuthUsername": "Username",
+          "basicAuthPassword": "Password",
+          "basicAuthUsernamePlaceholder": "Username ng iyong account",
+          "basicAuthPasswordPlaceholder": "Password ng iyong account",
+          "revealSecret": "Ipakita",
+          "hideSecret": "Itago"
+        },
+        "noAuthHint": "Hindi nangangailangan ng credentials ang {name}. I-click ang I-enable para idagdag ito sa iyong workspace.",
+        "apiKeyHelp": "Saan ko ito makikita?",
+        "connectedToast": "Nakakonekta sa {name}",
+        "unsupported": {
+          "title": "Hindi pa suportado ang ganitong uri ng koneksyon",
+          "body": "Gumagamit ang {name} ng {scheme} authentication flow na hindi pa namin na-set up sa app. Maaari mong ikonekta ito direkta sa Composio dashboard at lalabas dito kapag na-link na.",
+          "openComposioDashboard": "Buksan ang Composio dashboard"
+        }
+      }
+    },
+    "row": {
+      "disconnectAriaLabel": "I-disconnect ang {name}",
+      "disconnect": "I-disconnect"
+    },
+    "empty": {
+      "title": "Walang naka-connect na apps",
+      "description": "I-connect ang Gmail, Slack, Notion, at iba pa para magamit ng Coasty sa anumang chat."
+    },
+    "toolInvocation": {
+      "calling": "Tinatawag ang {toolkit}: {action}"
+    },
+    "reauth": {
+      "fallbackAppName": "App",
+      "expiredMessage": "Nag-expire ang iyong koneksyon sa {appName}.",
+      "reconnectLink": "I-reconnect"
+    },
+    "errors": {
+      "loadConnectionsFailed": "Hindi na-load ang mga koneksyon (HTTP {status})",
+      "loadToolkitsFailed": "Hindi na-load ang mga toolkit (HTTP {status})",
+      "startConnectionFailed": "Hindi nasimulan ang koneksyon (HTTP {status})",
+      "disconnectFailedHttp": "Hindi na-disconnect (HTTP {status})",
+      "credentialsRequired": "Pakipunan ang lahat ng kinakailangang field upang magpatuloy.",
+      "credentialsErrorPrefix": "Nabigo ang koneksyon:",
+      "unknownToolkit": "Hindi namin nakikilala ang app na ito. I-refresh ang catalog at subukan muli.",
+      "unsupportedAuthScheme": "Hindi pa suportado sa app ang authentication method na ito.",
+      "missingCredentials": "May kulang na mga field: {fields}",
+      "invalidCredentials": "Tinanggihan ang credentials. Pakisuri at subukan muli.",
+      "credentialValidationFailed": "Hindi ma-validate ang iyong credentials. Pakisubukan muli.",
+      "apiKeyRequired": "Kinakailangan ang API key.",
+      "tokenRequired": "Kinakailangan ang bearer token.",
+      "basicRequired": "Kinakailangan ang username at password."
+    },
+    "title": "Mga Koneksyon",
+    "subtitle": "Ikonekta ang mga apps na magagamit ng Coasty sa ngalan mo sa bawat chat.",
+    "connectedSuffix": "naka-connect",
+    "refresh": "I-refresh",
+    "newConnection": "Bagong koneksyon",
+    "retry": "Subukan ulit",
+    "noFilteredConnections": "Wala pang {filter} na apps",
+    "noFilteredDescription": "Subukan ang ibang filter, o magkonekta ng bagong app para magsimula.",
+    "filters": {
+      "all": "Lahat",
+      "active": "Aktibo",
+      "connecting": "Kinokonekta",
+      "expired": "Nag-expire",
+      "failed": "Nabigo"
+    }
+  },
+  "settings": {
+    "integrations": {
+      "heading": "Mga naka-connect na app",
+      "subheading": "Magagamit ng Coasty ang mga app na ito sa anumang chat para sa iyo.",
+      "connectNewApp": "Magdagdag ng app",
+      "manageOnFullPage": "I-manage sa full page"
+    }
   }
 }

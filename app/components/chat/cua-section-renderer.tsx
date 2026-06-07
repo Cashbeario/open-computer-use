@@ -13,6 +13,7 @@ import {
   Timer,
   Copy,
   Check,
+  Plug,
 } from "@phosphor-icons/react"
 import { AnimatePresence, motion } from "framer-motion"
 import { memo, useEffect, useMemo, useState } from "react"
@@ -499,6 +500,97 @@ function extractCodeAgentTask(code: string): string | null {
   return match[1].replace(/\\n/g, " ").trim()
 }
 
+/**
+ * Composio (Integration) action parser — mirrors the backend's
+ * `_describe_agent_action` handler for composio_* methods. The backend
+ * already produces a humanized next-action label ("Search the OUTLOOK
+ * integration for 'send email'"); this parser only needs to surface the
+ * TOOLKIT so the pill can show that integration's logo. The natural-
+ * language label already conveys the query/action verbatim, so we don't
+ * re-render it as a noisy detail row.
+ *
+ * Returns null when the code isn't a composio_* call. When it is:
+ *   - method:   "search" | "call" | "actions"
+ *   - toolkit:  uppercase toolkit slug (best-effort, may be "" for
+ *               toolkit-less composio_search calls).
+ */
+type IntegrationKind = "search" | "call" | "actions"
+interface IntegrationAction {
+  method: IntegrationKind
+  toolkit: string
+}
+
+function extractIntegrationAction(code: string): IntegrationAction | null {
+  // composio_search(query?, toolkits=[...], limit=N)
+  if (/agent\.composio_search\s*\(/.test(code)) {
+    let toolkit = ""
+    const tk = code.match(/toolkits\s*=\s*\[\s*([^\]]*)\]/)
+    if (tk) {
+      // Pull the FIRST entry; the pill renders one toolkit slug. If
+      // multiple toolkits are searched, the backend's natural-language
+      // label already enumerates them in the line above the pill.
+      const first = tk[1].match(/["']([^"']+)["']/)
+      if (first) toolkit = first[1].toUpperCase()
+    }
+    return { method: "search", toolkit }
+  }
+
+  // composio_call("TOOLKIT_ACTION", ...kwargs) — toolkit is the prefix
+  // segment before the first underscore.
+  const callMatch = code.match(/agent\.composio_call\s*\(\s*["']([A-Z0-9_]+)["']/)
+  if (callMatch) {
+    const toolkit = callMatch[1].split("_")[0] || ""
+    return { method: "call", toolkit }
+  }
+
+  // composio_actions("toolkit", search=?, limit=N)
+  const actionsMatch = code.match(/agent\.composio_actions\s*\(\s*["']([^"']+)["']/)
+  if (actionsMatch) {
+    return { method: "actions", toolkit: actionsMatch[1].toUpperCase() }
+  }
+
+  return null
+}
+
+/**
+ * Compact toolkit logo for the Integration pill.
+ *
+ * Sourced from `https://logos.composio.dev/api/<slug>` — Composio's
+ * public logo CDN, same source that powers the connections page. The
+ * image renders at its natural SVG size inside the pill chip (no tile,
+ * no ring, no forced background) so it sits "relaxed" next to the chip
+ * text the way the Terminal icon sits next to "Code Agent". On 404 /
+ * network error we silently fall back to a Plug glyph — a broken-image
+ * outline never appears.
+ *
+ * Uses a React state flag (rather than `onError` mutating the src
+ * in-place) so a slug change resets the fallback automatically — eg.
+ * a StepCard streaming outlook → gmail won't be permanently locked into
+ * the plug icon.
+ */
+function IntegrationLogo({ toolkit }: { toolkit: string }) {
+  const slug = toolkit.trim().toLowerCase()
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    setFailed(false)
+  }, [slug])
+
+  if (!slug || failed) {
+    return <Plug className="size-2.5 shrink-0" weight="fill" />
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- 3rd-party CDN,
+    // no Image() optimization benefit for an inline SVG.
+    <img
+      src={`https://logos.composio.dev/api/${slug}`}
+      alt=""
+      className="h-3 w-3 shrink-0 object-contain"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 /** Check if grounded action code is an agent function call (code_agent, wait, etc.) */
 function extractAgentAction(code: string): { type: string; label: string; detail?: string } | null {
   // Code agent
@@ -529,7 +621,13 @@ function StepCard({
       ? "success"
       : "pending"
   const hasScreenshot = !!screenshot
-  const agentAction = step.code ? extractAgentAction(step.code) : null
+  // Integration pill takes precedence over the generic Code Agent pill
+  // because both could match if a future composio_* slug ever overlaps
+  // with the code-agent regex. extractIntegrationAction returns null for
+  // non-composio code, so this is a no-op for all other action types.
+  const integrationAction = step.code ? extractIntegrationAction(step.code) : null
+  const agentAction =
+    !integrationAction && step.code ? extractAgentAction(step.code) : null
 
   return (
     // Bottom padding intentionally omitted — the parent timeline uses a
@@ -547,6 +645,28 @@ function StepCard({
         <p className="text-[15px] leading-relaxed text-foreground/90 break-words overflow-hidden">
           {truncateText(actionText, 200)}
         </p>
+      )}
+
+      {/* Integration badge — same dimensions / tokens as the inline result
+          badges below (text-[11px], px-1.5 py-0.5, rounded-full,
+          bg-{tone}-500/8). Sky tone. Compact, one-line. */}
+      {integrationAction && (
+        <div className="mt-1">
+          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-1.5 py-0.5 rounded-full bg-sky-500/8 text-sky-600/80 dark:text-sky-400/70">
+            <IntegrationLogo toolkit={integrationAction.toolkit} />
+            integration
+            {integrationAction.toolkit && (
+              <>
+                {" · "}
+                {integrationAction.toolkit.toLowerCase()}
+              </>
+            )}
+            {" · "}
+            {integrationAction.method === "search" && "search"}
+            {integrationAction.method === "call" && "run"}
+            {integrationAction.method === "actions" && "browse"}
+          </span>
+        </div>
       )}
 
       {/* Agent function call pill + prompt card (e.g. code_agent) */}

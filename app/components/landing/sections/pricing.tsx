@@ -70,7 +70,18 @@ function useCountUp(target: number, durationMs: number, start: boolean): number 
   return val
 }
 
-export function PricingSection({ isMobile }: { isMobile: boolean }) {
+export function PricingSection({
+  isMobile,
+  // Reused on the standalone /pricing page, where the page hero already
+  // carries the title and the "view detailed comparison" link would point
+  // at the current page. Both default to the landing's behaviour.
+  showHeader = true,
+  hideComparisonLink = false,
+}: {
+  isMobile: boolean
+  showHeader?: boolean
+  hideComparisonLink?: boolean
+}) {
   const t = useTranslations()
   const tc = useTranslations("common")
 
@@ -94,11 +105,13 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
     >
       <LandingSectionTopGlow />
       <div className="max-w-6xl w-full mx-auto">
-        <LandingSectionHeader
-          title={t("pricing.title")}
-          subtitle={t("pricing.subtitle")}
-          isMobile={isMobile}
-        />
+        {showHeader && (
+          <LandingSectionHeader
+            title={t("pricing.title")}
+            subtitle={t("pricing.subtitle")}
+            isMobile={isMobile}
+          />
+        )}
 
         <div
           className={cn(
@@ -183,22 +196,26 @@ export function PricingSection({ isMobile }: { isMobile: boolean }) {
           })}
         </div>
 
-        {/* Editorial outro — single hairline rule + one quiet line of copy. */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
-          transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
-          className="mt-14 flex flex-col items-center gap-4"
-        >
-          <Link
-            href="/pricing"
-            className="group inline-flex items-center gap-1.5 text-[12px] text-foreground/55 hover:text-foreground transition-colors"
+        {/* Editorial outro — single quiet line of copy. Hidden on the
+            standalone /pricing page (where it would link to itself) via
+            the hideComparisonLink prop. */}
+        {!hideComparisonLink && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+            transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
+            className="mt-14 flex flex-col items-center gap-4"
           >
-            <span>View detailed comparison</span>
-            <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-          </Link>
-        </motion.div>
+            <Link
+              href="/pricing"
+              className="group inline-flex items-center gap-1.5 text-[12px] text-foreground/55 hover:text-foreground transition-colors"
+            >
+              <span>View detailed comparison</span>
+              <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+          </motion.div>
+        )}
       </div>
     </section>
   )

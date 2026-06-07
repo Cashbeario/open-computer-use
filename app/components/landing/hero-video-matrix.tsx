@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { ArrowRight, Video, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import NextImage from "next/image"
@@ -29,6 +29,8 @@ function useCountUp(target: number, durationMs: number, start: boolean): number 
   useEffect(() => {
     if (!start) return
     if (target === 0) { setVal(0); return }
+    // Reduced-motion (durationMs <= 0): snap straight to the final value, no rAF spin.
+    if (durationMs <= 0) { setVal(target); return }
     const t0 = performance.now()
     let raf = 0
     const tick = (now: number) => {
@@ -49,16 +51,21 @@ function StatCell({
   label,
   sublabel,
   isMobile,
+  start,
+  reduced,
 }: {
   rawValue: string
   label: string
   sublabel: string
   isMobile: boolean
+  // Armed by the parent stats row once it has finished fading in, so the
+  // digits roll on a present row instead of spinning while it's invisible.
+  start: boolean
+  // Reduced-motion: snap to the final integer (no rAF count-up).
+  reduced: boolean
 }) {
   const { prefix, num, suffix } = useMemo(() => parseStat(rawValue), [rawValue])
-  // Above-the-fold hero — count-up starts on mount. The parent stats row
-  // owns the coordinated entrance animation.
-  const animated = useCountUp(num, 1800, true)
+  const animated = useCountUp(num, reduced ? 0 : 1100, start)
   const display = num === 0
     ? `${prefix}0${suffix}`
     : `${prefix}${animated.toLocaleString()}${suffix}`
@@ -78,7 +85,7 @@ function StatCell({
     >
       <div
         className={cn(
-          "font-semibold tabular-nums tracking-[-0.05em] leading-none",
+          "font-semibold tabular-nums tracking-[-0.05em] leading-none pb-1",
           "bg-clip-text text-transparent",
           "bg-gradient-to-b from-foreground to-foreground/85",
           "dark:from-white dark:to-white/80",
@@ -146,9 +153,18 @@ const ENABLE_CINEMATIC_INTRO = false
 //   3. Edge vignette — gentle radial darken so the centre content sits
 //      anchored and the corners recede
 //   4. Bottom fade — linear handoff into the next section
+// ── Cinematic color grade ───────────────────────────────────────────
+// Applied to BOTH the poster and the video so the look is identical from
+// first paint. A gentle contrast + brightness bump gives the footage a
+// filmic, lit depth and richer colour. One knob — tweak here to re-grade
+// the whole hero media at once (drop this entirely for the pristine
+// original, or add `grayscale` back for the monochrome look).
+const HERO_MEDIA_GRADE = "contrast-[1.15] brightness-[1.05]"
+
 function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [videoReady, setVideoReady] = useState(false)
+  const prefersReduced = useReducedMotion()
 
   // Pause the video when the hero is off-screen. Looping video kept
   // running in a background tab is a known battery + decode cost on
@@ -178,9 +194,9 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
           with a quintic ease-out. Applies once on mount; subsequent
           renders see the resolved state. */}
       <motion.div
-        initial={{ filter: "blur(24px)", opacity: 0, scale: 1.05 }}
-        animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+        initial={prefersReduced ? { opacity: 0 } : { filter: "blur(24px)", opacity: 0, scale: 1.05 }}
+        animate={prefersReduced ? { opacity: 1 } : { filter: "blur(0px)", opacity: 1, scale: 1 }}
+        transition={{ duration: prefersReduced ? 0.6 : 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
         className="absolute inset-0"
       >
         {/* Poster — always rendered, fills the hero from first paint. */}
@@ -190,7 +206,7 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className={cn("object-cover", HERO_MEDIA_GRADE)}
         />
 
         {/* Video — desktop only, fades in once `canplay` fires. */}
@@ -206,6 +222,7 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
             onCanPlay={() => setVideoReady(true)}
             className={cn(
               "absolute inset-0 w-full h-full object-cover motion-reduce:hidden",
+              HERO_MEDIA_GRADE,
               "transition-opacity duration-700 ease-out",
               videoReady ? "opacity-100" : "opacity-0",
             )}
@@ -219,6 +236,47 @@ function HeroAmbientBackground({ isMobile }: { isMobile: boolean }) {
           the moving media. Dark mode gets a slightly heavier veil because
           the page bg is near-black and contrast budgets are tighter. */}
       <div className="absolute inset-0 bg-background/55 dark:bg-background/65" />
+
+      {/* ─── Cinematic light over the footage ──────────────────────────
+          Two neutral, white-only layers that give the video a lit, filmic
+          depth. Both blend with `soft-light`, so they lift the midtones
+          into a gentle glow and never blow out highlights — and both sit
+          BELOW the z-10 text overlay, so the headline is never washed. The
+          vignette below still darkens the edges over them. */}
+
+      {/* Key light — a soft static bloom pooling from above, as if the room
+          is lit from the top. Pure atmosphere, no motion. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 mix-blend-soft-light opacity-70 dark:opacity-100"
+        style={{
+          background:
+            "radial-gradient(115% 80% at 50% -12%, rgba(255,255,255,0.18), transparent 62%)",
+        }}
+      />
+
+      {/* Sheen — a slow, wide diagonal gleam that drifts across the frame,
+          reading as cinematic light passing through the room rather than a
+          hard scanner line. Desktop + motion only. */}
+      {!isMobile && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 mix-blend-soft-light opacity-85 dark:opacity-100 motion-reduce:hidden"
+          style={{
+            background:
+              "linear-gradient(108deg, transparent 24%, rgba(255,255,255,0.11) 44%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.11) 56%, transparent 76%)",
+            backgroundSize: "230% 100%",
+            animation: "hero-sheen 12s ease-in-out infinite",
+          }}
+        />
+      )}
+
+      <style jsx global>{`
+        @keyframes hero-sheen {
+          0% { background-position: 210% 0; }
+          100% { background-position: -110% 0; }
+        }
+      `}</style>
 
       {/* Edge vignette — soft radial darken that pushes the corners back
           and anchors the centre content. Quiet enough to read as lighting,
@@ -269,15 +327,47 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   const [headlineIndex, setHeadlineIndex] = useState(0)
   const HEADLINES = HEADLINE_KEYS.map((key) => t(`useCases.${key}.headline`))
 
-  // Auto-rotate headlines. Slower cadence (4.5s) than a typical marquee
-  // so each line gets a confident dwell — premium pacing reads as
-  // intentional, not jittery.
+  // ─── Entrance choreography — "the settling page" ───
+  // The column resolves by OPACITY in one slow top-to-bottom cascade (no
+  // y-translate ladder) so it reads like a photograph developing rather than
+  // UI assembling itself. `prefersReduced` is the single gate — framer does
+  // NOT auto-disable. `settle` is the shared opacity-only entrance for the
+  // description / stats / CTAs (it collapses to near-instant under reduced
+  // motion); the headline gets its own slightly earlier beat.
+  const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+  const prefersReduced = useReducedMotion()
+  const settle = (delay: number, duration: number) => ({
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: {
+      duration: prefersReduced ? 0.4 : duration,
+      delay: prefersReduced ? delay * 0.3 : delay,
+      ease: EASE,
+    },
+  })
+
+  // Stat count-up is armed once the stats row has finished fading in (via its
+  // onAnimationComplete) so digits never spin on an invisible row. The timeout
+  // is a fail-safe in case that callback never fires, so the numbers can't
+  // strand at 0. (Comfortably after the row's ~1.42s settle so it only ever
+  // catches a genuine failure, never preempts the real signal.)
+  const [statsStarted, setStatsStarted] = useState(false)
   useEffect(() => {
+    if (prefersReduced) return
+    const id = setTimeout(() => setStatsStarted(true), 1900)
+    return () => clearTimeout(id)
+  }, [prefersReduced])
+
+  // Auto-rotate headlines. Slow 5.5s dwell so each line gets a confident rest —
+  // premium pacing reads as intentional, not jittery. Gated off entirely under
+  // reduced motion so the resting state is genuinely still.
+  useEffect(() => {
+    if (prefersReduced) return
     const interval = setInterval(() => {
       setHeadlineIndex((prev) => (prev + 1) % HEADLINES.length)
-    }, 4500)
+    }, 5500)
     return () => clearInterval(interval)
-  }, [HEADLINES.length])
+  }, [prefersReduced, HEADLINES.length])
 
   // Preload/decode thumbnails on mount — Safari defers lazy decode inside
   // transformed parents and dumps the work mid-scroll, causing visible stutter.
@@ -786,9 +876,13 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 with quint ease-out arrives first; the rest of the column
                 follows in a coordinated wave. */}
             <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.95, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: prefersReduced ? 0.5 : isMobile ? 0.8 : 1.0,
+                delay: prefersReduced ? 0 : 0.06,
+                ease: EASE,
+              }}
               className={cn(
                 "font-semibold tracking-[-0.045em] text-balance pb-1 sm:pb-2",
                 "bg-clip-text text-transparent",
@@ -832,10 +926,10 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
               <AnimatePresence mode="wait">
                 <motion.span
                   key={headlineIndex}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -7 }}
-                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                  initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                  animate={prefersReduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                  transition={{ duration: prefersReduced ? 0.6 : 1.0, ease: prefersReduced ? "linear" : EASE }}
                   className={cn(
                     "absolute inset-x-0 top-0 font-medium tracking-[-0.035em] text-foreground/50 dark:text-white/55",
                     isMobile
@@ -851,9 +945,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
             {/* Description — tighter leading (1.55 vs relaxed 1.625), narrower
                 measure on desktop for a true editorial line length. */}
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              {...settle(0.4, 0.85)}
               className={cn(
                 "mx-auto text-foreground/65 dark:text-white/65",
                 isMobile
@@ -873,9 +965,10 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 wash behind it — the stats stand on their own against
                 the page background. */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              {...settle(0.52, 0.9)}
+              onAnimationComplete={() => {
+                if (!prefersReduced) setStatsStarted(true)
+              }}
               className={cn(
                 "relative mx-auto",
                 isMobile ? "mt-6 max-w-[320px]" : "mt-9 max-w-[620px]",
@@ -923,6 +1016,8 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                       >
                         <StatCell
                           isMobile={isMobile}
+                          start={statsStarted || !!prefersReduced}
+                          reduced={!!prefersReduced}
                           rawValue={t(`resourceStats.${key}.value`)}
                           label={t(`resourceStats.${key}.label`)}
                           sublabel={t(`resourceStats.${key}.sublabel`)}
@@ -940,9 +1035,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
                 the previous 1.02). Secondary drops the x-translate
                 gimmick — colour shift alone reads more confident. */}
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              {...settle(0.64, 0.85)}
               className={cn(
                 "flex items-center justify-center",
                 isMobile ? "mt-5 gap-2.5 flex-col" : "mt-7 gap-6"

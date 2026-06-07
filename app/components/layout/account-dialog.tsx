@@ -20,6 +20,7 @@ import {
   Brain,
   BookOpen,
   Gift,
+  Plug,
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -31,6 +32,7 @@ import { DataSection } from "@/app/components/layout/settings/general/data-secti
 import { PublicChatsSection } from "@/app/components/layout/settings/general/public-chats-section"
 import { MemorySection } from "@/app/components/layout/settings/general/memory-section"
 import { BillingSection } from "@/app/components/layout/settings/billing/billing-section"
+import { ComposioSection } from "@/app/components/layout/settings/integrations/composio-section"
 import { ThemeSelection } from "@/app/components/layout/settings/appearance/theme-selection"
 import { BackgroundSelection } from "@/app/components/layout/settings/appearance/background-selection"
 import { LanguageSelection } from "@/app/components/layout/settings/appearance/language-selection"
@@ -86,6 +88,7 @@ function AppearanceSection() {
 // inside the dialog. They never become the dialog's active section.
 const sections = [
   { id: "account" as SectionType, label: "General", icon: User, description: "Profile and account", component: CombinedAccount },
+  { id: "integrations" as SectionType, label: "Integrations", icon: Plug, description: "Connect third-party apps", component: ComposioSection },
   { id: "memory" as SectionType, label: "Memory", icon: Brain, description: "Context applied to every agent run", component: MemorySection },
   { id: "appearance" as SectionType, label: "Appearance", icon: Paintbrush, description: "Theme, language, and background", component: AppearanceSection },
   { id: "billing" as SectionType, label: "Billing", icon: CreditCard, description: "Plans and credits", component: BillingSection },
@@ -100,7 +103,7 @@ const sections = [
 ]
 
 const navGroups = [
-  { label: "Settings", ids: ["account", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
+  { label: "Settings", ids: ["account", "integrations", "memory", "appearance", "billing", "public-chats", "privacy"] as SectionType[] },
   { label: "Resources", ids: ["guide", "referral", "data"] as SectionType[] },
   { label: "More", ids: ["feedback", "about", "social"] as SectionType[] },
 ]
@@ -163,7 +166,7 @@ function ComingSoonPlaceholder({ icon: Icon, label }: { icon: React.ComponentTyp
 // excluded on purpose — they are quick-link redirects, not section
 // states the dialog can settle on, so landing on /account?section=guide
 // falls back to "account" while the link still works from the sidebar.
-const validSections: SectionType[] = ["account", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
+const validSections: SectionType[] = ["account", "integrations", "billing", "privacy", "appearance", "data", "feedback", "about", "social", "public-chats", "memory"]
 
 export function AccountDialog() {
   const { isOpen, section, close, setSection, _syncFromUrl, _initialMobileView } = useAccountDialog()
@@ -183,6 +186,7 @@ export function AccountDialog() {
     { label: string; description: string } | null
   > = {
     account: { label: tDialog("sections.account.label"), description: tDialog("sections.account.description") },
+    integrations: { label: tDialog("sections.integrations.label"), description: tDialog("sections.integrations.description") },
     memory: { label: tMemory("section.title"), description: tMemory("sidebarDescription") },
     appearance: { label: tDialog("sections.appearance.label"), description: tDialog("sections.appearance.description") },
     billing: { label: tDialog("sections.billing.label"), description: tDialog("sections.billing.description") },
@@ -381,7 +385,7 @@ export function AccountDialog() {
                 <p className="text-[13px] font-medium leading-tight">{label}</p>
                 <p className="text-[11px] text-muted-foreground/35 mt-0.5">{sub}</p>
               </div>
-              <ChevronRight className="h-3 w-3 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
+              <ChevronRight className="h-3 w-3 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0 rtl:rotate-180" />
             </a>
           ))}
         </div>
@@ -511,7 +515,7 @@ export function AccountDialog() {
                         <button
                           onClick={handleClose}
                           aria-label="Close"
-                          className="-mr-1 p-1.5 rounded-md hover:bg-foreground/[0.05] text-muted-foreground/45 hover:text-muted-foreground transition-colors shrink-0"
+                          className="-me-1 p-1.5 rounded-md hover:bg-foreground/[0.05] text-muted-foreground/45 hover:text-muted-foreground transition-colors shrink-0"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -547,10 +551,10 @@ export function AccountDialog() {
                                     <Icon className="h-[15px] w-[15px] text-muted-foreground/40 shrink-0" strokeWidth={1.75} />
                                     <div className="flex-1 min-w-0">
                                       <div className="text-[13px] font-medium leading-tight">{s.label}</div>
-                                      <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5">{s.description}</div>
+                                      <div className="text-[11px] text-muted-foreground/40 truncate mt-0.5 [&:lang(zh)]:line-clamp-2 [&:lang(zh)]:whitespace-normal [&:lang(ja)]:line-clamp-2 [&:lang(ja)]:whitespace-normal [&:lang(ko)]:line-clamp-2 [&:lang(ko)]:whitespace-normal">{s.description}</div>
                                     </div>
                                     {!isDisabled && (
-                                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0" />
+                                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 shrink-0 rtl:rotate-180" />
                                     )}
                                   </button>
                                 )
@@ -577,9 +581,9 @@ export function AccountDialog() {
                         aria-label="Back to menu"
                         className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-foreground/[0.04] transition-colors shrink-0"
                       >
-                        <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                        <ChevronLeft className="h-[18px] w-[18px] rtl:rotate-180" strokeWidth={1.75} />
                       </button>
-                      <span className="text-[14px] font-semibold tracking-[-0.01em] text-foreground/90 truncate flex-1 text-center pr-1">
+                      <span className="text-[14px] font-semibold tracking-[-0.01em] text-foreground/90 truncate flex-1 text-center pe-1">
                         {activeConfig?.label}
                       </span>
                       <button
@@ -615,7 +619,7 @@ export function AccountDialog() {
                   </div>
                   <button
                     onClick={handleClose}
-                    className="p-1.5 -mr-1 rounded-md hover:bg-foreground/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
+                    className="p-1.5 -me-1 rounded-md hover:bg-foreground/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>

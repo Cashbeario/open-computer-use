@@ -220,7 +220,7 @@ export default function PrivacyPolicyPage() {
                 "font-bold tracking-tight",
                 isMobile ? "text-4xl" : "text-5xl sm:text-6xl"
               )}>
-                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent pb-1 sm:pb-2">
                   Your Privacy Matters
                 </span>
               </h1>

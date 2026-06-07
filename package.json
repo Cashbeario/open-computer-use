@@ -14,10 +14,14 @@
     "test:frontend": "vitest run",
     "test:backend": "node scripts/run-all-tests.mjs backend",
     "test:electron": "node scripts/run-all-tests.mjs electron",
-    "test:e2e": "node scripts/run-all-tests.mjs e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:i18n": "playwright test e2e/i18n-overflow.spec.ts",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:electron": "node scripts/run-all-tests.mjs e2e",
     "test:smoke": "node scripts/run-all-tests.mjs smoke",
-    "test:all": "node scripts/run-all-tests.mjs",
-    "test:all:fast": "node scripts/run-all-tests.mjs --no-e2e"
+    "test:all": "node scripts/run-all-tests.mjs --no-lint",
+    "test:all:fast": "node scripts/run-all-tests.mjs --no-e2e --no-lint",
+    "test:all:with-lint": "node scripts/run-all-tests.mjs"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^4.0.61",
@@ -126,6 +130,7 @@
     "@eslint/eslintrc": "^3",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@next/bundle-analyzer": "^15.2.4",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/eslint-plugin-query": "^5.78.0",
@@ -145,6 +150,6 @@
     "tailwindcss": "^4.1.5",
     "tw-animate-css": "^1.2.9",
     "typescript": "^5",
-    "vitest": "^4.1.0"
+    "vitest": "4.1.8"
   }
 }

@@ -43,12 +43,6 @@ const h = vi.hoisted(() => {
   }
 })
 
-vi.mock('./rainbow-border', () => ({
-  showRainbowBorder: vi.fn(),
-  hideRainbowBorder: vi.fn(),
-  initRainbowBorder: vi.fn(),
-}))
-
 vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => []) },
   screen: { getPrimaryDisplay: () => ({ size: { width: 1920, height: 1080 } }) },

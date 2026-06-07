@@ -16,7 +16,8 @@ const INITIAL_PAGE_SIZE = 9
 const PAGE_INCREMENT = 9
 
 /**
- * Blog index — client island.
+ * Blog index — client island, restyled in the landing's design language
+ * (strict monochrome, hairlines, glass-card chrome, mono metadata labels).
  *
  * Server delivers the full post list (great for SEO + AI crawlers — the
  * JSON-LD block in app/blog/page.tsx also enumerates every post). The
@@ -43,6 +44,29 @@ const PAGE_INCREMENT = 9
  * forced users to double-tap. See post-thumbnail.tsx and the
  * `@media (hover: none)` block in app/globals.css for details.
  */
+
+// Glass-card chrome shared with the landing (border-color/box-shadow/transform
+// transition + hover lift + shadow). Hover affordances are gated `sm:` so the
+// iOS hit-test mitigation above stays intact on touch devices.
+const CARD_CHROME = cn(
+  "blog-card-enter group flex h-full flex-col touch-manipulation overflow-hidden rounded-2xl",
+  "border border-foreground/10 bg-card/40 backdrop-blur-[2px]",
+  "sm:transition-[border-color,box-shadow,transform] sm:duration-500",
+  "sm:hover:-translate-y-0.5 sm:hover:border-foreground/20",
+  "sm:hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_44px_-22px_rgba(0,0,0,0.18)]",
+  "dark:sm:hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_18px_44px_-22px_rgba(0,0,0,0.5)]",
+)
+
+// Top-sheen hairline used on every glass card.
+function TopSheen() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute inset-x-6 top-0 z-10 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent"
+    />
+  )
+}
+
 export function BlogListClient({ posts }: BlogListClientProps) {
   const [activeCategory, setActiveCategory] = useState("All")
   const [query, setQuery] = useState("")
@@ -88,13 +112,13 @@ export function BlogListClient({ posts }: BlogListClientProps) {
   return (
     <>
       {/* ── Search + filter row ─────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-5 sm:px-10 mb-8 sm:mb-10">
+      <div className="mx-auto mb-8 max-w-5xl sm:mb-10">
         <div className="flex flex-col gap-4 sm:gap-5">
           {/* Search box */}
           <label className="group relative block">
             <Search
               aria-hidden="true"
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 transition-colors group-focus-within:text-foreground/70"
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40 transition-colors group-focus-within:text-foreground/70"
             />
             <input
               type="search"
@@ -103,9 +127,9 @@ export function BlogListClient({ posts }: BlogListClientProps) {
               placeholder="Search posts by title, topic, or author"
               aria-label="Search blog posts"
               className={cn(
-                "w-full rounded-full border border-border/40 bg-background/60 backdrop-blur-[2px]",
-                "pl-11 pr-11 py-3 text-[15px] placeholder:text-muted-foreground/40 text-foreground",
-                "outline-none focus-visible:border-border focus-visible:ring-[3px] focus-visible:ring-foreground/[0.06] transition-colors",
+                "w-full rounded-full border border-foreground/10 bg-card/40 backdrop-blur-[2px]",
+                "py-3 pl-11 pr-11 text-[15px] text-foreground placeholder:text-foreground/40",
+                "outline-none transition-colors focus-visible:border-foreground/25 focus-visible:ring-[3px] focus-visible:ring-foreground/[0.06]",
                 "[&::-webkit-search-cancel-button]:hidden",
               )}
               autoComplete="off"
@@ -116,7 +140,7 @@ export function BlogListClient({ posts }: BlogListClientProps) {
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center h-7 w-7 rounded-full text-muted-foreground/50 hover:text-foreground hover:bg-foreground/[0.06] transition-colors"
+                className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-foreground/50 transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -131,10 +155,10 @@ export function BlogListClient({ posts }: BlogListClientProps) {
                 type="button"
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
-                  "rounded-full text-sm font-medium px-4 py-1.5 touch-manipulation transition-colors duration-200",
+                  "touch-manipulation rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors duration-300",
                   activeCategory === cat
                     ? "bg-foreground text-background"
-                    : "text-muted-foreground/60 sm:hover:text-foreground border border-border/40 sm:hover:border-border/60",
+                    : "border border-foreground/12 text-foreground/55 sm:hover:border-foreground/25 sm:hover:text-foreground",
                 )}
               >
                 {cat}
@@ -148,7 +172,7 @@ export function BlogListClient({ posts }: BlogListClientProps) {
           {(deferredQuery.trim() !== "" || activeCategory !== "All" || matches.length === 0) && (
             <p
               className={cn(
-                "text-[13px] text-muted-foreground/60 transition-opacity",
+                "text-[13px] text-foreground/55 transition-opacity",
                 isStale ? "opacity-50" : "opacity-100",
               )}
               aria-live="polite"
@@ -173,39 +197,44 @@ export function BlogListClient({ posts }: BlogListClientProps) {
 
       {/* ── Featured post (only on the default view) ─────────────────── */}
       {showFeatured && (
-        <div className="max-w-5xl mx-auto px-5 sm:px-10 mb-8 sm:mb-12">
+        <div className="mx-auto mb-8 max-w-5xl sm:mb-12">
           <Link
             href={`/blog/${featured.id}`}
             aria-label={`Read featured post: ${featured.title}`}
             className={cn(
-              "blog-featured-enter group block touch-manipulation rounded-2xl overflow-hidden border border-border/40 bg-card",
-              "sm:hover:border-border/60 sm:transition-colors sm:duration-300",
+              "blog-featured-enter group relative block touch-manipulation overflow-hidden rounded-2xl",
+              "border border-foreground/10 bg-card/40 backdrop-blur-[2px]",
+              "sm:transition-[border-color,box-shadow,transform] sm:duration-500",
+              "sm:hover:-translate-y-0.5 sm:hover:border-foreground/20",
+              "sm:hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_44px_-22px_rgba(0,0,0,0.18)]",
+              "dark:sm:hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_18px_44px_-22px_rgba(0,0,0,0.5)]",
             )}
           >
+            <TopSheen />
             <FeaturedThumbnail postId={featured.id} />
             <div className="p-6 sm:p-10">
-              <div className="flex items-start justify-between mb-4 sm:mb-6">
+              <div className="mb-4 flex items-start justify-between sm:mb-6">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/40">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/40">
                     {featured.category}
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-foreground/30 bg-foreground/5 px-2 py-0.5 rounded-full">
+                  <span className="rounded-full bg-foreground/[0.06] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45">
                     Featured
                   </span>
                 </div>
-                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/20 sm:group-hover:text-foreground/50 sm:transition-all sm:duration-200 sm:group-hover:-translate-y-0.5 sm:group-hover:translate-x-0.5" />
+                <ArrowUpRight className="h-4 w-4 shrink-0 text-foreground/25 sm:transition-all sm:duration-300 sm:group-hover:-translate-y-0.5 sm:group-hover:translate-x-0.5 sm:group-hover:text-foreground/60" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2 sm:mb-3 sm:group-hover:text-foreground/70 sm:transition-colors sm:duration-200 leading-tight">
+              <h2 className="mb-2 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:mb-3 sm:text-3xl sm:transition-colors sm:duration-300 sm:group-hover:text-foreground/80">
                 {featured.title}
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 max-w-2xl">
+              <p className="mb-4 max-w-2xl text-base leading-relaxed text-muted-foreground/70 sm:mb-6 sm:text-lg">
                 {featured.excerpt}
               </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground/50">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground/40">
                 <span>{featured.author}</span>
-                <span aria-hidden="true" className="text-muted-foreground/20">·</span>
+                <span aria-hidden="true" className="text-foreground/20">·</span>
                 <span>{formatDate(featured.date)}</span>
-                <span aria-hidden="true" className="text-muted-foreground/20">·</span>
+                <span aria-hidden="true" className="text-foreground/20">·</span>
                 <span>{featured.read_time}</span>
               </div>
             </div>
@@ -214,8 +243,8 @@ export function BlogListClient({ posts }: BlogListClientProps) {
       )}
 
       {/* ── Post grid ────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-5 sm:px-10 mb-20 sm:mb-28">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+      <div className="mx-auto mb-20 max-w-5xl sm:mb-28">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {visiblePosts.map((post, i) => (
             <Link
               key={post.id}
@@ -230,30 +259,28 @@ export function BlogListClient({ posts }: BlogListClientProps) {
                 contentVisibility: "auto",
                 containIntrinsicSize: "400px 380px",
               } as CSSProperties}
-              className={cn(
-                "blog-card-enter group flex flex-col h-full touch-manipulation rounded-xl overflow-hidden border border-border/30 bg-card",
-                "sm:hover:border-border/60 sm:transition-colors sm:duration-300",
-              )}
+              className={cn(CARD_CHROME, "relative")}
             >
+              <TopSheen />
               <PostThumbnail postId={post.id} />
-              <div className="flex flex-col flex-1 p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/40">
+              <div className="flex flex-1 flex-col p-4 sm:p-6">
+                <div className="mb-3 flex items-center justify-between sm:mb-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/40">
                     {post.category}
                   </span>
-                  <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/20 sm:group-hover:text-foreground/50 sm:transition-all sm:duration-200 sm:group-hover:-translate-y-0.5 sm:group-hover:translate-x-0.5" />
+                  <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-foreground/25 sm:transition-all sm:duration-300 sm:group-hover:-translate-y-0.5 sm:group-hover:translate-x-0.5 sm:group-hover:text-foreground/60" />
                 </div>
-                <h3 className="font-semibold text-foreground sm:group-hover:text-foreground/70 sm:transition-colors sm:duration-200 mb-2 line-clamp-2 leading-snug">
+                <h3 className="mb-2 line-clamp-2 font-semibold leading-snug tracking-tight text-foreground sm:transition-colors sm:duration-300 sm:group-hover:text-foreground/80">
                   {post.title}
                 </h3>
-                <p className="text-sm text-muted-foreground/70 leading-relaxed mb-3 sm:mb-4 line-clamp-3 flex-1">
+                <p className="mb-3 line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground/70 sm:mb-4">
                   {post.excerpt}
                 </p>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground/40 mt-auto pt-3 sm:pt-4 border-t border-border/20">
+                <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-0.5 border-t border-foreground/10 pt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/40 sm:pt-4">
                   <span>{post.author}</span>
-                  <span aria-hidden="true" className="text-muted-foreground/15">·</span>
+                  <span aria-hidden="true" className="text-foreground/15">·</span>
                   <span>{formatDate(post.date)}</span>
-                  <span aria-hidden="true" className="text-muted-foreground/15">·</span>
+                  <span aria-hidden="true" className="text-foreground/15">·</span>
                   <span>{post.read_time}</span>
                 </div>
               </div>
@@ -263,8 +290,8 @@ export function BlogListClient({ posts }: BlogListClientProps) {
 
         {/* Empty state */}
         {matches.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground/60 text-sm mb-2">
+          <div className="py-16 text-center">
+            <p className="mb-2 text-sm text-foreground/55">
               {deferredQuery.trim() !== ""
                 ? `Nothing matched "${deferredQuery.trim()}".`
                 : "No posts in this category yet."}
@@ -275,7 +302,7 @@ export function BlogListClient({ posts }: BlogListClientProps) {
                 setActiveCategory("All")
                 setQuery("")
               }}
-              className="mt-2 text-sm text-foreground/70 hover:text-foreground transition-colors underline underline-offset-4 touch-manipulation"
+              className="mt-2 touch-manipulation text-sm text-foreground/70 underline underline-offset-4 transition-colors hover:text-foreground"
             >
               Reset filters
             </button>
@@ -284,18 +311,25 @@ export function BlogListClient({ posts }: BlogListClientProps) {
 
         {/* Pagination — Load more */}
         {hasMore && (
-          <div className="mt-10 sm:mt-12 flex flex-col items-center gap-3">
+          <div className="mt-10 flex flex-col items-center gap-3 sm:mt-12">
             <button
               type="button"
               onClick={() => setVisibleCount((n) => n + PAGE_INCREMENT)}
-              className="inline-flex items-center gap-2 rounded-full font-medium text-foreground border border-border/50 hover:border-border bg-background/60 hover:bg-foreground/[0.04] px-6 py-2.5 text-sm transition-colors touch-manipulation"
+              className={cn(
+                "group inline-flex touch-manipulation items-center justify-center gap-2 rounded-full font-medium",
+                "border border-foreground/15 dark:border-white/15 text-foreground dark:text-white",
+                "bg-foreground/[0.025] dark:bg-white/[0.03] backdrop-blur-[2px]",
+                "hover:border-foreground/25 hover:bg-foreground/[0.05] dark:hover:border-white/25 dark:hover:bg-white/[0.06]",
+                "transition-[background,border-color,transform] duration-300 active:scale-[0.985]",
+                "px-6 py-2.5 text-sm",
+              )}
             >
               Show more
-              <span className="text-muted-foreground/50">
+              <span className="text-foreground/45">
                 ({matches.length - visibleCount} left)
               </span>
             </button>
-            <p className="text-[11px] text-muted-foreground/40">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/40">
               Showing {visiblePosts.length} of {matches.length}
             </p>
           </div>

@@ -37,7 +37,7 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { useChats } from "@/lib/chat-store/chats/provider"
 import { useSidebarMachines } from "./hooks/use-sidebar-machines"
 import { useLazyFetch } from "./hooks/use-lazy-fetch"
-import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
+import { usePlatformMode } from "@/lib/platform-mode-store"
 
 // ─── Types ────────────────────────────────────────────────────────
 type HoverInfo = {
@@ -708,6 +708,31 @@ function SectionHeader({ label, expanded }: { label: string; expanded: boolean }
   )
 }
 
+// ─── ModeReveal ───────────────────────────────────────────────────
+//   Smoothly collapses / expands a block of nav sections when the sidebar
+//   morphs between platform modes (Personal ↔ Developer). Uses the grid-rows
+//   [0fr]↔[1fr] technique (same as ResourceDropdown) so the height animates
+//   to its natural size with no magic numbers, plus an opacity cross-fade.
+//   Always mounted so the transition runs in BOTH directions; while collapsed
+//   it's `inert` + pointer-events-none so hidden links aren't focusable or
+//   clickable.
+function ModeReveal({ show, children }: { show: boolean; children: ReactNode }) {
+  return (
+    <div
+      aria-hidden={!show}
+      inert={!show ? true : undefined}
+      className={cn(
+        "grid transition-[grid-template-rows,opacity] ease-[cubic-bezier(0.32,0.72,0,1)]",
+        show
+          ? "grid-rows-[1fr] opacity-100 duration-300"
+          : "grid-rows-[0fr] opacity-0 duration-200 pointer-events-none",
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">{children}</div>
+    </div>
+  )
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  ResourceDropdown — disclosure row for Computers · Schedules · Creds
 //
@@ -1117,6 +1142,17 @@ export const SidebarNavSection = memo(function SidebarNavSection({
   const { chats: allChats } = useChats()
   const { stats: machineStats } = useSidebarMachines(user)
 
+  // Developer platform mode → reveals the "Developer" nav section. Gate on
+  // mount: the platform-mode store hydrates eagerly from localStorage on the
+  // client, so reading `mode` during the SSR / first-paint (consumer default)
+  // render and then flipping to "developer" would cause a hydration mismatch.
+  // See lib/platform-mode-store.ts. The flag for the *public* developer
+  // surface still lives in lib/feature-flags.ts; this is the in-app surface.
+  const platformMode = usePlatformMode((s) => s.mode)
+  const [devModeMounted, setDevModeMounted] = useState(false)
+  useEffect(() => setDevModeMounted(true), [])
+  const isDeveloperMode = devModeMounted && platformMode === "developer"
+
   // Memory quick-edit popup is opened from the "Memory" entry in the
   // Resources group (both expanded inline and collapsed flyout modes).
   //
@@ -1157,6 +1193,10 @@ export const SidebarNavSection = memo(function SidebarNavSection({
 
   return (
     <>
+      {/* Consumer-only sections (New Task + Recent). In Developer mode the
+          sidebar narrows to just Workspace + Developer, so these collapse away
+          with a smooth height/opacity transition. */}
+      <ModeReveal show={!isDeveloperMode}>
       {/* New Task */}
       <div className={cn("relative", expanded ? "pb-1 mb-0.5" : "pb-1 mb-0.5")}>
         <NavButton
@@ -1209,6 +1249,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           }}
         />
       </div>
+      </ModeReveal>
 
       <SectionHeader label="Workspace" expanded={expanded} />
 
@@ -1296,24 +1337,37 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             />
           )
         })()}
-        {DEVELOPERS_API_ENABLED && (
+      </div>
+
+      {/* ── Developer section ──
+          Revealed only when the user switches to the Developer platform mode
+          via the sidebar-header switcher (usePlatformMode). The /developers
+          dashboard holds API keys, usage, traces, and the API reference.
+          `isDeveloperMode` is mount-gated (see above) so this never flashes
+          or triggers a hydration mismatch. The in-app developer surface — this
+          entry, the /developers page, and the guide's API tab — follows the
+          per-user runtime mode; only the public marketing surface (landing nav,
+          /api-docs) still rides DEVELOPERS_API_ENABLED. */}
+      <ModeReveal show={isDeveloperMode}>
+        <SectionHeader label="Developer" expanded={expanded} />
+        <div className="space-y-0.5">
           <NavButton
             id="sidebar-developers-link"
             icon={<IconKey size={16} stroke={1.5} className="shrink-0" />}
             label="Developers"
-            tooltip="API, MCP & integrations"
+            tooltip="API keys, usage & integrations"
             href="/developers"
             isActive={isItemActive("/developers")}
             accentColor="text-purple-500 dark:text-purple-400"
             onClick={closeMobileIfNeeded}
             hoverInfo={{
               description: "Developers",
-              detail: "API keys, MCP, SDKs, and everything to integrate computer-use intelligence into your apps.",
+              detail: "API keys, usage, traces, and everything to integrate computer-use intelligence into your apps.",
               visual: "developers",
             }}
           />
-        )}
-      </div>
+        </div>
+      </ModeReveal>
 
       {/* The Memory quick-edit popup is mounted at the AppSidebar root
           (a sibling of `Sidebar`, not a descendant) so it survives the

@@ -1,6 +1,22 @@
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import * as crypto from "crypto"
+
+// Cookie/RLS client authenticates the request; the service-role client does
+// the actual table I/O. The `api_keys` table grants the authenticated role
+// only SELECT + UPDATE policies (no INSERT), and `api_usage` is service-
+// managed, so the RLS client can list/revoke but NOT mint keys or read usage.
+// Every query in these routes is scoped by the authenticated `user_id`, so
+// using the service role here is safe and mirrors the FastAPI backend, which
+// also writes `api_keys` with the service role.
+function getDb(): SupabaseClient | null {
+  // Cast away the strict generated-schema typing: api_keys / api_usage /
+  // user_credits aren't in app/types/database.types.ts, and the cookie client
+  // these routes used before was untyped (Promise<any>). Runtime is identical.
+  return createServiceClient() as unknown as SupabaseClient | null
+}
 
 // ── Key prefix + hashing configuration ──
 //
@@ -86,13 +102,17 @@ export async function GET() {
     }
 
     const userId = authData.user.id
+    const db = getDb()
+    if (!db) {
+      return NextResponse.json({ error: "Service unavailable" }, { status: 500 })
+    }
     const now = Date.now()
     const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString()
     const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
     const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString()
 
     // Fetch keys
-    const { data: keys, error } = await supabase
+    const { data: keys, error } = await db
       .from("api_keys")
       .select("id, name, tier, scopes, created_at, last_used_at, key_prefix")
       .eq("user_id", userId)
@@ -104,7 +124,7 @@ export async function GET() {
     }
 
     // Fetch 30-day usage with full detail
-    const { data: usage } = await supabase
+    const { data: usage } = await db
       .from("api_usage")
       .select("endpoint, credits_charged, created_at, request_id")
       .eq("user_id", userId)
@@ -166,7 +186,7 @@ export async function GET() {
     const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets))
 
     // ── Credit balance ──
-    const { data: creditsData } = await supabase
+    const { data: creditsData } = await db
       .from("user_credits")
       .select("balance, subscription_tier")
       .eq("user_id", userId)
@@ -207,6 +227,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const db = getDb()
+    if (!db) {
+      return NextResponse.json({ error: "Service unavailable" }, { status: 500 })
+    }
+
     const body = await request.json()
     const { name, scopes, kind: requestedKind } = body
 
@@ -236,7 +261,7 @@ export async function POST(request: Request) {
     }
 
     // Per-user key cap (defense-in-depth — backend also enforces).
-    const { count: existingCount } = await supabase
+    const { count: existingCount } = await db
       .from("api_keys")
       .select("id", { count: "exact", head: true })
       .eq("user_id", authData.user.id)
@@ -283,7 +308,7 @@ export async function POST(request: Request) {
     const { hash: keyHash, hashVersion, pepperId } = hashKey(rawKey, kind)
     const keyId = crypto.randomBytes(8).toString("hex")
 
-    const { error } = await supabase.from("api_keys").insert({
+    const { error } = await db.from("api_keys").insert({
       id: keyId,
       user_id: authData.user.id,
       key_hash: keyHash,

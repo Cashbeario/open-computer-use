@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
@@ -32,6 +32,7 @@ import { DesktopAppTab } from "./tabs/desktop-app"
 import { BillingTab } from "./tabs/billing"
 import { APITab } from "./tabs/api"
 import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
+import { usePlatformMode } from "@/lib/platform-mode-store"
 
 /* ─── tab config ─── */
 
@@ -50,15 +51,17 @@ const ALL_TABS = [
 
 type TabId = (typeof ALL_TABS)[number]["id"]
 
-// Filter at module load — DEVELOPERS_API_ENABLED is a compile-time constant.
-const tabConfig = ALL_TABS.filter(
-  (t) => DEVELOPERS_API_ENABLED || t.id !== "api",
-)
+type GuideTab = (typeof ALL_TABS)[number]
 
-const tabIds = new Set<string>(tabConfig.map((t) => t.id))
-function isValidTabId(value: string | null): value is TabId {
-  return value !== null && tabIds.has(value)
-}
+// The "api" tab is gated for the PUBLIC guide by DEVELOPERS_API_ENABLED but is
+// reachable for users in the developer platform mode. The visible/valid tab
+// set is therefore computed at RUNTIME inside GuideContent (mode is a
+// client-only, per-user signal). This module-level set — flag-only — is used
+// solely to validate the INITIAL tab on the server / first client paint so the
+// two renders agree (no hydration mismatch).
+const FLAG_VALID_IDS = new Set<string>(
+  ALL_TABS.filter((t) => DEVELOPERS_API_ENABLED || t.id !== "api").map((t) => t.id),
+)
 
 /* ─── animation ─── */
 
@@ -97,7 +100,7 @@ function TabContent({ activeTab, inApp }: { activeTab: TabId; inApp: boolean }) 
 
 /* ─── tab navigation ─── */
 
-function TabNav({ activeTab, onTabChange }: { activeTab: TabId; onTabChange: (id: TabId) => void }) {
+function TabNav({ tabs, activeTab, onTabChange }: { tabs: readonly GuideTab[]; activeTab: TabId; onTabChange: (id: TabId) => void }) {
   const t = useTranslations("guide")
   return (
     <div className="rounded-2xl border border-foreground/[0.06] bg-background/60 dark:bg-background/40 backdrop-blur-2xl p-1.5 shadow-sm">
@@ -105,7 +108,7 @@ function TabNav({ activeTab, onTabChange }: { activeTab: TabId; onTabChange: (id
         className="flex flex-wrap justify-center gap-0.5"
         role="tablist"
       >
-        {tabConfig.map((tab) => {
+        {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
           return (
@@ -142,16 +145,40 @@ function GuideContent({ inApp }: { inApp: boolean }) {
   const t = useTranslations("guide")
   const searchParams = useSearchParams()
   const tabParam = searchParams.get("tab")
-  const [activeTab, setActiveTab] = useState<TabId>(
-    isValidTabId(tabParam) ? tabParam : "overview"
+
+  // "api" tab visibility: public flag OR developer platform mode. Mount-gate
+  // the mode read so SSR / first client paint (consumer default) match — no
+  // hydration mismatch; the effect below promotes ?tab=api once developer mode
+  // is confirmed post-mount.
+  const platformMode = usePlatformMode((s) => s.mode)
+  const [modeMounted, setModeMounted] = useState(false)
+  useEffect(() => setModeMounted(true), [])
+  const apiTabAllowed =
+    DEVELOPERS_API_ENABLED || (modeMounted && platformMode === "developer")
+
+  const tabs = useMemo<readonly GuideTab[]>(
+    () => ALL_TABS.filter((tab) => apiTabAllowed || tab.id !== "api"),
+    [apiTabAllowed],
+  )
+  const isValidTabId = (value: string | null): value is TabId =>
+    value !== null && tabs.some((tab) => tab.id === value)
+
+  // Initial tab validated against the FLAG-only set so server + first client
+  // render produce identical markup; ?tab=api therefore starts on Overview and
+  // is promoted by the effect once developer mode is confirmed on the client.
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    tabParam !== null && FLAG_VALID_IDS.has(tabParam)
+      ? (tabParam as TabId)
+      : "overview",
   )
 
-  // Sync with URL param changes (e.g. clicking guide links from other pages)
+  // Re-sync when the URL param changes OR apiTabAllowed flips true post-mount
+  // (so an in-app developer landing on /guide?tab=api lands on the API tab).
   useEffect(() => {
     if (isValidTabId(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam)
     }
-  }, [tabParam]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tabParam, apiTabAllowed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (inApp) {
     return (
@@ -191,7 +218,7 @@ function GuideContent({ inApp }: { inApp: boolean }) {
             transition={{ duration: 0.4, delay: 0.05, ease: [0.22, 1, 0.36, 1] as const }}
             className="sticky top-0 z-20 py-3"
           >
-            <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+            <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
           </motion.div>
 
           {/* Tab content */}
@@ -252,7 +279,7 @@ function GuideContent({ inApp }: { inApp: boolean }) {
             transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] as const }}
             className="sticky top-[56px] z-20 py-3"
           >
-            <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+            <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
           </motion.div>
 
           {/* ── tab content ── */}

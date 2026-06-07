@@ -16,7 +16,7 @@ import {
 import { useUser } from "@/lib/user-store/provider"
 import { useRouter } from "next/navigation"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { IconPin, IconPinFilled } from "@tabler/icons-react"
+import { IconLayoutSidebar, IconLayoutSidebarFilled } from "@tabler/icons-react"
 import { DialogCollaborativeAuth } from "../../collaborative/dialog-collaborative-auth"
 import { CoastyIcon } from "@/components/icons/coasty"
 import { cn } from "@/lib/utils"
@@ -185,14 +185,15 @@ export function AppSidebar() {
               )}
             </button>
 
-            {/* ── Pin toggle ──
-                Desktop-only — on mobile the sidebar is a sheet
-                drawer with no hover-to-expand, so pinning has no
-                meaning. Filled-pin tilted 45° in pinned state reads
-                as "stuck"; outline-pin upright reads as "loose /
-                will close on mouse-out". Color shifts from a quiet
-                foreground/30 to a deliberate foreground/75 with a
-                subtle bg when active. */}
+            {/* ── Keep-open toggle ──
+                Desktop-only — on mobile the sidebar is a sheet drawer
+                with no hover-to-expand, so this has no meaning. Uses the
+                sidebar-panel glyph (the modern pattern, à la VS Code /
+                Linear) rather than a pushpin: solid/filled panel = locked
+                open, outline panel = will auto-collapse on mouse-out.
+                Color shifts from a quiet foreground/30 to a deliberate
+                foreground/75 with a subtle bg when active; the icon
+                lifts on hover and presses in on click. */}
             {expanded && !isMobile && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -202,7 +203,8 @@ export function AppSidebar() {
                     aria-label={pinned ? "Unpin sidebar" : "Keep sidebar open"}
                     aria-pressed={pinned}
                     className={cn(
-                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150",
+                      "group flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
+                      "transition-all duration-150 ease-out active:scale-90",
                       "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
                       pinned
                         ? "text-foreground/75 bg-foreground/[0.05] hover:bg-foreground/[0.08] dark:bg-white/[0.05] dark:hover:bg-white/[0.08]"
@@ -210,16 +212,15 @@ export function AppSidebar() {
                     )}
                   >
                     {pinned ? (
-                      <IconPinFilled
-                        size={13}
-                        stroke={1.5}
-                        className="rotate-45 transition-transform duration-200"
+                      <IconLayoutSidebarFilled
+                        size={15}
+                        className="transition-transform duration-200 ease-out group-hover:scale-110"
                       />
                     ) : (
-                      <IconPin
-                        size={13}
-                        stroke={1.75}
-                        className="transition-transform duration-200"
+                      <IconLayoutSidebar
+                        size={15}
+                        stroke={1.8}
+                        className="transition-transform duration-200 ease-out group-hover:scale-110"
                       />
                     )}
                   </button>

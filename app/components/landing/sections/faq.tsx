@@ -11,11 +11,11 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
-import { Plus, ArrowUpRight } from "lucide-react"
+import { Plus, Minus, ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { LandingSectionHeader, LandingSectionTopGlow } from "../section-shell"
+import { LandingSectionHeader } from "../section-shell"
 
 const FAQ_KEYS = ["whatIsCoasty", "howDifferent", "whatTasks", "whatAreCredits", "localComputer", "dataSafe"] as const
 
@@ -30,16 +30,7 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
   }
 
   return (
-    <section
-      id="faq"
-      className={cn(
-        "relative py-20 sm:py-24 lg:py-32 px-8 sm:px-10",
-        // 2xl-only side padding clears the hero task-shot gutter cards
-        // (~280px deep on each side at 1536px+).
-        "2xl:px-[280px]",
-      )}
-    >
-      <LandingSectionTopGlow />
+    <section id="faq" className="relative py-20 sm:py-24 lg:py-32 px-8 sm:px-10">
       <div className="max-w-2xl w-full mx-auto">
         <LandingSectionHeader
           title={t("faq.title")}
@@ -47,48 +38,45 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
           isMobile={isMobile}
         />
 
-        <ul className="border-t border-foreground/10" role="list">
+        <motion.ul
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
+          transition={{ duration: 0.4, ease: EASE }}
+          className="border-t border-foreground/10"
+          role="list"
+        >
           {FAQ_KEYS.map((faqKey, index) => {
             const isActive = activeIndex === index
             return (
-              <motion.li
-                key={faqKey}
-                initial={{ opacity: 0, y: 8 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
-                transition={{ duration: 0.5, ease: EASE, delay: index * 0.05 }}
-                className="border-b border-foreground/10"
-              >
+              <li key={faqKey} className="border-b border-foreground/10">
                 <button
                   type="button"
                   onClick={() => handleToggle(index)}
                   aria-expanded={isActive}
                   aria-controls={`faq-panel-${index}`}
                   id={`faq-trigger-${index}`}
-                  className="group flex w-full items-center gap-4 py-5 sm:py-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                  className="flex w-full items-center gap-4 py-5 sm:py-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                 >
                   <span
                     className={cn(
-                      "flex-1 transition-colors duration-300",
+                      "flex-1",
                       isMobile ? "text-base" : "text-base sm:text-lg",
-                      isActive
-                        ? "font-medium text-foreground"
-                        : "text-foreground/85 group-hover:text-foreground",
+                      isActive ? "font-medium text-foreground" : "text-foreground/85",
                     )}
                   >
                     {t(`faq.items.${faqKey}.question`)}
                   </span>
-                  <motion.span
-                    animate={{ rotate: isActive ? 45 : 0 }}
-                    transition={{ duration: 0.3, ease: EASE }}
-                    className={cn(
-                      "shrink-0 inline-flex h-6 w-6 items-center justify-center transition-colors duration-300",
-                      isActive ? "text-foreground" : "text-foreground/45 group-hover:text-foreground/80",
-                    )}
+                  <span
+                    className="shrink-0 inline-flex h-6 w-6 items-center justify-center text-foreground/45"
                     aria-hidden
                   >
-                    <Plus className="h-4 w-4" strokeWidth={1.5} />
-                  </motion.span>
+                    {isActive ? (
+                      <Minus className="h-4 w-4" strokeWidth={1.5} />
+                    ) : (
+                      <Plus className="h-4 w-4" strokeWidth={1.5} />
+                    )}
+                  </span>
                 </button>
 
                 <AnimatePresence initial={false}>
@@ -118,17 +106,13 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.li>
+              </li>
             )
           })}
-        </ul>
+        </motion.ul>
 
         {/* Footer line — single inline CTA, no card chrome */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
-          transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
+        <div
           className={cn(
             "mt-10 flex items-center justify-center gap-2 sm:gap-3",
             isMobile ? "flex-col" : "flex-row flex-wrap",
@@ -152,9 +136,9 @@ export function FAQSection({ isMobile }: { isMobile: boolean }) {
               Book a 15-min call
               <span className="absolute -bottom-0.5 left-0 h-px w-full origin-left bg-foreground/30 transition-transform duration-300 group-hover:scale-x-0" />
             </span>
-            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

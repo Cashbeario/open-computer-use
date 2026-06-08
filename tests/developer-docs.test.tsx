@@ -75,6 +75,15 @@ import {
   LANGS,
   RESPONSE_EXAMPLE,
   ERROR_EXAMPLE,
+  RUN_FIELDS,
+  RUN_EVENT_TYPES,
+  WEBHOOK_EVENTS,
+  WORKFLOW_STEP_TYPES,
+  CONDITION_OPS,
+  WORKFLOW_RUN_FIELDS,
+  RUN_EXAMPLE,
+  WORKFLOW_DSL_EXAMPLE,
+  WORKFLOW_RUN_EXAMPLE,
 } from "@/app/components/developers/developer-docs"
 
 const CANONICAL_ACTION_TYPES = [
@@ -110,7 +119,7 @@ afterEach(() => {
 
 describe("DOC_SECTIONS catalogue", () => {
   it("has the expected sections, all with required fields", () => {
-    expect(DOC_SECTIONS.length).toBe(13)
+    expect(DOC_SECTIONS.length).toBe(20)
     for (const s of DOC_SECTIONS) {
       expect(typeof s.id).toBe("string")
       expect(s.id.length).toBeGreaterThan(0)
@@ -464,12 +473,13 @@ describe("additional languages", () => {
 describe("DeveloperDocs renders all six language tabs", () => {
   it("shows a tab for every language on every code block", () => {
     render(<DeveloperDocs />)
-    // 5 endpoints render a CodeTabs (predict, sessions, grounding, ocr, parse)
+    // 11 endpoints render a CodeTabs: predict, sessions, grounding, ocr, parse,
+    // runs, runEvents, runResume, webhookVerify, workflowCreate, workflowAdhoc.
     for (const l of LANGS) {
       expect(
         screen.getAllByRole("tab", { name: l.label }).length,
         `tab "${l.label}"`,
-      ).toBeGreaterThanOrEqual(5)
+      ).toBeGreaterThanOrEqual(11)
     }
   })
 
@@ -479,5 +489,271 @@ describe("DeveloperDocs renders all six language tabs", () => {
     fireEvent.click(screen.getAllByRole("tab", { name: "Go" })[0])
     expect(container.textContent).toContain("package main")
     expect(container.textContent).not.toContain("requests.post")
+  })
+})
+
+// ═════════════ E. AGENTS + WORKFLOWS (anti-drift guards) ═════════════
+// These pin the two new doc surfaces — the Agents (Task Runs) group and the
+// Workflows group — so their sidebar nav, endpoints, languages, reference
+// data, and JSON examples can't silently drift from the v1 contract.
+
+// The new section ids, grouped by the sidebar group they belong to.
+const AGENT_SECTION_IDS = ["runs", "run-events", "human-takeover", "run-webhooks"]
+const WORKFLOW_SECTION_IDS = ["workflows", "workflow-dsl", "workflow-runs"]
+
+// The new CODE_SAMPLES keys that are real HTTP examples (all six languages).
+const NEW_HTTP_SAMPLE_KEYS = [
+  "runs", "runEvents", "runResume", "webhookVerify", "workflowCreate", "workflowAdhoc",
+] as const
+
+describe("Agents + Workflows sidebar groups", () => {
+  it("registers the Agents and Workflows groups", () => {
+    expect(DOC_GROUPS).toContain("Agents")
+    expect(DOC_GROUPS).toContain("Workflows")
+  })
+
+  it("places the new sections in the right groups, contiguously", () => {
+    for (const id of AGENT_SECTION_IDS) {
+      const s = DOC_SECTIONS.find((x) => x.id === id)
+      expect(s, `missing Agents section #${id}`).toBeTruthy()
+      expect(s!.group).toBe("Agents")
+    }
+    for (const id of WORKFLOW_SECTION_IDS) {
+      const s = DOC_SECTIONS.find((x) => x.id === id)
+      expect(s, `missing Workflows section #${id}`).toBeTruthy()
+      expect(s!.group).toBe("Workflows")
+    }
+    // Agents must precede Workflows, which must precede Reference.
+    const order = DOC_SECTIONS.map((s) => s.group)
+    expect(order.indexOf("Agents")).toBeLessThan(order.indexOf("Workflows"))
+    expect(order.indexOf("Workflows")).toBeLessThan(order.indexOf("Reference"))
+  })
+
+  it("renders a sidebar group label and headings for every new section", () => {
+    const { container } = render(<DeveloperDocs />)
+    const aside = container.querySelector("aside")!
+    expect(within(aside).getAllByText("Agents").length).toBeGreaterThanOrEqual(1)
+    expect(within(aside).getAllByText("Workflows").length).toBeGreaterThanOrEqual(1)
+    for (const id of [...AGENT_SECTION_IDS, ...WORKFLOW_SECTION_IDS]) {
+      const s = DOC_SECTIONS.find((x) => x.id === id)!
+      expect(screen.getByRole("heading", { name: s.title }), `heading "${s.title}"`).toBeTruthy()
+      expect(container.querySelector(`#${id}`), `anchor #${id}`).toBeTruthy()
+    }
+  })
+})
+
+describe("Agents + Workflows code samples", () => {
+  it("provides all six languages for every new HTTP example", () => {
+    const langIds = LANGS.map((l) => l.id)
+    for (const key of NEW_HTTP_SAMPLE_KEYS) {
+      const sample = CODE_SAMPLES[key]
+      expect(sample, `CODE_SAMPLES.${key} should exist`).toBeTruthy()
+      expect(Object.keys(sample).sort()).toEqual([...langIds].sort())
+      for (const lang of langIds) {
+        expect(sample[lang].trim().length, `${key}.${lang} non-empty`).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it("targets the documented agent + workflow endpoints", () => {
+    const langIds = LANGS.map((l) => l.id)
+    // Each sample family must reference its core path in every language.
+    const expectedPath: Record<(typeof NEW_HTTP_SAMPLE_KEYS)[number], string> = {
+      runs: "/runs",
+      runEvents: "/runs/",            // .../runs/{id}/events
+      runResume: "/runs/",            // .../runs/{id}/resume
+      webhookVerify: "/runs",
+      workflowCreate: "/workflows",
+      workflowAdhoc: "/workflows/runs",
+    }
+    for (const key of NEW_HTTP_SAMPLE_KEYS) {
+      for (const lang of langIds) {
+        expect(CODE_SAMPLES[key][lang], `${key}.${lang} hits ${expectedPath[key]}`).toContain(expectedPath[key])
+      }
+    }
+    // The events + resume + cancel surface is documented somewhere in the runs sample family.
+    const runsBlob = NEW_HTTP_SAMPLE_KEYS.flatMap((k) => Object.values(CODE_SAMPLES[k])).join("\n")
+    expect(runsBlob).toContain("/runs/")
+    expect(runsBlob).toContain("/events")
+    expect(runsBlob).toContain("/resume")
+    expect(runsBlob).toContain("/workflows")
+    expect(runsBlob).toContain("/workflows/runs")
+  })
+
+  it("uses only real fields in the run-creation sample", () => {
+    for (const lang of LANGS.map((l) => l.id)) {
+      const code = CODE_SAMPLES.runs[lang]
+      expect(code, `${lang} sends machine_id`).toContain("machine_id")
+      expect(code, `${lang} sends task`).toContain("task")
+      expect(code, `${lang} sets on_awaiting_human`).toContain("on_awaiting_human")
+    }
+  })
+
+  it("streams events with Last-Event-ID replay in every language", () => {
+    for (const lang of LANGS.map((l) => l.id)) {
+      const code = CODE_SAMPLES.runEvents[lang]
+      expect(code, `${lang} reconnects with Last-Event-ID`).toContain("Last-Event-ID")
+    }
+    expect(CODE_SAMPLES.runEvents.curl, "curl uses -N").toContain("curl -N")
+  })
+
+  it("resumes only after detecting awaiting_human", () => {
+    for (const lang of LANGS.map((l) => l.id)) {
+      const code = CODE_SAMPLES.runResume[lang]
+      expect(code, `${lang} checks awaiting_human`).toContain("awaiting_human")
+      expect(code, `${lang} calls resume`).toContain("/resume")
+    }
+  })
+
+  it("verifies webhook signatures with HMAC-SHA256 (python + node)", () => {
+    const py = CODE_SAMPLES.webhookVerify.python
+    expect(py).toContain("hmac")
+    expect(py).toMatch(/sha256/i)
+    expect(py).toContain("compare_digest")
+    expect(py).toContain("webhook_secret")
+
+    const node = CODE_SAMPLES.webhookVerify.node
+    expect(node).toContain("createHmac")
+    expect(node).toMatch(/sha256/i)
+    expect(node).toContain("timingSafeEqual")
+    expect(node).toContain("webhook_secret")
+  })
+
+  it("builds workflows from a real DSL: task -> assert -> if branch", () => {
+    for (const lang of LANGS.map((l) => l.id)) {
+      const code = CODE_SAMPLES.workflowCreate[lang]
+      expect(code, `${lang} has a slug`).toContain("invoice-reconcile")
+      expect(code, `${lang} uses a {{var}} reference`).toContain("{{inputs.order_id}}")
+      expect(code, `${lang} uses a structured condition`).toMatch(/"?op"?\s*[:=>]+\s*"contains"/)
+      for (const t of ["task", "assert", "if", "succeed", "fail"]) {
+        expect(code, `${lang} uses step type ${t}`).toContain(t)
+      }
+    }
+  })
+
+  it("runs an inline definition for the ad-hoc workflow example", () => {
+    for (const lang of LANGS.map((l) => l.id)) {
+      const code = CODE_SAMPLES.workflowAdhoc[lang]
+      expect(code, `${lang} posts to /workflows/runs`).toContain("/workflows/runs")
+      expect(code, `${lang} carries an inline definition`).toContain("definition")
+      expect(code, `${lang} references inputs`).toContain("{{inputs.url}}")
+    }
+  })
+})
+
+describe("Agents + Workflows reference data + JSON examples", () => {
+  it("run object documents the contract status set", () => {
+    const fields = RUN_FIELDS.map((f) => f.field)
+    for (const required of ["id", "object", "status", "machine_id", "task", "result", "cua_version"]) {
+      expect(fields, `RUN_FIELDS missing ${required}`).toContain(required)
+    }
+  })
+
+  it("event types cover the full SSE catalogue", () => {
+    const types = RUN_EVENT_TYPES.map((e) => e.type)
+    for (const t of [
+      "status", "text", "reasoning", "tool_call", "tool_result",
+      "awaiting_human", "resumed", "step", "billing", "error", "done",
+    ]) {
+      expect(types, `event ${t}`).toContain(t)
+    }
+  })
+
+  it("webhook events are the five HMAC-signed lifecycle callbacks", () => {
+    const events = WEBHOOK_EVENTS.map((e) => e.event)
+    expect(new Set(events)).toEqual(new Set([
+      "run.awaiting_human", "run.succeeded", "run.failed", "run.cancelled", "run.timed_out",
+    ]))
+  })
+
+  it("workflow step types and condition operators are complete", () => {
+    const steps = WORKFLOW_STEP_TYPES.map((s) => s.type)
+    for (const t of [
+      "task", "assert", "if", "loop", "parallel", "human_approval", "retry", "succeed", "fail",
+    ]) {
+      expect(steps, `step ${t}`).toContain(t)
+    }
+    const ops = CONDITION_OPS.map((c) => c.op).join(" ")
+    for (const op of ["eq", "ne", "lt", "gt", "lte", "gte", "contains", "truthy", "falsy", "exists", "and", "or", "not"]) {
+      expect(ops, `op ${op}`).toContain(op)
+    }
+  })
+
+  it("RUN_EXAMPLE is a valid, contract-shaped agent.run", () => {
+    const round = JSON.parse(JSON.stringify(RUN_EXAMPLE))
+    expect(round).toEqual(RUN_EXAMPLE)
+    expect(RUN_EXAMPLE.object).toBe("agent.run")
+    expect(["queued", "running", "awaiting_human", "succeeded", "failed", "cancelled", "timed_out"])
+      .toContain(RUN_EXAMPLE.status)
+    expect(typeof RUN_EXAMPLE.machine_id).toBe("string")
+    // webhook_secret is shown once at create time.
+    expect(typeof RUN_EXAMPLE.webhook_secret).toBe("string")
+  })
+
+  it("WORKFLOW_DSL_EXAMPLE is a valid 2026-06-01 DSL with structured conditions", () => {
+    const round = JSON.parse(JSON.stringify(WORKFLOW_DSL_EXAMPLE))
+    expect(round).toEqual(WORKFLOW_DSL_EXAMPLE)
+    expect(WORKFLOW_DSL_EXAMPLE.dsl_version).toBe("2026-06-01")
+    const steps = WORKFLOW_DSL_EXAMPLE.definition.steps
+    expect(steps.map((s) => s.type)).toEqual(["task", "assert", "if"])
+    const ifStep = steps.find((s) => s.type === "if") as
+      | { type: "if"; condition: { op: string } }
+      | undefined
+    expect(ifStep?.condition.op).toBe("contains")
+  })
+
+  it("WORKFLOW_RUN_EXAMPLE is a valid, contract-shaped workflow.run", () => {
+    const round = JSON.parse(JSON.stringify(WORKFLOW_RUN_EXAMPLE))
+    expect(round).toEqual(WORKFLOW_RUN_EXAMPLE)
+    expect(WORKFLOW_RUN_EXAMPLE.object).toBe("workflow.run")
+    const fields = WORKFLOW_RUN_FIELDS.map((f) => f.field)
+    for (const required of ["id", "object", "status", "workflow_id", "workflow_version", "spent_cents", "budget_cents"]) {
+      expect(fields, `WORKFLOW_RUN_FIELDS missing ${required}`).toContain(required)
+    }
+  })
+})
+
+describe("Agents + Workflows house style: no em dashes", () => {
+  // Em dashes read as AI-written and are a hard house rule for new doc prose.
+  // Scope: every NEW doc string we authored — code samples, reference-data
+  // descriptions, JSON example string values, and the new sidebar entries.
+  const EM_DASH = /—/
+
+  function collectStrings(value: unknown, out: string[]) {
+    if (typeof value === "string") out.push(value)
+    else if (Array.isArray(value)) for (const v of value) collectStrings(v, out)
+    else if (value && typeof value === "object") for (const v of Object.values(value)) collectStrings(v, out)
+  }
+
+  it("no new code sample contains an em dash", () => {
+    for (const key of NEW_HTTP_SAMPLE_KEYS) {
+      for (const [lang, code] of Object.entries(CODE_SAMPLES[key])) {
+        expect(EM_DASH.test(code), `${key}.${lang} has an em dash`).toBe(false)
+      }
+    }
+  })
+
+  it("no new reference-data string contains an em dash", () => {
+    const blobs: string[] = []
+    collectStrings(RUN_FIELDS, blobs)
+    collectStrings(RUN_EVENT_TYPES, blobs)
+    collectStrings(WEBHOOK_EVENTS, blobs)
+    collectStrings(WORKFLOW_STEP_TYPES, blobs)
+    collectStrings(CONDITION_OPS, blobs)
+    collectStrings(WORKFLOW_RUN_FIELDS, blobs)
+    collectStrings(RUN_EXAMPLE, blobs)
+    collectStrings(WORKFLOW_DSL_EXAMPLE, blobs)
+    collectStrings(WORKFLOW_RUN_EXAMPLE, blobs)
+    for (const s of blobs) {
+      expect(EM_DASH.test(s), `reference string has an em dash: ${s}`).toBe(false)
+    }
+  })
+
+  it("no new sidebar section title or blurb contains an em dash", () => {
+    const newIds = new Set([...AGENT_SECTION_IDS, ...WORKFLOW_SECTION_IDS])
+    for (const s of DOC_SECTIONS.filter((x) => newIds.has(x.id))) {
+      expect(EM_DASH.test(s.title), `title "${s.title}" has an em dash`).toBe(false)
+      expect(EM_DASH.test(s.blurb), `blurb "${s.blurb}" has an em dash`).toBe(false)
+    }
   })
 })

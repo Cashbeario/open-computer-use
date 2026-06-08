@@ -21,6 +21,13 @@ import {
   Check,
   Terminal,
   ArrowRight,
+  Bot,
+  Radio,
+  Hand,
+  Webhook,
+  Workflow,
+  GitBranch,
+  Network,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -44,7 +51,7 @@ export const AUTH_HEADER = "X-API-Key"
 
 /* ─── Section catalogue (drives both the sidebar and scroll-spy) ─── */
 
-export type DocGroup = "Get started" | "Core API" | "Reference"
+export type DocGroup = "Get started" | "Core API" | "Agents" | "Workflows" | "Reference"
 
 export interface DocSection {
   id: string
@@ -64,6 +71,13 @@ export const DOC_SECTIONS: DocSection[] = [
   { id: "grounding",      title: "Grounding",         group: "Core API",    icon: Crosshair,          blurb: "Resolve a description to exact coordinates" },
   { id: "ocr",            title: "OCR",               group: "Core API",    icon: ScanText,           blurb: "Read on-screen text and bounding boxes" },
   { id: "parse",          title: "Parse",             group: "Core API",    icon: Braces,             blurb: "Turn pyautogui code into structured actions" },
+  { id: "runs",           title: "Task runs",         group: "Agents",      icon: Bot,                blurb: "Give the agent a task and a machine; it drives to done" },
+  { id: "run-events",     title: "Streaming events",  group: "Agents",      icon: Radio,              blurb: "Live SSE stream with Last-Event-ID replay" },
+  { id: "human-takeover", title: "Human takeover",    group: "Agents",      icon: Hand,               blurb: "Pause on awaiting_human, hand back with resume" },
+  { id: "run-webhooks",   title: "Webhooks",          group: "Agents",      icon: Webhook,            blurb: "HMAC-signed run lifecycle callbacks" },
+  { id: "workflows",      title: "Workflows",         group: "Workflows",   icon: Workflow,           blurb: "Compose many runs with a versioned JSON DSL" },
+  { id: "workflow-dsl",   title: "Workflow DSL",      group: "Workflows",   icon: GitBranch,          blurb: "Steps, structured conditions, and variable refs" },
+  { id: "workflow-runs",  title: "Running workflows", group: "Workflows",   icon: Network,            blurb: "Saved runs, ad-hoc runs, and guards" },
   { id: "actions",        title: "Action types",      group: "Reference",   icon: ListChecks,         blurb: "Every action the model can return" },
   { id: "responses",      title: "Response format",   group: "Reference",   icon: FileJson,           blurb: "The shape of every prediction response" },
   { id: "errors",         title: "Errors",            group: "Reference",   icon: AlertTriangle,      blurb: "Error envelope and HTTP status codes" },
@@ -71,7 +85,7 @@ export const DOC_SECTIONS: DocSection[] = [
   { id: "pricing",        title: "Credits & pricing", group: "Reference",   icon: Coins,              blurb: "What each endpoint costs in credits" },
 ]
 
-export const DOC_GROUPS: DocGroup[] = ["Get started", "Core API", "Reference"]
+export const DOC_GROUPS: DocGroup[] = ["Get started", "Core API", "Agents", "Workflows", "Reference"]
 
 /* ─── Reference data ─── */
 
@@ -138,6 +152,142 @@ export const PRICING: PriceRow[] = [
   { endpoint: "POST /v1/ground",                   cost: "3 credits", note: "Coordinate grounding." },
   { endpoint: "POST /v1/ocr",                      cost: "3 credits", note: "Text extraction." },
   { endpoint: "POST /v1/parse",                    cost: "Free",      note: "Deterministic, no model call." },
+  { endpoint: "POST /v1/runs",                     cost: "Per step",  note: "Billed per agent step from your dollar API wallet." },
+  { endpoint: "POST /v1/workflows/runs",           cost: "Per step",  note: "Each task step is a run; capped by budget_cents." },
+]
+
+/* ─── Agents (Task Runs) reference data ─── */
+
+export interface RunField {
+  field: string
+  type: string
+  description: string
+}
+
+/* The fields on the agent.run object, documented for the Task runs table. */
+export const RUN_FIELDS: RunField[] = [
+  { field: "id",                  type: "string",  description: "Unique run id, prefixed run_." },
+  { field: "object",             type: "string",  description: "Always \"agent.run\"." },
+  { field: "status",             type: "string",  description: "queued, running, awaiting_human, succeeded, failed, cancelled, or timed_out." },
+  { field: "machine_id",         type: "string",  description: "The machine the agent is driving." },
+  { field: "task",               type: "string",  description: "The natural-language goal you submitted." },
+  { field: "cua_version",        type: "string",  description: "Model family: \"v3\" (default) or \"v4\" (professional tier and above)." },
+  { field: "model",              type: "string",  description: "Resolved model id used for the run." },
+  { field: "instructions",       type: "string",  description: "Extra guidance appended to the base prompt (nullable)." },
+  { field: "max_steps",          type: "int",     description: "Hard cap on agent steps (default 50)." },
+  { field: "on_awaiting_human",  type: "string",  description: "What to do when a human is needed: pause, fail, or cancel." },
+  { field: "steps_completed",    type: "int",     description: "How many agent steps have run so far." },
+  { field: "credits_charged",    type: "int",     description: "Credits billed from your wallet to date." },
+  { field: "cost_cents",         type: "int",     description: "Dollar-API wallet cost so far, in cents." },
+  { field: "result",             type: "object",  description: "{ passed, status, summary, verdict? } once the run finishes." },
+  { field: "error",              type: "object",  description: "{ code, message } when the run failed (nullable)." },
+  { field: "awaiting_human_reason", type: "string", description: "Why the run paused for a human (nullable)." },
+  { field: "metadata",           type: "object",  description: "The metadata you attached at create time." },
+  { field: "webhook_url",        type: "string",  description: "Where lifecycle events are POSTed (nullable)." },
+  { field: "created_at",         type: "string",  description: "ISO-8601 creation timestamp." },
+  { field: "started_at",         type: "string",  description: "When the run left the queue (nullable)." },
+  { field: "awaiting_human_since", type: "string", description: "When the run last paused for a human (nullable)." },
+  { field: "finished_at",        type: "string",  description: "When the run reached a terminal state (nullable)." },
+  { field: "request_id",         type: "string",  description: "Id of the create request, for support and tracing." },
+]
+
+export interface EventType {
+  type: string
+  description: string
+}
+
+/* SSE event types emitted by GET /v1/runs/{id}/events. */
+export const RUN_EVENT_TYPES: EventType[] = [
+  { type: "status",        description: "The run moved to a new status (running, awaiting_human, succeeded, etc.)." },
+  { type: "text",          description: "A chunk of the agent's natural-language narration." },
+  { type: "reasoning",     description: "A chunk of the model's private reasoning, if exposed." },
+  { type: "tool_call",     description: "The agent invoked a tool (a click, a keypress, a navigation)." },
+  { type: "tool_result",   description: "The result of the most recent tool call." },
+  { type: "awaiting_human",description: "The run paused and is waiting for a human to take over." },
+  { type: "resumed",       description: "Control was handed back after a human takeover." },
+  { type: "step",          description: "A full agent step completed; carries steps_completed." },
+  { type: "billing",       description: "Incremental billing update (credits_charged, cost_cents)." },
+  { type: "error",         description: "A non-fatal or fatal error occurred during the run." },
+  { type: "done",          description: "Terminal event. The stream closes after this is sent." },
+]
+
+export interface WebhookEvent {
+  event: string
+  meaning: string
+}
+
+/* HMAC-signed webhook lifecycle events POSTed to webhook_url. */
+export const WEBHOOK_EVENTS: WebhookEvent[] = [
+  { event: "run.awaiting_human", meaning: "The run paused and needs a human to take over." },
+  { event: "run.succeeded",      meaning: "The run finished and verification passed." },
+  { event: "run.failed",         meaning: "The run ended in failure (verification failed or an error)." },
+  { event: "run.cancelled",      meaning: "The run was cancelled via the cancel endpoint." },
+  { event: "run.timed_out",      meaning: "The run breached its deadline before finishing." },
+]
+
+/* ─── Workflows reference data ─── */
+
+export interface StepType {
+  type: string
+  shape: string
+  description: string
+}
+
+/* The step types available in the workflow DSL (dsl_version 2026-06-01). */
+export const WORKFLOW_STEP_TYPES: StepType[] = [
+  { type: "task",           shape: "{ task, machine_id?, save_as? }",     description: "Run an agent task. Supports {{var}} templating. Binds its result under save_as and the step id." },
+  { type: "assert",         shape: "{ condition, message? }",             description: "Fail the workflow unless the structured condition holds." },
+  { type: "if",             shape: "{ condition, then, else? }",          description: "Branch on a structured condition." },
+  { type: "loop",           shape: "{ count | while, body }",             description: "Repeat a body a fixed number of times or while a condition holds." },
+  { type: "parallel",       shape: "{ branches: [[...], [...]] }",        description: "Run independent branches concurrently." },
+  { type: "human_approval", shape: "{ message?, timeout_seconds? }",      description: "Pause for a human to approve or reject before continuing." },
+  { type: "retry",          shape: "{ body, max_attempts }",             description: "Retry a body up to max_attempts times on failure." },
+  { type: "succeed",        shape: "{ output? }",                        description: "Finish the workflow successfully with an optional output." },
+  { type: "fail",           shape: "{ message? }",                       description: "Finish the workflow as failed with an optional message." },
+]
+
+export interface ConditionOp {
+  op: string
+  shape: string
+  description: string
+}
+
+/* Structured, injection-safe conditions (no expression strings). */
+export const CONDITION_OPS: ConditionOp[] = [
+  { op: "eq / ne",                 shape: "{ op, left, right }",       description: "Equal / not equal." },
+  { op: "lt / gt / lte / gte",     shape: "{ op, left, right }",       description: "Ordered numeric comparison." },
+  { op: "contains",                shape: "{ op, left, right }",       description: "left contains right (substring or membership)." },
+  { op: "truthy / falsy / exists", shape: "{ op, value }",             description: "Test a single value for truthiness, falsiness, or presence." },
+  { op: "and / or",                shape: "{ op, conditions: [..] }",  description: "Combine several conditions." },
+  { op: "not",                     shape: "{ op, condition }",         description: "Negate a condition." },
+]
+
+export interface WorkflowRunField {
+  field: string
+  type: string
+  description: string
+}
+
+/* The fields on the workflow.run object. */
+export const WORKFLOW_RUN_FIELDS: WorkflowRunField[] = [
+  { field: "id",                  type: "string", description: "Unique workflow-run id, prefixed wfr_." },
+  { field: "object",             type: "string", description: "Always \"workflow.run\"." },
+  { field: "status",             type: "string", description: "queued, running, awaiting_human, succeeded, failed, cancelled, or timed_out." },
+  { field: "workflow_id",        type: "string", description: "The workflow this run belongs to (null for inline runs)." },
+  { field: "workflow_version",   type: "int",    description: "The version of the workflow definition that ran." },
+  { field: "machine_id",         type: "string", description: "Default machine for task steps that omit machine_id." },
+  { field: "inputs",             type: "object", description: "The inputs you passed in, available as {{inputs.*}}." },
+  { field: "output",             type: "object", description: "The output produced by a succeed step (nullable)." },
+  { field: "error",              type: "object", description: "{ code, message } when the run failed (nullable)." },
+  { field: "awaiting_human_reason", type: "string", description: "Why the run paused (nullable)." },
+  { field: "awaiting_step_id",   type: "string", description: "The step id awaiting human approval (nullable)." },
+  { field: "iterations_used",    type: "int",    description: "Loop iterations consumed against max_iterations." },
+  { field: "spent_cents",        type: "int",    description: "Total spend so far, in cents." },
+  { field: "budget_cents",       type: "int",    description: "Spend cap (0 means unlimited)." },
+  { field: "created_at",         type: "string", description: "ISO-8601 creation timestamp." },
+  { field: "started_at",         type: "string", description: "When execution began (nullable)." },
+  { field: "finished_at",        type: "string", description: "When the run reached a terminal state (nullable)." },
+  { field: "request_id",         type: "string", description: "Id of the create request, for support and tracing." },
 ]
 
 /* ─── Verified code samples (cURL / Python / Node) ─── */
@@ -770,6 +920,1191 @@ $actions = json_decode(curl_exec($ch), true)["actions"];
 curl_close($ch);
 print_r($actions);`,
   },
+
+  runs: {
+    curl: `BASE=https://coasty.ai/v1
+AUTH="X-API-Key: $COASTY_API_KEY"
+
+# 1. Start a run. It returns status "queued" and a one-time webhook_secret.
+RUN_ID=$(curl -s "$BASE/runs" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: order-4821" \\
+  -d '{
+    "machine_id": "m_9f2c",
+    "task": "Open the billing page and download the latest invoice as PDF",
+    "cua_version": "v3",
+    "max_steps": 40,
+    "on_awaiting_human": "pause"
+  }' | python -c "import sys,json;print(json.load(sys.stdin)['id'])")
+
+# 2. Poll the run until it reaches a terminal state.
+while :; do
+  RUN=$(curl -s "$BASE/runs/$RUN_ID" -H "$AUTH")
+  STATUS=$(echo "$RUN" | python -c "import sys,json;print(json.load(sys.stdin)['status'])")
+  echo "status=$STATUS"
+  case "$STATUS" in
+    succeeded|failed|cancelled|timed_out) break ;;
+  esac
+  sleep 2
+done`,
+    python: `import os, time, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+TERMINAL = {"succeeded", "failed", "cancelled", "timed_out"}
+
+# 1. Start a run. Idempotency-Key makes a retried create safe.
+run = requests.post(
+    f"{BASE}/runs",
+    headers={**HEADERS, "Idempotency-Key": "order-4821"},
+    json={
+        "machine_id": "m_9f2c",
+        "task": "Open the billing page and download the latest invoice as PDF",
+        "cua_version": "v3",         # "v4" needs professional tier or above
+        "max_steps": 40,
+        "on_awaiting_human": "pause",
+    },
+    timeout=30,
+).json()
+run_id = run["id"]
+print(run["status"])                 # "queued"
+webhook_secret = run.get("webhook_secret")   # shown once; store it now
+
+# 2. Poll until terminal.
+while True:
+    run = requests.get(f"{BASE}/runs/{run_id}", headers=HEADERS, timeout=30).json()
+    print(run["status"], run["steps_completed"], "steps")
+    if run["status"] in TERMINAL:
+        break
+    time.sleep(2)
+
+print(run["result"])                 # {"passed": ..., "status": ..., "summary": ...}`,
+    node: `const BASE = "https://coasty.ai/v1";
+const HEADERS = {
+  "X-API-Key": process.env.COASTY_API_KEY,
+  "Content-Type": "application/json",
+};
+const TERMINAL = new Set(["succeeded", "failed", "cancelled", "timed_out"]);
+
+// 1. Start a run.
+const created = await fetch(\`\${BASE}/runs\`, {
+  method: "POST",
+  headers: { ...HEADERS, "Idempotency-Key": "order-4821" },
+  body: JSON.stringify({
+    machine_id: "m_9f2c",
+    task: "Open the billing page and download the latest invoice as PDF",
+    cua_version: "v3",               // "v4" needs professional tier or above
+    max_steps: 40,
+    on_awaiting_human: "pause",
+  }),
+}).then((r) => r.json());
+
+const runId = created.id;
+const webhookSecret = created.webhook_secret;  // shown once; store it now
+console.log(created.status);          // "queued"
+
+// 2. Poll until terminal.
+let run = created;
+while (!TERMINAL.has(run.status)) {
+  await new Promise((r) => setTimeout(r, 2000));
+  run = await fetch(\`\${BASE}/runs/\${runId}\`, { headers: HEADERS }).then((r) => r.json());
+  console.log(run.status, run.steps_completed, "steps");
+}
+console.log(run.result);`,
+    go: `package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+  "os"
+  "time"
+)
+
+const base = "https://coasty.ai/v1"
+
+func call(method, url string, payload any) map[string]any {
+  var reader *bytes.Reader
+  if payload != nil {
+    b, _ := json.Marshal(payload)
+    reader = bytes.NewReader(b)
+  } else {
+    reader = bytes.NewReader(nil)
+  }
+  req, _ := http.NewRequest(method, url, reader)
+  req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
+  req.Header.Set("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  var out map[string]any
+  json.NewDecoder(res.Body).Decode(&out)
+  return out
+}
+
+func main() {
+  terminal := map[string]bool{"succeeded": true, "failed": true, "cancelled": true, "timed_out": true}
+
+  // 1. Start a run.
+  run := call("POST", base+"/runs", map[string]any{
+    "machine_id":        "m_9f2c",
+    "task":              "Open the billing page and download the latest invoice as PDF",
+    "cua_version":       "v3",
+    "max_steps":         40,
+    "on_awaiting_human": "pause",
+  })
+  id := run["id"].(string)
+  fmt.Println(run["status"]) // "queued"
+
+  // 2. Poll until terminal.
+  for !terminal[run["status"].(string)] {
+    time.Sleep(2 * time.Second)
+    run = call("GET", base+"/runs/"+id, nil)
+    fmt.Println(run["status"], run["steps_completed"])
+  }
+  fmt.Println(run["result"])
+}`,
+    ruby: `require "json"
+require "net/http"
+
+BASE = "https://coasty.ai/v1"
+API_KEY = ENV.fetch("COASTY_API_KEY")
+TERMINAL = %w[succeeded failed cancelled timed_out]
+
+def call(method, path, payload = nil, extra = {})
+  uri = URI("#{BASE}#{path}")
+  klass = method == "GET" ? Net::HTTP::Get : Net::HTTP::Post
+  req = klass.new(uri)
+  req["X-API-Key"] = API_KEY
+  req["Content-Type"] = "application/json"
+  extra.each { |k, v| req[k] = v }
+  req.body = payload.to_json if payload
+  res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+  JSON.parse(res.body)
+end
+
+# 1. Start a run.
+run = call("POST", "/runs", {
+  machine_id: "m_9f2c",
+  task: "Open the billing page and download the latest invoice as PDF",
+  cua_version: "v3",
+  max_steps: 40,
+  on_awaiting_human: "pause"
+}, { "Idempotency-Key" => "order-4821" })
+run_id = run["id"]
+puts run["status"] # "queued"
+
+# 2. Poll until terminal.
+until TERMINAL.include?(run["status"])
+  sleep 2
+  run = call("GET", "/runs/#{run_id}")
+  puts "#{run['status']} #{run['steps_completed']}"
+end
+puts run["result"]`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+$apiKey = getenv("COASTY_API_KEY");
+$terminal = ["succeeded", "failed", "cancelled", "timed_out"];
+
+function call($method, $url, $payload = null, $extra = []) {
+  global $apiKey;
+  $headers = array_merge([
+    "X-API-Key: $apiKey",
+    "Content-Type: application/json",
+  ], $extra);
+  $ch = curl_init($url);
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST  => $method,
+    CURLOPT_HTTPHEADER     => $headers,
+  ]);
+  if ($payload !== null) {
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  }
+  $out = json_decode(curl_exec($ch), true);
+  curl_close($ch);
+  return $out;
+}
+
+// 1. Start a run.
+$run = call("POST", "$base/runs", [
+  "machine_id"        => "m_9f2c",
+  "task"              => "Open the billing page and download the latest invoice as PDF",
+  "cua_version"       => "v3",
+  "max_steps"         => 40,
+  "on_awaiting_human" => "pause",
+], ["Idempotency-Key: order-4821"]);
+$runId = $run["id"];
+echo $run["status"] . "\\n"; // "queued"
+
+// 2. Poll until terminal.
+while (!in_array($run["status"], $terminal, true)) {
+  sleep(2);
+  $run = call("GET", "$base/runs/$runId");
+  echo $run["status"] . " " . $run["steps_completed"] . "\\n";
+}
+print_r($run["result"]);`,
+  },
+
+  runEvents: {
+    curl: `# -N disables buffering so events arrive as they happen.
+# Pass Last-Event-ID (the last seq you saw) to replay after a drop.
+curl -N "https://coasty.ai/v1/runs/$RUN_ID/events" \\
+  -H "X-API-Key: $COASTY_API_KEY" \\
+  -H "Last-Event-ID: 42"`,
+    python: `import os, httpx
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+run_id = "run_7a1b"
+last_seq = 0  # persist this so a reconnect can replay
+
+# httpx streams the SSE body line by line. Reconnect with Last-Event-ID.
+with httpx.stream(
+    "GET",
+    f"{BASE}/runs/{run_id}/events",
+    headers={**HEADERS, "Last-Event-ID": str(last_seq)},
+    timeout=None,
+) as resp:
+    event_type = "message"
+    for line in resp.iter_lines():
+        if line.startswith("id:"):
+            last_seq = int(line[3:].strip())
+        elif line.startswith("event:"):
+            event_type = line[6:].strip()
+        elif line.startswith("data:"):
+            data = line[5:].strip()
+            print(event_type, data)
+            if event_type == "done":
+                break`,
+    node: `const BASE = "https://coasty.ai/v1";
+const runId = "run_7a1b";
+let lastSeq = 0; // persist this so a reconnect can replay
+
+// fetch streaming keeps the request body parser simple and dependency-free.
+const res = await fetch(\`\${BASE}/runs/\${runId}/events\`, {
+  headers: {
+    "X-API-Key": process.env.COASTY_API_KEY,
+    "Last-Event-ID": String(lastSeq),
+  },
+});
+
+const reader = res.body.getReader();
+const decoder = new TextDecoder();
+let buffer = "";
+
+for (;;) {
+  const { value, done } = await reader.read();
+  if (done) break;
+  buffer += decoder.decode(value, { stream: true });
+
+  const frames = buffer.split("\\n\\n");
+  buffer = frames.pop() ?? "";
+  for (const frame of frames) {
+    let type = "message";
+    let data = "";
+    for (const line of frame.split("\\n")) {
+      if (line.startsWith("id:")) lastSeq = Number(line.slice(3).trim());
+      else if (line.startsWith("event:")) type = line.slice(6).trim();
+      else if (line.startsWith("data:")) data += line.slice(5).trim();
+    }
+    console.log(type, data);
+    if (type === "done") return;
+  }
+}`,
+    go: `package main
+
+import (
+  "bufio"
+  "fmt"
+  "net/http"
+  "os"
+  "strconv"
+  "strings"
+)
+
+func main() {
+  base := "https://coasty.ai/v1"
+  runID := "run_7a1b"
+  lastSeq := 0 // persist so a reconnect can replay
+
+  req, _ := http.NewRequest("GET", base+"/runs/"+runID+"/events", nil)
+  req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
+  req.Header.Set("Last-Event-ID", strconv.Itoa(lastSeq))
+
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+
+  scanner := bufio.NewScanner(res.Body)
+  eventType := "message"
+  for scanner.Scan() {
+    line := scanner.Text()
+    switch {
+    case strings.HasPrefix(line, "id:"):
+      lastSeq, _ = strconv.Atoi(strings.TrimSpace(line[3:]))
+    case strings.HasPrefix(line, "event:"):
+      eventType = strings.TrimSpace(line[6:])
+    case strings.HasPrefix(line, "data:"):
+      fmt.Println(eventType, strings.TrimSpace(line[5:]))
+      if eventType == "done" {
+        return
+      }
+    }
+  }
+}`,
+    ruby: `require "net/http"
+
+base = "https://coasty.ai/v1"
+run_id = "run_7a1b"
+last_seq = 0 # persist so a reconnect can replay
+
+uri = URI("#{base}/runs/#{run_id}/events")
+req = Net::HTTP::Get.new(uri)
+req["X-API-Key"] = ENV.fetch("COASTY_API_KEY")
+req["Last-Event-ID"] = last_seq.to_s
+
+Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+  http.request(req) do |res|
+    event_type = "message"
+    res.read_body do |chunk|
+      chunk.each_line do |line|
+        if line.start_with?("id:")
+          last_seq = line[3..].strip.to_i
+        elsif line.start_with?("event:")
+          event_type = line[6..].strip
+        elsif line.start_with?("data:")
+          puts "#{event_type} #{line[5..].strip}"
+          return if event_type == "done"
+        end
+      end
+    end
+  end
+end`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+$runId = "run_7a1b";
+$lastSeq = 0; // persist so a reconnect can replay
+
+$ch = curl_init("$base/runs/$runId/events");
+curl_setopt_array($ch, [
+  CURLOPT_HTTPHEADER => [
+    "X-API-Key: " . getenv("COASTY_API_KEY"),
+    "Last-Event-ID: $lastSeq",
+  ],
+  // The write callback fires as each chunk of the SSE stream arrives.
+  CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
+    foreach (explode("\\n", $chunk) as $line) {
+      if (str_starts_with($line, "data:")) {
+        echo trim(substr($line, 5)) . "\\n";
+      }
+    }
+    return strlen($chunk);
+  },
+]);
+curl_exec($ch);
+curl_close($ch);`,
+  },
+
+  runResume: {
+    curl: `BASE=https://coasty.ai/v1
+AUTH="X-API-Key: $COASTY_API_KEY"
+
+# Detect the pause.
+STATUS=$(curl -s "$BASE/runs/$RUN_ID" -H "$AUTH" \\
+  | python -c "import sys,json;print(json.load(sys.stdin)['status'])")
+
+# When awaiting_human, a person completes the blocking step, then you resume.
+if [ "$STATUS" = "awaiting_human" ]; then
+  curl -s -X POST "$BASE/runs/$RUN_ID/resume" -H "$AUTH" \\
+    -H "Content-Type: application/json" \\
+    -d '{"note": "Solved the captcha; continue"}'
+fi`,
+    python: `import os, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+run_id = "run_7a1b"
+
+run = requests.get(f"{BASE}/runs/{run_id}", headers=HEADERS, timeout=30).json()
+
+# resume is only valid while status == "awaiting_human".
+if run["status"] == "awaiting_human":
+    print("paused:", run["awaiting_human_reason"])
+    # ... a human completes the blocking step out of band ...
+    resumed = requests.post(
+        f"{BASE}/runs/{run_id}/resume",
+        headers=HEADERS,
+        json={"note": "Solved the captcha; continue"},
+        timeout=30,
+    ).json()
+    print(resumed["status"])         # back to "running"`,
+    node: `const BASE = "https://coasty.ai/v1";
+const HEADERS = {
+  "X-API-Key": process.env.COASTY_API_KEY,
+  "Content-Type": "application/json",
+};
+const runId = "run_7a1b";
+
+const run = await fetch(\`\${BASE}/runs/\${runId}\`, { headers: HEADERS }).then((r) => r.json());
+
+// resume is only valid while status === "awaiting_human".
+if (run.status === "awaiting_human") {
+  console.log("paused:", run.awaiting_human_reason);
+  // ... a human completes the blocking step out of band ...
+  const resumed = await fetch(\`\${BASE}/runs/\${runId}/resume\`, {
+    method: "POST",
+    headers: HEADERS,
+    body: JSON.stringify({ note: "Solved the captcha; continue" }),
+  }).then((r) => r.json());
+  console.log(resumed.status);       // back to "running"
+}`,
+    go: `package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+  "os"
+)
+
+func main() {
+  base := "https://coasty.ai/v1"
+  runID := "run_7a1b"
+  key := os.Getenv("COASTY_API_KEY")
+
+  // Read the run.
+  getReq, _ := http.NewRequest("GET", base+"/runs/"+runID, nil)
+  getReq.Header.Set("X-API-Key", key)
+  getRes, _ := http.DefaultClient.Do(getReq)
+  var run map[string]any
+  json.NewDecoder(getRes.Body).Decode(&run)
+  getRes.Body.Close()
+
+  // resume is only valid while status == "awaiting_human".
+  if run["status"] == "awaiting_human" {
+    body, _ := json.Marshal(map[string]any{"note": "Solved the captcha; continue"})
+    req, _ := http.NewRequest("POST", base+"/runs/"+runID+"/resume", bytes.NewReader(body))
+    req.Header.Set("X-API-Key", key)
+    req.Header.Set("Content-Type", "application/json")
+    res, _ := http.DefaultClient.Do(req)
+    defer res.Body.Close()
+    var resumed map[string]any
+    json.NewDecoder(res.Body).Decode(&resumed)
+    fmt.Println(resumed["status"]) // back to "running"
+  }
+}`,
+    ruby: `require "json"
+require "net/http"
+
+base = "https://coasty.ai/v1"
+api_key = ENV.fetch("COASTY_API_KEY")
+run_id = "run_7a1b"
+
+get_uri = URI("#{base}/runs/#{run_id}")
+get_req = Net::HTTP::Get.new(get_uri)
+get_req["X-API-Key"] = api_key
+run = JSON.parse(
+  Net::HTTP.start(get_uri.hostname, get_uri.port, use_ssl: true) { |h| h.request(get_req) }.body
+)
+
+# resume is only valid while status == "awaiting_human".
+if run["status"] == "awaiting_human"
+  puts "paused: #{run['awaiting_human_reason']}"
+  uri = URI("#{base}/runs/#{run_id}/resume")
+  req = Net::HTTP::Post.new(uri)
+  req["X-API-Key"] = api_key
+  req["Content-Type"] = "application/json"
+  req.body = { note: "Solved the captcha; continue" }.to_json
+  res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+  puts JSON.parse(res.body)["status"] # back to "running"
+end`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+$apiKey = getenv("COASTY_API_KEY");
+$runId = "run_7a1b";
+$headers = ["X-API-Key: $apiKey", "Content-Type: application/json"];
+
+// Read the run.
+$ch = curl_init("$base/runs/$runId");
+curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_HTTPHEADER => $headers]);
+$run = json_decode(curl_exec($ch), true);
+curl_close($ch);
+
+// resume is only valid while status == "awaiting_human".
+if ($run["status"] === "awaiting_human") {
+  echo "paused: " . $run["awaiting_human_reason"] . "\\n";
+  $ch = curl_init("$base/runs/$runId/resume");
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => $headers,
+    CURLOPT_POSTFIELDS     => json_encode(["note" => "Solved the captcha; continue"]),
+  ]);
+  $resumed = json_decode(curl_exec($ch), true);
+  curl_close($ch);
+  echo $resumed["status"] . "\\n"; // back to "running"
+}`,
+  },
+
+  webhookVerify: {
+    curl: `# Create a run with a webhook. The response includes webhook_secret ONCE.
+# Store it; you verify every later callback against it (see Python / Node tabs).
+curl -s https://coasty.ai/v1/runs \\
+  -H "X-API-Key: $COASTY_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "machine_id": "m_9f2c",
+    "task": "Reconcile the invoice against the order",
+    "webhook_url": "https://example.com/hooks/coasty"
+  }'
+
+# Each callback carries:  Coasty-Signature: t=<unix_ts>,v1=<hex>
+# The signed payload is  "<t>." + raw_request_body, keyed by webhook_secret.`,
+    python: `import hashlib, hmac, os, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+
+# 1. Create a run with a webhook_url. webhook_secret is returned exactly once.
+run = requests.post(
+    f"{BASE}/runs",
+    headers=HEADERS,
+    json={
+        "machine_id": "m_9f2c",
+        "task": "Reconcile the invoice against the order",
+        "webhook_url": "https://example.com/hooks/coasty",
+    },
+    timeout=30,
+).json()
+webhook_secret = run["webhook_secret"]   # persist this securely
+
+# 2. In your webhook handler, verify the Coasty-Signature header.
+def verify(raw_body: bytes, signature_header: str, secret: str) -> bool:
+    parts = dict(p.split("=", 1) for p in signature_header.split(","))
+    signed = f"{parts['t']}.".encode() + raw_body
+    expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, parts["v1"])
+
+# Example (your framework supplies the raw body + header):
+# ok = verify(request.body, request.headers["Coasty-Signature"], webhook_secret)`,
+    node: `import { createHmac, timingSafeEqual } from "node:crypto";
+
+const BASE = "https://coasty.ai/v1";
+const HEADERS = {
+  "X-API-Key": process.env.COASTY_API_KEY,
+  "Content-Type": "application/json",
+};
+
+// 1. Create a run with a webhook_url. webhook_secret is returned exactly once.
+const run = await fetch(\`\${BASE}/runs\`, {
+  method: "POST",
+  headers: HEADERS,
+  body: JSON.stringify({
+    machine_id: "m_9f2c",
+    task: "Reconcile the invoice against the order",
+    webhook_url: "https://example.com/hooks/coasty",
+  }),
+}).then((r) => r.json());
+const webhookSecret = run.webhook_secret; // persist this securely
+
+// 2. In your webhook handler, verify the Coasty-Signature header.
+function verify(rawBody, signatureHeader, secret) {
+  const parts = Object.fromEntries(
+    signatureHeader.split(",").map((p) => p.split("=")),
+  );
+  const signed = \`\${parts.t}.\` + rawBody; // rawBody is the exact bytes received
+  const expected = createHmac("sha256", secret).update(signed).digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(parts.v1);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+// const ok = verify(rawBody, req.headers["coasty-signature"], webhookSecret);`,
+    go: `package main
+
+import (
+  "bytes"
+  "crypto/hmac"
+  "crypto/sha256"
+  "encoding/hex"
+  "encoding/json"
+  "net/http"
+  "os"
+  "strings"
+)
+
+const base = "https://coasty.ai/v1"
+
+// verify checks the Coasty-Signature header: t=<unix_ts>,v1=<hex>.
+func verify(rawBody []byte, signatureHeader, secret string) bool {
+  parts := map[string]string{}
+  for _, p := range strings.Split(signatureHeader, ",") {
+    kv := strings.SplitN(p, "=", 2)
+    if len(kv) == 2 {
+      parts[kv[0]] = kv[1]
+    }
+  }
+  mac := hmac.New(sha256.New, []byte(secret))
+  mac.Write([]byte(parts["t"] + "."))
+  mac.Write(rawBody)
+  expected := hex.EncodeToString(mac.Sum(nil))
+  return hmac.Equal([]byte(expected), []byte(parts["v1"]))
+}
+
+func main() {
+  // Create a run with a webhook_url; webhook_secret is returned once.
+  body, _ := json.Marshal(map[string]any{
+    "machine_id":  "m_9f2c",
+    "task":        "Reconcile the invoice against the order",
+    "webhook_url": "https://example.com/hooks/coasty",
+  })
+  req, _ := http.NewRequest("POST", base+"/runs", bytes.NewReader(body))
+  req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
+  req.Header.Set("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  var run map[string]any
+  json.NewDecoder(res.Body).Decode(&run)
+  _ = run["webhook_secret"] // persist this securely, then call verify() per callback
+}`,
+    ruby: `require "json"
+require "net/http"
+require "openssl"
+
+base = "https://coasty.ai/v1"
+api_key = ENV.fetch("COASTY_API_KEY")
+
+# 1. Create a run with a webhook_url. webhook_secret is returned exactly once.
+uri = URI("#{base}/runs")
+req = Net::HTTP::Post.new(uri)
+req["X-API-Key"] = api_key
+req["Content-Type"] = "application/json"
+req.body = {
+  machine_id: "m_9f2c",
+  task: "Reconcile the invoice against the order",
+  webhook_url: "https://example.com/hooks/coasty"
+}.to_json
+run = JSON.parse(
+  Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }.body
+)
+webhook_secret = run["webhook_secret"] # persist this securely
+
+# 2. Verify the Coasty-Signature header: t=<unix_ts>,v1=<hex>.
+def verify(raw_body, signature_header, secret)
+  parts = signature_header.split(",").map { |p| p.split("=", 2) }.to_h
+  signed = "#{parts['t']}.#{raw_body}"
+  expected = OpenSSL::HMAC.hexdigest("SHA256", secret, signed)
+  Rack::Utils.secure_compare(expected, parts["v1"])
+end
+# ok = verify(request.body.read, request.get_header("HTTP_COASTY_SIGNATURE"), webhook_secret)`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+$apiKey = getenv("COASTY_API_KEY");
+
+// 1. Create a run with a webhook_url. webhook_secret is returned exactly once.
+$ch = curl_init("$base/runs");
+curl_setopt_array($ch, [
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_POST           => true,
+  CURLOPT_HTTPHEADER     => [
+    "X-API-Key: $apiKey",
+    "Content-Type: application/json",
+  ],
+  CURLOPT_POSTFIELDS => json_encode([
+    "machine_id"  => "m_9f2c",
+    "task"        => "Reconcile the invoice against the order",
+    "webhook_url" => "https://example.com/hooks/coasty",
+  ]),
+]);
+$run = json_decode(curl_exec($ch), true);
+curl_close($ch);
+$webhookSecret = $run["webhook_secret"]; // persist this securely
+
+// 2. Verify the Coasty-Signature header: t=<unix_ts>,v1=<hex>.
+function verify($rawBody, $signatureHeader, $secret) {
+  $parts = [];
+  foreach (explode(",", $signatureHeader) as $p) {
+    [$k, $v] = explode("=", $p, 2);
+    $parts[$k] = $v;
+  }
+  $signed = $parts["t"] . "." . $rawBody;
+  $expected = hash_hmac("sha256", $signed, $secret);
+  return hash_equals($expected, $parts["v1"]);
+}
+// $ok = verify($rawBody, $_SERVER["HTTP_COASTY_SIGNATURE"], $webhookSecret);`,
+  },
+
+  workflowCreate: {
+    curl: `BASE=https://coasty.ai/v1
+AUTH="X-API-Key: $COASTY_API_KEY"
+
+# 1. Create a workflow: a task step, an assert, then an if/branch.
+#    {{var}} references pull from inputs.*, vars.*, and prior step results.
+WF_ID=$(curl -s "$BASE/workflows" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "Invoice reconciliation",
+    "slug": "invoice-reconcile",
+    "inputs_schema": {"type": "object", "properties": {"order_id": {"type": "string"}}},
+    "definition": {
+      "steps": [
+        {
+          "id": "fetch",
+          "type": "task",
+          "task": "Open order {{inputs.order_id}} and read the invoice total",
+          "save_as": "invoice"
+        },
+        {
+          "id": "check",
+          "type": "assert",
+          "condition": {"op": "truthy", "value": "{{invoice.passed}}"},
+          "message": "Agent failed to read the invoice"
+        },
+        {
+          "id": "branch",
+          "type": "if",
+          "condition": {"op": "contains", "left": "{{invoice.result}}", "right": "PAID"},
+          "then": [{"id": "ok", "type": "succeed", "output": {"state": "paid"}}],
+          "else": [{"id": "no", "type": "fail", "message": "Invoice not marked paid"}]
+        }
+      ]
+    }
+  }' | python -c "import sys,json;print(json.load(sys.stdin)['id'])")
+
+# 2. Start a run of the saved workflow.
+curl -s "$BASE/workflows/$WF_ID/runs" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"inputs": {"order_id": "ord_4821"}, "machine_id": "m_9f2c", "budget_cents": 500}'`,
+    python: `import os, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+
+definition = {
+    "steps": [
+        {
+            "id": "fetch",
+            "type": "task",
+            "task": "Open order {{inputs.order_id}} and read the invoice total",
+            "save_as": "invoice",
+        },
+        {
+            "id": "check",
+            "type": "assert",
+            "condition": {"op": "truthy", "value": "{{invoice.passed}}"},
+            "message": "Agent failed to read the invoice",
+        },
+        {
+            "id": "branch",
+            "type": "if",
+            "condition": {"op": "contains", "left": "{{invoice.result}}", "right": "PAID"},
+            "then": [{"id": "ok", "type": "succeed", "output": {"state": "paid"}}],
+            "else": [{"id": "no", "type": "fail", "message": "Invoice not marked paid"}],
+        },
+    ],
+}
+
+# 1. Create the workflow. Re-using the same slug bumps its version.
+wf = requests.post(
+    f"{BASE}/workflows",
+    headers=HEADERS,
+    json={
+        "name": "Invoice reconciliation",
+        "slug": "invoice-reconcile",
+        "inputs_schema": {"type": "object", "properties": {"order_id": {"type": "string"}}},
+        "definition": definition,
+    },
+    timeout=30,
+).json()
+print(wf["id"], "v", wf["version"], wf["dsl_version"])
+
+# 2. Start a run of the saved workflow.
+run = requests.post(
+    f"{BASE}/workflows/{wf['id']}/runs",
+    headers=HEADERS,
+    json={"inputs": {"order_id": "ord_4821"}, "machine_id": "m_9f2c", "budget_cents": 500},
+    timeout=30,
+).json()
+print(run["id"], run["status"])`,
+    node: `const BASE = "https://coasty.ai/v1";
+const HEADERS = {
+  "X-API-Key": process.env.COASTY_API_KEY,
+  "Content-Type": "application/json",
+};
+
+const definition = {
+  steps: [
+    {
+      id: "fetch",
+      type: "task",
+      task: "Open order {{inputs.order_id}} and read the invoice total",
+      save_as: "invoice",
+    },
+    {
+      id: "check",
+      type: "assert",
+      condition: { op: "truthy", value: "{{invoice.passed}}" },
+      message: "Agent failed to read the invoice",
+    },
+    {
+      id: "branch",
+      type: "if",
+      condition: { op: "contains", left: "{{invoice.result}}", right: "PAID" },
+      then: [{ id: "ok", type: "succeed", output: { state: "paid" } }],
+      else: [{ id: "no", type: "fail", message: "Invoice not marked paid" }],
+    },
+  ],
+};
+
+// 1. Create the workflow. Re-using the same slug bumps its version.
+const wf = await fetch(\`\${BASE}/workflows\`, {
+  method: "POST",
+  headers: HEADERS,
+  body: JSON.stringify({
+    name: "Invoice reconciliation",
+    slug: "invoice-reconcile",
+    inputs_schema: { type: "object", properties: { order_id: { type: "string" } } },
+    definition,
+  }),
+}).then((r) => r.json());
+console.log(wf.id, "v", wf.version, wf.dsl_version);
+
+// 2. Start a run of the saved workflow.
+const run = await fetch(\`\${BASE}/workflows/\${wf.id}/runs\`, {
+  method: "POST",
+  headers: HEADERS,
+  body: JSON.stringify({
+    inputs: { order_id: "ord_4821" },
+    machine_id: "m_9f2c",
+    budget_cents: 500,
+  }),
+}).then((r) => r.json());
+console.log(run.id, run.status);`,
+    go: `package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+  "os"
+)
+
+const base = "https://coasty.ai/v1"
+
+func post(path string, payload any) map[string]any {
+  b, _ := json.Marshal(payload)
+  req, _ := http.NewRequest("POST", base+path, bytes.NewReader(b))
+  req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
+  req.Header.Set("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  var out map[string]any
+  json.NewDecoder(res.Body).Decode(&out)
+  return out
+}
+
+func main() {
+  definition := map[string]any{
+    "steps": []any{
+      map[string]any{
+        "id": "fetch", "type": "task", "save_as": "invoice",
+        "task": "Open order {{inputs.order_id}} and read the invoice total",
+      },
+      map[string]any{
+        "id": "check", "type": "assert", "message": "Agent failed to read the invoice",
+        "condition": map[string]any{"op": "truthy", "value": "{{invoice.passed}}"},
+      },
+      map[string]any{
+        "id": "branch", "type": "if",
+        "condition": map[string]any{"op": "contains", "left": "{{invoice.result}}", "right": "PAID"},
+        "then": []any{map[string]any{"id": "ok", "type": "succeed", "output": map[string]any{"state": "paid"}}},
+        "else": []any{map[string]any{"id": "no", "type": "fail", "message": "Invoice not marked paid"}},
+      },
+    },
+  }
+
+  // 1. Create the workflow.
+  wf := post("/workflows", map[string]any{
+    "name": "Invoice reconciliation", "slug": "invoice-reconcile", "definition": definition,
+  })
+  fmt.Println(wf["id"], wf["version"], wf["dsl_version"])
+
+  // 2. Start a run.
+  run := post("/workflows/"+wf["id"].(string)+"/runs", map[string]any{
+    "inputs": map[string]any{"order_id": "ord_4821"}, "machine_id": "m_9f2c", "budget_cents": 500,
+  })
+  fmt.Println(run["id"], run["status"])
+}`,
+    ruby: `require "json"
+require "net/http"
+
+BASE = "https://coasty.ai/v1"
+API_KEY = ENV.fetch("COASTY_API_KEY")
+
+def post(path, payload)
+  uri = URI("#{BASE}#{path}")
+  req = Net::HTTP::Post.new(uri)
+  req["X-API-Key"] = API_KEY
+  req["Content-Type"] = "application/json"
+  req.body = payload.to_json
+  res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+  JSON.parse(res.body)
+end
+
+definition = {
+  steps: [
+    { id: "fetch", type: "task", save_as: "invoice",
+      task: "Open order {{inputs.order_id}} and read the invoice total" },
+    { id: "check", type: "assert", message: "Agent failed to read the invoice",
+      condition: { op: "truthy", value: "{{invoice.passed}}" } },
+    { id: "branch", type: "if",
+      condition: { op: "contains", left: "{{invoice.result}}", right: "PAID" },
+      then: [{ id: "ok", type: "succeed", output: { state: "paid" } }],
+      else: [{ id: "no", type: "fail", message: "Invoice not marked paid" }] }
+  ]
+}
+
+# 1. Create the workflow.
+wf = post("/workflows", {
+  name: "Invoice reconciliation", slug: "invoice-reconcile", definition: definition
+})
+puts "#{wf['id']} v#{wf['version']} #{wf['dsl_version']}"
+
+# 2. Start a run.
+run = post("/workflows/#{wf['id']}/runs", {
+  inputs: { order_id: "ord_4821" }, machine_id: "m_9f2c", budget_cents: 500
+})
+puts "#{run['id']} #{run['status']}"`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+$apiKey = getenv("COASTY_API_KEY");
+
+function post($path, $payload) {
+  global $base, $apiKey;
+  $ch = curl_init("$base$path");
+  curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => [
+      "X-API-Key: $apiKey",
+      "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode($payload),
+  ]);
+  $out = json_decode(curl_exec($ch), true);
+  curl_close($ch);
+  return $out;
+}
+
+$definition = [
+  "steps" => [
+    ["id" => "fetch", "type" => "task", "save_as" => "invoice",
+     "task" => "Open order {{inputs.order_id}} and read the invoice total"],
+    ["id" => "check", "type" => "assert", "message" => "Agent failed to read the invoice",
+     "condition" => ["op" => "truthy", "value" => "{{invoice.passed}}"]],
+    ["id" => "branch", "type" => "if",
+     "condition" => ["op" => "contains", "left" => "{{invoice.result}}", "right" => "PAID"],
+     "then" => [["id" => "ok", "type" => "succeed", "output" => ["state" => "paid"]]],
+     "else" => [["id" => "no", "type" => "fail", "message" => "Invoice not marked paid"]]],
+  ],
+];
+
+// 1. Create the workflow.
+$wf = post("/workflows", [
+  "name" => "Invoice reconciliation", "slug" => "invoice-reconcile", "definition" => $definition,
+]);
+echo $wf["id"] . " v" . $wf["version"] . " " . $wf["dsl_version"] . "\\n";
+
+// 2. Start a run.
+$run = post("/workflows/" . $wf["id"] . "/runs", [
+  "inputs" => ["order_id" => "ord_4821"], "machine_id" => "m_9f2c", "budget_cents" => 500,
+]);
+echo $run["id"] . " " . $run["status"] . "\\n";`,
+  },
+
+  workflowAdhoc: {
+    curl: `# Run a workflow inline (no save). The body is a workflow-run body PLUS a
+# "definition" (and optional "inputs_schema"). Great for one-off automations.
+curl -s https://coasty.ai/v1/workflows/runs \\
+  -H "X-API-Key: $COASTY_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "machine_id": "m_9f2c",
+    "inputs": {"url": "https://status.example.com"},
+    "max_iterations": 5,
+    "definition": {
+      "steps": [
+        {"id": "open", "type": "task", "save_as": "page",
+         "task": "Open {{inputs.url}} and report whether all systems are operational"},
+        {"id": "gate", "type": "assert",
+         "condition": {"op": "truthy", "value": "{{page.passed}}"}}
+      ]
+    }
+  }'`,
+    python: `import os, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+
+# POST /v1/workflows/runs runs a definition inline, without saving a workflow.
+run = requests.post(
+    f"{BASE}/workflows/runs",
+    headers=HEADERS,
+    json={
+        "machine_id": "m_9f2c",
+        "inputs": {"url": "https://status.example.com"},
+        "max_iterations": 5,
+        "definition": {
+            "steps": [
+                {
+                    "id": "open",
+                    "type": "task",
+                    "save_as": "page",
+                    "task": "Open {{inputs.url}} and report whether all systems are operational",
+                },
+                {
+                    "id": "gate",
+                    "type": "assert",
+                    "condition": {"op": "truthy", "value": "{{page.passed}}"},
+                },
+            ],
+        },
+    },
+    timeout=30,
+).json()
+print(run["id"], run["status"])      # object == "workflow.run"`,
+    node: `const BASE = "https://coasty.ai/v1";
+
+// POST /v1/workflows/runs runs a definition inline, without saving a workflow.
+const run = await fetch(\`\${BASE}/workflows/runs\`, {
+  method: "POST",
+  headers: {
+    "X-API-Key": process.env.COASTY_API_KEY,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    machine_id: "m_9f2c",
+    inputs: { url: "https://status.example.com" },
+    max_iterations: 5,
+    definition: {
+      steps: [
+        {
+          id: "open",
+          type: "task",
+          save_as: "page",
+          task: "Open {{inputs.url}} and report whether all systems are operational",
+        },
+        {
+          id: "gate",
+          type: "assert",
+          condition: { op: "truthy", value: "{{page.passed}}" },
+        },
+      ],
+    },
+  }),
+}).then((r) => r.json());
+console.log(run.id, run.status);      // object === "workflow.run"`,
+    go: `package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+  "os"
+)
+
+func main() {
+  base := "https://coasty.ai/v1"
+
+  // POST /v1/workflows/runs runs a definition inline, without saving.
+  body, _ := json.Marshal(map[string]any{
+    "machine_id":     "m_9f2c",
+    "inputs":         map[string]any{"url": "https://status.example.com"},
+    "max_iterations": 5,
+    "definition": map[string]any{
+      "steps": []any{
+        map[string]any{
+          "id": "open", "type": "task", "save_as": "page",
+          "task": "Open {{inputs.url}} and report whether all systems are operational",
+        },
+        map[string]any{
+          "id": "gate", "type": "assert",
+          "condition": map[string]any{"op": "truthy", "value": "{{page.passed}}"},
+        },
+      },
+    },
+  })
+
+  req, _ := http.NewRequest("POST", base+"/workflows/runs", bytes.NewReader(body))
+  req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
+  req.Header.Set("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+
+  var run map[string]any
+  json.NewDecoder(res.Body).Decode(&run)
+  fmt.Println(run["id"], run["status"]) // object == "workflow.run"
+}`,
+    ruby: `require "json"
+require "net/http"
+
+base = "https://coasty.ai/v1"
+
+# POST /v1/workflows/runs runs a definition inline, without saving a workflow.
+uri = URI("#{base}/workflows/runs")
+req = Net::HTTP::Post.new(uri)
+req["X-API-Key"] = ENV.fetch("COASTY_API_KEY")
+req["Content-Type"] = "application/json"
+req.body = {
+  machine_id: "m_9f2c",
+  inputs: { url: "https://status.example.com" },
+  max_iterations: 5,
+  definition: {
+    steps: [
+      { id: "open", type: "task", save_as: "page",
+        task: "Open {{inputs.url}} and report whether all systems are operational" },
+      { id: "gate", type: "assert",
+        condition: { op: "truthy", value: "{{page.passed}}" } }
+    ]
+  }
+}.to_json
+
+res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+run = JSON.parse(res.body)
+puts "#{run['id']} #{run['status']}" # object == "workflow.run"`,
+    php: `<?php
+$base = "https://coasty.ai/v1";
+
+// POST /v1/workflows/runs runs a definition inline, without saving a workflow.
+$ch = curl_init("$base/workflows/runs");
+curl_setopt_array($ch, [
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_POST           => true,
+  CURLOPT_HTTPHEADER     => [
+    "X-API-Key: " . getenv("COASTY_API_KEY"),
+    "Content-Type: application/json",
+  ],
+  CURLOPT_POSTFIELDS => json_encode([
+    "machine_id"     => "m_9f2c",
+    "inputs"         => ["url" => "https://status.example.com"],
+    "max_iterations" => 5,
+    "definition" => [
+      "steps" => [
+        ["id" => "open", "type" => "task", "save_as" => "page",
+         "task" => "Open {{inputs.url}} and report whether all systems are operational"],
+        ["id" => "gate", "type" => "assert",
+         "condition" => ["op" => "truthy", "value" => "{{page.passed}}"]],
+      ],
+    ],
+  ]),
+]);
+
+$run = json_decode(curl_exec($ch), true);
+curl_close($ch);
+echo $run["id"] . " " . $run["status"] . "\\n"; // object == "workflow.run"`,
+  },
 }
 
 /* JSON examples (kept as objects so the test suite can prove they are valid
@@ -794,6 +2129,88 @@ export const ERROR_EXAMPLE = {
     type: "payment_required",
     request_id: "req_8f2c1e9a",
   },
+}
+
+/* A freshly created agent.run, as returned by POST /v1/runs. */
+export const RUN_EXAMPLE = {
+  id: "run_7a1b2c3d",
+  object: "agent.run",
+  status: "queued",
+  machine_id: "m_9f2c",
+  task: "Open the billing page and download the latest invoice as PDF",
+  cua_version: "v3",
+  model: "coasty-cua-v3",
+  instructions: null,
+  max_steps: 40,
+  on_awaiting_human: "pause",
+  steps_completed: 0,
+  credits_charged: 0,
+  cost_cents: 0,
+  result: null,
+  error: null,
+  awaiting_human_reason: null,
+  metadata: { team: "finance" },
+  webhook_url: "https://example.com/hooks/coasty",
+  created_at: "2026-06-01T12:00:00Z",
+  started_at: null,
+  awaiting_human_since: null,
+  finished_at: null,
+  request_id: "req_4f9a2b1c",
+  // Returned only once, at create time. Store it to verify webhook signatures.
+  webhook_secret: "whsec_one_time_value_shown_here",
+}
+
+/* A real workflow DSL (dsl_version 2026-06-01): task -> assert -> if/branch.
+   Conditions are structured and injection-safe; {{path}} refs read inputs,
+   vars, and prior step results. */
+export const WORKFLOW_DSL_EXAMPLE = {
+  dsl_version: "2026-06-01",
+  definition: {
+    steps: [
+      {
+        id: "fetch",
+        type: "task",
+        task: "Open order {{inputs.order_id}} and read the invoice total",
+        save_as: "invoice",
+      },
+      {
+        id: "check",
+        type: "assert",
+        condition: { op: "truthy", value: "{{invoice.passed}}" },
+        message: "Agent failed to read the invoice",
+      },
+      {
+        id: "branch",
+        type: "if",
+        condition: { op: "contains", left: "{{invoice.result}}", right: "PAID" },
+        then: [{ id: "ok", type: "succeed", output: { state: "paid" } }],
+        else: [{ id: "no", type: "fail", message: "Invoice not marked paid" }],
+      },
+    ],
+    output: { paid: "{{invoice.result}}" },
+  },
+}
+
+/* A workflow.run as returned by POST /v1/workflows/{id}/runs. */
+export const WORKFLOW_RUN_EXAMPLE = {
+  id: "wfr_5e6f7a8b",
+  object: "workflow.run",
+  status: "running",
+  workflow_id: "wf_1a2b3c",
+  workflow_version: 3,
+  machine_id: "m_9f2c",
+  inputs: { order_id: "ord_4821" },
+  output: null,
+  error: null,
+  awaiting_human_reason: null,
+  awaiting_step_id: null,
+  iterations_used: 0,
+  spent_cents: 0,
+  budget_cents: 500,
+  created_at: "2026-06-01T12:00:00Z",
+  started_at: "2026-06-01T12:00:01Z",
+  finished_at: null,
+  request_id: "req_9c8b7a6d",
 }
 
 /* ===================================================================
@@ -1092,6 +2509,14 @@ function MobilePillNav({ active }: { active: string }) {
    The documentation content
    =================================================================== */
 
+/** Look up a section by id so the render order is decoupled from array
+    indices. Adding a section no longer requires renumbering every block. */
+function sec(id: string): DocSection {
+  const found = DOC_SECTIONS.find((s) => s.id === id)
+  if (!found) throw new Error(`Unknown doc section: ${id}`)
+  return found
+}
+
 function DocsBody() {
   const [lang, setLang] = useState<LangId>("python")
   const sampleProps = (key: keyof typeof CODE_SAMPLES) => ({
@@ -1265,8 +2690,255 @@ function DocsBody() {
         <CodeTabs {...sampleProps("parse")} />
       </DocBlock>
 
+      {/* ── Task runs ── */}
+      <DocBlock section={sec("runs")}>
+        <P>
+          A run hands the agent a task and a machine, then drives it to completion on our side. The
+          agent loops autonomously, verifies its own work (pass or fail), can pause for a human when it
+          hits a wall, bills per step from your dollar API wallet, and streams every event live. You
+          start one call and watch, instead of running the predict loop yourself.
+        </P>
+        <P>
+          Create a run with <InlineCode>POST /v1/runs</InlineCode>. The two required fields are{" "}
+          <InlineCode>machine_id</InlineCode> and <InlineCode>task</InlineCode>. The response is an{" "}
+          <InlineCode>agent.run</InlineCode> object with <InlineCode>status</InlineCode> of{" "}
+          <InlineCode>queued</InlineCode>, plus a one-time <InlineCode>webhook_secret</InlineCode> you
+          store to verify <Link href="#run-webhooks" onClick={(e) => { e.preventDefault(); scrollToSection("run-webhooks") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">webhooks</Link>.
+          Send an <InlineCode>Idempotency-Key</InlineCode> header to make a retried create safe.
+        </P>
+        <CodeTabs {...sampleProps("runs")} />
+        <RefTable
+          head={["Field", "Required", "Description"]}
+          rows={[
+            [<InlineCode key="a">machine_id</InlineCode>, <span key="a2" className="text-foreground/80">Yes</span>, "The machine the agent will drive."],
+            [<InlineCode key="b">task</InlineCode>, <span key="b2" className="text-foreground/80">Yes</span>, "The natural-language goal to accomplish."],
+            [<InlineCode key="c">cua_version</InlineCode>, "No", <>Model family. <InlineCode>v3</InlineCode> by default; <InlineCode>v4</InlineCode> needs professional tier or above.</>],
+            [<InlineCode key="d">instructions</InlineCode>, "No", "Extra guidance appended to the base prompt."],
+            [<InlineCode key="e">system_prompt</InlineCode>, "No", "A preamble placed ahead of the base prompt."],
+            [<InlineCode key="f">model</InlineCode>, "No", "Pin a specific model id instead of the cua_version default."],
+            [<InlineCode key="g">max_steps</InlineCode>, "No", "Hard cap on agent steps (default 50)."],
+            [<InlineCode key="h">deadline_seconds</InlineCode>, "No", <>Wall-clock budget; the run becomes <InlineCode>timed_out</InlineCode> if breached.</>],
+            [<InlineCode key="i">on_awaiting_human</InlineCode>, "No", <>What to do when a human is needed: <InlineCode>pause</InlineCode> (default), <InlineCode>fail</InlineCode>, or <InlineCode>cancel</InlineCode>.</>],
+            [<InlineCode key="j">awaiting_human_timeout_seconds</InlineCode>, "No", "How long to wait for a human before timing out."],
+            [<InlineCode key="k">webhook_url</InlineCode>, "No", "HTTPS endpoint for lifecycle callbacks (https only)."],
+            [<InlineCode key="l">metadata</InlineCode>, "No", "Arbitrary JSON echoed back on the run object."],
+          ]}
+        />
+        <RefTable
+          head={["Endpoint", "Purpose"]}
+          rows={[
+            [<InlineCode key="a">POST /v1/runs</InlineCode>, "Start a run. Returns the run plus a one-time webhook_secret."],
+            [<InlineCode key="b">GET /v1/runs</InlineCode>, <>List runs. Filter with <InlineCode>?status=</InlineCode> and <InlineCode>?limit=</InlineCode>.</>],
+            [<InlineCode key="c">GET /v1/runs/{"{id}"}</InlineCode>, "Fetch a single run and its current status."],
+            [<InlineCode key="d">GET /v1/runs/{"{id}"}/events</InlineCode>, "Server-Sent Events stream of the run (see Streaming events)."],
+            [<InlineCode key="e">POST /v1/runs/{"{id}"}/cancel</InlineCode>, "Cancel a run that has not reached a terminal state."],
+            [<InlineCode key="f">POST /v1/runs/{"{id}"}/resume</InlineCode>, "Hand control back after a human takeover."],
+          ]}
+        />
+        <JsonBlock value={RUN_EXAMPLE} />
+        <RefTable
+          head={["Field", "Type", "Description"]}
+          rows={RUN_FIELDS.map((f) => [
+            <InlineCode key={f.field}>{f.field}</InlineCode>,
+            <code key={`${f.field}-t`} className="font-mono text-[11.5px] text-muted-foreground/60">{f.type}</code>,
+            f.description,
+          ])}
+        />
+        <Callout>
+          A run moves through <InlineCode>queued</InlineCode> to <InlineCode>running</InlineCode>, can
+          bounce between <InlineCode>running</InlineCode> and <InlineCode>awaiting_human</InlineCode>,
+          and ends in one of <InlineCode>succeeded</InlineCode>, <InlineCode>failed</InlineCode>,{" "}
+          <InlineCode>cancelled</InlineCode>, or <InlineCode>timed_out</InlineCode>. Terminal states are
+          immutable, so it is always safe to stop polling once you reach one. Runs need the{" "}
+          <InlineCode>runs:read</InlineCode> and <InlineCode>runs:write</InlineCode> scopes, granted to
+          new keys by default.
+        </Callout>
+      </DocBlock>
+
+      {/* ── Streaming events ── */}
+      <DocBlock section={sec("run-events")}>
+        <P>
+          <InlineCode>GET /v1/runs/{"{id}"}/events</InlineCode> returns a Server-Sent Events stream so
+          you can follow a run as it happens, instead of polling. Each event has a type and a numeric{" "}
+          <InlineCode>id</InlineCode> (the sequence number). If your connection drops, reconnect and
+          replay everything you missed by sending the last sequence you saw as a{" "}
+          <InlineCode>Last-Event-ID</InlineCode> header, or as the <InlineCode>?after=</InlineCode> query
+          parameter. The stream closes after the <InlineCode>done</InlineCode> event.
+        </P>
+        <CodeTabs {...sampleProps("runEvents")} />
+        <RefTable
+          head={["Event", "Meaning"]}
+          rows={RUN_EVENT_TYPES.map((e) => [
+            <InlineCode key={e.type}>{e.type}</InlineCode>,
+            e.description,
+          ])}
+        />
+      </DocBlock>
+
+      {/* ── Human takeover ── */}
+      <DocBlock section={sec("human-takeover")}>
+        <P>
+          Some steps need a person: a captcha, a one-time code, a judgment call. When the agent reaches
+          one and <InlineCode>on_awaiting_human</InlineCode> is <InlineCode>pause</InlineCode>, the run
+          moves to <InlineCode>awaiting_human</InlineCode> and emits an{" "}
+          <InlineCode>awaiting_human</InlineCode> event with a reason. A human completes the blocking
+          step (in the same machine session), then you hand control back with{" "}
+          <InlineCode>POST /v1/runs/{"{id}"}/resume</InlineCode> and an optional{" "}
+          <InlineCode>note</InlineCode>. Resume is only valid while the status is{" "}
+          <InlineCode>awaiting_human</InlineCode>.
+        </P>
+        <CodeTabs {...sampleProps("runResume")} />
+        <Callout>
+          Detect the pause from either the run object (<InlineCode>status == awaiting_human</InlineCode>{" "}
+          with <InlineCode>awaiting_human_reason</InlineCode> set), the SSE{" "}
+          <InlineCode>awaiting_human</InlineCode> event, or the <InlineCode>run.awaiting_human</InlineCode>{" "}
+          webhook. After resume, the run returns to <InlineCode>running</InlineCode> and emits a{" "}
+          <InlineCode>resumed</InlineCode> event. Set <InlineCode>on_awaiting_human</InlineCode> to{" "}
+          <InlineCode>fail</InlineCode> or <InlineCode>cancel</InlineCode> at create time if you would
+          rather the run stop than wait for a human.
+        </Callout>
+      </DocBlock>
+
+      {/* ── Webhooks ── */}
+      <DocBlock section={sec("run-webhooks")}>
+        <P>
+          Pass a <InlineCode>webhook_url</InlineCode> (https only) when you create a run and we POST a
+          signed callback at each lifecycle transition. The response to your create call includes a{" "}
+          <InlineCode>webhook_secret</InlineCode> exactly once: store it, because every callback is
+          signed with it. Each request carries a <InlineCode>Coasty-Signature</InlineCode> header of the
+          form <InlineCode>t=&lt;unix_ts&gt;,v1=&lt;hex&gt;</InlineCode>.
+        </P>
+        <P>
+          To verify, build the signed payload as <InlineCode>{`"<t>." + raw_request_body`}</InlineCode>,
+          compute <InlineCode>HMAC-SHA256</InlineCode> over it keyed by the{" "}
+          <InlineCode>webhook_secret</InlineCode>, and compare against <InlineCode>v1</InlineCode> with a
+          constant-time check. Always hash the raw body bytes, before any JSON re-serialisation.
+        </P>
+        <CodeTabs {...sampleProps("webhookVerify")} />
+        <RefTable
+          head={["Event", "Meaning"]}
+          rows={WEBHOOK_EVENTS.map((e) => [
+            <InlineCode key={e.event}>{e.event}</InlineCode>,
+            e.meaning,
+          ])}
+        />
+      </DocBlock>
+
+      {/* ── Workflows ── */}
+      <DocBlock section={sec("workflows")}>
+        <P>
+          A workflow composes many runs into one versioned program, with branching, loops, and guards
+          expressed as a JSON DSL. Each <InlineCode>task</InlineCode> step is itself an agent run, so a
+          workflow is the way to chain tasks, gate them on conditions, and pass results between them.
+          Workflows are versioned: re-creating the same <InlineCode>slug</InlineCode> bumps the version,
+          and a <InlineCode>PUT</InlineCode> does too.
+        </P>
+        <P>
+          Create one with <InlineCode>POST /v1/workflows</InlineCode>. The <InlineCode>slug</InlineCode>{" "}
+          must match <InlineCode>[a-z0-9_-]</InlineCode>. The response is a <InlineCode>Workflow</InlineCode>{" "}
+          carrying an <InlineCode>id</InlineCode>, a <InlineCode>version</InlineCode>, and the current{" "}
+          <InlineCode>dsl_version</InlineCode> (<InlineCode>2026-06-01</InlineCode>).
+        </P>
+        <CodeTabs {...sampleProps("workflowCreate")} />
+        <RefTable
+          head={["Endpoint", "Purpose"]}
+          rows={[
+            [<InlineCode key="a">POST /v1/workflows</InlineCode>, "Create a workflow (or bump its version when the slug already exists)."],
+            [<InlineCode key="b">GET /v1/workflows</InlineCode>, <>List workflows. Filter with <InlineCode>?limit=</InlineCode>.</>],
+            [<InlineCode key="c">GET /v1/workflows/{"{id}"}</InlineCode>, "Fetch a workflow and its definition."],
+            [<InlineCode key="d">PUT /v1/workflows/{"{id}"}</InlineCode>, "Replace the definition; bumps the version."],
+            [<InlineCode key="e">DELETE /v1/workflows/{"{id}"}</InlineCode>, "Archive a workflow."],
+          ]}
+        />
+        <Callout>
+          Workflows need the <InlineCode>workflows:read</InlineCode> and{" "}
+          <InlineCode>workflows:write</InlineCode> scopes, granted to new keys by default. See the{" "}
+          <Link href="#workflow-dsl" onClick={(e) => { e.preventDefault(); scrollToSection("workflow-dsl") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">Workflow DSL</Link>{" "}
+          for the full step and condition catalogue.
+        </Callout>
+      </DocBlock>
+
+      {/* ── Workflow DSL ── */}
+      <DocBlock section={sec("workflow-dsl")}>
+        <P>
+          The DSL (<InlineCode>dsl_version</InlineCode> <InlineCode>2026-06-01</InlineCode>) is a JSON
+          object with a <InlineCode>steps</InlineCode> array and an optional <InlineCode>output</InlineCode>.
+          Each step has an <InlineCode>id</InlineCode> and a <InlineCode>type</InlineCode>. A{" "}
+          <InlineCode>task</InlineCode> step runs the agent and binds its result (
+          <InlineCode>{`{ status, passed, result, run_id, steps, error }`}</InlineCode>) under both its{" "}
+          <InlineCode>save_as</InlineCode> name and its step id, so later steps can read it.
+        </P>
+        <JsonBlock value={WORKFLOW_DSL_EXAMPLE} />
+        <RefTable
+          head={["Step type", "Shape", "Description"]}
+          rows={WORKFLOW_STEP_TYPES.map((s) => [
+            <InlineCode key={s.type}>{s.type}</InlineCode>,
+            <code key={`${s.type}-s`} className="font-mono text-[11.5px] text-muted-foreground/60">{s.shape}</code>,
+            s.description,
+          ])}
+        />
+        <P>
+          Conditions are structured rather than expression strings, which keeps them injection-safe.
+          Each <InlineCode>left</InlineCode>, <InlineCode>right</InlineCode>, or{" "}
+          <InlineCode>value</InlineCode> is either a literal or a <InlineCode>{`{{path}}`}</InlineCode>{" "}
+          reference. Paths are dotted lookups into <InlineCode>inputs.*</InlineCode>,{" "}
+          <InlineCode>vars.*</InlineCode>, and any step id or <InlineCode>save_as</InlineCode> name.
+        </P>
+        <RefTable
+          head={["Operator", "Shape", "Description"]}
+          rows={CONDITION_OPS.map((c) => [
+            <InlineCode key={c.op}>{c.op}</InlineCode>,
+            <code key={`${c.op}-s`} className="font-mono text-[11.5px] text-muted-foreground/60">{c.shape}</code>,
+            c.description,
+          ])}
+        />
+        <Callout>
+          Three hard guards stop a workflow run when breached:{" "}
+          <InlineCode>budget_cents</InlineCode> (spend cap; 0 means unlimited),{" "}
+          <InlineCode>max_iterations</InlineCode> (loop cap), and{" "}
+          <InlineCode>deadline_seconds</InlineCode> (wall-clock). A breach ends the run as{" "}
+          <InlineCode>failed</InlineCode> or <InlineCode>timed_out</InlineCode>.
+        </Callout>
+      </DocBlock>
+
+      {/* ── Running workflows ── */}
+      <DocBlock section={sec("workflow-runs")}>
+        <P>
+          Start a saved workflow with <InlineCode>POST /v1/workflows/{"{id}"}/runs</InlineCode>, or run a
+          definition inline (without saving) with <InlineCode>POST /v1/workflows/runs</InlineCode> by
+          adding a <InlineCode>definition</InlineCode> (and optional <InlineCode>inputs_schema</InlineCode>)
+          to the same body. Both return a <InlineCode>workflow.run</InlineCode>. The body accepts{" "}
+          <InlineCode>inputs</InlineCode>, a default <InlineCode>machine_id</InlineCode> for task steps,{" "}
+          and the <InlineCode>budget_cents</InlineCode>, <InlineCode>max_iterations</InlineCode>, and{" "}
+          <InlineCode>deadline_seconds</InlineCode> guards. An <InlineCode>Idempotency-Key</InlineCode>{" "}
+          header is honoured here too.
+        </P>
+        <CodeTabs {...sampleProps("workflowAdhoc")} />
+        <RefTable
+          head={["Endpoint", "Purpose"]}
+          rows={[
+            [<InlineCode key="a">POST /v1/workflows/{"{id}"}/runs</InlineCode>, "Start a run of a saved workflow."],
+            [<InlineCode key="b">POST /v1/workflows/runs</InlineCode>, "Run an inline definition without saving a workflow."],
+            [<InlineCode key="c">GET /v1/workflows/runs</InlineCode>, <>List workflow runs. Filter with <InlineCode>?workflow_id=</InlineCode> and <InlineCode>?limit=</InlineCode>.</>],
+            [<InlineCode key="d">GET /v1/workflows/runs/{"{id}"}</InlineCode>, "Fetch a single workflow run."],
+            [<InlineCode key="e">GET /v1/workflows/runs/{"{id}"}/events</InlineCode>, "SSE stream with the same Last-Event-ID replay semantics."],
+            [<InlineCode key="f">POST /v1/workflows/runs/{"{id}"}/cancel</InlineCode>, "Cancel a workflow run."],
+            [<InlineCode key="g">POST /v1/workflows/runs/{"{id}"}/resume</InlineCode>, <>Approve or reject a human_approval pause with <InlineCode>{`{ approved, note? }`}</InlineCode>.</>],
+          ]}
+        />
+        <JsonBlock value={WORKFLOW_RUN_EXAMPLE} />
+        <RefTable
+          head={["Field", "Type", "Description"]}
+          rows={WORKFLOW_RUN_FIELDS.map((f) => [
+            <InlineCode key={f.field}>{f.field}</InlineCode>,
+            <code key={`${f.field}-t`} className="font-mono text-[11.5px] text-muted-foreground/60">{f.type}</code>,
+            f.description,
+          ])}
+        />
+      </DocBlock>
+
       {/* ── Action types ── */}
-      <DocBlock section={DOC_SECTIONS[8]}>
+      <DocBlock section={sec("actions")}>
         <P>
           Every action the model can return uses an <InlineCode>action_type</InlineCode> from the table
           below, paired with a <InlineCode>params</InlineCode> object. Your executor switches on the
@@ -1285,7 +2957,7 @@ function DocsBody() {
       </DocBlock>
 
       {/* ── Response format ── */}
-      <DocBlock section={DOC_SECTIONS[9]}>
+      <DocBlock section={sec("responses")}>
         <P>
           Predict and session-predict return the same shape. <InlineCode>actions</InlineCode> is the
           ordered list to execute; <InlineCode>status</InlineCode> tells you whether to keep going
@@ -1308,7 +2980,7 @@ function DocsBody() {
       </DocBlock>
 
       {/* ── Errors ── */}
-      <DocBlock section={DOC_SECTIONS[10]}>
+      <DocBlock section={sec("errors")}>
         <P>
           Errors return a non-2xx status and a JSON envelope under an <InlineCode>error</InlineCode> key.
           The <InlineCode>code</InlineCode> is stable and safe to branch on; <InlineCode>message</InlineCode>{" "}
@@ -1332,7 +3004,7 @@ function DocsBody() {
       </DocBlock>
 
       {/* ── Rate limits ── */}
-      <DocBlock section={DOC_SECTIONS[11]}>
+      <DocBlock section={sec("rate-limits")}>
         <P>
           Limits apply per key and, in aggregate, per account. Every response carries{" "}
           <InlineCode>X-RateLimit-Limit</InlineCode>, <InlineCode>X-RateLimit-Remaining</InlineCode>, and{" "}
@@ -1351,7 +3023,7 @@ function DocsBody() {
       </DocBlock>
 
       {/* ── Pricing ── */}
-      <DocBlock section={DOC_SECTIONS[12]}>
+      <DocBlock section={sec("pricing")}>
         <P>
           Requests are billed in credits from your shared balance. Credits are charged before the model
           runs and automatically refunded if a request fails server-side. High-resolution screenshots

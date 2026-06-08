@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Plus, Copy, Check, Trash2, Key, MoreHorizontal, BarChart3,
+  Plus, Copy, Check, Trash2, Key, MoreHorizontal,
   Shield, BookOpen,
   Search, Download, RefreshCw, ChevronDown, ChevronRight, X,
   FileJson, FileText, ArrowUpDown, EyeOff, Eye, ExternalLink,
@@ -24,7 +24,6 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { PageLoader } from "@/components/common/page-loader"
@@ -37,9 +36,9 @@ import { useTranslations } from "next-intl"
    Constants
    ═══════════════════════════════════════════════════════════════════ */
 
-const EASE = [0.22, 1, 0.36, 1] as const
+export const EASE = [0.22, 1, 0.36, 1] as const
 
-type KeyKind = "live" | "test"
+export type KeyKind = "live" | "test"
 
 const SCOPE_OPTIONS = [
   { id: "predict", label: "Predict",  desc: "Run model predictions" },
@@ -63,7 +62,7 @@ type SnippetLangId = (typeof SNIPPET_LANGS)[number]["id"]
    Types
    ═══════════════════════════════════════════════════════════════════ */
 
-interface APIKey {
+export interface APIKey {
   id: string
   name: string
   tier: string
@@ -73,7 +72,7 @@ interface APIKey {
   key_prefix: string
 }
 
-interface Stats {
+export interface Stats {
   keyCount: number
   totalRequests: number
   totalCredits: number
@@ -82,24 +81,29 @@ interface Stats {
   credits7d: number
   avgCreditsPerRequest: number
   peakHour: number | null
+  // `balance` is the dollar API-wallet balance in USD cents (back-compat name).
   balance: number
+  walletBalanceCents?: number
+  walletBalanceUsd?: number
+  walletToppedUpCents?: number
+  walletSpentCents?: number
   tier: string
 }
 
-interface DailyPoint {
+export interface DailyPoint {
   date: string
   requests: number
   credits: number
 }
 
-interface RecentRequest {
+export interface RecentRequest {
   endpoint: string
   credits: number
   time: string
   request_id?: string | null
 }
 
-type EndpointBreakdown = Record<string, { requests: number; credits: number }>
+export type EndpointBreakdown = Record<string, { requests: number; credits: number }>
 
 /* ═══════════════════════════════════════════════════════════════════
    Helpers
@@ -118,7 +122,7 @@ function timeAgo(date: string | null): string {
   return new Date(date).toLocaleDateString()
 }
 
-function formatNum(n: number): string {
+export function formatNum(n: number): string {
   if (n < 1000)        return n.toLocaleString()
   if (n < 10_000)      return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k"
   if (n < 1_000_000)   return Math.round(n / 1000) + "k"
@@ -203,7 +207,7 @@ function rowsToCSV(rows: RecentRequest[]): string {
    Stat Tile — clean, no watermark, signature hairline accent
    ═══════════════════════════════════════════════════════════════════ */
 
-function StatTile({
+export function StatTile({
   label, value, suffix, hint, sparkData, accent,
 }: {
   label: string
@@ -267,7 +271,7 @@ function StatTile({
    Activity Chart — smooth bezier, refined colors
    ═══════════════════════════════════════════════════════════════════ */
 
-function ActivityChart({ daily }: { daily: DailyPoint[] }) {
+export function ActivityChart({ daily }: { daily: DailyPoint[] }) {
   const [hovered, setHovered] = useState<number | null>(null)
   const hasData = daily.some(d => d.requests > 0)
   const totalReqs  = daily.reduce((s, d) => s + d.requests, 0)
@@ -398,7 +402,7 @@ function ActivityChart({ daily }: { daily: DailyPoint[] }) {
    page fetched but never displayed
    ═══════════════════════════════════════════════════════════════════ */
 
-function EndpointBreakdownPanel({ byEndpoint }: { byEndpoint: EndpointBreakdown }) {
+export function EndpointBreakdownPanel({ byEndpoint }: { byEndpoint: EndpointBreakdown }) {
   const rows = useMemo(() => {
     return Object.entries(byEndpoint)
       .map(([ep, v]) => ({ endpoint: ep, ...v }))
@@ -505,7 +509,7 @@ function useKeyVisuals(keyId: string, isTest: boolean) {
   }, [keyId, isTest])
 }
 
-function APIKeyCard({
+export function APIKeyCard({
   apiKey, index, fullKey, onRevoke,
 }: {
   apiKey: APIKey
@@ -978,7 +982,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   "credits-asc":  "Credits (low → high)",
 }
 
-function TracesPanel({
+export function TracesPanel({
   recent, onRefresh,
 }: {
   recent: RecentRequest[]
@@ -1477,7 +1481,7 @@ function ReferenceSection({
   )
 }
 
-function QuickReferenceTab() {
+export function QuickReferenceTab() {
   const [lang, setLang] = useState<SnippetLangId>("python")
   const [copied, setCopied] = useState(false)
   // Use the placeholder key only — never reveals a real key
@@ -1631,7 +1635,7 @@ function QuickReferenceTab() {
    with Live/Test toggle and scope selection)
    ═══════════════════════════════════════════════════════════════════ */
 
-function CreateKeyDialog({
+export function CreateKeyDialog({
   open, onOpenChange, onCreate, creating,
 }: {
   open: boolean
@@ -1665,8 +1669,11 @@ function CreateKeyDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md p-0 gap-0 overflow-hidden">
-        <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-foreground/[0.05]">
+      {/* Flex column capped at the dynamic viewport: header + footer pinned,
+          the form body (name / mode / scopes) scrolls on short screens so the
+          Create / Cancel actions are always reachable. */}
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md p-0 gap-0 overflow-hidden max-h-[90dvh] flex flex-col">
+        <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-foreground/[0.05] shrink-0">
           <AlertDialogTitle className="text-[15px] font-medium tracking-[-0.005em]">
             Create API key
           </AlertDialogTitle>
@@ -1675,7 +1682,7 @@ function CreateKeyDialog({
           </AlertDialogDescription>
         </div>
 
-        <div className="px-5 sm:px-6 py-4 space-y-4">
+        <div className="px-5 sm:px-6 py-4 space-y-4 flex-1 min-h-0 overflow-y-auto scrollbar-invisible">
           {/* Name */}
           <div>
             <label className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/50 mb-1.5 block">
@@ -1753,7 +1760,7 @@ function CreateKeyDialog({
           </div>
         </div>
 
-        <AlertDialogFooter className="px-5 sm:px-6 py-3 border-t border-foreground/[0.05] bg-foreground/[0.012] gap-2">
+        <AlertDialogFooter className="px-5 sm:px-6 py-3 border-t border-foreground/[0.05] bg-foreground/[0.012] gap-2 shrink-0">
           <AlertDialogCancel className="text-[12.5px] h-8">Cancel</AlertDialogCancel>
           <Button
             className="text-[12.5px] h-8 gap-1.5"
@@ -1777,7 +1784,7 @@ function CreateKeyDialog({
    Created-Key Dialog (cleaner; uses CodeSnippetBlock)
    ═══════════════════════════════════════════════════════════════════ */
 
-function CreatedKeyDialog({
+export function CreatedKeyDialog({
   createdKey, onClose, onViewDocs,
 }: {
   createdKey: string | null
@@ -1815,11 +1822,16 @@ function CreatedKeyDialog({
 
   return (
     <AlertDialog open={!!createdKey} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg gap-0 p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-foreground/[0.05]">
+      {/* Flex column capped at the dynamic viewport height (dvh accounts for
+          mobile browser chrome). Header, the key + copy action, and the footer
+          are pinned (shrink-0); only the tall quick-start snippet scrolls, so
+          on any device the key, the Copy button, and Close/View reference are
+          always on screen and nothing spills past the viewport. */}
+      <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg gap-0 p-0 overflow-hidden max-h-[90dvh] flex flex-col">
+        {/* Header — pinned */}
+        <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-foreground/[0.05] shrink-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/20">
               <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.4} />
             </span>
             <AlertDialogTitle className="text-[14px] font-medium tracking-[-0.005em]">
@@ -1827,18 +1839,16 @@ function CreatedKeyDialog({
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-[12px] text-muted-foreground/55 ml-[34px]">
-            Save it somewhere safe — it won&apos;t be shown again.
+            Save it somewhere safe. It won&apos;t be shown again.
           </AlertDialogDescription>
         </div>
 
-        {/* Key reveal + copy.
-            The chip itself is `overflow-hidden`; the inner <code> uses
-            `overflow-x-auto whitespace-nowrap` so a 63-char revealed key
-            scrolls within the chip instead of pushing the dialog wider.
-            `min-w-0` is required — otherwise the flex child's intrinsic
-            min-width (one unbreakable token = the whole key) wins and the
-            chip refuses to shrink. */}
-        <div className="px-5 sm:px-6 py-4 space-y-2">
+        {/* Key reveal + copy — pinned so the key and its Copy action stay
+            visible on every screen. The chip is `overflow-hidden`; the inner
+            <code> uses `overflow-x-auto whitespace-nowrap` + `min-w-0` so a
+            63-char revealed key scrolls within the chip instead of widening
+            the dialog. */}
+        <div className="px-5 sm:px-6 py-4 space-y-2 shrink-0">
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-foreground/[0.08] bg-foreground/[0.025] overflow-hidden">
             <Key className="h-3.5 w-3.5 text-muted-foreground/45 shrink-0" />
             <code className="flex-1 min-w-0 font-mono text-[11px] sm:text-[12px] text-foreground/80 select-all overflow-x-auto whitespace-nowrap scrollbar-invisible">
@@ -1858,11 +1868,14 @@ function CreatedKeyDialog({
           </Button>
         </div>
 
-        {/* Quick start snippet */}
-        {createdKey && <CodeSnippetBlock apiKey={createdKey} onCopy={copyToClipboard} />}
+        {/* Quick start snippet — the only tall section; scrolls within its own
+            area on short viewports so the rest of the dialog stays fixed. */}
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-invisible">
+          {createdKey && <CodeSnippetBlock apiKey={createdKey} onCopy={copyToClipboard} />}
+        </div>
 
-        {/* Footer */}
-        <div className="border-t border-foreground/[0.05] px-5 sm:px-6 py-3 flex items-center justify-between gap-2">
+        {/* Footer — pinned */}
+        <div className="border-t border-foreground/[0.05] px-5 sm:px-6 py-3 flex items-center justify-between gap-2 shrink-0">
           <AlertDialogCancel className="text-[12px] h-8">Close</AlertDialogCancel>
           <AlertDialogAction className="gap-1.5 text-[12px] h-8" onClick={onViewDocs}>
             <BookOpen className="h-3.5 w-3.5" />
@@ -1874,40 +1887,39 @@ function CreatedKeyDialog({
   )
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   Main Content
-   ═══════════════════════════════════════════════════════════════════ */
+/* ===================================================================
+   Shared data hook + page scaffolding
+   Consumed by the four standalone developer pages: keys / logs /
+   usage / docs. Each page fetches the same /api/developers payload and
+   renders the slice it needs.
+   =================================================================== */
 
-type TabId = "keys" | "usage" | "reference"
+export const DEFAULT_STATS: Stats = {
+  keyCount: 0, totalRequests: 0, totalCredits: 0,
+  requests24h: 0, requests7d: 0, credits7d: 0,
+  avgCreditsPerRequest: 0, peakHour: null, balance: 0, tier: "",
+}
 
-const TABS: { id: TabId; label: string; icon: typeof Key }[] = [
-  { id: "keys",      label: "API keys",  icon: Key },
-  { id: "usage",     label: "Usage",     icon: BarChart3 },
-  { id: "reference", label: "Reference", icon: BookOpen },
-]
+export interface DeveloperData {
+  keys: APIKey[]
+  setKeys: React.Dispatch<React.SetStateAction<APIKey[]>>
+  stats: Stats
+  byEndpoint: EndpointBreakdown
+  daily: DailyPoint[]
+  recent: RecentRequest[]
+  loading: boolean
+  refetch: () => Promise<void>
+}
 
-export function DevelopersContent() {
-  const tLoader = useTranslations("pageLoaders.developers")
+export function useDeveloperData(): DeveloperData {
   const [keys, setKeys] = useState<APIKey[]>([])
-  const [stats, setStats] = useState<Stats>({
-    keyCount: 0, totalRequests: 0, totalCredits: 0,
-    requests24h: 0, requests7d: 0, credits7d: 0,
-    avgCreditsPerRequest: 0, peakHour: null, balance: 0, tier: "",
-  })
+  const [stats, setStats] = useState<Stats>(DEFAULT_STATS)
   const [byEndpoint, setByEndpoint] = useState<EndpointBreakdown>({})
-  const [daily, setDaily]   = useState<DailyPoint[]>([])
+  const [daily, setDaily] = useState<DailyPoint[]>([])
   const [recent, setRecent] = useState<RecentRequest[]>([])
   const [loading, setLoading] = useState(true)
-  const [creating, setCreating] = useState(false)
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [createdKey, setCreatedKey] = useState<string | null>(null)
-  const [revokeId, setRevokeId] = useState<string | null>(null)
-  const [rawKeys, setRawKeys] = useState<Record<string, string>>({})
-  const [activeTab, setActiveTab] = useState<TabId>("keys")
-  const [keySearch, setKeySearch] = useState("")
-  const [keyKindFilter, setKeyKindFilter] = useState<"all" | KeyKind>("all")
 
-  const fetchKeys = useCallback(async () => {
+  const refetch = useCallback(async () => {
     try {
       const res = await fetchClient("/api/developers")
       if (res.ok) {
@@ -1919,413 +1931,73 @@ export function DevelopersContent() {
         setRecent(data.recent ?? [])
       }
     } catch {
-      // silent — empty state covers it
+      // silent: per-section empty states cover the failure
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { fetchKeys() }, [fetchKeys])
+  useEffect(() => { refetch() }, [refetch])
 
-  const createKey = async ({ name, kind, scopes }: { name: string; kind: KeyKind; scopes: string[] }) => {
-    setCreating(true)
-    try {
-      const res = await fetchClient("/api/developers", {
-        method: "POST",
-        body: JSON.stringify({ name, kind, scopes }),
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setCreatedKey(data.key)
-        setRawKeys(prev => ({ ...prev, [data.key_id]: data.key }))
-        setShowCreateDialog(false)
-        fetchKeys()
-        toast.success(`${kind === "test" ? "Test" : "Live"} key created`)
-      } else {
-        const err = await res.json().catch(() => ({}))
-        toast.error(err?.error?.message ?? "Failed to create key")
-      }
-    } catch {
-      toast.error("Failed to create key")
-    } finally {
-      setCreating(false)
-    }
-  }
+  return { keys, setKeys, stats, byEndpoint, daily, recent, loading, refetch }
+}
 
-  const revokeKey = async (id: string) => {
-    try {
-      const res = await fetchClient(`/api/developers/${id}`, { method: "DELETE" })
-      if (res.ok) {
-        setKeys(prev => prev.filter(k => k.id !== id))
-        setRevokeId(null)
-        toast.success("API key revoked")
-      } else {
-        toast.error("Failed to revoke key")
-      }
-    } catch {
-      toast.error("Failed to revoke key")
-    }
-  }
-
-  // Filtered keys for the list view
-  const filteredKeys = useMemo(() => {
-    const q = keySearch.trim().toLowerCase()
-    return keys.filter(k => {
-      const isTest = k.key_prefix.startsWith("sk-coasty-test-")
-      if (keyKindFilter === "live" && isTest) return false
-      if (keyKindFilter === "test" && !isTest) return false
-      if (q) {
-        const hay = `${k.name} ${k.key_prefix}`.toLowerCase()
-        if (!hay.includes(q)) return false
-      }
-      return true
-    })
-  }, [keys, keySearch, keyKindFilter])
-
-  const sparkRequests = daily.slice(-7).map(d => d.requests)
-  const sparkCredits  = daily.slice(-7).map(d => d.credits)
-
+/* Page shell: ambient orbs + scroll container + optional splash loader.
+   Matches the chrome used by machines / schedules / guide so every
+   developer page sits in the same frame. */
+export function DevPageShell({
+  loading = false,
+  children,
+}: {
+  loading?: boolean
+  children: React.ReactNode
+}) {
+  const tLoader = useTranslations("pageLoaders.developers")
   return (
     <PageLoader isLoading={loading} title={tLoader("title")} description={tLoader("description")}>
-    <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
-
-      {/* Ambient orbs — match guide / schedules / machines */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="absolute -top-[30%] -right-[15%] h-[60%] w-[50%] rounded-full opacity-[0.02] dark:opacity-[0.04] blur-[120px]"
-          style={{ background: "radial-gradient(circle, currentColor, transparent 70%)" }}
-        />
-        <div
-          className="absolute -bottom-[20%] -left-[10%] h-[50%] w-[40%] rounded-full opacity-[0.015] dark:opacity-[0.035] blur-[100px]"
-          style={{ background: "radial-gradient(circle, currentColor, transparent 70%)" }}
-        />
+      <div className="h-full overflow-y-auto overflow-x-hidden scrollbar-invisible relative">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div
+            className="absolute -top-[30%] -right-[15%] h-[60%] w-[50%] rounded-full opacity-[0.02] dark:opacity-[0.04] blur-[120px]"
+            style={{ background: "radial-gradient(circle, currentColor, transparent 70%)" }}
+          />
+          <div
+            className="absolute -bottom-[20%] -left-[10%] h-[50%] w-[40%] rounded-full opacity-[0.015] dark:opacity-[0.035] blur-[100px]"
+            style={{ background: "radial-gradient(circle, currentColor, transparent 70%)" }}
+          />
+        </div>
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl space-y-6 relative z-10">
+          {children}
+        </div>
       </div>
-
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl space-y-6 relative z-10">
-
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <div>
-            <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/45 mb-1.5">
-              Developer platform
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">API & Integrations</h1>
-            <p className="text-muted-foreground text-sm mt-1.5">
-              Bring computer-use intelligence into your code. Manage keys, monitor usage, and ship.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href="/guide?tab=api"
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-foreground/[0.08] text-[12.5px] font-medium text-muted-foreground/70 hover:text-foreground hover:border-foreground/20 hover:bg-foreground/[0.03] transition-all"
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              Docs
-            </Link>
-            <button
-              onClick={() => setShowCreateDialog(true)}
-              className="inline-flex h-9 items-center justify-center rounded-xl px-4 text-[12.5px] font-medium gap-1.5 transition-all bg-foreground text-background hover:bg-foreground/90 shadow-sm"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create key
-            </button>
-          </div>
-        </motion.div>
-
-        {/* ── Stats row ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05, ease: EASE }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-        >
-          <StatTile
-            label="Balance"
-            value={formatNum(stats.balance)}
-            suffix="credits"
-            hint={stats.tier ? `${stats.tier} plan` : "Shared balance"}
-            accent="emerald"
-          />
-          <StatTile
-            label="Requests"
-            value={formatNum(stats.totalRequests)}
-            suffix="last 30d"
-            hint={stats.requests24h > 0 ? `${formatNum(stats.requests24h)} today` : "No requests today"}
-            sparkData={sparkRequests}
-          />
-          <StatTile
-            label="Credits used"
-            value={formatNum(stats.totalCredits)}
-            suffix="last 30d"
-            hint={stats.avgCreditsPerRequest > 0 ? `${stats.avgCreditsPerRequest} cr/req avg` : "—"}
-            sparkData={sparkCredits}
-          />
-          <StatTile
-            label="Active keys"
-            value={String(stats.keyCount)}
-            hint={stats.peakHour !== null && stats.totalRequests >= 5
-              ? `Peak at ${String(stats.peakHour).padStart(2, "0")}:00`
-              : "—"}
-          />
-        </motion.div>
-
-        {/* ── Tab navigation (matches guide-client glass pattern) ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: EASE }}
-          className="rounded-2xl border border-foreground/[0.06] bg-background/60 dark:bg-background/40 backdrop-blur-2xl p-1.5 shadow-sm w-fit"
-        >
-          <nav className="flex items-center gap-0.5" role="tablist">
-            {TABS.map(tab => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "relative flex items-center justify-center gap-1.5 rounded-xl px-3 sm:px-3.5 py-1.5 text-[11px] sm:text-[12.5px] font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-foreground/[0.08] dark:bg-foreground/[0.12] text-foreground"
-                      : "text-muted-foreground/55 hover:text-foreground/80 hover:bg-foreground/[0.04]",
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
-                  <span className="truncate">{tab.label}</span>
-                </button>
-              )
-            })}
-          </nav>
-        </motion.div>
-
-        {/* ── Tab content ── */}
-        <AnimatePresence mode="wait">
-
-          {/* ════ Keys tab ════ */}
-          {activeTab === "keys" && (
-            <motion.div
-              key="keys"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EASE }}
-            >
-              {keys.length === 0 ? (
-                /* ── Empty state — restrained, single CTA ── */
-                <div className="relative rounded-2xl border border-foreground/[0.06] bg-foreground/[0.015] dark:bg-foreground/[0.02] overflow-hidden">
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute -top-12 right-1/4 h-56 w-56 rounded-full bg-foreground/[0.02] blur-3xl" />
-                    <div className="absolute -bottom-12 left-1/4 h-48 w-48 rounded-full bg-foreground/[0.02] blur-3xl" />
-                  </div>
-
-                  <div className="relative flex flex-col items-center py-16 px-6 text-center">
-                    <div className="relative h-12 w-12 mb-6 flex items-center justify-center">
-                      <div className="absolute inset-0 rounded-2xl border border-foreground/[0.08] bg-foreground/[0.03]" />
-                      <Key className="relative h-5 w-5 text-foreground/55" strokeWidth={1.6} />
-                      <motion.span
-                        className="absolute inset-0 rounded-2xl border border-foreground/15"
-                        animate={{ opacity: [0, 0.6, 0], scale: [1, 1.18, 1.32] }}
-                        transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-                      />
-                    </div>
-
-                    <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/45 mb-2">
-                      Get started
-                    </div>
-                    <h3 className="text-[18px] sm:text-[20px] font-medium tracking-tight mb-2">No API keys yet</h3>
-                    <p className="text-[13px] text-muted-foreground/60 max-w-sm mb-7 leading-relaxed">
-                      Create a key to start sending screenshots and receiving structured automation actions.
-                    </p>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setShowCreateDialog(true)}
-                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[12.5px] font-medium transition-all text-background bg-foreground hover:bg-foreground/90 shadow-sm"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        Create your first key
-                      </button>
-                      <Link
-                        href="/guide?tab=api"
-                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl border border-foreground/[0.08] text-[12.5px] font-medium text-muted-foreground/70 hover:text-foreground hover:border-foreground/20 transition-all"
-                      >
-                        Read the docs
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {/* Search + kind filter toolbar */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="relative flex-1 min-w-[200px] max-w-sm">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-                      <input
-                        type="text"
-                        value={keySearch}
-                        onChange={e => setKeySearch(e.target.value)}
-                        placeholder="Search by name or prefix"
-                        className="w-full h-8 pl-8 pr-7 rounded-lg text-[12px] bg-background/60 border border-foreground/[0.08] placeholder:text-muted-foreground/35 text-foreground/85 focus:outline-none focus:border-foreground/20 focus:bg-background transition-colors"
-                      />
-                      {keySearch && (
-                        <button
-                          onClick={() => setKeySearch("")}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                    <div className="inline-flex items-center rounded-lg border border-foreground/[0.08] bg-background/60 p-0.5">
-                      {([
-                        { id: "all" as const,  label: "All"  },
-                        { id: "live" as const, label: "Live" },
-                        { id: "test" as const, label: "Test" },
-                      ]).map(opt => (
-                        <button
-                          key={opt.id}
-                          onClick={() => setKeyKindFilter(opt.id)}
-                          className={cn(
-                            "h-7 px-3 rounded-md text-[11px] font-medium transition-colors",
-                            keyKindFilter === opt.id
-                              ? "bg-foreground/[0.08] dark:bg-foreground/[0.12] text-foreground"
-                              : "text-muted-foreground/55 hover:text-foreground/80",
-                          )}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="ml-auto text-[10.5px] text-muted-foreground/35 tabular-nums">
-                      {filteredKeys.length === keys.length
-                        ? `${keys.length} key${keys.length !== 1 ? "s" : ""}`
-                        : `${filteredKeys.length} of ${keys.length}`}
-                    </div>
-                  </div>
-
-                  {/* Keys grid */}
-                  {filteredKeys.length === 0 ? (
-                    <div className="relative rounded-2xl border border-foreground/[0.06] bg-foreground/[0.015] dark:bg-foreground/[0.02] overflow-hidden px-5 py-10 text-center">
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
-                      <p className="text-[12px] text-muted-foreground/45">No keys match your filters.</p>
-                      <button
-                        onClick={() => { setKeySearch(""); setKeyKindFilter("all") }}
-                        className="mt-2 text-[11px] font-medium text-foreground/70 hover:text-foreground underline-offset-2 hover:underline"
-                      >
-                        Clear filters
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <AnimatePresence initial={false}>
-                        {filteredKeys.map((k, i) => (
-                          <APIKeyCard
-                            key={k.id}
-                            apiKey={k}
-                            index={i}
-                            fullKey={rawKeys[k.id]}
-                            onRevoke={(id) => setRevokeId(id)}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  )}
-
-                  {/* Footnote about test keys */}
-                  <div className="flex items-start gap-2 px-1 pt-1">
-                    <Shield className="h-3 w-3 text-muted-foreground/30 mt-0.5 shrink-0" />
-                    <p className="text-[10.5px] text-muted-foreground/45 leading-relaxed">
-                      Test keys (<code className="font-mono text-[10px]">sk-coasty-test-…</code>) return mock responses without billing credits. Use them for local development and CI.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* ════ Usage tab ════ */}
-          {activeTab === "usage" && (
-            <motion.div
-              key="usage"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EASE }}
-              className="space-y-5"
-            >
-              {/* Activity + endpoint breakdown side-by-side on lg */}
-              <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
-                <ActivityChart daily={daily} />
-                <EndpointBreakdownPanel byEndpoint={byEndpoint} />
-              </div>
-
-              {/* Traces */}
-              <TracesPanel recent={recent} onRefresh={fetchKeys} />
-            </motion.div>
-          )}
-
-          {/* ════ Reference tab ════ */}
-          {activeTab === "reference" && (
-            <motion.div
-              key="reference"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EASE }}
-            >
-              <QuickReferenceTab />
-            </motion.div>
-          )}
-
-        </AnimatePresence>
-      </div>
-
-      {/* ── Create dialog ── */}
-      <CreateKeyDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        onCreate={createKey}
-        creating={creating}
-      />
-
-      {/* ── Created-key dialog ── */}
-      <CreatedKeyDialog
-        createdKey={createdKey}
-        onClose={() => setCreatedKey(null)}
-        onViewDocs={() => { setCreatedKey(null); setActiveTab("reference") }}
-      />
-
-      {/* ── Revoke confirm ── */}
-      <AlertDialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revoke API key</AlertDialogTitle>
-            <AlertDialogDescription>
-              This key will immediately stop working. Any applications using it will fail. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => revokeId && revokeKey(revokeId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Revoke
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-    </div>
     </PageLoader>
+  )
+}
+
+/* Page header: eyebrow + title + subtitle + optional action cluster.
+   Same title format as the machines page (text-2xl/3xl medium tight). */
+export function DevHeader({
+  title, description, actions,
+}: {
+  title: string
+  description?: string
+  actions?: React.ReactNode
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: EASE }}
+      className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <div className="min-w-0">
+        <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/45 mb-1.5">
+          Developer platform
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">{title}</h1>
+        {description && <p className="text-muted-foreground text-sm mt-1.5">{description}</p>}
+      </div>
+      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+    </motion.div>
   )
 }

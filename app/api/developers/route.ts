@@ -185,12 +185,22 @@ export async function GET() {
     }
     const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets))
 
-    // ── Credit balance ──
+    // ── API wallet (dollar balance, independent of the consumer plan) ──
+    // Billing for developer API usage is drawn from the prepaid dollar wallet,
+    // NOT the consumer credit balance. Tier is still read from the consumer
+    // subscription because rate-limit tiers remain coupled for now (billing
+    // was decoupled; tiers are a fast-follow).
+    const { data: walletData } = await db
+      .from("api_wallets")
+      .select("balance_cents, total_topped_up_cents, total_spent_cents")
+      .eq("user_id", userId)
+      .maybeSingle()
     const { data: creditsData } = await db
       .from("user_credits")
-      .select("balance, subscription_tier")
+      .select("subscription_tier")
       .eq("user_id", userId)
-      .single()
+      .maybeSingle()
+    const walletBalanceCents = Number(walletData?.balance_cents ?? 0)
 
     return NextResponse.json({
       keys: keys ?? [],
@@ -203,7 +213,13 @@ export async function GET() {
         credits7d,
         avgCreditsPerRequest: totalRequests > 0 ? Math.round((totalCredits / totalRequests) * 10) / 10 : 0,
         peakHour: totalRequests > 0 ? peakHour : null,
-        balance: creditsData?.balance ?? 0,
+        // Dollar wallet balance (independent of consumer credits).
+        walletBalanceCents,
+        walletBalanceUsd: walletBalanceCents / 100,
+        walletToppedUpCents: Number(walletData?.total_topped_up_cents ?? 0),
+        walletSpentCents: Number(walletData?.total_spent_cents ?? 0),
+        // `balance` retained for back-compat; now reflects wallet cents.
+        balance: walletBalanceCents,
         tier: creditsData?.subscription_tier ?? "",
       },
       byEndpoint,

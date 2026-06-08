@@ -260,6 +260,75 @@ async function handleCreditPurchase(
   return { ok: true }
 }
 
+// Handle a dollar top-up of the developer API wallet (separate from consumer
+// credits/subscriptions). The credit_api_wallet RPC updates the balance and
+// appends the ledger row atomically, and dedups on stripe_payment_intent_id —
+// so a Stripe retry of the same PaymentIntent is a harmless 'duplicate'. No
+// manual transaction insert / 23505 compensation needed (unlike credits).
+async function handleApiWalletTopup(
+  session: Stripe.Checkout.Session,
+  supabase: any,
+  event: Stripe.Event
+): Promise<HandlerOutcome> {
+  const userId = session.metadata?.user_id
+  const amountCents = parseInt(session.metadata?.amount_cents || "0", 10)
+
+  if (!userId || !Number.isFinite(amountCents) || amountCents <= 0) {
+    console.error("API wallet topup: missing/invalid user_id or amount_cents in session metadata")
+    return { ok: true } // bad metadata is not retriable
+  }
+
+  const { data: rpcRows, error: rpcError } = await supabase.rpc("credit_api_wallet", {
+    p_user_id: userId,
+    p_amount_cents: amountCents,
+    p_type: "topup",
+    p_stripe_payment_intent_id: (session.payment_intent as string) || null,
+    p_stripe_checkout_session_id: session.id,
+    p_price_paid_cents: session.amount_total ?? amountCents,
+    p_description: "API wallet top-up",
+    p_metadata: { session_id: session.id, customer_email: session.customer_email ?? null },
+  })
+
+  if (rpcError) {
+    console.error("credit_api_wallet (topup) RPC failed:", {
+      eventId: event.id,
+      eventType: event.type,
+      userId,
+      amountCents,
+      code: rpcError.code,
+      message: rpcError.message,
+      details: rpcError.details,
+    })
+    await writeDeadLetter({
+      supabase,
+      event,
+      rpcName: "credit_api_wallet",
+      rpcError,
+      extra: { user_id: userId, amount_cents: amountCents },
+    })
+    return {
+      ok: false,
+      response: failLoudResponse(
+        event,
+        rpcError,
+        "credit_api_wallet (topup) failed; event dead-lettered for manual reconciliation"
+      ),
+    }
+  }
+
+  const result = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows
+  if (result?.outcome === "duplicate") {
+    console.log(
+      `API wallet topup for PaymentIntent ${session.payment_intent} already applied (RPC dedup); skipping`
+    )
+  } else {
+    console.log(
+      `API wallet topup applied: +${amountCents}¢ for user ${userId}; balance=${result?.balance_after_cents}¢`
+    )
+  }
+  return { ok: true }
+}
+
 export async function POST(req: NextRequest) {
   // Per-request access log. Critical for the Stripe webhook because a 500
   // here means Stripe retries — without the access log we couldn't tell
@@ -373,6 +442,18 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
         console.log(`Processing checkout session: ${session.id}, mode: ${session.mode}`)
+
+        // Developer API wallet top-up (dollar-denominated, independent of
+        // consumer subscriptions/credits). Detected by metadata.type.
+        if (session.metadata?.type === "api_wallet_topup") {
+          const outcome = await handleApiWalletTopup(session, supabase, event)
+          if (!outcome.ok) {
+            processedOk = false
+            outResponse = outcome.response!
+            return outResponse
+          }
+          break
+        }
 
         // Check if this is a subscription checkout
         if (session.mode === "subscription") {

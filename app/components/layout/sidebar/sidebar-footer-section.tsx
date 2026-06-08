@@ -1,21 +1,27 @@
 "use client"
 
-import { memo, useCallback, useEffect, useRef, useState } from "react"
+import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
+import { useTheme } from "next-themes"
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import {
   IconArrowUp,
   IconBook2,
   IconCheck,
+  IconCoins,
   IconCompass,
   IconCreditCard,
+  IconDeviceDesktop,
   IconGift,
   IconInfinity,
   IconLoader2,
   IconLogout,
   IconMessage2,
+  IconMoon,
   IconSettings,
+  IconSun,
   IconVideo,
+  IconWallet,
   IconX,
 } from "@tabler/icons-react"
 import Link from "next/link"
@@ -35,10 +41,118 @@ import { useCredits } from "@/lib/hooks/use-credits"
 import { useSubscription } from "@/lib/hooks/use-subscription"
 import { useUser } from "@/lib/user-store/provider"
 import { createClient } from "@/lib/supabase/client"
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler"
 import { useAccountDialog } from "@/lib/account-dialog-store"
+import { usePlatformMode } from "@/lib/platform-mode-store"
+import { useApiWallet } from "@/lib/hooks/use-api-wallet"
 
-// ─── Credit health model ──────────────────────────────────────────
+type UserLike =
+  | { id: string; display_name?: string | null; email?: string | null; profile_image?: string | null }
+  | null
+  | undefined
+
+// First grapheme of a name, surrogate-pair safe (Array.from splits on code
+// points, so an emoji- or astral-leading name yields a whole glyph not a
+// broken half).
+function initialOf(name: string) {
+  return Array.from(name)[0]?.toUpperCase() ?? "?"
+}
+
+// ─── Shared row recipe ────────────────────────────────────────────
+//   Byte-for-byte the nav row (see sidebar-nav-section.tsx NavButton):
+//   h-[30px] pill, 16px icon centered at sidebar-x=24 in both modes,
+//   12.5px medium label, the same quiet hover/active and a real focus
+//   ring. The footer is just three more of these, so it reads as a
+//   continuation of the nav rather than its own surface.
+const ROW = cn(
+  "group/btn relative flex w-full items-center gap-2.5 px-2 h-[30px] rounded-lg transition-colors duration-150",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
+  "text-foreground/55 hover:text-foreground/90 hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
+  "data-[state=open]:bg-foreground/[0.06] data-[state=open]:text-foreground/90 dark:data-[state=open]:bg-white/[0.06]",
+)
+
+// Shared inner content (icon + label + optional trailing). Used by the
+// button rows (Credits / Feedback / Account triggers) AND the Run-locally
+// link row, so every footer row is pixel-identical. Collapsed
+// (expanded=false) drops the label/trailing and shows just the icon.
+function RowInner({
+  icon,
+  label,
+  trailing,
+  expanded,
+  iconClassName,
+}: {
+  icon: React.ReactNode
+  label: React.ReactNode
+  trailing?: React.ReactNode
+  expanded: boolean
+  iconClassName?: string
+}) {
+  return (
+    <>
+      <span
+        className={cn(
+          "shrink-0 flex items-center justify-center w-4 h-4 transition-colors duration-150 group-hover/btn:text-foreground/80",
+          iconClassName,
+        )}
+      >
+        {icon}
+      </span>
+      {expanded && (
+        <>
+          <span className="flex-1 truncate text-left text-[12.5px] font-medium tracking-[-0.01em]">
+            {label}
+          </span>
+          {trailing != null && <span className="shrink-0">{trailing}</span>}
+        </>
+      )}
+    </>
+  )
+}
+
+// The button is the trigger surface for Popover/Drawer/Tooltip (all via
+// asChild), so it forwards ref + props.
+const FooterRowButton = forwardRef<
+  HTMLButtonElement,
+  {
+    icon: React.ReactNode
+    label: React.ReactNode
+    trailing?: React.ReactNode
+    expanded: boolean
+    iconClassName?: string
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>
+>(function FooterRowButton(
+  { icon, label, trailing, expanded, iconClassName, className, ...props },
+  ref,
+) {
+  return (
+    <button ref={ref} type="button" className={cn(ROW, className)} {...props}>
+      <RowInner icon={icon} label={label} trailing={trailing} expanded={expanded} iconClassName={iconClassName} />
+    </button>
+  )
+})
+
+// Wrap a (possibly already-trigger) node in a right-side tooltip when the
+// rail is collapsed — the only thing nav rows add at 48px.
+function collapsedTooltip(expanded: boolean, node: React.ReactNode, label: React.ReactNode) {
+  if (expanded) return node
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{node}</TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8}>
+        {typeof label === "string" ? (
+          <span className="font-medium text-[12px]">{label}</span>
+        ) : (
+          label
+        )}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ─── Credit health → trailing number color ────────────────────────
+//   The balance is the footer's one quiet signal: neutral at rest,
+//   tinting amber/rose only when low/depleted (progressive disclosure —
+//   a healthy account looks identical to every other row).
 type CreditHealth = "healthy" | "low" | "depleted"
 
 function getHealth(balance: number, totalPurchased: number): CreditHealth {
@@ -48,58 +162,39 @@ function getHealth(balance: number, totalPurchased: number): CreditHealth {
   return "healthy"
 }
 
-const HEALTH = {
-  healthy: {
-    dot: "bg-foreground/30",
-    text: "text-foreground",
-  },
-  low: {
-    dot: "bg-amber-500 dark:bg-amber-400",
-    text: "text-amber-600 dark:text-amber-400",
-  },
-  depleted: {
-    dot: "bg-rose-500 dark:bg-rose-400",
-    text: "text-rose-600 dark:text-rose-400",
-  },
-} as const
+const HEALTH_TEXT: Record<CreditHealth, string> = {
+  healthy: "text-foreground/45",
+  low: "text-amber-600 dark:text-amber-400",
+  depleted: "text-rose-600 dark:text-rose-400",
+}
 
 // ─── Feedback compose card ────────────────────────────────────────
-//   The active compose surface — eyebrow, autoresizing textarea,
-//   keyboard hint, send button, sending/sent/error states. Doesn't
-//   own its own visibility; the caller mounts/unmounts it. Submits
-//   directly to the Supabase `feedback` table under the row-level
-//   policy "Users can create feedback".
-//
-//   Status: idle → sending → sent (auto-dismiss 1.4s) | error.
-//   `onActiveChange(false)` fires once status reaches "sent" so a
-//   parent popover can unpin and prepare to close gracefully.
-//
-//   Mobile: textarea is 16px on small screens to defeat the iOS
-//   focus-zoom, 12.5px on sm+. Keyboard hint hidden under sm.
+//   Unchanged compose surface — eyebrow, autoresizing textarea, keyboard
+//   hint, send button, idle→sending→sent|error. `bare` drops its own card
+//   chrome when it lives inside a Drawer (the sheet provides the surface).
+//   Mobile: textarea is 16px to defeat iOS focus-zoom, 12.5px on sm+.
 function FeedbackComposeCard({
   userId,
   onCancel,
   onSent,
-  onActiveChange,
+  bare = false,
 }: {
   userId: string
   onCancel: () => void
   onSent: () => void
-  onActiveChange?: (active: boolean) => void
+  bare?: boolean
 }) {
   const [text, setText] = useState("")
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle")
   const taRef = useRef<HTMLTextAreaElement>(null)
 
+  // Autofocus once, then auto-resize on input (max ~160px → scrolls).
   useEffect(() => {
-    onActiveChange?.(status !== "sent")
-  }, [status, onActiveChange])
-
-  // Autofocus + auto-resize (max ~160px → ~6 lines, then scrolls).
+    taRef.current?.focus()
+  }, [])
   useEffect(() => {
     const ta = taRef.current
     if (!ta) return
-    ta.focus()
     ta.style.height = "auto"
     ta.style.height = Math.min(160, ta.scrollHeight) + "px"
   }, [text])
@@ -109,15 +204,15 @@ function FeedbackComposeCard({
     if (!trimmed || status === "sending") return
     setStatus("sending")
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       if (!supabase) throw new Error("Supabase unavailable")
       const { error } = await supabase
         .from("feedback")
         .insert({ user_id: userId, message: trimmed })
       if (error) throw error
+      setText("")
       setStatus("sent")
       setTimeout(() => {
-        setText("")
         setStatus("idle")
         onSent()
       }, 1400)
@@ -129,14 +224,10 @@ function FeedbackComposeCard({
   return (
     <div
       className={cn(
-        // Solid, full-opacity card — it floats in its own footer popover
-        // (which is transparent), so the surface lives here: opaque
-        // popover bg + border + lifted shadow.
         "overflow-hidden rounded-xl",
-        "bg-popover text-popover-foreground",
-        "border border-border/60 dark:border-white/[0.06]",
-        "shadow-2xl",
-        "animate-in fade-in-0 slide-in-from-top-1 duration-200"
+        bare
+          ? "bg-transparent"
+          : "bg-popover text-popover-foreground border border-border/60 dark:border-white/[0.06] shadow-2xl animate-in fade-in-0 slide-in-from-bottom-1 duration-200",
       )}
     >
       <div className="flex items-center justify-between px-2.5 pt-2 pb-1">
@@ -150,14 +241,18 @@ function FeedbackComposeCard({
           type="button"
           onClick={onCancel}
           aria-label="Cancel"
-          className="h-5 w-5 flex items-center justify-center rounded text-foreground/40 hover:text-foreground hover:bg-foreground/[0.05] transition-colors"
+          className="h-6 w-6 flex items-center justify-center rounded-md text-foreground/40 hover:text-foreground hover:bg-foreground/[0.05] transition-colors"
         >
-          <IconX size={11} stroke={1.75} />
+          <IconX size={12} stroke={1.75} />
         </button>
       </div>
 
       {status === "sent" ? (
-        <div className="flex items-center gap-2 px-3 pt-1 pb-3 animate-in fade-in-0 duration-200">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2 px-3 pt-1 pb-3 animate-in fade-in-0 duration-200"
+        >
           <span className="h-5 w-5 rounded-full bg-emerald-500/15 dark:bg-emerald-400/15 flex items-center justify-center shrink-0">
             <IconCheck size={11} stroke={2.5} className="text-emerald-600 dark:text-emerald-400" />
           </span>
@@ -189,7 +284,7 @@ function FeedbackComposeCard({
               "text-base leading-snug text-foreground placeholder:text-foreground/30 sm:text-[12.5px]",
               "outline-none focus:outline-none focus-visible:outline-none focus:ring-0",
               "max-h-[160px] overflow-y-auto",
-              "disabled:opacity-60"
+              "disabled:opacity-60",
             )}
           />
           <div className="flex items-center justify-between gap-2 border-t border-foreground/[0.05] px-2 py-1.5 dark:border-white/[0.04]">
@@ -199,7 +294,7 @@ function FeedbackComposeCard({
               </span>
             ) : (
               <span className="hidden sm:inline-flex items-center gap-1 text-[10px] tracking-[0.02em] text-foreground/35">
-                <kbd className="font-sans">⌘</kbd>
+                <kbd className="font-sans">⌘/Ctrl</kbd>
                 <span>+</span>
                 <kbd className="font-sans">↵</kbd>
                 <span className="ml-0.5">to send</span>
@@ -215,8 +310,9 @@ function FeedbackComposeCard({
                 "bg-foreground text-background text-[11.5px] font-semibold tracking-[-0.01em]",
                 "shadow-[0_1px_2px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.08)]",
                 "transition-all duration-150",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
                 "disabled:opacity-30 disabled:cursor-not-allowed",
-                "enabled:hover:opacity-90 enabled:active:scale-[0.97]"
+                "enabled:hover:opacity-90 enabled:active:scale-[0.97]",
               )}
             >
               {status === "sending" ? (
@@ -238,29 +334,30 @@ function FeedbackComposeCard({
   )
 }
 
-// ─── Avatar menu ──────────────────────────────────────────────────
-//   Progressive disclosure: at-rest the footer shows just identity.
-//   Everything else (account, billing, referral, talk-to-us, sign out)
-//   lives one click away. The trigger uses Popover (not HoverCard) so
-//   it works on touch.
-function AvatarMenu({
+// ─── Account menu ─────────────────────────────────────────────────
+//   Progressive disclosure: the footer shows identity; everything else
+//   (account, billing, guide, community, invite, talk-to-us, run-locally,
+//   theme, sign out) lives one click away. Same body in both chromes —
+//   only padding/width differs. "popover" (desktop) paints its own card;
+//   "drawer" (mobile) is bare because <DrawerContent> is the surface.
+function AccountMenu({
   user,
   onAction,
   chrome = "popover",
 }: {
-  user: { id: string; display_name?: string | null; email?: string | null; profile_image?: string | null } | null | undefined
+  user: NonNullable<UserLike>
   onAction: () => void
-  /** "popover" (desktop, default): self-contained card with border,
-   *  shadow, rounded corners, fixed 240px width.
-   *  "drawer" (mobile bottom sheet): full-width content, no card chrome
-   *  — the parent <DrawerContent> already provides the surface,
-   *  drag-handle pill, and rounded top edges. */
   chrome?: "popover" | "drawer"
 }) {
   const t = useTranslations("sidebar")
   const openDialog = useAccountDialog((s) => s.open)
   const { signOut } = useUser()
-  const displayName = user?.display_name || user?.email?.split("@")[0] || t("user")
+  const { resolvedTheme, setTheme } = useTheme()
+  const [themeReady, setThemeReady] = useState(false)
+  useEffect(() => setThemeReady(true), [])
+  const isDark = resolvedTheme === "dark"
+
+  const displayName = user.display_name || user.email?.split("@")[0] || t("user")
 
   type Item =
     | { kind: "button"; icon: typeof IconSettings; label: string; onClick: () => void }
@@ -268,12 +365,6 @@ function AvatarMenu({
     | { kind: "external"; icon: typeof IconSettings; label: string; href: string }
 
   const items: Item[] = [
-    // "Account" is a generic "open settings" entry, not a deep-link
-    // to the General profile section. On the mobile drawer this opens
-    // the dialog at the section-list view so the user can pick where
-    // to go (Memory, Appearance, Billing, …) instead of being dropped
-    // into a specific panel. Desktop renders nav + content side-by-side
-    // and ignores the hint, so behavior there is unchanged.
     { kind: "button", icon: IconSettings, label: t("account"), onClick: () => { openDialog("account", { mobileView: "menu" }); onAction() } },
     { kind: "button", icon: IconCreditCard, label: t("credits.buy"), onClick: () => { openDialog("billing"); onAction() } },
     { kind: "link", icon: IconBook2, label: t("guide"), href: "/guide" },
@@ -282,20 +373,14 @@ function AvatarMenu({
     { kind: "external", icon: IconVideo, label: t("talkToUs"), href: "https://cal.com/coasty/15min" },
   ]
 
-  // Drawer rows are slightly taller for comfortable thumb tap targets;
-  // popover rows stay compact since they're mouse-hit. Same
-  // px/gap/colors otherwise so the menu reads identically across both.
   const rowClass = cn(
     "w-full flex items-center gap-2.5 px-2 rounded-md text-left transition-colors duration-100",
     "text-muted-foreground/75 hover:text-foreground hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
+    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
     chrome === "drawer" ? "py-2.5" : "py-[7px]",
   )
+  const rowPad = chrome === "drawer" ? "py-2.5" : "py-[7px]"
 
-  // Outer chrome.
-  //   popover: card (border + shadow + rounded + bg + fixed width).
-  //   drawer:  bare; the <DrawerContent> provides the surface so this
-  //            component can grow to the sheet's full width and skip the
-  //            card decorations.
   const outerClass = cn(
     "overflow-hidden",
     chrome === "popover"
@@ -303,8 +388,6 @@ function AvatarMenu({
       : "w-full",
   )
 
-  // Header padding tightens slightly on drawer so the avatar + name +
-  // email row doesn't read as a separate "card" on top of the sheet.
   const headerClass = cn(
     "flex items-center gap-3 border-b border-border/30 dark:border-white/[0.05]",
     chrome === "drawer" ? "px-3 pt-2 pb-3" : "px-3.5 pt-3.5 pb-3",
@@ -314,16 +397,16 @@ function AvatarMenu({
     <div className={outerClass}>
       <div className={headerClass}>
         <Avatar className="h-9 w-9 ring-1 ring-border/40">
-          <AvatarImage src={user?.profile_image || undefined} />
+          <AvatarImage src={user.profile_image || undefined} />
           <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[11px] font-semibold">
-            {displayName[0].toUpperCase()}
+            {initialOf(displayName)}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-[12.5px] font-semibold text-foreground truncate leading-tight">
             {displayName}
           </span>
-          {user?.email && (
+          {user.email && (
             <span className="text-[10.5px] text-muted-foreground/70 truncate mt-0.5">
               {user.email}
             </span>
@@ -367,6 +450,28 @@ function AvatarMenu({
             </button>
           )
         })}
+
+        {/* Theme — toggles in place without closing the menu. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            setTheme(isDark ? "light" : "dark")
+          }}
+          aria-label="Toggle theme"
+          className={cn(
+            "w-full flex items-center gap-2.5 px-2 rounded-md text-left transition-colors duration-100",
+            "text-muted-foreground/75 hover:text-foreground hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
+            rowPad,
+          )}
+        >
+          {isDark ? <IconMoon size={14} stroke={1.5} className="shrink-0" /> : <IconSun size={14} stroke={1.5} className="shrink-0" />}
+          <span className="text-[12px] font-medium flex-1 truncate">Theme</span>
+          <span className="text-[10.5px] font-medium text-muted-foreground/60 capitalize tabular-nums">
+            {themeReady ? (isDark ? "Dark" : "Light") : ""}
+          </span>
+        </button>
       </div>
 
       <div className="p-1.5 border-t border-border/30 dark:border-white/[0.05]">
@@ -376,7 +481,12 @@ function AvatarMenu({
             signOut()
             onAction()
           }}
-          className="w-full flex items-center gap-2.5 px-2 py-[7px] rounded-md text-left transition-colors duration-100 text-muted-foreground/75 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/[0.06]"
+          className={cn(
+            "w-full flex items-center gap-2.5 px-2 rounded-md text-left transition-colors duration-100",
+            "text-muted-foreground/75 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/[0.06]",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
+            rowPad,
+          )}
         >
           <IconLogout size={14} stroke={1.5} className="shrink-0" />
           <span className="text-[12px] font-medium">Sign out</span>
@@ -386,60 +496,175 @@ function AvatarMenu({
   )
 }
 
-// ─── Feathered seam ───────────────────────────────────────────────
-//   The footer's single hairline. A 1px gradient that fades to
-//   transparent at both corners, so the footer detaches from the scroll
-//   list with a soft seam rather than a hard ruled border.
-function FooterSeam({ className }: { className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        "h-px bg-gradient-to-r from-transparent via-foreground/[0.13] to-transparent dark:via-white/[0.08]",
-        className,
-      )}
+// ─── Credits row ──────────────────────────────────────────────────
+function CreditsRow({
+  expanded,
+  isMobile,
+  closeMobileIfNeeded,
+}: {
+  expanded: boolean
+  isMobile: boolean
+  closeMobileIfNeeded: () => void
+}) {
+  const t = useTranslations("sidebar")
+  const openDialog = useAccountDialog((s) => s.open)
+  const { credits, loading } = useCredits()
+  const { isUnlimitedPlan } = useSubscription()
+
+  // Developer mode shows the dollar API wallet instead of consumer credits.
+  // Mount-gated so the persisted mode never causes a hydration mismatch; the
+  // wallet is only fetched when actually in developer mode.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const mode = usePlatformMode((s) => s.mode)
+  const isDev = mounted && mode === "developer"
+  const { wallet, loading: walletLoading } = useApiWallet(isDev)
+
+  if (isDev) {
+    const walletReady = !walletLoading && !!wallet
+    const usd = wallet?.balanceUsd ?? 0
+    const walletHealth: CreditHealth = usd <= 0 ? "depleted" : usd < 5 ? "low" : "healthy"
+    const walletNumClass = walletHealth === "healthy" ? "text-foreground/85" : HEALTH_TEXT[walletHealth]
+
+    const walletLabel = !walletReady ? (
+      <span className="inline-block h-3 w-14 rounded bg-foreground/10 animate-pulse align-middle" />
+    ) : (
+      <span>
+        <span className={cn("font-semibold tabular-nums", walletNumClass)}>${usd.toFixed(2)}</span>
+        <span className="font-normal text-foreground/45"> wallet</span>
+      </span>
+    )
+
+    const walletBtn = (
+      <FooterRowButton
+        expanded={expanded}
+        icon={<IconWallet size={16} stroke={1.6} />}
+        label={walletLabel}
+        onClick={() => {
+          openDialog("billing")
+          if (isMobile) closeMobileIfNeeded()
+        }}
+      />
+    )
+
+    return collapsedTooltip(
+      expanded,
+      walletBtn,
+      walletReady ? (
+        <>
+          <span className="font-semibold tabular-nums">${usd.toFixed(2)}</span>
+          <span className="text-muted-foreground ml-1">API wallet</span>
+        </>
+      ) : (
+        <span className="text-muted-foreground">…</span>
+      ),
+    )
+  }
+
+  const ready = !loading && !!credits
+  const balance = credits?.balance ?? 0
+  const totalPurchased = credits?.total_purchased ?? 0
+  const health: CreditHealth = isUnlimitedPlan ? "healthy" : getHealth(balance, totalPurchased)
+  // The amount IS the label here — a prominent number with a quiet
+  // "credits" suffix (amber/rose only when low/depleted), or "Unlimited".
+  const numClass = health === "healthy" ? "text-foreground/85" : HEALTH_TEXT[health]
+
+  const label = !ready ? (
+    <span className="inline-block h-3 w-14 rounded bg-foreground/10 animate-pulse align-middle" />
+  ) : isUnlimitedPlan ? (
+    <span className="font-semibold text-foreground/85">Unlimited</span>
+  ) : (
+    <span>
+      <span className={cn("font-semibold tabular-nums", numClass)}>{balance.toLocaleString()}</span>
+      <span className="font-normal text-foreground/45"> credits</span>
+    </span>
+  )
+
+  const btn = (
+    <FooterRowButton
+      expanded={expanded}
+      icon={isUnlimitedPlan ? <IconInfinity size={16} stroke={1.9} /> : <IconCoins size={16} stroke={1.6} />}
+      label={label}
+      onClick={() => {
+        openDialog("billing")
+        if (isMobile) closeMobileIfNeeded()
+      }}
     />
+  )
+
+  return collapsedTooltip(
+    expanded,
+    btn,
+    isUnlimitedPlan ? (
+      <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+        <IconInfinity size={12} stroke={2.5} />
+        Unlimited credits
+      </span>
+    ) : ready ? (
+      <>
+        <span className="font-semibold tabular-nums">{balance.toLocaleString()}</span>
+        <span className="text-muted-foreground ml-1">{t("credits.creditsLeft")}</span>
+      </>
+    ) : (
+      <span className="text-muted-foreground">…</span>
+    ),
   )
 }
 
-// ─── Footer feedback popover ──────────────────────────────────────
-//   The footer's Feedback action: a quiet icon that pops the compact
-//   compose card in place, anchored above the icon. Reuses
-//   FeedbackComposeCard; outside-click, Escape, or the card's X all
-//   dismiss it.
-function FeedbackPopButton({ userId, className }: { userId: string; className: string }) {
+// ─── Feedback row ─────────────────────────────────────────────────
+function FeedbackRow({
+  userId,
+  expanded,
+  isMobile,
+}: {
+  userId: string
+  expanded: boolean
+  isMobile: boolean
+}) {
   const [open, setOpen] = useState(false)
+  const icon = <IconMessage2 size={16} stroke={1.6} />
+
+  if (isMobile) {
+    return (
+      <>
+        <FooterRowButton
+          expanded={expanded}
+          icon={icon}
+          label="Feedback"
+          data-state={open ? "open" : "closed"}
+          onClick={() => setOpen(true)}
+        />
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="max-h-[82dvh] focus:outline-none rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]">
+            <DrawerTitle className="sr-only">Feedback</DrawerTitle>
+            <div className="px-3 pb-2">
+              <FeedbackComposeCard
+                bare
+                userId={userId}
+                onCancel={() => setOpen(false)}
+                onSent={() => setOpen(false)}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </>
+    )
+  }
+
+  const trigger = (
+    <PopoverTrigger asChild>
+      <FooterRowButton expanded={expanded} icon={icon} label="Feedback" />
+    </PopoverTrigger>
+  )
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <PopoverTrigger asChild>
-            <button type="button" aria-label="Send feedback" className={className}>
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M5 5h14a2 2 0 012 2v8a2 2 0 01-2 2h-7l-4 3v-3H5a2 2 0 01-2-2V7a2 2 0 012-2z"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinejoin="round"
-                />
-                <circle cx="9" cy="11" r="0.9" fill="currentColor" />
-                <circle cx="12" cy="11" r="0.9" fill="currentColor" />
-                <circle cx="15" cy="11" r="0.9" fill="currentColor" />
-              </svg>
-            </button>
-          </PopoverTrigger>
-        </TooltipTrigger>
-        {!open && (
-          <TooltipContent side="top" sideOffset={6}>
-            <span className="font-medium text-[12px]">Feedback</span>
-          </TooltipContent>
-        )}
-      </Tooltip>
+      {collapsedTooltip(expanded, trigger, "Feedback")}
       <PopoverContent
         side="top"
-        align="end"
-        sideOffset={10}
-        collisionPadding={16}
+        align="start"
+        sideOffset={8}
+        collisionPadding={12}
         className="w-72 p-0 border-0 bg-transparent shadow-none"
       >
         <FeedbackComposeCard
@@ -452,30 +677,150 @@ function FeedbackPopButton({ userId, className }: { userId: string; className: s
   )
 }
 
-// Shared utility-icon button (Run locally, Feedback, theme) — a quiet
-// 28px hit target that brightens with a soft fill on hover, so the
-// three read as one cluster on the identity row.
-const UTIL_BTN = cn(
-  "flex h-7 w-7 items-center justify-center shrink-0 rounded-md",
-  "text-foreground/35 hover:text-foreground/75 hover:bg-foreground/[0.04]",
-  "transition-colors duration-150 cursor-pointer",
-)
+// ─── Run-locally row ──────────────────────────────────────────────
+//   Sits right beside Feedback. A plain link to the desktop download —
+//   so it's a Link (not a popover trigger) wrapped in the same ROW recipe.
+function RunLocallyRow({
+  expanded,
+  closeMobileIfNeeded,
+}: {
+  expanded: boolean
+  closeMobileIfNeeded: () => void
+}) {
+  const link = (
+    <Link
+      href="/download"
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={closeMobileIfNeeded}
+      aria-label="Run locally"
+      className={ROW}
+    >
+      <RowInner
+        icon={<IconDeviceDesktop size={16} stroke={1.6} />}
+        label="Run locally"
+        expanded={expanded}
+      />
+    </Link>
+  )
+  return collapsedTooltip(expanded, link, "Run locally")
+}
 
-// Avatar trigger — same 28px footprint as the utility icons so the row
-// reads as one uniform bar, but rounded-full to hug the round avatar.
-const AVATAR_BTN = cn(
-  "flex h-7 w-7 items-center justify-center shrink-0 rounded-full",
-  "transition-colors duration-150 cursor-pointer",
-  "hover:bg-foreground/[0.06] data-[state=open]:bg-foreground/[0.08]",
-)
+// ─── Account row ──────────────────────────────────────────────────
+function AccountRow({
+  user,
+  expanded,
+  isMobile,
+  closeMobileIfNeeded,
+}: {
+  user: NonNullable<UserLike>
+  expanded: boolean
+  isMobile: boolean
+  closeMobileIfNeeded: () => void
+}) {
+  const t = useTranslations("sidebar")
+  const [open, setOpen] = useState(false)
+  const displayName = user.display_name || user.email?.split("@")[0] || t("user")
+
+  const avatar = (
+    <Avatar className="h-[20px] w-[20px] ring-1 ring-border/40">
+      <AvatarImage src={user.profile_image || undefined} />
+      <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[9px] font-semibold">
+        {initialOf(displayName)}
+      </AvatarFallback>
+    </Avatar>
+  )
+
+  const onAction = useCallback(() => {
+    setOpen(false)
+    closeMobileIfNeeded()
+  }, [closeMobileIfNeeded])
+
+  if (isMobile) {
+    return (
+      <>
+        <FooterRowButton
+          expanded={expanded}
+          icon={avatar}
+          iconClassName="justify-start overflow-visible"
+          label={displayName}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          data-state={open ? "open" : "closed"}
+          onClick={() => setOpen(true)}
+        />
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="max-h-[82dvh] focus:outline-none rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]">
+            <DrawerTitle className="sr-only">Account menu</DrawerTitle>
+            <div className="flex-1 min-h-0 overflow-y-auto pb-2">
+              <AccountMenu chrome="drawer" user={user} onAction={onAction} />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </>
+    )
+  }
+
+  const trigger = (
+    <PopoverTrigger asChild>
+      <FooterRowButton
+        expanded={expanded}
+        icon={avatar}
+        iconClassName="overflow-visible"
+        label={displayName}
+        aria-label="Open account menu"
+      />
+    </PopoverTrigger>
+  )
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      {collapsedTooltip(expanded, trigger, displayName)}
+      <PopoverContent
+        side="top"
+        align="start"
+        sideOffset={8}
+        collisionPadding={12}
+        className="w-auto p-0 border-0 bg-transparent shadow-none"
+      >
+        <AccountMenu user={user} onAction={onAction} />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// ─── Standalone theme row (logged-out only) ───────────────────────
+function ThemeRow({ expanded }: { expanded: boolean }) {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [ready, setReady] = useState(false)
+  useEffect(() => setReady(true), [])
+  const isDark = resolvedTheme === "dark"
+  const btn = (
+    <FooterRowButton
+      expanded={expanded}
+      icon={isDark ? <IconMoon size={16} stroke={1.6} /> : <IconSun size={16} stroke={1.6} />}
+      label="Theme"
+      trailing={
+        ready ? (
+          <span className="text-[11px] font-medium text-foreground/45 capitalize">
+            {isDark ? "Dark" : "Light"}
+          </span>
+        ) : null
+      }
+      aria-label="Toggle theme"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+    />
+  )
+  return collapsedTooltip(expanded, btn, "Theme")
+}
 
 // ═══════════════════════════════════════════════════════════════════
 //  SidebarFooterSection
 //  ─────────────────────
-//  Two rows beneath a single feathered seam: a centered credits hero and
-//  an icon bar (avatar + Run-locally / Feedback / theme, evenly spaced),
-//  held apart by air rather than dividers. No cards, no decorative
-//  backgrounds. Everything else lives in the avatar menu.
+//  Three rows built from the nav row recipe — Credits, Feedback, Account
+//  — and nothing else. No seam, no icon bar. Collapsed (48px) shows the
+//  three icons with right-side tooltips; mobile swaps each menu to a
+//  bottom Drawer. Theme and Run-locally live inside the account menu.
 // ═══════════════════════════════════════════════════════════════════
 export const SidebarFooterSection = memo(function SidebarFooterSection({
   user,
@@ -483,297 +828,39 @@ export const SidebarFooterSection = memo(function SidebarFooterSection({
   isMobile,
   closeMobileIfNeeded,
 }: {
-  user: { id: string; display_name?: string | null; email?: string | null; profile_image?: string | null } | null | undefined
+  user: UserLike
   expanded: boolean
   isMobile: boolean
   closeMobileIfNeeded: () => void
 }) {
-  const t = useTranslations("sidebar")
-  const openAccountDialog = useAccountDialog((s) => s.open)
-  const { credits } = useCredits()
-  const { isUnlimitedPlan } = useSubscription()
-
-  const balance = credits?.balance ?? 0
-  const totalPurchased = credits?.total_purchased ?? 0
-  // For unlimited plans, force "healthy" — the sentinel balance would
-  // always read healthy anyway, but the visual must render "Unlimited"
-  // (with the amber accent) instead of a number.
-  const health = isUnlimitedPlan ? "healthy" : getHealth(balance, totalPurchased)
-  const c = HEALTH[health]
-
-  const displayName = user?.display_name || user?.email?.split("@")[0] || t("user")
-
-  // Avatar menu open state. (Feedback now composes in its own footer
-  // popover, so the menu no longer needs a pin-to-stay-open guard.)
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  // ─── Collapsed icon rail ───────────────────────────────────────
-  // CRITICAL: do NOT use `items-center` on the flex-col container.
-  // The sidebar's outer panel animates its `width` over 280ms when
-  // toggling between expanded (216px) and collapsed (48px). During
-  // that transit the COLLAPSED branch is what's rendered (React
-  // flips the `expanded` flag instantly while the width tweens).
-  // If children were `items-center`'d, they'd be re-centered inside
-  // whatever the *current* container width happens to be on each
-  // animation frame, sliding horizontally from the wide center down
-  // to the narrow center.
-  //
-  // Instead, anchor everything to the left edge — buttons are
-  // `w-full`, content sits at the button's left content edge with
-  // no centering. The icon's x-position is then a pure function of
-  // SidebarFooter padding (8) + section padding (4) = sidebar-x=12,
-  // independent of container width. The avatar lands at x=12..36
-  // (center 24) at every frame of the animation, exactly like the
-  // header logo and the expanded identity row.
-  if (!expanded) {
-    return (
-      <div className="flex flex-col gap-1 px-1 pt-0 pb-2">
-        {/* Feathered seam — the footer's one hairline (see expanded). */}
-        <FooterSeam className="mb-1" />
-        {user && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={() => openAccountDialog("billing")}
-                className="flex h-8 w-full items-center rounded-md hover:bg-foreground/[0.04] transition-colors"
-              >
-                {/* The 24×24 wrapper places the credit dot in the
-                    same column as the avatar below — keeps the icon
-                    rail visually aligned at sidebar-x=24. */}
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                  <span className={cn("h-1.5 w-1.5 rounded-full", c.dot)} />
-                </span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              {isUnlimitedPlan ? (
-                <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                  <IconInfinity size={12} stroke={2.5} />
-                  Unlimited credits
-                </span>
-              ) : (
-                <>
-                  <span className="font-semibold tabular-nums">{balance.toLocaleString()}</span>
-                  <span className="text-muted-foreground ml-1">{t("credits.creditsLeft")}</span>
-                </>
-              )}
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-        {user && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={() => openAccountDialog()}
-                className="flex h-8 w-full items-center rounded-md hover:bg-foreground/[0.04] transition-colors"
-              >
-                <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border/40">
-                  <AvatarImage src={user?.profile_image || undefined} />
-                  <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[9px] font-semibold">
-                    {displayName[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              {displayName}
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-    )
-  }
-
-  // ─── Expanded ──────────────────────────────────────────────────
-  // Padding math (the avatar's pixel position must match collapsed):
-  //   sidebar-x=0 → SidebarFooter p-2 (8px) → section px-1 (4px)
-  //   → identity row no padding → avatar h-6 (24×24)
-  //   left edge: 8 + 4 = 12. center: 12 + 12 = 24. ✓
-  // In collapsed mode the avatar (h-6 inside h-8 button, items-center
-  // in a 48px sidebar) lands at the same x=12..36 box. So the avatar
-  // does not move during the expand/collapse animation — only the
-  // display name fades in/out beside it, exactly like nav rows.
-  //
-  // Section padding is px-1 (not px-2.5) precisely so the footer's
-  // left column aligns with the header logo at sidebar-x=12 and with
-  // the avatar's collapsed position. The credits "REMAINING" eyebrow
-  // and big balance number now share the same left rail as the logo
-  // above and the avatar below.
   return (
-    <div className="px-1 pt-0 pb-2.5">
-      {/* Feathered seam — the footer's one hairline, fading to
-          transparent at both corners so the footer detaches from the
-          scroll list with a soft seam instead of a hard ruled border. */}
-      <FooterSeam className="mb-3" />
-
-      {/* ── Row 1: Credits — the hero element ── */}
+    <div className="flex flex-col gap-0.5 pt-1 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
       {user && (
-        <button
-          type="button"
-          onClick={() => {
-            openAccountDialog("billing")
-            if (isMobile) closeMobileIfNeeded()
-          }}
-          className="group block w-full text-center rounded-md px-1 py-1 -mx-1 transition-colors hover:bg-foreground/[0.025]"
-        >
-          {isUnlimitedPlan ? (
-            // Unlimited: one clean line. The amber wordmark is the
-            // status itself, so no "PLAN" eyebrow and no separate dot.
-            <span className="inline-flex items-center justify-center gap-1.5 text-[24px] font-semibold tracking-[-0.025em] leading-none text-foreground">
-              <IconInfinity size={26} stroke={2.4} />
-              <span>Unlimited</span>
-            </span>
-          ) : (
-            <>
-              {/* Numeric balance keeps its eyebrow — the small label is
-                  what gives the raw number meaning, so it earns its place. */}
-              <div className="flex items-center justify-center gap-1.5 mb-[5px]">
-                <span className="text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/35">
-                  {t("credits.remaining")}
-                </span>
-                <span className={cn("h-1 w-1 rounded-full transition-colors", c.dot)} />
-              </div>
-              <div className="flex items-baseline justify-center gap-2">
-                <span className="text-[28px] font-semibold tabular-nums tracking-[-0.025em] leading-none text-foreground">
-                  {balance.toLocaleString()}
-                </span>
-                {totalPurchased > 0 && totalPurchased > balance && (
-                  <span className="text-[10px] text-foreground/30 tabular-nums leading-none">
-                    / {totalPurchased.toLocaleString()}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-        </button>
+        <CreditsRow
+          expanded={expanded}
+          isMobile={isMobile}
+          closeMobileIfNeeded={closeMobileIfNeeded}
+        />
       )}
 
-      {/* ── Row 2: Account + utility bar ──
-          Just icons now — the avatar (opens the account menu), Run
-          locally, Feedback, and the theme toggle — spread edge-to-edge
-          so the row reads as a tidy icon bar beneath the centered
-          credits hero. No name label; the avatar alone carries identity,
-          exactly like the collapsed rail. `justify-between` anchors the
-          avatar to the left rail and the theme toggle to the right, with
-          the two actions evenly spaced between. */}
-      <div className="mt-3.5 flex items-center justify-between">
-        {user ? (
-          // Same surface on both viewports; only the menu container
-          // differs — desktop a right-anchored Popover card, mobile a
-          // bottom Drawer (a side="right" popover would render off the
-          // left-edge sidebar drawer on a phone).
-          isMobile ? (
-            <>
-              <button
-                type="button"
-                aria-label="Open account menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen(true)}
-                data-state={menuOpen ? "open" : "closed"}
-                className={AVATAR_BTN}
-              >
-                <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border/40">
-                  <AvatarImage src={user?.profile_image || undefined} />
-                  <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[9px] font-semibold">
-                    {displayName[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-              <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
-                <DrawerContent
-                  className={cn(
-                    "max-h-[82dvh] focus:outline-none",
-                    "rounded-t-2xl border-t border-border/40 dark:border-white/[0.06]",
-                  )}
-                >
-                  <DrawerTitle className="sr-only">Account menu</DrawerTitle>
-                  <div className="flex-1 min-h-0 overflow-y-auto pb-2">
-                    <AvatarMenu
-                      chrome="drawer"
-                      user={user}
-                      onAction={() => {
-                        setMenuOpen(false)
-                        closeMobileIfNeeded()
-                      }}
-                    />
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            </>
-          ) : (
-            <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Open account menu"
-                  className={AVATAR_BTN}
-                >
-                  <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border/40">
-                    <AvatarImage src={user?.profile_image || undefined} />
-                    <AvatarFallback className="bg-foreground/[0.06] text-foreground text-[9px] font-semibold">
-                      {displayName[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="right"
-                align="end"
-                sideOffset={12}
-                collisionPadding={16}
-                className="w-auto p-0 border-0 bg-transparent shadow-none"
-              >
-                <AvatarMenu
-                  user={user}
-                  onAction={() => {
-                    setMenuOpen(false)
-                    closeMobileIfNeeded()
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-          )
-        ) : (
-          // Logged-out: an empty avatar-sized slot keeps the theme
-          // toggle pinned to the right edge.
-          <span className="h-7 w-7" />
-        )}
+      {user?.id && (
+        <FeedbackRow userId={user.id} expanded={expanded} isMobile={isMobile} />
+      )}
 
-        {/* Run locally + Feedback — quiet icon actions between the avatar
-            and the theme toggle. Tooltips name them. */}
-        {user?.id && (
-          <>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/download"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMobileIfNeeded}
-                  aria-label="Run locally"
-                  className={UTIL_BTN}
-                >
-                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <rect x="2" y="3" width="20" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-                    <path d="M8 21h8M12 17v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                    <path d="M12 7.5v4.5m0 0l-2-2m2 2l2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6}>
-                <span className="font-medium text-[12px]">Run locally</span>
-              </TooltipContent>
-            </Tooltip>
+      {user?.id && (
+        <RunLocallyRow expanded={expanded} closeMobileIfNeeded={closeMobileIfNeeded} />
+      )}
 
-            <FeedbackPopButton userId={user.id} className={UTIL_BTN} />
-          </>
-        )}
-
-        <AnimatedThemeToggler className={UTIL_BTN} />
-      </div>
+      {user ? (
+        <AccountRow
+          user={user}
+          expanded={expanded}
+          isMobile={isMobile}
+          closeMobileIfNeeded={closeMobileIfNeeded}
+        />
+      ) : (
+        <ThemeRow expanded={expanded} />
+      )}
     </div>
   )
 })

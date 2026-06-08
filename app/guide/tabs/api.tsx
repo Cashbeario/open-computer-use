@@ -1415,7 +1415,7 @@ export function APITab({ inApp }: { inApp: boolean }) {
           <div className="flex flex-wrap items-center gap-3">
             {inApp ? (
               <Link
-                href="/developers"
+                href="/developers/keys"
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all bg-foreground text-background hover:bg-foreground/90"
               >
                 Get API Key
@@ -1489,7 +1489,7 @@ export function APITab({ inApp }: { inApp: boolean }) {
             <p className="text-[13px] text-muted-foreground/55 leading-relaxed">
               Every request needs an <code className="text-[11px] px-1.5 py-0.5 rounded-md bg-foreground/[0.04] font-mono">X-API-Key</code> header.
               {inApp ? (
-                <> Create keys in your <Link href="/developers" className="underline underline-offset-2 hover:text-foreground transition-colors">Developer Dashboard</Link>.</>
+                <> Create keys in your <Link href="/developers/keys" className="underline underline-offset-2 hover:text-foreground transition-colors">Developer Dashboard</Link>.</>
               ) : (
                 <> Sign up to create API keys.</>
               )} Credits are deducted per request from your shared balance.
@@ -2248,7 +2248,7 @@ X-API-Key: sk-coasty-live-...
               </div>
               <div className="px-5 py-3 text-[11px] text-muted-foreground/55 leading-relaxed">
                 Returns <code className="text-[10px] font-mono">webhook_url</code> + <code className="text-[10px] font-mono">webhook_secret</code> (whsec_64hex). Sign every fire with
-                <code className="text-[10px] font-mono"> HMAC-SHA256(secret, "{"{ts}"}.body")</code> and send <code className="text-[10px] font-mono">Coasty-Signature: t={"{ts}"},v1={"{sig}"}</code>.
+                <code className="text-[10px] font-mono"> HMAC-SHA256(secret, &quot;{"{ts}"}.body&quot;)</code> and send <code className="text-[10px] font-mono">Coasty-Signature: t={"{ts}"},v1={"{sig}"}</code>.
                 Replay window 5 min. Idempotent on identical (id, body) within 60 s.
               </div>
             </div>

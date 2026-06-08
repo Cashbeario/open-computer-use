@@ -14,6 +14,9 @@ import {
   IconKey,
   IconBrandStackoverflow,
   IconDatabase,
+  IconActivity,
+  IconChartBar,
+  IconBook2,
 } from "@tabler/icons-react"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
 import Link from "next/link"
@@ -503,7 +506,7 @@ function SwarmsLivePopup({ swarms }: { swarms: { swarm_id: string; status?: stri
 }
 
 // ─── Nav hover card content ────────────────────────────────────────
-function NavHoverContent({ label, info }: { label: string; info: HoverInfo }) {
+function NavHoverContent({ label, info }: { label: React.ReactNode; info: HoverInfo }) {
   const Visual = visualComponents[info.visual]
   return (
     <div className="flex flex-col overflow-hidden -m-4">
@@ -536,7 +539,7 @@ const NavButton = memo(function NavButton({
   onHoverCardOpen,
 }: {
   icon: React.ReactNode
-  label: string
+  label: React.ReactNode
   tooltip?: string
   onClick?: () => void
   variant?: "default" | "primary"
@@ -1193,26 +1196,48 @@ export const SidebarNavSection = memo(function SidebarNavSection({
 
   return (
     <>
-      {/* Consumer-only sections (New Task + Recent). In Developer mode the
-          sidebar narrows to just Workspace + Developer, so these collapse away
-          with a smooth height/opacity transition. */}
-      <ModeReveal show={!isDeveloperMode}>
-      {/* New Task */}
-      <div className={cn("relative", expanded ? "pb-1 mb-0.5" : "pb-1 mb-0.5")}>
+      {/* Primary action — the ONE CTA that lives outside both ModeReveals so
+          it stays put as a stable anchor while everything below it cross-fades
+          between modes. It morphs between "New task" (Personal → home) and
+          "New API key" (Developer → keys page, auto-opening the create dialog
+          via ?new=1). The icon and label cross-fade on the mode flip (keyed
+          spans), so the swap reads as a morph rather than a hard cut. */}
+      <div className="relative pb-1 mb-0.5">
         <NavButton
-          icon={<IconPlus size={16} stroke={2} className="shrink-0" />}
-          label={t("newTask")}
-          tooltip={t("newTaskDescription")}
-          onClick={() => handleNavigation(() => router.push("/"))}
+          icon={
+            <span
+              key={isDeveloperMode ? "dev" : "consumer"}
+              className="flex items-center justify-center animate-in fade-in-0 zoom-in-90 duration-200"
+            >
+              {isDeveloperMode
+                ? <IconKey size={16} stroke={2} className="shrink-0" />
+                : <IconPlus size={16} stroke={2} className="shrink-0" />}
+            </span>
+          }
+          label={
+            <span
+              key={isDeveloperMode ? "dev" : "consumer"}
+              className="block animate-in fade-in-0 duration-200"
+            >
+              {isDeveloperMode ? "New API key" : t("newTask")}
+            </span>
+          }
+          tooltip={isDeveloperMode ? "Create a new API key" : t("newTaskDescription")}
+          onClick={() =>
+            isDeveloperMode
+              ? handleNavigation(() => router.push("/developers/keys?new=1"))
+              : handleNavigation(() => router.push("/"))
+          }
           variant="primary"
         />
       </div>
 
-      {/* ── Group 1 · Recent work ─────────────────────────────────
-          History first (highest frequency return destination),
-          then Swarms (its specialized parallel-runs sibling).
-          The section header itself separates this group from the
-          New Task button — no extra hairline needed. */}
+      {/* Personal-mode sections — Recent work + Workspace (Apps · Agent). Both
+          collapse away together with a smooth height/opacity transition when
+          the user switches into Developer mode, so Developer mode shows only
+          the New-API-key button above and the Developer section below. */}
+      <ModeReveal show={!isDeveloperMode}>
+      {/* ── Group 1 · Recent work ── */}
       <SectionHeader label="Recent" expanded={expanded} />
       <div className="space-y-0.5">
         <NavButton
@@ -1249,8 +1274,8 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           }}
         />
       </div>
-      </ModeReveal>
 
+      {/* ── Group 2 · Workspace (Apps · Agent) ── */}
       <SectionHeader label="Workspace" expanded={expanded} />
 
       <div className="space-y-0.5">
@@ -1338,6 +1363,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           )
         })()}
       </div>
+      </ModeReveal>
 
       {/* ── Developer section ──
           Revealed only when the user switches to the Developer platform mode
@@ -1352,17 +1378,66 @@ export const SidebarNavSection = memo(function SidebarNavSection({
         <SectionHeader label="Developer" expanded={expanded} />
         <div className="space-y-0.5">
           <NavButton
-            id="sidebar-developers-link"
+            id="sidebar-developers-keys-link"
+            testId="sidebar-nav-developers-keys"
             icon={<IconKey size={16} stroke={1.5} className="shrink-0" />}
-            label="Developers"
-            tooltip="API keys, usage & integrations"
-            href="/developers"
-            isActive={isItemActive("/developers")}
+            label="API keys"
+            tooltip="Create & manage API keys"
+            href="/developers/keys"
+            isActive={isItemActive("/developers/keys")}
             accentColor="text-purple-500 dark:text-purple-400"
             onClick={closeMobileIfNeeded}
             hoverInfo={{
-              description: "Developers",
-              detail: "API keys, usage, traces, and everything to integrate computer-use intelligence into your apps.",
+              description: "API keys",
+              detail: "Create, reveal, and revoke the keys that authenticate your API requests.",
+              visual: "developers",
+            }}
+          />
+          <NavButton
+            id="sidebar-developers-logs-link"
+            testId="sidebar-nav-developers-logs"
+            icon={<IconActivity size={16} stroke={1.5} className="shrink-0" />}
+            label="Logs"
+            tooltip="Request traces & history"
+            href="/developers/logs"
+            isActive={isItemActive("/developers/logs")}
+            accentColor="text-blue-500 dark:text-blue-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Logs",
+              detail: "Every API request as a filterable, exportable trace: endpoint, credits, timing, and request_id.",
+              visual: "developers",
+            }}
+          />
+          <NavButton
+            id="sidebar-developers-usage-link"
+            testId="sidebar-nav-developers-usage"
+            icon={<IconChartBar size={16} stroke={1.5} className="shrink-0" />}
+            label="Usage"
+            tooltip="Requests, credits & activity"
+            href="/developers/usage"
+            isActive={isItemActive("/developers/usage")}
+            accentColor="text-emerald-500 dark:text-emerald-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Usage",
+              detail: "Balance, request and credit totals, the activity chart, and your per-endpoint breakdown.",
+              visual: "developers",
+            }}
+          />
+          <NavButton
+            id="sidebar-developers-docs-link"
+            testId="sidebar-nav-developers-docs"
+            icon={<IconBook2 size={16} stroke={1.5} className="shrink-0" />}
+            label="Docs"
+            tooltip="API quick reference"
+            href="/developers/docs"
+            isActive={isItemActive("/developers/docs")}
+            accentColor="text-amber-500 dark:text-amber-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Docs",
+              detail: "Authentication, a copyable quick start, endpoint and action tables, and response shapes.",
               visual: "developers",
             }}
           />

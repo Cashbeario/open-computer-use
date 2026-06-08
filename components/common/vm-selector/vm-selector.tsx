@@ -5,6 +5,7 @@ import {
   CircleNotch,
   Plus,
   Desktop,
+  Laptop,
   WifiHigh,
   WifiSlash,
   Check,
@@ -19,8 +20,6 @@ import {
   Cloud,
   House,
 } from "@phosphor-icons/react"
-import { CloudDesktopIcon } from "@/components/icons/cloud-desktop"
-import { LocalLaptopIcon } from "@/components/icons/local-laptop"
 import { WindowsIcon, AppleIcon, LinuxIcon } from "@/components/icons/platform-icons"
 import { cn } from "@/lib/utils"
 import type { UserMachine } from "@/types/machines.types"
@@ -215,6 +214,32 @@ function StatusDot({ status }: { status: DisplayStatus }) {
   )
 }
 
+/**
+ * MachineGlyph — the trigger's one clean icon: a minimal monitor (cloud) or
+ * laptop (local) line glyph with a small status presence dot tucked into its
+ * corner. The dot carries connection state, so the trigger needs no separate
+ * status pill or coloured label.
+ */
+function MachineGlyph({ machine, status }: { machine: UserMachine; status: DisplayStatus }) {
+  const isLocal = machine.settings?.provider === "electron"
+  const Icon = isLocal ? Laptop : Desktop
+  const styles = getStatusStyles(status)
+  const animated =
+    status === "running" || status === "online" || status === "starting" ||
+    status === "creating" || status === "initiating"
+  return (
+    <span className="relative shrink-0">
+      <Icon className="size-[18px]" weight="regular" />
+      <span className="absolute -bottom-[3px] -right-[3px] flex size-2">
+        {animated && (
+          <span className={cn("absolute inline-flex h-full w-full rounded-full opacity-50 animate-ping", styles.dot)} />
+        )}
+        <span className={cn("relative inline-flex h-full w-full rounded-full ring-2 ring-background dark:ring-secondary", styles.dot)} />
+      </span>
+    </span>
+  )
+}
+
 type OsInfo = { Icon: typeof WindowsIcon; name: string }
 
 function getOsInfo(machine: UserMachine): OsInfo | null {
@@ -364,7 +389,6 @@ export function VMSelector({
   }
 
   const selectedMachine = allMachines.find(m => m.id === selectedVMId)
-  const isElectronSelected = selectedMachine?.settings?.provider === "electron"
   const hasAnyMachines = electronMachines.length > 0 || cloudMachines.length > 0
 
   const handleSelect = (machineId: string) => {
@@ -393,42 +417,46 @@ export function VMSelector({
           <button
             id="vm-selector-button"
             className={cn(
-              "inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-medium transition-all duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              "max-w-[160px] sm:max-w-[280px]",
+              // Same button family as the sibling action-row controls (h-9,
+              // rounded-full, hairline border, transparent/secondary fill) —
+              // just the labelled member of the set.
+              "group inline-flex items-center gap-2 h-9 pl-2.5 pr-2 rounded-full text-[13px] font-medium transition-colors duration-200",
+              "border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+              "max-w-[150px] sm:max-w-[260px]",
               swarmActive
-                ? "bg-amber-500 hover:bg-amber-600 text-white border border-amber-500 shadow-sm shadow-amber-500/20"
-                : "bg-gray-200 hover:bg-gray-300 dark:bg-accent/90 dark:hover:bg-accent/70 border border-gray-300 dark:border-transparent",
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/[0.16]"
+                : "border-border bg-transparent text-foreground/80 hover:bg-accent hover:text-foreground dark:bg-secondary dark:hover:bg-secondary/70 data-[state=open]:bg-accent dark:data-[state=open]:bg-secondary/70",
               className
             )}
           >
             {swarmActive ? (
               <>
-                <GitFork className="h-4 w-4 shrink-0" weight="duotone" />
-                <span className="font-semibold">Swarm</span>
-                <span className="opacity-80">×</span>
-                <span className="font-semibold tabular-nums">{swarmCount}</span>
+                <GitFork className="size-4 shrink-0" weight="bold" />
+                <span className="flex-1 min-w-0 truncate text-left">
+                  Swarm <span className="tabular-nums opacity-60">×{swarmCount}</span>
+                </span>
               </>
             ) : isLoading && !selectedMachine ? (
-              <CircleNotch className="h-3.5 w-3.5 animate-spin shrink-0" />
+              <>
+                <CircleNotch className="size-4 shrink-0 animate-spin opacity-60" />
+                <span className="hidden flex-1 min-w-0 truncate text-left text-muted-foreground sm:block">
+                  Loading
+                </span>
+              </>
             ) : selectedMachine ? (
               <>
-                {isElectronSelected ? (
-                  <LocalLaptopIcon className="h-[18px] w-[18px] shrink-0" />
-                ) : (
-                  <CloudDesktopIcon className="h-[18px] w-[18px] shrink-0" />
-                )}
-                <StatusDot status={getDisplayStatus(selectedMachine)} />
-                <span className="truncate">{selectedMachine.displayName}</span>
+                <MachineGlyph machine={selectedMachine} status={getDisplayStatus(selectedMachine)} />
+                <span className="flex-1 min-w-0 truncate text-left">{selectedMachine.displayName}</span>
               </>
             ) : (
               <>
-                <CloudDesktopIcon className="h-[18px] w-[18px] opacity-50 shrink-0" />
-                <span className="hidden sm:inline truncate">Select a Computer</span>
-                <span className="sm:hidden">Select</span>
+                <Desktop className="size-[18px] shrink-0 text-muted-foreground/60" weight="regular" />
+                <span className="flex-1 min-w-0 truncate text-left text-muted-foreground">
+                  <span className="hidden sm:inline">Select </span>Computer
+                </span>
               </>
             )}
-            <CaretUpDown className={cn("h-3 w-3 shrink-0", swarmActive ? "opacity-70" : "opacity-50")} />
+            <CaretUpDown className="size-3.5 shrink-0 opacity-40 transition-opacity group-hover:opacity-70" />
           </button>
         </PopoverTrigger>
 
@@ -730,7 +758,12 @@ function CloudMachineRow({ machine, isSelected, status, onClick, index }: CloudR
         isSelected ? "bg-accent" : "hover:bg-accent/55"
       )}
     >
-      <CloudDesktopIcon className="h-7 w-7 shrink-0" />
+      <span className={cn(
+        "flex size-9 items-center justify-center rounded-xl shrink-0 transition-colors",
+        isSelected ? "bg-primary/10 text-primary" : "bg-muted/60 text-foreground/65 group-hover:text-foreground/80"
+      )}>
+        <Desktop className="size-[18px]" weight="regular" />
+      </span>
       <div className="flex-1 min-w-0 flex flex-col">
         <span className="text-sm font-medium truncate leading-tight">{machine.displayName}</span>
         <OsLine machine={machine} />
@@ -772,7 +805,13 @@ function LocalMachineRow({ machine, isSelected, status, onClick, index }: LocalR
       )}
     >
       <div className="relative shrink-0">
-        <LocalLaptopIcon className="h-7 w-7" />
+        <span className={cn(
+          "flex size-9 items-center justify-center rounded-xl transition-colors",
+          isSelected ? "bg-primary/10 text-primary" : "bg-muted/60 text-foreground/65 group-hover:text-foreground/80",
+          !isOnline && "opacity-70"
+        )}>
+          <Laptop className="size-[18px]" weight="regular" />
+        </span>
         <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center">
           <AnimatePresence mode="wait" initial={false}>
             {isOnline ? (

@@ -12,12 +12,12 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  // 180s per-test budget — Next dev mode compiles each new route on first hit
-  // (5-30s cold) and the visual-fit tests then iterate ~30 selectors with
-  // measurement per render. 60s defaults trip mid-loop on perfectly healthy
-  // renders. CI may need a longer budget; the per-test setTimeout() inside
-  // i18n-overflow.spec.ts is the source of truth.
-  timeout: 180_000,
+  // 240s per-test budget — Next dev mode compiles each new route on first hit
+  // (5-30s cold, worse under load / after on-demand-entries eviction) and the
+  // visual-fit tests then iterate ~30 selectors with measurement per render.
+  // 60s defaults trip mid-loop on perfectly healthy renders. The per-test
+  // setTimeout() inside i18n-overflow.spec.ts is the source of truth.
+  timeout: 240_000,
   expect: { timeout: 5_000 },
   fullyParallel: false,
   workers: 1,

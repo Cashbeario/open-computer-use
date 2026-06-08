@@ -20,7 +20,7 @@ describe("AI_PROMPT — accurate, self-contained brief", () => {
     expect(AI_PROMPT).toContain("https://coasty.ai/v1")
     expect(AI_PROMPT).toContain("X-API-Key")
     expect(AI_PROMPT).toContain("COASTY_API_KEY")
-    expect(AI_PROMPT).toContain("/llms-full.txt")
+    expect(AI_PROMPT).toContain("/docs/llms.txt")
   })
 
   it("documents core + runs + workflows endpoints", () => {

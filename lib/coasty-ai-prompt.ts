@@ -18,8 +18,8 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 
 - Base URL: https://coasty.ai/v1
 - Auth: send the secret key in the \`X-API-Key: <key>\` header (or \`Authorization: Bearer <key>\`). Read it from a COASTY_API_KEY environment variable; never hardcode it.
-- Full machine-readable reference: https://coasty.ai/llms-full.txt
-- Human docs: https://coasty.ai/developers/docs  ·  API keys: https://coasty.ai/developers/keys
+- Full machine-readable reference (read this for complete detail): https://coasty.ai/docs/llms.txt
+- Human docs: https://coasty.ai/docs  ·  API keys: https://coasty.ai/developers/keys
 
 ## Core endpoints (stateless / session)
 - POST /v1/predict — body {screenshot (base64), instruction, cua_version} -> {actions:[{action_type, params}], status}. Loop: capture screenshot -> predict -> execute actions -> repeat until status is "done".

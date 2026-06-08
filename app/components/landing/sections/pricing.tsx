@@ -75,10 +75,14 @@ export function PricingSection({
           />
         )}
 
-        {/* One calm container fade for the whole grid — no per-card ladders. */}
+        {/* One calm container fade for the whole grid — no per-card ladders.
+            Unconditional initial/whileInView (matches benchmark/demo/faq): an
+            isMobile-gated `initial` is captured by framer once at mount, and
+            once isMobile flips true the paired `whileInView={undefined}` leaves
+            the grid stranded at opacity 0 on iOS. See tests/lib/mobile-compat. */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 8 }}
-          whileInView={isMobile ? undefined : { opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0, margin: "0px 0px -80px 0px" }}
           transition={{ duration: 0.4, ease: EASE }}
           className={cn(

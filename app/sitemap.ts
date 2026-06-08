@@ -32,6 +32,7 @@ const STATIC_PAGE_LAST_MODIFIED: Record<string, string> = {
   '/compare':             '2026-04-22',
   '/guide':               '2026-04-22',
   '/api-docs':            '2026-05-05',
+  '/docs':                '2026-06-08', // public API reference (reuses developer docs)
   '/pricing':             '2026-05-05',
   '/auth':                '2026-04-01',
   '/terms':               '2026-04-22',
@@ -43,6 +44,7 @@ const STATIC_PAGE_LAST_MODIFIED: Record<string, string> = {
   '/.well-known/openapi.json': '2026-05-05',
   '/llms.txt':            '2026-05-05',
   '/llms-full.txt':       '2026-05-05',
+  '/docs/llms.txt':       '2026-06-08', // LLM-friendly API reference
 }
 
 const COMPETITOR_SLUGS = [
@@ -98,7 +100,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/blog`,             lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/blog']),         changeFrequency: 'daily',   priority: 0.85 },
     { url: `${baseUrl}/compare`,          lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/compare']),      changeFrequency: 'weekly',  priority: 0.85 },
     ...(DEVELOPERS_API_ENABLED
-      ? [{ url: `${baseUrl}/api-docs`,     lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/api-docs']),     changeFrequency: 'weekly' as const,  priority: 0.85 }]
+      ? [
+          { url: `${baseUrl}/docs`,         lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/docs']),         changeFrequency: 'weekly' as const,  priority: 0.9 },
+          { url: `${baseUrl}/api-docs`,     lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/api-docs']),     changeFrequency: 'weekly' as const,  priority: 0.85 },
+        ]
       : []),
     { url: `${baseUrl}/pricing`,          lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/pricing']),      changeFrequency: 'weekly',  priority: 0.85 },
     { url: `${baseUrl}/guide`,            lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/guide']),        changeFrequency: 'weekly',  priority: 0.8 },
@@ -115,6 +120,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/.well-known/openapi.json`, lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/.well-known/openapi.json']), changeFrequency: 'weekly',  priority: 0.4 },
     { url: `${baseUrl}/llms.txt`,                 lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/llms.txt']),                 changeFrequency: 'weekly',  priority: 0.4 },
     { url: `${baseUrl}/llms-full.txt`,            lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/llms-full.txt']),            changeFrequency: 'weekly',  priority: 0.4 },
+    ...(DEVELOPERS_API_ENABLED
+      ? [{ url: `${baseUrl}/docs/llms.txt`,        lastModified: new Date(STATIC_PAGE_LAST_MODIFIED['/docs/llms.txt']),            changeFrequency: 'weekly' as const,  priority: 0.4 }]
+      : []),
   ]
 
   // Blog posts — real `updated_at` (or `date` fallback) from Supabase

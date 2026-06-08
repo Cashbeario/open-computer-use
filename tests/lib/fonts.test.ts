@@ -165,11 +165,10 @@ const CONSUMERS: Consumer[] = [
   },
   // chat-input.tsx no longer ships an inline swarm SVG (the swarm UI moved
   // into the VM selector popover), so it no longer needs SVG_SYSTEM_STACK.
-  {
-    file: "app/components/layout/settings/billing/billing-section.tsx",
-    constants: ["SVG_SYSTEM_STACK"],
-    removedLiterals: ['fontFamily="system-ui, -apple-system, sans-serif"'],
-  },
+  //
+  // billing-section.tsx likewise no longer ships an inline SVG chart (the
+  // billing UI redesign in commit b428cd6 removed it), so it no longer imports
+  // or uses SVG_SYSTEM_STACK — it was dropped from this consumer list to match.
   {
     file: "app/api/machines/[id]/screenshot/route.ts",
     constants: ["SVG_MONO_STACK"],

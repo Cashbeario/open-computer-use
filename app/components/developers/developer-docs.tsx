@@ -3102,20 +3102,46 @@ function DocsBody() {
    Public component
    =================================================================== */
 
-export function DeveloperDocs() {
+export function DeveloperDocs({
+  // The sticky top offset (a plain Tailwind class). Default suits the dashboard
+  // (scroll container starts below the app header); the public /docs page passes
+  // a larger offset to clear the fixed landing header.
+  sidebarStickyClassName = "top-2",
+  // Max-height for the nav, applied as an INLINE STYLE on purpose. Tailwind does
+  // NOT reliably emit a CSS rule for an arbitrary `max-h-[calc(100dvh-...)]`
+  // value (verified: the class lands in the DOM but computed max-height stays
+  // `none`), so the nav had no cap and never scrolled. An inline style with real
+  // calc() spaces always applies. The dashboard subtracts the app header
+  // (--spacing-app-header); the public page subtracts the fixed header zone.
+  sidebarMaxHeight = "calc(100dvh - var(--spacing-app-header, 56px) - 1.25rem)",
+}: { sidebarStickyClassName?: string; sidebarMaxHeight?: string } = {}) {
   const ids = useMemo(() => DOC_SECTIONS.map((s) => s.id), [])
   const active = useActiveSection(ids)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)] gap-x-10">
-      {/* Sticky sidebar — always visible on lg+, the primary way to navigate. */}
+      {/* Sticky sidebar — always visible on lg+, the primary way to navigate.
+          The sticky element is ITSELF the scroll container (a single
+          `overflow-y-auto` + `max-h` box reliably scrolls when content overflows
+          — no flexbox height ambiguity). The title is pinned with `sticky top-0`
+          inside it. `docs-nav-scroll` shows a subtle scrollbar because the app
+          hides scrollbars globally; `overscroll-contain` keeps wheel scrolling
+          inside the nav. */}
       <aside className="hidden lg:block">
-        <div className="sticky top-2 max-h-[calc(100dvh-1rem)] overflow-y-auto scrollbar-invisible rounded-2xl border border-foreground/[0.06] bg-foreground/[0.012] p-3">
-          <div className="px-2.5 pb-2.5 mb-2 border-b border-foreground/[0.06]">
+        <div
+          className={cn(
+            "sticky overflow-y-auto overscroll-contain docs-nav-scroll rounded-2xl border border-foreground/[0.06] bg-foreground/[0.012]",
+            sidebarStickyClassName,
+          )}
+          style={{ maxHeight: sidebarMaxHeight }}
+        >
+          <div className="sticky top-0 z-10 border-b border-foreground/[0.06] bg-background px-3 pt-3 pb-2.5">
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/40">Reference</div>
             <div className="text-[13px] font-semibold text-foreground/85 mt-0.5">Computer Use API</div>
           </div>
-          <Sidebar active={active} />
+          <div className="p-3 pt-2.5">
+            <Sidebar active={active} />
+          </div>
         </div>
       </aside>
 

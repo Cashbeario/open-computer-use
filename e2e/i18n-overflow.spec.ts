@@ -131,11 +131,14 @@ async function gotoConnections(page: Page): Promise<void> {
   // The waitForSelector below is the real readiness gate — we rely on the
   // page-title testid being visible to confirm hydration.
   await page.goto("/connections", { waitUntil: "commit", timeout: 60_000 });
-  // First navigation per worker triggers Next dev's route compile (5-30s).
-  // Give the selector enough budget to clear that one-time cost.
+  // The first navigation triggers Next dev's route compile (5-30s cold), and
+  // dev's on-demand-entries can EVICT an idle route mid-run, forcing a fresh
+  // compile on a later hit — so this cost is not strictly one-time. 90s gives
+  // a cold compile + RSC-streamed first render of the title comfortable head-
+  // room; 45s was tripping on slow/contended runs (see the per-test budget).
   await page.waitForSelector('[data-testid="connections-page-title"]', {
     state: "visible",
-    timeout: 45_000,
+    timeout: 90_000,
   });
   await page.waitForFunction(() =>
     (document as Document & { fonts: { ready: Promise<unknown> } }).fonts.ready.then(() => true),
@@ -330,11 +333,19 @@ async function applySetup(page: Page, setup: string | undefined): Promise<void> 
     // that needed this setup will simply fail their own "present" check
     // and (since they're marked `optional`) be skipped without aborting
     // the test. Keep the wait short to avoid burning 30s per locale.
-    await page.goto("/account?section=integrations", {
-      waitUntil: "commit",
-      timeout: 60_000,
-    });
+    // The ENTIRE navigation is best-effort. /account is not auth-bypassed in
+    // E2E (it renders a login stub, so the integrations dialog never mounts),
+    // and Next dev's streaming RSC means `commit` can hang past the budget on a
+    // cold compile. The page.goto MUST live inside the try/catch: a goto
+    // timeout here would otherwise abort the whole test, even though every
+    // dependent entry is `optional` and will skip via its own count===0 check.
+    // Short timeout so we fail fast rather than burn 60s on a route that can
+    // never satisfy this setup in the current bypass scope.
     try {
+      await page.goto("/account?section=integrations", {
+        waitUntil: "commit",
+        timeout: 20_000,
+      });
       await page.waitForSelector('[data-testid="settings-integrations-heading"]', {
         state: "visible",
         timeout: 5_000,
@@ -344,8 +355,8 @@ async function applySetup(page: Page, setup: string | undefined): Promise<void> 
       );
       await page.waitForTimeout(200);
     } catch {
-      // Dialog not mounted in this test environment — proceed; dependent
-      // entries handle their own absence via the `optional` flag.
+      // Route slow / dialog not mounted — proceed; the optional entries that
+      // needed this setup handle their own absence and are skipped.
     }
     return;
   }
@@ -389,12 +400,13 @@ for (const viewport of VIEWPORTS) {
   test.describe.parallel(`viewport ${viewport.name}`, () => {
     for (const locale of LOCALES) {
       test(`visual-fit: ${locale} @ ${viewport.name}`, async ({ page }) => {
-        // 180s budget per test: covers Next dev's one-time route compile
-        // (5-30s on a cold worker) plus iterating ~30 contract entries with
-        // per-element selector + measurement (~0.5-1s each). Without this
-        // headroom the 60s default trips mid-loop and aborts perfectly
-        // healthy renders.
-        test.setTimeout(180_000);
+        // 240s budget per test: covers Next dev's route compile (5-30s cold,
+        // worse under load or after on-demand-entries eviction) for BOTH the
+        // /connections page (90s selector wait) and the optional /account
+        // setup, plus iterating ~30 contract entries with per-element selector
+        // + measurement (~0.5-1s each). 180s was tripping when a slow cold
+        // render of /connections ate most of the budget before the loop ran.
+        test.setTimeout(240_000);
 
         await preparePage(page, locale);
         await page.setViewportSize({ width: viewport.width, height: viewport.height });

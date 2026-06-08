@@ -67,6 +67,12 @@ const ALLOWLIST_PENDING_MIGRATION = new Set<string>([
   "debug/machine-cleanup/route.ts",
   "developers/[id]/route.ts",
   "developers/route.ts",
+  // Developer API-wallet routes (commit 7d216f2) — grandfathered alongside the
+  // rest of the developers/* family above, pending the access-log migration.
+  // TODO(observability): wrap these with logApiAccess and remove from this list.
+  "developers/wallet/checkout/route.ts",
+  "developers/wallet/route.ts",
+  "developers/wallet/transactions/route.ts",
   "discover/route.ts",
   "discovery/route.ts",
   "download/route.ts",

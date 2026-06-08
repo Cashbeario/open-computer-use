@@ -453,20 +453,26 @@ describe("globals.css: critical mobile rules", () => {
 })
 
 // ---------------------------------------------------------------------------
-// Rule 5 — hero crossfade must keep its iOS visibility safety nets
+// Rule 5 — hero must never ship invisible on iOS
 // ---------------------------------------------------------------------------
 //
-// The hero `#hero-crossfade` wrapper is initialised with opacity 0 in JSX
-// and faded in by a rAF loop. iOS Safari throttles rAF during momentum
-// scroll, so we added two guarantees:
+// History: the hero used to be a hand-rolled `#hero-crossfade` wrapper that
+// started at opacity 0 and faded in via a rAF loop. iOS Safari throttles rAF
+// during momentum scroll, so that scroll-driven crossfade needed two guards
+// (`syncCrossfade` + a `failSafeTimer`) or the page could stay invisible.
 //
-//   (a) `syncCrossfade()` — recomputes opacity from window.scrollY on every
-//       scroll event, independent of rAF.
-//   (b) `failSafeTimer`   — 1.5 s after mount, if the user is past 50 % of
-//       the hero and crossfade is still hidden, force opacity 1.
+// Commit f8a4a1f ("landing upd 2") REWROTE the hero into a framer-motion
+// mount-entrance — the "editorial stillness" opacity cascade. That entrance
+// fires ONCE on mount, before any scroll, so the momentum-scroll rAF-throttle
+// failure mode no longer applies and the scroll/timer safety nets are obsolete.
+// The iOS guarantees for the new approach are instead:
 //
-// If either disappears, the iOS bug reopens. Lock them in with explicit
-// string-presence checks.
+//   (a) the entrance is an opacity fade gated on prefers-reduced-motion, and
+//   (b) framer-motion `initial` is NEVER gated on `isMobile` (that race —
+//       captured once at mount, then flipped — is exactly what strands an
+//       element at opacity 0 on iOS; see the landing-sections rule above).
+//
+// Lock those in so a future refactor can't quietly reopen the invisibility bug.
 // ---------------------------------------------------------------------------
 
 describe("landing-page hero: iOS visibility safety nets", () => {
@@ -483,34 +489,25 @@ describe("landing-page hero: iOS visibility safety nets", () => {
     expect(fs.existsSync(heroPath)).toBe(true)
   })
 
-  it("contains scroll-event-driven crossfade sync (`syncCrossfade`)", () => {
+  it("gates the entrance on prefers-reduced-motion", () => {
     expect(
-      /function\s+syncCrossfade\b|const\s+syncCrossfade\s*=/.test(src),
-      "Removing syncCrossfade re-introduces the iOS-momentum-scroll invisibility bug.",
+      /useReducedMotion\s*\(/.test(src),
+      "Hero entrance must honour prefers-reduced-motion (accessibility + a deterministic visible state).",
     ).toBe(true)
   })
 
-  it("contains the 1.5s fail-safe timer (`failSafeTimer`)", () => {
+  it("uses an opacity-based mount entrance (not a scroll-driven crossfade)", () => {
     expect(
-      /failSafeTimer\b/.test(src),
-      "Removing the failSafeTimer means a fully-throttled iOS rAF loop ships an invisible page.",
+      /initial:\s*\{\s*opacity:\s*0\s*\}/.test(src),
+      "Hero entrance must be a mount-time opacity fade — a scroll-driven crossfade re-opens the iOS rAF-throttle invisibility bug.",
     ).toBe(true)
   })
 
-  it("clears the fail-safe timer on cleanup", () => {
+  it("never gates a framer-motion `initial` on isMobile (iOS opacity-0 stranding race)", () => {
     expect(
-      /clearTimeout\(\s*failSafeTimer/.test(src),
-      "failSafeTimer is created but never cleared — leak risk on hot reload / route change.",
-    ).toBe(true)
-  })
-
-  it("attaches a scroll listener on window (passive)", () => {
-    // We allow either `addEventListener("scroll", …, { passive: true })` or
-    // a passing `{ passive: true }` option object on a separate line.
-    expect(
-      /addEventListener\(\s*["']scroll["'][^)]*passive\s*:\s*true/.test(src),
-      "Passive scroll listener missing — needed for the crossfade safety net to fire on iOS.",
-    ).toBe(true)
+      /initial=\{\s*isMobile\s*\?/.test(src),
+      "An isMobile-gated `initial` strands the hero at opacity 0 on iOS: framer captures `initial` once at mount, then the post-effect flip never re-runs it.",
+    ).toBe(false)
   })
 })
 

@@ -496,7 +496,7 @@ function DetailRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/detail flex items-center gap-1.5 py-1 text-[12.5px] text-neutral-500/50 hover:text-neutral-400/80 transition-colors"
+        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-medium tracking-tight text-neutral-400/40 hover:text-neutral-300/70 transition-colors"
       >
         <IconChevronRight
           className={cn(
@@ -504,7 +504,7 @@ function DetailRow({
             open && 'rotate-90'
           )}
         />
-        <Icon className="w-3 h-3 shrink-0 opacity-50 group-hover/detail:opacity-80 transition-opacity" />
+        <Icon className="w-3 h-3 shrink-0 opacity-70 group-hover/detail:opacity-100 transition-opacity" />
         <span>{label}</span>
       </button>
       <div
@@ -513,7 +513,7 @@ function DetailRow({
           open ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className="ml-[22px] pb-2 text-[13px] leading-relaxed text-neutral-400/80">
+        <div className="ml-[22px] pb-2 pt-0.5 text-[14px] leading-relaxed text-neutral-300/60">
           {children}
         </div>
       </div>
@@ -526,11 +526,111 @@ function StatusDot({ status }: { status: string }) {
     <span
       className={cn(
         'inline-block w-[5px] h-[5px] rounded-full shrink-0',
-        status === 'success' && 'bg-emerald-500/70',
-        status === 'error' && 'bg-red-500/70',
-        status !== 'success' && status !== 'error' && 'bg-neutral-400/10',
+        status === 'success' && 'bg-emerald-500',
+        status === 'error' && 'bg-red-500',
+        status !== 'success' && status !== 'error' && 'bg-neutral-400/20',
       )}
     />
+  )
+}
+
+// ── Unified content primitives (the redesign system) ──
+//
+// Mirrors the web renderer (app/components/chat/cua-section-renderer.tsx).
+// Every section's CONTENT (everything right of the rail) is built from this
+// vocabulary so all ~15 section types share one type scale, color ladder, and
+// surface set. The rail / dots / shimmer are untouched — the signature element.
+//
+//   • prose = text-[14px] leading-relaxed  (tier by opacity: /90 /60 /40)
+//   • meta  = text-[12px]                   (labels, chips, status words)
+//   • mono  = font-mono text-[12.5px]       (code surfaces only, /80)
+//   • COLOR is reserved for STATUS (emerald / red / amber); everything else
+//     is on the neutral opacity ladder.
+
+type Tone = 'success' | 'error' | 'attention'
+
+const TONE_TEXT: Record<Tone, string> = {
+  success: 'text-emerald-400',
+  error: 'text-red-400',
+  attention: 'text-amber-400',
+}
+const TONE_MOMENT: Record<Tone, string> = {
+  success: 'ring-emerald-500/20 bg-emerald-500/[0.06] text-emerald-400',
+  error: 'ring-red-500/20 bg-red-500/[0.06] text-red-400',
+  attention: 'ring-amber-500/20 bg-amber-500/[0.06] text-amber-400',
+}
+
+/** Faint caption/header above a block (e.g. "Session summary"). */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1 text-[12px] font-medium tracking-tight text-neutral-400/40">
+      {children}
+    </div>
+  )
+}
+
+/** The single delegation tag. Neutral — color is for status only. */
+function Chip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium text-neutral-200/70 ring-1 ring-inset ring-white/10 bg-white/[0.05]">
+      {icon}
+      {children}
+    </span>
+  )
+}
+
+/** Soft tinted container for terminal/important states — one radius, one ring
+ *  weight, one padding (status, reauth, awaiting-human lifecycle). */
+function MomentPill({
+  tone,
+  icon,
+  children,
+}: {
+  tone: Tone
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12px] font-medium ring-1 ring-inset',
+        TONE_MOMENT[tone],
+      )}
+    >
+      {icon}
+      <span>{children}</span>
+    </div>
+  )
+}
+
+/** Bare status line (no container) — a tone dot + text. Used for quiet
+ *  sub-agent "done" notes. */
+function StatusLine({ tone, children }: { tone: Tone; children: React.ReactNode }) {
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 text-[12px]', TONE_TEXT[tone])}>
+      <StatusDot status={tone === 'attention' ? 'pending' : tone} />
+      {children}
+    </span>
+  )
+}
+
+/** The single code/console surface — shared by the running command (thought)
+ *  and its output (result). Hairline ring, subtle fill, mono body, hover copy. */
+function CodeSurface({ text, error = false }: { text: string; error?: boolean }) {
+  return (
+    <div className="group/code relative overflow-hidden rounded-lg ring-1 ring-inset ring-white/[0.07] bg-white/[0.02]">
+      <div className="absolute right-1.5 top-1.5 z-[1] opacity-0 transition-opacity duration-150 group-hover/code:opacity-100">
+        <CopyButton text={text} />
+      </div>
+      <pre
+        className={cn(
+          'm-0 px-3.5 pr-10 py-3 font-mono text-[12.5px] leading-[1.6] tabular-nums whitespace-pre-wrap break-words min-w-0 overflow-hidden',
+          error ? 'text-red-400/90' : 'text-neutral-100/80',
+        )}
+      >
+        {text}
+      </pre>
+    </div>
   )
 }
 
@@ -723,20 +823,13 @@ function StepCard({
         </p>
       )}
 
-      {/* Integration badge — same dimensions as inline result badges
-          below. text-[11px], px-1.5 py-0.5, rounded-full, sky tone. */}
+      {/* Integration primitive (legacy) — one neutral Chip + a faint verb. */}
       {integrationAction && (
-        <div className="mt-1">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-1.5 py-0.5 rounded-full bg-sky-500/8 text-sky-400/70">
-            <IntegrationLogo toolkit={integrationAction.toolkit} />
-            integration
-            {integrationAction.toolkit && (
-              <>
-                {' · '}
-                {integrationAction.toolkit.toLowerCase()}
-              </>
-            )}
-            {' · '}
+        <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
+          <Chip icon={<IntegrationLogo toolkit={integrationAction.toolkit} />}>
+            {humanizeToolkit(integrationAction.toolkit) || 'Integration'}
+          </Chip>
+          <span className="text-[12px] text-neutral-400/40">
             {integrationAction.method === 'search' && 'search'}
             {integrationAction.method === 'call' && 'run'}
             {integrationAction.method === 'actions' && 'browse'}
@@ -744,51 +837,44 @@ function StepCard({
         </div>
       )}
 
-      {/* Integration delegation — a small inline chip + the (muted) task. */}
+      {/* Integration delegation — the one neutral Chip + the (secondary) task. */}
       {composioDelegation && (
         <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-sky-500/10 text-sky-400 ring-1 ring-sky-400/15 shrink-0">
-            <IconPlug className="w-3 h-3 shrink-0" />
-            Integration
-          </span>
+          <Chip icon={<IconPlug className="w-3 h-3 shrink-0" />}>Integration</Chip>
           {composioDelegation.task && (
-            <span className="text-[13px] leading-snug text-neutral-300/55 break-words min-w-0">
+            <span className="text-[14px] leading-snug text-neutral-300/60 break-words min-w-0">
               {truncateText(composioDelegation.task, 140)}
             </span>
           )}
         </div>
       )}
 
-      {/* Code-agent delegation — same small inline chip treatment. */}
+      {/* Code-agent delegation — same neutral Chip treatment. */}
       {agentAction && (
         <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-400/15 shrink-0">
-            <IconTerminal className="w-3 h-3 shrink-0" />
-            {agentAction.label}
-          </span>
+          <Chip icon={<IconTerminal className="w-3 h-3 shrink-0" />}>{agentAction.label}</Chip>
           {agentAction.detail && (
-            <span className="text-[13px] leading-snug text-neutral-300/55 break-words min-w-0">
+            <span className="text-[14px] leading-snug text-neutral-300/60 break-words min-w-0">
               {truncateText(agentAction.detail, 140)}
             </span>
           )}
         </div>
       )}
 
-      {/* Inline result badges (no-op delegation waits filtered out) */}
+      {/* Inline results — bare status rows (no pills): a tone dot + the
+          outcome. Only the dot (and error text) carries color. */}
       {visibleResults.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+        <div className="flex flex-col gap-y-0.5 mt-1">
           {visibleResults.map((r, j) => (
             <span
               key={j}
               className={cn(
-                'inline-flex items-center gap-1 text-[11px] leading-none px-1.5 py-0.5 rounded-full',
-                r.status === 'success' && 'text-emerald-400/70 bg-emerald-500/8',
-                r.status === 'error' && 'text-red-400/70 bg-red-500/8',
-                r.status !== 'success' && r.status !== 'error' && 'text-neutral-500/50 bg-neutral-500/5',
+                'inline-flex items-center gap-1.5 text-[12px] min-w-0',
+                r.status === 'error' ? 'text-red-400' : 'text-neutral-300/60',
               )}
             >
               <StatusDot status={r.status} />
-              {truncateText(r.content, 120)}
+              <span className="break-words min-w-0">{truncateText(r.content, 120)}</span>
             </span>
           ))}
         </div>
@@ -852,25 +938,19 @@ function ItemRenderer({
     case 'status': {
       const done = item.status === 'completed'
       return (
-        <div className="py-1.5 pl-6">
-          <div className={cn(
-            'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5',
-            done
-              ? 'border-emerald-700/40 bg-emerald-400/[0.04]'
-              : 'border-red-700/40 bg-red-400/[0.04]',
-          )}>
-            {done ? (
-              <IconCheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-            ) : (
-              <IconXCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
-            )}
-            <span className={cn(
-              'text-[13px] font-medium',
-              done ? 'text-emerald-300' : 'text-red-400',
-            )}>
-              {item.content}
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill
+            tone={done ? 'success' : 'error'}
+            icon={
+              done ? (
+                <IconCheckCircle className="w-3.5 h-3.5 shrink-0" />
+              ) : (
+                <IconXCircle className="w-3.5 h-3.5 shrink-0" />
+              )
+            }
+          >
+            {item.content}
+          </MomentPill>
         </div>
       )
     }
@@ -888,63 +968,30 @@ function ItemRenderer({
       const cleaned = truncateText(stripAgentMarkup(item.content), 3000)
       if (!cleaned) return null
       return (
-        <pre
-          className={cn(
-            'm-0 pl-6 py-1',
-            'font-mono text-[12.5px] leading-[1.65] tabular-nums text-neutral-100/85',
-            'whitespace-pre-wrap break-words',
-            'min-w-0 overflow-hidden',
-          )}
-        >
-          {cleaned}
-        </pre>
+        <div className="pl-6">
+          <CodeSurface text={cleaned} />
+        </div>
       )
     }
 
     case 'code-agent-result': {
-      // Single-card view: a clean two-row card with a contextual header
-      // label + copy button on top and mono content below. The content
-      // is filtered by stripAgentMarkup which removes <answer>/</answer>
-      // tags and ``` fence markers so the user sees clean text. The
-      // card sits behind a TerminalDot timeline marker — the code-step
-      // equivalent of the ScreenshotDot used for visual actions.
+      // The command's output — the SAME CodeSurface as the thought above,
+      // behind a TerminalDot rail marker. Errors tint the body red.
       const cleaned = stripAgentMarkup(item.content)
       if (!cleaned) return null
       const hasError = /\bError:\s/.test(cleaned)
       return (
-        <div className="relative pl-8 py-1.5">
+        <div className="relative pl-8">
           <TerminalDot />
-          {/* Result card — shadcn-style minimal: hairline border on a
-              subtle muted surface, no title bar, mono body. Copy button
-              floats in the top-right corner, muted at rest and full
-              brightness on hover. Errors are signaled by red body text
-              only — no extra chrome. */}
-          <div className="group/result-card relative overflow-hidden rounded-lg border border-white/[0.07] bg-white/[0.02]">
-            <div className="absolute right-1.5 top-1.5 opacity-40 transition-opacity duration-150 group-hover/result-card:opacity-100">
-              <CopyButton text={cleaned} />
-            </div>
-            <pre
-              className={cn(
-                // pr-10 reserves room for the floating copy button so
-                // long unbreakable lines never slide under it.
-                'm-0 pl-4 pr-10 py-3 font-mono text-[12px] leading-[1.65] tabular-nums whitespace-pre-wrap break-words',
-                hasError ? 'text-red-400/85' : 'text-neutral-100/85'
-              )}
-            >
-              {cleaned}
-            </pre>
-          </div>
+          <CodeSurface text={cleaned} error={hasError} />
         </div>
       )
     }
 
     case 'code-agent-done':
       return (
-        <div className="py-0.5 pl-6">
-          <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-400/40">
-            <IconCheckCircle className="w-3 h-3 shrink-0" />
-            {item.content}
-          </span>
+        <div className="pl-6">
+          <StatusLine tone="success">{item.content}</StatusLine>
         </div>
       )
 
@@ -958,36 +1005,33 @@ function ItemRenderer({
       const cleaned = truncateText(stripAgentMarkup(item.content), 5000)
       if (!cleaned) return null
       return (
-        <div className="group/summary relative pl-6 py-2">
-          <div className="absolute right-1 top-2 opacity-40 transition-opacity duration-150 group-hover/summary:opacity-100">
+        <div className="group/summary relative pl-6">
+          <div className="absolute right-1 top-0 opacity-0 transition-opacity duration-150 group-hover/summary:opacity-100">
             <CopyButton text={cleaned} />
           </div>
-          <div className="mb-2">
-            <span className="text-[11.5px] font-medium tracking-tight text-neutral-200/55">
-              Session Summary
-            </span>
-          </div>
+          <Eyebrow>Session summary</Eyebrow>
           <div
             className={cn(
-              'text-[14px] leading-[1.65] text-neutral-100/85',
+              'text-[14px] leading-relaxed text-neutral-100/90',
               // Containment: long unbreakable strings wrap inside the
               // bubble instead of pushing it wider.
               'min-w-0 overflow-hidden break-words',
               '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
               '[&_p]:my-2',
               '[&_strong]:font-semibold [&_strong]:text-neutral-100',
-              '[&_em]:italic [&_em]:text-neutral-100/75',
+              '[&_em]:italic [&_em]:text-neutral-100/60',
               '[&_ul]:my-2 [&_ul]:space-y-0.5 [&_ul]:pl-4',
               '[&_ol]:my-2 [&_ol]:space-y-0.5 [&_ol]:pl-5',
-              '[&_li]:marker:text-neutral-400/40 [&_li]:leading-[1.55]',
-              '[&_h1]:mt-3 [&_h1]:mb-1.5 [&_h1]:text-[15px] [&_h1]:font-semibold [&_h1]:text-neutral-100',
-              '[&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-[14.5px] [&_h2]:font-semibold [&_h2]:text-neutral-100',
+              '[&_li]:marker:text-neutral-400/40 [&_li]:leading-relaxed',
+              // Headings collapse to body size + weight — flat type scale.
+              '[&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-[14px] [&_h1]:font-semibold [&_h1]:text-neutral-100',
+              '[&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-[14px] [&_h2]:font-semibold [&_h2]:text-neutral-100',
               '[&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-neutral-100',
               '[&_code]:rounded-md [&_code]:bg-white/[0.06] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[12px] [&_code]:text-neutral-100/90 [&_code]:before:content-none [&_code]:after:content-none [&_code]:break-words',
-              '[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-white/[0.06] [&_pre]:!bg-white/[0.03] [&_pre]:p-3',
+              '[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:ring-1 [&_pre]:ring-inset [&_pre]:ring-white/[0.07] [&_pre]:!bg-white/[0.02] [&_pre]:p-3',
               '[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden',
               '[&_a]:text-neutral-100 [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-neutral-400/40 hover:[&_a]:decoration-neutral-100/60 [&_a]:break-all',
-              '[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-white/15 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-100/70 [&_blockquote]:italic'
+              '[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-white/15 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-100/60 [&_blockquote]:italic'
             )}
           >
             <Markdown>{cleaned}</Markdown>
@@ -1002,7 +1046,7 @@ function ItemRenderer({
       const cleaned = truncateText(stripAgentMarkup(item.content), 600)
       if (!cleaned) return null
       return (
-        <p className="pl-6 py-0.5 text-[14px] leading-relaxed text-neutral-300/55 break-words min-w-0 overflow-hidden">
+        <p className="pl-6 text-[14px] leading-relaxed text-neutral-300/60 break-words min-w-0 overflow-hidden">
           {cleaned}
         </p>
       )
@@ -1033,21 +1077,21 @@ function ItemRenderer({
         ? truncateText(stripAgentMarkup(item.content).replace(/^Error:\s*/i, ''), 140)
         : ''
       return (
-        <div className="relative pl-8 py-0.5">
+        <div className="relative pl-8">
           <IntegrationDot toolkit={item.toolkit} />
           <div className="flex min-h-[22px] items-center gap-1.5">
-            <span className={cn('text-[14px] leading-snug', isError ? 'text-neutral-100/70' : 'text-neutral-100/85')}>
+            <span className="text-[14px] leading-snug text-neutral-100/90">
               {toolkitName || 'Integration'}
-              {fn && <span className="text-neutral-100/45">{' · '}{fn}</span>}
+              {fn && <span className="text-neutral-100/40">{' · '}{fn}</span>}
             </span>
             {isError ? (
-              <IconXCircle className="w-3.5 h-3.5 shrink-0 text-red-500/70" />
+              <IconXCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
             ) : (
-              <IconCheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500/70" />
+              <IconCheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
             )}
           </div>
           {errMsg && (
-            <p className="mt-0.5 text-[13px] leading-relaxed text-red-400/70 break-words">
+            <p className="mt-0.5 text-[12px] leading-relaxed text-red-400 break-words">
               {errMsg}
             </p>
           )}
@@ -1057,38 +1101,28 @@ function ItemRenderer({
 
     case 'composio-agent-done':
       return (
-        <div className="py-0.5 pl-6">
-          <span className="inline-flex items-center gap-1.5 text-[12px] text-sky-400/40">
-            <IconCheckCircle className="w-3 h-3 shrink-0" />
-            {item.content}
-          </span>
+        <div className="pl-6">
+          <StatusLine tone="success">{item.content}</StatusLine>
         </div>
       )
 
     case 'composio-agent-reauth':
       return (
-        <div className="py-1.5 pl-6">
-          <div className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 border-amber-700/40 bg-amber-400/[0.04]">
-            <IntegrationLogo toolkit={item.toolkit} />
-            <span className="text-[13px] font-medium text-amber-300">
-              {item.content}
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill tone="attention" icon={<IntegrationLogo toolkit={item.toolkit} />}>
+            {item.content}
+          </MomentPill>
         </div>
       )
 
     case 'composio-agent-note': {
       const cleaned = item.content.trim()
       if (!cleaned) return null
-      return (
-        <div className="py-0.5 pl-6">
-          <span className="text-[12px] text-neutral-500/50">{cleaned}</span>
-        </div>
-      )
+      return <p className="pl-6 text-[12px] text-neutral-400/40">{cleaned}</p>
     }
 
     case 'search-results': {
-      const label = item.query ? `Search: ${item.query}` : 'Web search'
+      const label = item.query ? `Search · ${item.query}` : 'Web search'
       return (
         <div className="pl-6">
           <DetailRow icon={IconMagnifyingGlass} label={label} defaultOpen>
@@ -1112,25 +1146,26 @@ function ItemRenderer({
 
     case 'awaiting-human-timeout':
       return (
-        <div className="py-1.5 pl-6">
-          <div className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 border-amber-700/40 bg-amber-400/[0.04]">
-            <svg className="w-3.5 h-3.5 shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span className="text-[13px] font-medium text-amber-300">{item.content}</span>
-          </div>
+        <div className="pl-6">
+          <MomentPill
+            tone="attention"
+            icon={
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+            }
+          >
+            {item.content}
+          </MomentPill>
         </div>
       )
 
     case 'awaiting-human-resumed':
       return (
-        <div className="py-1.5 pl-6">
-          <div className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 border-emerald-700/40 bg-emerald-400/[0.04]">
-            <IconCheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-            <span className="text-[13px] font-medium text-emerald-300">
-              Human finished — agent resuming with fresh screen state
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill tone="success" icon={<IconCheckCircle className="w-3.5 h-3.5 shrink-0" />}>
+            Human finished. Agent resuming with fresh screen state.
+          </MomentPill>
         </div>
       )
 
@@ -1140,7 +1175,7 @@ function ItemRenderer({
       return (
         <div
           className={cn(
-            'pl-6 py-0.5 text-[14px] leading-relaxed text-neutral-200/85',
+            'pl-6 text-[14px] leading-relaxed text-neutral-200/90',
             'min-w-0 overflow-hidden break-words',
             '[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden',
             '[&_code]:break-words',

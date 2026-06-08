@@ -54,28 +54,31 @@ vi.mock("motion/react", () => {
 })
 
 vi.mock("@phosphor-icons/react", () => {
-  const Icon = (props: any) =>
-    React.createElement("span", { "data-icon": "phosphor", ...props })
+  // Per-name stub so a test can assert WHICH glyph a row renders (cloud rows →
+  // Desktop, local rows → Laptop). Each emits data-icon="phosphor-<name>" and
+  // spreads props so className/weight survive for finer-grained queries.
+  const make = (name: string) => (props: any) =>
+    React.createElement("span", { "data-icon": `phosphor-${name.toLowerCase()}`, ...props })
   // vitest validates named exports against the real module shape, so each
   // icon used by vm-selector.tsx must be enumerated.
   return {
-    CircleNotch: Icon,
-    Plus: Icon,
-    Desktop: Icon,
-    Laptop: Icon,
-    WifiHigh: Icon,
-    WifiSlash: Icon,
-    Check: Icon,
-    GitFork: Icon,
-    Lock: Icon,
-    Lightning: Icon,
-    ArrowRight: Icon,
-    Minus: Icon,
-    CaretUpDown: Icon,
-    CaretRight: Icon,
-    Cloud: Icon,
-    House: Icon,
-    default: Icon,
+    CircleNotch: make("CircleNotch"),
+    Plus: make("Plus"),
+    Desktop: make("Desktop"),
+    Laptop: make("Laptop"),
+    WifiHigh: make("WifiHigh"),
+    WifiSlash: make("WifiSlash"),
+    Check: make("Check"),
+    GitFork: make("GitFork"),
+    Lock: make("Lock"),
+    Lightning: make("Lightning"),
+    ArrowRight: make("ArrowRight"),
+    Minus: make("Minus"),
+    CaretUpDown: make("CaretUpDown"),
+    CaretRight: make("CaretRight"),
+    Cloud: make("Cloud"),
+    House: make("House"),
+    default: make("Icon"),
   }
 })
 
@@ -87,17 +90,9 @@ vi.mock("@/app/components/machines/create-machine-dialog", () => ({
   CreateMachineDialog: () => null,
 }))
 
-// Stub the icon imports so we don't pull real SVGs into the test runner.
-vi.mock("@/components/icons/cloud-desktop", () => ({
-  CloudDesktopIcon: (props: any) =>
-    React.createElement("span", { "data-icon": "cloud-desktop", ...props }),
-}))
-
-vi.mock("@/components/icons/local-laptop", () => ({
-  LocalLaptopIcon: (props: any) =>
-    React.createElement("span", { "data-icon": "local-laptop", ...props }),
-}))
-
+// Stub the OS platform icons (used in the OS subtitle line) so we don't pull
+// real SVGs into the test runner. The machine-row icons themselves are
+// Phosphor's Desktop/Laptop (mocked above), rendered inside the row's tile.
 vi.mock("@/components/icons/platform-icons", () => {
   const make = (label: string) => (props: any) =>
     React.createElement("span", { "data-platform": label, ...props })
@@ -418,7 +413,7 @@ describe("OS subtitle on machine rows", () => {
     expect(screen.queryByText("Win", { exact: true })).not.toBeInTheDocument()
   })
 
-  it("renders the local-laptop icon for electron rows (not phosphor's Laptop)", () => {
+  it("renders a Laptop glyph inside the row icon tile for electron rows", () => {
     const { container } = render(
       <ComputersBody
         {...baseProps}
@@ -432,12 +427,14 @@ describe("OS subtitle on machine rows", () => {
         ]}
       />
     )
-    expect(
-      container.querySelector('[data-icon="local-laptop"]')
-    ).toBeInTheDocument()
+    // Local rows render Phosphor's Laptop inside the size-9 rounded-xl tile.
+    // (.size-9.rounded-xl is unique to the machine-row icon container.)
+    const tile = container.querySelector(".size-9.rounded-xl")
+    expect(tile).toBeInTheDocument()
+    expect(tile?.querySelector('[data-icon="phosphor-laptop"]')).toBeInTheDocument()
   })
 
-  it("renders the cloud-desktop icon for cloud rows", () => {
+  it("renders a Desktop glyph inside the row icon tile for cloud rows", () => {
     const { container } = render(
       <ComputersBody
         {...baseProps}
@@ -447,9 +444,9 @@ describe("OS subtitle on machine rows", () => {
         electronMachines={[]}
       />
     )
-    expect(
-      container.querySelector('[data-icon="cloud-desktop"]')
-    ).toBeInTheDocument()
+    const tile = container.querySelector(".size-9.rounded-xl")
+    expect(tile).toBeInTheDocument()
+    expect(tile?.querySelector('[data-icon="phosphor-desktop"]')).toBeInTheDocument()
   })
 })
 

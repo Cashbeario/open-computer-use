@@ -48,6 +48,8 @@ const blogDropdownDef = [
 
 const navItemsDef = [
   { href: "/pricing", labelKey: "pricing", label: "Pricing", external: true },
+  // Public API reference — always shown (the /docs page is public).
+  { href: "/docs", labelKey: "docs", label: "Docs", external: true },
   ...(DEVELOPERS_API_ENABLED
     ? [{ href: "/api-docs", labelKey: "api", label: "API", external: true }]
     : []),
@@ -807,6 +809,7 @@ export function LandingHeader({
           const resourceLinks = [
             { href: "/blog", label: t("blog") },
             { href: "/guide", label: t("blogItems.guide") },
+            { href: "/docs", label: "Docs" },
             ...(DEVELOPERS_API_ENABLED
               ? [{ href: "/api-docs", label: "API" }]
               : []),

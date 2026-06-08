@@ -19,7 +19,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:electron": "node scripts/run-all-tests.mjs e2e",
     "test:smoke": "node scripts/run-all-tests.mjs smoke",
-    "test:all": "node scripts/run-all-tests.mjs --no-lint",
+    "test:all": "node scripts/run-all-tests.mjs --no-lint --no-web-e2e",
     "test:all:fast": "node scripts/run-all-tests.mjs --no-e2e --no-lint",
     "test:all:with-lint": "node scripts/run-all-tests.mjs"
   },

@@ -60,6 +60,8 @@ const manifest = {
     pricing: `${ORIGIN}/api/pricing`,
     llmsTxt: `${ORIGIN}/llms.txt`,
     llmsFull: `${ORIGIN}/llms-full.txt`,
+    apiReference: `${ORIGIN}/docs`,
+    apiReferenceLlms: `${ORIGIN}/docs/llms.txt`,
     sitemap: `${ORIGIN}/sitemap.xml`,
     robots: `${ORIGIN}/robots.txt`,
     securityTxt: `${ORIGIN}/.well-known/security.txt`,

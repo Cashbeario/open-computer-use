@@ -402,6 +402,32 @@ body.coasty-signing-out [data-sonner-toast] {
   height: 0;
 }
 
+/* Visible, subtle scrollbar — used by the docs section nav so it is obviously
+   scrollable (overrides the global scrollbar-hiding above). The thumb only
+   shows when the content actually overflows. */
+.docs-nav-scroll {
+  overscroll-behavior: contain;            /* don't chain-scroll the page */
+  scrollbar-width: thin;                   /* Firefox */
+  scrollbar-color: rgb(120 120 120 / 0.35) transparent;  /* thumb track (Firefox) */
+}
+.docs-nav-scroll::-webkit-scrollbar {
+  display: block;
+  width: 9px;
+  height: 9px;
+}
+.docs-nav-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.docs-nav-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(120 120 120 / 0.30);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.docs-nav-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(120 120 120 / 0.48);
+}
+
 @theme {
   --font-mono: var(--font-geist-mono);
   --spacing-app-header: 56px;

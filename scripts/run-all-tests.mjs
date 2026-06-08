@@ -27,7 +27,9 @@
 // Flags (any combination):
 //   --parallel    run unit surfaces in parallel
 //   --with-e2e    append e2e to a single-surface filter (e.g. ``electron --with-e2e``)
-//   --no-e2e      skip e2e when filter=all (fast path)
+//   --no-e2e      skip ALL e2e (electron + root web) when filter=all (fast path)
+//   --no-web-e2e  skip ONLY the Root E2E (Playwright web / i18n visual-fit)
+//                 suite; keep the electron e2e. ``npm run test:all`` uses this.
 //   --no-lint     skip ESLint gate when filter=all
 //   --no-security skip security audit gates (JWT leak guard) when filter=all
 //   --no-mcp      skip MCP unit tests when filter=all
@@ -61,6 +63,12 @@ const withE2E = argv.includes("--with-e2e")
 // ``--no-e2e`` is the fast-iteration escape hatch. Skips the ~30s electron
 // build + ~3min Playwright matrix and runs only the unit suites.
 const skipE2E = argv.includes("--no-e2e")
+// ``--no-web-e2e`` drops ONLY the Root E2E (Playwright web / i18n visual-fit)
+// suite — the slow Next-dev-driven locale × viewport matrix — while leaving
+// the Electron e2e in place. ``npm run test:all`` passes this so the default
+// local "all" run stays fast; run the web suite on demand with
+// ``npm run test:e2e`` (full matrix) or ``npm run test:e2e:i18n`` (one spec).
+const skipWebE2E = argv.includes("--no-web-e2e")
 // ``--no-lint`` opts out of the ESLint gate (configured but expensive on
 // large diffs). Default-on for filter=all so config drift is surfaced.
 const skipLint = argv.includes("--no-lint")
@@ -308,6 +316,10 @@ const wantE2E =
   filter === "e2e" ||
   (filter === "all" && !skipE2E) ||
   (filter !== "all" && withE2E)
+// Root web e2e (Playwright vs the Next dev server) is gated SEPARATELY from
+// the Electron e2e so ``--no-web-e2e`` can drop just this slow suite. It rides
+// the same wantE2E matrix above, minus the ``--no-web-e2e`` opt-out.
+const wantRootE2E = wantE2E && !skipWebE2E
 // ``smoke`` boots the packaged unpacked binary under electron/dist/. Unlike
 // e2e, this is NOT auto-built — the user must have already run
 // ``npm run package`` because building installers takes minutes.
@@ -438,14 +450,21 @@ if (wantE2E) {
   } else {
     console.log(`${YELLOW}  Skipping e2e — build failed above.${RESET}`)
   }
+}
 
-  // ── Root Playwright suite (i18n visual-fit + any future root e2e specs) ──
-  // Runs against `<repo>/playwright.config.ts`, which auto-boots `npm run dev`
-  // via its webServer block and asserts must-fit invariants across the
-  // locale × viewport matrix. Same wantE2E gate as the Electron run above
-  // so `npm run test:all -- --no-e2e` skips both. Always runs even when the
-  // Electron e2e failed — they're independent surfaces and a regression in
-  // one shouldn't hide regressions in the other.
+// ── Root Playwright suite (i18n visual-fit + any future root e2e specs) ──
+// Runs against `<repo>/playwright.config.ts`, which auto-boots `npm run dev`
+// via its webServer block and asserts must-fit invariants across the
+// locale × viewport matrix.
+//
+// Gated SEPARATELY from the Electron e2e via `wantRootE2E`, so it can be
+// dropped on its own: `npm run test:all` passes `--no-web-e2e` to skip this
+// slow Next-dev-driven suite while STILL running the Electron e2e. Run it on
+// demand with `npm run test:e2e` (full matrix) or `npm run test:e2e:i18n`
+// (single spec). It does not depend on the Electron build above, and runs
+// even when the Electron e2e failed — they're independent surfaces.
+if (wantRootE2E) {
+  banner("ROOT E2E TESTS (Playwright web — i18n visual-fit)")
   run(
     "Root E2E (Playwright web)",
     "npx playwright test --config=playwright.config.ts",

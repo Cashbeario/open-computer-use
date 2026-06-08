@@ -7,7 +7,6 @@ import {
   XCircle,
   CaretRight,
   Eye,
-  Code,
   Terminal,
   MagnifyingGlass,
   Timer,
@@ -49,7 +48,7 @@ const CUA_MARKDOWN_COMPONENTS: Partial<Components> = {
     // Block code: plain <code>, parent's [&_pre] selectors style the wrapper.
     return (
       <code
-        className={cn("font-mono text-[12px] text-foreground/85", className)}
+        className={cn("font-mono text-[12px] text-foreground/80", className)}
         {...props}
       >
         {children}
@@ -482,7 +481,7 @@ function DetailRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/detail flex items-center gap-1.5 py-1 text-[12.5px] text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-medium tracking-tight text-foreground/40 hover:text-foreground/70 transition-colors"
       >
         <CaretRight
           weight="bold"
@@ -491,7 +490,7 @@ function DetailRow({
             open && "rotate-90"
           )}
         />
-        <Icon className="size-3 shrink-0 opacity-50 group-hover/detail:opacity-80 transition-opacity" />
+        <Icon className="size-3 shrink-0 opacity-70 group-hover/detail:opacity-100 transition-opacity" />
         <span>{label}</span>
       </button>
       <AnimatePresence initial={false}>
@@ -503,7 +502,7 @@ function DetailRow({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="ml-[22px] pb-2 text-[13px] leading-relaxed text-muted-foreground/80">
+            <div className="ml-[22px] pb-2 pt-0.5 text-[14px] leading-relaxed text-foreground/60">
               {children}
             </div>
           </motion.div>
@@ -518,11 +517,112 @@ function StatusDot({ status }: { status: string }) {
     <span
       className={cn(
         "inline-block size-[5px] rounded-full shrink-0",
-        status === "success" && "bg-emerald-400 dark:bg-emerald-500/70",
-        status === "error" && "bg-red-400 dark:bg-red-500/70",
-        status !== "success" && status !== "error" && "bg-foreground/[0.14] dark:bg-foreground/[0.10]",
+        status === "success" && "bg-emerald-500",
+        status === "error" && "bg-red-500",
+        status !== "success" && status !== "error" && "bg-foreground/20",
       )}
     />
+  )
+}
+
+// ── Unified content primitives (the redesign system) ──
+//
+// Every section's CONTENT (everything to the RIGHT of the timeline rail) is
+// built from this tiny vocabulary so all ~15 section types share one type
+// scale, one color ladder, and one set of surfaces. The rail / dots / shimmer
+// are deliberately untouched — they are the single signature element.
+//
+//   • prose  = text-[14px] leading-relaxed   (tier by opacity: /90 /60 /40)
+//   • meta   = text-[12px]                    (labels, chips, status words)
+//   • mono   = font-mono text-[12.5px]        (code surfaces only, /80)
+//   • COLOR is reserved for STATUS (emerald success / red error / amber
+//     attention). Everything else lives on the neutral foreground opacity
+//     ladder, so the eye reads color as "an outcome happened", nothing else.
+
+type Tone = "success" | "error" | "attention"
+
+const TONE_TEXT: Record<Tone, string> = {
+  success: "text-emerald-500",
+  error: "text-red-500",
+  attention: "text-amber-500",
+}
+const TONE_MOMENT: Record<Tone, string> = {
+  success: "ring-emerald-500/20 bg-emerald-500/[0.05] text-emerald-600 dark:text-emerald-400",
+  error: "ring-red-500/20 bg-red-500/[0.05] text-red-600 dark:text-red-400",
+  attention: "ring-amber-500/20 bg-amber-500/[0.05] text-amber-600 dark:text-amber-400",
+}
+
+/** Faint caption/header sitting above a block (e.g. "Session summary"). */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-1 text-[12px] font-medium tracking-tight text-foreground/40">
+      {children}
+    </div>
+  )
+}
+
+/** The single delegation tag. Neutral by design — color is for status only. */
+function Chip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium text-foreground/70 ring-1 ring-inset ring-foreground/10 bg-foreground/[0.04]">
+      {icon}
+      {children}
+    </span>
+  )
+}
+
+/** Soft tinted container for terminal/important states — one radius, one ring
+ *  weight, one padding everywhere (status, reauth, awaiting-human lifecycle). */
+function MomentPill({
+  tone,
+  icon,
+  children,
+}: {
+  tone: Tone
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12px] font-medium ring-1 ring-inset",
+        TONE_MOMENT[tone],
+      )}
+    >
+      {icon}
+      <span>{children}</span>
+    </div>
+  )
+}
+
+/** Bare status line (no container) — a tone dot + text. Used for the quiet
+ *  sub-agent "done" notes so they read as a soft beat, not a banner. */
+function StatusLine({ tone, children }: { tone: Tone; children: React.ReactNode }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 text-[12px]", TONE_TEXT[tone])}>
+      <StatusDot status={tone === "attention" ? "pending" : tone} />
+      {children}
+    </span>
+  )
+}
+
+/** The single code/console surface — shared by the running command (thought)
+ *  and its output (result). Hairline ring, subtle fill, mono body, hover copy. */
+function CodeSurface({ text, error = false }: { text: string; error?: boolean }) {
+  return (
+    <div className="group/code relative overflow-hidden rounded-lg ring-1 ring-inset ring-foreground/[0.06] bg-foreground/[0.02]">
+      <div className="absolute right-1.5 top-1.5 z-[1] opacity-0 transition-opacity duration-150 group-hover/code:opacity-100">
+        <CopyButton text={text} />
+      </div>
+      <pre
+        className={cn(
+          "m-0 px-3.5 pr-10 py-3 font-mono text-[12.5px] leading-[1.6] tabular-nums whitespace-pre-wrap break-words min-w-0 overflow-hidden",
+          error ? "text-red-500/90 dark:text-red-400/90" : "text-foreground/80",
+        )}
+      >
+        {text}
+      </pre>
+    </div>
   )
 }
 
@@ -756,21 +856,13 @@ function StepCard({
         </p>
       )}
 
-      {/* Integration badge — same dimensions / tokens as the inline result
-          badges below (text-[11px], px-1.5 py-0.5, rounded-full,
-          bg-{tone}-500/8). Sky tone. Compact, one-line. */}
+      {/* Integration primitive (legacy) — one neutral Chip + a faint verb. */}
       {integrationAction && (
-        <div className="mt-1">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none px-1.5 py-0.5 rounded-full bg-sky-500/8 text-sky-600/80 dark:text-sky-400/70">
-            <IntegrationLogo toolkit={integrationAction.toolkit} />
-            integration
-            {integrationAction.toolkit && (
-              <>
-                {" · "}
-                {integrationAction.toolkit.toLowerCase()}
-              </>
-            )}
-            {" · "}
+        <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
+          <Chip icon={<IntegrationLogo toolkit={integrationAction.toolkit} />}>
+            {humanizeToolkit(integrationAction.toolkit) || "Integration"}
+          </Chip>
+          <span className="text-[12px] text-foreground/40">
             {integrationAction.method === "search" && "search"}
             {integrationAction.method === "call" && "run"}
             {integrationAction.method === "actions" && "browse"}
@@ -778,52 +870,46 @@ function StepCard({
         </div>
       )}
 
-      {/* Integration delegation — a small inline chip + the (muted) task on one
-          line. The per-toolkit logo appears later on the result row. */}
+      {/* Integration delegation — the one neutral Chip + the (secondary) task.
+          The per-toolkit logo appears later on the result row. */}
       {composioDelegation && (
         <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 ring-1 ring-sky-500/15 dark:ring-sky-400/15 shrink-0">
-            <Plug weight="fill" className="size-3 shrink-0" />
-            Integration
-          </span>
+          <Chip icon={<Plug weight="fill" className="size-3 shrink-0" />}>Integration</Chip>
           {composioDelegation.task && (
-            <span className="text-[13px] leading-snug text-foreground/55 break-words min-w-0">
+            <span className="text-[14px] leading-snug text-foreground/60 break-words min-w-0">
               {truncateText(composioDelegation.task, 140)}
             </span>
           )}
         </div>
       )}
 
-      {/* Code-agent delegation — same small inline chip treatment. */}
+      {/* Code-agent delegation — same neutral Chip treatment. */}
       {agentAction && (
         <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
-          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/15 dark:ring-emerald-400/15 shrink-0">
-            <Terminal className="size-3 shrink-0" />
-            {agentAction.label}
-          </span>
+          <Chip icon={<Terminal className="size-3 shrink-0" />}>{agentAction.label}</Chip>
           {agentAction.detail && (
-            <span className="text-[13px] leading-snug text-foreground/55 break-words min-w-0">
+            <span className="text-[14px] leading-snug text-foreground/60 break-words min-w-0">
               {truncateText(agentAction.detail, 140)}
             </span>
           )}
         </div>
       )}
 
-      {/* Inline result badges (no-op delegation waits filtered out) */}
+      {/* Inline results — bare status rows (no pills): a tone dot + the
+          outcome. Only the dot (and error text) carries color, so a column
+          of successful steps stays calm. Wait no-ops filtered on delegations. */}
       {visibleResults.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+        <div className="flex flex-col gap-y-0.5 mt-1">
           {visibleResults.map((r, j) => (
             <span
               key={j}
               className={cn(
-                "inline-flex items-center gap-1 text-[11px] leading-none px-1.5 py-0.5 rounded-full",
-                r.status === "success" && "text-emerald-600/80 dark:text-emerald-400/70 bg-emerald-500/8",
-                r.status === "error" && "text-red-500/80 dark:text-red-400/70 bg-red-500/8",
-                r.status !== "success" && r.status !== "error" && "text-muted-foreground/50 bg-muted-foreground/5",
+                "inline-flex items-center gap-1.5 text-[12px] min-w-0",
+                r.status === "error" ? "text-red-500" : "text-foreground/60",
               )}
             >
               <StatusDot status={r.status} />
-              {truncateText(r.content, 120)}
+              <span className="break-words min-w-0">{truncateText(r.content, 120)}</span>
             </span>
           ))}
         </div>
@@ -889,102 +975,56 @@ function ItemRenderer({
     case "status": {
       const done = item.status === "completed"
       return (
-        <div className="py-1.5 pl-6">
-          <div className={cn(
-            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5",
-            done
-              ? "border-emerald-200/60 bg-emerald-500/[0.04] dark:border-emerald-700/40 dark:bg-emerald-400/[0.04]"
-              : "border-red-200/60 bg-red-500/[0.04] dark:border-red-700/40 dark:bg-red-400/[0.04]",
-          )}>
-            {done ? (
-              <CheckCircle className="size-3.5 shrink-0 text-emerald-500" weight="fill" />
-            ) : (
-              <XCircle className="size-3.5 shrink-0 text-red-500" weight="fill" />
-            )}
-            <span className={cn(
-              "text-[13px] font-medium",
-              done ? "text-emerald-700 dark:text-emerald-300" : "text-red-600 dark:text-red-400",
-            )}>
-              {item.content}
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill
+            tone={done ? "success" : "error"}
+            icon={
+              done ? (
+                <CheckCircle className="size-3.5 shrink-0" weight="fill" />
+              ) : (
+                <XCircle className="size-3.5 shrink-0" weight="fill" />
+              )
+            }
+          >
+            {item.content}
+          </MomentPill>
         </div>
       )
     }
 
     case "code-agent-thought": {
-      // The agent's mid-execution reasoning is virtually always a code
-      // command (with the agent's narrative occasionally mixed in).
-      // Rendering through Markdown was the source of the inconsistent
-      // formatting the user reported: Python comments (`# x`) became
-      // <h1> headings, `>` lines became blockquotes, indentation got
-      // collapsed in paragraphs, and stripped fence markers left some
-      // lines as plain prose and others as monospace. We bypass
-      // Markdown entirely and render the whole block as a single
-      // monospace <pre> so every line — code, narrative, comment —
-      // gets the same treatment.
+      // The running command (with the agent's narrative occasionally mixed
+      // in). Markdown is bypassed — it turned Python comments into <h1> and
+      // `>` lines into blockquotes — so the whole block renders in the one
+      // shared CodeSurface, identical to its output below.
       const cleaned = truncateText(stripAgentMarkup(item.content), 3000)
       if (!cleaned) return null
       return (
-        <pre
-          className={cn(
-            "m-0 pl-6 py-1",
-            "font-mono text-[12.5px] leading-[1.65] tabular-nums text-foreground/85",
-            "whitespace-pre-wrap break-words",
-            "min-w-0 overflow-hidden",
-          )}
-        >
-          {cleaned}
-        </pre>
+        <div className="pl-6">
+          <CodeSurface text={cleaned} />
+        </div>
       )
     }
 
     case "code-agent-result": {
-      // Single-card view: a clean two-row card with a contextual header
-      // label + copy button on top and mono content below. The content
-      // is filtered by stripAgentMarkup which removes <answer>/</answer>
-      // tags and ``` fence markers so the user sees clean text. The
-      // card sits behind a TerminalDot timeline marker — the code-step
-      // equivalent of the ScreenshotDot used for visual actions.
+      // The command's output — the SAME CodeSurface as the thought above,
+      // behind a TerminalDot rail marker. Errors tint the body red; no
+      // other chrome distinguishes it.
       const cleaned = stripAgentMarkup(item.content)
       if (!cleaned) return null
       const hasError = /\bError:\s/.test(cleaned)
       return (
-        <div className="relative pl-8 py-1.5">
+        <div className="relative pl-8">
           <TerminalDot />
-          {/* Result card — shadcn-style minimal: hairline border on a
-              subtle muted surface, no title bar, mono body. Copy button
-              floats in the top-right corner, muted at rest and full
-              brightness on hover. Errors are signaled by red body text
-              only — no extra chrome. */}
-          <div className="group/result-card relative overflow-hidden rounded-lg border border-foreground/[0.07] bg-foreground/[0.02]">
-            <div className="absolute right-1.5 top-1.5 opacity-40 transition-opacity duration-150 group-hover/result-card:opacity-100">
-              <CopyButton text={cleaned} />
-            </div>
-            <pre
-              className={cn(
-                // pr-10 reserves room for the floating copy button so
-                // long unbreakable lines never slide under it.
-                "m-0 pl-4 pr-10 py-3 font-mono text-[12px] leading-[1.65] tabular-nums whitespace-pre-wrap break-words",
-                hasError
-                  ? "text-red-500/85 dark:text-red-400/90"
-                  : "text-foreground/85"
-              )}
-            >
-              {cleaned}
-            </pre>
-          </div>
+          <CodeSurface text={cleaned} error={hasError} />
         </div>
       )
     }
 
     case "code-agent-done":
       return (
-        <div className="py-0.5 pl-6">
-          <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-600/50 dark:text-emerald-400/40">
-            <CheckCircle className="size-3 shrink-0" weight="fill" />
-            {item.content}
-          </span>
+        <div className="pl-6">
+          <StatusLine tone="success">{item.content}</StatusLine>
         </div>
       )
 
@@ -998,36 +1038,34 @@ function ItemRenderer({
       const cleaned = truncateText(stripAgentMarkup(item.content), 5000)
       if (!cleaned) return null
       return (
-        <div className="group/summary relative pl-6 py-2">
-          <div className="absolute right-1 top-2 opacity-40 transition-opacity duration-150 group-hover/summary:opacity-100">
+        <div className="group/summary relative pl-6">
+          <div className="absolute right-1 top-0 opacity-0 transition-opacity duration-150 group-hover/summary:opacity-100">
             <CopyButton text={cleaned} />
           </div>
-          <div className="mb-2">
-            <span className="text-[11.5px] font-medium tracking-tight text-foreground/55">
-              Session Summary
-            </span>
-          </div>
+          <Eyebrow>Session summary</Eyebrow>
           <div
             className={cn(
-              "text-[14px] leading-[1.65] text-foreground/85",
+              "text-[14px] leading-relaxed text-foreground/90",
               // Containment: long unbreakable strings wrap inside the
               // bubble instead of pushing it wider.
               "min-w-0 overflow-hidden break-words",
               "[&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
               "[&_p]:my-2",
               "[&_strong]:font-semibold [&_strong]:text-foreground",
-              "[&_em]:italic [&_em]:text-foreground/75",
+              "[&_em]:italic [&_em]:text-foreground/60",
               "[&_ul]:my-2 [&_ul]:space-y-0.5 [&_ul]:pl-4",
               "[&_ol]:my-2 [&_ol]:space-y-0.5 [&_ol]:pl-5",
-              "[&_li]:marker:text-foreground/35 [&_li]:leading-[1.55]",
-              "[&_h1]:mt-3 [&_h1]:mb-1.5 [&_h1]:text-[15px] [&_h1]:font-semibold [&_h1]:text-foreground",
-              "[&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-[14.5px] [&_h2]:font-semibold [&_h2]:text-foreground",
+              "[&_li]:marker:text-foreground/40 [&_li]:leading-relaxed",
+              // Headings collapse to body size + weight — the timeline keeps
+              // a flat type scale; emphasis comes from weight, not size.
+              "[&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-[14px] [&_h1]:font-semibold [&_h1]:text-foreground",
+              "[&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-[14px] [&_h2]:font-semibold [&_h2]:text-foreground",
               "[&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-[14px] [&_h3]:font-medium [&_h3]:text-foreground",
-              "[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-foreground/[0.06] [&_pre]:!bg-foreground/[0.03] [&_pre]:p-3",
+              "[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:ring-1 [&_pre]:ring-inset [&_pre]:ring-foreground/[0.06] [&_pre]:!bg-foreground/[0.02] [&_pre]:p-3",
               "[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden",
               "[&_code]:break-words",
               "[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-[3px] [&_a]:decoration-foreground/30 hover:[&_a]:decoration-foreground/60 [&_a]:break-all",
-              "[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-foreground/15 [&_blockquote]:pl-3 [&_blockquote]:text-foreground/70 [&_blockquote]:italic"
+              "[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-foreground/15 [&_blockquote]:pl-3 [&_blockquote]:text-foreground/60 [&_blockquote]:italic"
             )}
           >
             <CuaMarkdown>{cleaned}</CuaMarkdown>
@@ -1037,12 +1075,12 @@ function ItemRenderer({
     }
 
     case "composio-agent-thought": {
-      // Sub-agent reasoning — kept deliberately quiet (muted, one-line-ish)
-      // so the integration timeline reads as calm progress, not noise.
+      // Sub-agent reasoning — the secondary prose tier (/60) so the
+      // integration timeline reads as calm progress, not noise.
       const cleaned = truncateText(stripAgentMarkup(item.content), 600)
       if (!cleaned) return null
       return (
-        <p className="pl-6 py-0.5 text-[14px] leading-relaxed text-foreground/55 break-words min-w-0 overflow-hidden">
+        <p className="pl-6 text-[14px] leading-relaxed text-foreground/60 break-words min-w-0 overflow-hidden">
           {cleaned}
         </p>
       )
@@ -1074,21 +1112,21 @@ function ItemRenderer({
         ? truncateText(stripAgentMarkup(item.content).replace(/^Error:\s*/i, ""), 140)
         : ""
       return (
-        <div className="relative pl-8 py-0.5">
+        <div className="relative pl-8">
           <IntegrationDot toolkit={item.toolkit} />
           <div className="flex min-h-[22px] items-center gap-1.5">
-            <span className={cn("text-[14px] leading-snug", isError ? "text-foreground/70" : "text-foreground/85")}>
+            <span className="text-[14px] leading-snug text-foreground/90">
               {toolkitName || "Integration"}
-              {fn && <span className="text-foreground/45">{" · "}{fn}</span>}
+              {fn && <span className="text-foreground/40">{" · "}{fn}</span>}
             </span>
             {isError ? (
-              <XCircle className="size-3.5 shrink-0 text-red-500/70" weight="fill" />
+              <XCircle className="size-3.5 shrink-0 text-red-500" weight="fill" />
             ) : (
-              <CheckCircle className="size-3.5 shrink-0 text-emerald-500/70" weight="fill" />
+              <CheckCircle className="size-3.5 shrink-0 text-emerald-500" weight="fill" />
             )}
           </div>
           {errMsg && (
-            <p className="mt-0.5 text-[13px] leading-relaxed text-red-500/70 dark:text-red-400/70 break-words">
+            <p className="mt-0.5 text-[12px] leading-relaxed text-red-500 dark:text-red-400 break-words">
               {errMsg}
             </p>
           )}
@@ -1098,38 +1136,28 @@ function ItemRenderer({
 
     case "composio-agent-done":
       return (
-        <div className="py-0.5 pl-6">
-          <span className="inline-flex items-center gap-1.5 text-[12px] text-sky-600/50 dark:text-sky-400/40">
-            <CheckCircle className="size-3 shrink-0" weight="fill" />
-            {item.content}
-          </span>
+        <div className="pl-6">
+          <StatusLine tone="success">{item.content}</StatusLine>
         </div>
       )
 
     case "composio-agent-reauth":
       return (
-        <div className="py-1.5 pl-6">
-          <div className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 border-amber-200/60 bg-amber-500/[0.04] dark:border-amber-700/40 dark:bg-amber-400/[0.04]">
-            <IntegrationLogo toolkit={item.toolkit} />
-            <span className="text-[13px] font-medium text-amber-700 dark:text-amber-300">
-              {item.content}
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill tone="attention" icon={<IntegrationLogo toolkit={item.toolkit} />}>
+            {item.content}
+          </MomentPill>
         </div>
       )
 
     case "composio-agent-note": {
       const cleaned = item.content.trim()
       if (!cleaned) return null
-      return (
-        <div className="py-0.5 pl-6">
-          <span className="text-[12px] text-muted-foreground/50">{cleaned}</span>
-        </div>
-      )
+      return <p className="pl-6 text-[12px] text-foreground/40">{cleaned}</p>
     }
 
     case "search-results": {
-      const label = item.query ? `Search: ${item.query}` : "Web search"
+      const label = item.query ? `Search · ${item.query}` : "Web search"
       return (
         <div className="pl-6">
           <DetailRow icon={MagnifyingGlass} label={label} defaultOpen>
@@ -1152,33 +1180,19 @@ function ItemRenderer({
 
     case "awaiting-human-timeout":
       return (
-        <div className="py-1.5 pl-6">
-          <div className={cn(
-            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5",
-            "border-amber-200/60 bg-amber-500/[0.04]",
-            "dark:border-amber-700/40 dark:bg-amber-400/[0.04]",
-          )}>
-            <Timer className="size-3.5 shrink-0 text-amber-500" weight="fill" />
-            <span className="text-[13px] font-medium text-amber-700 dark:text-amber-300">
-              {item.content}
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill tone="attention" icon={<Timer className="size-3.5 shrink-0" weight="fill" />}>
+            {item.content}
+          </MomentPill>
         </div>
       )
 
     case "awaiting-human-resumed":
       return (
-        <div className="py-1.5 pl-6">
-          <div className={cn(
-            "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5",
-            "border-emerald-200/60 bg-emerald-500/[0.04]",
-            "dark:border-emerald-700/40 dark:bg-emerald-400/[0.04]",
-          )}>
-            <CheckCircle className="size-3.5 shrink-0 text-emerald-500" weight="fill" />
-            <span className="text-[13px] font-medium text-emerald-700 dark:text-emerald-300">
-              Human finished — agent resuming with fresh screen state
-            </span>
-          </div>
+        <div className="pl-6">
+          <MomentPill tone="success" icon={<CheckCircle className="size-3.5 shrink-0" weight="fill" />}>
+            Human finished. Agent resuming with fresh screen state.
+          </MomentPill>
         </div>
       )
 
@@ -1188,7 +1202,7 @@ function ItemRenderer({
       return (
         <div
           className={cn(
-            "pl-6 py-0.5 text-[14px] leading-relaxed text-foreground/85",
+            "pl-6 text-[14px] leading-relaxed text-foreground/90",
             "min-w-0 overflow-hidden break-words",
             "[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden",
             "[&_code]:break-words",

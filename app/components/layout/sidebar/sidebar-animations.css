@@ -80,3 +80,61 @@
   to { opacity: 1; transform: translateY(0); }
 }
 .shv-type-char { animation: shv-char-reveal 0.15s ease-out both; }
+
+/* ── Platform-mode switcher: drifting aurora ──
+   Three blurred blobs sweep and breathe behind the Personal/Developer label.
+   Kept SMALLER than the pill so their travel is actually visible (a blob
+   bigger than its frame looks static); lightly tinted (soft indigo / violet /
+   teal — a slight wash of colour, not a rainbow); clipped to the rounded
+   pill. Each rides its own loop (10/13/16s) so they cross and the colour
+   field keeps shifting. Frozen to a static glow under prefers-reduced-motion.
+   Composited (transform/opacity only). */
+.mode-aurora {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(150% 150% at 50% 50%, #000 62%, transparent 100%);
+          mask-image: radial-gradient(150% 150% at 50% 50%, #000 62%, transparent 100%);
+}
+.mode-aurora-blob {
+  position: absolute;
+  top: -55%;
+  height: 210%;
+  width: 50%;
+  border-radius: 9999px;
+  filter: blur(11px);
+  will-change: transform, opacity;
+}
+
+/* Light theme — soft, slightly-tinted glow. */
+.mode-aurora-blob.b1 { left: -8%; background: radial-gradient(circle at 50% 50%, hsl(231 64% 60% / 0.40), transparent 66%); animation: mode-aurora-1 10s ease-in-out infinite; }
+.mode-aurora-blob.b2 { left: 28%; background: radial-gradient(circle at 50% 50%, hsl(278 52% 62% / 0.34), transparent 66%); animation: mode-aurora-2 13s ease-in-out infinite; }
+.mode-aurora-blob.b3 { left: 60%; background: radial-gradient(circle at 50% 50%, hsl(190 64% 52% / 0.30), transparent 66%); animation: mode-aurora-3 16s ease-in-out infinite; }
+
+/* Dark theme — same tints, a touch brighter on the dark backdrop. */
+:where(.dark) .mode-aurora-blob.b1 { background: radial-gradient(circle at 50% 50%, hsl(229 80% 72% / 0.44), transparent 66%); }
+:where(.dark) .mode-aurora-blob.b2 { background: radial-gradient(circle at 50% 50%, hsl(280 66% 74% / 0.38), transparent 66%); }
+:where(.dark) .mode-aurora-blob.b3 { background: radial-gradient(circle at 50% 50%, hsl(190 78% 64% / 0.34), transparent 66%); }
+
+/* Wide horizontal sweep so the drift is unmistakable, with a gentle vertical
+   wobble plus scale + opacity breathing for the slow "smoke" feel. */
+@keyframes mode-aurora-1 {
+  0%   { transform: translate3d(-70%, -8%, 0) scale(1);    opacity: 0.65; }
+  50%  { transform: translate3d(75%, 8%, 0)   scale(1.3);  opacity: 1; }
+  100% { transform: translate3d(-70%, -8%, 0) scale(1);    opacity: 0.65; }
+}
+@keyframes mode-aurora-2 {
+  0%   { transform: translate3d(70%, 10%, 0)  scale(1.2);  opacity: 0.55; }
+  50%  { transform: translate3d(-65%, -8%, 0) scale(1.4);  opacity: 0.95; }
+  100% { transform: translate3d(70%, 10%, 0)  scale(1.2);  opacity: 0.55; }
+}
+@keyframes mode-aurora-3 {
+  0%   { transform: translate3d(-45%, 8%, 0)  scale(0.95); opacity: 0.5; }
+  50%  { transform: translate3d(60%, -10%, 0) scale(1.25); opacity: 0.9; }
+  100% { transform: translate3d(-45%, 8%, 0)  scale(0.95); opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-aurora-blob { animation: none; opacity: 0.85; }
+}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { BuildWithAIBar } from "@/app/components/developers/copy-for-ai"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -222,6 +223,8 @@ export function UsageContent() {
           </>
         }
       />
+
+      <BuildWithAIBar />
 
       {/* ── Stats row: dollar wallet + analytics ── */}
       <motion.div

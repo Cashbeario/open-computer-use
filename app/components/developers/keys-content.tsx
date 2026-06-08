@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { BuildWithAIBar } from "@/app/components/developers/copy-for-ai"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -139,6 +140,8 @@ export function KeysContent() {
           </>
         }
       />
+
+      <BuildWithAIBar />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}

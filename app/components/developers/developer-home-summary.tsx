@@ -21,6 +21,7 @@ import {
   formatUsd,
   useDeveloperData,
 } from "@/app/components/developers/developers-shared"
+import { BuildWithAIBar } from "@/app/components/developers/copy-for-ai"
 
 const QUICK_LINKS = [
   { href: "/developers/keys",  icon: KeyRound,   label: "API keys" },
@@ -136,6 +137,9 @@ export function DeveloperHomeSummary() {
           </Link>
         ))}
       </motion.div>
+
+      {/* Build-with-AI: copy the full API prompt into an AI coding tool. */}
+      <BuildWithAIBar className="mt-8 text-left" />
     </motion.div>
   )
 }

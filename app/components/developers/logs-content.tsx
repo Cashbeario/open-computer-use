@@ -8,6 +8,7 @@ import {
   DevPageShell,
   DevHeader,
 } from "@/app/components/developers/developers-shared"
+import { BuildWithAIBar } from "@/app/components/developers/copy-for-ai"
 
 /* ===================================================================
    Logs page — every API request as a filterable, exportable trace
@@ -24,6 +25,8 @@ export function LogsContent() {
         title="Logs"
         description="Inspect every API request: endpoints, cost, timing, and request IDs."
       />
+
+      <BuildWithAIBar />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}

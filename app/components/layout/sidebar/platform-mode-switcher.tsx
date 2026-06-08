@@ -70,25 +70,38 @@ export function PlatformModeSwitcher({ className }: { className?: string }) {
           aria-expanded={open}
           aria-label={`Platform: ${active.label}. Click to switch platform`}
           className={cn(
-            // Flush with the sidebar at rest (no fill) — only hover/open lift a
-            // whisper of background, so it reads as part of the header rather
-            // than a stuck-on pill.
-            "group flex h-8 min-w-0 items-center gap-1 rounded-lg px-1.5",
-            "text-foreground/70 hover:text-foreground/90 data-[state=open]:text-foreground/90",
-            "hover:bg-foreground/[0.045] dark:hover:bg-white/[0.045]",
+            // A quietly alive pill: a subtle aurora drifts behind the label so
+            // the platform switcher stands out from the static header chrome
+            // without shouting. `overflow-hidden` clips the glow to the rounded
+            // pill; the label/chevron ride above it on z-10.
+            "group relative flex h-8 min-w-0 items-center gap-1 overflow-hidden rounded-lg px-1.5",
+            "text-foreground/75 hover:text-foreground data-[state=open]:text-foreground",
+            "hover:bg-foreground/[0.04] dark:hover:bg-white/[0.04]",
             "data-[state=open]:bg-foreground/[0.05] dark:data-[state=open]:bg-white/[0.05]",
             "transition-colors duration-150",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50",
             className,
           )}
         >
-          <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium tracking-[-0.01em]">
+          {/* Aurora — three blurred, slowly drifting blobs, radially masked to
+              fade at the edges. Brightens a touch on hover / when open; a
+              static soft glow remains under prefers-reduced-motion. */}
+          <span
+            aria-hidden="true"
+            className="mode-aurora pointer-events-none opacity-90 transition-opacity duration-700 group-hover:opacity-100 group-data-[state=open]:opacity-100"
+          >
+            <span className="mode-aurora-blob b1" />
+            <span className="mode-aurora-blob b2" />
+            <span className="mode-aurora-blob b3" />
+          </span>
+
+          <span className="relative z-10 min-w-0 flex-1 truncate text-left text-[13px] font-medium tracking-[-0.01em]">
             {active.label}
           </span>
           <IconChevronDown
             size={13}
             stroke={2}
-            className="shrink-0 text-foreground/35 transition-transform duration-200 group-data-[state=open]:rotate-180"
+            className="relative z-10 shrink-0 text-foreground/40 transition-transform duration-200 group-data-[state=open]:rotate-180"
           />
         </button>
       </PopoverTrigger>

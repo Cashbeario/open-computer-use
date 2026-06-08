@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { ArrowRight, Video } from "lucide-react"
 import Link from "next/link"
-import NextImage from "next/image"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
@@ -89,131 +88,6 @@ function StatCell({
 
 const RESOURCE_STAT_KEYS = ["money", "time", "speed", "effort"] as const
 
-/* ─── Ambient background + spotlight ───
- * The dimmed media stage (poster + optional desktop video, behind a
- * readability veil) is now lit by a single composed spotlight: a fixed
- * top "stage light", a cursor-following focal glow, and an edge vignette
- * that frames the centre. The glow tracks the pointer via two CSS custom
- * properties (--mx / --my) updated in a rAF-throttled pointermove, so it
- * follows the cursor with no React re-render. All of it is one signature
- * effect — soft, low-opacity, theme-aware — not a light show. Reduced
- * motion and mobile keep the static stage light only. The poster still
- * resolves with a single defocus reveal (blur → 0), a lens settling. */
-function HeroBackground({ isMobile }: { isMobile: boolean }) {
-  const prefersReduced = useReducedMotion()
-  const [videoReady, setVideoReady] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  // Cursor-following spotlight (desktop, motion allowed). A rAF-throttled
-  // pointermove writes the focal point into --mx / --my as percentages of
-  // the hero box; the glow layer reads them, so the light drifts toward the
-  // cursor without re-rendering. The wrapper is pointer-events-none, so we
-  // listen on window and translate against its bounding rect.
-  useEffect(() => {
-    if (isMobile || prefersReduced) return
-    const el = rootRef.current
-    if (!el) return
-    let raf = 0
-    let nx = 50
-    let ny = 26
-    const apply = () => {
-      raf = 0
-      el.style.setProperty("--mx", `${nx}%`)
-      el.style.setProperty("--my", `${ny}%`)
-    }
-    const onMove = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect()
-      if (r.width === 0 || r.height === 0) return
-      nx = ((e.clientX - r.left) / r.width) * 100
-      ny = ((e.clientY - r.top) / r.height) * 100
-      if (!raf) raf = requestAnimationFrame(apply)
-    }
-    window.addEventListener("pointermove", onMove, { passive: true })
-    return () => {
-      window.removeEventListener("pointermove", onMove)
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [isMobile, prefersReduced])
-
-  return (
-    <div
-      ref={rootRef}
-      aria-hidden="true"
-      style={{ "--mx": "50%", "--my": "26%" } as CSSProperties}
-      className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-    >
-      <motion.div
-        initial={prefersReduced ? { opacity: 0 } : { filter: "blur(20px)", opacity: 0, scale: 1.04 }}
-        animate={prefersReduced ? { opacity: 1 } : { filter: "blur(0px)", opacity: 1, scale: 1 }}
-        transition={{ duration: prefersReduced ? 0.6 : 1.3, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-        className="absolute inset-0"
-      >
-        <NextImage src="/hero-bg.jpg" alt="" fill priority sizes="100vw" className="object-cover" />
-        {!isMobile && (
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/hero-bg.jpg"
-            onCanPlay={() => setVideoReady(true)}
-            className={cn(
-              "absolute inset-0 w-full h-full object-cover motion-reduce:hidden transition-opacity duration-700 ease-out",
-              videoReady ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <source src="/hero-bg.mp4" type="video/mp4" />
-          </video>
-        )}
-      </motion.div>
-
-      {/* Readability veil — keeps type legible over the moving media. */}
-      <div className="absolute inset-0 bg-background/65 dark:bg-background/75" />
-
-      {/* Edge vignette — pulls the eye to the centre by easing the frame
-          back toward the page colour. Works in both themes. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(125% 115% at 50% 28%, transparent 52%, color-mix(in oklab, var(--background) 46%, transparent) 100%)",
-        }}
-      />
-
-      {/* Static stage light — a soft top-centre wash that lifts the scene
-          without washing it out (soft-light keeps it from blowing highlights).
-          This is the whole effect under reduced motion / on mobile. */}
-      <div
-        className="absolute inset-0 mix-blend-soft-light"
-        style={{
-          background:
-            "radial-gradient(78% 56% at 50% -4%, rgba(255,255,255,0.55), rgba(255,255,255,0.12) 40%, transparent 72%)",
-        }}
-      />
-
-      {/* Cursor-following focal glow — the signature. Desktop + motion only.
-          Reads --mx / --my; soft-light blend so it brightens the media at the
-          pointer rather than painting a flat white blob. */}
-      {!isMobile && (
-        <div
-          className="absolute inset-0 motion-reduce:hidden mix-blend-soft-light"
-          style={{
-            background:
-              "radial-gradient(420px 420px at var(--mx) var(--my), rgba(255,255,255,0.6), rgba(255,255,255,0.1) 44%, transparent 70%)",
-          }}
-        />
-      )}
-
-      {/* Soft handoff into the next section. */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-40"
-        style={{ background: "linear-gradient(to bottom, transparent, var(--background) 88%)" }}
-      />
-    </div>
-  )
-}
-
 export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   const t = useTranslations("hero")
   const tc = useTranslations("common")
@@ -242,8 +116,6 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
 
   return (
     <section className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden">
-      <HeroBackground isMobile={isMobile} />
-
       <div
         className={cn(
           "relative z-10 w-full text-center",

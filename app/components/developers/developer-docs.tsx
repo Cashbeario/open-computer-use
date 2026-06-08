@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { BuildWithAIBar } from "@/app/components/developers/copy-for-ai"
 import {
   BookOpen,
   KeyRound,
@@ -2542,6 +2543,9 @@ function DocsBody() {
 
   return (
     <div className="space-y-12">
+
+      {/* ── Build-with-AI bar: drop the whole API into an AI coding tool ── */}
+      <BuildWithAIBar />
 
       {/* ── Introduction ── */}
       <DocBlock section={DOC_SECTIONS[0]}>

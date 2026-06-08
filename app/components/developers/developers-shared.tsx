@@ -129,6 +129,25 @@ export function formatNum(n: number): string {
   return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
 }
 
+/* Developer API spend is denominated in USD. Internally costs are computed in
+   "credits" where 1 credit = 9 cents = $0.09 (API_CREDIT_USD_CENTS in
+   backend/app/services/api_billing_service.py). The data layer keeps the
+   `credits` field names (they mirror the api_usage table), but everything the
+   developer SEES is dollars. These helpers do the single conversion. */
+export const API_CREDIT_USD_CENTS = 9
+
+export function creditsToUsdCents(credits: number): number {
+  return Math.round((credits ?? 0) * API_CREDIT_USD_CENTS)
+}
+
+export function formatUsd(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`
+}
+
+export function creditsToUsd(credits: number): string {
+  return formatUsd(creditsToUsdCents(credits))
+}
+
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
     return navigator.clipboard.writeText(text).catch(() => execCopy(text))
@@ -191,14 +210,14 @@ function downloadFile(filename: string, content: string, mime: string) {
 }
 
 function rowsToCSV(rows: RecentRequest[]): string {
-  const header = ["request_id", "endpoint", "credits", "time"]
+  const header = ["request_id", "endpoint", "cost_usd", "time"]
   const escape = (v: unknown) => {
     const s = v == null ? "" : String(v)
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   const lines = [header.join(",")]
   for (const r of rows) {
-    lines.push([escape(r.request_id ?? ""), escape(r.endpoint), escape(r.credits), escape(r.time)].join(","))
+    lines.push([escape(r.request_id ?? ""), escape(r.endpoint), escape(creditsToUsd(r.credits)), escape(r.time)].join(","))
   }
   return lines.join("\n")
 }
@@ -319,7 +338,7 @@ export function ActivityChart({ daily }: { daily: DailyPoint[] }) {
             </span>
             {hasData && (
               <span className="text-[10.5px] text-muted-foreground/35 tabular-nums truncate">
-                {formatNum(totalReqs)} request{totalReqs !== 1 ? "s" : ""} · {formatNum(totalCreds)} credits
+                {formatNum(totalReqs)} request{totalReqs !== 1 ? "s" : ""} · {creditsToUsd(totalCreds)} spent
               </span>
             )}
           </div>
@@ -372,7 +391,7 @@ export function ActivityChart({ daily }: { daily: DailyPoint[] }) {
               >
                 {hovered === i && d.requests > 0 && (
                   <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-md bg-foreground text-background text-[9.5px] font-medium whitespace-nowrap z-10 pointer-events-none shadow-lg">
-                    <span className="tabular-nums">{d.requests}</span> req · <span className="tabular-nums">{d.credits}</span> cr
+                    <span className="tabular-nums">{d.requests}</span> req · <span className="tabular-nums">{creditsToUsd(d.credits)}</span>
                   </div>
                 )}
               </div>
@@ -447,7 +466,7 @@ export function EndpointBreakdownPanel({ byEndpoint }: { byEndpoint: EndpointBre
                       {formatNum(r.requests)}
                     </span>
                     <span className="text-[10px] text-muted-foreground/30 tabular-nums w-16 text-right shrink-0">
-                      {formatNum(r.credits)} cr
+                      {creditsToUsd(r.credits)}
                     </span>
                   </div>
                   <div className="h-[2px] rounded-full bg-foreground/[0.04] overflow-hidden ml-[68px]">
@@ -978,8 +997,8 @@ const TIME_RANGES: { id: TimeRange; label: string; ms: number | null }[] = [
 const SORT_LABELS: Record<SortKey, string> = {
   "newest":       "Newest first",
   "oldest":       "Oldest first",
-  "credits-desc": "Credits (high → low)",
-  "credits-asc":  "Credits (low → high)",
+  "credits-desc": "Spend (high → low)",
+  "credits-asc":  "Spend (low → high)",
 }
 
 export function TracesPanel({
@@ -1314,7 +1333,7 @@ export function TracesPanel({
                     <span className="text-[11px] text-muted-foreground/60 flex-1 truncate font-mono">
                       {r.request_id ?? r.endpoint.replace(/_/g, " ")}
                     </span>
-                    <span className="text-[10px] text-muted-foreground/40 tabular-nums">{r.credits} cr</span>
+                    <span className="text-[10px] text-muted-foreground/40 tabular-nums">{creditsToUsd(r.credits)}</span>
                     <span className="text-[10px] text-muted-foreground/30 tabular-nums w-14 text-right">
                       {timeAgo(r.time)}
                     </span>
@@ -1339,9 +1358,9 @@ export function TracesPanel({
                             mono
                           />
                           <DetailRow
-                            label="Credits"
-                            value={`${r.credits}`}
-                            onCopy={() => copyValue(String(r.credits), `${key}-cr`)}
+                            label="Cost"
+                            value={creditsToUsd(r.credits)}
+                            onCopy={() => copyValue(creditsToUsd(r.credits), `${key}-cr`)}
                             copied={copiedKey === `${key}-cr`}
                           />
                           <DetailRow
@@ -1424,13 +1443,13 @@ function DetailRow({
    ═══════════════════════════════════════════════════════════════════ */
 
 const REFERENCE_ENDPOINTS = [
-  { method: "POST",   path: "/v1/predict",                    desc: "Stateless prediction",  cost: "5 cr" },
-  { method: "POST",   path: "/v1/sessions",                   desc: "Create session",        cost: "10 cr" },
-  { method: "POST",   path: "/v1/sessions/{id}/predict",      desc: "Session prediction",    cost: "4 cr" },
+  { method: "POST",   path: "/v1/predict",                    desc: "Stateless prediction",  cost: "$0.45" },
+  { method: "POST",   path: "/v1/sessions",                   desc: "Create session",        cost: "$0.90" },
+  { method: "POST",   path: "/v1/sessions/{id}/predict",      desc: "Session prediction",    cost: "$0.36" },
   { method: "POST",   path: "/v1/sessions/{id}/reset",        desc: "Reset session",         cost: "Free" },
   { method: "DELETE", path: "/v1/sessions/{id}",              desc: "Delete session",        cost: "Free" },
-  { method: "POST",   path: "/v1/ground",                     desc: "Locate UI element",     cost: "3 cr" },
-  { method: "POST",   path: "/v1/ocr",                        desc: "Extract text",          cost: "3 cr" },
+  { method: "POST",   path: "/v1/ground",                     desc: "Locate UI element",     cost: "$0.27" },
+  { method: "POST",   path: "/v1/ocr",                        desc: "Extract text",          cost: "$0.27" },
   { method: "POST",   path: "/v1/parse",                      desc: "Parse pyautogui code",  cost: "Free" },
   { method: "GET",    path: "/v1/usage",                      desc: "Usage summary",         cost: "Free" },
 ] as const
@@ -1523,7 +1542,7 @@ export function QuickReferenceTab() {
         <p className="text-[12.5px] text-muted-foreground/60 leading-relaxed mb-4">
           Every request needs an{" "}
           <code className="text-[11px] px-1.5 py-0.5 rounded-md bg-foreground/[0.05] font-mono text-foreground/80">X-API-Key</code>{" "}
-          header. Credits are deducted per request from your shared balance.
+          header. Each request draws down your USD API wallet balance.
         </p>
         <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.02] overflow-hidden">
           <pre className="px-3.5 py-3 text-[11px] leading-relaxed font-mono text-foreground/65 overflow-x-auto scrollbar-invisible">
@@ -1619,7 +1638,8 @@ export function QuickReferenceTab() {
   "usage": {
     "input_tokens": 1523,
     "output_tokens": 245,
-    "credits_charged": 5
+    "credits_charged": 5,
+    "cost_cents": 45
   }
 }`}</code>
           </pre>
@@ -1706,7 +1726,7 @@ export function CreateKeyDialog({
             </label>
             <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-foreground/[0.03] border border-foreground/[0.05]">
               {([
-                { id: "live" as const, label: "Live",    hint: "Bills credits"  },
+                { id: "live" as const, label: "Live",    hint: "Bills your USD balance" },
                 { id: "test" as const, label: "Test",    hint: "Sandbox · free" },
               ]).map(opt => (
                 <button

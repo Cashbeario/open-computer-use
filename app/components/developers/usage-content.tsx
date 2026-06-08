@@ -18,6 +18,9 @@ import {
 import {
   EASE,
   formatNum,
+  creditsToUsd,
+  creditsToUsdCents,
+  formatUsd,
   StatTile,
   ActivityChart,
   EndpointBreakdownPanel,
@@ -199,7 +202,7 @@ export function UsageContent() {
     <DevPageShell loading={loading}>
       <DevHeader
         title="Usage"
-        description="Your dollar API wallet, plus requests, credit consumption, and endpoint activity."
+        description="Your dollar API wallet, plus requests, spend, and endpoint activity."
         actions={
           <>
             <Link
@@ -241,10 +244,10 @@ export function UsageContent() {
           sparkData={sparkRequests}
         />
         <StatTile
-          label="Credits used"
-          value={formatNum(stats.totalCredits)}
+          label="Total spend"
+          value={formatUsd(creditsToUsdCents(stats.totalCredits))}
           suffix="last 30d"
-          hint={stats.avgCreditsPerRequest > 0 ? `${stats.avgCreditsPerRequest} cr/req avg` : undefined}
+          hint={stats.avgCreditsPerRequest > 0 ? `${creditsToUsd(stats.avgCreditsPerRequest)}/req avg` : undefined}
           sparkData={sparkCredits}
         />
         <StatTile

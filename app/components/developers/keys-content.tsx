@@ -271,7 +271,7 @@ export function KeysContent() {
             <div className="flex items-start gap-2 px-1 pt-1">
               <Shield className="h-3 w-3 text-muted-foreground/30 mt-0.5 shrink-0" />
               <p className="text-[10.5px] text-muted-foreground/45 leading-relaxed">
-                Test keys (<code className="font-mono text-[10px]">sk-coasty-test-…</code>) return mock responses without billing credits. Use them for local development and CI.
+                Test keys (<code className="font-mono text-[10px]">sk-coasty-test-…</code>) return mock responses without billing your balance. Use them for local development and CI.
               </p>
             </div>
           </div>

@@ -82,7 +82,7 @@ export const DOC_SECTIONS: DocSection[] = [
   { id: "responses",      title: "Response format",   group: "Reference",   icon: FileJson,           blurb: "The shape of every prediction response" },
   { id: "errors",         title: "Errors",            group: "Reference",   icon: AlertTriangle,      blurb: "Error envelope and HTTP status codes" },
   { id: "rate-limits",    title: "Rate limits",       group: "Reference",   icon: Gauge,              blurb: "Per-tier limits and rate-limit headers" },
-  { id: "pricing",        title: "Credits & pricing", group: "Reference",   icon: Coins,              blurb: "What each endpoint costs in credits" },
+  { id: "pricing",        title: "Pricing",           group: "Reference",   icon: Coins,              blurb: "What each endpoint costs in USD" },
 ]
 
 export const DOC_GROUPS: DocGroup[] = ["Get started", "Core API", "Agents", "Workflows", "Reference"]
@@ -117,11 +117,11 @@ export interface ErrorCode {
 export const ERROR_CODES: ErrorCode[] = [
   { status: 400, code: "INVALID_REQUEST",      meaning: "Malformed body or a field failed validation (missing screenshot, instruction too long)." },
   { status: 401, code: "INVALID_API_KEY",      meaning: "The X-API-Key header is missing, malformed, or the key was revoked." },
-  { status: 402, code: "INSUFFICIENT_CREDITS", meaning: "Your shared balance can't cover this request. Top up in the dashboard." },
+  { status: 402, code: "INSUFFICIENT_CREDITS", meaning: "Your USD wallet balance can't cover this request. Add funds in the dashboard." },
   { status: 403, code: "INSUFFICIENT_SCOPE",   meaning: "The key is valid but lacks the scope this endpoint requires." },
   { status: 404, code: "NOT_FOUND",            meaning: "The session or resource id does not exist or has expired." },
   { status: 429, code: "RATE_LIMITED",         meaning: "You exceeded your per-minute or concurrent-session limit. Back off and retry." },
-  { status: 500, code: "PREDICTION_FAILED",    meaning: "The model run failed. Credits for the request are automatically refunded." },
+  { status: 500, code: "PREDICTION_FAILED",    meaning: "The model run failed. The charge for the request is automatically refunded." },
   { status: 503, code: "SERVICE_UNAVAILABLE",  meaning: "A transient upstream issue. Retry with exponential backoff." },
 ]
 
@@ -146,14 +146,14 @@ export interface PriceRow {
 }
 
 export const PRICING: PriceRow[] = [
-  { endpoint: "POST /v1/predict",                  cost: "5 credits", note: "Stateless prediction." },
-  { endpoint: "POST /v1/sessions",                 cost: "10 credits", note: "One-time session creation." },
-  { endpoint: "POST /v1/sessions/{id}/predict",    cost: "4 credits", note: "Each step inside a session." },
-  { endpoint: "POST /v1/ground",                   cost: "3 credits", note: "Coordinate grounding." },
-  { endpoint: "POST /v1/ocr",                      cost: "3 credits", note: "Text extraction." },
-  { endpoint: "POST /v1/parse",                    cost: "Free",      note: "Deterministic, no model call." },
-  { endpoint: "POST /v1/runs",                     cost: "Per step",  note: "Billed per agent step from your dollar API wallet." },
-  { endpoint: "POST /v1/workflows/runs",           cost: "Per step",  note: "Each task step is a run; capped by budget_cents." },
+  { endpoint: "POST /v1/predict",                  cost: "$0.45", note: "Stateless prediction." },
+  { endpoint: "POST /v1/sessions",                 cost: "$0.90", note: "One-time session creation." },
+  { endpoint: "POST /v1/sessions/{id}/predict",    cost: "$0.36", note: "Each step inside a session." },
+  { endpoint: "POST /v1/ground",                   cost: "$0.27", note: "Coordinate grounding." },
+  { endpoint: "POST /v1/ocr",                      cost: "$0.27", note: "Text extraction." },
+  { endpoint: "POST /v1/parse",                    cost: "Free",  note: "Deterministic, no model call." },
+  { endpoint: "POST /v1/runs",                     cost: "$0.45/step", note: "Per agent step on v3/v4 (v1 is $0.72), billed from your dollar API wallet." },
+  { endpoint: "POST /v1/workflows/runs",           cost: "$0.45/step", note: "Each task step is a run; total capped by budget_cents." },
 ]
 
 /* ─── Agents (Task Runs) reference data ─── */
@@ -177,8 +177,8 @@ export const RUN_FIELDS: RunField[] = [
   { field: "max_steps",          type: "int",     description: "Hard cap on agent steps (default 50)." },
   { field: "on_awaiting_human",  type: "string",  description: "What to do when a human is needed: pause, fail, or cancel." },
   { field: "steps_completed",    type: "int",     description: "How many agent steps have run so far." },
-  { field: "credits_charged",    type: "int",     description: "Credits billed from your wallet to date." },
-  { field: "cost_cents",         type: "int",     description: "Dollar-API wallet cost so far, in cents." },
+  { field: "credits_charged",    type: "int",     description: "Internal cost units billed (1 unit = $0.09). See cost_cents for the dollar amount." },
+  { field: "cost_cents",         type: "int",     description: "Dollar cost so far, in cents (USD)." },
   { field: "result",             type: "object",  description: "{ passed, status, summary, verdict? } once the run finishes." },
   { field: "error",              type: "object",  description: "{ code, message } when the run failed (nullable)." },
   { field: "awaiting_human_reason", type: "string", description: "Why the run paused for a human (nullable)." },
@@ -262,6 +262,21 @@ export const CONDITION_OPS: ConditionOp[] = [
   { op: "not",                     shape: "{ op, condition }",         description: "Negate a condition." },
 ]
 
+export interface WorkflowLimit {
+  limit: string
+  rule: string
+}
+
+/* Validation limits the DSL enforces at create / ad-hoc time. */
+export const WORKFLOW_LIMITS: WorkflowLimit[] = [
+  { limit: "Max steps",          rule: "A definition holds at most 100 steps in total (counting every nested step)." },
+  { limit: "Max nesting depth",  rule: "Steps can nest at most 8 levels deep (if, loop, parallel, retry bodies)." },
+  { limit: "Parallel branches",  rule: "A parallel step takes at most 16 branches; they run concurrently." },
+  { limit: "Retry attempts",     rule: "retry max_attempts is an integer from 1 to 20." },
+  { limit: "Parallel contents",  rule: "human_approval, succeed, and fail are not allowed inside a parallel branch." },
+  { limit: "save_as name",       rule: "save_as must not be \"inputs\" or \"vars\" (those namespaces are reserved)." },
+]
+
 export interface WorkflowRunField {
   field: string
   type: string
@@ -282,8 +297,8 @@ export const WORKFLOW_RUN_FIELDS: WorkflowRunField[] = [
   { field: "awaiting_human_reason", type: "string", description: "Why the run paused (nullable)." },
   { field: "awaiting_step_id",   type: "string", description: "The step id awaiting human approval (nullable)." },
   { field: "iterations_used",    type: "int",    description: "Loop iterations consumed against max_iterations." },
-  { field: "spent_cents",        type: "int",    description: "Total spend so far, in cents." },
-  { field: "budget_cents",       type: "int",    description: "Spend cap (0 means unlimited)." },
+  { field: "spent_cents",        type: "int",    description: "Total spend so far, in USD cents." },
+  { field: "budget_cents",       type: "int",    description: "Spend cap, in USD cents (0 means unlimited)." },
   { field: "created_at",         type: "string", description: "ISO-8601 creation timestamp." },
   { field: "started_at",         type: "string", description: "When execution began (nullable)." },
   { field: "finished_at",        type: "string", description: "When the run reached a terminal state (nullable)." },
@@ -2119,13 +2134,13 @@ export const RESPONSE_EXAMPLE = {
     { action_type: "type_text", params: { text: "you@example.com" }, description: "Type the email address" },
   ],
   raw_code: ["pyautogui.click(512, 340)", "pyautogui.typewrite('you@example.com')"],
-  usage: { input_tokens: 1523, output_tokens: 245, credits_charged: 5 },
+  usage: { input_tokens: 1523, output_tokens: 245, credits_charged: 5, cost_cents: 45 },
 }
 
 export const ERROR_EXAMPLE = {
   error: {
     code: "INSUFFICIENT_CREDITS",
-    message: "Your account does not have enough credits to complete this request.",
+    message: "Your API wallet does not have enough funds to complete this request.",
     type: "payment_required",
     request_id: "req_8f2c1e9a",
   },
@@ -2575,7 +2590,7 @@ function DocsBody() {
         <RefTable
           head={["Prefix", "Kind", "Behaviour"]}
           rows={[
-            [<InlineCode key="a">sk-coasty-live-</InlineCode>, <span key="b" className="font-medium text-foreground/80">Live</span>, "Runs the real model and deducts credits from your balance."],
+            [<InlineCode key="a">sk-coasty-live-</InlineCode>, <span key="b" className="font-medium text-foreground/80">Live</span>, "Runs the real model and draws down your USD wallet balance."],
             [<InlineCode key="c">sk-coasty-test-</InlineCode>, <span key="d" className="font-medium text-foreground/80">Test</span>, "Returns mock responses and never bills. Ideal for local dev and CI."],
           ]}
         />
@@ -2894,10 +2909,28 @@ function DocsBody() {
         />
         <Callout>
           Three hard guards stop a workflow run when breached:{" "}
-          <InlineCode>budget_cents</InlineCode> (spend cap; 0 means unlimited),{" "}
+          <InlineCode>budget_cents</InlineCode> (spend cap in USD cents; 0 means unlimited),{" "}
           <InlineCode>max_iterations</InlineCode> (loop cap), and{" "}
           <InlineCode>deadline_seconds</InlineCode> (wall-clock). A breach ends the run as{" "}
           <InlineCode>failed</InlineCode> or <InlineCode>timed_out</InlineCode>.
+        </Callout>
+        <P>
+          A definition is validated before it is accepted. The limits below are enforced at create and
+          ad-hoc time, so an invalid definition is rejected with <InlineCode>400 INVALID_REQUEST</InlineCode>{" "}
+          rather than failing mid-run.
+        </P>
+        <RefTable
+          head={["Limit", "Rule"]}
+          rows={WORKFLOW_LIMITS.map((l) => [
+            <span key={l.limit} className="font-medium text-foreground/80">{l.limit}</span>,
+            l.rule,
+          ])}
+        />
+        <Callout>
+          Workflows are version-pinned. When a run starts, the workflow&apos;s current{" "}
+          <InlineCode>definition</InlineCode> is snapshotted into that run, so editing or replacing the
+          workflow (which bumps its <InlineCode>version</InlineCode>) never changes runs already in
+          flight. Each run records the <InlineCode>workflow_version</InlineCode> it executed.
         </Callout>
       </DocBlock>
 
@@ -2963,7 +2996,7 @@ function DocsBody() {
           ordered list to execute; <InlineCode>status</InlineCode> tells you whether to keep going
           (<InlineCode>continue</InlineCode>), stop successfully (<InlineCode>done</InlineCode>), or stop
           because the task is impossible (<InlineCode>fail</InlineCode>). <InlineCode>usage</InlineCode>{" "}
-          reports tokens and the credits charged for the call.
+          reports tokens and the dollar cost of the call (<InlineCode>cost_cents</InlineCode>).
         </P>
         <JsonBlock value={RESPONSE_EXAMPLE} />
         <RefTable
@@ -2974,7 +3007,9 @@ function DocsBody() {
             [<InlineCode key="c">actions</InlineCode>, "Ordered list of actions to perform this step."],
             [<InlineCode key="d">reasoning</InlineCode>, "The model's explanation (omitted if include_reasoning is false)."],
             [<InlineCode key="e">raw_code</InlineCode>, "The equivalent pyautogui lines, if you prefer to run those."],
-            [<InlineCode key="f">usage</InlineCode>, <>Tokens and <InlineCode>credits_charged</InlineCode> for the request.</>],
+            [<InlineCode key="f">usage</InlineCode>, <>Tokens plus the cost of the request (see the two fields below).</>],
+            [<InlineCode key="g">usage.credits_charged</InlineCode>, <>Internal cost units billed (1 unit = <InlineCode>$0.09</InlineCode>). See <InlineCode>cost_cents</InlineCode> for the dollar amount.</>],
+            [<InlineCode key="h">usage.cost_cents</InlineCode>, "Dollar cost so far, in cents (USD)."],
           ]}
         />
       </DocBlock>
@@ -2999,7 +3034,7 @@ function DocsBody() {
         <Callout>
           Treat <InlineCode>429</InlineCode> and <InlineCode>503</InlineCode> as retryable with
           exponential backoff. A <InlineCode>500</InlineCode> automatically refunds the request&apos;s
-          credits, so it is safe to retry idempotent calls.
+          charge to your wallet, so it is safe to retry idempotent calls.
         </Callout>
       </DocBlock>
 
@@ -3025,9 +3060,11 @@ function DocsBody() {
       {/* ── Pricing ── */}
       <DocBlock section={sec("pricing")}>
         <P>
-          Requests are billed in credits from your shared balance. Credits are charged before the model
-          runs and automatically refunded if a request fails server-side. High-resolution screenshots
-          (above 1280×720) and longer trajectories add a small surcharge; test keys are always free.
+          Requests are billed in US dollars from your API wallet. The charge is taken before the model
+          runs and automatically refunded if a request fails server-side. Internally each request unit is{" "}
+          <InlineCode>$0.09</InlineCode> (the granularity behind every price below), but everything you
+          pay and see is dollars. High-resolution screenshots (above 1280×720) and longer trajectories
+          add a small surcharge; test keys are always free.
         </P>
         <RefTable
           head={["Endpoint", "Cost", "Notes"]}

@@ -34,6 +34,8 @@ import { Search, Bug, Globe, FileText, BarChart3, Mail, Zap, Sparkles, PenTool, 
 import { SwarmPanel } from "./swarm-panel"
 import { CinematicIntro, TaglineIntro } from "./cinematic-intro"
 import { useIntroStore } from "@/lib/intro-store"
+import { usePlatformMode } from "@/lib/platform-mode-store"
+import { DeveloperHomeSummary } from "@/app/components/developers/developer-home-summary"
 import { ActiveSwarmBanner, type ActiveSwarm } from "./active-swarm-banner"
 import { RemoteApproval } from "./remote-approval"
 
@@ -562,6 +564,9 @@ export function Chat() {
   const initialMessages = cleanMessageToolInvocations(providerMessages)
 
   const { user } = useUser()
+  // Platform mode (consumer | developer). In developer mode the chat homepage
+  // shows a minimal API summary instead of the greeting + chat input.
+  const platformMode = usePlatformMode((s) => s.mode)
   const { preferences } = useUserPreferences()
   const { draftValue, clearDraft } = useChatDraft(effectiveChatId)
 
@@ -1004,6 +1009,10 @@ export function Chat() {
 
   const showOnboarding = !effectiveChatId && redirectCheckMessages.length === 0
 
+  // Developer-mode homepage: on the empty state, render the API summary instead
+  // of the greeting + chat input (only for a signed-in user, never mid-swarm).
+  const isDeveloperHome = showOnboarding && platformMode === "developer" && !!user
+
   // ── Cinematic intro ──
   // Phase lives in a shared store so the app header (rendered above us in
   // LayoutApp) can stay invisible until the intro completes — otherwise it
@@ -1083,11 +1092,14 @@ export function Chat() {
           estimatedRuntime={creditsModalData.estimatedRuntime}
           errorMessage={creditsModalData.errorMessage}
         />
-        {showOnboarding && !!user && <QuickStartGuide />}
+        {showOnboarding && !!user && !isDeveloperHome && <QuickStartGuide />}
 
       
       <AnimatePresence initial={false} mode="popLayout">
-        {showOnboarding && !swarmFullscreen && (
+        {isDeveloperHome && !swarmFullscreen && (
+          <DeveloperHomeSummary key="developer-home" />
+        )}
+        {showOnboarding && !swarmFullscreen && !isDeveloperHome && (
           <motion.div
             key="onboarding"
             className="relative mx-auto w-full overflow-visible pb-12 sm:pb-10"
@@ -1255,6 +1267,8 @@ export function Chat() {
         )}
       </AnimatePresence>
 
+      {/* Developer-mode homepage replaces the input with the API summary above. */}
+      {!isDeveloperHome && (
       <motion.div
         className={cn(
           "relative inset-x-0 bottom-0 z-50 mx-auto w-full px-4 sm:px-6 md:px-8",
@@ -1375,6 +1389,7 @@ export function Chat() {
           .thv-pulse-dot { animation: thv-pulse-dot 2s ease-in-out infinite; }
         ` }} />
       </motion.div>
+      )}
     </div>
   )
 }

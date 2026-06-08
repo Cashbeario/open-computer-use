@@ -11,7 +11,7 @@ import {
 
 /* ===================================================================
    Logs page — every API request as a filterable, exportable trace
-   (endpoint, credits, timing, request_id). Search, time-range, endpoint
+   (endpoint, cost, timing, request_id). Search, time-range, endpoint
    filters, live auto-refresh, and CSV/JSON export all live in TracesPanel.
    =================================================================== */
 
@@ -22,7 +22,7 @@ export function LogsContent() {
     <DevPageShell loading={loading}>
       <DevHeader
         title="Logs"
-        description="Inspect every API request: endpoints, credits, timing, and request IDs."
+        description="Inspect every API request: endpoints, cost, timing, and request IDs."
       />
 
       <motion.div

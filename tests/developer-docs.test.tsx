@@ -187,6 +187,32 @@ describe("reference tables", () => {
     // parse must be documented as free
     expect(PRICING.some((p) => /parse/.test(p.endpoint) && /free/i.test(p.cost))).toBe(true)
   })
+
+  it("PRICING is denominated in USD, never credits", () => {
+    // Every cost is a dollar string ($X.XX, with an optional /step suffix) or "Free".
+    for (const p of PRICING) {
+      expect(p.cost, `${p.endpoint} cost "${p.cost}" must be USD or Free`).toMatch(/^(\$\d+\.\d{2}(\/step)?|Free)$/)
+      expect(p.cost.startsWith("$") || p.cost === "Free", `${p.endpoint} cost must start with $ or be Free`).toBe(true)
+      // the word "credit(s)" must never appear in a displayed price
+      expect(/credit/i.test(p.cost), `${p.endpoint} cost must not say "credits"`).toBe(false)
+    }
+    // the headline endpoints carry their exact USD prices
+    const byEndpoint = Object.fromEntries(PRICING.map((p) => [p.endpoint, p.cost]))
+    expect(byEndpoint["POST /v1/predict"]).toBe("$0.45")
+    expect(byEndpoint["POST /v1/sessions"]).toBe("$0.90")
+    expect(byEndpoint["POST /v1/sessions/{id}/predict"]).toBe("$0.36")
+    expect(byEndpoint["POST /v1/ground"]).toBe("$0.27")
+    expect(byEndpoint["POST /v1/ocr"]).toBe("$0.27")
+    expect(byEndpoint["POST /v1/parse"]).toBe("Free")
+  })
+
+  it("the pricing sidebar entry is USD-framed, not credit-framed", () => {
+    const pricing = DOC_SECTIONS.find((s) => s.id === "pricing")
+    expect(pricing).toBeTruthy()
+    expect(/credit/i.test(pricing!.title), "pricing title must not say credits").toBe(false)
+    expect(/credit/i.test(pricing!.blurb), "pricing blurb must not say credits").toBe(false)
+    expect(pricing!.blurb).toMatch(/USD|dollar|\$/i)
+  })
 })
 
 // ═══════════════════════ B. CODE CORRECTNESS ═══════════════════════
@@ -323,6 +349,19 @@ describe("DeveloperDocs rendering", () => {
       const pills = screen.getAllByRole("button", { name: s.title })
       expect(pills.length, `missing mobile pill for "${s.title}"`).toBeGreaterThanOrEqual(1)
     }
+  })
+
+  it("renders the pricing table in USD ($) and never as credits", () => {
+    const { container } = render(<DeveloperDocs />)
+    const pricing = container.querySelector("#pricing")!
+    expect(pricing).toBeTruthy()
+    const text = pricing.textContent ?? ""
+    // The headline USD prices appear in the rendered table.
+    expect(text).toContain("$0.45")
+    expect(text).toContain("$0.90")
+    expect(text).toContain("$0.27")
+    // No "credit" wording leaks into the rendered pricing section.
+    expect(/credit/i.test(text), "pricing section must not show the word credits").toBe(false)
   })
 })
 

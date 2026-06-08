@@ -15,8 +15,12 @@
 #
 # Optional env:
 #   AWS_SESSION_TOKEN, IMAGE_TAG (default: latest), ECR_HOST,
-#   SKIP_TESTS=1, SKIP_TERRAFORM=1, COMPOSE_FILE (default: docker-compose.yml),
-#   TF_DIR (default: infra/aws)
+#   SKIP_TESTS=1, SKIP_BUILD=1, SKIP_TERRAFORM=1,
+#   COMPOSE_FILE (default: docker-compose.yml), TF_DIR (default: infra/aws)
+#
+# SKIP_BUILD=1 reuses the existing local llmhub-backend:latest /
+# llmhub-frontend:latest images (e.g. when `docker compose build` already
+# succeeded but hung on teardown) and jumps straight to tag/push/terraform.
 
 set -euo pipefail
 
@@ -101,8 +105,18 @@ log "ecr" "logged in"
 # ---------- 3. compose build ----------
 # Compose auto-reads ./.env for build args (Stripe/Supabase/Encryption keys).
 # Outputs local images: llmhub-backend:latest, llmhub-frontend:latest
-log "build" "docker compose -f $COMPOSE_FILE build"
-docker compose -f "$COMPOSE_FILE" build
+if [[ "${SKIP_BUILD:-}" == "1" ]]; then
+  log "build" "SKIP_BUILD=1 -- reusing existing local llmhub-backend:latest / llmhub-frontend:latest"
+  for img in "llmhub-backend:latest" "llmhub-frontend:latest"; do
+    if ! docker image inspect "$img" >/dev/null 2>&1; then
+      fail "build" "SKIP_BUILD=1 but local image '$img' not found -- run once without SKIP_BUILD first"
+      exit 1
+    fi
+  done
+else
+  log "build" "docker compose -f $COMPOSE_FILE build"
+  docker compose -f "$COMPOSE_FILE" build
+fi
 
 # ---------- 4. tag for ECR ----------
 # Tag with BOTH the immutable version (canonical, what prod runs) and :latest

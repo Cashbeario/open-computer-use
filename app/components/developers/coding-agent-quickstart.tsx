@@ -120,7 +120,7 @@ function OptionChip({
           )}
         />
       )}
-      <span className="truncate">{label}</span>
+      <span className="whitespace-nowrap">{label}</span>
     </button>
   )
 }
@@ -214,8 +214,8 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
           <TriggerButton />
         </span>
       </DialogTrigger>
-      <DialogContent className="max-h-[88vh] gap-0 overflow-y-auto p-0 sm:max-w-xl">
-        <DialogHeader className="space-y-1 border-b border-foreground/[0.06] px-5 py-4 text-left">
+      <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <DialogHeader className="shrink-0 space-y-1 border-b border-foreground/[0.06] px-5 py-4 pr-12 text-left">
           <div className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/50">
             Coding Agent Quickstart
           </div>
@@ -225,52 +225,46 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
           <Question title="What are you coding with?">
-            <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
-              {CODING_AGENT_OPTIONS.map((o) => (
-                <OptionChip
-                  key={o.id}
-                  selected={cfg.codingAgent === o.id}
-                  onSelect={() => cfg.setCodingAgent(o.id)}
-                  logo={AGENT_LOGOS[o.id]}
-                  label={o.label}
-                />
-              ))}
-            </div>
+            {CODING_AGENT_OPTIONS.map((o) => (
+              <OptionChip
+                key={o.id}
+                selected={cfg.codingAgent === o.id}
+                onSelect={() => cfg.setCodingAgent(o.id)}
+                logo={AGENT_LOGOS[o.id]}
+                label={o.label}
+              />
+            ))}
           </Question>
           {cfg.codingAgent === "other" && (
             <OtherInput value={cfg.customAgent} onChange={cfg.setCustomAgent} placeholder="Which tool? e.g. Cline, Aider, Zed" />
           )}
 
           <Question title="What integration should the prompt generate?">
-            <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
-              {INTEGRATION_OPTIONS.map((o) => (
-                <OptionChip
-                  key={o.id}
-                  selected={cfg.integration === o.id}
-                  onSelect={() => cfg.setIntegration(o.id)}
-                  logo={o.id === "other" ? MoreHorizontal : INTEGRATION_LOGOS[o.id]}
-                  label={o.label}
-                />
-              ))}
-            </div>
+            {INTEGRATION_OPTIONS.map((o) => (
+              <OptionChip
+                key={o.id}
+                selected={cfg.integration === o.id}
+                onSelect={() => cfg.setIntegration(o.id)}
+                logo={o.id === "other" ? MoreHorizontal : INTEGRATION_LOGOS[o.id]}
+                label={o.label}
+              />
+            ))}
           </Question>
           {cfg.integration === "other" && (
             <OtherInput value={cfg.customIntegration} onChange={cfg.setCustomIntegration} placeholder="Which language or SDK?" />
           )}
 
           <Question title="What are you building?">
-            <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
-              {BUILD_TARGET_OPTIONS.map((o) => (
-                <OptionChip
-                  key={o.id}
-                  selected={cfg.building === o.id}
-                  onSelect={() => cfg.setBuilding(o.id)}
-                  label={o.label}
-                />
-              ))}
-            </div>
+            {BUILD_TARGET_OPTIONS.map((o) => (
+              <OptionChip
+                key={o.id}
+                selected={cfg.building === o.id}
+                onSelect={() => cfg.setBuilding(o.id)}
+                label={o.label}
+              />
+            ))}
           </Question>
           {cfg.building === "other" && (
             <OtherInput value={cfg.customBuilding} onChange={cfg.setCustomBuilding} placeholder="Describe what you want to build" />
@@ -278,18 +272,18 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
 
           {/* Tailored prompt preview. */}
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between gap-3">
               <div className="text-[12px] font-medium text-foreground/80">Your prompt</div>
-              <div className="text-[10.5px] text-muted-foreground/55">Tailored to your answers</div>
+              <div className="shrink-0 text-[10.5px] text-muted-foreground/55">Tailored to your answers</div>
             </div>
-            <pre className="max-h-36 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] p-3 text-[11px] leading-relaxed text-foreground/70">
+            <pre className="max-h-40 overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] p-3 text-[11px] leading-relaxed text-foreground/70 sm:max-h-52">
               {prompt}
             </pre>
           </div>
         </div>
 
-        {/* Actions. */}
-        <div className="flex flex-col-reverse gap-2 border-t border-foreground/[0.06] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-end">
+        {/* Actions — pinned below the scroll area so they stay reachable. */}
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-foreground/[0.06] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-end">
           <button
             type="button"
             onClick={() => openIn(CHATGPT_BASE)}

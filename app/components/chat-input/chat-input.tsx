@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { VMSelector } from "@/components/common/vm-selector/vm-selector"
-import { ArrowUpIcon, StopIcon, WarningCircle, CircleNotch, ArrowsClockwise } from "@phosphor-icons/react"
+import { ArrowUpIcon, WarningCircle, CircleNotch, ArrowsClockwise } from "@phosphor-icons/react"
 import { CloudDesktopIcon } from "@/components/icons/cloud-desktop"
 import { useCallback, useMemo, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
@@ -22,6 +22,7 @@ import { ButtonVMFileUpload } from "./button-vm-file-upload"
 import { ButtonViewScreen } from "./button-view-screen"
 import { ButtonConnections } from "./button-connections"
 import { FileList } from "./file-list"
+import { StopTaskButton } from "./stop-task-button"
 
 type ChatInputProps = {
   value: string
@@ -492,6 +493,18 @@ export function ChatInput({
     }
   }, [isStoppingMachine, selectedVMId, onSend])
 
+  // Track when the current run started, so the stop-confirm can show how long
+  // it's been working (and thus how much progress is on the line). Set once
+  // when a run begins; cleared when it finishes.
+  const [streamStartedAt, setStreamStartedAt] = useState<number | null>(null)
+  useEffect(() => {
+    if (status === "streaming" || status === "submitted") {
+      setStreamStartedAt((prev) => prev ?? Date.now())
+    } else {
+      setStreamStartedAt(null)
+    }
+  }, [status])
+
   const handleSend = useCallback(async () => {
     // Allow stopping even if isSubmitting is true
     if (status === "streaming") {
@@ -707,54 +720,56 @@ export function ChatInput({
                   users; not shown in swarm mode to keep that row focused. */}
               {isUserAuthenticated && !swarmMode && <ButtonConnections />}
             </div>
-            <PromptInputAction
-              tooltip={
-                status === "streaming" ? t("buttons.stop") :
-                swarmMode ? t("buttons.sendToSwarm") :
-                isMachineBusy ? t("buttons.taskRunning") :
-                (!selectedVMId || selectedVMId === "none") ? t("buttons.selectComputer") :
-                (machineStatus === "creating") ? t("buttons.waitCreating") :
-                (machineStatus === "starting" || machineStatus === "stopped") ? t("buttons.waitStarting") :
-                (machineStatus === "running" && !agentReady) ? t("buttons.waitAgent") :
-                (machineStatus === "stopping") ? t("buttons.vmStopping") :
-                t("buttons.send")
-              }
-            >
-              {isMachineBusy && value && !isOnlyWhitespace(value) && status !== "streaming" ? (
-                <Button
-                  size="sm"
-                  className="h-9 rounded-full transition-all duration-300 ease-out px-2.5 sm:px-3 gap-1.5 bg-amber-600 hover:bg-amber-700 text-white border-0"
-                  disabled={isStoppingMachine}
-                  type="button"
-                  onClick={forceStopAndSend}
-                  aria-label={t("buttons.stopLabel")}
-                >
-                  {isStoppingMachine ? (
-                    <CircleNotch className="size-4 shrink-0 animate-spin" />
-                  ) : (
-                    <ArrowsClockwise className="size-4 shrink-0" />
-                  )}
-                  <span className="text-xs font-medium hidden sm:inline whitespace-nowrap">
-                    {isStoppingMachine ? t("buttons.switching") : t("buttons.overrideRun")}
-                  </span>
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="size-9 rounded-full transition-all duration-300 ease-out"
-                  disabled={status === "streaming" ? false : (!!(!value || isSubmitting || isOnlyWhitespace(value) || (!swarmMode && (!selectedVMId || selectedVMId === "none" || machineStatus !== "running" || !agentReady))))}
-                  type="button"
-                  onClick={handleSend}
-                  aria-label={status === "streaming" ? t("buttons.stop") : t("buttons.sendLabel")}
-                >
-                  {status === "streaming" ? (
-                    <StopIcon className="size-4" />
-                  ) : (
+            {status === "streaming" ? (
+              // Stopping a running task goes through a calm confirm (see
+              // StopTaskButton) — most premature stops are impatience or a
+              // misclick, so we nudge toward letting it finish first.
+              <StopTaskButton startedAt={streamStartedAt} onStop={stop} />
+            ) : (
+              <PromptInputAction
+                tooltip={
+                  swarmMode ? t("buttons.sendToSwarm") :
+                  isMachineBusy ? t("buttons.taskRunning") :
+                  (!selectedVMId || selectedVMId === "none") ? t("buttons.selectComputer") :
+                  (machineStatus === "creating") ? t("buttons.waitCreating") :
+                  (machineStatus === "starting" || machineStatus === "stopped") ? t("buttons.waitStarting") :
+                  (machineStatus === "running" && !agentReady) ? t("buttons.waitAgent") :
+                  (machineStatus === "stopping") ? t("buttons.vmStopping") :
+                  t("buttons.send")
+                }
+              >
+                {isMachineBusy && value && !isOnlyWhitespace(value) ? (
+                  <Button
+                    size="sm"
+                    className="h-9 rounded-full transition-all duration-300 ease-out px-2.5 sm:px-3 gap-1.5 bg-amber-600 hover:bg-amber-700 text-white border-0"
+                    disabled={isStoppingMachine}
+                    type="button"
+                    onClick={forceStopAndSend}
+                    aria-label={t("buttons.stopLabel")}
+                  >
+                    {isStoppingMachine ? (
+                      <CircleNotch className="size-4 shrink-0 animate-spin" />
+                    ) : (
+                      <ArrowsClockwise className="size-4 shrink-0" />
+                    )}
+                    <span className="text-xs font-medium hidden sm:inline whitespace-nowrap">
+                      {isStoppingMachine ? t("buttons.switching") : t("buttons.overrideRun")}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="size-9 rounded-full transition-all duration-300 ease-out"
+                    disabled={!!(!value || isSubmitting || isOnlyWhitespace(value) || (!swarmMode && (!selectedVMId || selectedVMId === "none" || machineStatus !== "running" || !agentReady)))}
+                    type="button"
+                    onClick={handleSend}
+                    aria-label={t("buttons.sendLabel")}
+                  >
                     <ArrowUpIcon className="size-4" />
-                  )}
-                </Button>
-              )}
-            </PromptInputAction>
+                  </Button>
+                )}
+              </PromptInputAction>
+            )}
           </PromptInputActions>
         </PromptInput>
       </div>

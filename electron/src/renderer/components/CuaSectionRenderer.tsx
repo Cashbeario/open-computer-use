@@ -107,6 +107,14 @@ type SectionType =
   | 'code-agent-thought'
   | 'code-agent-result'
   | 'code-agent-done'
+  | 'composio-agent-thought'
+  | 'composio-agent-search'
+  | 'composio-agent-result'
+  | 'composio-agent-done'
+  | 'composio-agent-reauth'
+  | 'composio-agent-breaker'
+  | 'composio-agent-cancelled'
+  | 'composio-agent-deadline'
   | 'action-result'
   | 'status'
   | 'search-results'
@@ -135,6 +143,12 @@ type TopLevelItem =
   | { kind: 'code-agent-result'; content: string; step: string }
   | { kind: 'code-agent-done'; content: string; step: string }
   | { kind: 'code-agent-summary'; content: string }
+  | { kind: 'composio-agent-thought'; content: string; step: string }
+  | { kind: 'composio-agent-search'; content: string; step: string }
+  | { kind: 'composio-agent-result'; content: string; step: string; toolkit: string; slug: string; status: string }
+  | { kind: 'composio-agent-done'; content: string }
+  | { kind: 'composio-agent-reauth'; content: string; toolkit: string }
+  | { kind: 'composio-agent-note'; content: string }
   | { kind: 'search-results'; query: string; content: string }
   | { kind: 'awaiting-human'; reason: string; machineId: string }
   | { kind: 'awaiting-human-timeout'; content: string }
@@ -267,6 +281,28 @@ function buildTopLevel(sections: ParsedSection[]): TopLevelItem[] {
     } else if (s.type === 'code-agent-summary') {
       flushStep()
       items.push({ kind: 'code-agent-summary', content: s.content })
+    } else if (s.type === 'composio-agent-thought') {
+      flushStep()
+      items.push({ kind: 'composio-agent-thought', content: s.content, step: s.attrs.step || '' })
+    } else if (s.type === 'composio-agent-search') {
+      flushStep()
+      items.push({ kind: 'composio-agent-search', content: s.content, step: s.attrs.step || '' })
+    } else if (s.type === 'composio-agent-result') {
+      flushStep()
+      items.push({ kind: 'composio-agent-result', content: s.content, step: s.attrs.step || '', toolkit: s.attrs.toolkit || '', slug: s.attrs.slug || '', status: s.attrs.status || 'success' })
+    } else if (s.type === 'composio-agent-done') {
+      flushStep()
+      items.push({ kind: 'composio-agent-done', content: s.content })
+    } else if (s.type === 'composio-agent-reauth') {
+      flushStep()
+      items.push({ kind: 'composio-agent-reauth', content: s.content, toolkit: s.attrs.toolkit || '' })
+    } else if (
+      s.type === 'composio-agent-breaker' ||
+      s.type === 'composio-agent-cancelled' ||
+      s.type === 'composio-agent-deadline'
+    ) {
+      flushStep()
+      items.push({ kind: 'composio-agent-note', content: s.content })
     } else if (s.type === 'search-results') {
       flushStep()
       items.push({ kind: 'search-results', query: s.attrs.query || '', content: s.content })
@@ -576,6 +612,62 @@ function extractAgentAction(code: string): { type: string; label: string; detail
   return null
 }
 
+/**
+ * Detect the worker's `agent.call_composio(...)` DELEGATION (the post-refactor
+ * entry point; the inline composio_call/search/actions primitives are retired).
+ * Returns the optional narrow-task string, or {} for a no-arg full-task call.
+ */
+function extractComposioDelegation(code: string): { task?: string } | null {
+  const m =
+    code.match(/agent\.call_composio\s*\(\s*(?:task\s*=\s*)?"([\s\S]*?)(?:"\s*[,)])/s) ||
+    code.match(/agent\.call_composio\s*\(\s*(?:task\s*=\s*)?'([\s\S]*?)(?:'\s*[,)])/s)
+  if (m) return { task: m[1].replace(/\\n/g, ' ').trim() || undefined }
+  if (/agent\.call_composio\s*\(/.test(code)) return {}
+  return null
+}
+
+/** "gmail" → "Gmail", "google_drive" → "Google Drive" */
+function humanizeToolkit(toolkit: string): string {
+  return (toolkit || '')
+    .split('_')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ')
+}
+
+/** "GMAIL_SEND_EMAIL" + toolkit "gmail" → "Send email" (prefix dropped, sentence-cased). */
+function humanizeAction(slug: string, toolkit: string): string {
+  if (!slug) return ''
+  let rest = slug
+  const tkUpper = (toolkit || '').toUpperCase()
+  if (tkUpper && rest.toUpperCase().startsWith(tkUpper + '_')) {
+    rest = rest.slice(tkUpper.length + 1)
+  }
+  const words = rest.replace(/_/g, ' ').trim().toLowerCase()
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : ''
+}
+
+/**
+ * Timeline marker for Composio sub-agent items — the integration equivalent of
+ * TerminalDot. A small upright tile with a SOLID surface so the (often colored)
+ * brand logo reads cleanly. Centered on the rail at +3px (-left-[8px] + 22/2 = 3).
+ */
+function IntegrationDot({ toolkit }: { toolkit: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        'absolute -left-[8px] top-[1px] z-[2]',
+        'flex h-[22px] w-[22px] items-center justify-center rounded-[6px]',
+        'bg-neutral-800 ring-1 ring-white/[0.08]',
+        'shadow-[0_1px_2px_rgba(0,0,0,0.25),0_2px_5px_rgba(0,0,0,0.15)]',
+      )}
+    >
+      <IntegrationLogo toolkit={toolkit} />
+    </div>
+  )
+}
+
 function StepCard({
   step,
   screenshot,
@@ -599,8 +691,19 @@ function StepCard({
   // Integration pill wins over the Code Agent pill — see the web
   // renderer for the rationale (same parser, same precedence).
   const integrationAction = step.code ? extractIntegrationAction(step.code) : null
+  const composioDelegation =
+    !integrationAction && step.code ? extractComposioDelegation(step.code) : null
   const agentAction =
-    !integrationAction && step.code ? extractAgentAction(step.code) : null
+    !integrationAction && !composioDelegation && step.code ? extractAgentAction(step.code) : null
+  const isDelegation = !!(agentAction || composioDelegation)
+
+  // A delegation's eval returns a no-op time.sleep(...), surfaced as a
+  // "Waiting about N seconds…" line/badge. Drop it on delegation steps.
+  const isWaitNoop = (s: string) => /^\s*waiting\b[\s\S]*\bseconds?\b/i.test(s)
+  const showAction = actionText && !(isDelegation && isWaitNoop(actionText))
+  const visibleResults = isDelegation
+    ? step.results.filter((r) => !isWaitNoop(r.content))
+    : step.results
 
   return (
     // Bottom padding intentionally omitted — the parent timeline uses a
@@ -613,9 +716,9 @@ function StepCard({
         <PlainDot status={status} />
       )}
 
-      {/* Action — the natural language line (truncated for readability) */}
-      {actionText && (
-        <p className="text-[15px] leading-relaxed text-neutral-100/90 break-words overflow-hidden">
+      {/* Action — canonical timeline prose: 14px / leading-relaxed / sans. */}
+      {showAction && (
+        <p className="text-[14px] leading-relaxed text-neutral-100/90 break-words overflow-hidden">
           {truncateText(actionText, 200)}
         </p>
       )}
@@ -641,29 +744,40 @@ function StepCard({
         </div>
       )}
 
-      {/* Agent function call pill + prompt card (e.g. code_agent) */}
-      {agentAction && (
-        <div className="mt-1.5 rounded-lg border border-emerald-400/12 bg-emerald-400/[0.03] overflow-hidden">
-          <div className="flex items-center gap-2 px-2.5 py-1.5">
-            <span className="inline-flex items-center gap-1.5 text-[11.5px] leading-none font-medium px-2 py-[3px] rounded-full bg-emerald-500/12 text-emerald-400">
-              <IconTerminal className="w-3 h-3 shrink-0" />
-              {agentAction.label}
+      {/* Integration delegation — a small inline chip + the (muted) task. */}
+      {composioDelegation && (
+        <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-sky-500/10 text-sky-400 ring-1 ring-sky-400/15 shrink-0">
+            <IconPlug className="w-3 h-3 shrink-0" />
+            Integration
+          </span>
+          {composioDelegation.task && (
+            <span className="text-[13px] leading-snug text-neutral-300/55 break-words min-w-0">
+              {truncateText(composioDelegation.task, 140)}
             </span>
-          </div>
-          {agentAction.detail && (
-            <div className="px-3 pb-2.5 -mt-0.5 overflow-hidden">
-              <p className="text-[12.5px] leading-relaxed text-neutral-300/50 break-words">
-                {truncateText(agentAction.detail, 300)}
-              </p>
-            </div>
           )}
         </div>
       )}
 
-      {/* Inline result badges */}
-      {step.results.length > 0 && (
+      {/* Code-agent delegation — same small inline chip treatment. */}
+      {agentAction && (
+        <div className="mt-1 flex items-center gap-2 flex-wrap min-w-0">
+          <span className="inline-flex items-center gap-1.5 text-[11px] leading-none font-medium px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-400/15 shrink-0">
+            <IconTerminal className="w-3 h-3 shrink-0" />
+            {agentAction.label}
+          </span>
+          {agentAction.detail && (
+            <span className="text-[13px] leading-snug text-neutral-300/55 break-words min-w-0">
+              {truncateText(agentAction.detail, 140)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Inline result badges (no-op delegation waits filtered out) */}
+      {visibleResults.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
-          {step.results.map((r, j) => (
+          {visibleResults.map((r, j) => (
             <span
               key={j}
               className={cn(
@@ -882,6 +996,97 @@ function ItemRenderer({
       )
     }
 
+    case 'composio-agent-thought': {
+      // Sub-agent reasoning — kept quiet (muted) so the integration timeline
+      // reads as calm progress, not noise.
+      const cleaned = truncateText(stripAgentMarkup(item.content), 600)
+      if (!cleaned) return null
+      return (
+        <p className="pl-6 py-0.5 text-[14px] leading-relaxed text-neutral-300/55 break-words min-w-0 overflow-hidden">
+          {cleaned}
+        </p>
+      )
+    }
+
+    case 'composio-agent-search': {
+      // Candidate-action discovery — folded behind progressive disclosure.
+      const cleaned = stripAgentMarkup(item.content)
+      if (!cleaned) return null
+      return (
+        <div className="pl-6">
+          <DetailRow icon={IconMagnifyingGlass} label="Searched connected apps">
+            <Markdown>{cleaned}</Markdown>
+          </DetailRow>
+        </div>
+      )
+    }
+
+    case 'composio-agent-result': {
+      // Signature element — one clean line: integration name + humanized action
+      // it ran, with a success/error tick. The raw API payload is intentionally
+      // NOT shown; the dot carries the live logo.
+      const isError =
+        item.status === 'error' || /\bError:\s/.test(stripAgentMarkup(item.content))
+      const toolkitName = humanizeToolkit(item.toolkit)
+      const fn = humanizeAction(item.slug, item.toolkit)
+      const errMsg = isError
+        ? truncateText(stripAgentMarkup(item.content).replace(/^Error:\s*/i, ''), 140)
+        : ''
+      return (
+        <div className="relative pl-8 py-0.5">
+          <IntegrationDot toolkit={item.toolkit} />
+          <div className="flex min-h-[22px] items-center gap-1.5">
+            <span className={cn('text-[14px] leading-snug', isError ? 'text-neutral-100/70' : 'text-neutral-100/85')}>
+              {toolkitName || 'Integration'}
+              {fn && <span className="text-neutral-100/45">{' · '}{fn}</span>}
+            </span>
+            {isError ? (
+              <IconXCircle className="w-3.5 h-3.5 shrink-0 text-red-500/70" />
+            ) : (
+              <IconCheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500/70" />
+            )}
+          </div>
+          {errMsg && (
+            <p className="mt-0.5 text-[13px] leading-relaxed text-red-400/70 break-words">
+              {errMsg}
+            </p>
+          )}
+        </div>
+      )
+    }
+
+    case 'composio-agent-done':
+      return (
+        <div className="py-0.5 pl-6">
+          <span className="inline-flex items-center gap-1.5 text-[12px] text-sky-400/40">
+            <IconCheckCircle className="w-3 h-3 shrink-0" />
+            {item.content}
+          </span>
+        </div>
+      )
+
+    case 'composio-agent-reauth':
+      return (
+        <div className="py-1.5 pl-6">
+          <div className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 border-amber-700/40 bg-amber-400/[0.04]">
+            <IntegrationLogo toolkit={item.toolkit} />
+            <span className="text-[13px] font-medium text-amber-300">
+              {item.content}
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'composio-agent-note': {
+      const cleaned = item.content.trim()
+      if (!cleaned) return null
+      return (
+        <div className="py-0.5 pl-6">
+          <span className="text-[12px] text-neutral-500/50">{cleaned}</span>
+        </div>
+      )
+    }
+
     case 'search-results': {
       const label = item.query ? `Search: ${item.query}` : 'Web search'
       return (
@@ -935,7 +1140,7 @@ function ItemRenderer({
       return (
         <div
           className={cn(
-            'pl-6 py-0.5 text-[15px] leading-relaxed text-neutral-200/80',
+            'pl-6 py-0.5 text-[14px] leading-relaxed text-neutral-200/85',
             'min-w-0 overflow-hidden break-words',
             '[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:overflow-x-hidden',
             '[&_code]:break-words',

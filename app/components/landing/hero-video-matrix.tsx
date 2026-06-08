@@ -115,7 +115,7 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
   }, [prefersReduced])
 
   return (
-    <section className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full min-h-[88svh] flex items-start justify-center overflow-hidden pt-32 sm:pt-36 lg:pt-40 pb-24">
       <div
         className={cn(
           "relative z-10 w-full text-center",

@@ -71,11 +71,11 @@ describe("CopyForAI — interaction", () => {
 })
 
 describe("BuildWithAIBar — explainer callout", () => {
-  it("renders the explainer copy and the Copy for AI control", () => {
+  it("renders the explainer copy and the Create with AI trigger", () => {
     render(<BuildWithAIBar />)
     expect(screen.getByText(/Building with an AI assistant\?/)).toBeTruthy()
     expect(screen.getByText(/Cursor, Claude Code, ChatGPT/)).toBeTruthy()
-    expect(screen.getByLabelText(/Copy the Coasty API prompt/i)).toBeTruthy()
+    expect(screen.getByText("Create with AI")).toBeTruthy()
   })
 })
 

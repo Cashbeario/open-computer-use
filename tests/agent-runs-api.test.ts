@@ -163,6 +163,52 @@ describe("scopes — runs + workflows are first-class and granted by default", (
   })
 })
 
+describe("dashboard key-mint (route.ts) stays in lockstep with the backend scopes", () => {
+  // The Next.js dashboard route mints keys into the SAME api_keys table the
+  // FastAPI backend validates against. When route.ts's scope set drifted NARROW
+  // of the backend, dashboard-minted keys silently 403'd (INSUFFICIENT_SCOPE)
+  // on the entire runs/workflows/machines surface even though the key was valid.
+  // These guards pin the two together so that can't regress.
+  const ROUTE = read("app/api/developers/route.ts")
+
+  // The literal scope strings the backend DEFAULT_SCOPES_LIST grants a fresh key.
+  const BACKEND_DEFAULT = [
+    "predict", "session", "ground", "ocr", "parse",
+    "machines:read", "actions:exec", "files:read",
+    "runs:read", "runs:write", "workflows:read", "workflows:write",
+  ]
+
+  it("route.ts DEFAULT_SCOPES grants every backend default scope (no narrow drift)", () => {
+    const start = ROUTE.indexOf("const DEFAULT_SCOPES")
+    expect(start, "DEFAULT_SCOPES declared in route.ts").toBeGreaterThan(-1)
+    const block = ROUTE.slice(start, ROUTE.indexOf("]", start) + 1)
+    for (const s of BACKEND_DEFAULT) {
+      expect(block, `DEFAULT_SCOPES includes "${s}"`).toContain(`"${s}"`)
+    }
+  })
+
+  it("route.ts validates against a full ALL_SCOPES allowlist (can grant elevated scopes)", () => {
+    const start = ROUTE.indexOf("const ALL_SCOPES")
+    expect(start, "ALL_SCOPES allowlist declared in route.ts").toBeGreaterThan(-1)
+    const block = ROUTE.slice(start, ROUTE.indexOf("])", start) + 2)
+    // ALL_SCOPES must build on the full default set (so runs/workflows/machines
+    // read+write the user's key needed are all allowed)…
+    expect(block, "ALL_SCOPES spreads DEFAULT_SCOPES").toContain("...DEFAULT_SCOPES")
+    // …plus the elevated extras a caller can opt into beyond the defaults.
+    for (const s of ["keys", "usage", "machines:write", "terminal:exec", "files:write",
+                     "browser:execute", "snapshots:write", "connection:read",
+                     "schedules:read", "schedules:write", "triggers:write"]) {
+      expect(block, `ALL_SCOPES allows "${s}"`).toContain(`"${s}"`)
+    }
+    // Validation must check the allowlist, not the (narrower) default set.
+    expect(ROUTE).toMatch(/!ALL_SCOPES\.has\(s\)/)
+  })
+
+  it("backend create_key defaults empty scopes to DEFAULT_SCOPES_LIST (never mints a scopeless key)", () => {
+    expect(KEYS).toMatch(/if not scopes:\s*\n\s*scopes = list\(DEFAULT_SCOPES_LIST\)/)
+  })
+})
+
 describe("run service — billing, ownership, takeover, SSRF, kill-switch", () => {
   it("bills per step against the dollar wallet, idempotently per (run, step)", () => {
     expect(RUN_SVC).toMatch(/api_billing_service\.charge/)

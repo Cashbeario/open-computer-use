@@ -37,9 +37,49 @@ const HASH_VERSION_HMAC_SHA256 = "hmac-sha256-v1"
 const NEW_FORMAT_ENABLED =
   (process.env.API_KEY_NEW_FORMAT_ENABLED ?? "true").toLowerCase() !== "false"
 
-// Per-user limit + scopes default — match backend api_key_service.
+// Per-user limit + scopes default — MUST stay in lockstep with backend
+// api_key_service.DEFAULT_SCOPES_LIST. A key minted here is validated by the
+// FastAPI backend's scope gates, so a too-narrow default silently 403s the
+// runs/workflows/machines surface (INSUFFICIENT_SCOPE) even though the key is
+// otherwise valid. These are the conservative defaults a fresh key receives.
 const MAX_KEYS_PER_USER = 20
-const DEFAULT_SCOPES = ["predict", "session", "ground", "ocr", "parse"]
+const DEFAULT_SCOPES = [
+  "predict",
+  "session",
+  "ground",
+  "ocr",
+  "parse",
+  "machines:read",
+  "actions:exec",
+  "files:read",
+  // Runs + Workflows are the headline developer-agent surface — granted by
+  // default so a fresh key can start a run / workflow without re-minting.
+  "runs:read",
+  "runs:write",
+  "workflows:read",
+  "workflows:write",
+]
+
+// The complete set of scopes a key MAY hold — mirrors backend
+// api_key_service.ALL_SCOPES. Used to validate caller-supplied scopes: anything
+// in here is allowed (even if not granted by default), anything else is a typo
+// and is rejected with INVALID_SCOPE. Elevated scopes (terminal:exec,
+// files:write, browser:execute, snapshots:write, machines:write, etc.) are not
+// in DEFAULT_SCOPES but can be requested explicitly at key-creation time.
+const ALL_SCOPES: ReadonlySet<string> = new Set([
+  ...DEFAULT_SCOPES,
+  "keys", // listing/revoking own keys via the API
+  "usage", // reading usage summary
+  "machines:write",
+  "terminal:exec",
+  "files:write",
+  "browser:execute",
+  "snapshots:write",
+  "connection:read",
+  "schedules:read",
+  "schedules:write",
+  "triggers:write",
+])
 
 /**
  * Hash a raw key. Mirrors `_hash_sha256` / `_hash_hmac_sha256` in
@@ -300,13 +340,8 @@ export async function POST(request: Request) {
     const requestedScopes: string[] = Array.isArray(scopes) && scopes.length > 0
       ? scopes
       : DEFAULT_SCOPES
-    const allowedScopes = new Set([
-      ...DEFAULT_SCOPES,
-      "keys", // listing/revoking own keys via the API
-      "usage", // reading usage summary
-    ])
     for (const s of requestedScopes) {
-      if (typeof s !== "string" || !allowedScopes.has(s)) {
+      if (typeof s !== "string" || !ALL_SCOPES.has(s)) {
         return NextResponse.json(
           {
             error: {

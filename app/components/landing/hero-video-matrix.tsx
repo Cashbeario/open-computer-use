@@ -114,8 +114,12 @@ export function HeroVideoMatrix({ isMobile }: { isMobile: boolean }) {
     return () => clearTimeout(id)
   }, [prefersReduced])
 
+  // Full-viewport hero, content vertically centred. The symmetric vertical
+  // padding keeps it dead-centre on roomy screens while guaranteeing the block
+  // clears the fixed header (and never clips) on short or mobile viewports, so
+  // the composition reads clean at any dimension.
   return (
-    <section className="relative w-full min-h-[88svh] flex items-start justify-center overflow-hidden pt-32 sm:pt-36 lg:pt-40 pb-24">
+    <section className="relative w-full min-h-[100svh] flex items-center justify-center overflow-hidden py-28">
       <div
         className={cn(
           "relative z-10 w-full text-center",

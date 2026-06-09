@@ -580,7 +580,7 @@ defer resp.Body.Close()
 function highlightLine(line: string, lang: LangId) {
   // cheap, safe token coloring — no runtime risk, purely regex-based
   const parts: { t: string; c?: string }[] = []
-  let s = line
+  const s = line
   const push = (t: string, c?: string) => parts.push({ t, c })
 
   if (lang === "curl") {

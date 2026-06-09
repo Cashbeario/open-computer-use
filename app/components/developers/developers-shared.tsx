@@ -142,12 +142,11 @@ export interface RecentRequest {
   request_id?: string | null
   // Rich fields from the api_requests log (optional — absent on the thin
   // api_usage fallback, in which case the row renders as a plain success).
-  status?: string | null          // raw CUA model status (continue/done/fail)
+  status?: string | null          // CUA run status (continue/done/fail)
   error_code?: string | null      // non-null ⇒ the request failed
   error_message?: string | null
   duration_ms?: number | null
   cua_version?: string | null
-  model?: string | null
   input_tokens?: number | null
   output_tokens?: number | null
   was_refunded?: boolean
@@ -279,13 +278,12 @@ interface ExportRow {
   request_id: string | null
   endpoint: string
   outcome: "ok" | "error"
-  model_status: string | null
+  cua_status: string | null
   cost_usd: string
   credits: number
   latency_ms: number | null
   error_code: string | null
   error_message: string | null
-  model: string | null
   cua_version: string | null
   input_tokens: number | null
   output_tokens: number | null
@@ -298,13 +296,12 @@ function normalizeForExport(rows: RecentRequest[]): ExportRow[] {
     request_id: r.request_id ?? null,
     endpoint: r.endpoint,
     outcome: isFailed(r) ? "error" : "ok",
-    model_status: r.status ?? null,
+    cua_status: r.status ?? null,
     cost_usd: creditsToUsd(r.credits),
     credits: r.credits,
     latency_ms: r.duration_ms ?? null,
     error_code: r.error_code ?? null,
     error_message: r.error_message ?? null,
-    model: r.model ?? null,
     cua_version: r.cua_version ?? null,
     input_tokens: r.input_tokens ?? null,
     output_tokens: r.output_tokens ?? null,
@@ -316,8 +313,8 @@ function normalizeForExport(rows: RecentRequest[]): ExportRow[] {
 // CSV columns — error_message is intentionally omitted (multi-line/long; it's
 // in the JSON export). All other normalized fields are included.
 const CSV_COLUMNS: (keyof ExportRow)[] = [
-  "request_id", "endpoint", "outcome", "model_status", "cost_usd", "credits",
-  "latency_ms", "error_code", "model", "cua_version", "input_tokens",
+  "request_id", "endpoint", "outcome", "cua_status", "cost_usd", "credits",
+  "latency_ms", "error_code", "cua_version", "input_tokens",
   "output_tokens", "was_refunded", "time",
 ]
 
@@ -1552,7 +1549,6 @@ export function TracesPanel({
                           />
                           {latency && <DetailRow label="Latency" value={latency} />}
                           {r.status && <DetailRow label="Status" value={r.status} />}
-                          {r.model && <DetailRow label="Model" value={r.model} mono />}
                           {r.cua_version && <DetailRow label="Version" value={r.cua_version} />}
                           {(r.input_tokens != null || r.output_tokens != null) && (
                             <DetailRow

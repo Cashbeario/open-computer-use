@@ -211,12 +211,14 @@ export async function GET() {
 
     // ── Recent requests (rich per-request log) ──
     // Read the full request log (`api_requests`) rather than the billing
-    // ledger (`api_usage`) so Logs can show status, latency, errors, model,
-    // and tokens — and crucially INCLUDE failed requests and free `parse`
-    // calls, which never reach `api_usage` (record_usage only runs on the
-    // billed success path). Defensive: `api_requests` is provisioned outside
-    // the repo migrations, so if the table/columns differ we fall back to the
-    // thin `api_usage`-derived logs rather than 500-ing the whole dashboard.
+    // ledger (`api_usage`) so Logs can show status, latency, errors, and
+    // tokens — and crucially INCLUDE failed requests and free `parse` calls,
+    // which never reach `api_usage` (record_usage only runs on the billed
+    // success path). We deliberately do NOT surface the resolved `model` id —
+    // the underlying engine is an internal detail, not part of the developer
+    // contract. Defensive: `api_requests` is provisioned outside the repo
+    // migrations, so if the table/columns differ we fall back to the thin
+    // `api_usage`-derived logs rather than 500-ing the whole dashboard.
     type RecentRow = {
       endpoint: string
       credits: number
@@ -227,7 +229,6 @@ export async function GET() {
       error_message?: string | null
       duration_ms?: number | null
       cua_version?: string | null
-      model?: string | null
       input_tokens?: number | null
       output_tokens?: number | null
       was_refunded?: boolean
@@ -239,7 +240,7 @@ export async function GET() {
         .from("api_requests")
         .select(
           "request_id, endpoint, status, error_code, error_message, credits_charged, " +
-            "duration_ms, cua_version, model, input_tokens, output_tokens, was_refunded, created_at, instruction",
+            "duration_ms, cua_version, input_tokens, output_tokens, was_refunded, created_at, instruction",
         )
         .eq("user_id", userId)
         .gte("created_at", thirtyDaysAgo)
@@ -255,14 +256,13 @@ export async function GET() {
           credits: (r.credits_charged as number | null) ?? 0,
           time: r.created_at as string,
           request_id: (r.request_id as string | null) ?? null,
-          // Raw CUA model status (continue/done/fail) where present. The
-          // pass/fail OUTCOME is derived client-side from error_code.
+          // CUA run status (continue/done/fail) where present. The pass/fail
+          // OUTCOME is derived client-side from error_code.
           status: (r.status as string | null) ?? null,
           error_code: (r.error_code as string | null) ?? null,
           error_message: (r.error_message as string | null) ?? null,
           duration_ms: (r.duration_ms as number | null) ?? null,
           cua_version: (r.cua_version as string | null) ?? null,
-          model: (r.model as string | null) ?? null,
           input_tokens: (r.input_tokens as number | null) ?? null,
           output_tokens: (r.output_tokens as number | null) ?? null,
           was_refunded: Boolean(r.was_refunded),

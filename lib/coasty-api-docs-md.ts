@@ -244,7 +244,6 @@ instruction, get an ordered list of actions back. You manage trajectory.
 | \`screenshot\` | string | yes | - | Base64-encoded PNG/JPEG. Must be > 100 chars. |
 | \`instruction\` | string | yes | - | Natural language task. Must be non-empty. |
 | \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. |
-| \`model\` | string\\|null | no | null | Resolved server-side. |
 | \`system_prompt\` | string\\|null | no | null | REPLACES the base prompt. |
 | \`instructions\` | string\\|null | no | null | APPENDED to the base prompt. |
 | \`screen_width\` | int | no | 1920 | 320-3840. |
@@ -335,7 +334,6 @@ Create a session.
 | Field | Type | Req | Default | Notes |
 | --- | --- | --- | --- | --- |
 | \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. |
-| \`model\` | string\\|null | no | null | Resolved server-side. |
 | \`screen_width\` | int | no | 1920 | 320-3840. |
 | \`screen_height\` | int | no | 1080 | 240-2160. |
 | \`max_trajectory_length\` | int | no | 3 | 1-20. Clamped to your tier max. |
@@ -350,7 +348,6 @@ Create a session.
 {
   "session_id": "sess_3b9c...",
   "cua_version": "v3",
-  "model": "default",
   "screen_size": "1920x1080",
   "created_at": "2026-06-01T12:00:00Z",
   "expires_at": "2026-06-01T12:30:00Z"
@@ -395,7 +392,6 @@ Get one session's status (\`SessionInfoResponse\`):
 {
   "session_id": "sess_3b9c...",
   "cua_version": "v3",
-  "model": "default",
   "screen_size": "1920x1080",
   "step_count": 4,
   "created_at": "2026-06-01T12:00:00Z",
@@ -567,7 +563,6 @@ Start a run. Returns immediately with \`status: "queued"\` and a one-time
 | \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. \`v4\` requires professional+ tier. |
 | \`instructions\` | string\\|null | no | null | APPENDED to the base prompt. Up to 16000 chars. |
 | \`system_prompt\` | string\\|null | no | null | Custom preamble (takes priority). Up to 32000 chars. |
-| \`model\` | string\\|null | no | null | Resolved server-side. |
 | \`max_steps\` | int | no | 50 | 1-1000. Clamped to the server ceiling. |
 | \`deadline_seconds\` | int\\|null | no | null | 1-86400. Wall-clock budget. Clamped server-side. |
 | \`on_awaiting_human\` | string | no | \`pause\` | \`pause\` / \`fail\` / \`cancel\` when a human is needed. |
@@ -588,7 +583,6 @@ create safe. Reusing a key with a different body returns \`422 IDEMPOTENCY_KEY_R
 | \`machine_id\` | string | The machine the agent is driving. |
 | \`task\` | string | The goal you submitted. |
 | \`cua_version\` | string | \`v3\` (default) or \`v4\`. |
-| \`model\` | string\\|null | Resolved model id. |
 | \`instructions\` | string\\|null | Extra guidance appended to the base prompt. |
 | \`max_steps\` | int | Hard cap on agent steps. |
 | \`on_awaiting_human\` | string | \`pause\` / \`fail\` / \`cancel\`. |
@@ -617,7 +611,6 @@ create safe. Reusing a key with a different body returns \`422 IDEMPOTENCY_KEY_R
   "machine_id": "m_9f2c",
   "task": "Open the billing page and download the latest invoice as PDF",
   "cua_version": "v3",
-  "model": "coasty-cua-v3",
   "instructions": null,
   "max_steps": 40,
   "on_awaiting_human": "pause",

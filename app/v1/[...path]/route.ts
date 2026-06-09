@@ -19,6 +19,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import { fetchUpstreamWithRetry, isRetryable } from "@/lib/api/upstream-fetch"
 
 const PYTHON_BACKEND_URL =
   process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
@@ -147,46 +148,39 @@ async function proxyToBackend(
     }
   }
 
-  try {
-    // 90s timeout — must finish before Cloudflare's ~100s proxy timeout
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 90_000)
+  // Retry transient origin blips (deploy drain / keep-alive reset). Safe for
+  // reads, and for writes carrying an Idempotency-Key (backend dedupes/replays).
+  const retryable = isRetryable(req.method, Boolean(idemp))
+  const result = await fetchUpstreamWithRetry(url.toString(), fetchOptions, retryable)
 
-    const response = await fetch(url.toString(), {
-      ...fetchOptions,
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeout)
-
-    // Stream the response back, preserving status and headers.
-    const responseHeaders = new Headers()
-    response.headers.forEach((value, key) => {
-      const lower = key.toLowerCase()
-      if (!HOP_BY_HOP.has(lower)) {
-        responseHeaders.set(key, value)
-      }
-    })
-
-    return new Response(response.body, {
-      status: response.status,
-      headers: responseHeaders,
-    })
-  } catch (err) {
-    const isTimeout = err instanceof DOMException && err.name === "AbortError"
+  if (result.failed || !result.response) {
     return NextResponse.json(
       {
         error: {
-          code: isTimeout ? "PREDICTION_TIMEOUT" : "SERVICE_UNAVAILABLE",
-          message: isTimeout
+          code: result.timedOut ? "PREDICTION_TIMEOUT" : "SERVICE_UNAVAILABLE",
+          message: result.timedOut
             ? "Request timed out. The AI model may be under heavy load — please retry."
             : "API service temporarily unavailable",
           type: "server_error",
         },
       },
-      { status: isTimeout ? 504 : 503 },
+      { status: result.timedOut ? 504 : 503 },
     )
   }
+
+  // Stream the response back, preserving status and headers.
+  const response = result.response
+  const responseHeaders = new Headers()
+  response.headers.forEach((value, key) => {
+    const lower = key.toLowerCase()
+    if (!HOP_BY_HOP.has(lower)) {
+      responseHeaders.set(key, value)
+    }
+  })
+  return new Response(response.body, {
+    status: response.status,
+    headers: responseHeaders,
+  })
 }
 
 export const GET = proxyToBackend

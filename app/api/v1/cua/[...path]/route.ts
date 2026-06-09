@@ -16,6 +16,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import { fetchUpstreamWithRetry, isRetryable } from "@/lib/api/upstream-fetch"
 
 const PYTHON_BACKEND_URL =
   process.env.PYTHON_BACKEND_URL || "http://127.0.0.1:8001"
@@ -48,6 +49,17 @@ async function proxyToBackend(
   const apiKey = req.headers.get("X-API-Key")
   if (apiKey) {
     headers["X-API-Key"] = apiKey
+  }
+  // Authorization: Bearer <api-key> is an accepted auth alternative.
+  const authz = req.headers.get("Authorization")
+  if (authz) {
+    headers["Authorization"] = authz
+  }
+  // Idempotency-Key passthrough — lets the backend dedupe + replay, which also
+  // makes a transient-failure retry safe for billed writes.
+  const idemp = req.headers.get("Idempotency-Key")
+  if (idemp) {
+    headers["Idempotency-Key"] = idemp
   }
 
   const fetchOptions: RequestInit = {
@@ -82,59 +94,53 @@ async function proxyToBackend(
     }
   }
 
-  try {
-    // 90s timeout — must finish before Cloudflare's ~100s proxy timeout
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 90_000)
+  // Retry transient origin blips (deploy drain / keep-alive reset). Safe for
+  // reads, and for writes carrying an Idempotency-Key (backend dedupes/replays).
+  const retryable = isRetryable(req.method, Boolean(idemp))
+  const result = await fetchUpstreamWithRetry(url.toString(), fetchOptions, retryable)
 
-    const response = await fetch(url.toString(), {
-      ...fetchOptions,
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeout)
-
-    // Stream the response back, preserving status and headers
-    const responseHeaders = new Headers()
-    response.headers.forEach((value, key) => {
-      const lower = key.toLowerCase()
-      // Skip hop-by-hop headers
-      if (!["transfer-encoding", "connection", "keep-alive"].includes(lower)) {
-        responseHeaders.set(key, value)
-      }
-    })
-
-    // Deprecation signal — every response from the legacy alias carries
-    // these so SDK clients can surface a warning. The Link header points
-    // to the canonical replacement path (RFC 8288 link relation).
-    responseHeaders.set("Deprecation", "true")
-    responseHeaders.set("Sunset", LEGACY_SUNSET_DATE)
-    const successorPath = `/v1/${path.join("/")}`
-    responseHeaders.set("Link", `<${successorPath}>; rel="successor-version"`)
-    responseHeaders.set(
-      "Warning",
-      `299 - "Deprecated: the /api/v1/cua/* path is deprecated. Use ${successorPath} instead. Sunset: ${LEGACY_SUNSET_DATE}."`,
-    )
-
-    return new Response(response.body, {
-      status: response.status,
-      headers: responseHeaders,
-    })
-  } catch (err) {
-    const isTimeout = err instanceof DOMException && err.name === "AbortError"
+  if (result.failed || !result.response) {
     return NextResponse.json(
       {
         error: {
-          code: isTimeout ? "PREDICTION_TIMEOUT" : "SERVICE_UNAVAILABLE",
-          message: isTimeout
+          code: result.timedOut ? "PREDICTION_TIMEOUT" : "SERVICE_UNAVAILABLE",
+          message: result.timedOut
             ? "Request timed out. The AI model may be under heavy load — please retry."
             : "API service temporarily unavailable",
           type: "server_error",
         },
       },
-      { status: isTimeout ? 504 : 503 },
+      { status: result.timedOut ? 504 : 503 },
     )
   }
+
+  // Stream the response back, preserving status and headers
+  const response = result.response
+  const responseHeaders = new Headers()
+  response.headers.forEach((value, key) => {
+    const lower = key.toLowerCase()
+    // Skip hop-by-hop headers
+    if (!["transfer-encoding", "connection", "keep-alive"].includes(lower)) {
+      responseHeaders.set(key, value)
+    }
+  })
+
+  // Deprecation signal — every response from the legacy alias carries
+  // these so SDK clients can surface a warning. The Link header points
+  // to the canonical replacement path (RFC 8288 link relation).
+  responseHeaders.set("Deprecation", "true")
+  responseHeaders.set("Sunset", LEGACY_SUNSET_DATE)
+  const successorPath = `/v1/${path.join("/")}`
+  responseHeaders.set("Link", `<${successorPath}>; rel="successor-version"`)
+  responseHeaders.set(
+    "Warning",
+    `299 - "Deprecated: the /api/v1/cua/* path is deprecated. Use ${successorPath} instead. Sunset: ${LEGACY_SUNSET_DATE}."`,
+  )
+
+  return new Response(response.body, {
+    status: response.status,
+    headers: responseHeaders,
+  })
 }
 
 export const GET = proxyToBackend

@@ -23,7 +23,7 @@ export function LogsContent() {
     <DevPageShell loading={loading}>
       <DevHeader
         title="Logs"
-        description="Inspect every API request: endpoints, cost, timing, and request IDs."
+        description="Inspect every API request — status, latency, cost, errors, and request IDs — including failures."
       />
 
       <BuildWithAIBar />

@@ -101,6 +101,23 @@ export interface RecentRequest {
   credits: number
   time: string
   request_id?: string | null
+  // Rich fields from the api_requests log (optional — absent on the thin
+  // api_usage fallback, in which case the row renders as a plain success).
+  status?: string | null          // raw CUA model status (continue/done/fail)
+  error_code?: string | null      // non-null ⇒ the request failed
+  error_message?: string | null
+  duration_ms?: number | null
+  cua_version?: string | null
+  model?: string | null
+  input_tokens?: number | null
+  output_tokens?: number | null
+  was_refunded?: boolean
+  instruction?: string | null
+}
+
+/** A request failed iff it carries an error_code. */
+export function isFailed(r: RecentRequest): boolean {
+  return !!r.error_code
 }
 
 export type EndpointBreakdown = Record<string, { requests: number; credits: number }>
@@ -146,6 +163,14 @@ export function formatUsd(cents: number): string {
 
 export function creditsToUsd(credits: number): string {
   return formatUsd(creditsToUsdCents(credits))
+}
+
+/** Latency in human units: 840ms, 1.2s, 12s. */
+export function formatDuration(ms: number | null | undefined): string | null {
+  if (ms == null || !Number.isFinite(ms) || ms < 0) return null
+  if (ms < 1000) return `${Math.round(ms)}ms`
+  const s = ms / 1000
+  return s < 10 ? `${s.toFixed(1)}s` : `${Math.round(s)}s`
 }
 
 function copyToClipboard(text: string): Promise<void> {
@@ -209,15 +234,62 @@ function downloadFile(filename: string, content: string, mime: string) {
   setTimeout(() => URL.revokeObjectURL(url), 0)
 }
 
+/* Normalized export row — one shape shared by CSV + JSON so the two never
+   disagree on units (cost is always USD; raw credits kept for completeness). */
+interface ExportRow {
+  request_id: string | null
+  endpoint: string
+  outcome: "ok" | "error"
+  model_status: string | null
+  cost_usd: string
+  credits: number
+  latency_ms: number | null
+  error_code: string | null
+  error_message: string | null
+  model: string | null
+  cua_version: string | null
+  input_tokens: number | null
+  output_tokens: number | null
+  was_refunded: boolean
+  time: string
+}
+
+function normalizeForExport(rows: RecentRequest[]): ExportRow[] {
+  return rows.map(r => ({
+    request_id: r.request_id ?? null,
+    endpoint: r.endpoint,
+    outcome: isFailed(r) ? "error" : "ok",
+    model_status: r.status ?? null,
+    cost_usd: creditsToUsd(r.credits),
+    credits: r.credits,
+    latency_ms: r.duration_ms ?? null,
+    error_code: r.error_code ?? null,
+    error_message: r.error_message ?? null,
+    model: r.model ?? null,
+    cua_version: r.cua_version ?? null,
+    input_tokens: r.input_tokens ?? null,
+    output_tokens: r.output_tokens ?? null,
+    was_refunded: !!r.was_refunded,
+    time: r.time,
+  }))
+}
+
+// CSV columns — error_message is intentionally omitted (multi-line/long; it's
+// in the JSON export). All other normalized fields are included.
+const CSV_COLUMNS: (keyof ExportRow)[] = [
+  "request_id", "endpoint", "outcome", "model_status", "cost_usd", "credits",
+  "latency_ms", "error_code", "model", "cua_version", "input_tokens",
+  "output_tokens", "was_refunded", "time",
+]
+
 function rowsToCSV(rows: RecentRequest[]): string {
-  const header = ["request_id", "endpoint", "cost_usd", "time"]
   const escape = (v: unknown) => {
     const s = v == null ? "" : String(v)
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
-  const lines = [header.join(",")]
-  for (const r of rows) {
-    lines.push([escape(r.request_id ?? ""), escape(r.endpoint), escape(creditsToUsd(r.credits)), escape(r.time)].join(","))
+  const lines = [CSV_COLUMNS.join(",")]
+  for (const r of normalizeForExport(rows)) {
+    lines.push(CSV_COLUMNS.map(c => escape(r[c])).join(","))
   }
   return lines.join("\n")
 }
@@ -1010,6 +1082,7 @@ export function TracesPanel({
   const [search, setSearch] = useState("")
   const [selectedEndpoints, setSelectedEndpoints] = useState<Set<string>>(new Set())
   const [timeRange, setTimeRange] = useState<TimeRange>("24h")
+  const [outcome, setOutcome] = useState<"all" | "ok" | "error">("all")
   const [sortKey, setSortKey] = useState<SortKey>("newest")
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -1017,7 +1090,12 @@ export function TracesPanel({
   const [expanded, setExpanded] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
-  useEffect(() => { setVisibleCount(25) }, [search, selectedEndpoints, timeRange, sortKey])
+  useEffect(() => { setVisibleCount(25) }, [search, selectedEndpoints, timeRange, outcome, sortKey])
+
+  // Errors are only knowable when the rich api_requests log is available; on
+  // the thin api_usage fallback every row is a success, so the outcome filter
+  // simply has nothing to narrow.
+  const errorCount = useMemo(() => recent.filter(isFailed).length, [recent])
 
   useEffect(() => {
     if (!autoRefresh) return
@@ -1039,8 +1117,13 @@ export function TracesPanel({
     let rows = recent.filter(r => {
       if (cutoff !== null && new Date(r.time).getTime() < cutoff) return false
       if (selectedEndpoints.size > 0 && !selectedEndpoints.has(r.endpoint)) return false
+      if (outcome !== "all") {
+        const failed = isFailed(r)
+        if (outcome === "error" && !failed) return false
+        if (outcome === "ok" && failed) return false
+      }
       if (q) {
-        const hay = `${r.endpoint} ${r.request_id ?? ""}`.toLowerCase()
+        const hay = `${r.endpoint} ${r.request_id ?? ""} ${r.error_code ?? ""} ${r.instruction ?? ""}`.toLowerCase()
         if (!hay.includes(q)) return false
       }
       return true
@@ -1055,15 +1138,16 @@ export function TracesPanel({
       }
     })
     return rows
-  }, [recent, search, selectedEndpoints, timeRange, sortKey])
+  }, [recent, search, selectedEndpoints, timeRange, outcome, sortKey])
 
   const visible = filtered.slice(0, visibleCount)
-  const hasFilters = search.length > 0 || selectedEndpoints.size > 0 || timeRange !== "24h"
+  const hasFilters = search.length > 0 || selectedEndpoints.size > 0 || timeRange !== "24h" || outcome !== "all"
 
   const clearFilters = () => {
     setSearch("")
     setSelectedEndpoints(new Set())
     setTimeRange("24h")
+    setOutcome("all")
   }
 
   const toggleEndpoint = (ep: string) => {
@@ -1087,13 +1171,13 @@ export function TracesPanel({
 
   const exportJSON = () => {
     if (filtered.length === 0) return
-    downloadFile(`traces-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(filtered, null, 2), "application/json")
+    downloadFile(`traces-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(normalizeForExport(filtered), null, 2), "application/json")
     toast.success(`Exported ${filtered.length} row${filtered.length === 1 ? "" : "s"}`)
   }
 
   const copyJSON = () => {
     if (filtered.length === 0) return
-    copyToClipboard(JSON.stringify(filtered, null, 2))
+    copyToClipboard(JSON.stringify(normalizeForExport(filtered), null, 2))
       .then(() => toast.success("Copied JSON"))
       .catch(() => toast.error("Copy failed"))
   }
@@ -1200,6 +1284,31 @@ export function TracesPanel({
               )}
             >
               {r.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Outcome filter — success vs. failed. Errors only exist when the rich
+            api_requests log is available; the count nudges devs to failures. */}
+        <div className="inline-flex items-center rounded-md border border-foreground/[0.08] bg-background/40 p-0.5">
+          {([
+            { id: "all" as const, label: "All" },
+            { id: "ok" as const, label: "OK" },
+            { id: "error" as const, label: errorCount > 0 ? `Errors ${errorCount}` : "Errors" },
+          ]).map(o => (
+            <button
+              key={o.id}
+              onClick={() => setOutcome(o.id)}
+              className={cn(
+                "h-6 px-2 rounded text-[10.5px] font-medium tabular-nums transition-colors",
+                outcome === o.id
+                  ? o.id === "error"
+                    ? "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                    : "bg-foreground/[0.08] dark:bg-foreground/[0.12] text-foreground"
+                  : "text-muted-foreground/50 hover:text-foreground/85",
+              )}
+            >
+              {o.label}
             </button>
           ))}
         </div>
@@ -1314,6 +1423,8 @@ export function TracesPanel({
             {visible.map((r, i) => {
               const key = r.request_id || `${r.time}-${i}`
               const isOpen = expanded === key
+              const failed = isFailed(r)
+              const latency = formatDuration(r.duration_ms)
               return (
                 <div key={key} className="group/row">
                   <button
@@ -1324,16 +1435,32 @@ export function TracesPanel({
                       "h-3 w-3 text-muted-foreground/30 shrink-0 transition-transform",
                       isOpen && "rotate-90 text-muted-foreground/60",
                     )} />
+                    {/* Outcome dot — red on failure (scannable), faint green ok. */}
+                    <span
+                      title={failed ? `Failed${r.error_code ? ` · ${r.error_code}` : ""}` : "Succeeded"}
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full shrink-0",
+                        failed ? "bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.55)]" : "bg-emerald-500/55",
+                      )}
+                    />
                     <span className={cn(
                       "shrink-0 w-12 text-center text-[10px] font-bold tracking-wider py-0.5 rounded",
                       endpointBadgeClass(r.endpoint),
                     )}>
                       {endpointShort(r.endpoint)}
                     </span>
-                    <span className="text-[11px] text-muted-foreground/60 flex-1 truncate font-mono">
-                      {r.request_id ?? r.endpoint.replace(/_/g, " ")}
+                    <span className={cn(
+                      "text-[11px] flex-1 truncate font-mono",
+                      failed ? "text-rose-600/70 dark:text-rose-400/70" : "text-muted-foreground/60",
+                    )}>
+                      {failed && r.error_code ? r.error_code : (r.request_id ?? r.endpoint.replace(/_/g, " "))}
                     </span>
-                    <span className="text-[10px] text-muted-foreground/40 tabular-nums">{creditsToUsd(r.credits)}</span>
+                    {latency && (
+                      <span className="hidden sm:inline text-[10px] text-muted-foreground/30 tabular-nums w-12 text-right">
+                        {latency}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground/40 tabular-nums w-12 text-right">{creditsToUsd(r.credits)}</span>
                     <span className="text-[10px] text-muted-foreground/30 tabular-nums w-14 text-right">
                       {timeAgo(r.time)}
                     </span>
@@ -1377,6 +1504,45 @@ export function TracesPanel({
                             onCopy={() => copyValue(r.time, `${key}-t`)}
                             copied={copiedKey === `${key}-t`}
                           />
+                          <DetailRow
+                            label="Outcome"
+                            value={failed ? "Failed" : "Succeeded"}
+                            valueClassName={failed
+                              ? "text-rose-600 dark:text-rose-400 font-medium"
+                              : "text-emerald-600 dark:text-emerald-400 font-medium"}
+                          />
+                          {latency && <DetailRow label="Latency" value={latency} />}
+                          {r.status && <DetailRow label="Status" value={r.status} />}
+                          {r.model && <DetailRow label="Model" value={r.model} mono />}
+                          {r.cua_version && <DetailRow label="Version" value={r.cua_version} />}
+                          {(r.input_tokens != null || r.output_tokens != null) && (
+                            <DetailRow
+                              label="Tokens"
+                              value={`${formatNum(r.input_tokens ?? 0)} in · ${formatNum(r.output_tokens ?? 0)} out`}
+                            />
+                          )}
+                          {r.was_refunded && <DetailRow label="Refunded" value="Yes — credits returned" />}
+                          {failed && (r.error_message || r.error_code) && (
+                            <div className="sm:col-span-2">
+                              <DetailRow
+                                label="Error"
+                                value={r.error_message || r.error_code || "Request failed"}
+                                valueClassName="text-rose-600/90 dark:text-rose-400/90"
+                                onCopy={() => copyValue(r.error_message || r.error_code || "", `${key}-err`)}
+                                copied={copiedKey === `${key}-err`}
+                              />
+                            </div>
+                          )}
+                          {r.instruction && (
+                            <div className="sm:col-span-2">
+                              <DetailRow
+                                label="Task"
+                                value={r.instruction}
+                                onCopy={() => copyValue(r.instruction!, `${key}-task`)}
+                                copied={copiedKey === `${key}-task`}
+                              />
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -1403,7 +1569,7 @@ export function TracesPanel({
 }
 
 function DetailRow({
-  label, value, secondary, onCopy, copied, mono,
+  label, value, secondary, onCopy, copied, mono, valueClassName,
 }: {
   label: string
   value: string
@@ -1411,6 +1577,7 @@ function DetailRow({
   onCopy?: () => void
   copied?: boolean
   mono?: boolean
+  valueClassName?: string
 }) {
   return (
     <div className="flex items-start gap-3 group/detail">
@@ -1418,7 +1585,7 @@ function DetailRow({
         {label}
       </span>
       <div className="flex-1 min-w-0">
-        <div className={cn("text-[11.5px] text-foreground/80 break-all", mono && "font-mono text-[11px]")}>
+        <div className={cn("text-[11.5px] text-foreground/80 break-all", mono && "font-mono text-[11px]", valueClassName)}>
           {value}
         </div>
         {secondary && (

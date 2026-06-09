@@ -173,6 +173,34 @@ describe("reference tables", () => {
     }
   })
 
+  it("ERROR_CODES is the real backend catalogue, not the stale placeholder set", () => {
+    const codes = new Set(ERROR_CODES.map((e) => e.code))
+    // Real codes that must be documented (verified against the v1 contract).
+    for (const code of [
+      "INVALID_API_KEY", "INSUFFICIENT_SCOPE", "INSUFFICIENT_CREDITS", "WALLET_EXHAUSTED",
+      "VALIDATION_ERROR", "INVALID_SCREENSHOT", "PAYLOAD_TOO_LARGE", "INVALID_LIMIT",
+      "INVALID_STATUS_FILTER", "NOT_FOUND", "SESSION_NOT_FOUND", "RUN_NOT_FOUND",
+      "WORKFLOW_NOT_FOUND", "NOT_AWAITING_HUMAN", "RESUME_CONFLICT", "IDEMPOTENCY_KEY_REUSED",
+      "RATE_LIMIT_EXCEEDED", "TOO_MANY_RUNS", "FEATURE_NOT_AVAILABLE", "INTERNAL_ERROR",
+      "PREDICTION_FAILED", "GROUNDING_FAILED", "OCR_FAILED", "UPSTREAM_UNAVAILABLE", "UPSTREAM_TIMEOUT",
+    ]) {
+      expect(codes, `ERROR_CODES missing real code ${code}`).toContain(code)
+    }
+    // The stale/fake codes from the old placeholder table must be gone.
+    for (const stale of ["INVALID_REQUEST", "RATE_LIMITED", "SERVICE_UNAVAILABLE"]) {
+      expect(codes, `ERROR_CODES still contains stale code ${stale}`).not.toContain(stale)
+    }
+    // The status/code pairs the contract pins.
+    const byStatus = (code: string) => ERROR_CODES.find((e) => e.code === code)?.status
+    expect(byStatus("INVALID_API_KEY")).toBe(401)
+    expect(byStatus("INSUFFICIENT_SCOPE")).toBe(403)
+    expect(byStatus("INSUFFICIENT_CREDITS")).toBe(402)
+    expect(byStatus("VALIDATION_ERROR")).toBe(422)
+    expect(byStatus("PAYLOAD_TOO_LARGE")).toBe(413)
+    expect(byStatus("RATE_LIMIT_EXCEEDED")).toBe(429)
+    expect(byStatus("UPSTREAM_TIMEOUT")).toBe(504)
+  })
+
   it("RATE_TIERS and PRICING are well-formed and non-empty", () => {
     expect(RATE_TIERS.length).toBeGreaterThanOrEqual(3)
     for (const t of RATE_TIERS) {

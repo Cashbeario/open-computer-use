@@ -115,15 +115,44 @@ export interface ErrorCode {
   meaning: string
 }
 
+/* The real backend error catalogue. Every error envelope carries
+   error.code (stable, safe to branch on), error.request_id, and an
+   X-Coasty-Request-Id header. Authentication failures also carry a
+   WWW-Authenticate header. */
 export const ERROR_CODES: ErrorCode[] = [
-  { status: 400, code: "INVALID_REQUEST",      meaning: "Malformed body or a field failed validation (missing screenshot, instruction too long)." },
-  { status: 401, code: "INVALID_API_KEY",      meaning: "The X-API-Key header is missing, malformed, or the key was revoked." },
-  { status: 402, code: "INSUFFICIENT_CREDITS", meaning: "Your USD wallet balance can't cover this request. Add funds in the dashboard." },
-  { status: 403, code: "INSUFFICIENT_SCOPE",   meaning: "The key is valid but lacks the scope this endpoint requires." },
-  { status: 404, code: "NOT_FOUND",            meaning: "The session or resource id does not exist or has expired." },
-  { status: 429, code: "RATE_LIMITED",         meaning: "You exceeded your per-minute or concurrent-session limit. Back off and retry." },
-  { status: 500, code: "PREDICTION_FAILED",    meaning: "The model run failed. The charge for the request is automatically refunded." },
-  { status: 503, code: "SERVICE_UNAVAILABLE",  meaning: "A transient upstream issue. Retry with exponential backoff." },
+  // Auth + authorization
+  { status: 401, code: "INVALID_API_KEY",       meaning: "Key missing, malformed, or revoked (or \"Bearer \" was wrongly pasted into X-API-Key). 401s carry a WWW-Authenticate header." },
+  { status: 403, code: "INSUFFICIENT_SCOPE",    meaning: "The key is valid but lacks the scope this endpoint needs. The body lists required_scope and current_scopes; re-mint a key with the scope." },
+  // Billing
+  { status: 402, code: "INSUFFICIENT_CREDITS",  meaning: "Your USD wallet can't cover the request. The body reports required and balance. Add funds, or use a test key while building." },
+  { status: 402, code: "WALLET_EXHAUSTED",      meaning: "The wallet emptied mid-run. Steps that already completed were billed; top up to continue." },
+  // Request validation
+  { status: 422, code: "VALIDATION_ERROR",      meaning: "The body failed schema validation. error.details lists the offending field path and the expected type." },
+  { status: 422, code: "INVALID_SCREENSHOT",    meaning: "The screenshot is not decodable base64 PNG or JPEG. Strip any data: prefix and remove whitespace before encoding." },
+  { status: 413, code: "PAYLOAD_TOO_LARGE",     meaning: "The screenshot exceeds the 10 MB base64 limit. Downscale the image or re-encode it as JPEG." },
+  { status: 400, code: "INVALID_LIMIT",         meaning: "A ?limit= query parameter fell outside the allowed range of 1 to 200." },
+  { status: 400, code: "INVALID_STATUS_FILTER", meaning: "A ?status= query parameter is not one of the real statuses for that resource." },
+  // Resource lookup (ids are mode-isolated: test keys can't see live resources, and vice versa)
+  { status: 404, code: "NOT_FOUND",             meaning: "The resource id is unknown or expired. Ids are mode-isolated, so a test key can't see live resources." },
+  { status: 404, code: "SESSION_NOT_FOUND",     meaning: "The session id is unknown or its 24h inactivity window expired." },
+  { status: 404, code: "RUN_NOT_FOUND",         meaning: "The run id is unknown, expired, or belongs to the other key mode." },
+  { status: 404, code: "WORKFLOW_NOT_FOUND",    meaning: "The workflow id (or workflow-run id) is unknown or was archived." },
+  // State conflicts (carry machine-readable current_state plus allowed_from or required_state)
+  { status: 409, code: "NOT_AWAITING_HUMAN",    meaning: "You resumed a run that is not in awaiting_human. The body reports current_state and required_state." },
+  { status: 409, code: "RESUME_CONFLICT",       meaning: "A resume or cancel race was lost (the run already moved on). Re-read the run and retry against its new state." },
+  { status: 409, code: "IDEMPOTENCY_KEY_REUSED",meaning: "The same Idempotency-Key was sent with a different body. Use a fresh key, or replay the original request verbatim." },
+  // Rate + concurrency limits
+  { status: 429, code: "RATE_LIMIT_EXCEEDED",   meaning: "A per-key or per-user rate cap was hit. Honor Retry-After. A per_user cap can't be raised by minting more keys." },
+  { status: 429, code: "TOO_MANY_RUNS",         meaning: "The concurrent-run cap for your tier was reached. Wait for a run to finish, then retry." },
+  // Feature gating
+  { status: 400, code: "FEATURE_NOT_AVAILABLE", meaning: "The feature is gated to a higher tier (for example cua_version v4). Upgrade the plan or drop the gated option." },
+  // Server + upstream (charges for model failures are auto-refunded)
+  { status: 500, code: "INTERNAL_ERROR",        meaning: "An unexpected server error. Retry, and quote request_id when contacting support." },
+  { status: 500, code: "PREDICTION_FAILED",     meaning: "The prediction model run failed. The charge is automatically refunded." },
+  { status: 500, code: "GROUNDING_FAILED",      meaning: "The grounding model run failed. The charge is automatically refunded." },
+  { status: 500, code: "OCR_FAILED",            meaning: "The OCR model run failed. The charge is automatically refunded." },
+  { status: 503, code: "UPSTREAM_UNAVAILABLE",  meaning: "A transient upstream outage. Retry with an Idempotency-Key and exponential backoff." },
+  { status: 504, code: "UPSTREAM_TIMEOUT",      meaning: "An upstream call timed out. Transient; retry with an Idempotency-Key." },
 ]
 
 export interface RateTier {
@@ -2138,11 +2167,21 @@ export const RESPONSE_EXAMPLE = {
   usage: { input_tokens: 1523, output_tokens: 245, credits_charged: 5, cost_cents: 45 },
 }
 
+/* The standard error envelope. Every error carries error.code (stable),
+   error.message (human-readable), error.request_id (also echoed in the
+   X-Coasty-Request-Id header), plus error.suggestion and error.docs_url
+   for self-service. INSUFFICIENT_CREDITS additionally reports required +
+   balance so you can show the shortfall. A Link: <url>; rel="help" header
+   mirrors docs_url. */
 export const ERROR_EXAMPLE = {
   error: {
     code: "INSUFFICIENT_CREDITS",
     message: "Your API wallet does not have enough funds to complete this request.",
     type: "payment_required",
+    suggestion: "Add funds in the dashboard, or use an sk-coasty-test- key while building (test keys never bill).",
+    docs_url: "https://coasty.ai/developers/docs#errors",
+    required: 45,
+    balance: 12,
     request_id: "req_8f2c1e9a",
   },
 }
@@ -2576,8 +2615,13 @@ function DocsBody() {
       {/* ── Authentication ── */}
       <DocBlock section={DOC_SECTIONS[1]}>
         <P>
-          Every request must include your secret key in the <InlineCode>{AUTH_HEADER}</InlineCode>{" "}
-          header. Keys are created and revoked from the{" "}
+          Every request must include your secret key. The canonical way is the{" "}
+          <InlineCode>{AUTH_HEADER}</InlineCode> header, but{" "}
+          <InlineCode>Authorization: Bearer &lt;key&gt;</InlineCode> works too: a blank{" "}
+          <InlineCode>{AUTH_HEADER}</InlineCode> falls through to the Bearer header. Pick one form and
+          send the raw key. Do not paste the literal text <InlineCode>Bearer&nbsp;</InlineCode> inside{" "}
+          <InlineCode>{AUTH_HEADER}</InlineCode>; that is the single most common first-day mistake and it
+          returns <InlineCode>401 INVALID_API_KEY</InlineCode>. Keys are created and revoked from the{" "}
           <Link href="/developers/keys" className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">API keys</Link>{" "}
           page. Treat a key like a password: keep it server-side, store it in an environment variable,
           and never commit it or ship it in client-side code.
@@ -2599,18 +2643,34 @@ function DocsBody() {
           ]}
         />
         <Callout>
-          Prefer test keys while you wire up your integration. They exercise the exact same request and
-          response shapes with zero cost, so you can build and run CI confidently before flipping to a
-          live key.
+          Prefer test keys while you wire up your integration. An <InlineCode>sk-coasty-test-</InlineCode>{" "}
+          key never bills and runs against mock VMs, yet exercises the exact same request and response
+          shapes (its <InlineCode>X-Credits-Charged</InlineCode> and <InlineCode>usage.cost_cents</InlineCode>{" "}
+          are always <InlineCode>0</InlineCode>), so you can build and run CI confidently before flipping
+          to a live key.
         </Callout>
       </DocBlock>
 
       {/* ── Quickstart ── */}
       <DocBlock section={DOC_SECTIONS[2]}>
         <P>
-          Set <InlineCode>COASTY_API_KEY</InlineCode> in your environment, then send your first
-          prediction. The call below uploads a screenshot, asks the model to click a button, and prints
-          the actions it returns. Pick your language:
+          Your first prediction is four steps: export a key, capture a screenshot, base64-encode it, and
+          POST it with an instruction. Grab a test key from the{" "}
+          <Link href="/developers/keys" className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">API keys</Link>{" "}
+          page (it never bills) and set it in your shell:
+        </P>
+        <div className="rounded-xl border border-foreground/[0.08] bg-foreground/[0.02] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-foreground/[0.06] px-3 py-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/45">Shell</span>
+            <CopyButton value={`export COASTY_API_KEY="sk-coasty-test-your_key_here"`} />
+          </div>
+          <pre className="px-3.5 py-3 text-[12px] font-mono text-foreground/75 overflow-x-auto scrollbar-invisible">
+            <code>{`export COASTY_API_KEY="sk-coasty-test-your_key_here"`}</code>
+          </pre>
+        </div>
+        <P>
+          Now send the prediction. The call below uploads a screenshot, asks the model to click a button,
+          and prints the actions it returns. Pick your language:
         </P>
         <CodeTabs {...sampleProps("predict")} />
         <P>
@@ -2618,7 +2678,34 @@ function DocsBody() {
           <InlineCode>status</InlineCode> of <InlineCode>continue</InlineCode>,{" "}
           <InlineCode>done</InlineCode>, or <InlineCode>fail</InlineCode>. Execute each action in order,
           take a new screenshot, and call again while the status is <InlineCode>continue</InlineCode>.
+          That loop is the whole API in miniature.
         </P>
+        <RefTable
+          head={["Want to...", "Go to"]}
+          rows={[
+            [
+              "Run a multi-step task without resending history",
+              <Link key="s" href="#sessions" onClick={(e) => { e.preventDefault(); scrollToSection("sessions") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">Sessions</Link>,
+            ],
+            [
+              "Hand the agent a task and let it drive to done on its own",
+              <Link key="r" href="#runs" onClick={(e) => { e.preventDefault(); scrollToSection("runs") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">Task runs</Link>,
+            ],
+            [
+              "Chain many tasks with branches, loops, and guards",
+              <Link key="w" href="#workflows" onClick={(e) => { e.preventDefault(); scrollToSection("workflows") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">Workflows</Link>,
+            ],
+            [
+              "Map a failed call to a fix",
+              <Link key="e" href="#errors" onClick={(e) => { e.preventDefault(); scrollToSection("errors") }} className="text-foreground/85 underline underline-offset-2 decoration-foreground/25 hover:decoration-foreground/60">Errors</Link>,
+            ],
+          ]}
+        />
+        <Callout>
+          Each of those sections ships a complete, copy-pasteable flow in all six languages: a sessions
+          loop, a run polled to completion, and a workflow created then run. Start from the one that
+          matches your task and adapt it.
+        </Callout>
       </DocBlock>
 
       {/* ── Predict ── */}
@@ -2920,7 +3007,7 @@ function DocsBody() {
         </Callout>
         <P>
           A definition is validated before it is accepted. The limits below are enforced at create and
-          ad-hoc time, so an invalid definition is rejected with <InlineCode>400 INVALID_REQUEST</InlineCode>{" "}
+          ad-hoc time, so an invalid definition is rejected with <InlineCode>422 VALIDATION_ERROR</InlineCode>{" "}
           rather than failing mid-run.
         </P>
         <RefTable
@@ -3002,6 +3089,16 @@ function DocsBody() {
           because the task is impossible (<InlineCode>fail</InlineCode>). <InlineCode>usage</InlineCode>{" "}
           reports tokens and the dollar cost of the call (<InlineCode>cost_cents</InlineCode>).
         </P>
+        <P>
+          Billed success responses also carry two headers you can read without parsing the body:{" "}
+          <InlineCode>X-Credits-Charged</InlineCode> (what this call cost) and{" "}
+          <InlineCode>X-Credits-Remaining</InlineCode> (your wallet balance after it). In the body, the
+          same numbers appear as <InlineCode>usage.credits_charged</InlineCode> and{" "}
+          <InlineCode>usage.cost_cents</InlineCode>. On an <InlineCode>sk-coasty-test-</InlineCode> key
+          both are always <InlineCode>0</InlineCode>. Every response (success or error) additionally
+          carries an <InlineCode>X-Coasty-Request-Id</InlineCode> header that mirrors{" "}
+          <InlineCode>request_id</InlineCode>; quote it when contacting support.
+        </P>
         <JsonBlock value={RESPONSE_EXAMPLE} />
         <RefTable
           head={["Field", "Description"]}
@@ -3023,12 +3120,27 @@ function DocsBody() {
         <P>
           Errors return a non-2xx status and a JSON envelope under an <InlineCode>error</InlineCode> key.
           The <InlineCode>code</InlineCode> is stable and safe to branch on; <InlineCode>message</InlineCode>{" "}
-          is human-readable and may change. Always log <InlineCode>request_id</InlineCode> — it is the
-          fastest way for us to trace a failed call.
+          is human-readable and may change. Every error also carries an{" "}
+          <InlineCode>error.request_id</InlineCode> (mirrored in the{" "}
+          <InlineCode>X-Coasty-Request-Id</InlineCode> response header), plus{" "}
+          <InlineCode>error.suggestion</InlineCode> and <InlineCode>error.docs_url</InlineCode> for
+          self-service. A <InlineCode>{`Link: <url>; rel="help"`}</InlineCode> header mirrors{" "}
+          <InlineCode>docs_url</InlineCode>. Always log the request id: it is the fastest way for us to
+          trace a failed call.
+        </P>
+        <P>
+          Some codes attach machine-readable context to the body. A <InlineCode>402</InlineCode>{" "}
+          (<InlineCode>INSUFFICIENT_CREDITS</InlineCode>) reports <InlineCode>required</InlineCode> and{" "}
+          <InlineCode>balance</InlineCode>; a <InlineCode>403</InlineCode> reports{" "}
+          <InlineCode>required_scope</InlineCode> and <InlineCode>current_scopes</InlineCode>; a{" "}
+          <InlineCode>422</InlineCode> <InlineCode>VALIDATION_ERROR</InlineCode> lists the offending field
+          path under <InlineCode>error.details</InlineCode>; and a <InlineCode>409</InlineCode> state
+          conflict carries <InlineCode>current_state</InlineCode> with{" "}
+          <InlineCode>allowed_from</InlineCode> or <InlineCode>required_state</InlineCode>.
         </P>
         <JsonBlock value={ERROR_EXAMPLE} />
         <RefTable
-          head={["Status", "Code", "Meaning"]}
+          head={["Status", "Code", "Cause and fix"]}
           rows={ERROR_CODES.map((e) => [
             <span key={`${e.code}-s`} className="font-mono text-[12px] text-foreground/80">{e.status}</span>,
             <InlineCode key={`${e.code}-c`}>{e.code}</InlineCode>,
@@ -3036,19 +3148,64 @@ function DocsBody() {
           ])}
         />
         <Callout>
-          Treat <InlineCode>429</InlineCode> and <InlineCode>503</InlineCode> as retryable with
-          exponential backoff. A <InlineCode>500</InlineCode> automatically refunds the request&apos;s
-          charge to your wallet, so it is safe to retry idempotent calls.
+          Treat <InlineCode>429</InlineCode>, <InlineCode>503</InlineCode> (
+          <InlineCode>UPSTREAM_UNAVAILABLE</InlineCode>), and <InlineCode>504</InlineCode> (
+          <InlineCode>UPSTREAM_TIMEOUT</InlineCode>) as retryable: honor <InlineCode>Retry-After</InlineCode>{" "}
+          on a 429, and use an <InlineCode>Idempotency-Key</InlineCode> with exponential backoff on the
+          upstream codes. A <InlineCode>500</InlineCode> model failure (
+          <InlineCode>PREDICTION_FAILED</InlineCode>, <InlineCode>GROUNDING_FAILED</InlineCode>,{" "}
+          <InlineCode>OCR_FAILED</InlineCode>) auto-refunds the charge, so retrying is free.
         </Callout>
+
+        {/* Troubleshooting: the five most common first-week mistakes. */}
+        <h3 className="text-[15px] font-semibold tracking-tight text-foreground/90 pt-2">Troubleshooting</h3>
+        <P>
+          Five mistakes account for almost every first-week support ticket. Each maps to one status and
+          one fix:
+        </P>
+        <RefTable
+          head={["Symptom", "Likely cause", "Fix"]}
+          rows={[
+            [
+              <span key="s401" className="font-mono text-[12px] text-foreground/80">401</span>,
+              <>Wrong header. The key is missing, or <InlineCode>Bearer&nbsp;</InlineCode> was pasted into <InlineCode>{AUTH_HEADER}</InlineCode>.</>,
+              <>Send the raw key in <InlineCode>{AUTH_HEADER}</InlineCode>, or use <InlineCode>Authorization: Bearer &lt;key&gt;</InlineCode>. Never both prefixes.</>,
+            ],
+            [
+              <span key="s402" className="font-mono text-[12px] text-foreground/80">402</span>,
+              <>No credits. Your live wallet can&apos;t cover the call (<InlineCode>INSUFFICIENT_CREDITS</InlineCode>).</>,
+              <>Add funds, or build against an <InlineCode>sk-coasty-test-</InlineCode> key (test keys never bill).</>,
+            ],
+            [
+              <span key="s403" className="font-mono text-[12px] text-foreground/80">403</span>,
+              <>Missing scope. The key lacks <InlineCode>required_scope</InlineCode> for this endpoint.</>,
+              <>Re-mint a key with the needed scope (for example <InlineCode>runs:write</InlineCode> or <InlineCode>workflows:write</InlineCode>).</>,
+            ],
+            [
+              <span key="s422" className="font-mono text-[12px] text-foreground/80">422</span>,
+              <>Bad screenshot or missing field. Undecodable base64, a <InlineCode>data:</InlineCode> prefix, or an absent required field.</>,
+              <>Strip the <InlineCode>data:</InlineCode> prefix and whitespace; read <InlineCode>error.details</InlineCode> for the exact field path.</>,
+            ],
+            [
+              <span key="s429" className="font-mono text-[12px] text-foreground/80">429</span>,
+              <>Rate limited. A per-key or per-user cap (<InlineCode>RATE_LIMIT_EXCEEDED</InlineCode>) was hit.</>,
+              <>Back off and honor <InlineCode>Retry-After</InlineCode>. A per_user cap can&apos;t be raised by minting more keys.</>,
+            ],
+          ]}
+        />
       </DocBlock>
 
       {/* ── Rate limits ── */}
       <DocBlock section={sec("rate-limits")}>
         <P>
-          Limits apply per key and, in aggregate, per account. Every response carries{" "}
+          Limits apply per key and, in aggregate, per user. Every response carries{" "}
           <InlineCode>X-RateLimit-Limit</InlineCode>, <InlineCode>X-RateLimit-Remaining</InlineCode>, and{" "}
           <InlineCode>X-RateLimit-Reset</InlineCode> (a Unix timestamp) so you can pace requests precisely
-          rather than guessing. When you exceed a limit you get <InlineCode>429 RATE_LIMITED</InlineCode>.
+          rather than guessing. When you exceed a limit you get{" "}
+          <InlineCode>429 RATE_LIMIT_EXCEEDED</InlineCode> with a <InlineCode>Retry-After</InlineCode>{" "}
+          header: honor it before retrying. The per_user cap is shared across all your keys, so minting
+          more keys does not raise it. A separate <InlineCode>429 TOO_MANY_RUNS</InlineCode> guards the
+          concurrent-run cap for agent runs.
         </P>
         <RefTable
           head={["Tier", "Requests / min", "Concurrent sessions", "Trajectory"]}

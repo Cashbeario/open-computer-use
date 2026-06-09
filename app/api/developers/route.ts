@@ -209,13 +209,78 @@ export async function GET() {
       .map(([date, v]) => ({ date, ...v }))
       .sort((a, b) => a.date.localeCompare(b.date))
 
-    // ── Recent requests (last 200, with request_id) ──
-    const recent = rows.slice(0, 200).map(r => ({
-      endpoint: r.endpoint,
-      credits: r.credits_charged ?? 0,
-      time: r.created_at,
-      request_id: r.request_id ?? null,
-    }))
+    // ── Recent requests (rich per-request log) ──
+    // Read the full request log (`api_requests`) rather than the billing
+    // ledger (`api_usage`) so Logs can show status, latency, errors, model,
+    // and tokens — and crucially INCLUDE failed requests and free `parse`
+    // calls, which never reach `api_usage` (record_usage only runs on the
+    // billed success path). Defensive: `api_requests` is provisioned outside
+    // the repo migrations, so if the table/columns differ we fall back to the
+    // thin `api_usage`-derived logs rather than 500-ing the whole dashboard.
+    type RecentRow = {
+      endpoint: string
+      credits: number
+      time: string
+      request_id: string | null
+      status?: string | null
+      error_code?: string | null
+      error_message?: string | null
+      duration_ms?: number | null
+      cua_version?: string | null
+      model?: string | null
+      input_tokens?: number | null
+      output_tokens?: number | null
+      was_refunded?: boolean
+      instruction?: string | null
+    }
+    let recent: RecentRow[]
+    try {
+      const { data: reqRows, error: reqErr } = await db
+        .from("api_requests")
+        .select(
+          "request_id, endpoint, status, error_code, error_message, credits_charged, " +
+            "duration_ms, cua_version, model, input_tokens, output_tokens, was_refunded, created_at, instruction",
+        )
+        .eq("user_id", userId)
+        .gte("created_at", thirtyDaysAgo)
+        .order("created_at", { ascending: false })
+        .limit(200)
+      if (reqErr) throw new Error(reqErr.message)
+      // supabase-js infers the long concatenated select as GenericStringError[]
+      // at the type level (runtime is unaffected); cast to a plain row shape.
+      recent = ((reqRows ?? []) as unknown as Record<string, unknown>[]).map((r) => {
+        const instruction = (r.instruction as string | null) ?? null
+        return {
+          endpoint: (r.endpoint as string) ?? "unknown",
+          credits: (r.credits_charged as number | null) ?? 0,
+          time: r.created_at as string,
+          request_id: (r.request_id as string | null) ?? null,
+          // Raw CUA model status (continue/done/fail) where present. The
+          // pass/fail OUTCOME is derived client-side from error_code.
+          status: (r.status as string | null) ?? null,
+          error_code: (r.error_code as string | null) ?? null,
+          error_message: (r.error_message as string | null) ?? null,
+          duration_ms: (r.duration_ms as number | null) ?? null,
+          cua_version: (r.cua_version as string | null) ?? null,
+          model: (r.model as string | null) ?? null,
+          input_tokens: (r.input_tokens as number | null) ?? null,
+          output_tokens: (r.output_tokens as number | null) ?? null,
+          was_refunded: Boolean(r.was_refunded),
+          // Preview only — the full task text is the developer's own data, but
+          // keep the payload lean across 200 rows.
+          instruction:
+            instruction && instruction.length > 200 ? instruction.slice(0, 200) + "…" : instruction,
+        }
+      })
+    } catch {
+      // Older/absent api_requests schema — degrade to the billing-ledger logs.
+      recent = rows.slice(0, 200).map(r => ({
+        endpoint: r.endpoint,
+        credits: r.credits_charged ?? 0,
+        time: r.created_at,
+        request_id: r.request_id ?? null,
+      }))
+    }
 
     // ── Peak hour ──
     const hourBuckets: number[] = new Array(24).fill(0)

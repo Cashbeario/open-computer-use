@@ -525,7 +525,7 @@ function DeveloperBillingView() {
         </div>
         <p className="text-[11px] text-muted-foreground/45 mt-3.5 leading-relaxed">
           Charged once via Stripe. No subscription required. Funds are spent only as you make API
-          requests (1 credit = $0.09).
+          requests (1 credit = $0.01).
         </p>
       </div>
 

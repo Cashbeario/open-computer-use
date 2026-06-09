@@ -107,7 +107,7 @@ response header reports which family authenticated (\`live\`, \`test\`, or \`leg
 ### Billing model (USD)
 
 Your developer wallet is a **prepaid USD balance** (denominated in cents).
-Internally costs are computed at a granularity of $0.09 per unit; everywhere in
+Internally costs are computed at a granularity of $0.01 per unit; everywhere in
 this document costs are shown in dollars. Charges are taken before the model
 call and automatically refunded if the call fails. See the Pricing table in the
 Reference section for exact per-endpoint dollar costs.
@@ -593,7 +593,7 @@ create safe. Reusing a key with a different body returns \`422 IDEMPOTENCY_KEY_R
 | \`max_steps\` | int | Hard cap on agent steps. |
 | \`on_awaiting_human\` | string | \`pause\` / \`fail\` / \`cancel\`. |
 | \`steps_completed\` | int | Steps run so far. |
-| \`credits_charged\` | int | Internal cost units (1 unit = $0.09). See \`cost_cents\` for dollars. |
+| \`credits_charged\` | int | Internal cost units (1 unit = $0.01). See \`cost_cents\` for dollars. |
 | \`cost_cents\` | int | Dollar cost so far, in cents. |
 | \`result\` | object\\|null | \`{ passed, status, summary, verdict? }\` once finished. |
 | \`error\` | object\\|null | \`{ code, message }\` when failed. |
@@ -1280,23 +1280,23 @@ requested explicitly at key creation.
 
 ### Pricing (USD)
 
-Costs are computed internally at a granularity of $0.09 per unit and shown here
+Costs are computed internally at a granularity of $0.01 per unit and shown here
 in dollars. Charges are taken before the model call and refunded on failure.
 
 | Endpoint | Cost | Note |
 | --- | --- | --- |
-| \`POST /v1/predict\` | $0.45 | Stateless prediction. |
-| \`POST /v1/sessions\` | $0.90 | One-time session creation. |
-| \`POST /v1/sessions/{id}/predict\` | $0.36 | Each step inside a session. |
-| \`POST /v1/ground\` | $0.27 | Coordinate grounding. |
-| \`POST /v1/ocr\` | $0.27 | Text extraction. |
+| \`POST /v1/predict\` | $0.05 | Stateless prediction. |
+| \`POST /v1/sessions\` | $0.10 | One-time session creation. |
+| \`POST /v1/sessions/{id}/predict\` | $0.04 | Each step inside a session. |
+| \`POST /v1/ground\` | $0.03 | Coordinate grounding. |
+| \`POST /v1/ocr\` | $0.03 | Text extraction. |
 | \`POST /v1/parse\` | Free | Deterministic, no model call. |
-| \`POST /v1/runs\` | $0.45/step | Per agent step on v3/v4 (v1 is $0.72/step), billed from your USD wallet. |
-| \`POST /v1/workflows/runs\` | $0.45/step | Each task step is a run; total capped by \`budget_cents\`. |
+| \`POST /v1/runs\` | $0.05/step | Per agent step on v3/v4 (v1 is $0.08/step), billed from your USD wallet. |
+| \`POST /v1/workflows/runs\` | $0.05/step | Each task step is a run; total capped by \`budget_cents\`. |
 
-Surcharges may apply on inference endpoints: roughly +$0.18 per extra trajectory
-screenshot, +$0.09 per HD screenshot (wider than 1280x720), +$0.27 per request
-on the \`v1\` engine, and +$0.09 for a large custom prompt (over 500 chars). The
+Surcharges may apply on inference endpoints: roughly +$0.02 per extra trajectory
+screenshot, +$0.01 per HD screenshot (wider than 1280x720), +$0.03 per request
+on the \`v1\` engine, and +$0.01 for a large custom prompt (over 500 chars). The
 wallet is a prepaid USD balance; top up in the developer dashboard.
 
 ### MCP server

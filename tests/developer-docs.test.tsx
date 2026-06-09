@@ -226,11 +226,11 @@ describe("reference tables", () => {
     }
     // the headline endpoints carry their exact USD prices
     const byEndpoint = Object.fromEntries(PRICING.map((p) => [p.endpoint, p.cost]))
-    expect(byEndpoint["POST /v1/predict"]).toBe("$0.45")
-    expect(byEndpoint["POST /v1/sessions"]).toBe("$0.90")
-    expect(byEndpoint["POST /v1/sessions/{id}/predict"]).toBe("$0.36")
-    expect(byEndpoint["POST /v1/ground"]).toBe("$0.27")
-    expect(byEndpoint["POST /v1/ocr"]).toBe("$0.27")
+    expect(byEndpoint["POST /v1/predict"]).toBe("$0.05")
+    expect(byEndpoint["POST /v1/sessions"]).toBe("$0.10")
+    expect(byEndpoint["POST /v1/sessions/{id}/predict"]).toBe("$0.04")
+    expect(byEndpoint["POST /v1/ground"]).toBe("$0.03")
+    expect(byEndpoint["POST /v1/ocr"]).toBe("$0.03")
     expect(byEndpoint["POST /v1/parse"]).toBe("Free")
   })
 
@@ -385,9 +385,9 @@ describe("DeveloperDocs rendering", () => {
     expect(pricing).toBeTruthy()
     const text = pricing.textContent ?? ""
     // The headline USD prices appear in the rendered table.
-    expect(text).toContain("$0.45")
-    expect(text).toContain("$0.90")
-    expect(text).toContain("$0.27")
+    expect(text).toContain("$0.05")
+    expect(text).toContain("$0.10")
+    expect(text).toContain("$0.03")
     // No "credit" wording leaks into the rendered pricing section.
     expect(/credit/i.test(text), "pricing section must not show the word credits").toBe(false)
   })

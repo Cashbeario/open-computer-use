@@ -29,7 +29,7 @@ describe("buildCraftedPrompt — heavily-crafted, tailored", () => {
     const p = buildCraftedPrompt(base)
     expect(p).toContain(API_REFERENCE.split("\n")[0])  // the reference header
     expect(p).toContain("https://coasty.ai/v1")
-    expect(p).toContain("$0.45")
+    expect(p).toContain("$0.05")
     expect(p).toContain("COASTY_API_KEY")
     expect(p).not.toMatch(/\d+\s*credits/i)
   })

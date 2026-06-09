@@ -105,12 +105,12 @@ describe("credit_api_wallet RPC — atomic, idempotent topup/refund", () => {
 })
 
 describe("backend billing rewired to the dollar wallet", () => {
-  it("converts credits to cents at 9¢/credit (predict = $0.45)", () => {
+  it("converts credits to cents at 1¢/credit (predict = $0.05)", () => {
     const m = BILLING.match(/API_CREDIT_USD_CENTS\s*=\s*(\d+)/)
     expect(m).toBeTruthy()
     const rate = Number(m![1])
-    expect(rate).toBe(9)
-    expect(5 * rate).toBe(45) // POST /predict base = 5 credits = $0.45
+    expect(rate).toBe(1)
+    expect(5 * rate).toBe(5) // POST /predict base = 5 credits = $0.05
     expect(BILLING).toMatch(/credits \* API_CREDIT_USD_CENTS/)
   })
 

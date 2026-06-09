@@ -37,7 +37,7 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 - DSL step types: task, assert, if, loop, parallel, human_approval, retry, succeed, fail. Conditions are structured objects: {op: "eq"|"ne"|"lt"|"gt"|"lte"|"gte"|"contains"|"truthy"|"falsy"|"exists"|"and"|"or"|"not", ...}. Variables: {{inputs.x}}, {{vars.y}}, {{stepId.field}} (a task binds {status, passed, result, run_id}). Hard guards: budget_cents, max_iterations, deadline_seconds.
 
 ## Pricing (USD, prepaid dollar wallet)
-predict $0.45  ·  session create $0.90  ·  session step $0.36  ·  ground/ocr $0.27  ·  parse free  ·  runs and workflow task steps $0.45 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
+predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground/ocr $0.03  ·  parse free  ·  runs and workflow task steps $0.05 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
 
 ## Errors
 JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSUFFICIENT_CREDITS  ·  403 INSUFFICIENT_SCOPE  ·  429 rate limit / TOO_MANY_RUNS.`

@@ -186,11 +186,11 @@ export function formatNum(n: number): string {
 }
 
 /* Developer API spend is denominated in USD. Internally costs are computed in
-   "credits" where 1 credit = 9 cents = $0.09 (API_CREDIT_USD_CENTS in
+   "credits" where 1 credit = 1 cent = $0.01 (API_CREDIT_USD_CENTS in
    backend/app/services/api_billing_service.py). The data layer keeps the
    `credits` field names (they mirror the api_usage table), but everything the
    developer SEES is dollars. These helpers do the single conversion. */
-export const API_CREDIT_USD_CENTS = 9
+export const API_CREDIT_USD_CENTS = 1
 
 export function creditsToUsdCents(credits: number): number {
   return Math.round((credits ?? 0) * API_CREDIT_USD_CENTS)
@@ -1649,13 +1649,13 @@ function DetailRow({
    ═══════════════════════════════════════════════════════════════════ */
 
 const REFERENCE_ENDPOINTS = [
-  { method: "POST",   path: "/v1/predict",                    desc: "Stateless prediction",  cost: "$0.45" },
-  { method: "POST",   path: "/v1/sessions",                   desc: "Create session",        cost: "$0.90" },
-  { method: "POST",   path: "/v1/sessions/{id}/predict",      desc: "Session prediction",    cost: "$0.36" },
+  { method: "POST",   path: "/v1/predict",                    desc: "Stateless prediction",  cost: "$0.05" },
+  { method: "POST",   path: "/v1/sessions",                   desc: "Create session",        cost: "$0.10" },
+  { method: "POST",   path: "/v1/sessions/{id}/predict",      desc: "Session prediction",    cost: "$0.04" },
   { method: "POST",   path: "/v1/sessions/{id}/reset",        desc: "Reset session",         cost: "Free" },
   { method: "DELETE", path: "/v1/sessions/{id}",              desc: "Delete session",        cost: "Free" },
-  { method: "POST",   path: "/v1/ground",                     desc: "Locate UI element",     cost: "$0.27" },
-  { method: "POST",   path: "/v1/ocr",                        desc: "Extract text",          cost: "$0.27" },
+  { method: "POST",   path: "/v1/ground",                     desc: "Locate UI element",     cost: "$0.03" },
+  { method: "POST",   path: "/v1/ocr",                        desc: "Extract text",          cost: "$0.03" },
   { method: "POST",   path: "/v1/parse",                      desc: "Parse pyautogui code",  cost: "Free" },
   { method: "GET",    path: "/v1/usage",                      desc: "Usage summary",         cost: "Free" },
 ] as const

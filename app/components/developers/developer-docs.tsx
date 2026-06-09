@@ -176,14 +176,14 @@ export interface PriceRow {
 }
 
 export const PRICING: PriceRow[] = [
-  { endpoint: "POST /v1/predict",                  cost: "$0.45", note: "Stateless prediction." },
-  { endpoint: "POST /v1/sessions",                 cost: "$0.90", note: "One-time session creation." },
-  { endpoint: "POST /v1/sessions/{id}/predict",    cost: "$0.36", note: "Each step inside a session." },
-  { endpoint: "POST /v1/ground",                   cost: "$0.27", note: "Coordinate grounding." },
-  { endpoint: "POST /v1/ocr",                      cost: "$0.27", note: "Text extraction." },
+  { endpoint: "POST /v1/predict",                  cost: "$0.05", note: "Stateless prediction." },
+  { endpoint: "POST /v1/sessions",                 cost: "$0.10", note: "One-time session creation." },
+  { endpoint: "POST /v1/sessions/{id}/predict",    cost: "$0.04", note: "Each step inside a session." },
+  { endpoint: "POST /v1/ground",                   cost: "$0.03", note: "Coordinate grounding." },
+  { endpoint: "POST /v1/ocr",                      cost: "$0.03", note: "Text extraction." },
   { endpoint: "POST /v1/parse",                    cost: "Free",  note: "Deterministic, no model call." },
-  { endpoint: "POST /v1/runs",                     cost: "$0.45/step", note: "Per agent step on v3/v4 (v1 is $0.72), billed from your dollar API wallet." },
-  { endpoint: "POST /v1/workflows/runs",           cost: "$0.45/step", note: "Each task step is a run; total capped by budget_cents." },
+  { endpoint: "POST /v1/runs",                     cost: "$0.05/step", note: "Per agent step on v3/v4 (v1 is $0.08), billed from your dollar API wallet." },
+  { endpoint: "POST /v1/workflows/runs",           cost: "$0.05/step", note: "Each task step is a run; total capped by budget_cents." },
 ]
 
 /* ─── Agents (Task Runs) reference data ─── */
@@ -207,7 +207,7 @@ export const RUN_FIELDS: RunField[] = [
   { field: "max_steps",          type: "int",     description: "Hard cap on agent steps (default 50)." },
   { field: "on_awaiting_human",  type: "string",  description: "What to do when a human is needed: pause, fail, or cancel." },
   { field: "steps_completed",    type: "int",     description: "How many agent steps have run so far." },
-  { field: "credits_charged",    type: "int",     description: "Internal cost units billed (1 unit = $0.09). See cost_cents for the dollar amount." },
+  { field: "credits_charged",    type: "int",     description: "Internal cost units billed (1 unit = $0.01). See cost_cents for the dollar amount." },
   { field: "cost_cents",         type: "int",     description: "Dollar cost so far, in cents (USD)." },
   { field: "result",             type: "object",  description: "{ passed, status, summary, verdict? } once the run finishes." },
   { field: "error",              type: "object",  description: "{ code, message } when the run failed (nullable)." },
@@ -3109,7 +3109,7 @@ function DocsBody() {
             [<InlineCode key="d">reasoning</InlineCode>, "The model's explanation (omitted if include_reasoning is false)."],
             [<InlineCode key="e">raw_code</InlineCode>, "The equivalent pyautogui lines, if you prefer to run those."],
             [<InlineCode key="f">usage</InlineCode>, <>Tokens plus the cost of the request (see the two fields below).</>],
-            [<InlineCode key="g">usage.credits_charged</InlineCode>, <>Internal cost units billed (1 unit = <InlineCode>$0.09</InlineCode>). See <InlineCode>cost_cents</InlineCode> for the dollar amount.</>],
+            [<InlineCode key="g">usage.credits_charged</InlineCode>, <>Internal cost units billed (1 unit = <InlineCode>$0.01</InlineCode>). See <InlineCode>cost_cents</InlineCode> for the dollar amount.</>],
             [<InlineCode key="h">usage.cost_cents</InlineCode>, "Dollar cost so far, in cents (USD)."],
           ]}
         />
@@ -3223,7 +3223,7 @@ function DocsBody() {
         <P>
           Requests are billed in US dollars from your API wallet. The charge is taken before the model
           runs and automatically refunded if a request fails server-side. Internally each request unit is{" "}
-          <InlineCode>$0.09</InlineCode> (the granularity behind every price below), but everything you
+          <InlineCode>$0.01</InlineCode> (the granularity behind every price below), but everything you
           pay and see is dollars. High-resolution screenshots (above 1280×720) and longer trajectories
           add a small surcharge; test keys are always free.
         </P>

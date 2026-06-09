@@ -2650,7 +2650,7 @@ X-API-Key: sk-coasty-live-...
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST", p: "/v1/runs",                d: "Start a run (runs:write)",         c: "$0.45/step" },
+                { m: "POST", p: "/v1/runs",                d: "Start a run (runs:write)",         c: "$0.05/step" },
                 { m: "GET",  p: "/v1/runs",                d: "List runs (runs:read)",            c: "Free" },
                 { m: "GET",  p: "/v1/runs/{id}",           d: "Get a run (runs:read)",            c: "Free" },
                 { m: "GET",  p: "/v1/runs/{id}/events",    d: "SSE stream (runs:read)",           c: "Free" },
@@ -2683,8 +2683,8 @@ X-API-Key: sk-coasty-live-...
                 { m: "GET",    p: "/v1/workflows/{id}",             d: "Get (workflows:read)",            c: "Free" },
                 { m: "PUT",    p: "/v1/workflows/{id}",             d: "Update — bumps version",          c: "Free" },
                 { m: "DELETE", p: "/v1/workflows/{id}",             d: "Archive a workflow",              c: "Free" },
-                { m: "POST",   p: "/v1/workflows/{id}/runs",        d: "Run a saved workflow",            c: "$0.45/step" },
-                { m: "POST",   p: "/v1/workflows/runs",             d: "Ad-hoc inline definition",        c: "$0.45/step" },
+                { m: "POST",   p: "/v1/workflows/{id}/runs",        d: "Run a saved workflow",            c: "$0.05/step" },
+                { m: "POST",   p: "/v1/workflows/runs",             d: "Ad-hoc inline definition",        c: "$0.05/step" },
                 { m: "GET",    p: "/v1/workflows/runs",             d: "List workflow runs",              c: "Free" },
                 { m: "GET",    p: "/v1/workflows/runs/{id}",        d: "Get a workflow run",              c: "Free" },
                 { m: "GET",    p: "/v1/workflows/runs/{id}/events", d: "SSE stream (Last-Event-ID)",      c: "Free" },

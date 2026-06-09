@@ -32,8 +32,8 @@ describe("AI_PROMPT — accurate, self-contained brief", () => {
   })
 
   it("prices in USD, never in credits", () => {
-    expect(AI_PROMPT).toContain("$0.45")
-    expect(AI_PROMPT).toContain("$0.90")
+    expect(AI_PROMPT).toContain("$0.05")
+    expect(AI_PROMPT).toContain("$0.10")
     expect(AI_PROMPT).not.toMatch(/\d+\s*credits/i)  // no credit-denominated pricing
   })
 

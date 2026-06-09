@@ -17,6 +17,7 @@ import {
   IconActivity,
   IconChartBar,
   IconBook2,
+  IconCode,
 } from "@tabler/icons-react"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
 import Link from "next/link"
@@ -1152,6 +1153,9 @@ export const SidebarNavSection = memo(function SidebarNavSection({
   // See lib/platform-mode-store.ts. The flag for the *public* developer
   // surface still lives in lib/feature-flags.ts; this is the in-app surface.
   const platformMode = usePlatformMode((s) => s.mode)
+  // Same store action the header switcher calls — the in-sidebar "Developer"
+  // row below flips the platform exactly the way the switcher does.
+  const setPlatformMode = usePlatformMode((s) => s.setMode)
   const [devModeMounted, setDevModeMounted] = useState(false)
   useEffect(() => setDevModeMounted(true), [])
   const isDeveloperMode = devModeMounted && platformMode === "developer"
@@ -1362,6 +1366,22 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             />
           )
         })()}
+
+        {/* Developer — a one-click switch into the Developer platform that
+            mirrors the header switcher exactly (usePlatformMode → "developer",
+            no navigation, side-effect free). Sits directly below Agent. It
+            lives inside the Personal ModeReveal, so flipping the mode collapses
+            this whole group away while the full Developer section below reveals
+            — the same animated transition the header switcher triggers. */}
+        <NavButton
+          id="sidebar-developer-switch"
+          testId="sidebar-nav-developer"
+          icon={<IconCode size={16} stroke={1.5} className="shrink-0" />}
+          label="Developer"
+          tooltip="Switch to the developer platform"
+          accentColor="text-purple-500 dark:text-purple-400"
+          onClick={() => setPlatformMode("developer")}
+        />
       </div>
       </ModeReveal>
 

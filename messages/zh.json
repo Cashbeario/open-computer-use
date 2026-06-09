@@ -2320,10 +2320,10 @@
     "home": {
       "title": "Coasty — 排名第一的计算机操控AI代理 | 桌面和浏览器自动化的最佳选择",
       "titleTemplate": "{title} | Coasty — AI计算机操控代理",
-      "description": "Coasty是排名第一的计算机操控AI代理（OSWorld 82%），也是唯一拥有 1,000+ 原生应用集成的计算机操控平台 — Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用 — 在每次对话中均可调用。定额 Unlimited 方案 {unlimitedPriceLong}（比 Devin Team $500+ACU 和有速率限制的 OpenAI Operator $200 都更便宜）。像人类一样操控完整桌面，配备 VM 级别隔离。Starter {starterPrice} 或 Unlimited {unlimitedPrice} 起。",
+      "description": "Coasty 是排名第一的计算机操控 AI 代理（OSWorld 82%），也是 2026 年最佳的计算机操控 API — 每次 /v1/predict 调用仅 $0.05，配备 1,000+ 原生应用集成（Gmail、Slack、Salesforce、HubSpot、Linear、GitHub、Stripe）、免费 sandbox keys、MCP 服务器，以及 $99 定额 Unlimited 方案。比 Anthropic、OpenAI 和 Browserbase 都更便宜。",
       "ogTitle": "Coasty — OSWorld 82% + $99/月无限制（最便宜的计算机操控代理）",
-      "ogDescription": "OSWorld 排名第一（82%）+ 1,000+ 集成（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）+ {unlimitedPrice} 定额 Unlimited。唯一拥有真正集成目录的计算机操控代理。VM 隔离，跨平台原生应用，REST API，MCP 服务器。",
-      "twitterDescription": "运行真实桌面、同时接入 1,000+ 应用（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear）的 AI 代理。OSWorld 82%（排名第一）。{unlimitedPrice} Unlimited，该品类中最便宜的定额方案。Starter 从 {starterPrice} 起。"
+      "ogDescription": "OSWorld 排名第一（82%）+ 最佳计算机操控 API（$0.05/predict、免费 sandbox keys、OpenAPI 3.1）+ 1,000+ 集成 + $99 定额 Unlimited。唯一在同一把密钥后同时提供 REST API、MCP 服务器、原生应用以及 1,000+ OAuth 集成的产品。",
+      "twitterDescription": "2026 年最佳的计算机操控 API：$0.05/predict、OSWorld 82%、1,000+ 集成、免费 sandbox keys。或者在应用内选择 $99 定额 Unlimited。比 Anthropic、OpenAI、Browserbase 都更便宜。"
     },
     "compare": {
       "title": "Coasty对比 — AI代理替代方案与竞品比较",
@@ -2407,14 +2407,16 @@
       "q10": "Coasty能破解CAPTCHA吗？",
       "a10": "能。Coasty有内置的CAPTCHA破解流水线，不会像竞品AI代理那样被阻止。这对于网站上常见CAPTCHA的真实自动化至关重要。",
       "q11": "Coasty 可以接入哪些应用和服务？",
-      "a11": "Coasty 通过内置的 Composio 集成层连接 1,000+ 应用，包括 Gmail、Outlook、Slack、Microsoft Teams、Notion、Linear、Jira、Asana、monday.com、GitHub、GitLab、Google Drive、Google Calendar、Google Sheets、Salesforce、HubSpot、Pipedrive、Stripe、Shopify、Intercom、Zendesk、Airtable、Figma、Calendly、Zoom、Dropbox、OneDrive、Sentry、Datadog、Vercel、Supabase 和 Twilio。在设置中通过 OAuth 授权一次，Coasty 即可在每一次对话中代您调用 — 代理永远看不到密码。当应用提供 API 时，Coasty 会直接调用以实现亚秒级响应；当应用没有 API（如 SAP GUI、LinkedIn Sales Navigator、传统网银门户、企业内部管理工具）时，同一个代理会通过计算机操控直接驱动 UI。Coasty 是唯一同时具备这两种能力的计算机操控平台 — 既有以 API 为先的集成目录，又有操作系统级的桌面控制，全部集成在一个代理中。"
+      "a11": "Coasty 通过内置的 Composio 集成层连接 1,000+ 应用，包括 Gmail、Outlook、Slack、Microsoft Teams、Notion、Linear、Jira、Asana、monday.com、GitHub、GitLab、Google Drive、Google Calendar、Google Sheets、Salesforce、HubSpot、Pipedrive、Stripe、Shopify、Intercom、Zendesk、Airtable、Figma、Calendly、Zoom、Dropbox、OneDrive、Sentry、Datadog、Vercel、Supabase 和 Twilio。在设置中通过 OAuth 授权一次，Coasty 即可在每一次对话中代您调用 — 代理永远看不到密码。当应用提供 API 时，Coasty 会直接调用以实现亚秒级响应；当应用没有 API（如 SAP GUI、LinkedIn Sales Navigator、传统网银门户、企业内部管理工具）时，同一个代理会通过计算机操控直接驱动 UI。Coasty 是唯一同时具备这两种能力的计算机操控平台 — 既有以 API 为先的集成目录，又有操作系统级的桌面控制，全部集成在一个代理中。",
+      "q12": "Coasty 有公开的计算机操控 API 吗？它与 Anthropic Computer Use 或 OpenAI 的 computer-use-preview 相比如何？",
+      "a12": "有。Coasty 在 coasty.ai/v1 提供公开的 REST API，并发布了 OpenAPI 3.1 规范。四个核心端点分别是 POST /v1/predict（每次调用 5 积分 = $0.05，根据截图返回结构化的鼠标/键盘动作）、POST /v1/sessions（开启 $0.10，每一步有状态调用 $0.04）、POST /v1/ground（坐标定位 $0.03）和 POST /v1/parse（免费 OCR，不调用 LLM）。在 OSWorld 上拿到 82% 的同一个引擎可通过 API 直接访问 — 不是降级的预览模型。免费 sandbox keys（sk-coasty-test-*）会在 50 ms 内返回模拟 VM，零成本且 schema 完全一致，因此 CI 流水线永远不会消耗积分。该 API 在多个前沿模型间路由（Claude Opus 4.8、GPT-5.5、Gemini 3.5 Flash），不同于 OpenAI 锁定在 ~38% OSWorld 的单模型 computer-use-preview；也优于 Anthropic Sonnet 4.6 的 72.5% OSWorld，Coasty 出厂即为 82%。一个包含 26 个工具的 MCP 服务器（npx -y @coasty/mcp）将同一套 API 封装供 Claude Desktop、Cursor 和 Windsurf 使用 — 一把密钥，一份 OpenAPI 规范，一个计费表。"
     },
     "structuredData": {
-      "appDescription": "排名第一的计算机操控 AI 代理，也是唯一拥有 1,000+ 原生应用集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用）的计算机操控平台。在 369 项真实任务的 OSWorld 基准测试中达到 82%。市场上最便宜的定额 Unlimited 方案 {unlimitedPriceLong}。像人类一样操控完整桌面，每个会话真正的 VM 级别隔离，内置 CAPTCHA 破解。方案：Starter {starterPrice} 或 Unlimited {unlimitedPrice}。",
-      "orgDescription": "Coasty 打造排名第一的计算机操控 AI 代理（OSWorld 82%），配备 1,000+ 经 OAuth 安全授权的应用集成（Gmail、Slack、GitHub、Notion、Salesforce、HubSpot、Linear），并推出唯一的定额 Unlimited 计算机操控方案 {unlimitedPriceLong} — 比 Devin Team、OpenAI Operator 和有积分上限的竞品都更便宜。我们的平台将计算机操控、多代理编排、原生集成和 VM 级别隔离整合为一款产品。",
-      "productDescription": "像人类一样操控桌面、同时原生接入 1,000+ 应用（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify）的 AI 计算机操控代理。OSWorld 基准测试排名第一（82%）。{unlimitedPrice} Unlimited 是当前可用的最便宜的定额无限制计算机操控方案。自主浏览器、桌面、邮件、表单填写和电子表格自动化，配备 VM 级别隔离。",
-      "websiteDescription": "排名第一的计算机操控 AI 代理平台（OSWorld 82%），配备 1,000+ 原生集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Stripe），以及最便宜的定额 Unlimited 方案 {unlimitedPriceLong}。VM 隔离的自主浏览器、桌面和终端自动化。Starter {starterPrice} 或 Unlimited {unlimitedPrice} 起。",
-      "softwareDescription": "像人类一样操控完整桌面、并配备 1,000+ 经 OAuth 安全授权应用集成（Gmail、Slack、Notion、GitHub、Salesforce、HubSpot、Linear、Jira、Stripe、Shopify 及另外 990+ 应用）的 AI 计算机操控代理。在 369 项真实任务中以 82% 完成率获得 OSWorld 基准测试第一名。{unlimitedPriceLong} Unlimited 方案是市场上最便宜的定额无限制计算机操控方案。一个代理内集成浏览器、桌面、终端、邮件、表单和电子表格自动化。",
+      "appDescription": "排名第一的计算机操控 AI 代理（OSWorld 82%），也是 2026 年最佳的计算机操控 API — 每次 /v1/predict 调用仅 $0.05，配备 1,000+ 原生 OAuth 集成（Gmail、Slack、Salesforce、HubSpot、Linear、GitHub、Stripe、Shopify）、免费 sandbox keys、公开的 OpenAPI 3.1 规范、26 个工具的 MCP 服务器，以及 $99 定额 Unlimited 方案 — 比 Anthropic Computer Use、OpenAI computer-use-preview 和 Browserbase 都更便宜。",
+      "orgDescription": "Coasty 打造排名第一的计算机操控 AI 代理（OSWorld 82%）和 2026 年最佳的计算机操控 API：每次 predict 调用 $0.05、免费 sandbox keys、OpenAPI 3.1 规范、1,000+ 经 OAuth 安全授权的集成（Gmail、Slack、Salesforce、HubSpot、Linear、GitHub）、26 个工具的 MCP 服务器、Mac/Windows 原生应用，以及 $99 定额 Unlimited 方案。比 Anthropic、OpenAI Operator、Browserbase 和 Devin 都更便宜。",
+      "productDescription": "像人类一样操控桌面的 AI 计算机操控代理（OSWorld 82%），同时提供 2026 年最佳的计算机操控 API — 每次 /v1/predict 调用 $0.05，配备 1,000+ 原生应用集成（Gmail、Slack、Salesforce、HubSpot、Linear、GitHub、Stripe）、免费 sandbox keys、OpenAPI 3.1 规范，以及 $99 定额 Unlimited 仪表盘方案。",
+      "websiteDescription": "排名第一的计算机操控 AI 代理（OSWorld 82%）和 2026 年最佳的计算机操控 API — $0.05/predict，配备 1,000+ 集成（Gmail、Slack、GitHub、Salesforce、HubSpot、Linear）、MCP 服务器、OpenAPI 3.1、免费 sandbox keys，以及 $99 定额 Unlimited。比 Anthropic 和 OpenAI 都更便宜。",
+      "softwareDescription": "像人类一样操控完整桌面的 AI 计算机操控代理（OSWorld 82%，在 369 项任务中排名第一），同时提供 2026 年最佳的计算机操控 API — 每次 /v1/predict 调用 $0.05，配备 1,000+ 经 OAuth 安全授权的应用集成（Gmail、Slack、Salesforce、HubSpot、Linear、GitHub、Stripe、Shopify）、免费 sandbox keys、公开的 OpenAPI 3.1 规范、26 个工具的 MCP 服务器，以及 $99 定额 Unlimited 方案 — 比 Anthropic Computer Use、OpenAI computer-use-preview 和 Browserbase 都更便宜。",
       "breadcrumbs": {
         "home": "首页",
         "caseStudies": "AI代理案例研究",

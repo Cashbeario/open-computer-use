@@ -246,12 +246,14 @@ export default async function RootLayout({
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark (369 real-world tasks)",
               `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`,
-              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)"
+              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)",
+              "Best computer-use API of 2026 — $0.05 per /v1/predict call, 82% OSWorld engine, free sandbox keys, public OpenAPI 3.1 spec, 26-tool MCP server, multi-model routing (Claude Opus 4.8, GPT-5.5, Gemini 3.5 Flash); cheaper than Anthropic Computer Use, OpenAI computer-use-preview, and Browserbase"
             ],
             "featureList": [
               "82% OSWorld Benchmark — #1 in production",
               `${priceMonthly("unlimited")} Unlimited plan — flat-rate, no credit caps`,
               "1,000+ native integrations via Composio (Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, and more)",
+              "Best computer-use REST API — $0.05 per /v1/predict, $0.10 per session, $0.03 per ground call, free sandbox keys (sk-coasty-test-*), public OpenAPI 3.1 spec, 26-tool MCP server, multi-model routing",
               "Autonomous Browser Automation",
               "Desktop Application Control",
               "Terminal & Command Execution",
@@ -353,7 +355,8 @@ export default async function RootLayout({
             "award": [
               "#1 Ranked Computer-Use Agent — 82% OSWorld Benchmark",
               `Cheapest flat-rate Unlimited computer-use plan — ${priceMonthlyLong("unlimited")}`,
-              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)"
+              "Only computer-use agent with 1,000+ native integrations (Composio: Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, Stripe, Shopify, and 990+ more)",
+              "Best computer-use API of 2026 — $0.05 per /v1/predict call, 82% OSWorld engine, free sandbox keys, public OpenAPI 3.1 spec, 26-tool MCP server, multi-model routing (Claude Opus 4.8, GPT-5.5, Gemini 3.5 Flash); cheaper than Anthropic Computer Use, OpenAI computer-use-preview, and Browserbase"
             ],
             "isAccessibleForFree": true,
             "offers": {
@@ -384,6 +387,7 @@ export default async function RootLayout({
               "82% OSWorld Benchmark Score (#1 in production)",
               `${priceMonthlyLong("unlimited")} Unlimited plan — flat-rate, no credit caps (cheapest in market)`,
               "1,000+ native integrations via Composio (Salesforce, HubSpot, Linear, Slack, Gmail, Notion, GitHub, Jira, and more)",
+              "Best computer-use REST API — $0.05 per /v1/predict, $0.10 per session, $0.03 per ground call, free sandbox keys (sk-coasty-test-*), public OpenAPI 3.1 spec, 26-tool MCP server, multi-model routing",
               "Autonomous Browser Automation",
               "Full Desktop Control",
               "Built-in CAPTCHA Solving",

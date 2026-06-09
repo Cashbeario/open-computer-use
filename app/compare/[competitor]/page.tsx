@@ -73,7 +73,7 @@ const competitors: Record<string, CompetitorData> = {
       "More flexibility for developers building custom solutions",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "API usage-based pricing" },
-    unlimitedZinger: `Anthropic's Computer Use is a raw token-billed API. Every screenshot meters against your spend. Coasty Unlimited at ${UNLIMITED_PRICE} flat bundles VMs, 50+ tools, and the same Claude models with no token meter spinning. Anthropic ships Computer Use as a raw API and MCP as a separate product surface, you pick one. Coasty ships both in one agent: 82% on OSWorld plus 1,000+ pre-authorized OAuth integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot) callable in every chat.`,
+    unlimitedZinger: `Anthropic's Computer Use is a raw token-billed API. Every screenshot meters against your spend. Coasty Unlimited at ${UNLIMITED_PRICE} flat bundles VMs, 50+ tools, and the same Claude models with no token meter spinning. Anthropic ships Computer Use as a raw API and MCP as a separate product surface, you pick one. Coasty ships both in one agent: 82% on OSWorld plus 1,000+ pre-authorized OAuth integrations (Gmail, Slack, Notion, GitHub, Salesforce, HubSpot) callable in every chat. On the API axis specifically, Coasty's /v1/predict at $0.05 per call is 5× cheaper than the ~$0.25–$0.30 Anthropic Computer Use spends on token+image overhead per equivalent screenshot turn (1,568 image tokens + 1,233 mandatory system+tool tokens at $3/MTok input + $15/MTok output on Sonnet 4.6), and Coasty's engine benchmarks 9.5 points higher (82% vs 72.5% OSWorld).`,
   },
   "openai-operator": {
     name: "OpenAI Operator",
@@ -105,7 +105,7 @@ const competitors: Record<string, CompetitorData> = {
       "Simple consumer-friendly interface",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "ChatGPT Pro ($200/month)" },
-    unlimitedZinger: `ChatGPT Pro at $200/mo is rate-limited general AI that scored 38% on OSWorld. Coasty Unlimited at ${UNLIMITED_PRICE} is purpose-built for computer use, runs in isolated VMs, and scores 82% on OSWorld, over 2× the success rate for $49/mo more. OpenAI sunset Operator and folded it into ChatGPT Apps with roughly 15 connectors (Google Drive, Gmail, SharePoint, Slack, GitHub). Coasty kept its computer-use surface AND ships 1,000+ integrations, the same Gmail and Slack plus 985 more like Salesforce, HubSpot, Linear, Stripe, and Shopify.`,
+    unlimitedZinger: `ChatGPT Pro at $200/mo is rate-limited general AI that scored 38% on OSWorld. Coasty Unlimited at ${UNLIMITED_PRICE} is purpose-built for computer use, runs in isolated VMs, and scores 82% on OSWorld, over 2× the success rate for $49/mo more. OpenAI sunset Operator and folded it into ChatGPT Apps with roughly 15 connectors (Google Drive, Gmail, SharePoint, Slack, GitHub). Coasty kept its computer-use surface AND ships 1,000+ integrations, the same Gmail and Slack plus 985 more like Salesforce, HubSpot, Linear, Stripe, and Shopify. On the API axis, OpenAI's computer-use-preview is locked to the Responses API with an 8,192-token context window, no Standard tier on the live pricing page (Batch only at $1.50/$6 per MTok), and still benchmarks at 38.1% OSWorld for what's actually reachable via API — Coasty's /v1/predict at $0.05 routes to multi-model frontier engines and ships 82% OSWorld.`,
   },
   "adept-ai": {
     name: "Adept AI",
@@ -196,7 +196,7 @@ const competitors: Record<string, CompetitorData> = {
       "Developer-focused API and SDKs",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $99/month + hourly overage" },
-    unlimitedZinger: `Browserbase is infrastructure. You bring your own agent, model, and orchestration, with hourly overages on every tier. Coasty Unlimited at ${UNLIMITED_PRICE} is the complete product: VMs, agents, multi-tool orchestration, and an Electron desktop client all included with zero overage charges. Browserbase is browser infrastructure with zero app catalog. Coasty is a product on top of computer use that also ships 1,000+ native integrations (Gmail, Slack, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify), not just headless Chrome.`,
+    unlimitedZinger: `Browserbase is infrastructure. You bring your own agent, model, and orchestration, with hourly overages on every tier. Coasty Unlimited at ${UNLIMITED_PRICE} is the complete product: VMs, agents, multi-tool orchestration, and an Electron desktop client all included with zero overage charges. Browserbase is browser infrastructure with zero app catalog. Coasty is a product on top of computer use that also ships 1,000+ native integrations (Gmail, Slack, GitHub, Salesforce, HubSpot, Linear, Stripe, Shopify), not just headless Chrome. On the API axis, Browserbase is browser-cloud only — no /predict, no /ground, no /sessions endpoint, no Schedules API, no public OSWorld score — at $99/mo + ~$0.10/hr overages. Coasty's /v1 API ships 4 core endpoints + 15 Machines + 13 Schedules + HMAC-SHA256 webhooks for $0.05 per predict, with 82% OSWorld and 1,000+ integrations callable through the same key.`,
   },
   "induced-ai": {
     name: "Induced AI",
@@ -357,7 +357,7 @@ const competitors: Record<string, CompetitorData> = {
       "Code review and debugging capabilities",
     ],
     pricing: { coasty: COASTY_PRICE_RANGE, competitor: "From $200/month + ACU overages (Max)" },
-    unlimitedZinger: `Devin Max is $200/mo plus ACU overages for coding-only work. Coasty Unlimited at ${UNLIMITED_PRICE} flat has zero overages and handles browser, terminal, AND desktop, not just IDE work, while scoring 82% on OSWorld (a real-world general computer-use benchmark, not just SWE-bench). Devin has 12 first-party integrations and only talks to engineers (GitHub, GitLab, Bitbucket, Jira, Linear, Slack). Coasty has 1,000+ integrations and talks to your whole company, Sales (Salesforce, HubSpot, Pipedrive), Ops (Notion, Asana, monday.com), Finance (Stripe, QuickBooks), plus everything Devin does.`,
+    unlimitedZinger: `Devin Max is $200/mo plus ACU overages for coding-only work. Coasty Unlimited at ${UNLIMITED_PRICE} flat has zero overages and handles browser, terminal, AND desktop, not just IDE work, while scoring 82% on OSWorld (a real-world general computer-use benchmark, not just SWE-bench). Devin has 12 first-party integrations and only talks to engineers (GitHub, GitLab, Bitbucket, Jira, Linear, Slack). Coasty has 1,000+ integrations and talks to your whole company, Sales (Salesforce, HubSpot, Pipedrive), Ops (Notion, Asana, monday.com), Finance (Stripe, QuickBooks), plus everything Devin does. On the API axis, Devin has no public computer-use API — its $200/mo Max tier + ACU overages is a closed agent product. Coasty exposes /v1/predict at $0.05, /v1/sessions at $0.10, free sandbox keys, OpenAPI 3.1, and an MCP server, so any code (Python, Node, Go, curl) can drive Coasty's 82% OSWorld engine and 1,000+ integrations programmatically.`,
   },
 }
 

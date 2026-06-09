@@ -112,3 +112,40 @@ describe("middleware: scanner 410-Gone short-circuit", () => {
     expect(res.status).toBe(410)
   })
 })
+
+describe("middleware: CSRF exemption for the public /v1 API", () => {
+  // Regression: the matcher excludes /api but not /v1, so cookie-based CSRF was
+  // 403-ing EVERY /v1 write ("Invalid CSRF token") before it reached FastAPI.
+  // /v1 authenticates with X-API-Key (no cookies) and must be exempt.
+
+  it("does NOT CSRF-block POST /v1/* carrying X-API-Key (no csrf cookie)", async () => {
+    const req = new NextRequest("https://coasty.ai/v1/predict", {
+      method: "POST",
+      headers: new Headers({ "x-api-key": "sk-coasty-live-deadbeef" }),
+    })
+    const res = await middleware(req)
+    expect(await res.text()).not.toBe("Invalid CSRF token")
+  })
+
+  it("does NOT CSRF-block POST /v1/* even with no auth header (path-based exemption)", async () => {
+    const req = new NextRequest("https://coasty.ai/v1/parse", { method: "POST" })
+    const res = await middleware(req)
+    expect(await res.text()).not.toBe("Invalid CSRF token")
+  })
+
+  it("does NOT CSRF-block a non-/v1 POST that carries X-API-Key (cookieless auth is CSRF-safe)", async () => {
+    const req = new NextRequest("https://coasty.ai/some/mutation", {
+      method: "POST",
+      headers: new Headers({ "x-api-key": "sk-coasty-live-deadbeef" }),
+    })
+    const res = await middleware(req)
+    expect(await res.text()).not.toBe("Invalid CSRF token")
+  })
+
+  it("STILL CSRF-blocks a cookieless browser POST to a page route (no /v1, no api header)", async () => {
+    const req = new NextRequest("https://coasty.ai/c/abc-123", { method: "POST" })
+    const res = await middleware(req)
+    expect(res.status).toBe(403)
+    expect(await res.text()).toBe("Invalid CSRF token")
+  })
+})

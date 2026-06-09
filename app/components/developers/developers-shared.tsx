@@ -40,13 +40,52 @@ export const EASE = [0.22, 1, 0.36, 1] as const
 
 export type KeyKind = "live" | "test"
 
-const SCOPE_OPTIONS = [
-  { id: "predict", label: "Predict",  desc: "Run model predictions" },
-  { id: "session", label: "Sessions", desc: "Stateful multi-step tasks" },
-  { id: "ground",  label: "Ground",   desc: "Locate UI elements" },
-  { id: "ocr",     label: "OCR",      desc: "Extract text from images" },
-  { id: "parse",   label: "Parse",    desc: "Parse pyautogui code" },
+// The full scope catalogue a key can hold. MUST stay in lockstep with the
+// backend allowlist (api_key_service.ALL_SCOPES) and the dashboard mint route
+// (app/api/developers/route.ts ALL_SCOPES) — any id offered here that the
+// backend doesn't allow would be rejected with INVALID_SCOPE at create time.
+// `recommended` marks the conservative default set a fresh key receives
+// (backend DEFAULT_SCOPES_LIST); the rest are opt-in elevated scopes shown
+// under "advanced".
+type ScopeGroup = "Vision" | "Agents" | "Machines" | "Files & shell" | "Schedules" | "Account"
+type ScopeOption = { id: string; label: string; desc: string; group: ScopeGroup; recommended: boolean }
+
+const SCOPE_OPTIONS: readonly ScopeOption[] = [
+  // Vision (core prediction surface)
+  { id: "predict",         label: "Predict",           desc: "Run model predictions",              group: "Vision",        recommended: true },
+  { id: "session",         label: "Sessions",          desc: "Stateful multi-step tasks",          group: "Vision",        recommended: true },
+  { id: "ground",          label: "Ground",            desc: "Locate UI elements",                 group: "Vision",        recommended: true },
+  { id: "ocr",             label: "OCR",               desc: "Extract text from images",           group: "Vision",        recommended: true },
+  { id: "parse",           label: "Parse",             desc: "Parse pyautogui code",               group: "Vision",        recommended: true },
+  // Agents (task runs + workflows — the headline developer surface)
+  { id: "runs:read",       label: "Runs (read)",       desc: "List and read agent task runs",      group: "Agents",        recommended: true },
+  { id: "runs:write",      label: "Runs (write)",      desc: "Start, cancel, and resume runs",     group: "Agents",        recommended: true },
+  { id: "workflows:read",  label: "Workflows (read)",  desc: "List and read workflows",            group: "Agents",        recommended: true },
+  { id: "workflows:write", label: "Workflows (write)", desc: "Create, update, and run workflows",  group: "Agents",        recommended: true },
+  // Machines
+  { id: "machines:read",   label: "Machines (read)",   desc: "List machines and read state",       group: "Machines",      recommended: true },
+  { id: "actions:exec",    label: "Actions",           desc: "Click, type, and scroll a machine",  group: "Machines",      recommended: true },
+  { id: "machines:write",  label: "Machines (write)",  desc: "Provision, start, stop, delete",     group: "Machines",      recommended: false },
+  { id: "connection:read", label: "Connection",        desc: "Read SSH / VNC connection details",  group: "Machines",      recommended: false },
+  { id: "snapshots:write", label: "Snapshots",         desc: "Create machine snapshots",           group: "Machines",      recommended: false },
+  // Files & shell (in-VM)
+  { id: "files:read",      label: "Files (read)",      desc: "Read files and list directories",    group: "Files & shell", recommended: true },
+  { id: "files:write",     label: "Files (write)",     desc: "Write, edit, and delete files",      group: "Files & shell", recommended: false },
+  { id: "terminal:exec",   label: "Terminal",          desc: "Run shell commands on a machine",    group: "Files & shell", recommended: false },
+  { id: "browser:execute", label: "Browser",           desc: "Drive an in-VM browser",             group: "Files & shell", recommended: false },
+  // Schedules
+  { id: "schedules:read",  label: "Schedules (read)",  desc: "List and read schedules",            group: "Schedules",     recommended: false },
+  { id: "schedules:write", label: "Schedules (write)", desc: "Create, pause, and run schedules",   group: "Schedules",     recommended: false },
+  { id: "triggers:write",  label: "Triggers",          desc: "Manage webhook / email triggers",    group: "Schedules",     recommended: false },
+  // Account
+  { id: "keys",            label: "Keys",              desc: "List and revoke API keys",           group: "Account",       recommended: false },
+  { id: "usage",           label: "Usage",             desc: "Read usage and billing summary",     group: "Account",       recommended: false },
 ] as const
+
+const SCOPE_GROUPS: ScopeGroup[] = ["Vision", "Agents", "Machines", "Files & shell", "Schedules", "Account"]
+// Pre-selected on the create dialog — mirrors backend DEFAULT_SCOPES_LIST so a
+// fresh key works for predictions, agents, workflows, and driving machines.
+const DEFAULT_SCOPE_IDS = SCOPE_OPTIONS.filter(s => s.recommended).map(s => s.id)
 
 const SNIPPET_LANGS = [
   { id: "python",     label: "Python" },
@@ -1832,20 +1871,23 @@ export function CreateKeyDialog({
 }) {
   const [name, setName] = useState("")
   const [kind, setKind] = useState<KeyKind>("live")
-  const [scopes, setScopes] = useState<string[]>(SCOPE_OPTIONS.map(s => s.id))
+  const [scopes, setScopes] = useState<string[]>(DEFAULT_SCOPE_IDS)
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
       setName("")
       setKind("live")
-      setScopes(SCOPE_OPTIONS.map(s => s.id))
+      setScopes(DEFAULT_SCOPE_IDS)
+      setShowAdvanced(false)
     }
   }, [open])
 
   const toggleScope = (id: string) => {
     setScopes(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
   }
+  const advancedCount = SCOPE_OPTIONS.filter(s => !s.recommended).length
 
   const canSubmit = name.trim().length > 0 && scopes.length > 0 && !creating
 
@@ -1915,31 +1957,68 @@ export function CreateKeyDialog({
 
           {/* Scopes */}
           <div>
-            <label className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/50 mb-1.5 block">
-              Scopes
-            </label>
-            <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.015] divide-y divide-foreground/[0.04]">
-              {SCOPE_OPTIONS.map(s => {
-                const checked = scopes.includes(s.id)
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-muted-foreground/50">
+                Scopes
+              </label>
+              <span className="text-[10px] text-muted-foreground/40 tabular-nums">{scopes.length} selected</span>
+            </div>
+            <p className="text-[10.5px] text-muted-foreground/45 mb-2 leading-snug">
+              Recommended scopes let a key run predictions, agents, workflows, and drive machines. Add elevated scopes only if you need them.
+            </p>
+            <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.015] overflow-hidden">
+              {SCOPE_GROUPS.map(group => {
+                const opts = SCOPE_OPTIONS.filter(s => s.group === group && (showAdvanced || s.recommended))
+                if (opts.length === 0) return null
                 return (
-                  <button
-                    key={s.id}
-                    onClick={() => toggleScope(s.id)}
-                    className="w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-foreground/[0.02] transition-colors"
-                  >
-                    <span className={cn(
-                      "mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border transition-colors",
-                      checked ? "bg-foreground border-foreground" : "border-foreground/30",
-                    )}>
-                      {checked && <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[12px] font-medium text-foreground/85 leading-tight">{s.label}</div>
-                      <div className="text-[10.5px] text-muted-foreground/45 mt-0.5 leading-tight">{s.desc}</div>
+                  <div key={group} className="border-b border-foreground/[0.04] last:border-b-0">
+                    <div className="px-3 pt-2 pb-1 text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/35">
+                      {group}
                     </div>
-                  </button>
+                    <div className="divide-y divide-foreground/[0.04]">
+                      {opts.map(s => {
+                        const checked = scopes.includes(s.id)
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => toggleScope(s.id)}
+                            aria-pressed={checked}
+                            className="w-full flex items-start gap-3 px-3 py-2 text-left hover:bg-foreground/[0.02] transition-colors"
+                          >
+                            <span className={cn(
+                              "mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border transition-colors",
+                              checked ? "bg-foreground border-foreground" : "border-foreground/30",
+                            )}>
+                              {checked && <Check className="h-2.5 w-2.5 text-background" strokeWidth={3} />}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[12px] font-medium text-foreground/85 leading-tight">{s.label}</div>
+                              <div className="text-[10.5px] text-muted-foreground/45 mt-0.5 leading-tight">{s.desc}</div>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
                 )
               })}
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(v => !v)}
+                className="text-[10.5px] font-medium text-foreground/55 hover:text-foreground transition-colors"
+              >
+                {showAdvanced ? "Hide advanced scopes" : `Show ${advancedCount} advanced scopes`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setScopes(DEFAULT_SCOPE_IDS)}
+                className="text-[10.5px] text-muted-foreground/45 hover:text-foreground/70 transition-colors"
+              >
+                Reset to recommended
+              </button>
             </div>
             {scopes.length === 0 && (
               <p className="text-[10.5px] text-rose-500/70 mt-1.5">Select at least one scope.</p>

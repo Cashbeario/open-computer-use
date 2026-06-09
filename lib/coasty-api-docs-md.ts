@@ -62,7 +62,24 @@ Authorization: Bearer sk-coasty-live-<48 hex>
 \`\`\`
 
 Read the key from the \`COASTY_API_KEY\` environment variable rather than hard
-coding it. A missing or malformed key returns \`401 INVALID_API_KEY\`.
+coding it. A missing or malformed key returns \`401 INVALID_API_KEY\` (which also
+sends a \`WWW-Authenticate: Bearer\` challenge header).
+
+### Request ids and response headers
+
+Every response (success or error) carries an \`X-Coasty-Request-Id\` header, and
+every error body repeats it as \`error.request_id\`. Quote that id verbatim when
+you contact support; it ties together the whole request end-to-end.
+
+Billed responses also return two headers so you can track spend without a
+second call:
+
+- \`X-Credits-Charged\`: what this request cost (internal units; \`0\` on test keys).
+- \`X-Credits-Remaining\`: your wallet balance after the charge (USD cents).
+
+Other useful headers: \`X-Coasty-Key-Kind\` (\`live\` / \`test\` / \`legacy\`),
+\`X-Coasty-Test-Mode: true\` (test keys only), and \`X-Coasty-Idempotent-Replay: true\`
+when a response was served from the idempotency cache.
 
 ### Key management
 
@@ -1141,33 +1158,73 @@ Every action type the model can return in \`actions\`:
 
 ### Error envelope
 
-Every error returns the same shape with the HTTP status set accordingly:
+Every error, on every endpoint, returns the same JSON shape with the HTTP
+status set accordingly. The body is always wrapped in an \`error\` object:
 
 \`\`\`json
 {
   "error": {
     "code": "INSUFFICIENT_CREDITS",
-    "message": "Your API wallet does not have enough funds to complete this request.",
-    "type": "payment_required",
-    "request_id": "req_8f2c1e9a"
+    "message": "Operation needs 20 credits; you have 5.",
+    "type": "billing_error",
+    "request_id": "req_8f2c1e9a",
+    "suggestion": "Top up at https://coasty.ai/credits, or switch to a sandbox key 'sk-coasty-test-...' for free testing.",
+    "docs_url": "https://coasty.ai/api-docs#errors",
+    "required": 20,
+    "balance": 5
   }
 }
 \`\`\`
 
-| Status | Code | Meaning |
-| --- | --- | --- |
-| 400 | \`INVALID_REQUEST\` | Malformed body or a field failed validation. |
-| 401 | \`INVALID_API_KEY\` | The key is missing, malformed, or revoked. |
-| 402 | \`INSUFFICIENT_CREDITS\` | Your USD wallet can't cover this request. Add funds. |
-| 403 | \`INSUFFICIENT_SCOPE\` | The key is valid but lacks the required scope. |
-| 404 | \`NOT_FOUND\` | The session/run/resource id does not exist or expired. |
-| 422 | \`INVALID_REQUEST\` / \`IDEMPOTENCY_KEY_REUSED\` | Unknown body field, or an idempotency key reused with a different body. |
-| 429 | \`RATE_LIMITED\` / \`TOO_MANY_RUNS\` / \`SESSION_LIMIT_REACHED\` | Per-minute, per-hour, concurrency, or concurrent-session limit exceeded. Back off and retry. |
-| 500 | \`PREDICTION_FAILED\` | The model run failed. The charge is automatically refunded. |
-| 503 | \`SERVICE_UNAVAILABLE\` | A transient upstream issue. Retry with backoff. |
+Field reference (every error carries the first four; the rest are conditional):
 
-Rate-limit responses include \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\`, and
-\`X-RateLimit-Reset\` (advisory) plus a \`retry_after\` hint.
+- \`code\`: machine-readable, stable across versions. Branch your logic on this,
+  never on \`message\`.
+- \`message\`: human-readable, may change between versions. Do not parse it.
+- \`type\`: coarse telemetry category (\`auth_error\`, \`billing_error\`,
+  \`validation_error\`, \`not_found_error\`, \`state_error\`, \`rate_limit_error\`,
+  \`server_error\`).
+- \`request_id\`: also returned as the \`X-Coasty-Request-Id\` header. Quote it to
+  support.
+- \`suggestion\`: a concrete next step (auto-filled per code). LLM agents can act
+  on this to self-recover.
+- \`docs_url\`: deep link to the matching docs anchor (also sent as
+  \`Link: <url>; rel="help"\`).
+- \`support\`: \`founders@coasty.ai\`, attached only on 5xx and a few ambiguous 4xx.
+- Context extras: code-specific fields such as \`required_scope\`,
+  \`current_scopes\`, \`required\`, \`balance\`, \`retry_after\`, \`valid_options\`,
+  \`examples\`, \`details\`, \`current_state\`, \`allowed_from\`. Use these to
+  auto-correct.
+
+### Full error catalog
+
+| Status | Code | Cause | Fix |
+| --- | --- | --- | --- |
+| 401 | \`INVALID_API_KEY\` | Key missing, malformed, revoked, or \`Bearer \` pasted into \`X-API-Key\`. Also sends \`WWW-Authenticate\`. | Send a raw \`sk-coasty-live-\`/\`sk-coasty-test-\` key in \`X-API-Key\`, or \`Authorization: Bearer <key>\`. |
+| 403 | \`INSUFFICIENT_SCOPE\` | Key is valid but lacks the scope this route needs. Body has \`required_scope\` + \`current_scopes\`. | Re-mint the key with the missing scope, or call an endpoint your scopes allow. |
+| 402 | \`INSUFFICIENT_CREDITS\` | Prepaid USD wallet can't cover this request. Body has \`required\` + \`balance\`. | Top up at https://coasty.ai/credits, or use a \`sk-coasty-test-\` key (free). |
+| 402 | \`WALLET_EXHAUSTED\` | Wallet ran dry mid-run; the run stopped at the step in \`message\`. Completed steps were already billed. | Top up, then start a new run. |
+| 422 | \`VALIDATION_ERROR\` | A request field failed validation. \`error.details\` (loc) names the field path + expected type. | Fix the named field and retry. |
+| 422 | \`INVALID_SCREENSHOT\` | \`screenshot\` is not decodable base64 (often a \`data:...;base64,\` prefix or embedded newlines). | Strip the \`data:\` prefix and whitespace; send raw base64. |
+| 413 | \`PAYLOAD_TOO_LARGE\` | Body exceeds the cap (CUA screenshot endpoints accept up to 10 MB of base64). | Downscale or JPEG-compress the screenshot, or split the work. |
+| 400 | \`INVALID_LIMIT\` | A \`limit\` query param is outside \`1..200\`. Body has \`actual\`, \`min\`, \`max\`. | Pass \`1 <= limit <= 200\` (default 50), or omit the param. |
+| 400 | \`INVALID_STATUS_FILTER\` | A \`status\` filter value is not a recognized state. Body lists \`valid_options\`. | Use a value from \`valid_options\` or omit \`?status=\`. |
+| 404 | \`NOT_FOUND\` / \`MACHINE_NOT_FOUND\` / \`RUN_NOT_FOUND\` / \`WORKFLOW_NOT_FOUND\` / \`SESSION_NOT_FOUND\` | Id does not exist in this key's namespace. Ids are mode-isolated: a test key cannot see live resources and vice-versa. | Verify the id with the matching \`GET\` listing endpoint, using a key of the same kind. |
+| 409 | \`NOT_AWAITING_HUMAN\` | You tried to resume a run that is not in \`awaiting_human\`. | Re-GET the run; resume only while \`status == "awaiting_human"\`. |
+| 409 | \`RESUME_CONFLICT\` | Another resume/cancel/timeout won the race. | Re-GET the run to read its current status, then retry. |
+| 409 | \`IDEMPOTENCY_KEY_REUSED\` | Same \`Idempotency-Key\` sent with a different body. | Resend the original body to get the cached result, or use a new key. |
+| 409 | \`INVALID_STATE\` | A lifecycle action is illegal in the resource's current state. Body has \`current_state\` + \`allowed_from\`. | Check the state first (actions need \`running\`; provisioning is async), then retry. |
+| 429 | \`RATE_LIMIT_EXCEEDED\` | Per-key or per-user rate limit hit. \`scope\` is \`per_key\` or \`per_user\`; honor \`Retry-After\`. | Back off. The \`per_user\` cap is per-account across ALL keys, so minting more keys will NOT raise it; upgrade your plan instead. |
+| 429 | \`TOO_MANY_RUNS\` | Too many concurrent runs in flight. | Wait for one to finish or cancel one; honor \`Retry-After\`. |
+| 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. \`v4\` on free/starter, custom prompts on free). | Upgrade your plan or use an available alternative. |
+| 500 | \`INTERNAL_ERROR\` | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
+| 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` / \`OCR_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding/OCR, send a clearer or higher-resolution screenshot. |
+| 504 | \`UPSTREAM_TIMEOUT\` | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
+| 503 | \`UPSTREAM_UNAVAILABLE\` | An upstream service is briefly unavailable. | Retry with backoff; check https://status.coasty.ai. |
+
+Rate-limit responses also include \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\`,
+and \`X-RateLimit-Reset\` headers plus a \`Retry-After\` header (and a \`retry_after\`
+body field). Always honor \`Retry-After\` before retrying.
 
 ### Rate limits per tier
 
@@ -1253,6 +1310,441 @@ npx -y @coasty/mcp
 
 Set \`COASTY_API_KEY\` in the environment; the MCP server exposes the same
 endpoints documented above as tools.
+
+---
+
+## 7. Machines API
+
+A machine is a cloud VM you own. Provision one, drive it with low-level actions
+(click, type, terminal, browser, files), snapshot it, and tear it down. A
+machine id is the \`machine_id\` you pass to runs, workflows, and schedules.
+
+A machine id is either a UUID (live machines) or \`mch_test_<8-32 hex>\` (sandbox
+machines from a test key). Ids are mode-isolated: a test key never sees live
+machines and a live key never sees test machines.
+
+**Sandbox shortcut.** A test key (\`sk-coasty-test-\`) returns a mock VM
+**instantly** with no AWS provisioning, no wallet billing, and an
+\`mch_test_*\` id. Use it to build and test the full action surface for free.
+Live provisioning needs the \`machines:write\` scope and a minimum wallet balance
+(a 20-credit pre-flight check).
+
+### Machine endpoints + scopes
+
+| Method + path | Scope | Description |
+| --- | --- | --- |
+| \`POST /v1/machines\` | \`machines:write\` | Provision a VM. Honors \`Idempotency-Key\`. |
+| \`GET /v1/machines\` | \`machines:read\` | List your machines (\`limit\`, 1-200, default 50). |
+| \`GET /v1/machines/{id}\` | \`machines:read\` | Get one machine. |
+| \`DELETE /v1/machines/{id}\` | \`machines:write\` | Terminate a machine. |
+| \`POST /v1/machines/{id}/start\` | \`machines:write\` | Start a stopped machine. |
+| \`POST /v1/machines/{id}/stop\` | \`machines:write\` | Stop a running machine. |
+| \`POST /v1/machines/{id}/snapshot\` | \`snapshots:write\` | Snapshot the disk. Honors \`Idempotency-Key\`. |
+| \`GET /v1/machines/{id}/screenshot\` | \`machines:read\` | Capture the screen as base64. |
+| \`GET /v1/machines/{id}/connection\` | \`connection:read\` | SSH key + VNC password + ports (HIGH-RISK). |
+| \`POST /v1/machines/{id}/actions\` | varies by command | Run one action (click, type, scroll, terminal, file, browser). |
+| \`POST /v1/machines/{id}/actions/batch\` | varies by command | Run up to 50 actions in order. |
+| \`POST /v1/machines/{id}/browser/{op}\` | \`actions:exec\` (\`browser:execute\` for raw JS) | Browser convenience wrapper. |
+| \`POST /v1/machines/{id}/terminal\` | \`terminal:exec\` | Run a shell command (PowerShell on Windows, bash on Unix). |
+| \`POST /v1/machines/{id}/files/{op}\` | \`files:read\` or \`files:write\` | File operations. |
+
+Per-command scopes on \`/actions\`: \`terminal_*\` needs \`terminal:exec\`;
+\`file_read\`/\`file_exists\`/\`directory_list\`/\`file_download\`/\`file_list_downloads\`
+need \`files:read\`; \`file_write\`/\`file_edit\`/\`file_append\`/\`file_delete\`/\`directory_delete\`
+need \`files:write\`; \`browser_execute\` (arbitrary JS) needs \`browser:execute\`;
+everything else needs \`actions:exec\`.
+
+### POST /v1/machines (provision)
+
+**Request body**
+
+| Field | Type | Req | Default | Notes |
+| --- | --- | --- | --- | --- |
+| \`display_name\` | string | yes | - | 1-64 chars. Shown in dashboards. |
+| \`os_type\` | string | no | \`linux\` | \`linux\` or \`windows\`. |
+| \`desktop_enabled\` | bool | no | false | Install XFCE + VNC for a GUI desktop. |
+| \`provider\` | string | no | \`auto\` | \`aws\` / \`azure\` / \`auto\`. |
+| \`cpu_cores\` | int\\|null | no | null | 1-16, capped to your tier. |
+| \`memory_gb\` | int\\|null | no | null | 1-64, capped to your tier. |
+| \`storage_gb\` | int\\|null | no | null | 8-500. |
+| \`restore_from_snapshot\` | bool\\|null | no | false | Restore your latest snapshot (Linux only). |
+| \`metadata\` | object\\|null | no | null | Free-form string tags (max 16 entries). |
+
+Pass \`Idempotency-Key: <up to 128 chars, [A-Za-z0-9_-:]>\` so a retried provision
+does not create a second VM (deduped for 24h).
+
+**curl**
+
+\`\`\`bash
+BASE=https://coasty.ai/v1
+AUTH="X-API-Key: $COASTY_API_KEY"
+
+curl -s "$BASE/machines" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: provision-bot-001" \\
+  -d '{"display_name":"invoice-bot","os_type":"linux","desktop_enabled":true}'
+\`\`\`
+
+**Python**
+
+\`\`\`python
+import os, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+
+m = requests.post(
+    f"{BASE}/machines",
+    headers={**HEADERS, "Idempotency-Key": "provision-bot-001"},
+    json={"display_name": "invoice-bot", "os_type": "linux", "desktop_enabled": True},
+    timeout=60,
+).json()
+machine_id = m["machine"]["id"]
+print(machine_id, m["machine"]["status"])
+\`\`\`
+
+**Response**
+
+\`\`\`json
+{
+  "machine": {
+    "id": "mch_test_a1b2c3d4",
+    "display_name": "invoice-bot",
+    "status": "running",
+    "os_type": "linux",
+    "provider": "aws",
+    "desktop_enabled": true,
+    "cpu_cores": 2,
+    "memory_gb": 4.0,
+    "storage_gb": 20,
+    "public_ip": "203.0.113.7",
+    "is_test": true,
+    "created_at": "2026-06-01T12:00:00Z",
+    "metadata": {}
+  },
+  "connection": {
+    "public_ip": "203.0.113.7",
+    "ssh_port": 22,
+    "ssh_username": "ubuntu",
+    "vnc_port": 5900,
+    "websocket_port": 8080,
+    "has_ssh_key": true,
+    "has_vnc_password": true
+  },
+  "request_id": "req_8f2c1e9a"
+}
+\`\`\`
+
+The provision response NEVER includes the SSH key or VNC password. Fetch those
+from \`GET /v1/machines/{id}/connection\` (gated by \`connection:read\`); it returns
+\`ssh_private_key_pem\`, \`vnc_password\`, \`websocket_url\`, and \`devtools_url\`. Treat
+that response as a secret (it is sent with \`Cache-Control: no-store\`).
+
+### Lifecycle: start / stop / delete / snapshot
+
+\`POST /v1/machines/{id}/start\`, \`/stop\`, and \`DELETE /v1/machines/{id}\` return
+\`{ machine_id, status, message, request_id }\`. \`POST /v1/machines/{id}/snapshot\`
+returns \`{ machine_id, snapshot_id, name, created_at, credits_charged, request_id }\`.
+
+### GET /v1/machines/{id}/screenshot
+
+\`\`\`bash
+curl -s "$BASE/machines/$MACHINE_ID/screenshot" -H "$AUTH"
+\`\`\`
+
+\`\`\`json
+{
+  "machine_id": "mch_test_a1b2c3d4",
+  "image_b64": "<raw base64, no data: prefix>",
+  "mime_type": "image/jpeg",
+  "width": 1280,
+  "height": 720,
+  "captured_at": "2026-06-01T12:00:05Z",
+  "request_id": "req_8f2c1e9a"
+}
+\`\`\`
+
+The \`image_b64\` is pure base64 with any \`data:image/...;base64,\` prefix already
+stripped, so you can feed it straight back into \`/v1/predict\`.
+
+### POST /v1/machines/{id}/actions
+
+**Request body**
+
+| Field | Type | Req | Default | Notes |
+| --- | --- | --- | --- | --- |
+| \`command\` | string | yes | - | A name from the action allowlist (e.g. \`click\`, \`type\`, \`scroll\`, \`screenshot\`). |
+| \`parameters\` | object | no | {} | Command-specific params, e.g. \`{ "x": 512, "y": 340 }\` for \`click\`. |
+| \`timeout_ms\` | int\\|null | no | null | 1000-120000. Defaults to the command's tuned timeout. |
+
+\`\`\`bash
+curl -s "$BASE/machines/$MACHINE_ID/actions" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"command":"click","parameters":{"x":512,"y":340}}'
+\`\`\`
+
+\`\`\`python
+res = requests.post(
+    f"{BASE}/machines/{machine_id}/actions",
+    headers=HEADERS,
+    json={"command": "click", "parameters": {"x": 512, "y": 340}},
+    timeout=60,
+).json()
+print(res["success"], res["duration_ms"], "ms")
+\`\`\`
+
+\`\`\`json
+{
+  "machine_id": "mch_test_a1b2c3d4",
+  "command": "click",
+  "success": true,
+  "result": { "success": true, "x": 512, "y": 340 },
+  "error": null,
+  "duration_ms": 84,
+  "screenshot": null,
+  "request_id": "req_8f2c1e9a"
+}
+\`\`\`
+
+### POST /v1/machines/{id}/actions/batch
+
+Run an ordered list of actions in one round-trip. Body: \`{ "steps": [ ActionRequest... ],
+"stop_on_error": true }\` (max 50 steps; \`stop_on_error\` aborts on the first
+failure, shell \`&&\`-style). Returns \`{ machine_id, results, completed_count,
+failed_count, aborted, request_id }\`.
+
+\`\`\`bash
+curl -s "$BASE/machines/$MACHINE_ID/actions/batch" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "steps": [
+      {"command": "click", "parameters": {"x": 512, "y": 340}},
+      {"command": "type", "parameters": {"text": "you@example.com"}},
+      {"command": "key_press", "parameters": {"key": "enter"}}
+    ],
+    "stop_on_error": true
+  }'
+\`\`\`
+
+### POST /v1/machines/{id}/browser/{op}
+
+A convenience wrapper over browser commands. \`op\` is one of: \`open\`, \`navigate\`,
+\`click\`, \`type\`, \`dom\`, \`clickables\`, \`state\`, \`info\`, \`scroll\`, \`close\`,
+\`screenshot\`, \`wait\`, \`list-tabs\`, \`open-tab\`, \`close-tab\`, \`switch-tab\`. Body:
+\`{ "parameters": {...}, "timeout_ms": null }\`. Arbitrary JS (\`browser_execute\`)
+is intentionally NOT a browser op; send it through \`/actions\` with the
+\`browser:execute\` scope.
+
+\`\`\`bash
+curl -s "$BASE/machines/$MACHINE_ID/browser/navigate" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"parameters":{"url":"https://example.com"}}'
+\`\`\`
+
+### POST /v1/machines/{id}/terminal
+
+Run a shell command. Requires \`terminal:exec\`. Output is truncated VM-side to
+5000 chars; the hard timeout cap is 120s.
+
+**Request body**
+
+| Field | Type | Req | Default | Notes |
+| --- | --- | --- | --- | --- |
+| \`command\` | string | yes | - | 1-8192 chars. PowerShell on Windows, bash on Unix. |
+| \`timeout_ms\` | int | no | 30000 | 1000-120000. |
+| \`session_id\` | string\\|null | no | null | Reuse a persistent terminal session. |
+| \`cwd\` | string\\|null | no | null | Initial working directory. |
+
+\`\`\`bash
+curl -s "$BASE/machines/$MACHINE_ID/terminal" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"command":"ls -la /tmp","timeout_ms":15000}'
+\`\`\`
+
+### POST /v1/machines/{id}/files/{op}
+
+File operations. \`op\` is one of: \`read\`, \`exists\`, \`list\`, \`list-directory\`,
+\`download\`, \`list-downloads\` (need \`files:read\`) or \`write\`, \`edit\`, \`append\`,
+\`delete\`, \`delete-directory\` (need \`files:write\`). Body: \`{ "parameters": {...} }\`
+where the params depend on the op (e.g. \`{ "path": "..." }\` for read,
+\`{ "path": ..., "content": ... }\` for write).
+
+\`\`\`bash
+# Read a file
+curl -s "$BASE/machines/$MACHINE_ID/files/read" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"parameters":{"path":"/home/ubuntu/report.txt"}}'
+
+# Write a file (needs files:write)
+curl -s "$BASE/machines/$MACHINE_ID/files/write" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{"parameters":{"path":"/home/ubuntu/out.txt","content":"hello"}}'
+\`\`\`
+
+---
+
+## 8. Schedules & Triggers
+
+A schedule fires an agent task against a machine on a cron/preset cadence, or
+in response to an inbound trigger (an HMAC-signed webhook, inbound email, or
+when another schedule completes). Scopes: \`schedules:read\` (list/get/runs) and
+\`schedules:write\` (create/update/delete/pause/resume/run-now); adding or removing
+triggers needs \`triggers:write\`.
+
+A schedule id is a UUID (live) or \`sch_test_<8-32 hex>\` (sandbox). Test keys get
+mock schedules that never bill, capped at 10. A trigger id matches \`trg_<8-32 hex>\`.
+
+### Schedule endpoints
+
+| Method + path | Scope | Description |
+| --- | --- | --- |
+| \`POST /v1/schedules\` | \`schedules:write\` | Create a schedule. Honors \`Idempotency-Key\`. |
+| \`GET /v1/schedules\` | \`schedules:read\` | List schedules (\`limit\`, 1-200, default 50). |
+| \`GET /v1/schedules/{id}\` | \`schedules:read\` | Get one schedule. |
+| \`PATCH /v1/schedules/{id}\` | \`schedules:write\` | Update fields (at least one required). |
+| \`DELETE /v1/schedules/{id}\` | \`schedules:write\` | Delete a schedule. |
+| \`POST /v1/schedules/{id}/run\` | \`schedules:write\` | Fire once now (optional overrides). |
+| \`POST /v1/schedules/{id}/pause\` | \`schedules:write\` | Pause (stop firing). |
+| \`POST /v1/schedules/{id}/resume\` | \`schedules:write\` | Resume a paused schedule. |
+| \`GET /v1/schedules/{id}/runs\` | \`schedules:read\` | List run history (\`cursor\`, \`status\`, \`limit\`). |
+| \`GET /v1/schedules/{id}/runs/{run_id}\` | \`schedules:read\` | Get one schedule run. |
+| \`GET /v1/schedules/{id}/triggers\` | \`schedules:read\` | List a schedule's triggers. |
+| \`POST /v1/schedules/{id}/triggers\` | \`triggers:write\` | Add a webhook/email/chain trigger. |
+| \`DELETE /v1/schedules/{id}/triggers/{tid}\` | \`triggers:write\` | Remove a trigger. |
+| \`POST /v1/triggers/webhook/{id}\` | NONE (HMAC-signed) | Public fire endpoint hit by external systems. |
+| \`POST /v1/triggers/email-mailbox\` | \`triggers:write\` | Provision an inbound email address. |
+
+### POST /v1/schedules (create)
+
+Provide exactly one of \`frequency\` (a recurring preset) or \`run_at\` (a one-shot
+UTC timestamp). With \`frequency: "custom"\` you must also supply a raw \`cron\`.
+
+**Request body**
+
+| Field | Type | Req | Default | Notes |
+| --- | --- | --- | --- | --- |
+| \`name\` | string | yes | - | 1-128 chars. |
+| \`machine_id\` | string | yes | - | Target VM, owned by your key's user. |
+| \`task_prompt\` | string | yes | - | 1-8000 chars. The agent's instructions each fire. |
+| \`frequency\` | string\\|null | no | null | \`every_15_minutes\`, \`every_30_minutes\`, \`hourly\`, \`every_6_hours\`, \`every_12_hours\`, \`daily\`, \`weekly\`, \`monthly\`, \`custom\`. |
+| \`cron\` | string\\|null | no | null | Raw 5-or-6-field cron. Required when \`frequency = "custom"\`. |
+| \`time\` | string\\|null | no | null | \`HH:MM\` for daily/weekly/monthly presets. |
+| \`timezone\` | string | no | \`UTC\` | IANA timezone, e.g. \`America/New_York\`. |
+| \`day_of_week\` | int\\|null | no | null | 0=Mon..6=Sun (weekly). |
+| \`day_of_month\` | int\\|null | no | null | 1-28 (monthly). |
+| \`run_at\` | string\\|null | no | null | ISO-8601 UTC for a one-shot schedule. Mutually exclusive with \`frequency\`. |
+| \`max_consecutive_failures\` | int | no | 5 | 1-50. Circuit breaker: auto-pause after N failures. |
+| \`metadata\` | object\\|null | no | null | String tags (max 16). |
+
+\`\`\`bash
+BASE=https://coasty.ai/v1
+AUTH="X-API-Key: $COASTY_API_KEY"
+
+curl -s "$BASE/schedules" -H "$AUTH" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "Daily invoice sweep",
+    "machine_id": "mch_test_a1b2c3d4",
+    "task_prompt": "Open the billing page and download every new invoice as PDF",
+    "frequency": "daily",
+    "time": "09:00",
+    "timezone": "America/New_York"
+  }'
+\`\`\`
+
+A schedule (\`ScheduleResponse\`) returns \`{ id, name, machine_id, task_prompt,
+enabled, frequency, cron, timezone, next_run_at, last_run_at, run_count,
+consecutive_failures, paused_reason, is_test, created_at, metadata }\`.
+
+\`PATCH /v1/schedules/{id}\` accepts any subset of \`name\`, \`task_prompt\`,
+\`frequency\`, \`cron\`, \`timezone\`, \`time\`, \`day_of_week\`, \`day_of_month\`,
+\`max_consecutive_failures\`, \`enabled\`, \`metadata\` (an empty body is a 400
+\`EMPTY_UPDATE\`).
+
+### Run now / pause / resume
+
+\`POST /v1/schedules/{id}/run\` fires immediately; body (all optional):
+\`{ "task_prompt_override": "...", "triggered_context": { ... } }\`. It returns
+\`{ schedule_id, run_id, status, message, request_id }\`. \`/pause\` and \`/resume\`
+flip the schedule's \`enabled\` flag.
+
+### Run history
+
+\`GET /v1/schedules/{id}/runs\` lists past fires: \`{ data: [ { id, schedule_id,
+status, trigger, duration_seconds, credits_charged, error, executed_at } ],
+next_cursor, has_more, request_id }\`. Filter with \`?status=\` (one of
+\`completed\`, \`failed\`, \`skipped\`, \`cancelled\`, \`running\`, \`insufficient_credits\`).
+\`GET /v1/schedules/{id}/runs/{run_id}\` returns a single run.
+
+### Triggers
+
+\`POST /v1/schedules/{id}/triggers\` adds a trigger. \`kind\` is one of:
+
+- \`webhook\`: returns a public \`webhook_url\` plus a one-time \`webhook_secret\`.
+  Optional \`rate_limit_per_minute\` (1-600, default 60).
+- \`email\`: provisions an inbound mailbox; optional \`email_label\`.
+- \`chain\`: fires this schedule when \`source_schedule_id\` completes. Optional
+  \`event\` (\`on_complete\` / \`on_failure\` / \`on_any\`, default \`on_complete\`) and
+  \`pass_output\` (default true). Chain depth is capped at 5.
+
+The webhook \`webhook_secret\` is shown ONCE at creation (the response carries
+\`Cache-Control: no-store\`); only its hash is stored, so save it now.
+
+### POST /v1/triggers/webhook/{id} (unauthenticated, HMAC-signed)
+
+External systems (Stripe, Linear, a CRM) fire a schedule by POSTing to the
+webhook URL. There is NO API key: the request is authenticated by an HMAC-SHA256
+signature instead. Send the signature in the \`Coasty-Signature\` header as
+\`t=<unix_ts>,v1=<hex>\`, where the signed payload is \`"<t>." + raw_request_body\`.
+The replay window is 5 minutes: a signature whose \`t\` is older than 5 minutes is
+rejected even if the HMAC is valid. Identical \`(webhook_id, body)\` fires within
+60s are deduplicated.
+
+\`\`\`python
+import hashlib, hmac, json, os, time, requests
+
+BASE = "https://coasty.ai/v1"
+HEADERS = {"X-API-Key": os.environ["COASTY_API_KEY"]}
+SCHEDULE_ID = "sch_test_a1b2c3d4"
+
+# 1. Add a webhook trigger. webhook_url + webhook_secret are returned ONCE.
+trig = requests.post(
+    f"{BASE}/schedules/{SCHEDULE_ID}/triggers",
+    headers=HEADERS,
+    json={"kind": "webhook"},
+    timeout=30,
+).json()
+webhook_url = trig["webhook_url"]        # https://coasty.ai/v1/triggers/webhook/whk_...
+webhook_secret = trig["webhook_secret"]  # persist this securely; shown only here
+
+# 2. Sign and fire the webhook the way an external system would.
+body = json.dumps({"event": "invoice.created", "id": "inv_4821"}).encode()
+ts = str(int(time.time()))
+signed = ts.encode() + b"." + body
+sig = hmac.new(webhook_secret.encode(), signed, hashlib.sha256).hexdigest()
+
+res = requests.post(
+    webhook_url,
+    headers={
+        "Content-Type": "application/json",
+        "Coasty-Signature": f"t={ts},v1={sig}",
+    },
+    data=body,
+    timeout=30,
+).json()
+print(res["received"], res.get("run_id"))   # {"received": true, "run_id": "...", ...}
+\`\`\`
+
+The fire response is \`{ received, schedule_id, run_id, deduplicated, message,
+request_id }\`. A bad/missing/expired signature returns \`401 INVALID_SIGNATURE\`; a
+paused schedule returns \`SCHEDULE_INACTIVE\`; exceeding the per-webhook rate limit
+returns \`429 RATE_LIMITED\` (honor \`Retry-After\`).
+
+### POST /v1/triggers/email-mailbox
+
+Provisions a fresh inbound address on the \`agents.coasty.ai\` domain (gated by
+\`triggers:write\`). Returns \`{ email_address, label, is_test, note, request_id }\`.
+Pair it with a chain or email trigger to fire schedules on inbound mail.
 
 ---
 

@@ -140,7 +140,7 @@ export function registerMachineTools(server: McpServer, api: CoastyClient): void
       title: "Capture a screenshot of a running VM",
       description:
         "Returns a base64-encoded JPEG screenshot of the VM's current desktop. " +
-        "VM must be in status='running'. Use this before predict/ground/ocr.",
+        "VM must be in status='running'. Use this before predict/ground.",
       inputSchema: {
         machine_id: z.string().min(8).max(64),
       },

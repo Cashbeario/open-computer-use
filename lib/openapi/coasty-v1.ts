@@ -248,7 +248,7 @@ const schemas = {
     },
   },
 
-  // Ground / OCR / Parse
+  // Ground / Parse
   GroundRequest: {
     type: "object",
     required: ["screenshot", "element"],
@@ -265,44 +265,6 @@ const schemas = {
     properties: {
       x: { type: "integer" },
       y: { type: "integer" },
-      usage: { $ref: "#/components/schemas/UsageInfo" },
-    },
-  },
-  OCRRequest: {
-    type: "object",
-    required: ["screenshot"],
-    properties: {
-      screenshot: { type: "string" },
-      region: {
-        type: "object",
-        nullable: true,
-        properties: {
-          x: { type: "integer" },
-          y: { type: "integer" },
-          width: { type: "integer" },
-          height: { type: "integer" },
-        },
-      },
-    },
-  },
-  OCRElement: {
-    type: "object",
-    required: ["id", "text", "left", "top", "width", "height"],
-    properties: {
-      id: { type: "integer" },
-      text: { type: "string" },
-      left: { type: "integer" },
-      top: { type: "integer" },
-      width: { type: "integer" },
-      height: { type: "integer" },
-    },
-  },
-  OCRResponse: {
-    type: "object",
-    required: ["elements", "full_text", "usage"],
-    properties: {
-      elements: { type: "array", items: { $ref: "#/components/schemas/OCRElement" } },
-      full_text: { type: "string" },
       usage: { $ref: "#/components/schemas/UsageInfo" },
     },
   },
@@ -375,9 +337,9 @@ const schemas = {
       scopes: {
         type: "array",
         items: { type: "string" },
-        default: ["predict", "session", "ground", "ocr", "parse"],
+        default: ["predict", "session", "ground", "parse"],
         description:
-          "CUA scopes. Valid: predict, session, ground, ocr, parse. Machine/schedule scopes are assigned by tier.",
+          "CUA scopes. Valid: predict, session, ground, parse. Machine/schedule scopes are assigned by tier.",
       },
     },
   },
@@ -1105,7 +1067,7 @@ const paths = {
     },
   },
 
-  // ── Ground / OCR / Parse ──
+  // ── Ground / Parse ──
   "/v1/ground": {
     post: {
       tags: ["predict"],
@@ -1121,26 +1083,6 @@ const paths = {
         "200": {
           description: "Grounded coordinates.",
           content: { "application/json": { schema: { $ref: "#/components/schemas/GroundResponse" } } },
-        },
-        ...billedErrors,
-      },
-    },
-  },
-  "/v1/ocr": {
-    post: {
-      tags: ["predict"],
-      operationId: "ocr",
-      summary: "OCR a screenshot",
-      description: "Extract text + bounding boxes. ~1 credit/call.",
-      security: [{ apiKey: [] }, { bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: { "application/json": { schema: { $ref: "#/components/schemas/OCRRequest" } } },
-      },
-      responses: {
-        "200": {
-          description: "OCR result.",
-          content: { "application/json": { schema: { $ref: "#/components/schemas/OCRResponse" } } },
         },
         ...billedErrors,
       },
@@ -2045,7 +1987,6 @@ export const COASTY_OPENAPI_SPEC: OpenApiV31Spec = {
       "| `POST /v1/sessions` | 10 |",
       "| `POST /v1/sessions/{id}/predict` | ~3 |",
       "| `POST /v1/ground` | ~2 |",
-      "| `POST /v1/ocr` | ~1 |",
       "| `POST /v1/parse` | 0 (free) |",
       "",
       "Long-running CUA jobs orchestrated through the dashboard (not this API) bill at",
@@ -2117,7 +2058,7 @@ export const COASTY_OPENAPI_SPEC: OpenApiV31Spec = {
     { bearerAuth: [] },
   ],
   tags: [
-    { name: "predict", description: "Stateless CUA action prediction, grounding, OCR." },
+    { name: "predict", description: "Stateless CUA action prediction and grounding." },
     { name: "sessions", description: "Stateful CUA sessions with persistent trajectory." },
     { name: "machines", description: "Provision and control managed VMs (AWS, Azure)." },
     { name: "schedules", description: "Cron and one-shot scheduled CUA jobs." },

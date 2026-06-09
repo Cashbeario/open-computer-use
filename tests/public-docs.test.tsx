@@ -25,7 +25,7 @@ describe("API_DOCS_MARKDOWN — the highest-detail LLM-friendly reference", () =
     expect(API_DOCS_MARKDOWN).toContain("COASTY_API_KEY")
   })
   it("documents core + runs + workflows endpoints", () => {
-    for (const ep of ["/v1/predict", "/v1/sessions", "/v1/ground", "/v1/ocr", "/v1/parse",
+    for (const ep of ["/v1/predict", "/v1/sessions", "/v1/ground", "/v1/parse",
                       "/v1/runs", "/v1/runs/{id}/events", "/v1/workflows", "/v1/workflows/runs"]) {
       expect(API_DOCS_MARKDOWN, `documents ${ep}`).toContain(ep)
     }

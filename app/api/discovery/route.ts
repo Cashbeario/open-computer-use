@@ -89,7 +89,6 @@ const manifest = {
     scopes: [
       "predict",
       "ground",
-      "ocr",
       "parse",
       "session",
       "machines:read",

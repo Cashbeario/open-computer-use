@@ -11,7 +11,6 @@ import {
   MousePointerClick,
   Repeat,
   Crosshair,
-  ScanText,
   Braces,
   ListChecks,
   FileJson,
@@ -70,7 +69,6 @@ export const DOC_SECTIONS: DocSection[] = [
   { id: "predict",        title: "Predict",           group: "Core API",    icon: MousePointerClick,  blurb: "Stateless screenshot → actions" },
   { id: "sessions",       title: "Sessions",          group: "Core API",    icon: Repeat,             blurb: "Stateful, multi-step tasks with memory" },
   { id: "grounding",      title: "Grounding",         group: "Core API",    icon: Crosshair,          blurb: "Resolve a description to exact coordinates" },
-  { id: "ocr",            title: "OCR",               group: "Core API",    icon: ScanText,           blurb: "Read on-screen text and bounding boxes" },
   { id: "parse",          title: "Parse",             group: "Core API",    icon: Braces,             blurb: "Turn pyautogui code into structured actions" },
   { id: "runs",           title: "Task runs",         group: "Agents",      icon: Bot,                blurb: "Give the agent a task and a machine; it drives to done" },
   { id: "run-events",     title: "Streaming events",  group: "Agents",      icon: Radio,              blurb: "Live SSE stream with Last-Event-ID replay" },
@@ -150,7 +148,6 @@ export const ERROR_CODES: ErrorCode[] = [
   { status: 500, code: "INTERNAL_ERROR",        meaning: "An unexpected server error. Retry, and quote request_id when contacting support." },
   { status: 500, code: "PREDICTION_FAILED",     meaning: "The prediction model run failed. The charge is automatically refunded." },
   { status: 500, code: "GROUNDING_FAILED",      meaning: "The grounding model run failed. The charge is automatically refunded." },
-  { status: 500, code: "OCR_FAILED",            meaning: "The OCR model run failed. The charge is automatically refunded." },
   { status: 503, code: "UPSTREAM_UNAVAILABLE",  meaning: "A transient upstream outage. Retry with an Idempotency-Key and exponential backoff." },
   { status: 504, code: "UPSTREAM_TIMEOUT",      meaning: "An upstream call timed out. Transient; retry with an Idempotency-Key." },
 ]
@@ -180,7 +177,6 @@ export const PRICING: PriceRow[] = [
   { endpoint: "POST /v1/sessions",                 cost: "$0.10", note: "One-time session creation." },
   { endpoint: "POST /v1/sessions/{id}/predict",    cost: "$0.04", note: "Each step inside a session." },
   { endpoint: "POST /v1/ground",                   cost: "$0.03", note: "Coordinate grounding." },
-  { endpoint: "POST /v1/ocr",                      cost: "$0.03", note: "Text extraction." },
   { endpoint: "POST /v1/parse",                    cost: "Free",  note: "Deterministic, no model call." },
   { endpoint: "POST /v1/runs",                     cost: "$0.05/step", note: "Per agent step on v3/v4 (v1 is $0.08), billed from your dollar API wallet." },
   { endpoint: "POST /v1/workflows/runs",           cost: "$0.05/step", note: "Each task step is a run; total capped by budget_cents." },
@@ -816,83 +812,6 @@ curl_setopt_array($ch, [
 $data = json_decode(curl_exec($ch), true);
 curl_close($ch);
 echo $data["x"] . ", " . $data["y"] . "\\n";`,
-  },
-
-  ocr: {
-    curl: `curl -s https://coasty.ai/v1/ocr \\
-  -H "X-API-Key: $COASTY_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d "{\\"screenshot\\":\\"$SCREENSHOT\\"}"`,
-    python: `import os, requests
-
-res = requests.post(
-    "https://coasty.ai/v1/ocr",
-    headers={"X-API-Key": os.environ["COASTY_API_KEY"]},
-    json={"screenshot": screenshot},   # base64 PNG (see Quickstart)
-    timeout=60,
-).json()
-
-print(res["full_text"])
-for el in res["elements"]:
-    print(repr(el["text"]), "at", (el["left"], el["top"]))`,
-    node: `const res = await fetch("https://coasty.ai/v1/ocr", {
-  method: "POST",
-  headers: {
-    "X-API-Key": process.env.COASTY_API_KEY,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ screenshot }),   // base64 PNG (see Quickstart)
-}).then((r) => r.json());
-
-console.log(res.full_text);
-for (const el of res.elements) {
-  console.log(el.text, el.left, el.top);
-}`,
-    go: `body, _ := json.Marshal(map[string]any{
-  "screenshot": screenshot, // base64 PNG (see Quickstart)
-})
-
-req, _ := http.NewRequest("POST", "https://coasty.ai/v1/ocr", bytes.NewReader(body))
-req.Header.Set("X-API-Key", os.Getenv("COASTY_API_KEY"))
-req.Header.Set("Content-Type", "application/json")
-
-res, _ := http.DefaultClient.Do(req)
-defer res.Body.Close()
-
-var data map[string]any
-json.NewDecoder(res.Body).Decode(&data)
-fmt.Println(data["full_text"])`,
-    ruby: `require "json"
-require "net/http"
-
-uri = URI("https://coasty.ai/v1/ocr")
-req = Net::HTTP::Post.new(uri)
-req["X-API-Key"] = ENV.fetch("COASTY_API_KEY")
-req["Content-Type"] = "application/json"
-req.body = { screenshot: screenshot }.to_json # base64 PNG (see Quickstart)
-
-res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
-data = JSON.parse(res.body)
-puts data["full_text"]
-data["elements"].each { |el| puts "#{el['text']} (#{el['left']}, #{el['top']})" }`,
-    php: `<?php
-$ch = curl_init("https://coasty.ai/v1/ocr");
-curl_setopt_array($ch, [
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_POST           => true,
-  CURLOPT_HTTPHEADER     => [
-    "X-API-Key: " . getenv("COASTY_API_KEY"),
-    "Content-Type: application/json",
-  ],
-  CURLOPT_POSTFIELDS => json_encode(["screenshot" => $screenshot]), // base64 PNG
-]);
-
-$data = json_decode(curl_exec($ch), true);
-curl_close($ch);
-echo $data["full_text"] . "\\n";
-foreach ($data["elements"] as $el) {
-  echo $el["text"] . " (" . $el["left"] . ", " . $el["top"] . ")\\n";
-}`,
   },
 
   parse: {
@@ -2772,19 +2691,8 @@ function DocsBody() {
         </P>
       </DocBlock>
 
-      {/* ── OCR ── */}
-      <DocBlock section={DOC_SECTIONS[6]}>
-        <P>
-          OCR extracts every piece of visible text from a screenshot, each with its bounding box. Use it
-          to assert that a page reached the expected state, to scrape values, or to feed text into your
-          own logic. Returns a flat <InlineCode>full_text</InlineCode> string plus an{" "}
-          <InlineCode>elements</InlineCode> array of <InlineCode>{`{ text, left, top, width, height }`}</InlineCode>.
-        </P>
-        <CodeTabs {...sampleProps("ocr")} />
-      </DocBlock>
-
       {/* ── Parse ── */}
-      <DocBlock section={DOC_SECTIONS[7]}>
+      <DocBlock section={DOC_SECTIONS[6]}>
         <P>
           Parse converts a block of <InlineCode>pyautogui</InlineCode> code into the same structured
           action objects the model returns. It is deterministic, runs no model, and is free. Use it to
@@ -3150,8 +3058,8 @@ function DocsBody() {
           <InlineCode>UPSTREAM_TIMEOUT</InlineCode>) as retryable: honor <InlineCode>Retry-After</InlineCode>{" "}
           on a 429, and use an <InlineCode>Idempotency-Key</InlineCode> with exponential backoff on the
           upstream codes. A <InlineCode>500</InlineCode> model failure (
-          <InlineCode>PREDICTION_FAILED</InlineCode>, <InlineCode>GROUNDING_FAILED</InlineCode>,{" "}
-          <InlineCode>OCR_FAILED</InlineCode>) auto-refunds the charge, so retrying is free.
+          <InlineCode>PREDICTION_FAILED</InlineCode> or <InlineCode>GROUNDING_FAILED</InlineCode>)
+          auto-refunds the charge, so retrying is free.
         </Callout>
 
         {/* Troubleshooting: the five most common first-week mistakes. */}

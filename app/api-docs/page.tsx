@@ -1424,7 +1424,6 @@ export default function ApiDocsPage() {
               <PricingRow endpoint="POST /sessions" cost="10 cr" description="Create multi-step session" />
               <PricingRow endpoint="POST /sessions/{id}/predict" cost="4 cr" description="Predict within session" />
               <PricingRow endpoint="POST /ground" cost="3 cr" description="Find element coordinates" />
-              <PricingRow endpoint="POST /ocr" cost="3 cr" description="Extract text from image" />
               <PricingRow endpoint="POST /parse" cost="Free" description="Parse action code" highlight />
               <PricingRow
                 endpoint="GET /models, /usage, /sessions"

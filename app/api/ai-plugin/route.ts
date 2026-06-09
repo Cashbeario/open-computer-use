@@ -35,7 +35,7 @@ const manifest = {
   description_for_human:
     "AI agents that operate computers — predict UI actions, run virtual machines, schedule automation.",
   description_for_model:
-    "Coasty exposes computer-use AI tools: predict UI actions from screenshots, ground UI elements, run OCR, provision/control virtual machines, and schedule recurring automation jobs. Authenticate with sk-coasty-{live|test}-* API keys. Sandbox keys are free. Use /api/pricing to budget calls. Full /v1/* surface is documented at /.well-known/openapi.json. For native MCP integration, install @coasty/mcp via npm.",
+    "Coasty exposes computer-use AI tools: predict UI actions from screenshots, ground UI elements, provision/control virtual machines, and schedule recurring automation jobs. Authenticate with sk-coasty-{live|test}-* API keys. Sandbox keys are free. Use /api/pricing to budget calls. Full /v1/* surface is documented at /.well-known/openapi.json. For native MCP integration, install @coasty/mcp via npm.",
   auth: {
     type: "user_http",
     authorization_type: "bearer",

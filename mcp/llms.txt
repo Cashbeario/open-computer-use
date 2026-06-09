@@ -28,12 +28,11 @@ The package is `@coasty/mcp` on npm. Run with `npx -y @coasty/mcp`. Get a free s
 
 Compatible with: Claude Desktop, Claude Code, Cursor, Windsurf, VS Code Copilot (Agent mode), and any MCP host implementing spec 2025-06-18 or later.
 
-## Tools (26)
+## Tools (25)
 
-### Predict (4)
+### Predict (3)
 - `coasty_predict` — screenshot + goal → list of agent actions
 - `coasty_ground` — element description → (x, y) coords
-- `coasty_ocr` — extract text from screenshot
 - `coasty_parse` — pyautogui code → structured action records
 
 ### Machines (9)

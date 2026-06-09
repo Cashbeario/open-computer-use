@@ -1249,7 +1249,6 @@ def test_no_set_cookie_from_any_public_endpoint(http: httpx.Client):
         ("POST", "/parse", '{"code": '),                       # invalid json
         ("POST", "/sessions", "{"),                            # truncated json
         ("POST", "/ground", "[1, 2, 3]"),                      # array, expects object
-        ("POST", "/ocr", '{"screenshot": 12345}'),             # wrong type
     ],
 )
 def test_malformed_bodies_never_500(http: httpx.Client, method: str, path: str, payload: str):

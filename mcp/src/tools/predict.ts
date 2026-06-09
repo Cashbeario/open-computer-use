@@ -3,10 +3,9 @@
  *
  * predict   : screenshot + instruction → list of actions (click/type/etc.)
  * ground    : screenshot + element description → coordinates
- * ocr       : screenshot → extracted text + bounding boxes
  * parse     : pyautogui code string → structured Coasty action records
  *
- * All four are read-only / idempotent / open-world (talk to a remote API).
+ * All three are read-only / idempotent / open-world (talk to a remote API).
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -27,11 +26,6 @@ const GROUND_DESC =
   "language (e.g. 'the blue Submit button below the form'). Returns " +
   "{x, y, confidence}. Cheaper than predict — use when you already know " +
   "what action to take and just need the position.";
-
-const OCR_DESC =
-  "Extract all text from a screenshot. Returns text + per-fragment bounding " +
-  "boxes. Useful for reading status messages, error dialogs, or table data " +
-  "where you don't need full action prediction.";
 
 const PARSE_DESC =
   "Parse a pyautogui code snippet (the format CUA agents emit) into Coasty " +
@@ -116,26 +110,6 @@ export function registerPredictTools(server: McpServer, api: CoastyClient): void
             ? args.screenshot.split(",", 2)[1]
             : args.screenshot,
           description: args.description,
-        }),
-      ),
-  );
-
-  server.registerTool(
-    "coasty_ocr",
-    {
-      title: "Extract text from a screenshot",
-      description: OCR_DESC,
-      inputSchema: {
-        screenshot: z.string().min(20).describe("Base64 PNG/JPEG."),
-      },
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
-    },
-    async (args) =>
-      runTool(() =>
-        api.post("/v1/ocr", {
-          screenshot: args.screenshot.startsWith("data:")
-            ? args.screenshot.split(",", 2)[1]
-            : args.screenshot,
         }),
       ),
   );

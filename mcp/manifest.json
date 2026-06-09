@@ -88,11 +88,6 @@
       "annotations": { "readOnlyHint": true, "idempotentHint": true, "openWorldHint": true }
     },
     {
-      "name": "coasty_ocr",
-      "description": "Extract text from a screenshot with bounding boxes.",
-      "annotations": { "readOnlyHint": true, "idempotentHint": true, "openWorldHint": true }
-    },
-    {
       "name": "coasty_parse",
       "description": "Parse pyautogui code into structured Coasty action records (no LLM call).",
       "annotations": { "readOnlyHint": true, "idempotentHint": true, "openWorldHint": true }

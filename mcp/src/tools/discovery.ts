@@ -68,14 +68,6 @@ const TOOL_CATALOG: ReadonlyArray<ToolCatalogEntry> = [
     scopes: ["ground"],
   },
   {
-    name: "coasty_ocr",
-    type: "mcp",
-    kind: "predict",
-    description: "Extract text from a screenshot with bounding boxes.",
-    cost_credits: 1,
-    scopes: ["ocr"],
-  },
-  {
     name: "coasty_parse",
     type: "mcp",
     kind: "predict",
@@ -284,7 +276,6 @@ const ALL_SCOPES: ReadonlyArray<string> = [
   "predict",
   "session",
   "ground",
-  "ocr",
   "parse",
   "keys",
   "usage",

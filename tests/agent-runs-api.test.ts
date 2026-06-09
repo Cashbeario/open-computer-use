@@ -173,7 +173,7 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
 
   // The literal scope strings the backend DEFAULT_SCOPES_LIST grants a fresh key.
   const BACKEND_DEFAULT = [
-    "predict", "session", "ground", "ocr", "parse",
+    "predict", "session", "ground", "parse",
     "machines:read", "actions:exec", "files:read",
     "runs:read", "runs:write", "workflows:read", "workflows:write",
   ]

@@ -1930,7 +1930,6 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
             <div className="divide-y divide-foreground/[0.03]">
               {[
                 { m: "POST", p: "/v1/ground", d: "Find (x,y) for element", c: "3 cr" },
-                { m: "POST", p: "/v1/ocr", d: "Extract text from image", c: "3 cr" },
                 { m: "POST", p: "/v1/parse", d: "Parse pyautogui code", c: "Free" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
@@ -3245,7 +3244,7 @@ claude mcp list
           id="mcp-tools"
           title="Tools the MCP server exposes"
           icon={ListBullets}
-          description="24 tools across Predict, Machines, Schedules, and Account. All carry MCP annotations (readOnly / destructive / idempotent) so well-behaved hosts confirm before destructive operations."
+          description="23 tools across Predict, Machines, Schedules, and Account. All carry MCP annotations (readOnly / destructive / idempotent) so well-behaved hosts confirm before destructive operations."
         >
           <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
             {[
@@ -3254,7 +3253,6 @@ claude mcp list
                 tools: [
                   { n: "coasty_predict",                   d: "Screenshot + goal → list of actions" },
                   { n: "coasty_ground",                    d: "Element description → (x, y) coords" },
-                  { n: "coasty_ocr",                       d: "Screenshot → text + bounding boxes" },
                   { n: "coasty_parse",                     d: "pyautogui code → structured actions (free)" },
                 ],
               },
@@ -3359,7 +3357,7 @@ claude mcp list
                 <p>Body fields: <code className="text-[10px] font-mono">code</code>, <code className="text-[10px] font-mono">message</code>, <code className="text-[10px] font-mono">type</code>, <code className="text-[10px] font-mono">request_id</code>, <code className="text-[10px] font-mono">suggestion</code>, <code className="text-[10px] font-mono">docs_url</code>, plus code-specific context (e.g. <code className="text-[10px] font-mono">required_scope</code>, <code className="text-[10px] font-mono">balance</code>, <code className="text-[10px] font-mono">details</code>).</p>
                 <p>Headers: <code className="text-[10px] font-mono">X-Coasty-Request-Id</code> (quote it in support tickets) and <code className="text-[10px] font-mono">Link: &lt;docs_url&gt;; rel=&quot;help&quot;</code>.</p>
                 <p>Auth failures also send <code className="text-[10px] font-mono">WWW-Authenticate: Bearer</code>; rate limits send <code className="text-[10px] font-mono">Retry-After</code>.</p>
-                <p>Auto-refunded codes (<code className="text-[10px] font-mono">PREDICTION_FAILED</code>, <code className="text-[10px] font-mono">GROUNDING_FAILED</code>, <code className="text-[10px] font-mono">OCR_FAILED</code>) refund the charge, so you are not billed for a failed model call.</p>
+                <p>Auto-refunded codes (<code className="text-[10px] font-mono">PREDICTION_FAILED</code>, <code className="text-[10px] font-mono">GROUNDING_FAILED</code>) refund the charge, so you are not billed for a failed model call.</p>
               </div>
             </div>
           </div>
@@ -3414,7 +3412,6 @@ claude mcp list
               { code: "500", name: "INTERNAL_ERROR",         desc: "Unexpected server error; retry, and quote the request_id if it persists" },
               { code: "500", name: "PREDICTION_FAILED",      desc: "Model run failed; the charge is auto-refunded" },
               { code: "500", name: "GROUNDING_FAILED",       desc: "Grounding failed; auto-refunded" },
-              { code: "500", name: "OCR_FAILED",             desc: "OCR failed; auto-refunded" },
               { code: "503", name: "UPSTREAM_UNAVAILABLE",   desc: "A dependency is down; retry with backoff" },
               { code: "504", name: "UPSTREAM_TIMEOUT",       desc: "Upstream timed out; retry (use Idempotency-Key on POSTs)" },
             ].map((row, i) => (

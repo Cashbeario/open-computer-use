@@ -47,7 +47,6 @@ const DEFAULT_SCOPES = [
   "predict",
   "session",
   "ground",
-  "ocr",
   "parse",
   "machines:read",
   "actions:exec",

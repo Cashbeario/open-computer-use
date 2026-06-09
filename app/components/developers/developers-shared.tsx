@@ -55,7 +55,6 @@ const SCOPE_OPTIONS: readonly ScopeOption[] = [
   { id: "predict",         label: "Predict",           desc: "Run model predictions",              group: "Vision",        recommended: true },
   { id: "session",         label: "Sessions",          desc: "Stateful multi-step tasks",          group: "Vision",        recommended: true },
   { id: "ground",          label: "Ground",            desc: "Locate UI elements",                 group: "Vision",        recommended: true },
-  { id: "ocr",             label: "OCR",               desc: "Extract text from images",           group: "Vision",        recommended: true },
   { id: "parse",           label: "Parse",             desc: "Parse pyautogui code",               group: "Vision",        recommended: true },
   // Agents (task runs + workflows — the headline developer surface)
   { id: "runs:read",       label: "Runs (read)",       desc: "List and read agent task runs",      group: "Agents",        recommended: true },
@@ -246,7 +245,6 @@ function abbreviateKey(key: string): string {
 function endpointBadgeClass(ep: string): string {
   if (ep.startsWith("session")) return "bg-blue-500/10 text-blue-600 dark:text-blue-400"
   if (ep === "ground")          return "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-  if (ep === "ocr")             return "bg-purple-500/10 text-purple-600 dark:text-purple-400"
   if (ep === "parse")           return "bg-slate-500/10 text-slate-600 dark:text-slate-400"
   return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
 }
@@ -1651,7 +1649,6 @@ const REFERENCE_ENDPOINTS = [
   { method: "POST",   path: "/v1/sessions/{id}/reset",        desc: "Reset session",         cost: "Free" },
   { method: "DELETE", path: "/v1/sessions/{id}",              desc: "Delete session",        cost: "Free" },
   { method: "POST",   path: "/v1/ground",                     desc: "Locate UI element",     cost: "$0.03" },
-  { method: "POST",   path: "/v1/ocr",                        desc: "Extract text",          cost: "$0.03" },
   { method: "POST",   path: "/v1/parse",                      desc: "Parse pyautogui code",  cost: "Free" },
   { method: "GET",    path: "/v1/usage",                      desc: "Usage summary",         cost: "Free" },
 ] as const

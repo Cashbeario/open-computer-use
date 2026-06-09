@@ -119,7 +119,7 @@ afterEach(() => {
 
 describe("DOC_SECTIONS catalogue", () => {
   it("has the expected sections, all with required fields", () => {
-    expect(DOC_SECTIONS.length).toBe(20)
+    expect(DOC_SECTIONS.length).toBe(19)
     for (const s of DOC_SECTIONS) {
       expect(typeof s.id).toBe("string")
       expect(s.id.length).toBeGreaterThan(0)
@@ -182,7 +182,7 @@ describe("reference tables", () => {
       "INVALID_STATUS_FILTER", "NOT_FOUND", "SESSION_NOT_FOUND", "RUN_NOT_FOUND",
       "WORKFLOW_NOT_FOUND", "NOT_AWAITING_HUMAN", "RESUME_CONFLICT", "IDEMPOTENCY_KEY_REUSED",
       "RATE_LIMIT_EXCEEDED", "TOO_MANY_RUNS", "FEATURE_NOT_AVAILABLE", "INTERNAL_ERROR",
-      "PREDICTION_FAILED", "GROUNDING_FAILED", "OCR_FAILED", "UPSTREAM_UNAVAILABLE", "UPSTREAM_TIMEOUT",
+      "PREDICTION_FAILED", "GROUNDING_FAILED", "UPSTREAM_UNAVAILABLE", "UPSTREAM_TIMEOUT",
     ]) {
       expect(codes, `ERROR_CODES missing real code ${code}`).toContain(code)
     }
@@ -230,7 +230,6 @@ describe("reference tables", () => {
     expect(byEndpoint["POST /v1/sessions"]).toBe("$0.10")
     expect(byEndpoint["POST /v1/sessions/{id}/predict"]).toBe("$0.04")
     expect(byEndpoint["POST /v1/ground"]).toBe("$0.03")
-    expect(byEndpoint["POST /v1/ocr"]).toBe("$0.03")
     expect(byEndpoint["POST /v1/parse"]).toBe("Free")
   })
 
@@ -516,7 +515,6 @@ describe("additional languages", () => {
     const required: Record<string, string[]> = {
       predict: ["screenshot", "instruction"],
       grounding: ["element"],
-      ocr: ["screenshot"],
       parse: ["code", "pyautogui"],
     }
     for (const [endpoint, fields] of Object.entries(required)) {
@@ -540,13 +538,13 @@ describe("additional languages", () => {
 describe("DeveloperDocs renders all six language tabs", () => {
   it("shows a tab for every language on every code block", () => {
     render(<DeveloperDocs />)
-    // 11 endpoints render a CodeTabs: predict, sessions, grounding, ocr, parse,
+    // 10 endpoints render a CodeTabs: predict, sessions, grounding, parse,
     // runs, runEvents, runResume, webhookVerify, workflowCreate, workflowAdhoc.
     for (const l of LANGS) {
       expect(
         screen.getAllByRole("tab", { name: l.label }).length,
         `tab "${l.label}"`,
-      ).toBeGreaterThanOrEqual(11)
+      ).toBeGreaterThanOrEqual(10)
     }
   })
 

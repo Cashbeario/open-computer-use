@@ -111,14 +111,6 @@ describe("Predict tool routing", () => {
     expect(r.body.description).toBe("the blue Submit button");
   });
 
-  it("coasty_ocr → POST /v1/ocr", async () => {
-    const c = await setup();
-    await c.callTool({ name: "coasty_ocr", arguments: { screenshot: TINY_PNG_B64 } });
-    const r = lastCall();
-    expect(r.method).toBe("POST");
-    expect(r.pathname).toBe("/v1/ocr");
-  });
-
   it("coasty_parse → POST /v1/parse with code", async () => {
     const c = await setup();
     await c.callTool({

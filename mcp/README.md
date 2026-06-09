@@ -67,7 +67,7 @@ Restart Claude Desktop. Coasty tools appear under the 🛠️ icon.
 claude mcp add coasty \
   --env COASTY_API_KEY=sk-coasty-test-... \
   -- npx -y @coasty/mcp
-claude mcp list                 # ✓ connected (24 tools, 2 prompts)
+claude mcp list                 # ✓ connected (23 tools, 2 prompts)
 ```
 
 ### Cursor
@@ -130,15 +130,14 @@ The package follows the standard stdio transport defined in MCP spec [2025-11-25
 
 ## Tools
 
-Coasty MCP exposes **24 tools** across 4 groups + 2 prompts. Every tool advertises [MCP annotations](https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-annotations) (`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`) so well-behaved hosts auto-approve safe reads and surface explicit-consent UI for destructive ops.
+Coasty MCP exposes **23 tools** across 4 groups + 2 prompts. Every tool advertises [MCP annotations](https://modelcontextprotocol.io/specification/2025-11-25/server/tools#tool-annotations) (`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`) so well-behaved hosts auto-approve safe reads and surface explicit-consent UI for destructive ops.
 
-### Predict (4 tools)
+### Predict (3 tools)
 
 | Tool | Purpose | Annotations |
 |---|---|---|
 | `coasty_predict` | Screenshot + goal → list of agent actions (click/type/scroll/etc.) | read · idempotent |
 | `coasty_ground` | Element description → exact (x, y) coordinates | read · idempotent |
-| `coasty_ocr` | Extract text + bounding boxes from a screenshot | read · idempotent |
 | `coasty_parse` | Parse pyautogui code → structured action records (free, no LLM) | read · idempotent |
 
 ### Machines (9 tools)
@@ -246,7 +245,7 @@ Set via the Coasty Electron app or the `COASTY_APPROVAL_MODE` env var in advance
 
 ## Auth + scopes
 
-API keys carry scopes that gate which tools work. A misconfigured scope returns 403 with a self-explanatory hint. Default-issued keys get `predict`, `session`, `ground`, `ocr`, `parse`, `machines:read`, `actions:exec`, `files:read`. Mint elevated-scope keys at <https://coasty.ai/developers>.
+API keys carry scopes that gate which tools work. A misconfigured scope returns 403 with a self-explanatory hint. Default-issued keys get `predict`, `session`, `ground`, `parse`, `machines:read`, `actions:exec`, `files:read`. Mint elevated-scope keys at <https://coasty.ai/developers>.
 
 | Scope | Required by |
 |---|---|

@@ -302,7 +302,6 @@ export const METERED_RATES: readonly MeteredRate[] = [
   { endpoint: "POST /v1/sessions",        creditsPerCall: 10, description: "Open a stateful CUA session" },
   { endpoint: "POST /v1/sessions/{id}/predict", creditsPerCall: 4, description: "Predict within an existing session" },
   { endpoint: "POST /v1/ground",          creditsPerCall: 3,  description: "Ground a UI element to (x, y)" },
-  { endpoint: "POST /v1/ocr",             creditsPerCall: 3,  description: "OCR a screenshot" },
 ];
 
 /** Long-running agent jobs (CUA orchestration via dashboard) bill per

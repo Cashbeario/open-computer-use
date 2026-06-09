@@ -29,7 +29,7 @@ export const API_DOCS_MARKDOWN = `# Coasty Computer Use API
 
 Coasty exposes three layers, smallest to largest:
 
-1. **Core inference** (\`/v1/predict\`, \`/v1/sessions\`, \`/v1/ground\`, \`/v1/ocr\`,
+1. **Core inference** (\`/v1/predict\`, \`/v1/sessions\`, \`/v1/ground\`,
    \`/v1/parse\`). You supply screenshots and instructions; Coasty returns the
    actions to take. You execute the actions on your own machine and loop.
 2. **Task Runs** (\`/v1/runs\`). You give the agent a task plus a \`machine_id\` and
@@ -444,38 +444,6 @@ curl -s https://coasty.ai/v1/ground \\
   -H "X-API-Key: $COASTY_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d "{\\"screenshot\\":\\"$SCREENSHOT\\",\\"element\\":\\"the blue Submit button\\"}"
-\`\`\`
-
----
-
-### POST /v1/ocr
-
-Read on-screen text and bounding boxes. Scope: \`ocr\`.
-
-**Request body**
-
-| Field | Type | Req | Default | Notes |
-| --- | --- | --- | --- | --- |
-| \`screenshot\` | string | yes | - | Base64 PNG/JPEG. |
-| \`region\` | object\\|null | no | null | Optional \`{x, y, width, height}\`. |
-
-**Response** (\`OCRResponse\`)
-
-\`\`\`json
-{
-  "elements": [
-    { "id": 0, "text": "Sign in", "left": 480, "top": 300, "width": 80, "height": 24 }
-  ],
-  "full_text": "Sign in ...",
-  "usage": { "credits_charged": 3, "cost_cents": 27 }
-}
-\`\`\`
-
-\`\`\`bash
-curl -s https://coasty.ai/v1/ocr \\
-  -H "X-API-Key: $COASTY_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d "{\\"screenshot\\":\\"$SCREENSHOT\\"}"
 \`\`\`
 
 ---
@@ -1211,7 +1179,7 @@ Field reference (every error carries the first four; the rest are conditional):
 | 429 | \`TOO_MANY_RUNS\` | Too many concurrent runs in flight. | Wait for one to finish or cancel one; honor \`Retry-After\`. |
 | 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. \`v4\` on free/starter, custom prompts on free). | Upgrade your plan or use an available alternative. |
 | 500 | \`INTERNAL_ERROR\` | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
-| 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` / \`OCR_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding/OCR, send a clearer or higher-resolution screenshot. |
+| 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding, send a clearer or higher-resolution screenshot. |
 | 504 | \`UPSTREAM_TIMEOUT\` | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
 | 503 | \`UPSTREAM_UNAVAILABLE\` | An upstream service is briefly unavailable. | Retry with backoff; check https://status.coasty.ai. |
 
@@ -1246,7 +1214,6 @@ Scopes are deny-by-default; each route asserts the scope it requires. Naming is
 | \`predict\` | \`POST /v1/predict\`. |
 | \`session\` | All \`/v1/sessions\` endpoints. |
 | \`ground\` | \`POST /v1/ground\`. |
-| \`ocr\` | \`POST /v1/ocr\`. |
 | \`parse\` | \`POST /v1/parse\`. |
 | \`keys\` | List/revoke your own keys via the API. |
 | \`usage\` | Read the usage summary. |
@@ -1265,7 +1232,7 @@ Scopes are deny-by-default; each route asserts the scope it requires. Naming is
 | \`schedules:read\` / \`schedules:write\` | List/get; create/update/delete/run-now schedules. |
 | \`triggers:write\` | Add/remove webhook + email + chain triggers. |
 
-Default scopes on a new key: \`predict\`, \`session\`, \`ground\`, \`ocr\`, \`parse\`,
+Default scopes on a new key: \`predict\`, \`session\`, \`ground\`, \`parse\`,
 \`machines:read\`, \`actions:exec\`, \`files:read\`, \`runs:read\`, \`runs:write\`,
 \`workflows:read\`, \`workflows:write\`. Elevated scopes (\`terminal:exec\`,
 \`files:write\`, \`browser:execute\`, \`connection:read\`, \`snapshots:write\`) are
@@ -1282,7 +1249,6 @@ in dollars. Charges are taken before the model call and refunded on failure.
 | \`POST /v1/sessions\` | $0.10 | One-time session creation. |
 | \`POST /v1/sessions/{id}/predict\` | $0.04 | Each step inside a session. |
 | \`POST /v1/ground\` | $0.03 | Coordinate grounding. |
-| \`POST /v1/ocr\` | $0.03 | Text extraction. |
 | \`POST /v1/parse\` | Free | Deterministic, no model call. |
 | \`POST /v1/runs\` | $0.05/step | Per agent step on v3/v4 (v1 is $0.08/step), billed from your USD wallet. |
 | \`POST /v1/workflows/runs\` | $0.05/step | Each task step is a run; total capped by \`budget_cents\`. |

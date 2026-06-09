@@ -17,7 +17,6 @@ Endpoints discovered in ``public_cua.py``:
   * GET    /api/v1/cua/sessions                         — list sessions
   * GET    /api/v1/cua/sessions/{id}                    — session status
   * POST   /api/v1/cua/ground                           — coordinate grounding
-  * POST   /api/v1/cua/ocr                              — OCR extraction
   * POST   /api/v1/cua/parse                            — parse pyautogui code
   * GET    /api/v1/cua/models                           — list models/versions
   * GET    /api/v1/cua/usage                            — usage summary
@@ -93,7 +92,6 @@ _POST_ENDPOINTS = [
     "/predict",
     "/sessions",
     "/ground",
-    "/ocr",
     "/parse",
     "/keys",
 ]
@@ -235,7 +233,6 @@ def test_predict_without_auth_returns_401(http: httpx.Client):
         ("GET", "/usage"),
         ("GET", "/keys"),
         ("POST", "/ground"),
-        ("POST", "/ocr"),
         ("POST", "/parse"),
         ("POST", "/sessions"),
     ],

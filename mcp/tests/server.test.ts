@@ -60,7 +60,6 @@ describe("MCP server", () => {
       // Predict
       "coasty_predict",
       "coasty_ground",
-      "coasty_ocr",
       "coasty_parse",
       // Machines
       "coasty_list_machines",
@@ -123,7 +122,6 @@ describe("MCP server", () => {
     const readOnlyTools = [
       "coasty_predict",
       "coasty_ground",
-      "coasty_ocr",
       "coasty_parse",
       "coasty_list_machines",
       "coasty_get_machine",

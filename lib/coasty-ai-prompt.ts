@@ -24,7 +24,7 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 ## Core endpoints (stateless / session)
 - POST /v1/predict — body {screenshot (base64), instruction, cua_version} -> {actions:[{action_type, params}], status}. Loop: capture screenshot -> predict -> execute actions -> repeat until status is "done".
 - POST /v1/sessions then POST /v1/sessions/{id}/predict — stateful multi-step with trajectory memory.
-- POST /v1/ground — {screenshot, element} -> {x, y}. POST /v1/ocr — read on-screen text. POST /v1/parse — pyautogui code -> structured actions (free).
+- POST /v1/ground — {screenshot, element} -> {x, y}. POST /v1/parse — pyautogui code -> structured actions (free).
 
 ## Task Runs — the server drives an agent task to completion
 - POST /v1/runs — {machine_id, task, cua_version ("v3" default; "v4" = autonomous + pass/fail verifier), instructions?, system_prompt?, max_steps?, deadline_seconds?, on_awaiting_human ("pause"|"fail"|"cancel"), webhook_url?} -> a run (status "queued"). The server runs the screenshot->act loop, verifies success, and bills per step.
@@ -37,7 +37,7 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 - DSL step types: task, assert, if, loop, parallel, human_approval, retry, succeed, fail. Conditions are structured objects: {op: "eq"|"ne"|"lt"|"gt"|"lte"|"gte"|"contains"|"truthy"|"falsy"|"exists"|"and"|"or"|"not", ...}. Variables: {{inputs.x}}, {{vars.y}}, {{stepId.field}} (a task binds {status, passed, result, run_id}). Hard guards: budget_cents, max_iterations, deadline_seconds.
 
 ## Pricing (USD, prepaid dollar wallet)
-predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground/ocr $0.03  ·  parse free  ·  runs and workflow task steps $0.05 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
+predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground $0.03  ·  parse free  ·  runs and workflow task steps $0.05 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
 
 ## Errors
 JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSUFFICIENT_CREDITS  ·  403 INSUFFICIENT_SCOPE  ·  429 rate limit / TOO_MANY_RUNS.`

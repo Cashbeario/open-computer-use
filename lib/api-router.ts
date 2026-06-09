@@ -180,7 +180,7 @@ type PathMapEntry = {
  * `lib/openapi/coasty-v1.ts`:
  *
  *   * Present in spec: `/v1/predict`, `/v1/sessions`, `/v1/ground`,
- *     `/v1/ocr`, `/v1/parse`, `/v1/models`, `/v1/usage`, `/v1/keys`,
+ *     `/v1/parse`, `/v1/models`, `/v1/usage`, `/v1/keys`,
  *     `/v1/health`, `/v1/machines`, `/v1/schedules`, `/v1/triggers`,
  *     `/v1/chat`, `/v1/chats`, `/v1/files`, `/v1/credits`, `/v1/swarms`
  *     (the latter five added in Round 2, May 2026 — Beta).

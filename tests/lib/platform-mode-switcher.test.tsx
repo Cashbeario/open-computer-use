@@ -58,7 +58,7 @@ vi.mock("@tabler/icons-react", () => {
   const Icon = (props: any) =>
     React.createElement("span", { "data-icon": true, ...props })
   return {
-    IconChevronDown: Icon,
+    IconSelector: Icon,
     IconCheck: Icon,
   }
 })

@@ -44,8 +44,8 @@ describe("API_DOCS_MARKDOWN — the highest-detail LLM-friendly reference", () =
     expect(API_DOCS_MARKDOWN).toContain("16 branches")      // parallel <= 16
   })
   it("prices in USD with the documented figures", () => {
-    expect(API_DOCS_MARKDOWN).toContain("$0.45")
-    expect(API_DOCS_MARKDOWN).toContain("$0.09")  // internal granularity stated once
+    expect(API_DOCS_MARKDOWN).toContain("$0.05")
+    expect(API_DOCS_MARKDOWN).toContain("$0.01")  // internal granularity stated once
   })
   it("documents the error codes + the MCP server", () => {
     expect(API_DOCS_MARKDOWN).toContain("INSUFFICIENT_CREDITS")

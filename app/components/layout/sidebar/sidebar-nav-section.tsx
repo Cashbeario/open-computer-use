@@ -18,6 +18,7 @@ import {
   IconChartBar,
   IconBook2,
   IconCode,
+  IconUser,
 } from "@tabler/icons-react"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
 import Link from "next/link"
@@ -1395,7 +1396,10 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           per-user runtime mode; only the public marketing surface (landing nav,
           /api-docs) still rides DEVELOPERS_API_ENABLED. */}
       <ModeReveal show={isDeveloperMode}>
-        <SectionHeader label="Developer" expanded={expanded} />
+        {/* ── Group 1 · Build ── what you integrate with: your API keys and
+            the reference docs. Mirrors the two-section rhythm of Personal mode
+            (Recent · Workspace) so both platforms read the same way. */}
+        <SectionHeader label="Build" expanded={expanded} />
         <div className="space-y-0.5">
           <NavButton
             id="sidebar-developers-keys-link"
@@ -1413,6 +1417,28 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               visual: "developers",
             }}
           />
+          <NavButton
+            id="sidebar-developers-docs-link"
+            testId="sidebar-nav-developers-docs"
+            icon={<IconBook2 size={16} stroke={1.5} className="shrink-0" />}
+            label="Docs"
+            tooltip="API quick reference"
+            href="/developers/docs"
+            isActive={isItemActive("/developers/docs")}
+            accentColor="text-amber-500 dark:text-amber-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Docs",
+              detail: "Authentication, a copyable quick start, endpoint and action tables, and response shapes.",
+              visual: "developers",
+            }}
+          />
+        </div>
+
+        {/* ── Group 2 · Monitor ── observability for what's already running:
+            request traces (Logs) and consumption (Usage). */}
+        <SectionHeader label="Monitor" expanded={expanded} />
+        <div className="space-y-0.5">
           <NavButton
             id="sidebar-developers-logs-link"
             testId="sidebar-nav-developers-logs"
@@ -1445,21 +1471,21 @@ export const SidebarNavSection = memo(function SidebarNavSection({
               visual: "developers",
             }}
           />
+          {/* Personal — the mirror of the "Developer" row in Personal mode:
+              one click back to the Personal platform (usePlatformMode →
+              "consumer"), so the platform toggle is reachable from the sidebar
+              in BOTH directions, not just the header switcher. Sits at the
+              bottom of the Developer nav — the symmetric position to where
+              "Developer" sits under Agent in Personal mode — so the option
+              flips its label between modes rather than vanishing entirely. */}
           <NavButton
-            id="sidebar-developers-docs-link"
-            testId="sidebar-nav-developers-docs"
-            icon={<IconBook2 size={16} stroke={1.5} className="shrink-0" />}
-            label="Docs"
-            tooltip="API quick reference"
-            href="/developers/docs"
-            isActive={isItemActive("/developers/docs")}
-            accentColor="text-amber-500 dark:text-amber-400"
-            onClick={closeMobileIfNeeded}
-            hoverInfo={{
-              description: "Docs",
-              detail: "Authentication, a copyable quick start, endpoint and action tables, and response shapes.",
-              visual: "developers",
-            }}
+            id="sidebar-personal-switch"
+            testId="sidebar-nav-personal"
+            icon={<IconUser size={16} stroke={1.5} className="shrink-0" />}
+            label="Personal"
+            tooltip="Switch back to the personal platform"
+            accentColor="text-blue-500 dark:text-blue-400"
+            onClick={() => setPlatformMode("consumer")}
           />
         </div>
       </ModeReveal>

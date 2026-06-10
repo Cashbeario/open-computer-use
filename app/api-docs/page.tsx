@@ -1198,9 +1198,12 @@ export default function ApiDocsPage() {
             {[
               "POST /v1/machines",
               "GET /v1/machines",
+              "GET /v1/machines/pricing",
+              "PATCH /v1/machines/{id}",
               "DELETE /v1/machines/{id}",
               "POST /v1/machines/{id}/start",
               "POST /v1/machines/{id}/stop",
+              "POST /v1/machines/{id}/restart",
               "POST /v1/machines/{id}/snapshot",
               "GET /v1/machines/{id}/screenshot",
               "GET /v1/machines/{id}/connection",

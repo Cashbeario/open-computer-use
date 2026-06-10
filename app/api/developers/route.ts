@@ -48,9 +48,20 @@ const DEFAULT_SCOPES = [
   "session",
   "ground",
   "parse",
+  // Full machine lifecycle is granted by default: provision/terminate/
+  // start/stop/restart/TTL (machines:write), inspect (machines:read), drive
+  // (actions:exec), shell (terminal:exec), files both ways, snapshots.
+  // Driving VMs is the documented purpose of the product; ownership is
+  // enforced on every call. Only the two high-risk scopes (connection:read —
+  // plaintext SSH/VNC secrets — and browser:execute — arbitrary JS) stay
+  // opt-in below.
   "machines:read",
+  "machines:write",
   "actions:exec",
+  "terminal:exec",
   "files:read",
+  "files:write",
+  "snapshots:write",
   // Runs + Workflows are the headline developer-agent surface — granted by
   // default so a fresh key can start a run / workflow without re-minting.
   "runs:read",
@@ -62,18 +73,14 @@ const DEFAULT_SCOPES = [
 // The complete set of scopes a key MAY hold — mirrors backend
 // api_key_service.ALL_SCOPES. Used to validate caller-supplied scopes: anything
 // in here is allowed (even if not granted by default), anything else is a typo
-// and is rejected with INVALID_SCOPE. Elevated scopes (terminal:exec,
-// files:write, browser:execute, snapshots:write, machines:write, etc.) are not
-// in DEFAULT_SCOPES but can be requested explicitly at key-creation time.
+// and is rejected with INVALID_SCOPE. High-risk scopes (connection:read,
+// browser:execute) are not in DEFAULT_SCOPES but can be requested explicitly
+// at key-creation time.
 const ALL_SCOPES: ReadonlySet<string> = new Set([
   ...DEFAULT_SCOPES,
   "keys", // listing/revoking own keys via the API
   "usage", // reading usage summary
-  "machines:write",
-  "terminal:exec",
-  "files:write",
   "browser:execute",
-  "snapshots:write",
   "connection:read",
   "schedules:read",
   "schedules:write",

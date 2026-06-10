@@ -156,7 +156,7 @@ describe("scopes — runs + workflows are first-class and granted by default", (
     for (const s of ["SCOPE_RUNS_READ", "SCOPE_RUNS_WRITE", "SCOPE_WORKFLOWS_READ", "SCOPE_WORKFLOWS_WRITE"]) {
       expect(allScopes, `ALL_SCOPES has ${s}`).toContain(s)
     }
-    const def = KEYS.slice(KEYS.indexOf("DEFAULT_SCOPES_LIST"), KEYS.indexOf("DEFAULT_SCOPES_LIST") + 600)
+    const def = KEYS.slice(KEYS.indexOf("DEFAULT_SCOPES_LIST"), KEYS.indexOf("DEFAULT_SCOPES_LIST") + 1200)
     for (const s of ["SCOPE_RUNS_READ", "SCOPE_RUNS_WRITE", "SCOPE_WORKFLOWS_READ", "SCOPE_WORKFLOWS_WRITE"]) {
       expect(def, `DEFAULT has ${s}`).toContain(s)
     }
@@ -171,10 +171,17 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
   // These guards pin the two together so that can't regress.
   const ROUTE = read("app/api/developers/route.ts")
 
-  // The literal scope strings the backend DEFAULT_SCOPES_LIST grants a fresh key.
+  // The literal scope strings the backend DEFAULT_SCOPES_LIST grants a fresh
+  // key. Since the machines-API expansion this includes the FULL machine
+  // lifecycle (machines:write, terminal:exec, files:write, snapshots:write) —
+  // only the two high-risk scopes (connection:read, browser:execute) stay
+  // opt-in.
   const BACKEND_DEFAULT = [
     "predict", "session", "ground", "parse",
-    "machines:read", "actions:exec", "files:read",
+    "machines:read", "machines:write",
+    "actions:exec", "terminal:exec",
+    "files:read", "files:write",
+    "snapshots:write",
     "runs:read", "runs:write", "workflows:read", "workflows:write",
   ]
 
@@ -187,6 +194,27 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
     }
   })
 
+  it("high-risk scopes stay OUT of route.ts DEFAULT_SCOPES (opt-in only)", () => {
+    // connection:read returns plaintext SSH keys + VNC passwords;
+    // browser:execute runs arbitrary JS. Granting them silently to every
+    // fresh key would be a privilege-escalation regression — pin them out.
+    const start = ROUTE.indexOf("const DEFAULT_SCOPES")
+    const block = ROUTE.slice(start, ROUTE.indexOf("]", start) + 1)
+    for (const s of ["connection:read", "browser:execute"]) {
+      expect(block, `DEFAULT_SCOPES must NOT include "${s}"`).not.toContain(`"${s}"`)
+    }
+  })
+
+  it("backend DEFAULT_SCOPES_LIST matches the same machine-lifecycle expansion", () => {
+    const def = KEYS.slice(KEYS.indexOf("DEFAULT_SCOPES_LIST"), KEYS.indexOf("DEFAULT_SCOPES_LIST") + 1200)
+    for (const s of ["SCOPE_MACHINES_WRITE", "SCOPE_TERMINAL_EXEC", "SCOPE_FILES_WRITE", "SCOPE_SNAPSHOTS_WRITE"]) {
+      expect(def, `backend DEFAULT has ${s}`).toContain(s)
+    }
+    for (const s of ["SCOPE_CONNECTION_READ", "SCOPE_BROWSER_EXECUTE"]) {
+      expect(def, `backend DEFAULT must NOT have ${s}`).not.toContain(s)
+    }
+  })
+
   it("route.ts validates against a full ALL_SCOPES allowlist (can grant elevated scopes)", () => {
     const start = ROUTE.indexOf("const ALL_SCOPES")
     expect(start, "ALL_SCOPES allowlist declared in route.ts").toBeGreaterThan(-1)
@@ -194,9 +222,8 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
     // ALL_SCOPES must build on the full default set (so runs/workflows/machines
     // read+write the user's key needed are all allowed)…
     expect(block, "ALL_SCOPES spreads DEFAULT_SCOPES").toContain("...DEFAULT_SCOPES")
-    // …plus the elevated extras a caller can opt into beyond the defaults.
-    for (const s of ["keys", "usage", "machines:write", "terminal:exec", "files:write",
-                     "browser:execute", "snapshots:write", "connection:read",
+    // …plus the opt-in extras a caller can request beyond the defaults.
+    for (const s of ["keys", "usage", "browser:execute", "connection:read",
                      "schedules:read", "schedules:write", "triggers:write"]) {
       expect(block, `ALL_SCOPES allows "${s}"`).toContain(`"${s}"`)
     }

@@ -61,16 +61,18 @@ const SCOPE_OPTIONS: readonly ScopeOption[] = [
   { id: "runs:write",      label: "Runs (write)",      desc: "Start, cancel, and resume runs",     group: "Agents",        recommended: true },
   { id: "workflows:read",  label: "Workflows (read)",  desc: "List and read workflows",            group: "Agents",        recommended: true },
   { id: "workflows:write", label: "Workflows (write)", desc: "Create, update, and run workflows",  group: "Agents",        recommended: true },
-  // Machines
+  // Machines — full lifecycle (provision / start / stop / restart / TTL /
+  // terminate / snapshot) is part of the backend default set; only
+  // connection:read (plaintext SSH/VNC secrets) stays opt-in.
   { id: "machines:read",   label: "Machines (read)",   desc: "List machines and read state",       group: "Machines",      recommended: true },
   { id: "actions:exec",    label: "Actions",           desc: "Click, type, and scroll a machine",  group: "Machines",      recommended: true },
-  { id: "machines:write",  label: "Machines (write)",  desc: "Provision, start, stop, delete",     group: "Machines",      recommended: false },
+  { id: "machines:write",  label: "Machines (write)",  desc: "Provision, start/stop, TTL, delete", group: "Machines",      recommended: true },
   { id: "connection:read", label: "Connection",        desc: "Read SSH / VNC connection details",  group: "Machines",      recommended: false },
-  { id: "snapshots:write", label: "Snapshots",         desc: "Create machine snapshots",           group: "Machines",      recommended: false },
-  // Files & shell (in-VM)
+  { id: "snapshots:write", label: "Snapshots",         desc: "Create machine snapshots",           group: "Machines",      recommended: true },
+  // Files & shell (in-VM). browser:execute (arbitrary JS) stays opt-in.
   { id: "files:read",      label: "Files (read)",      desc: "Read files and list directories",    group: "Files & shell", recommended: true },
-  { id: "files:write",     label: "Files (write)",     desc: "Write, edit, and delete files",      group: "Files & shell", recommended: false },
-  { id: "terminal:exec",   label: "Terminal",          desc: "Run shell commands on a machine",    group: "Files & shell", recommended: false },
+  { id: "files:write",     label: "Files (write)",     desc: "Write, edit, and delete files",      group: "Files & shell", recommended: true },
+  { id: "terminal:exec",   label: "Terminal",          desc: "Run shell commands on a machine",    group: "Files & shell", recommended: true },
   { id: "browser:execute", label: "Browser",           desc: "Drive an in-VM browser",             group: "Files & shell", recommended: false },
   // Schedules
   { id: "schedules:read",  label: "Schedules (read)",  desc: "List and read schedules",            group: "Schedules",     recommended: false },
@@ -82,9 +84,13 @@ const SCOPE_OPTIONS: readonly ScopeOption[] = [
 ] as const
 
 const SCOPE_GROUPS: ScopeGroup[] = ["Vision", "Agents", "Machines", "Files & shell", "Schedules", "Account"]
-// Pre-selected on the create dialog — mirrors backend DEFAULT_SCOPES_LIST so a
-// fresh key works for predictions, agents, workflows, and driving machines.
-const DEFAULT_SCOPE_IDS = SCOPE_OPTIONS.filter(s => s.recommended).map(s => s.id)
+// The conservative subset (backend DEFAULT_SCOPES_LIST) — kept for the
+// "Reset to recommended" shortcut so users can narrow a key after the fact.
+const RECOMMENDED_SCOPE_IDS = SCOPE_OPTIONS.filter(s => s.recommended).map(s => s.id)
+// Pre-selected on the create dialog: EVERY scope (the full backend ALL_SCOPES
+// allowlist). A fresh key gets full access by default; users uncheck anything
+// they do not want rather than opting in.
+const ALL_SCOPE_IDS = SCOPE_OPTIONS.map(s => s.id)
 
 const SNIPPET_LANGS = [
   { id: "python",     label: "Python" },
@@ -1864,16 +1870,18 @@ export function CreateKeyDialog({
 }) {
   const [name, setName] = useState("")
   const [kind, setKind] = useState<KeyKind>("live")
-  const [scopes, setScopes] = useState<string[]>(DEFAULT_SCOPE_IDS)
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  // Every scope is selected by default (full access); advanced shown so the
+  // full selection is visible, not hidden behind a toggle.
+  const [scopes, setScopes] = useState<string[]>(ALL_SCOPE_IDS)
+  const [showAdvanced, setShowAdvanced] = useState(true)
 
   // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
       setName("")
       setKind("live")
-      setScopes(DEFAULT_SCOPE_IDS)
-      setShowAdvanced(false)
+      setScopes(ALL_SCOPE_IDS)
+      setShowAdvanced(true)
     }
   }, [open])
 
@@ -1957,7 +1965,7 @@ export function CreateKeyDialog({
               <span className="text-[10px] text-muted-foreground/40 tabular-nums">{scopes.length} selected</span>
             </div>
             <p className="text-[10.5px] text-muted-foreground/45 mb-2 leading-snug">
-              Recommended scopes let a key run predictions, agents, workflows, and drive machines. Add elevated scopes only if you need them.
+              All scopes are selected by default so your key has full access. Uncheck any you do not need, or reset to the recommended set.
             </p>
             <div className="rounded-lg border border-foreground/[0.06] bg-foreground/[0.015] overflow-hidden">
               {SCOPE_GROUPS.map(group => {
@@ -2007,7 +2015,7 @@ export function CreateKeyDialog({
               </button>
               <button
                 type="button"
-                onClick={() => setScopes(DEFAULT_SCOPE_IDS)}
+                onClick={() => setScopes(RECOMMENDED_SCOPE_IDS)}
                 className="text-[10.5px] text-muted-foreground/45 hover:text-foreground/70 transition-colors"
               >
                 Reset to recommended

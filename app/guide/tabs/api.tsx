@@ -464,8 +464,12 @@ defer resp.Body.Close()`,
   -d '{
     "display_name": "automation-bot",
     "os_type": "linux",
-    "desktop_enabled": true
-  }'`,
+    "desktop_enabled": true,
+    "ttl_minutes": 240
+  }'
+# ttl_minutes (optional, 5–10080): auto-destroy lease. Extend/clear later:
+#   curl -X PATCH https://coasty.ai/v1/machines/$MACHINE_ID \\
+#     -H "X-API-Key: ..." -d '{"ttl_minutes": 480}'   # or 0 to clear`,
     action: `curl -X POST https://coasty.ai/v1/machines/$MACHINE_ID/actions \\
   -H "X-API-Key: sk-coasty-live-..." \\
   -H "Content-Type: application/json" \\
@@ -2017,14 +2021,18 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
               </div>
               <div className="divide-y divide-foreground/[0.03]">
                 {[
-                  { r: "Provision (any provider)",       c: "20 cr min" },
-                  { r: "Agent run on managed VM",         c: "10 cr/min" },
-                  { r: "Raw VM-hour (Linux)",             c: "50 cr/hr" },
-                  { r: "Raw VM-hour (Windows)",           c: "75 cr/hr" },
-                  { r: "Idle VM (provisioned, unused)",   c: "5 cr/hr" },
+                  // Runtime is metered per minute (whole credits, floor —
+                  // partial credits never billed) against the API wallet:
+                  // a small fixed surplus over the underlying cloud cost.
+                  // Source of truth: backend machine_runtime_billing.py +
+                  // GET /v1/machines/pricing.
+                  { r: "Provision (balance gate)",        c: "20 cr min" },
+                  { r: "VM runtime — Linux, running",     c: "5 cr/hr" },
+                  { r: "VM runtime — Windows, running",   c: "9 cr/hr" },
+                  { r: "VM stopped (storage only)",       c: "1 cr/hr" },
+                  { r: "Auto-destroy TTL (ttl_minutes)",  c: "Free" },
                   { r: "Snapshot create",                 c: "1 cr" },
-                  { r: "Snapshot storage",                c: "1 cr / 2 GB-mo" },
-                  { r: "Egress (after first 10 GB/mo)",   c: "1 cr/GB" },
+                  { r: "Out of funds → VM auto-stopped",  c: "never destroyed" },
                   { r: "Sandbox (sk-coasty-test-*)",      c: "Free" },
                 ].map(row => (
                   <div key={row.r} className="flex items-center gap-3 px-5 py-2.5">
@@ -2058,7 +2066,7 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
           id="machines-provision"
           title="Provision & Lifecycle"
           icon={Lightning}
-          description="Create a VM, list your fleet, and control start/stop/snapshot/terminate. Sandbox keys mock everything in-memory; live keys provision real EC2 / Azure instances."
+          description="Create a VM, list your fleet, and control start/stop/restart/snapshot/terminate. Set ttl_minutes for auto-destroy (extend or clear any time via PATCH). Runtime bills your API wallet per minute at a small surplus over cloud cost. Sandbox keys mock everything in-memory; live keys provision real EC2 / Azure instances."
         >
           <GuideCodeBlock label={`provision a vm — ${lang}`} code={MACHINES_SNIPPETS[lang].provision} />
 
@@ -2070,8 +2078,11 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
               {[
                 { m: "GET",    p: "/v1/machines",                d: "List your machines" },
                 { m: "GET",    p: "/v1/machines/{id}",           d: "Get a machine" },
+                { m: "GET",    p: "/v1/machines/pricing",        d: "Runtime + one-time price table" },
+                { m: "PATCH",  p: "/v1/machines/{id}",           d: "Set / extend / clear auto-destroy TTL" },
                 { m: "POST",   p: "/v1/machines/{id}/start",     d: "Start a stopped VM" },
                 { m: "POST",   p: "/v1/machines/{id}/stop",      d: "Stop a running VM" },
+                { m: "POST",   p: "/v1/machines/{id}/restart",   d: "Restart a running VM" },
                 { m: "POST",   p: "/v1/machines/{id}/snapshot",  d: "Create AMI snapshot" },
                 { m: "DELETE", p: "/v1/machines/{id}",           d: "Terminate (irreversible)" },
               ].map(row => (
@@ -2080,6 +2091,7 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
                     "shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded",
                     row.m === "GET"    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
                     row.m === "POST"   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                    row.m === "PATCH"  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" :
                                          "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                   )}>
                     {row.m}
@@ -2264,12 +2276,15 @@ Returns:
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST",   p: "/v1/machines",                  d: "Provision a new VM",       c: "20 cr min" },
+                { m: "POST",   p: "/v1/machines",                  d: "Provision (runtime 5–9 cr/hr)", c: "20 cr min" },
                 { m: "GET",    p: "/v1/machines",                  d: "List machines",             c: "Free" },
                 { m: "GET",    p: "/v1/machines/{id}",             d: "Get a machine",             c: "Free" },
+                { m: "GET",    p: "/v1/machines/pricing",          d: "Runtime price table",       c: "Free" },
+                { m: "PATCH",  p: "/v1/machines/{id}",             d: "Set / clear auto-destroy TTL", c: "Free" },
                 { m: "DELETE", p: "/v1/machines/{id}",             d: "Terminate (irreversible)",  c: "Free" },
                 { m: "POST",   p: "/v1/machines/{id}/start",       d: "Start stopped VM",          c: "Free" },
-                { m: "POST",   p: "/v1/machines/{id}/stop",        d: "Stop running VM",           c: "Free" },
+                { m: "POST",   p: "/v1/machines/{id}/stop",        d: "Stop running VM (1 cr/hr stopped)", c: "Free" },
+                { m: "POST",   p: "/v1/machines/{id}/restart",     d: "Restart running VM",        c: "Free" },
                 { m: "POST",   p: "/v1/machines/{id}/snapshot",    d: "Create AMI snapshot",       c: "1 cr" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
@@ -2277,6 +2292,7 @@ Returns:
                     "shrink-0 w-14 text-center text-[10px] font-bold tracking-wider py-0.5 rounded",
                     row.m === "GET"    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
                     row.m === "POST"   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                    row.m === "PATCH"  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" :
                                          "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                   )}>
                     {row.m}

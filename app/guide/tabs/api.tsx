@@ -19,6 +19,14 @@ import {
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
+import {
+  ACTION_EXECUTOR_MAP,
+  COORDINATE_SCALING_NOTE,
+  LOCAL_AUTOMATION_SNIPPETS,
+  LOCAL_SAFETY_NOTE,
+  PROMPT_PRESETS,
+  type LocalAutomationLang,
+} from "@/lib/local-automation"
 
 /* ─── animations ─── */
 
@@ -1303,7 +1311,7 @@ type DocSection = {
   id: string
   title: string
   icon: PhosphorIcon
-  group: "Start" | "Predict" | "Machines" | "Agents" | "Schedules" | "MCP" | "Errors"
+  group: "Start" | "Predict" | "Local" | "Machines" | "Agents" | "Schedules" | "MCP" | "Errors"
 }
 
 const DOC_SECTIONS: DocSection[] = [
@@ -1317,6 +1325,11 @@ const DOC_SECTIONS: DocSection[] = [
   { id: "actions",                title: "Action Types",           icon: CursorClick,   group: "Predict" },
   { id: "options",                title: "Request Options",        icon: Textbox,       group: "Predict" },
   { id: "endpoints",              title: "Predict Endpoints",      icon: Terminal,      group: "Predict" },
+
+  // ── Local automation (bring your own screen — no VM required) ──
+  { id: "local-overview",         title: "Automate Any Screen",    icon: CursorClick,   group: "Local" },
+  { id: "local-loop",             title: "The Local Agent Loop",   icon: Lightning,     group: "Local" },
+  { id: "local-presets",          title: "Prompt Presets",         icon: Textbox,       group: "Local" },
 
   // ── Machines API (the managed-VM surface) ──
   { id: "machines-overview",      title: "Overview & Scopes",      icon: Plugs,         group: "Machines" },
@@ -1628,6 +1641,174 @@ function DocsSidebar({ active }: { active: string }) {
 }
 
 /* ─── main component ─── */
+
+/* ─── Local automation ("automate any screen") sections ─── */
+
+const LOCAL_LANGS: { id: LocalAutomationLang; label: string }[] = [
+  { id: "python", label: "Python · pyautogui" },
+  { id: "javascript", label: "Node · Playwright" },
+  { id: "curl", label: "cURL · one-shot" },
+  { id: "go", label: "Go · robotgo" },
+]
+
+const SCREEN_SOURCES = [
+  { name: "Your own desktop", how: "mss / screencapture / PowerShell — execute with pyautogui" },
+  { name: "A browser page", how: "Playwright or Puppeteer screenshot — execute with page.mouse / keyboard" },
+  { name: "A phone emulator", how: "adb exec-out screencap — execute with adb input tap / text" },
+  { name: "A remote VNC / RDP frame", how: "framebuffer grab — execute by injecting input on the remote" },
+  { name: "A Coasty cloud VM", how: "/v1/machines does the whole loop for you, screenshots included" },
+]
+
+function LocalAutomationSections() {
+  const [lang, setLang] = useState<LocalAutomationLang>("python")
+  const [presetId, setPresetId] = useState<string>(PROMPT_PRESETS[0].id)
+  const preset = PROMPT_PRESETS.find(p => p.id === presetId) ?? PROMPT_PRESETS[0]
+  const executorCol = lang === "javascript" ? "playwright" : "pyautogui"
+
+  return (
+    <>
+      {/* ─── Local: Overview ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="local-overview"
+          title="Automate Any Screen"
+          icon={CursorClick}
+          description="predict, ground and sessions are screen-agnostic: a screenshot goes in, coordinates and actions come out. The pixels can come from anywhere — your own desktop, a browser, a phone emulator, a VNC frame. Coasty VMs are one execution target, not the only one."
+        >
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Anything that renders pixels is automatable</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {SCREEN_SOURCES.map(s => (
+                <div key={s.name} className="flex items-start gap-3 px-5 py-3">
+                  <span className="text-[12px] font-medium text-foreground/70 w-44 shrink-0">{s.name}</span>
+                  <span className="text-[11px] text-muted-foreground/45 leading-relaxed">{s.how}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-amber-500/15 bg-amber-500/[0.04] px-5 py-4">
+            <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1.5">Coordinates &amp; scaling — read this first</p>
+            <p className="text-[12px] text-muted-foreground/60 leading-relaxed">{COORDINATE_SCALING_NOTE}</p>
+          </div>
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.015] px-5 py-4">
+            <p className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-wider mb-1.5">Safety on a real desktop</p>
+            <p className="text-[12px] text-muted-foreground/60 leading-relaxed">{LOCAL_SAFETY_NOTE}</p>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Local: The agent loop ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="local-loop"
+          title="The Local Agent Loop"
+          icon={Lightning}
+          description="Screenshot → predict → execute → repeat until status leaves continue. The full pattern below runs on YOUR machine: sessions keep history server-side, the Idempotency-Key makes every step retry-safe, and the executor maps each returned action to a real input event."
+        >
+          <div className="flex flex-wrap gap-1.5 p-1.5 rounded-xl bg-foreground/[0.025] border border-foreground/[0.04] w-fit">
+            {LOCAL_LANGS.map(l => (
+              <button
+                key={l.id}
+                onClick={() => setLang(l.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150",
+                  lang === l.id
+                    ? "bg-background shadow-sm text-foreground border border-foreground/[0.06]"
+                    : "text-muted-foreground/45 hover:text-foreground/70"
+                )}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
+          <GuideCodeBlock
+            label={lang === "curl" ? "one-shot — any screenshot in, actions out" : "full agent loop on your screen"}
+            code={LOCAL_AUTOMATION_SNIPPETS[lang]}
+          />
+
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">
+                Executing every action type {executorCol === "playwright" ? "in a browser (Playwright)" : "on a desktop (pyautogui)"}
+              </span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {ACTION_EXECUTOR_MAP.map(row => (
+                <div key={row.actionType} className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-3 px-5 py-3">
+                  <code className="text-[11px] font-mono text-foreground/70 w-24 shrink-0">{row.actionType}</code>
+                  <span className="text-[10px] font-mono text-muted-foreground/35 w-56 shrink-0 leading-relaxed">{row.params}</span>
+                  <code className="text-[10px] font-mono text-muted-foreground/50 leading-relaxed break-all">
+                    {executorCol === "playwright" ? row.playwright : row.pyautogui}
+                  </code>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <SectionDivider />
+
+      {/* ─── Local: Prompt presets ─── */}
+      <div className="py-8 mb-8">
+        <Section
+          id="local-presets"
+          title="Prompt Presets"
+          icon={Textbox}
+          description="Best-practice steering for the `instructions` field — appended to the base agent prompt (unlike system_prompt, which replaces it). Pick the preset that matches your job, copy it, and pass it on session create or any predict call. Custom prompts require Starter or higher."
+        >
+          <div className="flex flex-wrap gap-1.5 p-1.5 rounded-xl bg-foreground/[0.025] border border-foreground/[0.04] w-fit">
+            {PROMPT_PRESETS.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setPresetId(p.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150",
+                  presetId === p.id
+                    ? "bg-background shadow-sm text-foreground border border-foreground/[0.06]"
+                    : "text-muted-foreground/45 hover:text-foreground/70"
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <p className="text-[12px] text-muted-foreground/55 leading-relaxed">{preset.description}</p>
+
+          <GuideCodeBlock
+            label={`instructions — ${preset.label}`}
+            code={preset.instructions}
+          />
+
+          <GuideCodeBlock
+            label="using a preset"
+            code={`requests.post(f"{API}/sessions", headers=HDRS, json={
+    "cua_version": "v3",
+    "screen_width": 1280, "screen_height": 720,
+    "instructions": PRESET,   # the text above — applies to every step in the session
+})`}
+          />
+
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.015] px-5 py-4">
+            <p className="text-[12px] text-muted-foreground/55 leading-relaxed">
+              <code className="text-[11px]">instructions</code> is additive steering on top of the tuned base prompt — start here.
+              <code className="text-[11px] ml-1">system_prompt</code> fully replaces the base prompt: more power, more ways to break grounding —
+              reach for it only when a preset plus task phrasing can&apos;t express what you need. Both draw from the same per-tier
+              character budget (Starter 2,000 / Pro 4,000 / Enterprise 16,000; +1 credit per call above 500 chars).
+            </p>
+          </div>
+        </Section>
+      </div>
+    </>
+  )
+}
 
 export function APITab({ inApp }: { inApp: boolean }) {
   const [lang, setLang] = useState<LangId>("python")
@@ -1970,6 +2151,16 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
           </div>
         </Section>
       </div>
+
+      <SectionDivider />
+
+      {/* ════════════════════════════════════════════════════════════════════
+           ═════════════════ LOCAL AUTOMATION ═════════════════
+           Bring-your-own-screen: the predict surface pointed at the user's
+           desktop / a browser / an emulator, executed locally. No VM needed.
+           ════════════════════════════════════════════════════════════════════ */}
+
+      <LocalAutomationSections />
 
       <SectionDivider />
 
@@ -3121,7 +3312,7 @@ X-Coasty-Webhook-Deduplicated: false
                 MCP (Model Context Protocol) is the open standard, designed by Anthropic and adopted across
                 the agent ecosystem, that lets LLM hosts plug into external tools and data.
                 Coasty&apos;s MCP server is a thin wrapper over the <code className="text-[11px] font-mono text-foreground/65">/v1</code> API —
-                same scopes, same rate limits, same billing. It runs locally via <code className="text-[11px] font-mono text-foreground/65">npx</code>;
+                same scopes, same billing. It runs locally via <code className="text-[11px] font-mono text-foreground/65">npx</code>;
                 your API key never touches a Coasty MCP relay.
               </p>
             </div>
@@ -3372,7 +3563,7 @@ claude mcp list
               <div className="px-5 py-4 text-[11px] text-muted-foreground/55 leading-relaxed space-y-2">
                 <p>Body fields: <code className="text-[10px] font-mono">code</code>, <code className="text-[10px] font-mono">message</code>, <code className="text-[10px] font-mono">type</code>, <code className="text-[10px] font-mono">request_id</code>, <code className="text-[10px] font-mono">suggestion</code>, <code className="text-[10px] font-mono">docs_url</code>, plus code-specific context (e.g. <code className="text-[10px] font-mono">required_scope</code>, <code className="text-[10px] font-mono">balance</code>, <code className="text-[10px] font-mono">details</code>).</p>
                 <p>Headers: <code className="text-[10px] font-mono">X-Coasty-Request-Id</code> (quote it in support tickets) and <code className="text-[10px] font-mono">Link: &lt;docs_url&gt;; rel=&quot;help&quot;</code>.</p>
-                <p>Auth failures also send <code className="text-[10px] font-mono">WWW-Authenticate: Bearer</code>; rate limits send <code className="text-[10px] font-mono">Retry-After</code>.</p>
+                <p>Auth failures also send <code className="text-[10px] font-mono">WWW-Authenticate: Bearer</code>; transient errors (timeouts, upstream outages) send <code className="text-[10px] font-mono">Retry-After</code>.</p>
                 <p>Auto-refunded codes (<code className="text-[10px] font-mono">PREDICTION_FAILED</code>, <code className="text-[10px] font-mono">GROUNDING_FAILED</code>) refund the charge, so you are not billed for a failed model call.</p>
               </div>
             </div>
@@ -3389,7 +3580,6 @@ claude mcp list
                 { code: "402", t: "Out of credits", f: "Add funds, or develop against a sk-coasty-test- key. Test keys never bill and use mock VMs." },
                 { code: "403", t: "Missing scope", f: "The key is valid but lacks the route's scope. Re-mint it with the needed scope at /developers; old keys are not upgraded in place." },
                 { code: "422", t: "Bad screenshot / missing field", f: "Strip any data: URI prefix before base64; error.details carries the exact failing field path." },
-                { code: "429", t: "Rate limited", f: "Honor the Retry-After header and back off. The per_user cap spans all your keys, so minting more keys does not raise it." },
               ].map(row => (
                 <div key={row.code} className="flex items-start gap-4 px-5 py-3.5">
                   <span className="text-[11px] font-mono font-bold text-amber-600/70 dark:text-amber-400/70 w-8 shrink-0 mt-0.5">{row.code}</span>
@@ -3423,8 +3613,6 @@ claude mcp list
               { code: "413", name: "PAYLOAD_TOO_LARGE",      desc: "Base64 body over the 10 MB cap" },
               { code: "422", name: "VALIDATION_ERROR",       desc: "Body failed validation; error.details = field path that failed" },
               { code: "422", name: "INVALID_SCREENSHOT",     desc: "Screenshot not valid base64; strip the data: prefix first" },
-              { code: "429", name: "RATE_LIMIT_EXCEEDED",    desc: "Honor Retry-After. The per_user cap is NOT raised by minting more keys" },
-              { code: "429", name: "TOO_MANY_RUNS",          desc: "Concurrent run limit for your tier reached; back off" },
               { code: "500", name: "INTERNAL_ERROR",         desc: "Unexpected server error; retry, and quote the request_id if it persists" },
               { code: "500", name: "PREDICTION_FAILED",      desc: "Model run failed; the charge is auto-refunded" },
               { code: "500", name: "GROUNDING_FAILED",       desc: "Grounding failed; auto-refunded" },

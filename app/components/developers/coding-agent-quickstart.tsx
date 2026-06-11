@@ -28,6 +28,7 @@ import {
   CHATGPT_BASE,
   CLAUDE_BASE,
   CODING_AGENT_OPTIONS,
+  EXECUTION_TARGET_OPTIONS,
   INTEGRATION_OPTIONS,
   buildCraftedPrompt,
 } from "@/lib/coasty-ai-prompt"
@@ -186,8 +187,9 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
         customIntegration: cfg.customIntegration,
         building: cfg.building,
         customBuilding: cfg.customBuilding,
+        executionTarget: cfg.executionTarget,
       }),
-    [cfg.codingAgent, cfg.customAgent, cfg.integration, cfg.customIntegration, cfg.building, cfg.customBuilding],
+    [cfg.codingAgent, cfg.customAgent, cfg.integration, cfg.customIntegration, cfg.building, cfg.customBuilding, cfg.executionTarget],
   )
 
   const onCopy = async () => {
@@ -221,7 +223,7 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
           </div>
           <DialogTitle className="text-lg font-semibold">Create with AI</DialogTitle>
           <DialogDescription className="text-[12.5px]">
-            Answer three quick questions and we will craft the perfect prompt for your AI coding agent.
+            Answer a few quick questions and we will craft the perfect prompt for your AI coding agent.
           </DialogDescription>
         </DialogHeader>
 
@@ -268,6 +270,24 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
           </Question>
           {cfg.building === "other" && (
             <OtherInput value={cfg.customBuilding} onChange={cfg.setCustomBuilding} placeholder="Describe what you want to build" />
+          )}
+
+          <Question title="Where should it run?">
+            {EXECUTION_TARGET_OPTIONS.map((o) => (
+              <OptionChip
+                key={o.id}
+                selected={cfg.executionTarget === o.id}
+                onSelect={() => cfg.setExecutionTarget(o.id)}
+                label={o.label}
+              />
+            ))}
+          </Question>
+          {cfg.executionTarget !== "cloud-vm" && (
+            <p className="-mt-2 text-[11px] leading-relaxed text-muted-foreground/55">
+              Default: the prompt builds the local agent loop — screenshot your screen → /v1 predict →
+              execute the actions with pyautogui or Playwright. No VM is provisioned. Pick the cloud VM
+              only when you want Coasty to run the machine for you.
+            </p>
           )}
 
           {/* Tailored prompt preview. */}

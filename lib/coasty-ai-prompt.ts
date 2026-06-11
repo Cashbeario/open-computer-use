@@ -18,6 +18,7 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 
 - Base URL: https://coasty.ai/v1
 - Auth: send the secret key in the \`X-API-Key: <key>\` header (or \`Authorization: Bearer <key>\`). Read it from a COASTY_API_KEY environment variable; never hardcode it.
+- The predict surface (/v1/predict, /v1/ground, /v1/sessions) is SCREEN-AGNOSTIC: it can automate the user's OWN screen locally (capture a screenshot, POST it, execute the returned click/type/scroll actions with pyautogui or Playwright) or any other screen — Coasty-managed cloud VMs via /v1/machines are one execution target, not the only one. See the "Local automation" section of the reference below.
 - Full machine-readable reference (read this for complete detail): https://coasty.ai/docs/llms.txt
 - Human docs: https://coasty.ai/docs  ·  API keys: https://coasty.ai/developers/keys
 
@@ -40,12 +41,12 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground $0.03  ·  parse free  ·  runs and workflow task steps $0.05 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
 
 ## Errors
-JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSUFFICIENT_CREDITS  ·  403 INSUFFICIENT_SCOPE  ·  429 rate limit / TOO_MANY_RUNS.`
+JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSUFFICIENT_CREDITS  ·  403 INSUFFICIENT_SCOPE.`
 
 export const AI_PROMPT = `${API_REFERENCE}
 
 ---
-Now help me build: <describe what you want to build>. Use minimal, correct code, read COASTY_API_KEY from the environment, and ask me for a machine_id when a run or workflow needs one.`
+Now help me build: <describe what you want to build>. Use minimal, correct code and read COASTY_API_KEY from the environment. DEFAULT TO AUTOMATING MY OWN SCREEN locally (the "Local automation" loop: capture a screenshot, POST to /v1/sessions/{id}/predict, execute the returned actions with pyautogui or Playwright) unless I explicitly ask for a Coasty cloud VM — only then provision via /v1/machines or ask me for a machine_id for /v1/runs.`
 
 /* ── Quickstart option catalogs (ids shared with the store + UI) ──────────── */
 
@@ -65,6 +66,15 @@ export const INTEGRATION_OPTIONS = [
   { id: "go", label: "Go" },
   { id: "mcp", label: "MCP server" },
   { id: "other", label: "Other" },
+] as const
+
+export const EXECUTION_TARGET_OPTIONS = [
+  // "local" is THE DEFAULT everywhere (store default + builder fallback):
+  // the crafted prompt builds the screenshot->predict->execute loop against
+  // the developer's OWN machine — no VM. "cloud-vm" is the explicit opt-in
+  // for /v1/machines + /v1/runs orchestration; choices persist in the store.
+  { id: "local", label: "My own screen (local)" },
+  { id: "cloud-vm", label: "Coasty cloud VM" },
 ] as const
 
 export const BUILD_TARGET_OPTIONS = [
@@ -101,6 +111,8 @@ export interface QuickstartSelection {
   customIntegration: string
   building: string
   customBuilding: string
+  /** "local" | "cloud-vm" — where the generated code should run. */
+  executionTarget: string
 }
 
 function labelFor(options: readonly { id: string; label: string }[], id: string, fallback: string) {
@@ -123,15 +135,39 @@ export function buildCraftedPrompt(cfg: QuickstartSelection): string {
       ? `Write the integration in ${cfg.customIntegration.trim() || "my preferred language and stack"}.`
       : INTEGRATION_GUIDE[cfg.integration] || "Write a small, idiomatic client."
 
-  const goal =
+  const rawGoal =
     cfg.building === "other"
       ? cfg.customBuilding.trim() || "the tool I describe"
       : BUILDING_GOAL[cfg.building] || "a working end-to-end example"
 
+  // LOCAL IS THE DEFAULT: anything that isn't an explicit "cloud-vm" pick
+  // (including a missing/unknown value from an older persisted config)
+  // crafts the local agent loop against the developer's own screen.
+  const local = cfg.executionTarget !== "cloud-vm"
+
+  // Goal phrasing must match the run target — "on a Coasty machine" would
+  // contradict a local-execution prompt.
+  const goal = local ? rawGoal.replace(" on a Coasty machine", " in a browser on my machine") : rawGoal
+
+  // Where the generated code runs decides the whole integration shape:
+  // local = the screenshot->predict->execute loop on the developer's own
+  // machine; cloud-vm = machine provisioning + /v1/runs orchestration.
+  const executionBullets = local
+    ? [
+        `- Run target: MY OWN screen — no Coasty VM. Build the local agent loop: capture a screenshot of my screen (mss on Python / Playwright page.screenshot for a browser target), POST it to /v1/sessions/{id}/predict with the task instruction, EXECUTE the returned actions locally (pyautogui for the desktop, page.mouse/keyboard for a browser), and repeat until status leaves "continue".`,
+        `- Coordinates come back in the coordinate space of the screenshot I send: if the code downscales screenshots (e.g. to 1280x720), scale returned x/y back up before clicking, and pass the DOWNSCALED size as screen_width/screen_height.`,
+        `- Send an Idempotency-Key header on every predict step so a network retry can never double-execute an action, keep pyautogui.FAILSAFE enabled on desktop targets, and cap the loop at a fixed number of steps.`,
+        `- Read the "Local automation" section of https://coasty.ai/docs/llms.txt for the canonical loop, the per-action executor mapping, and the selectable instruction presets (pass one in the "instructions" field on session create — e.g. the Cautious preset when the screen can reach anything irreversible).`,
+      ]
+    : [
+        `- Run target: a Coasty cloud VM. Provision or pick a machine at https://coasty.ai/developers, or ask me for a machine_id, then drive the task with POST /v1/runs (use a workflow for multi-step logic).`,
+        `- Stream progress from GET /v1/runs/{id}/events and stop when status is succeeded or failed.`,
+      ]
+
   return [
     `# Build with the Coasty Computer Use API using ${agentLabel}`,
     ``,
-    `I'm using ${agentLabel} and I want to build ${goal} with the Coasty Computer Use API. Generate ${integrationLabel} code.`,
+    `I'm using ${agentLabel} and I want to build ${goal} with the Coasty Computer Use API${local ? ", running against my own screen (local automation, no VM)" : ""}. Generate ${integrationLabel} code.`,
     ``,
     API_REFERENCE,
     ``,
@@ -139,8 +175,7 @@ export function buildCraftedPrompt(cfg: QuickstartSelection): string {
     `- Stack: ${integrationGuide}`,
     `- Goal: build something that ${goal}.`,
     `- Read COASTY_API_KEY from the environment; never hardcode it.`,
-    `- Provision or pick a machine at https://coasty.ai/developers, or ask me for a machine_id, then drive the task with POST /v1/runs (use a workflow for multi-step logic).`,
-    `- Stream progress from GET /v1/runs/{id}/events and stop when status is succeeded or failed.`,
+    ...executionBullets,
     ``,
     `Start by scaffolding a minimal, runnable ${integrationLabel} example that ${goal}, then explain how to run and extend it.`,
   ].join("\n")

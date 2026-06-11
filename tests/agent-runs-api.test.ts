@@ -291,7 +291,9 @@ describe("run service — billing, ownership, takeover, SSRF, kill-switch", () =
 
 describe("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
   it("each route asserts the right scope", () => {
-    expect(RUN_ROUTES).toMatch(/enforce_scope\(SCOPE_RUNS_WRITE\)[\s\S]{0,2000}create_run/)
+    // window sized to span the idempotency reservation block between the
+    // scope check and the service call
+    expect(RUN_ROUTES).toMatch(/enforce_scope\(SCOPE_RUNS_WRITE\)[\s\S]{0,3500}create_run/)
     expect(RUN_ROUTES).toMatch(/enforce_scope\(SCOPE_RUNS_READ\)/)
   })
   it("respects the RUNS_API_ENABLED kill-switch", () => {
@@ -299,9 +301,14 @@ describe("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
     expect(RUN_ROUTES).toMatch(/RUNS_API_ENABLED/)
     expect(RUN_ROUTES).toMatch(/RUNS_API_DISABLED/)
   })
-  it("create is idempotent via the Idempotency-Key header", () => {
-    expect(RUN_ROUTES).toMatch(/idempotency_get_full/)
+  it("create is idempotent via the Idempotency-Key header (reserve protocol)", () => {
+    // The reservation protocol (not the old lookup-then-store): the key is
+    // atomically CLAIMED before execution so a retry that lands mid-flight
+    // gets 409 IDEMPOTENCY_IN_FLIGHT instead of a second run + charge.
+    // (The 2026-06-10 live double-bill was the lookup-then-store hole.)
+    expect(RUN_ROUTES).toMatch(/idempotency_reserve_full/)
     expect(RUN_ROUTES).toMatch(/IDEMPOTENCY_KEY_REUSED/)
+    expect(RUN_ROUTES).toMatch(/IDEMPOTENCY_IN_FLIGHT/)
     // never persist the one-time webhook secret into the idempotency cache
     expect(RUN_ROUTES).toMatch(/safe\["webhook_secret"\]\s*=\s*None/)
   })

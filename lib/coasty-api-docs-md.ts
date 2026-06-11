@@ -92,15 +92,14 @@ when a response was served from the idempotency cache.
 
 ### Test vs live keys
 
-| Prefix | Kind | Bills your wallet? | Rate limits |
-| --- | --- | --- | --- |
-| \`sk-coasty-live-<48 hex>\` | live | Yes | Your subscription tier |
-| \`sk-coasty-test-<48 hex>\` | test (sandbox) | No (free) | Same as your tier |
-| \`cua_sk_<48 hex>\` | legacy | Yes | Your tier (accepted through 2026-11-01) |
+| Prefix | Kind | Bills your wallet? |
+| --- | --- | --- |
+| \`sk-coasty-live-<48 hex>\` | live | Yes |
+| \`sk-coasty-test-<48 hex>\` | test (sandbox) | No (free) |
+| \`cua_sk_<48 hex>\` | legacy (accepted through 2026-11-01) | Yes |
 
 Test keys (\`sk-coasty-test-*\`) run the same validation and logic as live keys
-but **never debit your wallet**. They still consume rate-limit budget, so a
-runaway test loop cannot starve production traffic. Responses from test keys
+but **never debit your wallet**. Responses from test keys
 carry \`X-Coasty-Test-Mode: true\` and \`X-Credits-Charged: 0\`. The \`X-Coasty-Key-Kind\`
 response header reports which family authenticated (\`live\`, \`test\`, or \`legacy\`).
 
@@ -1098,6 +1097,125 @@ Workflow run events stream the same way as run events
 
 ---
 
+## Local automation — automate ANY screen (no VM required)
+
+\`/v1/predict\`, \`/v1/ground\` and \`/v1/sessions\` are **screen-agnostic**: a
+screenshot goes in, coordinates and typed actions come out. The pixels can come
+from anywhere — the user's own desktop, a Playwright/Puppeteer browser page, an
+Android emulator (\`adb exec-out screencap\`), a VNC/RDP framebuffer, a Citrix
+window. Coasty-managed VMs (\`/v1/machines\`) are one execution target, not the
+only one. To automate locally you write a small loop: capture → predict →
+execute → repeat.
+
+### The local agent loop (your own desktop)
+
+\`\`\`python
+# pip install requests mss pyautogui pillow
+import base64, io, time, uuid, requests, mss, pyautogui
+from PIL import Image
+
+API, HDRS = "https://coasty.ai/v1", {"X-API-Key": "sk-coasty-test-..."}
+pyautogui.FAILSAFE = True                    # mouse to a corner aborts instantly
+
+REAL_W, REAL_H = pyautogui.size()            # actual desktop resolution
+SEND_W, SEND_H = 1280, 720                   # what the model sees (SD = 1 credit cheaper)
+SX, SY = REAL_W / SEND_W, REAL_H / SEND_H    # scale model coords -> real pixels
+
+def screenshot_b64():
+    with mss.mss() as sct:
+        shot = sct.grab(sct.monitors[1])
+        img = Image.frombytes("RGB", shot.size, shot.bgra, "raw", "BGRX")
+        img = img.resize((SEND_W, SEND_H))   # MUST match screen_width/height below
+        buf = io.BytesIO(); img.save(buf, format="PNG")
+        return base64.b64encode(buf.getvalue()).decode()
+
+def execute(a):
+    t, p = a["action_type"], a["params"]
+    if t == "click":      pyautogui.click(p["x"]*SX, p["y"]*SY, clicks=p.get("clicks",1), button=p.get("button","left"))
+    elif t == "type_text": pyautogui.write(p["text"], interval=0.02)
+    elif t == "key_press": pyautogui.press(p["keys"])
+    elif t == "key_combo": pyautogui.hotkey(*p["keys"])
+    elif t == "scroll":    pyautogui.scroll(p["clicks"])      # +clicks = up (pyautogui convention)
+    elif t == "drag":      pyautogui.moveTo(p["x1"]*SX, p["y1"]*SY); pyautogui.dragTo(p["x2"]*SX, p["y2"]*SY, duration=0.4)
+    elif t == "wait":      time.sleep(p["seconds"])
+    return t
+
+sess = requests.post(f"{API}/sessions", headers=HDRS, json={
+    "cua_version": "v3", "screen_width": SEND_W, "screen_height": SEND_H,
+    "instructions": "Be precise. Before clicking, confirm the target element is actually visible in the CURRENT screenshot.",
+}).json()
+sid = sess["session_id"]
+
+task = "Open the calculator and compute 42 * 17"
+try:
+    for step in range(25):
+        r = requests.post(f"{API}/sessions/{sid}/predict",
+            headers={**HDRS, "Idempotency-Key": f"step-{sid}-{step}-{uuid.uuid4().hex[:8]}"},
+            json={"screenshot": screenshot_b64(), "instruction": task}, timeout=120).json()
+        for a in r["actions"]:
+            if execute(a) in ("done", "fail"):
+                raise SystemExit(f"finished: {r['status']} - {r['reasoning']}")
+        if r["status"] != "continue": break
+        time.sleep(0.5)
+finally:
+    requests.delete(f"{API}/sessions/{sid}", headers=HDRS)   # stop the session clock
+\`\`\`
+
+For a browser, use a fixed 1280x720 Playwright viewport so coordinates map 1:1
+(\`page.screenshot()\` in, \`page.mouse.click(x, y)\` out — no scaling at all).
+For Android: \`adb exec-out screencap -p\` in, \`adb shell input tap x y\` out.
+
+### Coordinate scaling — the #1 pitfall
+
+Coordinates come back **in the same space as the screenshot you sent**. If you
+downscale (e.g. a 2560x1440 desktop resized to 1280x720 to save a credit),
+multiply returned x/y by your scale factor before clicking — and pass the
+DOWNSCALED size as \`screen_width\`/\`screen_height\`. Sending full resolution
+with the real width/height also works (coordinates map 1:1) and costs +1 credit
+above 1280x720. A mismatched screenshot vs \`screen_width\`/\`screen_height\` is
+the number-one cause of "it clicks the wrong place".
+
+### Executing every action type locally
+
+| action_type | params | desktop (pyautogui) | browser (Playwright) |
+| --- | --- | --- | --- |
+| \`click\` | x, y, button?=left, clicks?=1 | \`pyautogui.click(x, y, clicks, button)\` | \`page.mouse.click(x, y, {button, clickCount})\` |
+| \`type_text\` | text | \`pyautogui.write(text, interval=0.02)\` | \`page.keyboard.type(text, {delay: 20})\` |
+| \`key_press\` | keys (in order) | \`pyautogui.press(keys)\` | \`page.keyboard.press(...)\` per key |
+| \`key_combo\` | keys (held together) | \`pyautogui.hotkey(*keys)\` | \`page.keyboard.press("Control+C")\` |
+| \`scroll\` | clicks (+up / −down), direction?, x?, y? | \`pyautogui.scroll(clicks)\` / \`hscroll\` | \`page.mouse.wheel(0, -clicks * 120)\` |
+| \`drag\` | x1, y1, x2, y2, button? | \`moveTo(x1,y1); dragTo(x2,y2)\` | \`mouse.move/down/move/up\` |
+| \`wait\` | seconds | \`time.sleep(seconds)\` | \`page.waitForTimeout(s * 1000)\` |
+| \`done\` | — | task finished — stop the loop | same |
+| \`fail\` | — | agent blocked — stop, read \`reasoning\` | same |
+| \`raw\` | code (pyautogui source) | log it; exec only in a sandbox you trust | never exec in a browser target |
+
+### Prompt presets (best-suggestion \`instructions\` values)
+
+\`instructions\` is APPENDED to the tuned base agent prompt (unlike
+\`system_prompt\`, which replaces it — prefer \`instructions\`). Custom prompts
+require Starter or higher; budgets are Starter 2,000 / Pro 4,000 / Enterprise
+16,000 chars, +1 credit per call when over 500 chars. Pass a preset on session
+create (applies to every step) or per predict call. The presets:
+
+* **Precise UI control** (default pick): "Be precise. Before clicking, confirm the target element is actually visible in the CURRENT screenshot — never click from memory of a previous screen. Click the visual center of elements, not their edges. If the element you need is not visible, scroll toward where it should be instead of guessing coordinates. If two elements look similar, prefer the one whose text matches the task exactly. After typing into a field, verify focus landed in the right field before continuing."
+* **Forms & data entry**: "You are doing data entry. Prefer keyboard navigation (Tab between fields, Enter to submit) over clicking when a form has focus. Clear a field (ctrl+a then type) before entering a new value — never append to stale text. Enter values EXACTLY as given in the task: do not reformat dates, trim IDs, or autocorrect spellings. After filling each field, confirm the screenshot shows the value you typed. Do not submit the form until every required field is verified filled."
+* **QA & regression testing**: "You are executing a QA test step. Follow the instruction literally — do NOT improvise workarounds when the UI misbehaves; surfacing the failure is the point. If an expected element is missing, a button is disabled, or an error/dialog appears that the task does not mention, stop and emit fail() with what you observed. Wait for loading indicators to finish before asserting anything. Treat warnings and console-looking error text on screen as findings worth stopping for."
+* **Read & extract**: "Your goal is to READ information from the screen, not to change anything. Interact only to reveal the data (scroll, switch tabs, expand rows) — never edit, submit, or delete. When you can see the requested information, emit done() and state the extracted values verbatim in your reasoning, exactly as rendered on screen including units and punctuation. If the data spans multiple screens, scroll through all of it before finishing."
+* **Cautious (non-destructive)**: "Operate in non-destructive mode. NEVER click buttons that delete, remove, purchase, pay, send, post, publish, or permanently change state — if completing the task requires one, stop and emit fail() explaining which action needs human approval. Never enter credentials, 2FA codes, or payment details even if a login wall appears: fail() and describe the prompt instead. Dismissing cookie banners and closing popups is allowed. When in doubt about whether an action is reversible, do not take it."
+* **Fast batch mode**: "This is a repetitive batch task on a UI you have already seen. Emit several actions per step when the sequence is predictable (click field, type value, Tab) instead of one action at a time. Skip re-verifying elements that were stable in previous screenshots. Still stop immediately if the screen layout changes unexpectedly, an error appears, or a click lands on the wrong element — batch speed never justifies compounding a mistake."
+
+### Local-run safety
+
+You are giving a model control of a real mouse and keyboard. Keep
+\`pyautogui.FAILSAFE\` on (mouse to a corner aborts), run with a step cap, send
+an \`Idempotency-Key\` on every predict so a network retry can never
+double-execute a step, and use the Cautious preset when the screen can reach
+anything irreversible. Develop against a \`sk-coasty-test-*\` key (free) and
+switch to live when the loop is stable.
+
+---
+
 ## 6. Reference
 
 ### Action types
@@ -1175,34 +1293,21 @@ Field reference (every error carries the first four; the rest are conditional):
 | 409 | \`RESUME_CONFLICT\` | Another resume/cancel/timeout won the race. | Re-GET the run to read its current status, then retry. |
 | 409 | \`IDEMPOTENCY_KEY_REUSED\` | Same \`Idempotency-Key\` sent with a different body. | Resend the original body to get the cached result, or use a new key. |
 | 409 | \`INVALID_STATE\` | A lifecycle action is illegal in the resource's current state. Body has \`current_state\` + \`allowed_from\`. | Check the state first (actions need \`running\`; provisioning is async), then retry. |
-| 429 | \`RATE_LIMIT_EXCEEDED\` | Per-key or per-user rate limit hit. \`scope\` is \`per_key\` or \`per_user\`; honor \`Retry-After\`. | Back off. The \`per_user\` cap is per-account across ALL keys, so minting more keys will NOT raise it; upgrade your plan instead. |
-| 429 | \`TOO_MANY_RUNS\` | Too many concurrent runs in flight. | Wait for one to finish or cancel one; honor \`Retry-After\`. |
 | 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. \`v4\` on free/starter, custom prompts on free). | Upgrade your plan or use an available alternative. |
 | 500 | \`INTERNAL_ERROR\` | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
 | 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding, send a clearer or higher-resolution screenshot. |
 | 504 | \`UPSTREAM_TIMEOUT\` | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
 | 503 | \`UPSTREAM_UNAVAILABLE\` | An upstream service is briefly unavailable. | Retry with backoff; check https://status.coasty.ai. |
 
-Rate-limit responses also include \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\`,
-and \`X-RateLimit-Reset\` headers plus a \`Retry-After\` header (and a \`retry_after\`
-body field). Always honor \`Retry-After\` before retrying.
+Errors that are transient (\`UPSTREAM_TIMEOUT\`, \`UPSTREAM_UNAVAILABLE\`) carry a
+\`Retry-After\` header (and a \`retry_after\` body field) — honor it before retrying.
 
-### Rate limits per tier
+### Per-tier features
 
-API tiers are derived from your subscription. Both a per-key and a per-user
-(across all your keys) limit apply.
-
-| Tier | Requests/min | Requests/hour | Concurrent sessions | Max trajectory | Max actions | CUA versions |
-| --- | --- | --- | --- | --- | --- | --- |
-| free | 3 | 30 | 1 | 3 | 3 | v3 |
-| starter | 10 | 200 | 3 | 5 | 5 | v3 |
-| professional | 20 | 500 | 10 | 8 | 5 | v1, v3, v4 |
-| enterprise | 30 | 1000 | 100 | 20 | 10 | v1, v3, v4 |
-
-Per-user hard cap across all keys: 40 requests/min, 1500 requests/hour. Custom
-prompts (\`system_prompt\` + \`instructions\`) are gated by \`max_system_prompt_chars\`
-per tier: free 0 (unavailable), starter 2000, professional 4000, enterprise
-16000.
+API tiers are derived from your subscription. \`v4\` requires professional tier
+or above. Custom prompts (\`system_prompt\` + \`instructions\`) are gated by
+\`max_system_prompt_chars\` per tier: free 0 (unavailable), starter 2000,
+professional 4000, enterprise 16000.
 
 ### Scopes
 

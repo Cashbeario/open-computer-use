@@ -113,7 +113,7 @@ export function PageLoader({
  * Uses CSS @keyframes with translateX/Y only (compositor-friendly).
  * ────────────────────────────────────────────────────────────────────────── */
 
-function LoaderAmbient() {
+export function LoaderAmbient() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       <style

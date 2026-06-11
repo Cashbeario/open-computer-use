@@ -6,6 +6,7 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { APITab } from "@/app/guide/tabs/api"
 import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
+import { LOCAL_AUTOMATION_SNIPPETS } from "@/lib/local-automation"
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState, type MouseEvent } from "react"
@@ -751,6 +752,83 @@ function TryIt() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   LOCAL AUTOMATION — bring your own screen. The predict surface
+   pointed at the USER'S desktop / browser / emulator, executed
+   locally with pyautogui / Playwright / robotgo. Snippets live in
+   lib/local-automation.ts (shared with the guide) and their bodies
+   are validated by backend/tests/test_doc_examples.py.
+   ═══════════════════════════════════════════════════════════════ */
+
+function LocalTryIt() {
+  const [lang, setLang] = useState<LangId>("python")
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      {/* Tabs */}
+      <div className="relative inline-flex items-center rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-1 mb-5">
+        {LANGS.map((l) => {
+          const active = l.id === lang
+          return (
+            <button
+              key={l.id}
+              onClick={() => setLang(l.id)}
+              className={`relative px-4 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
+                active ? "text-foreground" : "text-muted-foreground/55 hover:text-foreground/80"
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="local-lang-pill"
+                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  className="absolute inset-0 rounded-lg bg-foreground/[0.06] border border-border/40"
+                />
+              )}
+              <span className="relative">{l.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Code card */}
+      <div className="relative rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/[0.08] to-transparent" />
+        <div className="flex items-center justify-between px-5 py-2.5 border-b border-border/20">
+          <div className="flex items-center gap-2">
+            <Terminal className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <span className="text-[11px] font-mono text-muted-foreground/55">
+              your screen → /v1 → your input events
+            </span>
+          </div>
+        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={lang}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease }}
+          >
+            <CodeBlock code={LOCAL_AUTOMATION_SNIPPETS[lang]} lang={lang} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Footnote strip */}
+      <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-muted-foreground/45">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span>Coordinates come back in the space of the screenshot you sent — scale before you click.</span>
+        <Link
+          href="/guide?tab=api#local-overview"
+          className="ml-auto hidden sm:inline-flex items-center gap-1 text-foreground/60 hover:text-foreground transition-colors"
+        >
+          Full local guide <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MACHINES — provision + drive a real VM in one snippet.
    Mirrors TryIt's tab pattern. Bodies are validated by
    backend/tests/test_doc_examples.py against the live Pydantic
@@ -1272,6 +1350,59 @@ export default function ApiDocsPage() {
               "DELETE /v1/schedules/{id}/triggers/{tid}",
               "POST /v1/triggers/webhook/{wh}  ←  unauth · HMAC",
               "POST /v1/triggers/email-mailbox",
+            ].map((path) => (
+              <code
+                key={path}
+                className="text-[10px] font-mono text-muted-foreground/55 px-2.5 py-1 rounded-md border border-border/30 bg-card/30"
+              >
+                {path}
+              </code>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      {/* ─── LOCAL AUTOMATION (bring your own screen) ─── */}
+      <section className="py-24 px-7 sm:px-10 relative">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease }}
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center gap-2 h-6 px-3 rounded-full border border-border/30 bg-card/30 text-[10px] font-mono text-muted-foreground/60 mb-5">
+              <Terminal className="h-3 w-3" />
+              Local automation
+            </div>
+            <h2 className="text-[28px] sm:text-4xl font-bold tracking-[-0.02em] mb-4">
+              Automate any screen. Yours included.
+            </h2>
+            <p className="text-[14px] sm:text-base text-muted-foreground/55 max-w-xl mx-auto">
+              predict, ground and sessions are screen-agnostic — feed them screenshots from your own
+              desktop, a Playwright page, a phone emulator, or a VNC frame, and execute the returned
+              actions with pyautogui, page.mouse, or adb. No VM required.
+            </p>
+          </motion.div>
+
+          <LocalTryIt />
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1, ease }}
+            className="mt-8 flex flex-wrap justify-center gap-2 max-w-3xl mx-auto"
+          >
+            {[
+              "your desktop  ·  mss + pyautogui",
+              "a browser  ·  Playwright",
+              "a phone  ·  adb screencap + input",
+              "VNC / RDP  ·  framebuffer + injected input",
+              "a Coasty VM  ·  /v1/machines runs the loop for you",
             ].map((path) => (
               <code
                 key={path}

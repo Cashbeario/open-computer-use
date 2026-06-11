@@ -25,6 +25,14 @@ export interface CodingAgentConfig {
   /** What the developer is building (id from BUILD_TARGETS). */
   building: string
   customBuilding: string
+  /**
+   * Where generated code should run (id from EXECUTION_TARGET_OPTIONS):
+   * "local" — automate the developer's OWN screen (screenshot loop +
+   * pyautogui/Playwright execution, no VM); "cloud-vm" — a Coasty-managed
+   * machine via /v1/machines + /v1/runs. LOCAL IS THE DEFAULT everywhere;
+   * persisted, so an explicit cloud-vm pick sticks for later prompts.
+   */
+  executionTarget: string
   /** ISO timestamp set the first time the user acts on a config (copy / open). */
   configuredAt: string | null
 }
@@ -36,6 +44,7 @@ const DEFAULT_CONFIG: CodingAgentConfig = {
   customIntegration: "",
   building: "",
   customBuilding: "",
+  executionTarget: "local",
   configuredAt: null,
 }
 
@@ -46,6 +55,7 @@ interface CodingAgentState extends CodingAgentConfig {
   setCustomIntegration: (v: string) => void
   setBuilding: (v: string) => void
   setCustomBuilding: (v: string) => void
+  setExecutionTarget: (v: string) => void
   /** Mark that the user committed to this config (used to gate recommendations). */
   markConfigured: () => void
   reset: () => void
@@ -61,6 +71,7 @@ export const useCodingAgentConfig = create<CodingAgentState>()(
       setCustomIntegration: (v) => set({ customIntegration: v }),
       setBuilding: (v) => set({ building: v }),
       setCustomBuilding: (v) => set({ customBuilding: v }),
+      setExecutionTarget: (v) => set({ executionTarget: v }),
       markConfigured: () => set({ configuredAt: new Date().toISOString() }),
       reset: () => set({ ...DEFAULT_CONFIG }),
     }),
@@ -75,6 +86,7 @@ export const useCodingAgentConfig = create<CodingAgentState>()(
         customIntegration: s.customIntegration,
         building: s.building,
         customBuilding: s.customBuilding,
+        executionTarget: s.executionTarget,
         configuredAt: s.configuredAt,
       }),
     },

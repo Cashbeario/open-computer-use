@@ -69,7 +69,6 @@ import {
   AUTH_HEADER,
   ACTION_TYPES,
   ERROR_CODES,
-  RATE_TIERS,
   PRICING,
   CODE_SAMPLES,
   LANGS,
@@ -119,7 +118,7 @@ afterEach(() => {
 
 describe("DOC_SECTIONS catalogue", () => {
   it("has the expected sections, all with required fields", () => {
-    expect(DOC_SECTIONS.length).toBe(19)
+    expect(DOC_SECTIONS.length).toBe(18)
     for (const s of DOC_SECTIONS) {
       expect(typeof s.id).toBe("string")
       expect(s.id.length).toBeGreaterThan(0)
@@ -168,7 +167,7 @@ describe("reference tables", () => {
       expect(e.meaning.length).toBeGreaterThan(0)
     }
     const statuses = ERROR_CODES.map((e) => e.status)
-    for (const required of [401, 402, 403, 429]) {
+    for (const required of [401, 402, 403]) {
       expect(statuses).toContain(required)
     }
   })
@@ -181,7 +180,7 @@ describe("reference tables", () => {
       "VALIDATION_ERROR", "INVALID_SCREENSHOT", "PAYLOAD_TOO_LARGE", "INVALID_LIMIT",
       "INVALID_STATUS_FILTER", "NOT_FOUND", "SESSION_NOT_FOUND", "RUN_NOT_FOUND",
       "WORKFLOW_NOT_FOUND", "NOT_AWAITING_HUMAN", "RESUME_CONFLICT", "IDEMPOTENCY_KEY_REUSED",
-      "RATE_LIMIT_EXCEEDED", "TOO_MANY_RUNS", "FEATURE_NOT_AVAILABLE", "INTERNAL_ERROR",
+      "FEATURE_NOT_AVAILABLE", "INTERNAL_ERROR",
       "PREDICTION_FAILED", "GROUNDING_FAILED", "UPSTREAM_UNAVAILABLE", "UPSTREAM_TIMEOUT",
     ]) {
       expect(codes, `ERROR_CODES missing real code ${code}`).toContain(code)
@@ -197,16 +196,10 @@ describe("reference tables", () => {
     expect(byStatus("INSUFFICIENT_CREDITS")).toBe(402)
     expect(byStatus("VALIDATION_ERROR")).toBe(422)
     expect(byStatus("PAYLOAD_TOO_LARGE")).toBe(413)
-    expect(byStatus("RATE_LIMIT_EXCEEDED")).toBe(429)
     expect(byStatus("UPSTREAM_TIMEOUT")).toBe(504)
   })
 
-  it("RATE_TIERS and PRICING are well-formed and non-empty", () => {
-    expect(RATE_TIERS.length).toBeGreaterThanOrEqual(3)
-    for (const t of RATE_TIERS) {
-      expect(t.tier.length).toBeGreaterThan(0)
-      expect(t.perMinute).toMatch(/^\d+$/)
-    }
+  it("PRICING is well-formed and non-empty", () => {
     expect(PRICING.length).toBeGreaterThanOrEqual(5)
     for (const p of PRICING) {
       expect(p.endpoint).toContain("/v1/")

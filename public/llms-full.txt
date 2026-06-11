@@ -69,7 +69,7 @@ There are four ways to use Coasty:
 
 1. **Web application** at https://coasty.ai , sign up, click "New Run", give the agent a goal, watch it work in your browser.
 2. **Native desktop app** (Mac, Windows, Linux) , registers your local machine with Coasty's backend so the same APIs that drive a sandbox VM can drive your real desktop. No data leaves your network. Download: https://coasty.ai/download.
-3. **Public REST API** at `/v1/*` , direct programmatic access. Stateless `POST /v1/predict` (screenshot + instruction → actions), stateful sessions, managed VMs, scheduled jobs. Auth via `sk-coasty-{live|test}-*` keys.
+3. **Public REST API** at `/v1/*` , direct programmatic access. Stateless `POST /v1/predict` (screenshot + instruction → actions), stateful sessions, managed VMs, scheduled jobs. Auth via `sk-coasty-{live|test}-*` keys. The predict surface is screen-agnostic: it automates ANY screen, not just Coasty VMs , feed it screenshots from your own desktop (mss + pyautogui), a Playwright browser page, an Android emulator (adb), or a VNC frame, and execute the returned actions locally. Coordinates come back in the space of the screenshot you sent. Full local agent loop + per-action executor mapping + six selectable best-practice prompt presets for the `instructions` field: https://coasty.ai/docs/llms.txt ("Local automation" section) and https://coasty.ai/guide?tab=api#local-overview.
 4. **MCP server** (`@coasty/mcp` on npm) , exposes 26 tools to any MCP host (Claude Desktop, Claude Code, Cursor, Windsurf, VS Code Copilot Agent). Install with `npx -y @coasty/mcp`.
 
 ### What Makes Coasty Different
@@ -320,12 +320,6 @@ Each key carries a set of scopes. Default keys carry every scope; you can scope 
 - `machines:read`, `machines:write`, `actions:exec`
 - `files:read`, `files:write`, `terminal:exec`
 - `schedules:read`, `schedules:write`, `triggers:write`
-
-### Rate limits
-
-- 60 requests/minute, 1000/hour per key by default
-- Per-tier overrides at https://coasty.ai/api/pricing
-- Response headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 
 ### Idempotency
 

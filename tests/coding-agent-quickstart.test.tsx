@@ -9,11 +9,13 @@ import { render, screen, fireEvent } from "@testing-library/react"
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 import {
+  AI_PROMPT,
   API_REFERENCE,
   buildCraftedPrompt,
   CODING_AGENT_OPTIONS,
   INTEGRATION_OPTIONS,
   BUILD_TARGET_OPTIONS,
+  EXECUTION_TARGET_OPTIONS,
 } from "@/lib/coasty-ai-prompt"
 import { useCodingAgentConfig } from "@/lib/coding-agent-store"
 import { CodingAgentQuickstart } from "@/app/components/developers/coding-agent-quickstart"
@@ -22,6 +24,7 @@ const base = {
   codingAgent: "cursor", customAgent: "",
   integration: "python", customIntegration: "",
   building: "", customBuilding: "",
+  executionTarget: "cloud-vm",
 }
 
 describe("buildCraftedPrompt — heavily-crafted, tailored", () => {
@@ -54,10 +57,61 @@ describe("buildCraftedPrompt — heavily-crafted, tailored", () => {
       codingAgent: "other", customAgent: "Cline",
       integration: "other", customIntegration: "Rust",
       building: "other", customBuilding: "a price tracker",
+      executionTarget: "cloud-vm",
     })
     expect(p).toContain("Cline")
     expect(p).toContain("Rust")
     expect(p).toContain("a price tracker")
+  })
+
+  it("local execution target crafts the local agent loop, not a VM run", () => {
+    const p = buildCraftedPrompt({ ...base, executionTarget: "local" })
+    // The endpoint catalog (API_REFERENCE) always lists /v1/runs; what must
+    // switch is the TASK section the agent acts on.
+    const task = p.split("## Your task")[1]
+    expect(task).toContain("MY OWN screen")
+    expect(task).toContain("pyautogui")
+    expect(task).toContain("Idempotency-Key")
+    expect(task).toContain("scale returned x/y")         // the scaling pitfall
+    expect(task).toContain("Local automation")           // points at the docs section
+    expect(task).not.toContain("POST /v1/runs")          // no VM orchestration
+    expect(task).not.toContain("machine_id")
+  })
+
+  it("cloud-vm execution target keeps the runs orchestration", () => {
+    const p = buildCraftedPrompt({ ...base, executionTarget: "cloud-vm" })
+    const task = p.split("## Your task")[1]
+    expect(task).toContain("POST /v1/runs")
+    expect(task).toContain("GET /v1/runs/{id}/events")
+    expect(task).not.toContain("MY OWN screen")
+  })
+
+  it("the API reference itself says the surface is screen-agnostic", () => {
+    // Every surface that embeds API_REFERENCE (quickstart, copy-for-AI,
+    // ChatGPT/Claude deep links) inherits the local-automation story.
+    expect(API_REFERENCE).toContain("SCREEN-AGNOSTIC")
+    expect(API_REFERENCE).toContain("OWN screen")
+  })
+
+  it("offers both execution targets with local first-class", () => {
+    const ids = EXECUTION_TARGET_OPTIONS.map((o) => o.id)
+    expect(ids).toContain("local")
+    expect(ids).toContain("cloud-vm")
+    expect(ids[0]).toBe("local")                         // local listed first
+  })
+
+  it("LOCAL IS THE DEFAULT: store default + builder fallback + static prompt", () => {
+    // 1. A fresh store (no persisted choice) defaults to local.
+    expect(useCodingAgentConfig.getState().executionTarget).toBe("local")
+    // 2. The builder treats anything but an explicit cloud-vm pick as local —
+    //    including empty/unknown values from older persisted configs.
+    for (const value of ["", "local", "unknown-future-id"]) {
+      const task = buildCraftedPrompt({ ...base, executionTarget: value }).split("## Your task")[1]
+      expect(task, `executionTarget=${JSON.stringify(value)}`).toContain("MY OWN screen")
+    }
+    // 3. The static AI_PROMPT (Copy-for-AI + ChatGPT/Claude deep links)
+    //    instructs the agent to default to the user's own screen too.
+    expect(AI_PROMPT).toContain("DEFAULT TO AUTOMATING MY OWN SCREEN")
   })
 
   it("offers a sensible set of options for each question", () => {

@@ -27,6 +27,7 @@ import { PlatformModeSwitcher } from "./platform-mode-switcher"
 import { PLATFORM_MODE_SWITCHER_ENABLED } from "@/lib/feature-flags"
 import { MemoryDialog } from "@/app/components/layout/settings/general/memory-dialog"
 import { useMemoryDialog } from "@/lib/memory-dialog-store"
+import { PlatformSwitchLoader } from "./platform-switch-loader"
 
 const SIDEBAR_PINNED_KEY = "coasty:sidebar:pinned"
 
@@ -290,6 +291,12 @@ export function AppSidebar() {
           behind the sidebar". Open/close state is shared via the
           `useMemoryDialog` store. */}
       <MemoryDialogMount />
+
+      {/* Full-screen transition that plays on every platform-mode flip
+          (Personal ⇄ Developer), from the header switcher or the in-sidebar
+          rows. Mounted here (outside <Sidebar>) so it can cover the whole
+          viewport and survives the mobile sidebar's exit animation. */}
+      <PlatformSwitchLoader />
     </>
   )
 }

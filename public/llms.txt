@@ -66,6 +66,8 @@ Per-endpoint pricing:
 
 Sandbox keys (`sk-coasty-test-*`): free forever, never debit your balance, return mocked VMs in under 50ms, and enforce identical schemas to live keys — perfect for CI/CD without burning credits. Response headers expose `X-Credits-Charged: 0`, `X-Coasty-Test-Mode: true`, `X-Coasty-Key-Kind: test`.
 
+Automate ANY screen — not just Coasty VMs: `/v1/predict`, `/v1/ground`, and `/v1/sessions` are screen-agnostic (screenshot in → coordinates/actions out). Feed them screenshots from the user's own desktop (mss + pyautogui), a Playwright/Puppeteer browser page, an Android emulator (adb screencap + input), or a VNC/RDP framebuffer, and execute the returned `click`/`type_text`/`key_press`/`key_combo`/`scroll`/`drag` actions locally. Coordinates come back in the space of the screenshot you sent (scale before clicking if you downscaled). Full local-agent-loop code, an executor mapping for every action type, and six best-practice prompt presets for the `instructions` field (Precise UI control, Forms & data entry, QA & regression, Read & extract, Cautious non-destructive, Fast batch) live at https://coasty.ai/docs/llms.txt under "Local automation" and https://coasty.ai/guide?tab=api#local-overview.
+
 MCP server: `npx -y @coasty/mcp` — 26 tools across predict, machines, schedules, account, and discovery groups; same key drives Claude Desktop, Claude Code, Cursor, Windsurf, and VS Code Copilot Agent.
 
 OpenAPI 3.1 spec: https://coasty.ai/.well-known/openapi.json (39 paths, 57 schemas, sandbox + production servers).
@@ -162,7 +164,6 @@ If you are an AI agent reading this file to learn how to use Coasty, fetch any o
 - Authentication: `X-API-Key: sk-coasty-{live|test}-<64 hex>` or `Authorization: Bearer <same>`
 - Sandbox keys (sk-coasty-test-*): mock VMs in <50ms, 0 credits billed, identical schemas
 - Idempotency: every POST accepts `Idempotency-Key` (24h replay safety)
-- Rate limits: 60/min, 1000/hour per key (per-tier overrides at /api/pricing)
 - Versioning: breaking changes ship under a new prefix (/v2, /v3); /v1 is additive-only
 
 Core endpoints:

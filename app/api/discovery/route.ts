@@ -109,15 +109,30 @@ const manifest = {
     publicPathPrefix: "/v1",
     versioningPolicy:
       "Breaking changes ship behind a new path prefix (/v2, /v3). Within a major version, additive changes are allowed without notice; field removals require 90-day deprecation.",
+    // The predict surface (predict / ground / sessions) is SCREEN-AGNOSTIC:
+    // it automates any screen, not just Coasty-managed VMs. Send screenshots
+    // from a local desktop, a Playwright page, an emulator, or a VNC frame
+    // and execute the returned actions locally. Coordinates are returned in
+    // the coordinate space of the screenshot that was sent.
+    localAutomation: {
+      guide: `${ORIGIN}/guide?tab=api#local-overview`,
+      llmsReference: `${ORIGIN}/docs/llms.txt`,
+      promptPresets: [
+        "precise-ui", "forms-data-entry", "qa-regression",
+        "read-extract", "cautious", "fast-batch",
+      ],
+    },
     idempotency: {
       headerName: "Idempotency-Key",
       ttlSeconds: 86_400,
-      maxKeyLength: 256,
-    },
-    rateLimit: {
-      perKeyDefault: "60/min, 1000/hour",
-      perTier: `${ORIGIN}/api/pricing`,
-      headers: ["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
+      // Mirrors the backend validator: <=128 chars of [A-Za-z0-9_-:].
+      maxKeyLength: 128,
+      // A duplicate that arrives while the original request is still
+      // executing gets 409 IDEMPOTENCY_IN_FLIGHT with Retry-After; resend
+      // the same request to receive the original's replayed result
+      // (Idempotent-Replay: true, no second charge).
+      inFlightStatus: 409,
+      inFlightCode: "IDEMPOTENCY_IN_FLIGHT",
     },
     errorEnvelope: {
       shape: { error: { code: "STRING", message: "STRING", type: "STRING", request_id: "STRING" } },

@@ -15,7 +15,6 @@ import {
   ListChecks,
   FileJson,
   AlertTriangle,
-  Gauge,
   Coins,
   Copy,
   Check,
@@ -40,7 +39,7 @@ import { cn } from "@/lib/utils"
    high-detail prose. Every code sample is verified against the live v1
    contract (POST https://coasty.ai/v1/*, X-API-Key auth).
 
-   The data constants (DOC_SECTIONS, ACTION_TYPES, ERROR_CODES, RATE_TIERS,
+   The data constants (DOC_SECTIONS, ACTION_TYPES, ERROR_CODES,
    PRICING, CODE_SAMPLES, RESPONSE_EXAMPLE, ERROR_EXAMPLE) are exported so
    the test suite can assert section integrity, JSON validity, and that
    every snippet targets the correct base URL + auth header.
@@ -80,7 +79,6 @@ export const DOC_SECTIONS: DocSection[] = [
   { id: "actions",        title: "Action types",      group: "Reference",   icon: ListChecks,         blurb: "Every action the model can return" },
   { id: "responses",      title: "Response format",   group: "Reference",   icon: FileJson,           blurb: "The shape of every prediction response" },
   { id: "errors",         title: "Errors",            group: "Reference",   icon: AlertTriangle,      blurb: "Error envelope and HTTP status codes" },
-  { id: "rate-limits",    title: "Rate limits",       group: "Reference",   icon: Gauge,              blurb: "Per-tier limits and rate-limit headers" },
   { id: "pricing",        title: "Pricing",           group: "Reference",   icon: Coins,              blurb: "What each endpoint costs in USD" },
 ]
 
@@ -139,9 +137,6 @@ export const ERROR_CODES: ErrorCode[] = [
   { status: 409, code: "NOT_AWAITING_HUMAN",    meaning: "You resumed a run that is not in awaiting_human. The body reports current_state and required_state." },
   { status: 409, code: "RESUME_CONFLICT",       meaning: "A resume or cancel race was lost (the run already moved on). Re-read the run and retry against its new state." },
   { status: 409, code: "IDEMPOTENCY_KEY_REUSED",meaning: "The same Idempotency-Key was sent with a different body. Use a fresh key, or replay the original request verbatim." },
-  // Rate + concurrency limits
-  { status: 429, code: "RATE_LIMIT_EXCEEDED",   meaning: "A per-key or per-user rate cap was hit. Honor Retry-After. A per_user cap can't be raised by minting more keys." },
-  { status: 429, code: "TOO_MANY_RUNS",         meaning: "The concurrent-run cap for your tier was reached. Wait for a run to finish, then retry." },
   // Feature gating
   { status: 400, code: "FEATURE_NOT_AVAILABLE", meaning: "The feature is gated to a higher tier (for example cua_version v4). Upgrade the plan or drop the gated option." },
   // Server + upstream (charges for model failures are auto-refunded)
@@ -150,20 +145,6 @@ export const ERROR_CODES: ErrorCode[] = [
   { status: 500, code: "GROUNDING_FAILED",      meaning: "The grounding model run failed. The charge is automatically refunded." },
   { status: 503, code: "UPSTREAM_UNAVAILABLE",  meaning: "A transient upstream outage. Retry with an Idempotency-Key and exponential backoff." },
   { status: 504, code: "UPSTREAM_TIMEOUT",      meaning: "An upstream call timed out. Transient; retry with an Idempotency-Key." },
-]
-
-export interface RateTier {
-  tier: string
-  perMinute: string
-  concurrent: string
-  trajectory: string
-}
-
-export const RATE_TIERS: RateTier[] = [
-  { tier: "Free",         perMinute: "3",  concurrent: "1",   trajectory: "3 steps"  },
-  { tier: "Starter",      perMinute: "10", concurrent: "3",   trajectory: "5 steps"  },
-  { tier: "Professional", perMinute: "20", concurrent: "10",  trajectory: "8 steps"  },
-  { tier: "Enterprise",   perMinute: "30", concurrent: "100", trajectory: "20 steps" },
 ]
 
 export interface PriceRow {
@@ -3091,35 +3072,7 @@ function DocsBody() {
               <>Bad screenshot or missing field. Undecodable base64, a <InlineCode>data:</InlineCode> prefix, or an absent required field.</>,
               <>Strip the <InlineCode>data:</InlineCode> prefix and whitespace; read <InlineCode>error.details</InlineCode> for the exact field path.</>,
             ],
-            [
-              <span key="s429" className="font-mono text-[12px] text-foreground/80">429</span>,
-              <>Rate limited. A per-key or per-user cap (<InlineCode>RATE_LIMIT_EXCEEDED</InlineCode>) was hit.</>,
-              <>Back off and honor <InlineCode>Retry-After</InlineCode>. A per_user cap can&apos;t be raised by minting more keys.</>,
-            ],
           ]}
-        />
-      </DocBlock>
-
-      {/* ── Rate limits ── */}
-      <DocBlock section={sec("rate-limits")}>
-        <P>
-          Limits apply per key and, in aggregate, per user. Every response carries{" "}
-          <InlineCode>X-RateLimit-Limit</InlineCode>, <InlineCode>X-RateLimit-Remaining</InlineCode>, and{" "}
-          <InlineCode>X-RateLimit-Reset</InlineCode> (a Unix timestamp) so you can pace requests precisely
-          rather than guessing. When you exceed a limit you get{" "}
-          <InlineCode>429 RATE_LIMIT_EXCEEDED</InlineCode> with a <InlineCode>Retry-After</InlineCode>{" "}
-          header: honor it before retrying. The per_user cap is shared across all your keys, so minting
-          more keys does not raise it. A separate <InlineCode>429 TOO_MANY_RUNS</InlineCode> guards the
-          concurrent-run cap for agent runs.
-        </P>
-        <RefTable
-          head={["Tier", "Requests / min", "Concurrent sessions", "Trajectory"]}
-          rows={RATE_TIERS.map((t) => [
-            <span key={`${t.tier}-t`} className="font-medium text-foreground/80">{t.tier}</span>,
-            <span key={`${t.tier}-m`} className="font-mono tabular-nums">{t.perMinute}</span>,
-            <span key={`${t.tier}-c`} className="font-mono tabular-nums">{t.concurrent}</span>,
-            t.trajectory,
-          ])}
         />
       </DocBlock>
 

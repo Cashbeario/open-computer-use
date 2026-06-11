@@ -23,7 +23,7 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 - Human docs: https://coasty.ai/docs  ·  API keys: https://coasty.ai/developers/keys
 
 ## Core endpoints (stateless / session)
-- POST /v1/predict — body {screenshot (base64), instruction, cua_version} -> {actions:[{action_type, params}], status}. Loop: capture screenshot -> predict -> execute actions -> repeat until status is "done".
+- POST /v1/predict — body {screenshot (base64), instruction, cua_version} -> {actions:[{action_type, params}], status}. Loop: capture screenshot -> predict -> execute actions -> repeat while status is "continue" ("done" / "fail" are terminal).
 - POST /v1/sessions then POST /v1/sessions/{id}/predict — stateful multi-step with trajectory memory.
 - POST /v1/ground — {screenshot, element} -> {x, y}. POST /v1/parse — pyautogui code -> structured actions (free).
 
@@ -34,11 +34,15 @@ You are helping me build on the Coasty Computer Use API: a REST API that lets co
 - Webhooks are HMAC-signed: header "Coasty-Signature: t=<unix>,v1=<hex>", signed payload "<t>." + raw_body, key = the webhook_secret returned once at create.
 
 ## Workflows — versioned JSON DSL composed of runs
-- POST /v1/workflows {name, slug, definition, inputs_schema?}  ·  POST /v1/workflows/{id}/runs  ·  POST /v1/workflows/runs (ad-hoc inline definition)  ·  GET/POST /v1/workflows/runs/{id} + /events + /cancel + /resume {approved}.
+- POST /v1/workflows {name, slug, definition, inputs_schema?}  ·  POST /v1/workflows/{id}/runs  ·  POST /v1/workflows/runs (ad-hoc inline definition)  ·  GET /v1/workflows/runs/{id} + /events (SSE)  ·  POST /v1/workflows/runs/{id}/cancel + /resume {approved}.
 - DSL step types: task, assert, if, loop, parallel, human_approval, retry, succeed, fail. Conditions are structured objects: {op: "eq"|"ne"|"lt"|"gt"|"lte"|"gte"|"contains"|"truthy"|"falsy"|"exists"|"and"|"or"|"not", ...}. Variables: {{inputs.x}}, {{vars.y}}, {{stepId.field}} (a task binds {status, passed, result, run_id}). Hard guards: budget_cents, max_iterations, deadline_seconds.
 
-## Pricing (USD, prepaid dollar wallet)
-predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground $0.03  ·  parse free  ·  runs and workflow task steps $0.05 per agent step (v3/v4). Top up at https://coasty.ai/developers/usage.
+## Pricing (USD, prepaid dollar wallet; 1 credit = $0.01)
+- Inference: predict $0.05  ·  session create $0.10  ·  session step $0.04  ·  ground $0.03  ·  parse free. Exact surcharges: +$0.02 per trajectory screenshot, +$0.01 per HD image (width > 1280 or height > 720; current + trajectory), +$0.03 per request on the v1 engine, +$0.01 when system_prompt exceeds 500 chars.
+- Runs & workflows: $0.05 per completed agent step on v3/v4, $0.08 on v1; workflow control-flow steps (if/assert/loop/parallel/retry/human_approval/succeed/fail) are free; cap spend with budget_cents.
+- Machines: $0.05/hr Linux running, $0.09/hr Windows running, $0.01/hr stopped, $0 while creating/terminated (metered per minute, rounded down); snapshot $0.01 one-time; all per-call machine ops (actions/terminal/browser/files/screenshot) free; provisioning needs a $0.20 wallet minimum (a gate, not a fee).
+- Schedules: create/run-now/webhook-fire need a $0.20 wallet minimum, no per-fire fee; execution bills your Coasty account credit balance at 10 credits per minute of agent runtime.
+- sk-coasty-test-* sandbox keys never bill. Top up at https://coasty.ai/developers/usage.
 
 ## Errors
 JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSUFFICIENT_CREDITS  ·  403 INSUFFICIENT_SCOPE.`
@@ -46,7 +50,7 @@ JSON envelope {error:{code, message, request_id}}. 401 invalid key  ·  402 INSU
 export const AI_PROMPT = `${API_REFERENCE}
 
 ---
-Now help me build: <describe what you want to build>. Use minimal, correct code and read COASTY_API_KEY from the environment. DEFAULT TO AUTOMATING MY OWN SCREEN locally (the "Local automation" loop: capture a screenshot, POST to /v1/sessions/{id}/predict, execute the returned actions with pyautogui or Playwright) unless I explicitly ask for a Coasty cloud VM — only then provision via /v1/machines or ask me for a machine_id for /v1/runs.`
+Now help me build: <describe what you want to build>. Use minimal, correct code. DEFAULT TO AUTOMATING MY OWN SCREEN locally (the "Local automation" loop described above, via /v1/sessions/{id}/predict) unless I explicitly ask for a Coasty cloud VM — only then provision via /v1/machines or ask me for a machine_id for /v1/runs.`
 
 /* ── Quickstart option catalogs (ids shared with the store + UI) ──────────── */
 
@@ -155,13 +159,13 @@ export function buildCraftedPrompt(cfg: QuickstartSelection): string {
   const executionBullets = local
     ? [
         `- Run target: MY OWN screen — no Coasty VM. Build the local agent loop: capture a screenshot of my screen (mss on Python / Playwright page.screenshot for a browser target), POST it to /v1/sessions/{id}/predict with the task instruction, EXECUTE the returned actions locally (pyautogui for the desktop, page.mouse/keyboard for a browser), and repeat until status leaves "continue".`,
-        `- Coordinates come back in the coordinate space of the screenshot I send: if the code downscales screenshots (e.g. to 1280x720), scale returned x/y back up before clicking, and pass the DOWNSCALED size as screen_width/screen_height.`,
+        `- Coordinates come back in the coordinate space of the screenshot I send: pass the screenshot's EXACT pixel size as screen_width/screen_height on session create (POST /v1/sessions — the predict step has no size fields), and if the code downscales screenshots (e.g. to 1280x720), scale returned x/y back up before clicking.`,
         `- Send an Idempotency-Key header on every predict step so a network retry can never double-execute an action, keep pyautogui.FAILSAFE enabled on desktop targets, and cap the loop at a fixed number of steps.`,
-        `- Read the "Local automation" section of https://coasty.ai/docs/llms.txt for the canonical loop, the per-action executor mapping, and the selectable instruction presets (pass one in the "instructions" field on session create — e.g. the Cautious preset when the screen can reach anything irreversible).`,
+        `- Read the "Local automation" section of https://coasty.ai/docs/llms.txt for the per-action executor mapping and the selectable instruction presets (pass one in the "instructions" field on session create — e.g. the Cautious preset when the screen can reach anything irreversible; custom instructions require the Starter tier or higher, so omit the field on a free-tier key).`,
       ]
     : [
-        `- Run target: a Coasty cloud VM. Provision or pick a machine at https://coasty.ai/developers, or ask me for a machine_id, then drive the task with POST /v1/runs (use a workflow for multi-step logic).`,
-        `- Stream progress from GET /v1/runs/{id}/events and stop when status is succeeded or failed.`,
+        `- Run target: a Coasty cloud VM. Provision a machine via POST /v1/machines (or pick one at https://coasty.ai/machines), or ask me for a machine_id, then drive the task with POST /v1/runs (use a workflow for multi-step logic).`,
+        `- Stream progress from GET /v1/runs/{id}/events and stop when the run reaches a terminal status (succeeded | failed | cancelled | timed_out).`,
       ]
 
   return [
@@ -174,7 +178,6 @@ export function buildCraftedPrompt(cfg: QuickstartSelection): string {
     `## Your task`,
     `- Stack: ${integrationGuide}`,
     `- Goal: build something that ${goal}.`,
-    `- Read COASTY_API_KEY from the environment; never hardcode it.`,
     ...executionBullets,
     ``,
     `Start by scaffolding a minimal, runnable ${integrationLabel} example that ${goal}, then explain how to run and extend it.`,

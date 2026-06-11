@@ -1056,7 +1056,7 @@ function PricingRow({
         {description}
       </span>
       <span
-        className={`text-[11px] font-mono font-semibold w-16 text-right shrink-0 ${
+        className={`text-[11px] font-mono font-semibold w-20 text-right shrink-0 ${
           highlight ? "text-emerald-600 dark:text-emerald-400" : "text-foreground/60"
         }`}
       >
@@ -1323,7 +1323,7 @@ export default function ApiDocsPage() {
             </h2>
             <p className="text-[14px] sm:text-base text-muted-foreground/55 max-w-xl mx-auto">
               Run an agent on a cron, fire it from any webhook with HMAC, or chain schedules together.
-              Per-fire 10 cr/min · webhook routing 1 cr / 200 fires · sandbox is free.
+              Webhook fires free (no routing fee, $0.20 wallet gate) · execution 10 cr/min from subscription credits (min 20, 6 h cap) · sandbox is free.
             </p>
           </motion.div>
 
@@ -1529,7 +1529,7 @@ export default function ApiDocsPage() {
               Per-request pricing. No subscription.
             </h2>
             <p className="text-[14px] sm:text-base text-muted-foreground/55 max-w-md mx-auto">
-              Deducted from your shared credit balance. Management endpoints always free.
+              Billed to your API wallet — 1 credit = $0.01, separate from subscription credits. Charged before execution, refunded on failure. Management endpoints and sandbox keys always free.
             </p>
           </motion.div>
 
@@ -1549,16 +1549,25 @@ export default function ApiDocsPage() {
               <span className="text-[9.5px] font-mono font-semibold text-muted-foreground/45 uppercase tracking-[0.15em] hidden sm:block w-44">
                 Description
               </span>
-              <span className="text-[9.5px] font-mono font-semibold text-muted-foreground/45 uppercase tracking-[0.15em] w-16 text-right">
+              <span className="text-[9.5px] font-mono font-semibold text-muted-foreground/45 uppercase tracking-[0.15em] w-20 text-right">
                 Cost
               </span>
             </div>
             <div className="divide-y divide-border/15">
-              <PricingRow endpoint="POST /predict" cost="5 cr" description="Screenshot to actions" />
-              <PricingRow endpoint="POST /sessions" cost="10 cr" description="Create multi-step session" />
-              <PricingRow endpoint="POST /sessions/{id}/predict" cost="4 cr" description="Predict within session" />
-              <PricingRow endpoint="POST /ground" cost="3 cr" description="Find element coordinates" />
-              <PricingRow endpoint="POST /parse" cost="Free" description="Parse action code" highlight />
+              <PricingRow endpoint="POST /predict" cost="5 cr" description="$0.05 — screenshot to actions" />
+              <PricingRow endpoint="POST /sessions" cost="10 cr" description="$0.10 — create session, no surcharges" />
+              <PricingRow endpoint="POST /sessions/{id}/predict" cost="4 cr" description="$0.04 — predict within session" />
+              <PricingRow endpoint="POST /ground" cost="3 cr" description="$0.03 — find element coordinates" />
+              <PricingRow endpoint="Run / workflow agent step (v3, v4)" cost="5 cr" description="$0.05 per completed step" />
+              <PricingRow endpoint="Run / workflow agent step (v1)" cost="8 cr" description="$0.08 — 5 base + 3 v1 engine" />
+              <PricingRow endpoint="Machine running — Linux" cost="5 cr/hr" description="$0.05/hr, per-minute granularity" />
+              <PricingRow endpoint="Machine running — Windows" cost="9 cr/hr" description="$0.09/hr, per-minute granularity" />
+              <PricingRow endpoint="Machine stopped / suspended" cost="1 cr/hr" description="$0.01/hr — creating/terminated free" />
+              <PricingRow endpoint="POST /machines/{id}/snapshot" cost="1 cr" description="$0.01 one-time" />
+              <PricingRow endpoint="POST /parse" cost="Free" description="OCR / parse — no LLM cost" highlight />
+              <PricingRow endpoint="Machine actions · terminal · browser · files" cost="Free" description="Covered by hourly runtime" highlight />
+              <PricingRow endpoint="Workflow control-flow steps" cost="Free" description="if / loop / parallel / retry / wait" highlight />
+              <PricingRow endpoint="Schedules create · run · webhook fire" cost="Free" description="$0.20 wallet gate, no per-fire fee" highlight />
               <PricingRow
                 endpoint="GET /models, /usage, /sessions"
                 cost="Free"
@@ -1584,7 +1593,7 @@ export default function ApiDocsPage() {
                 ["Trajectory screenshot", "+2 cr each"],
                 ["HD image >1280×720", "+1 cr/image"],
                 ["V1 engine", "+3 cr/request"],
-                ["Custom system prompt", "+1 cr"],
+                ["System prompt >500 chars", "+1 cr"],
               ].map(([label, cost]) => (
                 <div
                   key={label}
@@ -1597,6 +1606,9 @@ export default function ApiDocsPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-3 text-[10.5px] text-muted-foreground/40 leading-relaxed">
+              Surcharges apply to predict, session predict and ground; session create has none. HD is strictly larger than 1280×720. Gates, not fees: machine provisioning, schedule create, run-now and webhook fires each require a $0.20 API-wallet balance. Scheduled-run execution bills subscription credits at 10 cr/min (min 20 credits, 6 h cap). Machines auto-stop (never destroyed) if the wallet empties. Test keys (sk-coasty-test-*) bill 0 everywhere. Live machine rates: GET /v1/machines/pricing.
+            </p>
           </motion.div>
         </div>
       </section>

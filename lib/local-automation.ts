@@ -52,14 +52,14 @@ export const PROMPT_PRESETS: PromptPreset[] = [
     label: "QA & regression testing",
     description: "Exercising an app under test — observes carefully, reports failures instead of working around them.",
     instructions:
-      "You are executing a QA test step. Follow the instruction literally — do NOT improvise workarounds when the UI misbehaves; surfacing the failure is the point. If an expected element is missing, a button is disabled, or an error/dialog appears that the task does not mention, stop and emit fail() with what you observed. Wait for loading indicators to finish before asserting anything. Treat warnings and console-looking error text on screen as findings worth stopping for.",
+      "You are executing a QA test step. Follow the instruction literally — do NOT improvise workarounds when the UI misbehaves; surfacing the failure is the point. If an expected element is missing, a button is disabled, or an error/dialog appears that the task does not mention, stop and emit fail() with what you observed. Wait for loading indicators to finish before asserting anything. If warnings or console-style error text appear, stop and fail() with what you see.",
   },
   {
     id: "read-extract",
     label: "Read & extract",
     description: "Reading values off the screen with minimal interaction — navigation only when needed.",
     instructions:
-      "Your goal is to READ information from the screen, not to change anything. Interact only to reveal the data (scroll, switch tabs, expand rows) — never edit, submit, or delete. When you can see the requested information, emit done() and state the extracted values verbatim in your reasoning, exactly as rendered on screen including units and punctuation. If the data spans multiple screens, scroll through all of it before finishing.",
+      "Your goal is to READ information from the screen, not to change anything. Interact only to reveal the data (scroll, switch tabs, expand rows) — never edit, submit, or delete. When you can see the requested information, write the extracted values verbatim as plain text before your code block — for this task that text IS the deliverable and overrides the code-only response format — exactly as rendered on screen including units and punctuation, then emit done(). If the data spans multiple screens, scroll through all of it before finishing.",
   },
   {
     id: "cautious",
@@ -73,7 +73,7 @@ export const PROMPT_PRESETS: PromptPreset[] = [
     label: "Fast batch mode",
     description: "High-volume repetitive steps on a stable UI — fewer verifications, more actions per turn.",
     instructions:
-      "This is a repetitive batch task on a UI you have already seen. Emit several actions per step when the sequence is predictable (click field, type value, Tab) instead of one action at a time. Skip re-verifying elements that were stable in previous screenshots. Still stop immediately if the screen layout changes unexpectedly, an error appears, or a click lands on the wrong element — batch speed never justifies compounding a mistake.",
+      "This is a repetitive batch task on a UI you have already seen. You may chain click field, type value, Tab in one step here: the usual one-state-change rule is relaxed on this stable UI. Skip re-verifying elements that were stable in previous screenshots. Still stop immediately if the screen layout changes unexpectedly, an error appears, or a click lands on the wrong element — batch speed never justifies compounding a mistake.",
   },
 ]
 
@@ -211,7 +211,7 @@ sess = requests.post(f"{API}/sessions", headers=HDRS, json={
     "cua_version": "v3",
     "screen_width": SEND_W, "screen_height": SEND_H,
     # Optional best-practice steering (Starter+). Pick a preset from the docs:
-    "instructions": "Be precise. Before clicking, confirm the target element is actually visible in the CURRENT screenshot.",
+    "instructions": "Click the visual center of elements. If the target is not visible, scroll toward it, never guess.",
 }).json()
 sid = sess["session_id"]
 

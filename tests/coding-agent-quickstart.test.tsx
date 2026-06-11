@@ -34,7 +34,10 @@ describe("buildCraftedPrompt — heavily-crafted, tailored", () => {
     expect(p).toContain("https://coasty.ai/v1")
     expect(p).toContain("$0.05")
     expect(p).toContain("COASTY_API_KEY")
-    expect(p).not.toMatch(/\d+\s*credits/i)
+    expect(p).toContain("1 credit = $0.01")  // the anchor that makes any credit mention exact
+    // The ONLY credit-denominated rate allowed is the consumer-balance schedule
+    // runtime (10 credits/min bills subscription credits, not the USD wallet).
+    expect(p.match(/\d+\s*credits/gi) ?? []).toEqual(["10 credits"])
   })
 
   it("tailors to the coding agent + integration + goal", () => {

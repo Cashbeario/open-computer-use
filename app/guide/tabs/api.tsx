@@ -613,7 +613,8 @@ const SCHEDULES_SNIPPETS: Record<LangId, SchedulesSnippet> = {
     create: `import requests
 
 # Daily 9:00 AM ET email summary, fired by the Coasty scheduler.
-# Per-fire cost: 10 credits/min while the agent runs.
+# Per fire: needs >= 20 cr ($0.20) in your API wallet to dispatch (gate only);
+# agent runtime then bills your Coasty credit balance at 10 credits/min.
 r = requests.post(
     "https://coasty.ai/v1/schedules",
     headers={
@@ -1801,7 +1802,7 @@ function LocalAutomationSections() {
               <code className="text-[11px]">instructions</code> is additive steering on top of the tuned base prompt — start here.
               <code className="text-[11px] ml-1">system_prompt</code> fully replaces the base prompt: more power, more ways to break grounding —
               reach for it only when a preset plus task phrasing can&apos;t express what you need. Both draw from the same per-tier
-              character budget (Starter 2,000 / Pro 4,000 / Enterprise 16,000; +1 credit per call above 500 chars).
+              character budget (Starter 2,000 / Pro 4,000 / Enterprise 16,000; +1 credit / $0.01 per call when the prompt is strictly over 500 chars — exactly 500 is free).
             </p>
           </div>
         </Section>
@@ -1919,7 +1920,7 @@ export function APITab({ inApp }: { inApp: boolean }) {
                 <> Create keys in your <Link href="/developers/keys" className="underline underline-offset-2 hover:text-foreground transition-colors">Developer Dashboard</Link>.</>
               ) : (
                 <> Sign up to create API keys.</>
-              )} Credits are deducted per request from your shared balance.
+              )} Charges debit your prepaid developer API wallet (1 credit = 1¢ = $0.01) — separate from your Coasty app subscription, even on Unlimited. Fees are charged before execution and auto-refunded on failure.
             </p>
             <GuideCodeBlock label="header" code={`X-API-Key: sk-coasty-live-your_key_here
 # or, equivalently:
@@ -2011,7 +2012,7 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
     "input_tokens": 1523,
     "output_tokens": 245,
     "credits_charged": 5,
-    "cost_cents": 45
+    "cost_cents": 5
   }
 }`}
           />
@@ -2056,7 +2057,7 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
               {[
                 { f: "screenshot", t: "string", req: true },
                 { f: "instruction", t: "string", req: true },
-                { f: "cua_version", t: '"v3" | "v1"', req: false },
+                { f: "cua_version", t: '"v3" | "v4" | "v1" (+3 cr)', req: false },
                 { f: "screen_width", t: "int", req: false },
                 { f: "screen_height", t: "int", req: false },
                 { f: "max_actions", t: "int (1-10)", req: false },
@@ -2149,6 +2150,27 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
               ))}
             </div>
           </div>
+          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.01] overflow-hidden">
+            <div className="px-5 py-2.5 bg-foreground/[0.02] border-b border-foreground/[0.04]">
+              <span className="text-[10px] font-semibold text-muted-foreground/35 uppercase tracking-wider">Surcharges — added to the base fee</span>
+            </div>
+            <div className="divide-y divide-foreground/[0.03]">
+              {[
+                { r: "Per trajectory screenshot (each prior image sent)",                    c: "+2 cr ($0.02)" },
+                { r: "Per HD image — strictly larger than 1280×720 (current + trajectory)",  c: "+1 cr ($0.01)" },
+                { r: 'v1 engine (cua_version: "v1") — v3 / v4 add nothing',                  c: "+3 cr ($0.03)" },
+                { r: "system_prompt over 500 chars (exactly 500 = no fee)",                  c: "+1 cr ($0.01)" },
+              ].map(row => (
+                <div key={row.r} className="flex items-center gap-3 px-5 py-2.5">
+                  <span className="text-[11px] text-muted-foreground/55 flex-1">{row.r}</span>
+                  <code className="text-[10px] font-mono text-foreground/55 shrink-0">{row.c}</code>
+                </div>
+              ))}
+            </div>
+            <div className="px-5 py-3 text-[10px] text-muted-foreground/45 leading-relaxed border-t border-foreground/[0.04]">
+              1 credit = $0.01. Base fees: predict 5 cr ($0.05) · session create 10 cr ($0.10, never carries surcharges) · session predict 4 cr ($0.04) · ground 3 cr ($0.03, HD fee only — single image) · parse Free. Charged up-front, auto-refunded if the call fails (PREDICTION_FAILED / GROUNDING_FAILED).
+            </div>
+          </div>
         </Section>
       </div>
 
@@ -2217,14 +2239,16 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
                   // a small fixed surplus over the underlying cloud cost.
                   // Source of truth: backend machine_runtime_billing.py +
                   // GET /v1/machines/pricing.
-                  { r: "Provision (balance gate)",        c: "20 cr min" },
-                  { r: "VM runtime — Linux, running",     c: "5 cr/hr" },
-                  { r: "VM runtime — Windows, running",   c: "9 cr/hr" },
-                  { r: "VM stopped (storage only)",       c: "1 cr/hr" },
-                  { r: "Auto-destroy TTL (ttl_minutes)",  c: "Free" },
-                  { r: "Snapshot create",                 c: "1 cr" },
-                  { r: "Out of funds → VM auto-stopped",  c: "never destroyed" },
-                  { r: "Sandbox (sk-coasty-test-*)",      c: "Free" },
+                  { r: "Provision — wallet gate, no fee",          c: "20 cr ($0.20) min" },
+                  { r: "VM runtime — Linux, running",              c: "5 cr/hr ($0.05)" },
+                  { r: "VM runtime — Windows, running",            c: "9 cr/hr ($0.09)" },
+                  { r: "starting / stopping / restarting",         c: "running rate" },
+                  { r: "VM stopped or suspended (storage only)",   c: "1 cr/hr ($0.01)" },
+                  { r: "creating / error / terminated",            c: "Free" },
+                  { r: "Auto-destroy TTL (ttl_minutes)",           c: "Free" },
+                  { r: "Snapshot create (one-time)",               c: "1 cr ($0.01)" },
+                  { r: "Out of funds → VM auto-stopped",           c: "never destroyed" },
+                  { r: "Sandbox (sk-coasty-test-*)",               c: "Free" },
                 ].map(row => (
                   <div key={row.r} className="flex items-center gap-3 px-5 py-2.5">
                     <span className="text-[11px] text-muted-foreground/55 flex-1 truncate">{row.r}</span>
@@ -2232,6 +2256,9 @@ Authorization: Bearer sk-coasty-live-your_key_here`} />
                   </div>
                 ))}
               </div>
+                <div className="px-5 py-3 text-[10px] text-muted-foreground/45 leading-relaxed border-t border-foreground/[0.04]">
+                  Metered per minute against your API wallet (1 cr = $0.01), rounded down — partial minutes and partial credits are never billed. All per-call machine endpoints (actions, batch, terminal, browser, files, screenshot, connection, lifecycle) are Free — you pay only the hourly runtime. Live table: GET /v1/machines/pricing.
+                </div>
             </div>
           </div>
 
@@ -2467,7 +2494,7 @@ Returns:
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST",   p: "/v1/machines",                  d: "Provision (runtime 5–9 cr/hr)", c: "20 cr min" },
+                { m: "POST",   p: "/v1/machines",                  d: "Provision (runtime 5–9 cr/hr)", c: "20 cr gate" },
                 { m: "GET",    p: "/v1/machines",                  d: "List machines",             c: "Free" },
                 { m: "GET",    p: "/v1/machines/{id}",             d: "Get a machine",             c: "Free" },
                 { m: "GET",    p: "/v1/machines/pricing",          d: "Runtime price table",       c: "Free" },
@@ -2609,7 +2636,7 @@ Returns:
               <span className="text-[12px] text-muted-foreground/55 leading-relaxed">
                 Billed responses carry <code className="text-[11px] font-mono text-foreground/65">X-Credits-Charged</code> + <code className="text-[11px] font-mono text-foreground/65">X-Credits-Remaining</code> headers,
                 and the body <code className="text-[11px] font-mono text-foreground/65">usage</code> object exposes <code className="text-[11px] font-mono text-foreground/65">credits_charged</code> + <code className="text-[11px] font-mono text-foreground/65">cost_cents</code> (both 0 on test keys).
-                Each workflow <code className="text-[11px] font-mono text-foreground/65">task</code> step is itself a run; the total is capped by <code className="text-[11px] font-mono text-foreground/65">budget_cents</code>.
+                Each agent step costs 5 cr ($0.05) on v3/v4 and 8 cr ($0.08) on v1, charged from your API wallet after the step completes (idempotent per step; a failed charge stops the run with WALLET_EXHAUSTED). Starting a run requires wallet balance ≥ one step&apos;s cost. Each workflow <code className="text-[11px] font-mono text-foreground/65">task</code> step is itself a run with identical per-step billing; control-flow steps (assert · if · loop · parallel · retry · human_approval · succeed · fail) are Free. Total spend is capped by <code className="text-[11px] font-mono text-foreground/65">budget_cents</code> (default 0 = no budget guard) and max_iterations (≤ 1000). Test-mode runs bill 0.
               </span>
             </div>
           </div>
@@ -2638,7 +2665,7 @@ Returns:
                 {[
                   { f: "machine_id",         t: "uuid",                 req: true },
                   { f: "task",               t: "string",               req: true },
-                  { f: "cua_version",        t: '"v3" | "v4"',          req: false },
+                  { f: "cua_version",        t: '"v3" | "v4" | "v1" (8 cr/step)', req: false },
                   { f: "max_steps",          t: "int (1-1000)",         req: false },
                   { f: "on_awaiting_human",  t: '"pause"|"fail"|"cancel"', req: false },
                   { f: "webhook_url",        t: "string (https)",       req: false },
@@ -2792,6 +2819,9 @@ X-API-Key: sk-coasty-live-...
                   </div>
                 ))}
               </div>
+              <div className="px-5 py-3 text-[10px] text-muted-foreground/45 leading-relaxed border-t border-foreground/[0.04]">
+                Only <code className="text-[10px] font-mono">task</code> steps bill — 5 cr ($0.05) on v3/v4, 8 cr ($0.08) on v1. All other step types are Free.
+              </div>
             </div>
 
             {/* Conditions + limits */}
@@ -2856,7 +2886,7 @@ X-API-Key: sk-coasty-live-...
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST", p: "/v1/runs",                d: "Start a run (runs:write)",         c: "$0.05/step" },
+                { m: "POST", p: "/v1/runs",                d: "Start a run (runs:write)",         c: "5–8 cr/step" },
                 { m: "GET",  p: "/v1/runs",                d: "List runs (runs:read)",            c: "Free" },
                 { m: "GET",  p: "/v1/runs/{id}",           d: "Get a run (runs:read)",            c: "Free" },
                 { m: "GET",  p: "/v1/runs/{id}/events",    d: "SSE stream (runs:read)",           c: "Free" },
@@ -2889,8 +2919,8 @@ X-API-Key: sk-coasty-live-...
                 { m: "GET",    p: "/v1/workflows/{id}",             d: "Get (workflows:read)",            c: "Free" },
                 { m: "PUT",    p: "/v1/workflows/{id}",             d: "Update — bumps version",          c: "Free" },
                 { m: "DELETE", p: "/v1/workflows/{id}",             d: "Archive a workflow",              c: "Free" },
-                { m: "POST",   p: "/v1/workflows/{id}/runs",        d: "Run a saved workflow",            c: "$0.05/step" },
-                { m: "POST",   p: "/v1/workflows/runs",             d: "Ad-hoc inline definition",        c: "$0.05/step" },
+                { m: "POST",   p: "/v1/workflows/{id}/runs",        d: "Run a saved workflow",            c: "5–8 cr/step" },
+                { m: "POST",   p: "/v1/workflows/runs",             d: "Ad-hoc inline definition",        c: "5–8 cr/step" },
                 { m: "GET",    p: "/v1/workflows/runs",             d: "List workflow runs",              c: "Free" },
                 { m: "GET",    p: "/v1/workflows/runs/{id}",        d: "Get a workflow run",              c: "Free" },
                 { m: "GET",    p: "/v1/workflows/runs/{id}/events", d: "SSE stream (Last-Event-ID)",      c: "Free" },
@@ -2960,10 +2990,11 @@ X-API-Key: sk-coasty-live-...
               </div>
               <div className="divide-y divide-foreground/[0.03]">
                 {[
-                  { r: "Schedule create",                  c: "20 cr min" },
-                  { r: "Per fire (agent run)",             c: "10 cr/min" },
-                  { r: "Webhook fire (routing)",           c: "1 cr / 200" },
-                  { r: "Email fire (routing)",             c: "1 cr / 10" },
+                  { r: "Schedule create — wallet gate, no fee",      c: "20 cr ($0.20) min" },
+                  { r: "Fire / run-now — wallet gate, no fee",       c: "20 cr ($0.20) min" },
+                  { r: "Agent runtime per fire (credit balance)",    c: "10 cr/min" },
+                  { r: "Webhook fire — no routing fee (60/min limit)", c: "Free" },
+                  { r: "Email fire — no routing fee",              c: "Free" },
                   { r: "Chain trigger (no extra cost)",    c: "Free" },
                   { r: "Pause / resume / list / runs",     c: "Free" },
                   { r: "Sandbox (sk-coasty-test-*)",       c: "Free" },
@@ -2973,6 +3004,9 @@ X-API-Key: sk-coasty-live-...
                     <code className="text-[10px] font-mono text-foreground/55 shrink-0">{row.c}</code>
                   </div>
                 ))}
+              </div>
+              <div className="px-5 py-3 text-[10px] text-muted-foreground/45 leading-relaxed border-t border-foreground/[0.04]">
+                Gates check your API wallet (1 cr = $0.01) but never charge it. Execution time is billed to your Coasty account credit balance — the same balance the app uses — at 10 credits/min, minimum 20 credits to start, max 6 h per session. Webhook fires charge no routing fee: they require the owner&apos;s wallet ≥ 20 cr ($0.20) and are rate-limited (default 60/min per webhook). Test schedules record credits_charged: 0.
               </div>
             </div>
           </div>
@@ -3216,14 +3250,14 @@ X-Coasty-Webhook-Deduplicated: false
             </div>
             <div className="divide-y divide-foreground/[0.03]">
               {[
-                { m: "POST",   p: "/v1/schedules",                d: "Create",                        c: "20 cr min" },
+                { m: "POST",   p: "/v1/schedules",                d: "Create (wallet gate, no fee)",  c: "20 cr gate" },
                 { m: "GET",    p: "/v1/schedules",                d: "List schedules",                c: "Free" },
                 { m: "GET",    p: "/v1/schedules/{id}",           d: "Get",                            c: "Free" },
                 { m: "PATCH",  p: "/v1/schedules/{id}",           d: "Update (partial)",               c: "Free" },
                 { m: "DELETE", p: "/v1/schedules/{id}",           d: "Soft-delete",                    c: "Free" },
                 { m: "POST",   p: "/v1/schedules/{id}/pause",     d: "Pause future runs",              c: "Free" },
                 { m: "POST",   p: "/v1/schedules/{id}/resume",    d: "Resume future runs",             c: "Free" },
-                { m: "POST",   p: "/v1/schedules/{id}/run",       d: "Manual fire (idempotent)",       c: "10 cr/min" },
+                { m: "POST",   p: "/v1/schedules/{id}/run",       d: "Manual fire (runtime 10 cr/min*)", c: "20 cr gate" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
                   <span className={cn(
@@ -3270,7 +3304,7 @@ X-Coasty-Webhook-Deduplicated: false
                 { m: "POST",   p: "/v1/schedules/{id}/triggers",                d: "Add (webhook | email | chain)",  c: "Free" },
                 { m: "DELETE", p: "/v1/schedules/{id}/triggers/{trigger_id}",   d: "Remove",                          c: "Free" },
                 { m: "POST",   p: "/v1/triggers/email-mailbox",                 d: "Provision inbound mailbox",      c: "Free" },
-                { m: "POST",   p: "/v1/triggers/webhook/{webhook_id}",          d: "Public fire (HMAC, no auth)",    c: "1 cr / 200" },
+                { m: "POST",   p: "/v1/triggers/webhook/{webhook_id}",          d: "Public fire (HMAC, no auth; 60/min, 20 cr wallet gate)", c: "Free" },
               ].map(row => (
                 <div key={`${row.m} ${row.p}`} className="flex items-center gap-3 px-5 py-3">
                   <span className={cn(

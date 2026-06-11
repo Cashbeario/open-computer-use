@@ -1560,7 +1560,7 @@ export function TracesPanel({
                               value={`${formatNum(r.input_tokens ?? 0)} in · ${formatNum(r.output_tokens ?? 0)} out`}
                             />
                           )}
-                          {r.was_refunded && <DetailRow label="Refunded" value="Yes — credits returned" />}
+                          {r.was_refunded && <DetailRow label="Refunded" value="Yes — charge returned to your wallet" />}
                           {failed && (r.error_message || r.error_code) && (
                             <div className="sm:col-span-2">
                               <DetailRow
@@ -1811,6 +1811,11 @@ export function QuickReferenceTab() {
               </div>
             ))}
           </div>
+          <p className="text-[10.5px] text-muted-foreground/40 leading-relaxed mt-3">
+            Machines bill runtime only, metered per minute: $0.05/hr for Linux and $0.09/hr for
+            Windows while running, $0.01/hr while stopped. Snapshots are $0.01 one-time; every
+            per-call machine op (actions, browser, terminal, files, screenshot) is free.
+          </p>
         </ReferenceSection>
 
         <ReferenceSection title="Action types" eyebrow="Reference">
@@ -1844,7 +1849,7 @@ export function QuickReferenceTab() {
     "input_tokens": 1523,
     "output_tokens": 245,
     "credits_charged": 5,
-    "cost_cents": 45
+    "cost_cents": 5
   }
 }`}</code>
           </pre>

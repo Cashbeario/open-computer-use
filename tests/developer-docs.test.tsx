@@ -210,9 +210,10 @@ describe("reference tables", () => {
   })
 
   it("PRICING is denominated in USD, never credits", () => {
-    // Every cost is a dollar string ($X.XX, with an optional /step suffix) or "Free".
+    // Every cost is a dollar string ($X.XX, with an optional /step or /hr
+    // suffix for per-step and runtime-metered rates) or "Free".
     for (const p of PRICING) {
-      expect(p.cost, `${p.endpoint} cost "${p.cost}" must be USD or Free`).toMatch(/^(\$\d+\.\d{2}(\/step)?|Free)$/)
+      expect(p.cost, `${p.endpoint} cost "${p.cost}" must be USD or Free`).toMatch(/^(\$\d+\.\d{2}(\/step|\/hr)?|Free)$/)
       expect(p.cost.startsWith("$") || p.cost === "Free", `${p.endpoint} cost must start with $ or be Free`).toBe(true)
       // the word "credit(s)" must never appear in a displayed price
       expect(/credit/i.test(p.cost), `${p.endpoint} cost must not say "credits"`).toBe(false)
@@ -371,7 +372,7 @@ describe("DeveloperDocs rendering", () => {
     }
   })
 
-  it("renders the pricing table in USD ($) and never as credits", () => {
+  it("renders the pricing table in USD ($), with credits only in the schedules two-wallet note", () => {
     const { container } = render(<DeveloperDocs />)
     const pricing = container.querySelector("#pricing")!
     expect(pricing).toBeTruthy()
@@ -380,8 +381,25 @@ describe("DeveloperDocs rendering", () => {
     expect(text).toContain("$0.05")
     expect(text).toContain("$0.10")
     expect(text).toContain("$0.03")
-    // No "credit" wording leaks into the rendered pricing section.
-    expect(/credit/i.test(text), "pricing section must not show the word credits").toBe(false)
+    // Machine runtime rates render in dollars per hour, snapshots as a one-time USD price.
+    expect(text).toContain("$0.05/hr")
+    expect(text).toContain("$0.09/hr")
+    expect(text).toContain("$0.01/hr")
+    expect(text).toContain("$0.01")
+    // The exact surcharges render in USD.
+    expect(text).toContain("+$0.02 each")
+    expect(text).toContain("+$0.01 each")
+    expect(text).toContain("+$0.03 per request")
+    // "credit" appears ONLY in the schedules subscription-balance note (the
+    // two-wallet split: schedule runtime bills subscription credits at
+    // 10 credits/min, not the USD API wallet) — never as an API price.
+    for (const m of text.matchAll(/credit/gi)) {
+      const ctx = text.slice(Math.max(0, m.index! - 140), m.index! + 140)
+      expect(
+        /subscription/i.test(ctx),
+        `"credit" outside the schedules subscription-credit note: ...${ctx}...`,
+      ).toBe(true)
+    }
   })
 })
 

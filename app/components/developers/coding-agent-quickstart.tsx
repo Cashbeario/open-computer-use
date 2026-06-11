@@ -9,7 +9,7 @@
  * Renders its own trigger ("Create with AI"); drop it anywhere (the bar, a page).
  */
 
-import { useMemo, useState, type ComponentType, type ReactNode } from "react"
+import { useMemo, useState, type ComponentType, type ReactElement, type ReactNode } from "react"
 import { Check, Copy, MoreHorizontal } from "lucide-react"
 import { toast } from "sonner"
 
@@ -174,7 +174,15 @@ function TriggerButton({ className }: { className?: string }) {
 
 /* ── Quickstart ───────────────────────────────────────────────────────────── */
 
-export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?: string }) {
+export function CodingAgentQuickstart({
+  triggerClassName,
+  trigger,
+}: {
+  triggerClassName?: string
+  // Optional custom trigger element (e.g. the landing hero's CTA pill).
+  // Must be a single element — DialogTrigger clones it via asChild.
+  trigger?: ReactElement
+}) {
   const cfg = useCodingAgentConfig()
   const [copied, setCopied] = useState(false)
 
@@ -212,9 +220,11 @@ export function CodingAgentQuickstart({ triggerClassName }: { triggerClassName?:
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <span className={triggerClassName}>
-          <TriggerButton />
-        </span>
+        {trigger ?? (
+          <span className={triggerClassName}>
+            <TriggerButton />
+          </span>
+        )}
       </DialogTrigger>
       <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
         <DialogHeader className="shrink-0 space-y-1 border-b border-foreground/[0.06] px-5 py-4 pr-12 text-left">

@@ -74,7 +74,7 @@ you contact support; it ties together the whole request end-to-end.
 Billed responses also return two headers so you can track spend without a
 second call:
 
-- \`X-Credits-Charged\`: what this request cost (internal units; \`0\` on test keys).
+- \`X-Credits-Charged\`: what this request cost in credits (1 credit = $0.01; \`0\` on test keys).
 - \`X-Credits-Remaining\`: your wallet balance after the charge (USD cents).
 
 Other useful headers: \`X-Coasty-Key-Kind\` (\`live\` / \`test\` / \`legacy\`),
@@ -106,10 +106,11 @@ response header reports which family authenticated (\`live\`, \`test\`, or \`leg
 ### Billing model (USD)
 
 Your developer wallet is a **prepaid USD balance** (denominated in cents).
-Internally costs are computed at a granularity of $0.01 per unit; everywhere in
-this document costs are shown in dollars. Charges are taken before the model
-call and automatically refunded if the call fails. See the Pricing table in the
-Reference section for exact per-endpoint dollar costs.
+Costs are counted in **credits, and 1 credit = 1 cent = $0.01 exactly** —
+every \`credits_charged\` / \`total_credits\` field in this API uses that unit.
+Per-request charges are taken before the model call and automatically refunded
+if the call fails. Machines additionally bill an hourly runtime rate, metered
+per minute. See the Pricing table in the Reference section for exact costs.
 
 ---
 
@@ -236,6 +237,12 @@ print(run["result"])               # {"passed": ..., "status": ..., "summary": .
 Stateless action prediction. Scope: \`predict\`. Send a screenshot plus an
 instruction, get an ordered list of actions back. You manage trajectory.
 
+**Price:** $0.05 (5 credits) per call, plus exact surcharges: +$0.02 (2 cr)
+per \`trajectory\` screenshot you attach, +$0.01 (1 cr) per HD image (width >
+1280 or height > 720 — charged on the current screenshot and each trajectory
+screenshot), +$0.03 (3 cr) when \`cua_version\` is \`v1\`, and +$0.01 (1 cr)
+when \`system_prompt\` exceeds 500 characters. Refunded if the call fails.
+
 **Request body**
 
 | Field | Type | Req | Default | Notes |
@@ -265,7 +272,7 @@ instruction, get an ordered list of actions back. You manage trajectory.
     { "action_type": "type_text", "params": { "text": "you@example.com" }, "description": "Type the email address" }
   ],
   "raw_code": ["pyautogui.click(512, 340)", "pyautogui.typewrite('you@example.com')"],
-  "usage": { "input_tokens": 1523, "output_tokens": 245, "credits_charged": 5, "cost_cents": 45 }
+  "usage": { "input_tokens": 1523, "output_tokens": 245, "credits_charged": 6, "cost_cents": 6 }
 }
 \`\`\`
 
@@ -328,6 +335,10 @@ session when done to free your concurrency quota.
 
 Create a session.
 
+**Price:** $0.10 (10 credits) one-time at creation, with no surcharges.
+Reset, get, list, and delete are free, and sessions carry no per-minute
+cost — deleting just frees your concurrency slot.
+
 **Request body**
 
 | Field | Type | Req | Default | Notes |
@@ -356,6 +367,11 @@ Create a session.
 #### POST /v1/sessions/{id}/predict
 
 Predict the next step inside a session. Repeat until \`status != "continue"\`.
+
+**Price:** $0.04 (4 credits) per step, plus the same surcharges as
+\`/v1/predict\`: +$0.02 per screenshot in the server-kept trajectory, +$0.01
+per HD image (current + trajectory), +$0.03 on the \`v1\` engine, +$0.01 for
+a \`system_prompt\` over 500 characters.
 
 **Request body**
 
@@ -427,6 +443,9 @@ curl -s -X DELETE "$BASE/sessions/$SESSION_ID" -H "$AUTH"
 Resolve a natural language description of an element to exact \`(x, y)\` pixel
 coordinates. Scope: \`ground\`.
 
+**Price:** $0.03 (3 credits) per call, +$0.01 (1 credit) if the screenshot
+is HD (width > 1280 or height > 720).
+
 **Request body**
 
 | Field | Type | Req | Default |
@@ -496,7 +515,7 @@ defaults to the current month).
   "period": "2026-06",
   "total_requests": 128,
   "total_credits": 540,
-  "total_cost_cents": 4860,
+  "total_cost_cents": 540,
   "breakdown": { "predict": { "requests": 100, "credits": 500 } },
   "balance": 9300,
   "wallet_balance_cents": 9300,
@@ -514,6 +533,16 @@ A run gives the agent a task plus a machine and drives it to completion
 server-side: an autonomous loop with pass/fail verification, optional human
 takeover, per-step wallet billing, a streaming event log, and webhooks. Scopes:
 \`runs:read\` (list/get/events) and \`runs:write\` (start/cancel/resume).
+
+**Pricing.** Each completed agent step bills your wallet $0.05 (5 credits)
+on \`v3\`/\`v4\`, or $0.08 (8 credits) on \`v1\` (5 base + 3 v1 engine
+surcharge). Steps are billed one at a time as they complete, idempotently
+per step; bookkeeping steps emitted when you resume a paused run are not
+billed, and no trajectory/HD/prompt surcharges apply to run steps. Creating
+a run requires the wallet to cover at least one step (otherwise
+\`402 INSUFFICIENT_CREDITS\`); if the wallet runs dry mid-run the run fails
+with \`WALLET_EXHAUSTED\` and only completed steps stay billed. Test keys
+bill $0.
 
 ### POST /v1/runs
 
@@ -816,6 +845,14 @@ The \`definition\` is validated structurally on create and on ad-hoc start. When
 run begins, the definition is **snapshotted** into the run, so editing a workflow
 never changes an in-flight run (version pinning). Updating a saved workflow bumps
 its \`version\`.
+
+**Pricing.** A workflow adds no fee of its own. Each \`task\` step executes as
+a run and bills the identical per-step rate: $0.05 (5 credits) on \`v3\`/\`v4\`,
+$0.08 (8 credits) on \`v1\`. Control-flow steps — \`if\`, \`assert\`, \`loop\`,
+\`parallel\`, \`retry\`, \`human_approval\`, \`succeed\`, \`fail\` — are **free**.
+Total spend accrues against \`budget_cents\` (0 or null = uncapped); breaching
+it (or \`max_iterations\`) stops the run with \`GUARD_EXCEEDED\`. Test keys
+bill $0.
 
 ### Workflow endpoints
 
@@ -1142,7 +1179,7 @@ def execute(a):
 
 sess = requests.post(f"{API}/sessions", headers=HDRS, json={
     "cua_version": "v3", "screen_width": SEND_W, "screen_height": SEND_H,
-    "instructions": "Be precise. Before clicking, confirm the target element is actually visible in the CURRENT screenshot.",
+    "instructions": "Click the visual center of elements. If the target is not visible, scroll toward it, never guess.",
 }).json()
 sid = sess["session_id"]
 
@@ -1158,7 +1195,7 @@ try:
         if r["status"] != "continue": break
         time.sleep(0.5)
 finally:
-    requests.delete(f"{API}/sessions/{sid}", headers=HDRS)   # stop the session clock
+    requests.delete(f"{API}/sessions/{sid}", headers=HDRS)   # free the concurrency slot (sessions have no per-minute cost)
 \`\`\`
 
 For a browser, use a fixed 1280x720 Playwright viewport so coordinates map 1:1
@@ -1200,10 +1237,10 @@ create (applies to every step) or per predict call. The presets:
 
 * **Precise UI control** (default pick): "Be precise. Before clicking, confirm the target element is actually visible in the CURRENT screenshot — never click from memory of a previous screen. Click the visual center of elements, not their edges. If the element you need is not visible, scroll toward where it should be instead of guessing coordinates. If two elements look similar, prefer the one whose text matches the task exactly. After typing into a field, verify focus landed in the right field before continuing."
 * **Forms & data entry**: "You are doing data entry. Prefer keyboard navigation (Tab between fields, Enter to submit) over clicking when a form has focus. Clear a field (ctrl+a then type) before entering a new value — never append to stale text. Enter values EXACTLY as given in the task: do not reformat dates, trim IDs, or autocorrect spellings. After filling each field, confirm the screenshot shows the value you typed. Do not submit the form until every required field is verified filled."
-* **QA & regression testing**: "You are executing a QA test step. Follow the instruction literally — do NOT improvise workarounds when the UI misbehaves; surfacing the failure is the point. If an expected element is missing, a button is disabled, or an error/dialog appears that the task does not mention, stop and emit fail() with what you observed. Wait for loading indicators to finish before asserting anything. Treat warnings and console-looking error text on screen as findings worth stopping for."
-* **Read & extract**: "Your goal is to READ information from the screen, not to change anything. Interact only to reveal the data (scroll, switch tabs, expand rows) — never edit, submit, or delete. When you can see the requested information, emit done() and state the extracted values verbatim in your reasoning, exactly as rendered on screen including units and punctuation. If the data spans multiple screens, scroll through all of it before finishing."
+* **QA & regression testing**: "You are executing a QA test step. Follow the instruction literally — do NOT improvise workarounds when the UI misbehaves; surfacing the failure is the point. If an expected element is missing, a button is disabled, or an error/dialog appears that the task does not mention, stop and emit fail() with what you observed. Wait for loading indicators to finish before asserting anything. If warnings or console-style error text appear, stop and fail() with what you see."
+* **Read & extract**: "Your goal is to READ information from the screen, not to change anything. Interact only to reveal the data (scroll, switch tabs, expand rows) — never edit, submit, or delete. When you can see the requested information, write the extracted values verbatim as plain text before your code block — for this task that text IS the deliverable and overrides the code-only response format — exactly as rendered on screen including units and punctuation, then emit done(). If the data spans multiple screens, scroll through all of it before finishing."
 * **Cautious (non-destructive)**: "Operate in non-destructive mode. NEVER click buttons that delete, remove, purchase, pay, send, post, publish, or permanently change state — if completing the task requires one, stop and emit fail() explaining which action needs human approval. Never enter credentials, 2FA codes, or payment details even if a login wall appears: fail() and describe the prompt instead. Dismissing cookie banners and closing popups is allowed. When in doubt about whether an action is reversible, do not take it."
-* **Fast batch mode**: "This is a repetitive batch task on a UI you have already seen. Emit several actions per step when the sequence is predictable (click field, type value, Tab) instead of one action at a time. Skip re-verifying elements that were stable in previous screenshots. Still stop immediately if the screen layout changes unexpectedly, an error appears, or a click lands on the wrong element — batch speed never justifies compounding a mistake."
+* **Fast batch mode**: "This is a repetitive batch task on a UI you have already seen. You may chain click field, type value, Tab in one step here: the usual one-state-change rule is relaxed on this stable UI. Skip re-verifying elements that were stable in previous screenshots. Still stop immediately if the screen layout changes unexpectedly, an error appears, or a click lands on the wrong element — batch speed never justifies compounding a mistake."
 
 ### Local-run safety
 
@@ -1345,23 +1382,71 @@ requested explicitly at key creation.
 
 ### Pricing (USD)
 
-Costs are computed internally at a granularity of $0.01 per unit and shown here
-in dollars. Charges are taken before the model call and refunded on failure.
+1 credit = 1 cent = $0.01, exactly. All charges debit your prepaid developer
+wallet, are taken before execution, and are refunded automatically on failure.
+Test keys (\`sk-coasty-test-*\`) never bill anything, anywhere.
+
+**Per-request (inference)**
 
 | Endpoint | Cost | Note |
 | --- | --- | --- |
-| \`POST /v1/predict\` | $0.05 | Stateless prediction. |
-| \`POST /v1/sessions\` | $0.10 | One-time session creation. |
-| \`POST /v1/sessions/{id}/predict\` | $0.04 | Each step inside a session. |
-| \`POST /v1/ground\` | $0.03 | Coordinate grounding. |
+| \`POST /v1/predict\` | $0.05 (5 cr) | Stateless prediction. Surcharges below apply. |
+| \`POST /v1/sessions\` | $0.10 (10 cr) | One-time at creation; no surcharges. |
+| \`POST /v1/sessions/{id}/predict\` | $0.04 (4 cr) | Each step inside a session. Surcharges below apply. |
+| \`POST /v1/ground\` | $0.03 (3 cr) | Coordinate grounding; +$0.01 if the image is HD. |
 | \`POST /v1/parse\` | Free | Deterministic, no model call. |
-| \`POST /v1/runs\` | $0.05/step | Per agent step on v3/v4 (v1 is $0.08/step), billed from your USD wallet. |
-| \`POST /v1/workflows/runs\` | $0.05/step | Each task step is a run; total capped by \`budget_cents\`. |
+| Session reset / get / list / delete | Free | Sessions have no per-minute cost. |
+| \`GET /v1/models\`, \`GET /v1/usage\`, \`/v1/keys\` | Free | |
 
-Surcharges may apply on inference endpoints: roughly +$0.02 per extra trajectory
-screenshot, +$0.01 per HD screenshot (wider than 1280x720), +$0.03 per request
-on the \`v1\` engine, and +$0.01 for a large custom prompt (over 500 chars). The
-wallet is a prepaid USD balance; top up in the developer dashboard.
+**Surcharges** (exact amounts, added per inference request):
+
+- +$0.02 (2 cr) per trajectory screenshot beyond the current one.
+- +$0.01 (1 cr) per HD image. An image is HD when width > 1280 **or**
+  height > 720, strictly — exactly 1280x720 is NOT HD. The fee applies to the
+  current screenshot and to every trajectory screenshot.
+- +$0.03 (3 cr) per request on the \`v1\` engine; \`v3\` and \`v4\` add $0.
+- +$0.01 (1 cr) when \`system_prompt\` is longer than 500 characters (exactly
+  500 chars is free).
+
+**Runs & workflows (per agent step)**
+
+| Item | Cost | Note |
+| --- | --- | --- |
+| Run step on \`v3\` / \`v4\` | $0.05/step (5 cr) | Billed after each completed step; no trajectory/HD/prompt surcharges on run steps. |
+| Run step on \`v1\` | $0.08/step (8 cr) | 5 cr base + 3 cr v1 engine surcharge. |
+| Workflow \`task\` step | Same as a run step | $0.05 on v3/v4, $0.08 on v1; total capped by \`budget_cents\`. |
+| Workflow control-flow steps (\`if\`, \`assert\`, \`loop\`, \`parallel\`, \`retry\`, \`human_approval\`, \`succeed\`, \`fail\`) | Free | Only \`task\` steps bill. |
+
+Starting a run requires your wallet to cover at least one step ($0.05, or
+$0.08 on \`v1\`) — otherwise \`402 INSUFFICIENT_CREDITS\`. If the wallet runs dry
+mid-run, the run fails with \`WALLET_EXHAUSTED\`; completed steps stay billed.
+
+**Machines (runtime — metered per minute, hourly rates)**
+
+| State | Cost | Note |
+| --- | --- | --- |
+| Running — Linux | $0.05/hr (5 cr/hr) | Also billed while starting / stopping / restarting. |
+| Running — Windows | $0.09/hr (9 cr/hr) | |
+| Stopped / suspended | $0.01/hr (1 cr/hr) | Storage-only rate, any OS. |
+| Creating / error / terminated | Free | Provisioning time is never billed. |
+| \`POST /v1/machines/{id}/snapshot\` | $0.01 (1 cr) | One-time; refunded if the snapshot fails. |
+| Actions, batches, terminal, browser ops, files, screenshots, start/stop/restart, connection, list/get/delete | Free per call | Covered by the runtime rate. |
+
+Runtime is billed in whole credits, rounded down in your favor (partial
+credits are never billed). Provisioning requires a wallet balance of at least
+$0.20 (20 credits) — a gate, not a fee. An empty wallet **stops** the machine
+(never destroys it) and flags it \`suspended_for_billing\`; top up and start it
+again. The live price table is also served at \`GET /v1/machines/pricing\`.
+
+**Schedules & triggers**
+
+| Item | Cost | Note |
+| --- | --- | --- |
+| Create schedule / run-now / webhook fire | Free — gate only | Requires a $0.20 (20 cr) wallet minimum; there is no per-fire fee. |
+| Scheduled execution | 10 Coasty credits per minute of agent runtime | Billed to your account credit balance (the consumer balance, NOT this API wallet); 20-credit minimum to start, 6-hour session cap. |
+| Test schedules (\`sch_test_*\`) | Free | Synthetic runs; \`credits_charged: 0\`. |
+
+The wallet is a prepaid USD balance; top up in the developer dashboard.
 
 ### MCP server
 
@@ -1390,8 +1475,28 @@ machines and a live key never sees test machines.
 **Sandbox shortcut.** A test key (\`sk-coasty-test-\`) returns a mock VM
 **instantly** with no AWS provisioning, no wallet billing, and an
 \`mch_test_*\` id. Use it to build and test the full action surface for free.
-Live provisioning needs the \`machines:write\` scope and a minimum wallet balance
-(a 20-credit pre-flight check).
+Live provisioning needs the \`machines:write\` scope and a minimum wallet
+balance of $0.20 (20 credits) — a pre-flight gate, not a fee.
+
+**Runtime billing.** A live machine bills your API wallet by state, metered
+per minute and always rounded down in your favor:
+
+| State | Rate |
+| --- | --- |
+| Running — Linux (incl. starting/stopping/restarting) | $0.05/hr (5 credits/hr) |
+| Running — Windows | $0.09/hr (9 credits/hr) |
+| Stopped / suspended (any OS — storage only) | $0.01/hr (1 credit/hr) |
+| Creating / error / terminated | Free |
+
+Every per-call operation on a machine — actions, batches, terminal, browser
+ops, files, screenshots, start/stop/restart, connection details — is
+**free**; you pay only the hourly runtime rate (plus $0.01 one-time for a
+snapshot). If your wallet runs dry the machine is **stopped, never
+destroyed**, and flagged \`suspended_for_billing\`; top up and start it again.
+To bound spend, set \`ttl_minutes\` at provision time (5 minutes to 7 days):
+the machine auto-terminates at \`created_at + ttl_minutes\`, ending all
+billing. Extend or clear the TTL any time via \`PATCH /v1/machines/{id}\`.
+The same numbers are served machine-readably at \`GET /v1/machines/pricing\`.
 
 ### Machine endpoints + scopes
 
@@ -1399,10 +1504,13 @@ Live provisioning needs the \`machines:write\` scope and a minimum wallet balanc
 | --- | --- | --- |
 | \`POST /v1/machines\` | \`machines:write\` | Provision a VM. Honors \`Idempotency-Key\`. |
 | \`GET /v1/machines\` | \`machines:read\` | List your machines (\`limit\`, 1-200, default 50). |
+| \`GET /v1/machines/pricing\` | \`machines:read\` | The runtime + one-time price table (machine-readable). |
 | \`GET /v1/machines/{id}\` | \`machines:read\` | Get one machine. |
 | \`DELETE /v1/machines/{id}\` | \`machines:write\` | Terminate a machine. |
 | \`POST /v1/machines/{id}/start\` | \`machines:write\` | Start a stopped machine. |
 | \`POST /v1/machines/{id}/stop\` | \`machines:write\` | Stop a running machine. |
+| \`POST /v1/machines/{id}/restart\` | \`machines:write\` | Restart a machine (billed at the running rate throughout). |
+| \`PATCH /v1/machines/{id}\` | \`machines:write\` | Update the auto-destroy TTL (\`ttl_minutes\`: 5-10080 from now, 0 clears). |
 | \`POST /v1/machines/{id}/snapshot\` | \`snapshots:write\` | Snapshot the disk. Honors \`Idempotency-Key\`. |
 | \`GET /v1/machines/{id}/screenshot\` | \`machines:read\` | Capture the screen as base64. |
 | \`GET /v1/machines/{id}/connection\` | \`connection:read\` | SSH key + VNC password + ports (HIGH-RISK). |
@@ -1432,6 +1540,7 @@ everything else needs \`actions:exec\`.
 | \`memory_gb\` | int\\|null | no | null | 1-64, capped to your tier. |
 | \`storage_gb\` | int\\|null | no | null | 8-500. |
 | \`restore_from_snapshot\` | bool\\|null | no | false | Restore your latest snapshot (Linux only). |
+| \`ttl_minutes\` | int\\|null | no | null | 5-10080 (5 min - 7 days). Auto-terminate at \`created_at + ttl_minutes\`, ending runtime billing. |
 | \`metadata\` | object\\|null | no | null | Free-form string tags (max 16 entries). |
 
 Pass \`Idempotency-Key: <up to 128 chars, [A-Za-z0-9_-:]>\` so a retried provision
@@ -1509,6 +1618,11 @@ that response as a secret (it is sent with \`Cache-Control: no-store\`).
 \`POST /v1/machines/{id}/start\`, \`/stop\`, and \`DELETE /v1/machines/{id}\` return
 \`{ machine_id, status, message, request_id }\`. \`POST /v1/machines/{id}/snapshot\`
 returns \`{ machine_id, snapshot_id, name, created_at, credits_charged, request_id }\`.
+
+A snapshot costs **$0.01 (1 credit)** one-time, charged up front and refunded
+if the snapshot fails. Start, stop, restart, and delete are free per call —
+they only switch which hourly runtime rate applies ($0.05-0.09/hr running,
+$0.01/hr stopped, $0 after termination).
 
 ### GET /v1/machines/{id}/screenshot
 
@@ -1658,6 +1772,15 @@ triggers needs \`triggers:write\`.
 A schedule id is a UUID (live) or \`sch_test_<8-32 hex>\` (sandbox). Test keys get
 mock schedules that never bill, capped at 10. A trigger id matches \`trg_<8-32 hex>\`.
 
+**Pricing.** Creating a schedule, firing it with run-now, and firing it via
+webhook each require an API wallet balance of at least $0.20 (20 credits) —
+a runway gate, not a fee; there is no per-fire or per-trigger charge.
+Execution itself bills per minute of agent runtime to your Coasty account
+credit balance (the consumer balance, not this API wallet) at 10 credits per
+minute, with a 20-credit minimum to start and a 6-hour session cap. A fire
+that cannot meet the balance gate records a run with status
+\`insufficient_credits\`. Test schedules never bill (\`credits_charged: 0\`).
+
 ### Schedule endpoints
 
 | Method + path | Scope | Description |
@@ -1763,6 +1886,9 @@ signature instead. Send the signature in the \`Coasty-Signature\` header as
 The replay window is 5 minutes: a signature whose \`t\` is older than 5 minutes is
 rejected even if the HMAC is valid. Identical \`(webhook_id, body)\` fires within
 60s are deduplicated.
+
+Webhook fires are free — there is no routing fee — but a fire is rejected
+unless the schedule owner's API wallet holds at least $0.20 (20 credits).
 
 \`\`\`python
 import hashlib, hmac, json, os, time, requests

@@ -119,13 +119,11 @@ describe("landing header + references", () => {
     expect(HEADER).toMatch(/href:\s*"\/docs",\s*labelKey:\s*"docs",\s*label:\s*"Docs"/)
     // mobile resourceLinks
     expect(HEADER).toMatch(/href:\s*"\/docs",\s*label:\s*"Docs"/)
-    // The /docs nav item sits BEFORE the DEVELOPERS_API_ENABLED gate, so it
-    // shows even while the API feature flag is off.
-    const navBlock = HEADER.slice(HEADER.indexOf("const navItemsDef"))
-    const docsIdx = navBlock.indexOf('label: "Docs"')
-    const gateIdx = navBlock.indexOf("DEVELOPERS_API_ENABLED")
-    expect(docsIdx).toBeGreaterThan(0)
-    expect(docsIdx).toBeLessThan(gateIdx)
+    // The navbar carries NO separate "API" item: the developer story lives
+    // behind the landing hero's Product/Developers toggle, and /docs is the
+    // only reference link in the header (desktop nav + mobile drawer).
+    expect(HEADER).not.toContain("/api-docs")
+    expect(HEADER).not.toContain("DEVELOPERS_API_ENABLED")
   })
   it("the Copy-for-AI prompt points at the public docs + llm version", () => {
     const PROMPT = read("lib/coasty-ai-prompt.ts")

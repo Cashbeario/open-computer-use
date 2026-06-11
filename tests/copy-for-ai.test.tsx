@@ -31,10 +31,15 @@ describe("AI_PROMPT — accurate, self-contained brief", () => {
     expect(AI_PROMPT).toContain("task, assert, if, loop, parallel, human_approval, retry, succeed, fail")
   })
 
-  it("prices in USD, never in credits", () => {
+  it("prices in USD, with the credit anchor stated", () => {
     expect(AI_PROMPT).toContain("$0.05")
     expect(AI_PROMPT).toContain("$0.10")
-    expect(AI_PROMPT).not.toMatch(/\d+\s*credits/i)  // no credit-denominated pricing
+    expect(AI_PROMPT).toContain("1 credit = $0.01")  // the anchor that makes any credit mention exact
+    // The ONLY credit-denominated rate allowed is the consumer-balance schedule
+    // runtime (10 credits/min bills subscription credits, not the USD wallet).
+    expect(AI_PROMPT).toContain("10 credits per minute")
+    const creditMentions = AI_PROMPT.match(/\d+\s*credits/gi) ?? []
+    expect(creditMentions).toEqual(["10 credits"])
   })
 
   it("lists the standard error codes", () => {

@@ -159,8 +159,29 @@ export const PRICING: PriceRow[] = [
   { endpoint: "POST /v1/sessions/{id}/predict",    cost: "$0.04", note: "Each step inside a session." },
   { endpoint: "POST /v1/ground",                   cost: "$0.03", note: "Coordinate grounding." },
   { endpoint: "POST /v1/parse",                    cost: "Free",  note: "Deterministic, no model call." },
-  { endpoint: "POST /v1/runs",                     cost: "$0.05/step", note: "Per agent step on v3/v4 (v1 is $0.08), billed from your dollar API wallet." },
-  { endpoint: "POST /v1/workflows/runs",           cost: "$0.05/step", note: "Each task step is a run; total capped by budget_cents." },
+  { endpoint: "POST /v1/runs",                     cost: "$0.05/step", note: "Per completed agent step on v3/v4 ($0.08/step on the legacy v1 engine), billed from your dollar API wallet." },
+  { endpoint: "POST /v1/workflows/runs",           cost: "$0.05/step", note: "Each task step is a run ($0.08/step on v1). Control-flow steps (if, assert, loop, parallel, retry, human_approval, succeed, fail) are free. Total capped by budget_cents." },
+  { endpoint: "/v1/machines (Linux, running)",     cost: "$0.05/hr", note: "Runtime metered per minute, rounded down. Starting, stopping, and restarting bill at the running rate." },
+  { endpoint: "/v1/machines (Windows, running)",   cost: "$0.09/hr", note: "Runtime metered per minute, rounded down." },
+  { endpoint: "/v1/machines (stopped or suspended)", cost: "$0.01/hr", note: "Keep-alive rate while a machine is parked. The creating, error, and terminated states bill nothing." },
+  { endpoint: "POST /v1/machines/{id}/snapshot",   cost: "$0.01", note: "One-time charge per snapshot." },
+  { endpoint: "/v1/machines/{id} per-call ops",    cost: "Free",  note: "Actions, batch, browser, terminal, files, screenshot, and connection calls are never billed; you pay for runtime only." },
+  { endpoint: "POST /v1/schedules",                cost: "Free",  note: "No per-fire fee; webhook fires are free (limited to 60/min). Create, run-now, and webhook fires require a $0.20 wallet minimum as a gate, not a charge." },
+]
+
+/* Exact per-request surcharges layered on top of the base prices above.
+   Every surcharge is a fixed USD amount, never an estimate. */
+export interface SurchargeRow {
+  surcharge: string
+  cost: string
+  applies: string
+}
+
+export const SURCHARGES: SurchargeRow[] = [
+  { surcharge: "Trajectory screenshot", cost: "+$0.02 each",        applies: "Every screenshot you include in a request's trajectory history." },
+  { surcharge: "High-resolution image", cost: "+$0.01 each",        applies: "Any image wider than 1280px or taller than 720px (strict), counting the current screenshot and every trajectory image." },
+  { surcharge: "v1 engine",             cost: "+$0.03 per request", applies: "Requests served by the legacy v1 engine instead of v3/v4." },
+  { surcharge: "Long system prompt",    cost: "+$0.01 per request", applies: "Requests whose system_prompt exceeds 500 characters." },
 ]
 
 /* ─── Agents (Task Runs) reference data ─── */
@@ -2063,7 +2084,9 @@ export const RESPONSE_EXAMPLE = {
     { action_type: "type_text", params: { text: "you@example.com" }, description: "Type the email address" },
   ],
   raw_code: ["pyautogui.click(512, 340)", "pyautogui.typewrite('you@example.com')"],
-  usage: { input_tokens: 1523, output_tokens: 245, credits_charged: 5, cost_cents: 45 },
+  // A base $0.05 predict: credits_charged is the internal unit count (1 unit = $0.01),
+  // cost_cents is the same amount in USD cents. The two always agree.
+  usage: { input_tokens: 1523, output_tokens: 245, credits_charged: 5, cost_cents: 5 },
 }
 
 /* The standard error envelope. Every error carries error.code (stable),
@@ -2079,8 +2102,9 @@ export const ERROR_EXAMPLE = {
     type: "payment_required",
     suggestion: "Add funds in the dashboard, or use an sk-coasty-test- key while building (test keys never bill).",
     docs_url: "https://coasty.ai/developers/docs#errors",
-    required: 45,
-    balance: 12,
+    // Units are USD cents: a $0.05 predict was attempted with $0.02 left.
+    required: 5,
+    balance: 2,
     request_id: "req_8f2c1e9a",
   },
 }
@@ -2662,8 +2686,8 @@ function DocsBody() {
           Grounding answers a narrower question than predict: &ldquo;where is this element?&rdquo; Give it
           a screenshot and a description and it returns the exact <InlineCode>x</InlineCode>,{" "}
           <InlineCode>y</InlineCode> coordinate to target. It is faster and cheaper than a full
-          prediction, which makes it ideal when you already know what to do and only need a pixel to
-          click.
+          prediction ($0.03 instead of $0.05), which makes it ideal when you already know what to do
+          and only need a pixel to click.
         </P>
         <CodeTabs {...sampleProps("grounding")} />
         <P>
@@ -2688,7 +2712,8 @@ function DocsBody() {
         <P>
           A run hands the agent a task and a machine, then drives it to completion on our side. The
           agent loops autonomously, verifies its own work (pass or fail), can pause for a human when it
-          hits a wall, bills per step from your dollar API wallet, and streams every event live. You
+          hits a wall, bills $0.05 per completed step from your dollar API wallet ($0.08/step on the
+          legacy v1 engine), and streams every event live. You
           start one call and watch, instead of running the predict loop yourself.
         </P>
         <P>
@@ -3079,11 +3104,11 @@ function DocsBody() {
       {/* ── Pricing ── */}
       <DocBlock section={sec("pricing")}>
         <P>
-          Requests are billed in US dollars from your API wallet. The charge is taken before the model
-          runs and automatically refunded if a request fails server-side. Internally each request unit is{" "}
-          <InlineCode>$0.01</InlineCode> (the granularity behind every price below), but everything you
-          pay and see is dollars. High-resolution screenshots (above 1280×720) and longer trajectories
-          add a small surcharge; test keys are always free.
+          Requests are billed in US dollars from your prepaid API wallet. The charge is taken before the
+          model runs and automatically refunded if a request fails server-side. Internally each request
+          unit is <InlineCode>$0.01</InlineCode> (the granularity behind every price below), but
+          everything you pay and see is dollars. Every price on this page is exact; test keys (
+          <InlineCode>sk-coasty-test-</InlineCode>) always bill <InlineCode>$0.00</InlineCode>.
         </P>
         <RefTable
           head={["Endpoint", "Cost", "Notes"]}
@@ -3093,6 +3118,45 @@ function DocsBody() {
             p.note,
           ])}
         />
+
+        <h3 className="text-[15px] font-semibold tracking-tight text-foreground/90 pt-2">Surcharges</h3>
+        <P>
+          Four fixed surcharges can apply on top of a base price, all on the vision endpoints
+          (predict, session steps, ground). Each is an exact USD amount:
+        </P>
+        <RefTable
+          head={["Surcharge", "Cost", "Applies to"]}
+          rows={SURCHARGES.map((s) => [
+            <span key={s.surcharge} className="font-medium text-foreground/80">{s.surcharge}</span>,
+            <span key={`${s.surcharge}-c`} className="font-medium text-foreground/80 whitespace-nowrap">{s.cost}</span>,
+            s.applies,
+          ])}
+        />
+
+        <h3 className="text-[15px] font-semibold tracking-tight text-foreground/90 pt-2">Machines</h3>
+        <P>
+          Machines bill for runtime only, metered per minute and rounded down:{" "}
+          <InlineCode>$0.05/hr</InlineCode> for a running Linux machine,{" "}
+          <InlineCode>$0.09/hr</InlineCode> for a running Windows machine, and{" "}
+          <InlineCode>$0.01/hr</InlineCode> while stopped or suspended. The starting, stopping, and
+          restarting transitions bill at the running rate; the creating, error, and terminated states
+          bill nothing, and TTL auto-destroy is free. Snapshots are a one-time{" "}
+          <InlineCode>$0.01</InlineCode> each, and every per-call operation (actions, batch, browser,
+          terminal, files, screenshot, connection) is free. Provisioning requires a{" "}
+          <InlineCode>$0.20</InlineCode> wallet minimum, which is a gate, not a charge. If the wallet
+          empties mid-flight the machine is automatically stopped, never destroyed, and resumes after
+          you top up. The live rate card is always at <InlineCode>GET /v1/machines/pricing</InlineCode>.
+        </P>
+
+        <h3 className="text-[15px] font-semibold tracking-tight text-foreground/90 pt-2">Schedules</h3>
+        <P>
+          Schedules have no per-fire fee: webhook fires are free (limited to 60/min), and create,
+          run-now, and webhook fires only require the same <InlineCode>$0.20</InlineCode> wallet
+          minimum as a gate. The execution itself is billed differently from everything else on this
+          page: scheduled agent runtime is charged to your subscription credit balance at 10 credits
+          per minute ($0.10 of subscription value per minute, at 1 credit = $0.01), not to this USD
+          API wallet. Keep both balances funded if you rely on schedules.
+        </P>
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <Link
             href="/developers/keys"

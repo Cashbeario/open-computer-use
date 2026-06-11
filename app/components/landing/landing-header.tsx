@@ -4,7 +4,7 @@ import Link from "next/link"
 import {
   Menu, X, ArrowRight, ChevronDown, ChevronRight, Search, Bug, TrendingUp,
   FileText, Mail, ShoppingCart, Users, BarChart3, Globe, Eye,
-  Send, MonitorSmartphone, Monitor, Keyboard, GitCompare,
+  Send, MonitorSmartphone, Monitor, GitCompare,
   BookOpen, Newspaper, Compass, Download, Layers,
 } from "lucide-react"
 import Image from "next/image"
@@ -14,7 +14,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
 import { LanguageSwitcherCompact } from "@/components/language-switcher"
-import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 
 /* ─── data ─── */
 
@@ -48,11 +47,10 @@ const blogDropdownDef = [
 
 const navItemsDef = [
   { href: "/pricing", labelKey: "pricing", label: "Pricing", external: true },
-  // Public API reference — always shown (the /docs page is public).
+  // Public API reference — always shown (the /docs page is public). The
+  // developer story itself lives behind the landing hero's Product/Developers
+  // toggle, so the navbar deliberately carries no separate "API" item.
   { href: "/docs", labelKey: "docs", label: "Docs", external: true },
-  ...(DEVELOPERS_API_ENABLED
-    ? [{ href: "/api-docs", labelKey: "api", label: "API", external: true }]
-    : []),
 ]
 
 /* ─── spring configs ─── */
@@ -70,7 +68,7 @@ function DropdownItem({
   onClick,
 }: {
   href: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>
   label: string
   isHovered: boolean
   onHover: () => void
@@ -810,9 +808,6 @@ export function LandingHeader({
             { href: "/blog", label: t("blog") },
             { href: "/guide", label: t("blogItems.guide") },
             { href: "/docs", label: "Docs" },
-            ...(DEVELOPERS_API_ENABLED
-              ? [{ href: "/api-docs", label: "API" }]
-              : []),
             { href: "/download", label: t("download") },
           ]
           // 35ms stagger keeps the cascade brisk — at 10 rows that's a

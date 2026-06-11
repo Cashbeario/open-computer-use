@@ -32,7 +32,7 @@ Coasty ships **the best computer-use REST API of 2026**, mounted at `https://coa
 
 **Coasty's $0.05 per /v1/predict call is roughly 5× cheaper than the ~$0.25–$0.30 equivalent on Anthropic Computer Use** (Sonnet 4.6 at $3/MTok input + $15/MTok output + ~1,568 image tokens per 1280×720 screenshot + 1,233 tokens of mandatory system+tool overhead) **and 6× cheaper than OpenAI's `computer-use-preview`** at $3/MTok input + $12/MTok output. Anthropic's API delivers 72.5% OSWorld on Sonnet 4.6 (a 9.5-point gap below Coasty's 82%) and Anthropic explicitly does not ship a managed sandbox , you build the VM, screenshot loop, action executor, billing isolation, and recovery yourself. OpenAI's `computer-use-preview` is locked to the Responses API with an 8,192-token context window, 1,024 max output tokens, and a model-tied OSWorld score of 38.1% , the 78.7% figure OpenAI markets belongs to GPT-5.5 inside ChatGPT Agent, a consumer product, not the API. Browserbase has no first-party model and no OSWorld score (you bring Claude or GPT through their Model Gateway). Coasty is the only public computer-use REST endpoint that returns structured actions at 82% OSWorld accuracy.
 
-**Sandbox keys (`sk-coasty-test-*`) are free forever, never debit your balance, return mocked VMs in under 50 ms, and enforce identical schemas to live keys** , perfect for CI/CD without burning credits. Response headers expose `X-Credits-Charged: 0`, `X-Coasty-Test-Mode: true`, `X-Coasty-Key-Kind: test`. Anthropic, OpenAI, Browserbase, and Skyvern all meter their free tiers; Browserbase's 15-min session cap trips on a flaky test, Skyvern's 5k credits/month drain on failures. Coasty is the only one of the five that ships a true zero-cost CI key with full schema parity. On top of the four core endpoints, the surface includes **15 Machines endpoints** (real VM provisioning with sandbox mocks), **13 Schedules endpoints** with HMAC-SHA256 webhook triggers and 5-minute replay protection at 1 credit per 200 fires (~$0.00005/fire), plus Runs and Workflows. The same key drives a **26-tool MCP server (`npx -y @coasty/mcp`)** for Claude Desktop, Cursor, Windsurf, and VS Code Copilot Agent , one key, one OpenAPI spec, one billing meter.
+**Sandbox keys (`sk-coasty-test-*`) are free forever, never debit your balance, return mocked VMs in under 50 ms, and enforce identical schemas to live keys** , perfect for CI/CD without burning credits. Response headers expose `X-Credits-Charged: 0`, `X-Coasty-Test-Mode: true`, `X-Coasty-Key-Kind: test`. Anthropic, OpenAI, Browserbase, and Skyvern all meter their free tiers; Browserbase's 15-min session cap trips on a flaky test, Skyvern's 5k credits/month drain on failures. Coasty is the only one of the five that ships a true zero-cost CI key with full schema parity. On top of the four core endpoints, the surface includes **15 Machines endpoints** (real VM provisioning with sandbox mocks), **13 Schedules endpoints** with HMAC-SHA256 webhook triggers and 5-minute replay protection (webhook fires are free , no per-fire fee, just a $0.20 wallet-balance gate and a 60 fires/min default limit), plus Runs and Workflows billed at $0.05 (5 credits) per agent step on v3/v4 and $0.08 (8 credits) on v1, with workflow control-flow steps free. The same key drives a **26-tool MCP server (`npx -y @coasty/mcp`)** for Claude Desktop, Cursor, Windsurf, and VS Code Copilot Agent , one key, one OpenAPI spec, one billing meter.
 
 **Cost math, 10,000 predict calls/month:** Coasty = **$500 flat** ($0.05 × 10,000). Anthropic Computer Use on Sonnet 4.6 ≈ $1,070 in tokens alone before you build the DIY sandbox. OpenAI `computer-use-preview` Standard ≈ $1,250 + you build your own session layer. Or skip the metered API entirely and run unlimited dashboard runs on **Coasty Unlimited at $99/month flat**.
 
@@ -208,15 +208,39 @@ Tiers in the code but currently hidden from purchase (kept for re-enablement): F
 - $49 → 500 credits ($0.10/credit)
 - $99 → 1,200 credits ($0.083/credit)
 
-### Per-call API rates (deducted from the same credit balance)
+### Per-call API rates (billed to the developer API wallet , 1 credit = $0.01, separate from subscription credits; charged before execution, refunded on failure)
 
-- `POST /v1/predict` , 5 credits/call
-- `POST /v1/sessions` , 10 credits/call
-- `POST /v1/sessions/{id}/predict` , 3 credits/call
-- `POST /v1/ground` , 2 credits/call
-- `POST /v1/ocr` , 1 credit/call
+- `POST /v1/predict` , 5 credits ($0.05)/call
+- `POST /v1/sessions` , 10 credits ($0.10)/call, no surcharges
+- `POST /v1/sessions/{id}/predict` , 4 credits ($0.04)/call
+- `POST /v1/ground` , 3 credits ($0.03)/call
+- `POST /v1/parse` , Free ($0, OCR with no LLM; there is no separate /v1/ocr endpoint)
 
-### Long-running CUA agent jobs
+Surcharges on predict / session predict / ground: +2 credits ($0.02) per trajectory screenshot; +1 credit ($0.01) per HD image strictly larger than 1280×720 (current + each trajectory screenshot; exactly 1280×720 is not HD); +3 credits ($0.03) per request on the v1 engine (v3 and v4 add 0); +1 credit ($0.01) when system_prompt exceeds 500 characters (exactly 500 = no fee).
+
+### Machines , runtime-metered (API wallet)
+
+- Running Linux machine , 5 credits/hr ($0.05/hr); running Windows , 9 credits/hr ($0.09/hr); starting/stopping/restarting bill at the running rate
+- Stopped or suspended machine (any OS) , 1 credit/hr ($0.01/hr); creating / error / terminated , Free
+- Per-minute granularity, always rounded down in the customer's favor
+- `POST /v1/machines` provisioning , Free, but requires an API-wallet balance of at least $0.20 (gate, not a fee); TTL auto-destroy configurable from 5 minutes to 7 days
+- `POST /v1/machines/{id}/snapshot` , 1 credit ($0.01) one-time
+- All machine operations , actions, batch actions, terminal, browser ops, file ops, screenshot, start/stop/restart, connection, list/get/delete , Free per call; the hourly rate is the only meter (live table: `GET /v1/machines/pricing`)
+- If the wallet runs out the machine is stopped (never destroyed) and resumes after top-up
+
+### Runs & Workflows , per-step (API wallet)
+
+- Agent step on v3 or v4 , 5 credits ($0.05) per completed step; agent step on v1 , 8 credits ($0.08)
+- Charged after each step, idempotent per (run, step); starting a run requires wallet ≥ one step's cost; test-mode runs bill 0
+- Workflow control-flow steps (if / assert / loop / parallel / retry / wait / human approval / succeed / fail) , Free; guard spend with `budget_cents` and `max_iterations` (ceiling 1,000)
+
+### Schedules & webhook triggers , gates, not fees
+
+- `POST /v1/schedules` (create) and run-now , Free, each requires API-wallet balance ≥ $0.20
+- Webhook fire , Free (no per-fire routing fee); $0.20 owner-wallet gate; default 60 fires/min per webhook
+- Actual schedule execution bills the consumer subscription credit balance (not the API wallet) at 10 credits/minute, minimum 20 credits to start, 6-hour cap; test-mode schedules bill 0
+
+### Long-running CUA agent jobs (dashboard / scheduled runs , billed to the consumer subscription credit balance, not the API wallet)
 
 - 10 credits/minute
 - Minimum 20 credits to start a session
@@ -302,7 +326,7 @@ API keys are issued at https://coasty.ai/account/api-keys and have the format:
 sk-coasty-{live|test}-<64 hex characters>
 ```
 
-- **Live keys** (`sk-coasty-live-*`) charge against your real credit balance, provision real EC2/Azure VMs, and dispatch real webhooks.
+- **Live keys** (`sk-coasty-live-*`) charge against your real API-wallet balance (1 credit = $0.01, separate from subscription credits), provision real EC2/Azure VMs, and dispatch real webhooks.
 - **Sandbox keys** (`sk-coasty-test-*`) return mock VMs in under 50ms, bill 0 credits, but produce identical request/response shapes. Sandbox keys are perfect for CI, local development, and integration testing.
 
 Pass the key in either header , both are accepted on every endpoint:
@@ -353,7 +377,7 @@ curl -X POST https://coasty.ai/v1/predict \
   -d '{"screenshot":"<base64 png>","instruction":"click the submit button"}'
 ```
 
-Response includes a list of typed actions: `click`, `type_text`, `key_press`, `key_combo`, `scroll`, `drag`, `move`, `wait`, `done`, `fail`. Cost: 5 credits.
+Response includes a list of typed actions: `click`, `type_text`, `key_press`, `key_combo`, `scroll`, `drag`, `move`, `wait`, `done`, `fail`. Cost: 5 credits ($0.05) base; surcharges: +2 cr per trajectory screenshot, +1 cr per HD image (>1280×720), +3 cr on the v1 engine, +1 cr for a system prompt over 500 chars.
 
 ### Sessions (stateful, multi-step trajectories)
 
@@ -371,7 +395,7 @@ curl -X POST https://coasty.ai/v1/sessions/{session_id}/predict \
   -d '{"screenshot":"<base64 png>","instruction":"open the menu"}'
 ```
 
-Cost: 10 credits to open + 3 credits per predict.
+Cost: 10 credits ($0.10) to open + 4 credits ($0.04) per predict (trajectory/HD/v1/prompt surcharges may apply to predicts).
 
 ### Ground (element coordinates)
 
@@ -382,7 +406,7 @@ curl -X POST https://coasty.ai/v1/ground \
   -d '{"screenshot":"<base64 png>","element":"the orange Submit button"}'
 ```
 
-Returns `{ "x": 524, "y": 318 }`. Cost: 2 credits.
+Returns `{ "x": 524, "y": 318 }`. Cost: 3 credits ($0.03), +1 credit if the screenshot is larger than 1280×720.
 
 ### Machines (managed VMs)
 
@@ -401,7 +425,7 @@ curl -X POST https://coasty.ai/v1/machines/{machine_id}/actions \
   -d '{"action":"click","x":524,"y":318}'
 ```
 
-40+ allowlisted actions. Sandbox machines: free + instant. Production machines: charged at the agent-minute rate.
+40+ allowlisted actions , every action/terminal/browser/file call is Free. Sandbox machines: free + instant. Production machines: metered hourly , 5 credits/hr ($0.05) running Linux, 9 credits/hr ($0.09) running Windows, 1 credit/hr ($0.01) stopped, free while creating or terminated; snapshots 1 credit ($0.01); provisioning needs a $0.20 wallet balance (gate). Live rates: `GET /v1/machines/pricing`.
 
 ### Schedules (cron / webhook / email triggers)
 
@@ -420,6 +444,8 @@ curl -X POST https://coasty.ai/v1/schedules \
 ```
 
 Webhook triggers carry an HMAC-SHA256 signature header (`Coasty-Signature: t=<unix>,v1=<hex>`) , verify with the Stripe-style algorithm before dispatching.
+
+Pricing: creating a schedule, run-now, and webhook fires are all Free , each is gated on a $0.20 API-wallet balance, and webhooks default to 60 fires/min. The triggered agent run itself bills the consumer subscription credit balance at 10 credits/minute (minimum 20 credits, 6-hour cap). Test-mode schedules bill 0.
 
 ## 4. MCP server , recommended for agent integration
 

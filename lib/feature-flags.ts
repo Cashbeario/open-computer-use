@@ -23,7 +23,7 @@
  * The backend `/api/developers` Next.js routes and the FastAPI public API
  * (/v1/*) are auth-gated and live regardless of this flag.
  */
-export const DEVELOPERS_API_ENABLED = false
+export const DEVELOPERS_API_ENABLED = true
 
 /**
  * Gates the sidebar platform-mode switcher (Consumer ↔ Developer) shown next
@@ -32,3 +32,11 @@ export const DEVELOPERS_API_ENABLED = false
  * last choice.
  */
 export const PLATFORM_MODE_SWITCHER_ENABLED = true
+
+/**
+ * Gates the "Data" view of the landing page (the synthetic computer-use
+ * training-data pitch reached via the hero's audience toggle and the
+ * ?view=data deep link). Independent of DEVELOPERS_API_ENABLED — the hero
+ * toggle renders whenever more than one landing view is enabled.
+ */
+export const DATA_LANDING_ENABLED = true

@@ -1,447 +1,254 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { LegalPage, type LegalSection } from "@/app/components/legal/legal-page"
+import { PRIVACY_LAST_UPDATED, PRIVACY_VERSION } from "@/lib/legal/versions"
 
-import { ArrowLeft, Shield, Lock, Database, Globe, Users, Clock, Mail, FileText, Eye, Download, Trash2, Settings, Baby, Code, Edit, ChevronRight } from "lucide-react"
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { cn } from "@/lib/utils"
-
-import { LandingHeader } from "@/app/components/landing/landing-header"
-import { LandingFooter } from "@/app/components/landing/landing-footer"
-import { motion, AnimatePresence } from "framer-motion"
-import { PRIVACY_LAST_UPDATED } from "@/lib/legal/versions"
-
-const privacySections = [
+const sections: LegalSection[] = [
   {
-    id: "introduction",
-    title: "Introduction",
-    icon: Shield,
-    content: "Welcome to Coasty. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you use your AI employee that collaborates with everyone in your organization."
+    id: "overview",
+    title: "Overview",
+    blocks: [
+      {
+        kind: "p",
+        text: "Coasty is an AI employee that operates a computer on your behalf. To do that work it necessarily sees and acts on a lot of your information, so we keep this policy plain about what we collect, what the agent can access, how we use it, and the controls you have. This policy applies to the hosted Coasty service at coasty.ai and the Coasty desktop app.",
+      },
+      {
+        kind: "callout",
+        text: "Short version: we collect what we need to run the service and the agents you ask for, we use it broadly to operate, secure, bill for, and improve Coasty, we share it only with the infrastructure and AI providers that power the product, and we do not sell your personal information.",
+      },
+    ],
+  },
+  {
+    id: "agent-access",
+    title: "What the agent can access",
+    blocks: [
+      {
+        kind: "p",
+        text: "Coasty is a computer-use product. When you run an agent, you are authorizing it to see and act on whatever is needed to complete the task you gave it. Depending on how you use Coasty, that can include a wide range of your information.",
+      },
+      {
+        kind: "list",
+        items: [
+          "Screenshots of the screen the agent is operating, captured during a session so the model can see what it is doing.",
+          "Files and folders you point the agent at, including their contents, which it may read, create, edit, or delete.",
+          "Terminal and command output produced while the agent works.",
+          "Web pages and browser activity the agent navigates on your instruction.",
+          "Credentials and connected accounts you choose to provide so the agent can act as you on a site or service.",
+        ],
+      },
+      {
+        kind: "callout",
+        text: "This is broad by design. You decide what to expose to a session, and you can keep sensitive material out of the agent's reach. On the desktop app the agent runs on your own machine and you control what it is pointed at.",
+      },
+    ],
   },
   {
     id: "data-collection",
-    title: "Information We Collect",
-    icon: Database,
-    subsections: [
+    title: "Information we collect",
+    blocks: [
       {
-        title: "Account Information",
+        kind: "sub",
+        title: "Account information",
         items: [
-          "Email address (when you create an account)",
-          "Username or display name (optional)",
-          "Profile picture (optional)"
-        ]
+          "Email address, and your name and profile picture if you provide them.",
+          "Onboarding details you choose to share (role, company, team size, use case).",
+        ],
       },
       {
-        title: "Usage Data",
+        kind: "sub",
+        title: "Content and activity",
         items: [
-          "Virtual machine usage and session data",
-          "AI agent interactions and task history",
-          "Model preferences and settings",
-          "API keys (encrypted with your personal encryption key)"
-        ]
+          "Your prompts and chats, and the assistant's replies.",
+          "Agent task history, tool calls, and their results.",
+          "Files you upload and screenshots captured during agent sessions.",
+          "Model preferences and settings.",
+        ],
       },
       {
-        title: "Technical Information",
+        kind: "sub",
+        title: "Payment information",
+        text: "Subscription, billing, and transaction records. Card details are handled by Stripe, our payment processor, and are not stored on our servers.",
+      },
+      {
+        kind: "sub",
+        title: "Technical information",
         items: [
-          "IP address",
-          "Browser type and version",
-          "Device information",
-          "Usage patterns and preferences"
-        ]
-      }
-    ]
+          "IP address, device and browser information, and the desktop app's system identifiers.",
+          "Usage patterns, performance data, and, where you have consented, cookies and analytics identifiers.",
+        ],
+      },
+    ],
   },
   {
-    id: "data-usage",
-    title: "How We Use Your Information",
-    icon: Settings,
-    items: [
-      "Provide and maintain our AI agent and virtual machine services",
-      "Store your task history and session data",
-      "Enable collaborative features when you choose to use them",
-      "Monitor and optimize resource allocation",
-      "Ensure security and prevent abuse",
-      "Comply with legal obligations"
-    ]
+    id: "data-use",
+    title: "How we use your information",
+    blocks: [
+      {
+        kind: "p",
+        text: "We use the information above broadly to run Coasty and make it better. Specifically, we use it to:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Provide and operate the service, and run the AI agents and virtual machines you request.",
+          "Process your content through the AI and infrastructure providers that power the product.",
+          "Store your chats, task history, and session data so you can return to them.",
+          "Secure the service, detect and prevent abuse, fraud, and misuse, and enforce our Terms.",
+          "Measure usage and analyze, debug, and improve the service, our agents, and the product experience.",
+          "Bill you, manage subscriptions and credits, and provide support.",
+          "Comply with legal obligations and respond to lawful requests.",
+        ],
+      },
+      {
+        kind: "callout",
+        text: "We do not sell your personal information, and we do not use your private content to train third-party foundation models. We may use aggregated or de-identified data, which cannot reasonably be linked back to you, to analyze and improve Coasty.",
+      },
+      {
+        kind: "p",
+        text: "Where the law requires a legal basis (for example in the EEA and UK), we rely on performing our contract with you to provide the service, our legitimate interests in securing and improving it, your consent for optional analytics and cookies, and compliance with legal obligations.",
+      },
+    ],
+  },
+  {
+    id: "providers",
+    title: "AI models and infrastructure providers",
+    blocks: [
+      {
+        kind: "p",
+        text: "To deliver the service we share the data needed to run it with a small set of providers who process it on our behalf. We share only what is necessary for each provider's role.",
+      },
+      {
+        kind: "list",
+        items: [
+          "Amazon Web Services (AWS): all AI model inference runs through Amazon Bedrock, plus the compute that powers the agent virtual machines, in the United States.",
+          "Supabase: authentication and database storage for your account, chats, and history.",
+          "Stripe: payment processing and subscription billing.",
+          "PostHog and Umami: product analytics, loaded only where you have consented.",
+          "Google: sign-in and web search used by the agent.",
+        ],
+      },
+      {
+        kind: "sub",
+        title: "Model providers available through Amazon Bedrock",
+        text: "Depending on the model you select for a task, your prompts and content are processed by a model from one of the providers below. Every model is hosted and run inside Amazon Bedrock, so your content is processed within AWS and is not sent separately to the companies that created the models.",
+        items: [
+          "Anthropic (proprietary models).",
+          "Amazon (proprietary models).",
+          "Mistral (proprietary models).",
+          "Meta (open-weight models).",
+        ],
+      },
+      {
+        kind: "callout",
+        text: "Your prompts, screenshots, and related content are sent to Amazon Bedrock so the model you choose can reason about your task. We do not run model inference on Microsoft Azure, and we do not send your content directly to OpenAI, Google Gemini, or other external model APIs.",
+      },
+    ],
   },
   {
     id: "security",
-    title: "Data Storage and Security",
-    icon: Lock,
-    subsections: [
+    title: "Storage and security",
+    blocks: [
       {
+        kind: "sub",
         title: "Encryption",
-        description: "All API keys are encrypted using AES-256-GCM encryption with a unique encryption key per user. We never store your API keys in plain text.",
-        highlight: true
+        text: "Data is encrypted in transit with TLS. Sensitive secrets such as your stored API keys are encrypted at rest with AES-256-GCM using a per-secret initialization vector, and are never stored in plain text. You can opt additional categories of your data into at-rest encryption from your account settings.",
       },
       {
-        title: "Infrastructure Security",
-        description: "Your virtual machines run in isolated Azure Container Instances with strict resource limits and security boundaries.",
+        kind: "sub",
+        title: "Infrastructure",
         items: [
-          "Isolated container environments",
-          "No data persistence between sessions",
-          "Automatic session termination",
-          "Resource usage monitoring and limits"
-        ]
+          "Agent virtual machines run in isolated environments with resource limits and automatic session termination.",
+          "No data persists on a virtual machine's filesystem between sessions; your chats and history are stored separately in our database.",
+          "Database access is protected by Row Level Security so each account can only reach its own data.",
+        ],
       },
       {
-        title: "Data Storage",
-        description: "Your data is stored using Supabase with industry-standard security measures:",
-        items: [
-          "Row Level Security (RLS) to ensure data isolation",
-          "SSL/TLS encryption for data in transit",
-          "Regular security audits and updates",
-          "Automatic backups and disaster recovery"
-        ]
-      }
-    ]
-  },
-  {
-    id: "third-party",
-    title: "Third-Party Services",
-    icon: Globe,
-    description: "We use Microsoft Azure for all infrastructure and AI model processing. Azure does not store or use your data for training or improvement of their services.",
-    features: [
-      "Your data is processed transiently and not stored by Azure",
-      "Azure does not use customer data to improve their models",
-      "All data transmission is encrypted using industry-standard protocols",
-      "Azure complies with major privacy regulations including GDPR, HIPAA, and SOC 2"
-    ]
-  },
-  {
-    id: "rights",
-    title: "Your Rights and Choices",
-    icon: Users,
-    rights: [
-      "Access your personal data",
-      "Update or correct your information",
-      "Delete your account and associated data",
-      "Export your session history",
-      "Opt-out of certain features",
-      "Control resource allocation limits"
-    ]
+        kind: "p",
+        text: "No method of transmission or storage is perfectly secure, but we work to protect your information with industry-standard controls and to limit access to it within our team.",
+      },
+    ],
   },
   {
     id: "retention",
-    title: "Data Retention",
-    icon: Clock,
-    content: "We retain your data as long as your account is active. Virtual machine sessions are automatically terminated after the allocated time, and no data persists on the VMs. You can delete your account data at any time through your account settings."
+    title: "Data retention",
+    blocks: [
+      {
+        kind: "p",
+        text: "We keep your data for as long as your account is active so the service works as expected. You can delete individual chats at any time, and you can delete your entire account and its associated data from Account, then Data. We retain limited records longer where we need them for billing, security, dispute resolution, or to meet legal obligations, and backups age out on a rolling basis.",
+      },
+    ],
+  },
+  {
+    id: "rights",
+    title: "Your rights and choices",
+    blocks: [
+      {
+        kind: "p",
+        text: "You have meaningful control over your information, and we have built the tools to exercise it directly in the product:",
+      },
+      {
+        kind: "list",
+        items: [
+          "Access and export a copy of your data from Account, then Data.",
+          "Delete your account and associated data from Account, then Data.",
+          "Correct or update your profile information at any time.",
+          "Turn product analytics on or off, and withdraw consent, from your privacy settings.",
+          "Choose what each agent session is allowed to access.",
+        ],
+      },
+      {
+        kind: "p",
+        text: "Depending on where you live, you may also have rights to object to or restrict certain processing, to data portability, and to lodge a complaint with your local data protection authority. To make a request or ask a question, contact us at privacy@coasty.ai.",
+      },
+    ],
+  },
+  {
+    id: "transfers",
+    title: "International data transfers",
+    blocks: [
+      {
+        kind: "p",
+        text: "Coasty is operated from the United States, and the providers above process data in the United States. If you use Coasty from the EEA, the UK, or elsewhere, your information will be transferred to and processed in the United States. Where required, we rely on appropriate safeguards such as Standard Contractual Clauses or equivalent mechanisms for these transfers.",
+      },
+    ],
   },
   {
     id: "children",
-    title: "Children's Privacy",
-    icon: Baby,
-    content: "Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13."
-  },
-  {
-    id: "open-source",
-    title: "Open Source Considerations",
-    icon: Code,
-    content: "Coasty is your AI employee that works with your entire team. While the official hosted version follows this privacy policy, we respect your data ownership. All content generated by your AI agents belongs to you, and we will never use it to train our models or share it without your explicit permission."
+    title: "Children's privacy",
+    blocks: [
+      {
+        kind: "p",
+        text: "Coasty is not intended for children. You must be at least 16 in the EEA, or at least 13 elsewhere, to use the service. We do not knowingly collect personal information from children under these ages. If you believe a child has provided us information, contact us and we will delete it.",
+      },
+    ],
   },
   {
     id: "changes",
-    title: "Changes to This Policy",
-    icon: Edit,
-    content: "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date."
+    title: "Changes and contact",
+    blocks: [
+      {
+        kind: "p",
+        text: "We may update this policy from time to time. When we make material changes we will update the version and date at the top of this page and, where appropriate, notify you in the product or by email. Continued use of Coasty after an update means you accept the revised policy.",
+      },
+      {
+        kind: "p",
+        text: "Questions about this policy or your data can be sent to privacy@coasty.ai.",
+      },
+    ],
   },
-  {
-    id: "contact",
-    title: "Contact Us",
-    icon: Mail,
-    content: "If you have any questions about this Privacy Policy or our data practices, please contact us through our GitHub repository or the contact information provided in the application.",
-    cta: true
-  }
 ]
 
 export default function PrivacyPolicyPage() {
-  const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut" as const
-      }
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-background relative">
-      <LandingHeader />
-
-      {/* Main Content */}
-      <main className={cn(
-        "relative",
-        isMobile ? "pt-16" : "pt-20"
-      )}>
-        {/* Hero Section */}
-        <section className={cn(
-          "flex items-center justify-center",
-          isMobile ? "px-7 py-12" : "px-10 py-20"
-        )}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="w-full max-w-6xl"
-          >
-            <motion.div variants={itemVariants} className="text-center mb-12">
-              <Badge variant="outline" className="mb-4">
-                <Shield className="mr-1 h-3 w-3" />
-                Privacy First
-              </Badge>
-              <h1 className={cn(
-                "font-bold tracking-tight",
-                isMobile ? "text-4xl" : "text-5xl sm:text-6xl"
-              )}>
-                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent pb-1 sm:pb-2">
-                  Your Privacy Matters
-                </span>
-              </h1>
-              <p className={cn(
-                "text-muted-foreground mx-auto",
-                isMobile ? "mt-4 text-base max-w-md" : "mt-6 text-lg sm:text-xl max-w-2xl"
-              )}>
-                We take your privacy seriously. Learn how we protect your data while delivering powerful AI agent capabilities.
-              </p>
-              <p className="text-sm text-muted-foreground mt-4">
-                Last updated: {PRIVACY_LAST_UPDATED}
-              </p>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        {/* Privacy Sections */}
-        <section className={cn(
-          "py-12",
-          isMobile ? "px-7" : "px-10"
-        )}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            className="max-w-5xl mx-auto"
-          >
-            <div className="space-y-6">
-              {privacySections.map((section, index) => {
-                const Icon = section.icon
-                const isActive = activeSection === section.id
-
-                return (
-                  <motion.div
-                    key={section.id}
-                    variants={itemVariants}
-                    transition={{ duration: 0.2 }}
-                    className="transition-transform duration-200 hover:scale-[1.01]"
-                  >
-                    <Card 
-                      className={cn(
-                        "border-muted/50 transition-all cursor-pointer",
-                        isActive && "border-primary shadow-xl",
-                        section.cta && "border-primary/50 bg-gradient-to-br from-primary/5 to-transparent"
-                      )}
-                      onClick={() => setActiveSection(isActive ? null : section.id)}
-                    >
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "p-2 rounded-lg transition-colors",
-                              isActive ? "bg-primary text-primary-foreground" : "bg-primary/10"
-                            )}>
-                              <Icon className="h-5 w-5" />
-                            </div>
-                            <CardTitle className="text-2xl">
-                              {section.title}
-                            </CardTitle>
-                          </div>
-                          <motion.div
-                            animate={{ rotate: isActive ? 90 : 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                          </motion.div>
-                        </div>
-                      </CardHeader>
-                      
-                      <AnimatePresence>
-                        {isActive && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <CardContent className="pt-0">
-                              {/* Simple content */}
-                              {section.content && (
-                                <p className="text-muted-foreground leading-relaxed">
-                                  {section.content}
-                                </p>
-                              )}
-
-                              {/* Description with features */}
-                              {section.description && (
-                                <div className="space-y-4">
-                                  <p className="text-muted-foreground leading-relaxed">
-                                    {section.description}
-                                  </p>
-                                  {section.features && (
-                                    <div className="grid gap-3 mt-4">
-                                      {section.features.map((feature, idx) => (
-                                        <div key={idx} className="flex items-start gap-3 bg-background/50 rounded-lg p-3 border border-border/30">
-                                          <Shield className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                                          <span className="text-sm text-muted-foreground">{feature}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Subsections */}
-                              {section.subsections && (
-                                <div className="space-y-6 mt-4">
-                                  {section.subsections.map((subsection, idx) => (
-                                    <div 
-                                      key={idx}
-                                      className={cn(
-                                        "rounded-xl p-4 border",
-                                        'highlight' in subsection && subsection.highlight 
-                                          ? "bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20" 
-                                          : "bg-background/50 border-border/30"
-                                      )}
-                                    >
-                                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                        {'highlight' in subsection && subsection.highlight && <Lock className="h-4 w-4 text-primary" />}
-                                        {subsection.title}
-                                      </h3>
-                                      {'description' in subsection && subsection.description && (
-                                        <p className="text-sm text-muted-foreground mb-3">
-                                          {subsection.description}
-                                        </p>
-                                      )}
-                                      {'items' in subsection && subsection.items && (
-                                        <ul className="space-y-2">
-                                          {subsection.items.map((item, itemIdx) => (
-                                            <li key={itemIdx} className="flex items-start gap-2">
-                                              <span className="text-primary mt-1">•</span>
-                                              <span className="text-sm text-muted-foreground">{item}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Simple items list */}
-                              {section.items && (
-                                <ul className="space-y-3 mt-4">
-                                  {section.items.map((item, idx) => (
-                                    <li key={idx} className="flex items-start gap-3">
-                                      <Shield className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground">{item}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-
-                              {/* Rights grid */}
-                              {section.rights && (
-                                <div className="grid sm:grid-cols-2 gap-3 mt-4">
-                                  {section.rights.map((right, idx) => {
-                                    const icons = [Eye, Download, Trash2, Settings, Edit, Database]
-                                    const RightIcon = icons[idx % icons.length]
-                                    return (
-                                      <div key={idx} className="flex items-center gap-3 bg-gradient-to-br from-primary/5 to-transparent rounded-lg p-3 border border-primary/10">
-                                        <RightIcon className="h-4 w-4 text-primary shrink-0" />
-                                        <span className="text-sm text-muted-foreground">{right}</span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              )}
-
-                              {/* CTA Button */}
-                              {section.cta && (
-                                <div className="mt-6 flex gap-4">
-                                  <Button asChild>
-                                    <Link href="https://github.com/coasty-ai" target="_blank">
-                                      <Mail className="mr-2 h-4 w-4" />
-                                      Contact via GitHub
-                                    </Link>
-                                  </Button>
-                                  <Button variant="outline" asChild>
-                                    <Link href="/support">
-                                      Support Center
-                                    </Link>
-                                  </Button>
-                                </div>
-                              )}
-                            </CardContent>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Card>
-                  </motion.div>
-                )
-              })}
-            </div>
-
-            {/* Quick Actions */}
-            <motion.div 
-              variants={itemVariants}
-              className="mt-12 text-center"
-            >
-              <div className="inline-flex flex-col sm:flex-row gap-4">
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Home
-                  </Link>
-                </Button>
-                <Button size="lg" asChild>
-                  <Link href="/auth">
-                    Get Started
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        <LandingFooter />
-      </main>
-    </div>
+    <LegalPage
+      kicker="Privacy"
+      title="Privacy Policy"
+      subtitle="How Coasty collects, uses, and protects your information while it works as your AI employee."
+      updatedLabel="Last updated"
+      updatedDate={PRIVACY_LAST_UPDATED}
+      version={PRIVACY_VERSION}
+      sections={sections}
+      ctaLabel="Get started"
+    />
   )
 }

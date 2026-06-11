@@ -1,537 +1,246 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-
-import { ArrowLeft, Shield, Scale, FileText, Users, AlertCircle, Globe, Ban, Clock, Gavel, Heart, HelpCircle, Mail, ChevronRight, Zap, BookOpen } from "lucide-react"
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { cn } from "@/lib/utils"
-
-import { LandingHeader } from "@/app/components/landing/landing-header"
-import { LandingFooter } from "@/app/components/landing/landing-footer"
-import { motion, AnimatePresence } from "framer-motion"
+import { LegalPage, type LegalSection } from "@/app/components/legal/legal-page"
+import { TERMS_EFFECTIVE_DATE, TERMS_VERSION } from "@/lib/legal/versions"
 import { priceTermsForm } from "@/lib/pricing/format"
-import { TERMS_EFFECTIVE_DATE } from "@/lib/legal/versions"
 
-const termsSections = [
+const sections: LegalSection[] = [
   {
     id: "acceptance",
-    title: "Acceptance of Terms",
-    icon: Shield,
-    content: "By accessing and using Coasty, your AI employee that collaborates with everyone, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service."
+    title: "Acceptance of terms",
+    blocks: [
+      {
+        kind: "p",
+        text: "These Terms of Service are a legally binding agreement between you and Coasty. By creating an account, signing in, or using Coasty in any way, you agree to these Terms and to our Privacy Policy. If you do not agree, do not use the service.",
+      },
+    ],
   },
   {
-    id: "service-description",
-    title: "Service Description",
-    icon: Zap,
-    subsections: [
+    id: "service",
+    title: "The service",
+    blocks: [
       {
-        title: "What We Provide",
+        kind: "sub",
+        title: "What we provide",
         items: [
-          "AI-powered virtual machines and desktop environments",
-          "Multi-model AI chat capabilities (OpenAI, Anthropic, Google, etc.)",
-          "Collaborative AI workspace features",
-          "Code execution and automation tools",
-          "Web search and research capabilities"
-        ]
+          "AI agents that operate computers, browsers, terminals, and desktop environments on your behalf.",
+          "Multi-model AI chat and a collaborative AI workspace.",
+          "Code execution, automation tools, and web research.",
+        ],
       },
       {
-        title: "Service Availability",
+        kind: "sub",
+        title: "Availability",
         items: [
-          "Services are provided on an 'as available' basis",
-          "We strive for 99.9% uptime but do not guarantee uninterrupted service",
-          "Scheduled maintenance will be announced in advance when possible",
-          "Features may be added, modified, or removed at our discretion"
-        ]
-      }
-    ]
+          "The service is provided on an as-available basis.",
+          "We aim for high uptime but do not guarantee uninterrupted service.",
+          "We may add, change, or remove features at our discretion.",
+        ],
+      },
+    ],
   },
   {
-    id: "user-responsibilities",
-    title: "User Responsibilities",
-    icon: Users,
-    subsections: [
+    id: "content-license",
+    title: "Your content and the license you grant",
+    blocks: [
       {
-        title: "Account Security",
-        items: [
-          "You are responsible for maintaining the confidentiality of your account",
-          "You must notify us immediately of any unauthorized access",
-          "You are responsible for all activities under your account",
-          "You must provide accurate and current information"
-        ]
+        kind: "p",
+        text: "You keep ownership of the content you create with Coasty. To run the service, you grant us a broad license over that content and the data you make available to the agent.",
       },
       {
-        title: "Acceptable Use",
-        items: [
-          "Use the service in compliance with all applicable laws",
-          "Do not use for any illegal or unauthorized purpose",
-          "Do not attempt to bypass any security measures",
-          "Do not interfere with or disrupt the service",
-          "Respect intellectual property rights"
-        ]
+        kind: "callout",
+        text: "You grant Coasty a worldwide, non-exclusive, royalty-free license to host, store, reproduce, transmit, process, analyze, and use your content and session data in order to operate, secure, support, and improve the service, to run the agents you request, and to do so through our AI and infrastructure providers. This license lasts as long as we host your content and ends when it is deleted, except for backups that age out and records we must retain by law.",
       },
       {
-        title: "Content Guidelines",
-        items: [
-          "You retain ownership of content you create",
-          "You grant us license to use content for service operation",
-          "Do not upload malicious code or harmful content",
-          "Ensure you have rights to all content you share"
-        ]
-      }
-    ]
+        kind: "p",
+        text: "We do not sell your personal information, and we do not use your private content to train third-party foundation models. We may use aggregated or de-identified data to improve the service. You are responsible for having the rights to all content and credentials you provide to the agent.",
+      },
+    ],
   },
   {
-    id: "prohibited-uses",
-    title: "Prohibited Uses",
-    icon: Ban,
-    items: [
-      "Mining cryptocurrency or any computationally intensive operations unrelated to legitimate use",
-      "Launching attacks on other systems or networks",
-      "Distributing malware, viruses, or harmful code",
-      "Violating privacy of others or collecting personal data without consent",
-      "Circumventing usage limits or authentication mechanisms",
-      "Using the service for spam or unsolicited communications",
-      "Engaging in activities that violate laws or regulations",
-      "Reselling or redistributing the service without authorization"
-    ]
-  },
-  {
-    id: "virtual-machines",
-    title: "Virtual Machines & AI Agents",
-    icon: Globe,
-    subsections: [
+    id: "agents",
+    title: "AI agents and automation",
+    blocks: [
       {
-        title: "Resource Limits",
-        description: "Virtual machines are subject to the following limitations:",
-        items: [
-          "Maximum session duration based on your subscription tier",
-          "CPU, memory, and storage limits as specified in your plan",
-          "Automatic termination after idle timeout",
-          "No persistent storage between sessions unless explicitly provided"
-        ]
+        kind: "p",
+        text: "Coasty acts on your instructions. When you run an agent, you authorize it to access and act on the screens, files, terminals, browsers, accounts, and data you make available to it, and to take actions on your behalf, including actions that create, modify, or delete data.",
       },
       {
-        title: "AI Agent Usage",
-        description: "When using AI agents to control virtual machines:",
+        kind: "list",
         items: [
-          "You are responsible for all actions performed by AI agents",
-          "Monitor AI agent activities to ensure compliance",
-          "We log all AI agent actions for security and audit purposes",
-          "Automated actions must comply with all terms of service"
-        ]
-      }
-    ]
-  },
-  {
-    id: "payment-billing",
-    title: "Payment & Billing",
-    icon: Scale,
-    subsections: [
-      {
-        title: "Subscription Terms",
-        items: [
-          "Subscriptions are billed monthly or annually in advance",
-          "Prices may change with 30 days notice",
-          "No refunds for partial months or unused resources",
-          "You can cancel anytime, effective at end of billing period"
-        ]
+          "You are responsible for the instructions you give and for the actions agents take under your account.",
+          "You are responsible for supervising agent activity and for keeping sensitive material out of a session when you do not want it accessed.",
+          "We log agent actions for security, debugging, and audit purposes.",
+          "Automated actions must comply with these Terms and all applicable laws.",
+        ],
       },
       {
-        title: "Usage-Based Billing",
-        items: [
-          "Additional usage beyond plan limits will be billed separately",
-          "Usage is calculated based on resource consumption",
-          "Billing occurs monthly for usage-based charges",
-          "Disputes must be raised within 30 days of billing"
-        ]
-      }
-    ]
+        kind: "callout",
+        text: "AI is probabilistic and can be wrong. Agent output and automated actions may be inaccurate, incomplete, or unintended. Review results before relying on them, and do not use Coasty for actions whose consequences you are not prepared to accept.",
+      },
+    ],
   },
   {
-    id: "usage-quotas",
-    title: "Usage Quotas & Unlimited Plans",
-    icon: Zap,
-    subsections: [
+    id: "responsibilities",
+    title: "Your responsibilities",
+    blocks: [
       {
+        kind: "sub",
+        title: "Account security",
+        items: [
+          "Keep your account credentials confidential and your information accurate.",
+          "Tell us promptly about any unauthorized access.",
+          "You are responsible for all activity under your account.",
+        ],
+      },
+      {
+        kind: "sub",
+        title: "Acceptable use",
+        items: [
+          "Use Coasty in compliance with all applicable laws.",
+          "Do not bypass security measures, usage limits, or authentication.",
+          "Do not interfere with or disrupt the service.",
+          "Respect the intellectual property and privacy rights of others.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "prohibited",
+    title: "Prohibited uses",
+    blocks: [
+      {
+        kind: "list",
+        items: [
+          "Attacking, probing, or disrupting other systems or networks.",
+          "Distributing malware or harmful code.",
+          "Collecting other people's personal data without a lawful basis or consent.",
+          "Crypto mining or other heavy workloads unrelated to legitimate use.",
+          "Spam or unsolicited communications.",
+          "Reselling or redistributing the service without authorization.",
+          "Any illegal activity or activity that violates these Terms.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "billing",
+    title: "Plans, billing, and renewal",
+    blocks: [
+      {
+        kind: "sub",
+        title: "Subscriptions and renewal",
+        items: [
+          "Paid plans are billed in advance on a recurring basis and renew automatically until cancelled.",
+          "You can cancel anytime, effective at the end of the current billing period.",
+          "Prices may change with notice. Except where required by law, payments are non-refundable for partial periods or unused resources.",
+        ],
+      },
+      {
+        kind: "sub",
         title: priceTermsForm("starter"),
-        description: "The Starter plan includes the following monthly quotas:",
         items: [
-          "200 credits of AI agent usage per month",
-          "Fair usage policy applies to prevent abuse",
-          "Usage resets at the beginning of each billing cycle",
-          "Overage may result in temporary throttling or suspension"
-        ]
+          "A monthly allowance of AI agent usage credits.",
+          "A fair-use policy applies, and the allowance resets each billing cycle.",
+        ],
       },
       {
+        kind: "sub",
         title: priceTermsForm("unlimited"),
-        description: "The Unlimited plan includes the following monthly quotas:",
         items: [
-          "Unlimited AI agent usage per month, subject to the fair usage policy",
-          "Priority resource allocation and higher limits",
-          "Enhanced fair usage policy with higher thresholds",
-          "Usage resets at the beginning of each billing cycle",
-          "Premium support for quota-related inquiries"
-        ]
+          "Unlimited AI agent usage subject to a fair-use policy and priority resources.",
+          "Automated high-frequency or abusive usage may be reviewed, and we may throttle or suspend accounts after notice.",
+        ],
       },
-      {
-        title: "Fair Usage Policy",
-        description: "All unlimited plans are subject to reasonable usage limitations:",
-        items: [
-          "Plans are designed for legitimate business and personal use",
-          "Automated high-frequency usage may be subject to review",
-          "We reserve the right to suspend accounts for abuse",
-          "Users will be notified before any quota-related actions",
-          "Contact support for quota increase requests"
-        ]
-      }
-    ]
+    ],
   },
   {
-    id: "intellectual-property",
-    title: "Intellectual Property",
-    icon: BookOpen,
-    subsections: [
+    id: "ip",
+    title: "Intellectual property",
+    blocks: [
       {
-        title: "Our Property",
-        description: "Coasty and its original content, features, and functionality are owned by us and are protected by international copyright, trademark, and other intellectual property laws."
+        kind: "p",
+        text: "Coasty and its original content, features, and functionality are owned by us and protected by intellectual property laws. You retain rights to the content you create, subject to the license above. Content generated by AI models belongs to you, subject to the terms of the underlying model providers, and we make no ownership claim to it.",
       },
-      {
-        title: "Your Content",
-        description: "You retain all rights to content you create using our service. By using Coasty, you grant us a worldwide, non-exclusive license to use, reproduce, and distribute your content solely for providing and improving our services."
-      },
-      {
-        title: "AI-Generated Content",
-        description: "Content generated by AI models belongs to you, subject to the terms of the underlying AI providers. We make no claims to AI-generated content created through our platform."
-      }
-    ]
+    ],
   },
   {
-    id: "limitation-liability",
-    title: "Limitation of Liability",
-    icon: AlertCircle,
-    content: "TO THE MAXIMUM EXTENT PERMITTED BY LAW, Coasty SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT PAID BY YOU IN THE PAST TWELVE MONTHS.",
-    highlight: true
+    id: "disclaimers",
+    title: "Disclaimers",
+    blocks: [
+      {
+        kind: "callout",
+        text: "THE SERVICE IS PROVIDED ON AN AS-IS AND AS-AVAILABLE BASIS, WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ANY WARRANTY THAT AI OUTPUT OR AUTOMATED ACTIONS WILL BE ACCURATE, COMPLETE, OR FREE OF ERROR. YOU USE COASTY, AND ALLOW IT TO ACT ON YOUR DEVICES AND DATA, AT YOUR OWN RISK.",
+      },
+    ],
+  },
+  {
+    id: "liability",
+    title: "Limitation of liability",
+    blocks: [
+      {
+        kind: "callout",
+        text: "TO THE MAXIMUM EXTENT PERMITTED BY LAW, COASTY WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL. OUR TOTAL LIABILITY FOR ANY CLAIM WILL NOT EXCEED THE AMOUNT YOU PAID US IN THE TWELVE MONTHS BEFORE THE CLAIM.",
+      },
+    ],
   },
   {
     id: "indemnification",
     title: "Indemnification",
-    icon: Heart,
-    content: "You agree to indemnify and hold harmless Coasty, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, losses, liabilities, costs, and expenses arising from your use of the service or violation of these terms."
+    blocks: [
+      {
+        kind: "p",
+        text: "You agree to indemnify and hold harmless Coasty and its affiliates, officers, employees, and agents from any claims, damages, losses, liabilities, and expenses arising from your use of the service, the actions you direct agents to take, or your violation of these Terms or applicable law.",
+      },
+    ],
   },
   {
     id: "termination",
     title: "Termination",
-    icon: Clock,
-    subsections: [
+    blocks: [
       {
-        title: "Termination by You",
-        description: "You may terminate your account at any time through your account settings or by contacting support."
+        kind: "p",
+        text: "You may close your account at any time from your settings. We may suspend or terminate your access if you violate these Terms, if your use harms the service or other users, or where required by law. On termination your right to use the service ends, and we may delete your data after a reasonable period except where we must retain it.",
       },
-      {
-        title: "Termination by Us",
-        description: "We may terminate or suspend your account immediately, without prior notice, for:",
-        items: [
-          "Violation of these Terms of Service",
-          "Conduct that we believe harms our service or users",
-          "Extended period of inactivity",
-          "Request by law enforcement or government agencies"
-        ]
-      },
-      {
-        title: "Effect of Termination",
-        description: "Upon termination, your right to use the service ceases immediately. We may delete your data after a reasonable period, except where required to retain it by law."
-      }
-    ]
+    ],
   },
   {
     id: "governing-law",
-    title: "Governing Law",
-    icon: Gavel,
-    content: "These Terms shall be governed by and construed in accordance with the laws of the United States, without regard to its conflict of law provisions. You agree to submit to the personal jurisdiction of the courts located in the United States for the resolution of any disputes."
+    title: "Governing law and disputes",
+    blocks: [
+      {
+        kind: "p",
+        text: "These Terms are governed by the laws of the State of Delaware, United States, without regard to its conflict-of-law rules. You agree to the exclusive jurisdiction of the state and federal courts located in Delaware for any dispute that is not otherwise resolved, except where applicable law gives you the right to bring a claim in your local courts.",
+      },
+    ],
   },
   {
     id: "changes",
-    title: "Changes to Terms",
-    icon: FileText,
-    content: "We reserve the right to modify these terms at any time. We will notify users of any material changes via email or through the service. Your continued use of Coasty after such modifications constitutes acceptance of the updated terms."
+    title: "Changes and contact",
+    blocks: [
+      {
+        kind: "p",
+        text: "We may update these Terms from time to time. When changes are material we will update the version and date above and, where appropriate, notify you. Continued use of Coasty after an update means you accept the revised Terms. Questions can be sent to legal@coasty.ai.",
+      },
+    ],
   },
-  {
-    id: "contact",
-    title: "Contact Information",
-    icon: Mail,
-    content: "If you have any questions about these Terms of Service, please contact us through our GitHub repository or support channels. We aim to respond to all inquiries within 48 hours.",
-    cta: true
-  }
 ]
 
 export default function TermsPage() {
-  const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut" as const
-      }
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-background relative">
-      <LandingHeader />
-
-      {/* Main Content */}
-      <main className={cn(
-        "relative",
-        isMobile ? "pt-16" : "pt-20"
-      )}>
-        {/* Hero Section */}
-        <section className={cn(
-          "flex items-center justify-center",
-          isMobile ? "px-7 py-12" : "px-10 py-20"
-        )}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="w-full max-w-6xl"
-          >
-            <motion.div variants={itemVariants} className="text-center mb-12">
-              <Badge variant="outline" className="mb-4">
-                <Scale className="mr-1 h-3 w-3" />
-                Legal Agreement
-              </Badge>
-              <h1 className={cn(
-                "font-bold tracking-tight",
-                isMobile ? "text-4xl" : "text-5xl sm:text-6xl"
-              )}>
-                <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  Terms of Service
-                </span>
-              </h1>
-              <p className={cn(
-                "text-muted-foreground mx-auto",
-                isMobile ? "mt-4 text-base max-w-md" : "mt-6 text-lg sm:text-xl max-w-2xl"
-              )}>
-                Please read these terms carefully before using Coasty, your AI employee that collaborates with everyone.
-              </p>
-              <p className="text-sm text-muted-foreground mt-4">
-                Effective Date: {TERMS_EFFECTIVE_DATE}
-              </p>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        {/* Terms Sections */}
-        <section className={cn(
-          "py-12",
-          isMobile ? "px-7" : "px-10"
-        )}>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            className="max-w-5xl mx-auto"
-          >
-            <div className="space-y-6">
-              {termsSections.map((section, index) => {
-                const Icon = section.icon
-                const isActive = activeSection === section.id
-
-                return (
-                  <motion.div
-                    key={section.id}
-                    variants={itemVariants}
-                    transition={{ duration: 0.2 }}
-                    className="transition-transform duration-200 hover:scale-[1.01]"
-                  >
-                    <Card 
-                      className={cn(
-                        "border-muted/50 transition-all cursor-pointer",
-                        isActive && "border-primary shadow-xl",
-                        section.highlight && "border-orange-500/50 bg-gradient-to-br from-orange-500/5 to-transparent",
-                        section.cta && "border-primary/50 bg-gradient-to-br from-primary/5 to-transparent"
-                      )}
-                      onClick={() => setActiveSection(isActive ? null : section.id)}
-                    >
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "p-2 rounded-lg transition-colors",
-                              isActive ? "bg-primary text-primary-foreground" : 
-                              section.highlight ? "bg-orange-500/10 text-orange-500" : "bg-primary/10"
-                            )}>
-                              <Icon className="h-5 w-5" />
-                            </div>
-                            <CardTitle className="text-2xl">
-                              {section.title}
-                            </CardTitle>
-                          </div>
-                          <motion.div
-                            animate={{ rotate: isActive ? 90 : 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                          </motion.div>
-                        </div>
-                      </CardHeader>
-                      
-                      <AnimatePresence>
-                        {isActive && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <CardContent className="pt-0">
-                              {/* Simple content */}
-                              {section.content && (
-                                <p className={cn(
-                                  "leading-relaxed",
-                                  section.highlight ? "font-mono text-sm text-orange-600 dark:text-orange-400" : "text-muted-foreground"
-                                )}>
-                                  {section.content}
-                                </p>
-                              )}
-
-                              {/* Subsections */}
-                              {section.subsections && (
-                                <div className="space-y-6 mt-4">
-                                  {section.subsections.map((subsection, idx) => (
-                                    <div 
-                                      key={idx}
-                                      className="rounded-xl p-4 border bg-background/50 border-border/30"
-                                    >
-                                      <h3 className="font-semibold mb-3">
-                                        {subsection.title}
-                                      </h3>
-                                      {'description' in subsection && subsection.description && (
-                                        <p className="text-sm text-muted-foreground mb-3">
-                                          {subsection.description}
-                                        </p>
-                                      )}
-                                      {'items' in subsection && subsection.items && (
-                                        <ul className="space-y-2">
-                                          {subsection.items.map((item, itemIdx) => (
-                                            <li key={itemIdx} className="flex items-start gap-2">
-                                              <span className="text-primary mt-1">•</span>
-                                              <span className="text-sm text-muted-foreground">{item}</span>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Simple items list */}
-                              {section.items && (
-                                <ul className="space-y-3 mt-4">
-                                  {section.items.map((item, idx) => (
-                                    <li key={idx} className="flex items-start gap-3">
-                                      <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground">{item}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-
-                              {/* CTA Button */}
-                              {section.cta && (
-                                <div className="mt-6 flex gap-4">
-                                  <Button asChild>
-                                    <Link href="https://github.com/coasty-ai" target="_blank">
-                                      <Mail className="mr-2 h-4 w-4" />
-                                      Contact via GitHub
-                                    </Link>
-                                  </Button>
-                                  <Button variant="outline" asChild>
-                                    <Link href="/support">
-                                      <HelpCircle className="mr-2 h-4 w-4" />
-                                      Support Center
-                                    </Link>
-                                  </Button>
-                                </div>
-                              )}
-                            </CardContent>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Card>
-                  </motion.div>
-                )
-              })}
-            </div>
-
-            {/* Agreement Section */}
-            <motion.div 
-              variants={itemVariants}
-              className="mt-12 p-6 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-            >
-              <div className="text-center space-y-4">
-                <Shield className="h-8 w-8 text-primary mx-auto" />
-                <h3 className="text-lg font-semibold">By using Coasty, you agree to these Terms of Service</h3>
-                <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-                  These terms constitute a legally binding agreement between you and Coasty. 
-                  If you do not agree to these terms, you must not use our service.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div 
-              variants={itemVariants}
-              className="mt-12 text-center"
-            >
-              <div className="inline-flex flex-col sm:flex-row gap-4">
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Home
-                  </Link>
-                </Button>
-                <Button size="lg" asChild>
-                  <Link href="/auth">
-                    I Agree - Get Started
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        <LandingFooter />
-      </main>
-    </div>
+    <LegalPage
+      kicker="Legal"
+      title="Terms of Service"
+      subtitle="The agreement that governs your use of Coasty, your AI employee that works across your computer."
+      updatedLabel="Effective"
+      updatedDate={TERMS_EFFECTIVE_DATE}
+      version={TERMS_VERSION}
+      sections={sections}
+      closing={{
+        title: "By using Coasty, you agree to these Terms.",
+        text: "These Terms form a binding agreement between you and Coasty. If you do not agree to them, you must not use the service.",
+      }}
+      ctaLabel="I agree, get started"
+    />
   )
 }

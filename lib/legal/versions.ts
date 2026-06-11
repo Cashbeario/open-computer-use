@@ -17,9 +17,9 @@
  * Versions are plain dates (YYYY-MM-DD) so they sort and read cleanly.
  */
 
-export const TERMS_VERSION = "2025-08-01"
-export const PRIVACY_VERSION = "2025-08-01"
+export const TERMS_VERSION = "2026-06-10"
+export const PRIVACY_VERSION = "2026-06-10"
 
 /** Human-readable forms shown on the public legal pages. */
-export const TERMS_EFFECTIVE_DATE = "August 1, 2025"
-export const PRIVACY_LAST_UPDATED = "August 1, 2025"
+export const TERMS_EFFECTIVE_DATE = "June 10, 2026"
+export const PRIVACY_LAST_UPDATED = "June 10, 2026"

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { logApiAccess } from "@/lib/observability/api-access-log"
 
 /**
  * GET /api/me/data/export
@@ -22,8 +23,12 @@ const PYTHON_BACKEND_URL =
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || ""
 
 export async function GET(request: NextRequest) {
+  // A full-account data export is exactly the access worth an audit trail —
+  // log every exit path, success or refusal.
+  const t0 = Date.now()
   const supabase = await createClient()
   if (!supabase) {
+    logApiAccess(request, 500, Date.now() - t0, { op: "dsr_export" })
     return NextResponse.json(
       { error: "Database connection failed" },
       { status: 500 }
@@ -35,6 +40,7 @@ export async function GET(request: NextRequest) {
     error: authError,
   } = await supabase.auth.getUser()
   if (authError || !user) {
+    logApiAccess(request, 401, Date.now() - t0, { op: "dsr_export" })
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -56,9 +62,15 @@ export async function GET(request: NextRequest) {
       headers["Content-Disposition"] =
         'attachment; filename="coasty-data-export.json"'
     }
+    logApiAccess(request, res.status, Date.now() - t0, {
+      op: "dsr_export",
+      user_id: user.id,
+      include_screenshots: includeScreenshots !== "false",
+    })
     return new NextResponse(text, { status: res.status, headers })
   } catch (e) {
     console.error("[me/data/export] proxy failed:", e)
+    logApiAccess(request, 502, Date.now() - t0, { op: "dsr_export", user_id: user.id })
     return NextResponse.json(
       { error: "Failed to reach the data service" },
       { status: 502 }

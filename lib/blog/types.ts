@@ -1,8 +1,10 @@
 export interface ContentBlock {
-  type: "intro" | "section" | "highlight" | "conclusion"
+  type: "intro" | "section" | "highlight" | "conclusion" | "code"
   text?: string
   title?: string
   bullets?: string[]
+  /** For type "code": optional language hint (e.g. "bash", "python"). */
+  language?: string
 }
 
 export interface BlogPost {

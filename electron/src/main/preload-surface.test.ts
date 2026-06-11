@@ -209,6 +209,10 @@ describe('window.coasty API surface snapshot', () => {
     'signIn', 'signInWithEmail', 'signUpWithEmail', 'sendMagicLink',
     'awaitMagicLink', 'resetPassword', 'cancelAuth', 'signOut',
     'getSession', 'getToken',
+    // External links (AuthScreen consent notice -> hosted Terms / Privacy).
+    // Main-process handler is hardened: URL-parsed, http(s)-only, so the
+    // renderer can never hand file:/custom protocols to the OS (ipc-handlers.ts).
+    'openExternal',
     // Bridge
     'connectBridge', 'disconnectBridge', 'getBridgeState', 'setTaskActive',
     // Config

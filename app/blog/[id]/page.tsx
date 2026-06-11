@@ -192,6 +192,26 @@ export default async function BlogPostPage({
                     </div>
                   )
                 }
+                if (block.type === "code") {
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-xl border border-foreground/[0.08] bg-foreground/[0.03] overflow-hidden"
+                    >
+                      {block.language ? (
+                        <div className="px-4 pt-2.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground/45">
+                          {block.language}
+                        </div>
+                      ) : null}
+                      <pre className="overflow-x-auto px-4 py-3 text-[12.5px] leading-relaxed">
+                        {/* React escapes children, so model-generated code is inert text (no XSS). */}
+                        <code className="font-mono text-foreground/85 whitespace-pre">
+                          {block.text}
+                        </code>
+                      </pre>
+                    </div>
+                  )
+                }
                 return null
               })}
             </div>

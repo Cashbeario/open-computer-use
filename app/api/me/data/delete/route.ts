@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { logApiAccess } from "@/lib/observability/api-access-log"
 
 /**
  * POST /api/me/data/delete
@@ -24,8 +25,12 @@ const PYTHON_BACKEND_URL =
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || ""
 
 export async function POST(request: NextRequest) {
+  // A destructive DSR endpoint needs an access trail more than any other
+  // route — log every exit path, success or refusal.
+  const t0 = Date.now()
   const supabase = await createClient()
   if (!supabase) {
+    logApiAccess(request, 500, Date.now() - t0, { op: "dsr_delete" })
     return NextResponse.json(
       { error: "Database connection failed" },
       { status: 500 }
@@ -37,6 +42,7 @@ export async function POST(request: NextRequest) {
     error: authError,
   } = await supabase.auth.getUser()
   if (authError || !user) {
+    logApiAccess(request, 401, Date.now() - t0, { op: "dsr_delete" })
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -47,6 +53,7 @@ export async function POST(request: NextRequest) {
     // Empty/invalid body — the confirm guard below rejects it.
   }
   if (body?.confirm !== true) {
+    logApiAccess(request, 400, Date.now() - t0, { op: "dsr_delete", user_id: user.id })
     return NextResponse.json({ error: "confirm must be true" }, { status: 400 })
   }
 
@@ -66,6 +73,11 @@ export async function POST(request: NextRequest) {
       }),
     })
     const text = await res.text()
+    logApiAccess(request, res.status, Date.now() - t0, {
+      op: "dsr_delete",
+      user_id: user.id,
+      close_account: body.close_account !== false,
+    })
     return new NextResponse(text, {
       status: res.status,
       headers: {
@@ -75,6 +87,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (e) {
     console.error("[me/data/delete] proxy failed:", e)
+    logApiAccess(request, 502, Date.now() - t0, { op: "dsr_delete", user_id: user.id })
     return NextResponse.json(
       { error: "Failed to reach the data service" },
       { status: 502 }

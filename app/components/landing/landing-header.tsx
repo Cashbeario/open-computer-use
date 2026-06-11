@@ -53,6 +53,16 @@ const navItemsDef = [
   { href: "/docs", labelKey: "docs", label: "Docs", external: true },
 ]
 
+// In-page section anchors shown INSTEAD of the product nav while the landing
+// page is in its data view (/?view=data). Ids match sections/data.tsx.
+const dataNavDef = [
+  { id: "data-why", label: "Why this data" },
+  { id: "data-spec", label: "Inside a trajectory" },
+  { id: "data-buyers", label: "Diligence" },
+  { id: "data-custom", label: "Customize" },
+  { id: "data-process", label: "Under 30 days" },
+]
+
 /* ─── spring configs ─── */
 
 const smoothSpring = { type: "spring" as const, stiffness: 400, damping: 30 }
@@ -318,8 +328,11 @@ function DrawerSectionLabel({ children }: { children: React.ReactNode }) {
 
 export function LandingHeader({
   animateBrandFromIntro = false,
+  dataView = false,
 }: {
   animateBrandFromIntro?: boolean
+  /** Landing page is showing the data story: swap the nav for its sections. */
+  dataView?: boolean
 }) {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState("hero")
@@ -401,6 +414,20 @@ export function LandingHeader({
       const offset = 80
       window.scrollTo({
         top: el.getBoundingClientRect().top + window.pageYOffset - offset,
+        behavior: "smooth",
+      })
+    }
+    setMobileMenuOpen(false)
+  }
+
+  // Smooth-scroll to a data-view section (same -80px header offset as
+  // handleNavClick), used by both the desktop nav and the mobile drawer.
+  const handleDataNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault()
+    const el = document.getElementById(id)
+    if (el) {
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.pageYOffset - 80,
         behavior: "smooth",
       })
     }
@@ -513,6 +540,26 @@ export function LandingHeader({
 
               {/* ── desktop nav ── */}
               <ul className="hidden lg:flex items-center gap-0.5 relative flex-1 justify-center">
+                {dataView ? (
+                  // Data view: the nav becomes a table of contents for the
+                  // data page sections instead of the product dropdowns.
+                  dataNavDef.map((item) => (
+                    <li key={item.id} className="relative">
+                      <a
+                        href={`#${item.id}`}
+                        onClick={(e) => handleDataNavClick(e, item.id)}
+                        className={cn(
+                          "relative block whitespace-nowrap px-3 py-1.5",
+                          "text-[13px] font-medium tracking-[-0.01em] rounded-lg transition-all duration-200",
+                          "text-foreground/45 hover:text-foreground/80",
+                        )}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))
+                ) : (
+                  <>
                 {/* Use Cases dropdown */}
                 <li
                   className="relative"
@@ -717,37 +764,47 @@ export function LandingHeader({
                     )}
                   </AnimatePresence>
                 </li>
+                  </>
+                )}
               </ul>
 
               {/* ── desktop right ── */}
               <div className="hidden lg:flex items-center gap-0.5 flex-shrink-0">
-                <Link
-                  href="/download"
-                  className={cn(
-                    "inline-flex items-center justify-center rounded-lg transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.05]",
-                    scrolled ? "h-7 w-7 p-1.5" : "h-9 w-9 p-2",
-                  )}
-                  title="Download Desktop App"
-                >
-                  <Download className={cn(scrolled ? "h-3.5 w-3.5" : "h-4 w-4")} strokeWidth={1.8} />
-                </Link>
+                {/* Data view keeps the right cluster minimal: no Download,
+                    no Get Started — the page's only ask is the data call. */}
+                {!dataView && (
+                  <Link
+                    href="/download"
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-lg transition-all duration-200 text-foreground/40 hover:text-foreground/70 hover:bg-foreground/[0.05]",
+                      scrolled ? "h-7 w-7 p-1.5" : "h-9 w-9 p-2",
+                    )}
+                    title="Download Desktop App"
+                  >
+                    <Download className={cn(scrolled ? "h-3.5 w-3.5" : "h-4 w-4")} strokeWidth={1.8} />
+                  </Link>
+                )}
                 <LanguageSwitcherCompact />
-                <div className="w-px h-4 bg-foreground/[0.08] mx-0.5" />
-                <Link
-                  href="/auth"
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-xl font-medium transition-all duration-200 whitespace-nowrap",
-                    "text-[13px] tracking-[-0.01em]",
-                    "bg-foreground text-background",
-                    "hover:opacity-90 active:scale-[0.97]",
-                    "shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.1)]",
-                    "dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.06)]",
-                    scrolled ? "px-3 py-1" : "px-4 py-2",
-                  )}
-                >
-                  {t("getStarted")}
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
+                {!dataView && (
+                  <>
+                    <div className="w-px h-4 bg-foreground/[0.08] mx-0.5" />
+                    <Link
+                      href="/auth"
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-xl font-medium transition-all duration-200 whitespace-nowrap",
+                        "text-[13px] tracking-[-0.01em]",
+                        "bg-foreground text-background",
+                        "hover:opacity-90 active:scale-[0.97]",
+                        "shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.1)]",
+                        "dark:shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.06)]",
+                        scrolled ? "px-3 py-1" : "px-4 py-2",
+                      )}
+                    >
+                      {t("getStarted")}
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* ── mobile controls ── */}
@@ -884,31 +941,48 @@ export function LandingHeader({
                       viewport is short (landscape phones, browsers with
                       tall toolbars). Two sections, hairline-divided. */}
                   <nav className="relative flex-1 overflow-y-auto px-2 py-3">
-                    <DrawerSectionLabel>Product</DrawerSectionLabel>
-                    {productLinks.map((link, i) => (
-                      <DrawerRow
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        onClick={closeMobileMenu}
-                        active={isPathActive(link.href, currentPath)}
-                        delay={HEAD_DELAY + i * STAGGER}
-                      />
-                    ))}
+                    {dataView ? (
+                      <>
+                        <DrawerSectionLabel>On this page</DrawerSectionLabel>
+                        {dataNavDef.map((item, i) => (
+                          <DrawerRow
+                            key={item.id}
+                            href={`#${item.id}`}
+                            label={item.label}
+                            onClick={closeMobileMenu}
+                            delay={HEAD_DELAY + i * STAGGER}
+                          />
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <DrawerSectionLabel>Product</DrawerSectionLabel>
+                        {productLinks.map((link, i) => (
+                          <DrawerRow
+                            key={link.href}
+                            href={link.href}
+                            label={link.label}
+                            onClick={closeMobileMenu}
+                            active={isPathActive(link.href, currentPath)}
+                            delay={HEAD_DELAY + i * STAGGER}
+                          />
+                        ))}
 
-                    <div className="mx-3 my-3 h-px bg-foreground/[0.05]" />
+                        <div className="mx-3 my-3 h-px bg-foreground/[0.05]" />
 
-                    <DrawerSectionLabel>Resources</DrawerSectionLabel>
-                    {resourceLinks.map((link, i) => (
-                      <DrawerRow
-                        key={link.href}
-                        href={link.href}
-                        label={link.label}
-                        onClick={closeMobileMenu}
-                        active={isPathActive(link.href, currentPath)}
-                        delay={HEAD_DELAY + (productLinks.length + i) * STAGGER}
-                      />
-                    ))}
+                        <DrawerSectionLabel>Resources</DrawerSectionLabel>
+                        {resourceLinks.map((link, i) => (
+                          <DrawerRow
+                            key={link.href}
+                            href={link.href}
+                            label={link.label}
+                            onClick={closeMobileMenu}
+                            active={isPathActive(link.href, currentPath)}
+                            delay={HEAD_DELAY + (productLinks.length + i) * STAGGER}
+                          />
+                        ))}
+                      </>
+                    )}
                   </nav>
 
                   {/* CTA — pinned bottom, the drawer's single signature
@@ -925,10 +999,10 @@ export function LandingHeader({
                         ease: [0.22, 1, 0.36, 1],
                       }}
                     >
-                      <Link
-                        href="/auth"
-                        onClick={closeMobileMenu}
-                        className={cn(
+                      {/* In data view the drawer's ask matches the page's:
+                          a data call instead of consumer signup. */}
+                      {(() => {
+                        const ctaClass = cn(
                           "flex items-center justify-center gap-2 w-full rounded-xl h-12",
                           "text-[15px] font-semibold tracking-[-0.01em]",
                           "bg-foreground text-background",
@@ -936,11 +1010,25 @@ export function LandingHeader({
                           "shadow-[0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.1)]",
                           "dark:shadow-[0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.06)]",
                           "transition-all duration-150",
-                        )}
-                      >
-                        {t("getStarted")}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
+                        )
+                        return dataView ? (
+                          <a
+                            href="https://cal.com/coasty/coasty-data-call"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={closeMobileMenu}
+                            className={ctaClass}
+                          >
+                            Book a data call
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </a>
+                        ) : (
+                          <Link href="/auth" onClick={closeMobileMenu} className={ctaClass}>
+                            {t("getStarted")}
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        )
+                      })()}
                     </motion.div>
                   </div>
                 </div>

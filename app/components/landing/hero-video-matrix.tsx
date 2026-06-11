@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { CodingAgentQuickstart } from "@/app/components/developers/coding-agent-quickstart"
 import { ClaudeMark, CursorMark, OpenAIMark } from "@/app/components/developers/brand-logos"
+import { StanfordLogo, ColumbiaLogo, PurdueLogo, AdobeLogo } from "./institution-logos"
 
 /* Which audience the landing page is speaking to. "product" is the default
  * consumer story; "developers" swaps the hero and the sections below for the
@@ -220,6 +221,17 @@ const DATA_RECORD = `{
   "outcome": { "verified": true, "method": "programmatic" }
 }`
 
+/* Institutions using the data pipeline — official vector marks (see
+ * institution-logos.tsx for sources), tinted monochrome by the strip via
+ * currentColor. Heights are tuned per mark so the wordmarks carry equal
+ * visual weight despite very different aspect ratios. */
+const DATA_INSTITUTIONS = [
+  { name: "Stanford University", Logo: StanfordLogo, className: "h-[17px]" },
+  { name: "Columbia University", Logo: ColumbiaLogo, className: "h-[14px]" },
+  { name: "Purdue University", Logo: PurdueLogo, className: "h-[21px]" },
+  { name: "Adobe", Logo: AdobeLogo, className: "h-[15px]" },
+] as const
+
 function DataHeroRecord({ isMobile }: { isMobile: boolean }) {
   return (
     <div className={cn("mx-auto text-left", isMobile ? "max-w-[420px]" : "max-w-[560px]")}>
@@ -294,8 +306,10 @@ export function HeroVideoMatrix({
         )}
       >
         {/* Audience toggle — sits above the crossfade so it never remounts
-            (the sliding thumb needs a stable layoutId across switches). */}
-        {onViewChange && views.length > 1 && (
+            (the sliding thumb needs a stable layoutId across switches). Hidden
+            when the current view isn't among its options (e.g. the deep-link
+            only data view), so it never renders with nothing selected. */}
+        {onViewChange && views.length > 1 && views.includes(view) && (
           <motion.div {...settle(0, 0.7)} className={cn("flex justify-center", isMobile ? "mb-7" : "mb-9")}>
             <AudienceToggle view={view} views={views} onChange={onViewChange} reduced={!!prefersReduced} />
           </motion.div>
@@ -337,10 +351,10 @@ export function HeroVideoMatrix({
 
               <motion.div
                 {...settle(0.46, 0.85)}
-                className={cn("flex items-center justify-center", isMobile ? "mt-7 gap-3 flex-col" : "mt-9 gap-3")}
+                className={cn("flex items-center justify-center", isMobile ? "mt-7" : "mt-9")}
               >
                 <a
-                  href="https://cal.com/coasty/15min"
+                  href="https://cal.com/coasty/coasty-data-call"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
@@ -353,21 +367,21 @@ export function HeroVideoMatrix({
                   Book a data call
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
                 </a>
-                <a
-                  href="#data-spec"
-                  className={cn(
-                    "inline-flex items-center justify-center gap-2 rounded-full font-medium",
-                    "border border-foreground/15 text-foreground bg-background/40 backdrop-blur-[2px]",
-                    "transition-colors duration-200 hover:border-foreground/30 hover:bg-foreground/[0.03]",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                    isMobile ? "w-full max-w-[280px] px-6 py-3 text-sm" : "px-7 py-3 text-[14.5px]",
-                  )}
-                >
-                  See what&apos;s inside
-                </a>
               </motion.div>
 
-              <motion.div {...settle(0.6, 0.9)} className={isMobile ? "mt-10" : "mt-12"}>
+              {/* Institutions strip — directly under the call CTA. */}
+              <motion.div {...settle(0.58, 0.9)} className={isMobile ? "mt-8" : "mt-9"}>
+                <p className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-muted-foreground/45">
+                  Built and used by teams at
+                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-x-9 gap-y-3.5 text-muted-foreground/60">
+                  {DATA_INSTITUTIONS.map(({ name, Logo, className }) => (
+                    <Logo key={name} className={cn("w-auto", className)} />
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div {...settle(0.72, 0.9)} className={isMobile ? "mt-10" : "mt-12"}>
                 <DataHeroRecord isMobile={isMobile} />
               </motion.div>
             </motion.div>

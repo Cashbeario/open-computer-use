@@ -37,6 +37,11 @@ const ENABLED_VIEWS: readonly LandingView[] = [
   ...(DATA_LANDING_ENABLED ? (["data"] as const) : []),
 ]
 
+// Views offered in the hero switcher. The data story is deliberately NOT
+// listed — it stays reachable only through its /?view=data deep link, so it
+// can be shared with prospects without advertising it on the public pill.
+const TOGGLE_VIEWS: readonly LandingView[] = ENABLED_VIEWS.filter((v) => v !== "data")
+
 // Minimal landing IA: a calm hero, then five tight sections separated by a
 // single hairline divider, then the footer. The old floating HeroTaskShots
 // video matrix and the section-reflow plumbing were removed — every section
@@ -104,15 +109,15 @@ export function LandingPage() {
       <TopAnnouncementBanner />
 
       <div id="landing-header-wrap">
-        <LandingHeader />
+        <LandingHeader dataView={view === "data"} />
       </div>
 
       {/* Hero — natural scroll, one viewport tall. */}
       <HeroVideoMatrix
         isMobile={isMobile}
         view={view}
-        views={ENABLED_VIEWS}
-        onViewChange={ENABLED_VIEWS.length > 1 ? switchView : undefined}
+        views={TOGGLE_VIEWS}
+        onViewChange={TOGGLE_VIEWS.length > 1 ? switchView : undefined}
       />
 
       <main className="relative bg-background">

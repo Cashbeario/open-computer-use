@@ -43,6 +43,12 @@ async function proxyToBackend(
   // Forward all relevant headers (X-API-Key, Content-Type)
   const headers: Record<string, string> = {
     "Content-Type": req.headers.get("Content-Type") || "application/json",
+    // Uncompressed upstream body — undici would transparently decompress a
+    // gzipped one anyway, and forwarding the upstream's stale
+    // content-encoding/content-length headers on a decompressed stream made
+    // Cloudflare 502 every backend response >= the gzip floor (see the
+    // canonical /v1 proxy for the full incident note).
+    "Accept-Encoding": "identity",
   }
 
   // Pass through the X-API-Key header for CUA API auth
@@ -119,8 +125,19 @@ async function proxyToBackend(
   const responseHeaders = new Headers()
   response.headers.forEach((value, key) => {
     const lower = key.toLowerCase()
-    // Skip hop-by-hop headers
-    if (!["transfer-encoding", "connection", "keep-alive"].includes(lower)) {
+    // Skip hop-by-hop headers, plus content-encoding/content-length: undici
+    // already decompressed the body, so the upstream's values describe bytes
+    // we are NOT sending — forwarding them makes Cloudflare reject the
+    // response as malformed (502). Next.js re-frames the response itself.
+    if (
+      ![
+        "transfer-encoding",
+        "connection",
+        "keep-alive",
+        "content-encoding",
+        "content-length",
+      ].includes(lower)
+    ) {
       responseHeaders.set(key, value)
     }
   })

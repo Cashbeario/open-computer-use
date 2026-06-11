@@ -61,10 +61,20 @@ async function proxyToBackend(
   try {
     const response = await fetch(url.toString(), fetchOptions)
 
-    // Stream the response back
+    // Stream the response back. content-encoding/content-length are dropped
+    // because undici already decompressed the body — forwarding the upstream
+    // values on the decoded stream makes Cloudflare 502 any response the
+    // backend gzipped (>= 1000B). Next.js re-frames the response itself.
     const responseHeaders = new Headers()
     response.headers.forEach((value, key) => {
-      if (!["transfer-encoding", "connection"].includes(key.toLowerCase())) {
+      if (
+        ![
+          "transfer-encoding",
+          "connection",
+          "content-encoding",
+          "content-length",
+        ].includes(key.toLowerCase())
+      ) {
         responseHeaders.set(key, value)
       }
     })

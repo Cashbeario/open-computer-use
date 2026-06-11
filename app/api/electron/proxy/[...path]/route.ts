@@ -104,11 +104,22 @@ async function proxyToBackend(
   }
 }
 
-/** Stream a backend response back to the client, preserving status and headers. */
+/** Stream a backend response back to the client, preserving status and headers.
+ * content-encoding/content-length are dropped: undici already decompressed
+ * the body, so the upstream values describe bytes we are not sending —
+ * forwarding them makes Cloudflare 502 any response the backend gzipped
+ * (>= 1000B). Next.js re-frames the response itself. */
 function streamResponse(response: Response) {
   const responseHeaders = new Headers()
   response.headers.forEach((value, key) => {
-    if (!["transfer-encoding", "connection"].includes(key.toLowerCase())) {
+    if (
+      ![
+        "transfer-encoding",
+        "connection",
+        "content-encoding",
+        "content-length",
+      ].includes(key.toLowerCase())
+    ) {
       responseHeaders.set(key, value)
     }
   })

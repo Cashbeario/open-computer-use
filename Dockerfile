@@ -98,5 +98,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+
+ENV KEEP_ALIVE_TIMEOUT=3700000
+
 # Start the application
 CMD ["node", "server.js"]

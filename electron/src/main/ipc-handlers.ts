@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron'
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron'
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -49,6 +49,43 @@ async function getTokenOrDeclareDead(auth: ElectronAuth): Promise<string | null>
 }
 
 /**
+ * Record the user's acceptance of the Terms + Privacy Policy after a
+ * successful desktop sign-in/up.
+ *
+ * The web app records consent server-side in /auth/callback at account
+ * creation, but the Electron Google/OAuth + magic-link paths never hit that
+ * route (the session is exchanged locally), so a desktop-only signup would
+ * otherwise have NO consent record. The button-level notice on AuthScreen is
+ * the user-facing assent; this is the durable record of it.
+ *
+ * Fire-and-forget and fully swallowed: a consent-logging hiccup must NEVER
+ * block or fail sign-in. The backend endpoint is idempotent on
+ * (user_id, terms_version, privacy_version), so recording on every successful
+ * auth (including returning sign-ins) just no-ops for already-recorded versions
+ * and guarantees coverage. OSS mode has no Bearer token, so it is skipped.
+ */
+async function recordConsentBestEffort(
+  auth: ElectronAuth,
+  backendUrl: string,
+  method: 'google' | 'email' | 'magic_link',
+): Promise<void> {
+  try {
+    const token = await auth.getAccessToken()
+    if (!token) return
+    await fetch(`${backendUrl}/api/me/consent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ method, source: 'electron' }),
+    })
+  } catch (err) {
+    console.warn('[auth] consent recording failed (non-fatal):', err)
+  }
+}
+
+/**
  * Standard header set for all OSS-mode coasty.ai calls. Centralised so the
  * X-API-Key + X-Coasty-Source pair is identical across every handler — the
  * backend keys off `X-Coasty-Source: electron-oss` to route into the OSS
@@ -94,6 +131,7 @@ export function registerIpcHandlers(
   secureHandle('auth:sign-in', async () => {
     try {
       const result = await auth.signInWithGoogle()
+      void recordConsentBestEffort(auth, backendUrl, 'google')
       return {
         success: true,
         user: {
@@ -111,6 +149,7 @@ export function registerIpcHandlers(
   secureHandle('auth:sign-in-email', async (_event, email: string, password: string) => {
     try {
       const result = await auth.signInWithEmail(email, password)
+      void recordConsentBestEffort(auth, backendUrl, 'email')
       return {
         success: true,
         user: {
@@ -129,6 +168,7 @@ export function registerIpcHandlers(
   secureHandle('auth:sign-up-email', async (_event, email: string, password: string) => {
     try {
       const result = await auth.signUpWithEmail(email, password)
+      void recordConsentBestEffort(auth, backendUrl, 'email')
       return {
         success: true,
         user: {
@@ -157,6 +197,7 @@ export function registerIpcHandlers(
   secureHandle('auth:await-magic-link', async () => {
     try {
       const result = await auth.awaitMagicLinkSession()
+      void recordConsentBestEffort(auth, backendUrl, 'magic_link')
       return {
         success: true,
         user: {
@@ -244,6 +285,24 @@ export function registerIpcHandlers(
     // exactly this — see chat:resume-human).
     if (await isOssMode()) return null
     return await auth.getAccessToken()
+  })
+
+  // Open an external URL in the user's default browser. Used by the
+  // AuthScreen consent notice to link to the hosted Terms / Privacy Policy
+  // without navigating the frameless overlay window. Hardened: only http(s)
+  // URLs are ever handed to the OS, so a malformed/again-injected value can't
+  // launch arbitrary protocols (file:, etc.).
+  secureHandle('shell:open-external', async (_event, url: string) => {
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return { success: false, error: 'Only http(s) URLs are allowed' }
+      }
+      await shell.openExternal(parsed.toString())
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error?.message || 'Invalid URL' }
+    }
   })
 
   // WebSocket bridge handlers

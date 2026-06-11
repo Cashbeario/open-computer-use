@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion, AnimatePresence } from "framer-motion"
+import { PRIVACY_LAST_UPDATED } from "@/lib/legal/versions"
 
 const privacySections = [
   {
@@ -231,7 +232,7 @@ export default function PrivacyPolicyPage() {
                 We take your privacy seriously. Learn how we protect your data while delivering powerful AI agent capabilities.
               </p>
               <p className="text-sm text-muted-foreground mt-4">
-                Last updated: August 1, 2025
+                Last updated: {PRIVACY_LAST_UPDATED}
               </p>
             </motion.div>
           </motion.div>

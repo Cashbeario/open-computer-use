@@ -286,7 +286,24 @@ export function AuthScreen() {
             )}
           </div>
 
-          <p className="text-neutral-600 text-[10px]">By continuing, you agree to let Coasty automate tasks on this machine.</p>
+          <p className="text-neutral-600 text-[10px] leading-relaxed">
+            By continuing, you agree to let Coasty automate tasks on this machine and accept our{' '}
+            <button
+              type="button"
+              onClick={() => window.coasty.openExternal('https://coasty.ai/terms')}
+              className="text-neutral-400 underline underline-offset-2 hover:text-neutral-200 transition-colors"
+            >
+              Terms
+            </button>{' '}
+            and{' '}
+            <button
+              type="button"
+              onClick={() => window.coasty.openExternal('https://coasty.ai/privacy')}
+              className="text-neutral-400 underline underline-offset-2 hover:text-neutral-200 transition-colors"
+            >
+              Privacy Policy
+            </button>.
+          </p>
         </div>
       </div>
     </div>

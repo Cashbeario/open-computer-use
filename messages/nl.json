@@ -1,4 +1,11 @@
 {
+  "consent": {
+    "ariaLabel": "Cookie and analytics consent",
+    "message": "We use cookies and analytics to improve Coasty.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
   "common": {
     "startFree": "Start gratis",
     "bookDemo": "Boek een demo",

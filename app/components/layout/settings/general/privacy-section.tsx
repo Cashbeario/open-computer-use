@@ -12,6 +12,8 @@ import {
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
+import { useConsent } from "@/lib/consent/consent-context"
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 10 },
@@ -26,11 +28,51 @@ const securityFeaturesMeta = [
   { icon: ShieldCheck, key: "session" as const },
 ]
 
+function AnalyticsConsentCard() {
+  const { analyticsAllowed, accept, reject, ready } = useConsent()
+
+  return (
+    <motion.div {...fadeUp(0.28)}>
+      <div className="rounded-xl border border-border/30 bg-card/20 p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold">Product analytics</h3>
+            <p className="text-xs text-muted-foreground/50 mt-0.5 leading-relaxed">
+              Help improve Coasty with privacy-respecting usage analytics. You can turn this off at any time.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={analyticsAllowed}
+            aria-label="Toggle product analytics"
+            disabled={!ready}
+            onClick={() => (analyticsAllowed ? reject() : accept())}
+            className={cn(
+              "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50",
+              analyticsAllowed ? "bg-primary" : "bg-muted"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-block h-5 w-5 transform rounded-full bg-background shadow transition-transform",
+                analyticsAllowed ? "translate-x-5" : "translate-x-0.5"
+              )}
+            />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export function PrivacySection() {
   const t = useTranslations("privacySettings")
 
   return (
     <div className="space-y-8">
+
+      <AnalyticsConsentCard />
 
       {/* ─── Security Overview ────────────────────────────────────────── */}
       <motion.div {...fadeUp(0)}>

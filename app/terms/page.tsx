@@ -13,6 +13,7 @@ import { LandingHeader } from "@/app/components/landing/landing-header"
 import { LandingFooter } from "@/app/components/landing/landing-footer"
 import { motion, AnimatePresence } from "framer-motion"
 import { priceTermsForm } from "@/lib/pricing/format"
+import { TERMS_EFFECTIVE_DATE } from "@/lib/legal/versions"
 
 const termsSections = [
   {
@@ -341,7 +342,7 @@ export default function TermsPage() {
                 Please read these terms carefully before using Coasty, your AI employee that collaborates with everyone.
               </p>
               <p className="text-sm text-muted-foreground mt-4">
-                Effective Date: August 1, 2025
+                Effective Date: {TERMS_EFFECTIVE_DATE}
               </p>
             </motion.div>
           </motion.div>

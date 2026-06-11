@@ -13,8 +13,23 @@ import {
   LockKey,
   LockKeyOpen,
   Cpu,
+  DownloadSimple,
+  TrashSimple,
 } from "@phosphor-icons/react"
 import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
@@ -27,10 +42,9 @@ import { useTranslations } from "next-intl"
  *      we never train on customer data.
  *   2. The encryption-preferences card (per-category opt-in at-rest
  *      encryption).
- *
- * The export and delete-all-my-data flows that used to live here have
- * been removed along with their backing API routes
- * (/api/me/data/export, /api/me/data/delete).
+ *   3. Export-your-data (GDPR Art. 15/20 portability) and delete-account
+ *      (GDPR Art. 17 erasure). Both proxy to the FastAPI DSR endpoints via
+ *      /api/me/data/export and /api/me/data/delete.
  */
 
 const fadeUp = (delay: number) => ({
@@ -48,6 +62,174 @@ export function DataSection() {
       <motion.div {...fadeUp(0.06)}>
         <EncryptionPrefsCard />
       </motion.div>
+      <motion.div {...fadeUp(0.12)}>
+        <ExportDataCard />
+      </motion.div>
+      <motion.div {...fadeUp(0.18)}>
+        <DeleteAccountCard />
+      </motion.div>
+    </div>
+  )
+}
+
+// ===========================================================================
+// ExportDataCard — GDPR Art. 15/20 portability. Downloads a JSON dump of the
+// caller's data via the /api/me/data/export proxy. Screenshots are omitted by
+// default to keep the file small; text records are complete.
+// ===========================================================================
+
+function ExportDataCard() {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleExport() {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/me/data/export?include_screenshots=false", {
+        cache: "no-store",
+      })
+      if (!res.ok) throw new Error(`Export failed (HTTP ${res.status})`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "coasty-data-export.json"
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Export failed")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-border/30 bg-card/20 p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3.5 min-w-0">
+          <div className="h-9 w-9 rounded-xl bg-foreground/[0.05] flex items-center justify-center shrink-0">
+            <DownloadSimple className="h-4 w-4 text-foreground/55" weight="duotone" />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-sm font-medium">Export your data</h4>
+            <p className="text-xs text-muted-foreground/65 mt-1 leading-relaxed">
+              Download a JSON copy of your account: chats, messages, machine
+              sessions, usage, and profile. Screenshots are omitted to keep the
+              file small.
+            </p>
+            {error && <p className="text-[11px] text-red-500 mt-2">{error}</p>}
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          disabled={busy}
+          className="shrink-0 gap-1.5"
+        >
+          {busy ? (
+            <CircleNotch className="size-3.5 animate-spin" />
+          ) : (
+            <DownloadSimple className="size-3.5" />
+          )}
+          {busy ? "Preparing…" : "Export"}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ===========================================================================
+// DeleteAccountCard — GDPR Art. 17 erasure. Confirms via AlertDialog, then
+// POSTs to /api/me/data/delete (full account closure), signs out, and returns
+// to the landing page.
+// ===========================================================================
+
+function DeleteAccountCard() {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleDelete() {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/me/data/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true, close_account: true }),
+      })
+      if (!res.ok) throw new Error(`Delete failed (HTTP ${res.status})`)
+      // Account closed — sign out locally and return to the landing page.
+      try {
+        const supabase = createClient()
+        if (supabase) await supabase.auth.signOut()
+      } catch {
+        // Session may already be invalid after auth.users deletion — ignore.
+      }
+      window.location.replace("/")
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Delete failed")
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-red-500/30 bg-red-500/[0.03] p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3.5 min-w-0">
+          <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <TrashSimple className="h-4 w-4 text-red-500" weight="duotone" />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-sm font-medium">Delete account</h4>
+            <p className="text-xs text-muted-foreground/65 mt-1 leading-relaxed">
+              Permanently delete your account and all associated data: chats,
+              messages, machine history, screenshots, and billing records. This
+              cannot be undone.
+            </p>
+            {error && <p className="text-[11px] text-red-500 mt-2">{error}</p>}
+          </div>
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={busy}
+              className="shrink-0 gap-1.5"
+            >
+              {busy ? (
+                <CircleNotch className="size-3.5 animate-spin" />
+              ) : (
+                <TrashSimple className="size-3.5" />
+              )}
+              {busy ? "Deleting…" : "Delete"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes your account and all associated data
+                (chats, messages, machine history, screenshots, billing). This
+                action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete account
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   )
 }

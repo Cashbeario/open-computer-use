@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client"
 import { isSupabaseEnabled } from "@/lib/supabase/config"
 import { detectInAppBrowser } from "@/lib/detect-in-app-browser"
 import Image from "next/image"
+import Link from "next/link"
 import { useState, useMemo } from "react"
 
 type DialogAuthProps = {
@@ -98,6 +99,17 @@ export function DialogAuth({ open, setOpen }: DialogAuthProps) {
             <span>{isLoading ? "Connecting..." : "Continue with Google"}</span>
           </Button>
         </DialogFooter>
+        {/* Button-level consent: continuing IS the acceptance. */}
+        <p className="text-center text-[11px] leading-relaxed text-muted-foreground/80">
+          By continuing, you agree to our{" "}
+          <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
+        </p>
       </DialogContent>
     </Dialog>
   )

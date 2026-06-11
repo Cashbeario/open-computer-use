@@ -819,6 +819,20 @@ export default function LoginPage() {
                   </span>
                 </Button>
 
+                {/* Button-level consent: clicking a sign-in/up action IS the
+                    acceptance. Notice sits directly under the primary CTA and
+                    is recorded server-side at account creation. */}
+                <p className="text-center text-[11px] leading-relaxed text-muted-foreground/80">
+                  {t("termsAgreement")}{" "}
+                  <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                    {t("terms")}
+                  </Link>{" "}
+                  {t("and")}{" "}
+                  <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                    {t("privacyPolicy")}
+                  </Link>
+                </p>
+
                 {/* Divider */}
                 <div className="relative flex items-center gap-3 py-1">
                   <div className="h-px flex-1 bg-border/60" />
@@ -959,6 +973,16 @@ export default function LoginPage() {
                         >
                           {isLoading ? t("creatingAccount") : t("createAccount")}
                         </Button>
+                        <p className="text-center text-[11px] leading-relaxed text-muted-foreground/80">
+                          {t("termsAgreement")}{" "}
+                          <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                            {t("terms")}
+                          </Link>{" "}
+                          {t("and")}{" "}
+                          <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground transition-colors">
+                            {t("privacyPolicy")}
+                          </Link>
+                        </p>
                         <p className="text-center text-[13px] text-muted-foreground pt-2">
                           {t("alreadyHaveAccount")}{" "}
                           <button
@@ -1048,19 +1072,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="mt-4 sm:mt-6 text-center">
-              <p className="text-[12px] text-muted-foreground/60 leading-relaxed">
-                {t("termsAgreement")}{" "}
-                <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
-                  {t("terms")}
-                </Link>{" "}
-                {t("and")}{" "}
-                <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
-                  {t("privacyPolicy")}
-                </Link>
-              </p>
-            </div>
           </motion.div>
           </div>
         </main>

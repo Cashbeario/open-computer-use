@@ -18,6 +18,9 @@ import { LayoutClient } from "./layout-client"
 import { AnimatedFavicon } from "@/components/animated-favicon"
 import { PostHogProvider } from "@/lib/posthog/provider"
 import { PostHogPageView } from "@/lib/posthog/page-view"
+import { ConsentProvider } from "@/lib/consent/consent-context"
+import { ConsentBanner } from "@/components/consent/consent-banner"
+import { UmamiAnalytics } from "@/components/analytics/umami"
 import { LocalizedSEOSchemas } from "./seo-schemas"
 import { IntlClientProvider } from "./intl-client-provider"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
@@ -135,7 +138,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const isDev = process.env.NODE_ENV === "development"
   const userProfile = await getUserProfile()
 
   let locale = "en"
@@ -213,13 +215,8 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
-        {!isDev ? (
-          <Script
-            async
-            src="https://analytics.umami.is/script.js"
-            data-website-id="42e5b68c-5478-41a6-bc68-088d029cee52"
-          />
-        ) : null}
+        {/* Umami analytics is loaded by a consent-gated client component
+            (components/analytics/umami.tsx) so it never fires before consent. */}
         {/* Structured Data for SEO */}
         <Script
           id="structured-data"
@@ -410,8 +407,10 @@ export default async function RootLayout({
       >
         <AnimatedFavicon />
         <IntlClientProvider locale={locale} messages={messages as Record<string, unknown>}>
+          <ConsentProvider>
           <PostHogProvider>
             <PostHogPageView />
+            <UmamiAnalytics />
             <TanstackQueryProvider>
               <LayoutClient />
               <UserProvider initialUser={userProfile}>
@@ -444,6 +443,8 @@ export default async function RootLayout({
               </UserProvider>
             </TanstackQueryProvider>
           </PostHogProvider>
+          <ConsentBanner />
+          </ConsentProvider>
         </IntlClientProvider>
       </body>
     </html>

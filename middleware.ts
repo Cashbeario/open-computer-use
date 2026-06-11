@@ -140,6 +140,26 @@ export async function middleware(request: NextRequest) {
     response.headers.set("Content-Language", activeLocale)
     response.headers.set("Vary", "Accept-Language, Cookie")
 
+    // Geo hint for the client-side analytics-consent banner. EU/EEA/UK visitors
+    // require prior opt-in (ePrivacy / PECR); everyone else is opt-out. The
+    // country comes from the edge (Cloudflare cf-ipcountry / Vercel
+    // x-vercel-ip-country) and is stored in a readable (non-httpOnly) cookie so
+    // the consent provider can branch without a round-trip. "XX"/unknown is
+    // skipped and treated as opt-out client-side.
+    const country =
+      request.headers.get("cf-ipcountry") ||
+      request.headers.get("x-vercel-ip-country") ||
+      ""
+    if (country && country !== "XX") {
+      if (request.cookies.get("coasty_geo")?.value !== country) {
+        response.cookies.set("coasty_geo", country, {
+          path: "/",
+          maxAge: 24 * 60 * 60,
+          sameSite: "lax",
+        })
+      }
+    }
+
     // CSRF protection for state-changing requests.
     //
     // EXEMPT the public developer API (`/v1/*`) and any request that

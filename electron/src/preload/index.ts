@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld('coasty', {
   getSession: () => ipcRenderer.invoke('auth:get-session'),
   getToken: () => ipcRenderer.invoke('auth:get-token'),
 
+  // Open a URL in the user's default browser (Terms / Privacy links).
+  openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
+
   // WebSocket bridge
   connectBridge: () => ipcRenderer.invoke('bridge:connect'),
   disconnectBridge: () => ipcRenderer.invoke('bridge:disconnect'),
@@ -235,6 +238,7 @@ export interface CoastyAPI {
     machineId: string
   }>
   getToken: () => Promise<string | null>
+  openExternal: (url: string) => Promise<{ success: boolean; error?: string }>
 
   connectBridge: () => Promise<{ success: boolean; machineId?: string; error?: string }>
   disconnectBridge: () => Promise<{ success: boolean }>

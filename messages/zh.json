@@ -1,4 +1,11 @@
 {
+  "consent": {
+    "ariaLabel": "Cookie and analytics consent",
+    "message": "We use cookies and analytics to improve Coasty.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
   "common": {
     "startFree": "免费开始",
     "bookDemo": "预约演示",

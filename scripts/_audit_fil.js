@@ -1,5 +1,6 @@
 const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('c:/Users/prate/OneDrive/Documents/vscode/open-computer-use/messages/fil.json', 'utf8'));
+const path = require('path');
+const data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'messages', 'fil.json'), 'utf8'));
 
 function get(obj, path) {
   return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);

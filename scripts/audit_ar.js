@@ -1,5 +1,6 @@
 const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('c:/Users/prate/OneDrive/Documents/vscode/open-computer-use/messages/ar.json', 'utf8'));
+const path = require('path');
+const data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'messages', 'ar.json'), 'utf8'));
 
 const keys = [
   ['connections.title', 40, 'wrap_unlimited'],

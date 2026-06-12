@@ -116,7 +116,7 @@ export type SessionDeadReason =
   | 'manual'                 // user clicked sign-out (still fired for symmetry)
 
 export class ElectronAuth {
-  private supabase: SupabaseClient
+  private supabaseClient: SupabaseClient | null = null
   private session: Session | null = null
   private refreshTimer: ReturnType<typeof setTimeout> | null = null
   private refreshPromise: Promise<void> | null = null
@@ -142,17 +142,61 @@ export class ElectronAuth {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('[Auth] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY not set in .env')
+      console.warn(
+        '[Auth] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY not set ' +
+        '— sign-in is disabled. Copy electron/.env.example to electron/.env, ' +
+        'fill in your Supabase project values, and restart.'
+      )
     }
 
-    this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-        flowType: 'pkce',
-      },
-    })
+    // Construct defensively. The real @supabase/supabase-js throws
+    // "supabaseUrl is required." when given empty creds, which used to fire
+    // inside app.whenReady() on a fresh clone with no electron/.env — the
+    // overlay window never appeared and the app sat as a headless zombie
+    // process. Catching it lets the app boot to the auth screen; sign-in
+    // then fails at the point of use via the `supabase` getter with an
+    // actionable message instead of taking down startup.
+    try {
+      this.supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          flowType: 'pkce',
+        },
+      })
+    } catch (err) {
+      console.warn(
+        '[Auth] Supabase client unavailable:',
+        (err as Error)?.message ?? err,
+      )
+      this.supabaseClient = null
+    }
     this.loadStoredSession()
+  }
+
+  /** True when the Supabase client was constructed successfully (valid
+   *  NEXT_PUBLIC_SUPABASE_URL / ANON_KEY at startup). The renderer can use
+   *  this to label the auth screen; sign-in paths fail with a descriptive
+   *  error either way via the `supabase` getter. */
+  isConfigured(): boolean {
+    return this.supabaseClient !== null
+  }
+
+  /** Every auth flow reaches Supabase through this accessor so the
+   *  unconfigured case fails at the point of use (a sign-in click) with an
+   *  actionable message, instead of at construction time where it used to
+   *  take down startup before any window existed. All call sites run inside
+   *  try/catch or async flows whose rejections the IPC layer converts to
+   *  `{ success: false, error }` for the renderer. */
+  private get supabase(): SupabaseClient {
+    if (!this.supabaseClient) {
+      throw new Error(
+        'Supabase is not configured. Copy electron/.env.example to ' +
+        'electron/.env, set NEXT_PUBLIC_SUPABASE_URL and ' +
+        'NEXT_PUBLIC_SUPABASE_ANON_KEY, and restart the app.'
+      )
+    }
+    return this.supabaseClient
   }
 
   // ── Shared callback server ─────────────────────────────────────────────

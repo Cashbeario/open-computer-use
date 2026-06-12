@@ -177,24 +177,30 @@ type PathMapEntry = {
 
 /**
  * Single source of truth for `/api/*` → `/v1/*` rewrites. Verified against
- * `lib/openapi/coasty-v1.ts`:
+ * `lib/openapi/coasty-v1.ts` AND the backend's actual router mounts
+ * (backend/main.py `_mount_if` calls) — the spec and the mounted surface
+ * must BOTH list a path before it gets a non-null mapping here:
  *
- *   * Present in spec: `/v1/predict`, `/v1/sessions`, `/v1/ground`,
- *     `/v1/parse`, `/v1/models`, `/v1/usage`, `/v1/keys`,
- *     `/v1/health`, `/v1/machines`, `/v1/schedules`, `/v1/triggers`,
- *     `/v1/chat`, `/v1/chats`, `/v1/files`, `/v1/credits`, `/v1/swarms`
- *     (the latter five added in Round 2, May 2026 — Beta).
+ *   * Present in spec and mounted: `/v1/predict`, `/v1/sessions`,
+ *     `/v1/ground`, `/v1/parse`, `/v1/models`, `/v1/usage`, `/v1/keys`,
+ *     `/v1/health`, `/v1/machines`, `/v1/schedules`, `/v1/triggers`
+ *     (plus `/v1/runs` and `/v1/workflows`, which have no `/api/*`
+ *     equivalents in this app and so don't appear in the table).
  *
- *   * NOT in spec (so `oss: null` here): `/v1/screenshots`, `/v1/search`,
- *     `/v1/electron`, `/v1/osworld`. These remain hosted-only: screenshot
- *     storage and Google Custom Search are infra-coupled, electron bridge
- *     is a websocket relay, OSWorld is the benchmark harness. OSS mode
- *     hits these as 501s and the caller is expected to surface a
+ *   * NOT live (so `oss: null` here): `/v1/chat`, `/v1/chats`, `/v1/files`,
+ *     `/v1/credits`, `/v1/swarms` — these were drafted for a Round-2 spec
+ *     expansion (May 2026) that has not shipped; the backend mounts no
+ *     such routers. Also hosted-only by design: `/v1/screenshots`,
+ *     `/v1/search`, `/v1/electron`, `/v1/osworld` (screenshot storage and
+ *     Google Custom Search are infra-coupled, electron bridge is a
+ *     websocket relay, OSWorld is the benchmark harness). OSS mode hits
+ *     all of these as 501s and the caller is expected to surface a
  *     "self-host this feature or upgrade to coasty.ai hosted" message.
  *
- * TODO Phase 2.5: revisit `/api/screenshots` and `/api/search` once the
- * backend team decides whether to publicize them. When a /v1/* path
- * appears in the spec, replace its `oss: null` with `{ prefix: "/v1/..." }`.
+ * TODO: when the Round-2 endpoints (chat/chats/files/credits/swarms) go
+ * live, flip their rows back to `{ prefix: "/v1/..." }` and update the
+ * pins in tests/lib/api-router.test.ts — app/api/chat/route.ts documents
+ * the one-line route change that completes the OSS chat path.
  */
 const PATH_MAP: ReadonlyArray<PathMapEntry> = [
   // ── More specific prefixes first ──────────────────────────────────────────
@@ -202,9 +208,10 @@ const PATH_MAP: ReadonlyArray<PathMapEntry> = [
   { apiPrefix: "/api/credits/checkout", oss: null, match: "prefix" },
   { apiPrefix: "/api/credits/webhook", oss: null, match: "prefix" },
   { apiPrefix: "/api/credits/auto-refill", oss: null, match: "prefix" },
-  // The one credits sub-route that's safe to forward (read-only balance).
-  // In spec (Beta) since 2026-05.
-  { apiPrefix: "/api/credits/balance", oss: { prefix: "/v1/credits" }, match: "exact" },
+  // Read-only balance was drafted to forward to /v1/credits, but that
+  // router never shipped (not mounted in backend/main.py) — null until it
+  // does. Kept as a distinct exact-match row so the flip stays one-line.
+  { apiPrefix: "/api/credits/balance", oss: null, match: "exact" },
   { apiPrefix: "/api/credits", oss: null, match: "prefix" },
 
   // Local-only / admin / supabase-only routes — `oss: null` so the caller
@@ -216,16 +223,16 @@ const PATH_MAP: ReadonlyArray<PathMapEntry> = [
   { apiPrefix: "/api/developers", oss: null, match: "prefix", note: "API key minting — link to coasty.ai/developers" },
   { apiPrefix: "/api/status", oss: null, match: "prefix", note: "admin/cron" },
 
-  // ── First-party hosted features now in spec (Beta since 2026-05) ─────────
-  // /api/chat → /v1/chat (SSE streaming chat). In spec (Beta) since 2026-05.
-  { apiPrefix: "/api/chat", oss: { prefix: "/v1/chat" }, match: "prefix" },
-  // /api/chats → /v1/chats (CRUD over saved chats + messages). In spec (Beta) since 2026-05.
-  { apiPrefix: "/api/chats", oss: { prefix: "/v1/chats" }, match: "prefix" },
-  // /api/files → /v1/files (multipart upload, list, delete). In spec (Beta) since 2026-05.
-  { apiPrefix: "/api/files", oss: { prefix: "/v1/files" }, match: "prefix" },
-  // /api/swarm{,s} → /v1/swarms (multi-machine orchestration). In spec (Beta) since 2026-05.
-  { apiPrefix: "/api/swarm", oss: { prefix: "/v1/swarms" }, match: "prefix" },
-  { apiPrefix: "/api/swarms", oss: { prefix: "/v1/swarms" }, match: "prefix" },
+  // ── Round-2 endpoints that never shipped (drafted May 2026) ──────────────
+  // These were mapped to /v1/chat, /v1/chats, /v1/files, and /v1/swarms in
+  // anticipation of a spec expansion that hasn't landed — the backend mounts
+  // no such routers (backend/main.py). All null until they exist upstream;
+  // app/api/chat/route.ts returns its own readable OSS message for chat.
+  { apiPrefix: "/api/chat", oss: null, match: "prefix", note: "flip to /v1/chat when mounted" },
+  { apiPrefix: "/api/chats", oss: null, match: "prefix", note: "flip to /v1/chats when mounted" },
+  { apiPrefix: "/api/files", oss: null, match: "prefix", note: "flip to /v1/files when mounted" },
+  { apiPrefix: "/api/swarm", oss: null, match: "prefix", note: "flip to /v1/swarms when mounted" },
+  { apiPrefix: "/api/swarms", oss: null, match: "prefix", note: "flip to /v1/swarms when mounted" },
   // TODO Phase 2.5: spec needs /v1/screenshots (lookup by SHA256 id).
   { apiPrefix: "/api/screenshots", oss: null, match: "prefix" },
   // TODO Phase 2.5: spec needs /v1/search (Google Custom Search wrapper).

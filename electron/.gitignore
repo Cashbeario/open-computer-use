@@ -1,6 +1,12 @@
 node_modules/
 out/
 dist/
-build/
+# build/ here is electron-builder's buildResources (icons, mac entitlements,
+# AppImage LICENSE.txt) — required to package on a fresh clone, so it IS
+# tracked. The negation also overrides the unanchored `build/` rule in the
+# root .gitignore (deeper .gitignore files take precedence). Local-only
+# native experiments live under native/, ignored below.
+!build/
+native/
 *.env*
 !.env.example

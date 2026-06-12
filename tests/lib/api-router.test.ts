@@ -128,51 +128,31 @@ describe("mapApiPathToV1", () => {
     expect(mapApiPathToV1(apiPath)).toBeNull()
   })
 
-  // Round 2: chat / chats / files / credits-balance / swarms now in spec.
-  it("/api/chat → /v1/chat", () => {
-    expect(mapApiPathToV1("/api/chat")).toBe("/v1/chat")
-  })
-
-  it("/api/chat/route → /v1/chat/route (prefix preserves suffix)", () => {
-    expect(mapApiPathToV1("/api/chat/route")).toBe("/v1/chat/route")
-  })
-
-  it("/api/chats → /v1/chats", () => {
-    expect(mapApiPathToV1("/api/chats")).toBe("/v1/chats")
-  })
-
-  it("/api/chats/abc/messages → /v1/chats/abc/messages", () => {
-    expect(mapApiPathToV1("/api/chats/abc/messages")).toBe("/v1/chats/abc/messages")
-  })
-
-  it("/api/files → /v1/files", () => {
-    expect(mapApiPathToV1("/api/files")).toBe("/v1/files")
-  })
-
-  it("/api/files/foo → /v1/files/foo", () => {
-    expect(mapApiPathToV1("/api/files/foo")).toBe("/v1/files/foo")
-  })
-
-  it("/api/credits/balance → /v1/credits (exact match)", () => {
-    expect(mapApiPathToV1("/api/credits/balance")).toBe("/v1/credits")
+  // Round-2 endpoints (chat / chats / files / credits-balance / swarms)
+  // were drafted against a May-2026 spec expansion that never shipped —
+  // backend/main.py mounts no /v1/chat, /v1/chats, /v1/files, /v1/credits,
+  // or /v1/swarms routers. These pins assert the mappings stay null until
+  // the upstream exists; when a router ships, flip its PATH_MAP row in
+  // lib/api-router.ts AND the matching pin here in the same commit.
+  it.each([
+    ["/api/chat", "no /v1/chat router mounted"],
+    ["/api/chat/route", "chat subtree"],
+    ["/api/chats", "no /v1/chats router mounted"],
+    ["/api/chats/abc/messages", "chats subtree"],
+    ["/api/files", "no /v1/files router mounted"],
+    ["/api/files/foo", "files subtree"],
+    ["/api/credits/balance", "no /v1/credits router mounted (exact row kept for the flip)"],
+    ["/api/swarm", "no /v1/swarms router mounted"],
+    ["/api/swarms", "no /v1/swarms router mounted"],
+    ["/api/swarm/abc/stop", "swarm subtree"],
+  ])("%s returns null until its /v1 router ships (%s)", (apiPath) => {
+    expect(mapApiPathToV1(apiPath)).toBeNull()
   })
 
   it("/api/credits/balance/extra falls through to null (exact doesn't match)", () => {
     // The /api/credits/balance entry is `match: "exact"`, so a deeper path
     // doesn't match it; it falls through to the /api/credits null catch-all.
     expect(mapApiPathToV1("/api/credits/balance/extra")).toBeNull()
-  })
-
-  it("/api/swarm → /v1/swarms", () => {
-    expect(mapApiPathToV1("/api/swarm")).toBe("/v1/swarms")
-  })
-
-  it("/api/swarms → /v1/swarms", () => {
-    expect(mapApiPathToV1("/api/swarms")).toBe("/v1/swarms")
-  })
-
-  it("/api/swarm/abc/stop → /v1/swarms/abc/stop", () => {
-    expect(mapApiPathToV1("/api/swarm/abc/stop")).toBe("/v1/swarms/abc/stop")
   })
 
   it("returns null for paths outside /api/", () => {

@@ -11,12 +11,16 @@
 import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
+import { HAVE_BACKEND, haveMigration } from "./helpers/private-sources"
 
 const root = process.cwd()
 const read = (p: string) => readFileSync(join(root, p), "utf8")
 
-const MIGRATION = read("supabase/migrations/024_api_wallet.sql")
-const BILLING = read("backend/app/services/api_billing_service.py")
+// backend/ + migration 024 are gitignored from the public repo, so reads are
+// guarded to keep collection alive there; the maintainer tree runs everything.
+const HAVE_M024 = haveMigration("024_api_wallet.sql")
+const MIGRATION = HAVE_M024 ? read("supabase/migrations/024_api_wallet.sql") : ""
+const BILLING = HAVE_BACKEND ? read("backend/app/services/api_billing_service.py") : ""
 const WEBHOOK = read("app/api/credits/webhook/route.ts")
 const CHECKOUT = read("app/api/developers/wallet/checkout/route.ts")
 const WALLET_GET = read("app/api/developers/wallet/route.ts")
@@ -24,7 +28,8 @@ const DEVROUTE = read("app/api/developers/route.ts")
 
 const slice = (s: string, marker: string) => s.slice(s.indexOf(marker))
 
-describe("024 migration — api_wallet schema", () => {
+// public-clone skip: migration 024 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M024)("024 migration — api_wallet schema", () => {
   it("creates api_wallets with a non-negative integer-cents balance", () => {
     expect(MIGRATION).toMatch(/CREATE TABLE IF NOT EXISTS public\.api_wallets/)
     expect(MIGRATION).toMatch(/balance_cents\s+bigint NOT NULL DEFAULT 0 CHECK \(balance_cents >= 0\)/)
@@ -67,7 +72,8 @@ describe("024 migration — api_wallet schema", () => {
   })
 })
 
-describe("debit_api_wallet RPC — atomic, idempotent, overdraw-proof", () => {
+// public-clone skip: migration 024 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M024)("debit_api_wallet RPC — atomic, idempotent, overdraw-proof", () => {
   const fn = slice(MIGRATION, "FUNCTION public.debit_api_wallet")
 
   it("locks the row FOR UPDATE, is SECURITY DEFINER, and is granted to service_role", () => {
@@ -89,7 +95,8 @@ describe("debit_api_wallet RPC — atomic, idempotent, overdraw-proof", () => {
   })
 })
 
-describe("credit_api_wallet RPC — atomic, idempotent topup/refund", () => {
+// public-clone skip: migration 024 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M024)("credit_api_wallet RPC — atomic, idempotent topup/refund", () => {
   const fn = slice(MIGRATION, "FUNCTION public.credit_api_wallet")
 
   it("locks FOR UPDATE, catches unique_violation, and is granted to service_role", () => {
@@ -104,7 +111,8 @@ describe("credit_api_wallet RPC — atomic, idempotent topup/refund", () => {
   })
 })
 
-describe("backend billing rewired to the dollar wallet", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("backend billing rewired to the dollar wallet", () => {
   it("converts credits to cents at 1¢/credit (predict = $0.05)", () => {
     const m = BILLING.match(/API_CREDIT_USD_CENTS\s*=\s*(\d+)/)
     expect(m).toBeTruthy()

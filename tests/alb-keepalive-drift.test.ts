@@ -19,6 +19,7 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
+import { HAVE_BACKEND } from "./helpers/private-sources"
 
 const ROOT = join(__dirname, "..")
 const ALB_IDLE_TIMEOUT_S = 3600
@@ -33,15 +34,15 @@ describe("Next.js standalone keep-alive", () => {
   })
 })
 
-describe("FastAPI (gunicorn + uvicorn) keep-alive", () => {
-  const gunicornConf = readFileSync(
-    join(ROOT, "backend", "gunicorn_conf.py"),
-    "utf-8"
-  )
-  const worker = readFileSync(
-    join(ROOT, "backend", "app", "core", "uvicorn_worker.py"),
-    "utf-8"
-  )
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("FastAPI (gunicorn + uvicorn) keep-alive", () => {
+  // guarded reads: this body still executes at collection even when skipped
+  const gunicornConf = HAVE_BACKEND
+    ? readFileSync(join(ROOT, "backend", "gunicorn_conf.py"), "utf-8")
+    : ""
+  const worker = HAVE_BACKEND
+    ? readFileSync(join(ROOT, "backend", "app", "core", "uvicorn_worker.py"), "utf-8")
+    : ""
 
   it("gunicorn uses the CoastyUvicornWorker subclass (plain UvicornWorker ignores `keepalive`)", () => {
     expect(gunicornConf).toContain(

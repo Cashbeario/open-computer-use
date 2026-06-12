@@ -29,8 +29,14 @@
 import { describe, it, expect, beforeAll } from "vitest"
 import * as fs from "node:fs"
 import * as path from "node:path"
+import { haveMigration } from "./helpers/private-sources"
 
 const REPO_ROOT = path.resolve(__dirname, "..")
+
+// Migration 018 is gitignored from the public repo; suite 1 skips there
+// while the maintainer tree always runs it (the i18n suites below read only
+// the public messages/*.json files and run everywhere).
+const HAVE_M018 = haveMigration("018_auth_users_mirror_trigger.sql")
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1.  Migration 018 — source-level guards.
@@ -39,7 +45,8 @@ const REPO_ROOT = path.resolve(__dirname, "..")
 //     these will trigger the test before it ships.
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe("Migration 018 — auth.users → public.users mirror", () => {
+// public-clone skip: migration 018 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M018)("Migration 018 — auth.users → public.users mirror", () => {
   let sql: string
 
   beforeAll(() => {

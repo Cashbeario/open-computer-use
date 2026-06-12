@@ -28,17 +28,25 @@ import {
   extractFunctionDefs,
   loadMigrations,
 } from './lib/sql-parser'
+import { haveMigration } from './helpers/private-sources'
 
 const REPO_ROOT = path.resolve(__dirname, '..')
 const SCHEMA_PATH = path.join(REPO_ROOT, 'supabase', 'schema.sql')
 const MIGRATIONS_DIR = path.join(REPO_ROOT, 'supabase', 'migrations')
 const SCHEMA_SQL = fs.readFileSync(SCHEMA_PATH, 'utf8')
 
+// Migrations 015/021 are gitignored from the public repo (only 001–006 ship);
+// the tests that read them skip there, while the maintainer tree always runs
+// them. The dir itself always exists, so loadMigrations stays guarded too.
+const HAVE_M015_M021 =
+  haveMigration('015_fix_ambiguous_user_id.sql') &&
+  haveMigration('021_re_apply_ambiguous_user_id_fix.sql')
+
 // Build maps once for the suite.
 const SCHEMA_FNS = extractFunctionDefs(SCHEMA_SQL, SCHEMA_PATH)
 const SCHEMA_FN_BY_NAME = new Map(SCHEMA_FNS.map((fn) => [fn.name, fn]))
 
-const MIGRATIONS = loadMigrations(MIGRATIONS_DIR)
+const MIGRATIONS = fs.existsSync(MIGRATIONS_DIR) ? loadMigrations(MIGRATIONS_DIR) : []
 // Map<fnName, {fn, file}>  — last write wins (i.e. latest migration).
 const LATEST_MIGRATION_FN = new Map<
   string,
@@ -58,7 +66,8 @@ describe('schema.sql ↔ migrations: RETURNS TABLE name consistency', () => {
     expect(fn!.outColumns.length).toBeGreaterThan(0)
   })
 
-  it('the LATEST migration definition of update_subscription_status uses out_user_id', () => {
+  // public-clone skip (this test only): migrations 015/021 are gitignored there
+  it.skipIf(!HAVE_M015_M021)('the LATEST migration definition of update_subscription_status uses out_user_id', () => {
     // This is the post-015 / post-021 invariant.  If it drifts, the
     // ambiguous-user_id bug is back.
     const m = LATEST_MIGRATION_FN.get('update_subscription_status')
@@ -150,7 +159,8 @@ describe('schema.sql ↔ migrations: RETURNS TABLE name consistency', () => {
   })
 })
 
-describe('schema.sql ↔ migrations: regression-vector documentation', () => {
+// public-clone skip: migrations 015/021 are gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M015_M021)('schema.sql ↔ migrations: regression-vector documentation', () => {
   it('migration 015 explicitly documents the NEW-1 incident in its preamble', () => {
     const m015Path = path.join(MIGRATIONS_DIR, '015_fix_ambiguous_user_id.sql')
     const sql = fs.readFileSync(m015Path, 'utf8')

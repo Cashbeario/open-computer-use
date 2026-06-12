@@ -29,10 +29,16 @@ import {
   loadMigrations,
   stripSqlComments,
 } from './lib/sql-parser'
+import { haveMigration } from './helpers/private-sources'
 
 const REPO_ROOT = path.resolve(__dirname, '..')
 const SCHEMA_PATH = path.join(REPO_ROOT, 'supabase', 'schema.sql')
 const MIGRATIONS_DIR = path.join(REPO_ROOT, 'supabase', 'migrations')
+
+// Migration 011 is gitignored from the public repo (only 001–006 ship); the
+// linter-liveness check that replays its historical bug skips there while the
+// maintainer tree always runs it.
+const HAVE_M011 = haveMigration('011_unify_tier_vocabulary.sql')
 
 // Real schema.sql is the source of truth for table column names.  We use
 // it for ALL fixture linting so the rules match production semantics.
@@ -336,7 +342,8 @@ describe('Static shadowing linter: real schema.sql + migrations', () => {
     expect(findings).toEqual([])
   })
 
-  it('LEGACY migration 011 was buggy on purpose (sanity check the linter is alive)', () => {
+  // public-clone skip (this test only): migration 011 is gitignored there
+  it.skipIf(!HAVE_M011)('LEGACY migration 011 was buggy on purpose (sanity check the linter is alive)', () => {
     // Defence-in-depth: ensures the linter CAN detect the historical bug.
     // If this stops finding it, the linter has been weakened and the
     // real-schema asserts above are silently passing for the wrong reason.

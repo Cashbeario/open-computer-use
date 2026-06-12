@@ -9,22 +9,27 @@
 import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
+import { HAVE_BACKEND, haveMigration } from "./helpers/private-sources"
 
 const root = process.cwd()
 const read = (p: string) => readFileSync(join(root, p), "utf8")
 
-const M026 = read("supabase/migrations/026_workflows.sql")
-const WF_MODELS = read("backend/app/models/public_workflows.py")
-const WF_ENGINE = read("backend/app/services/workflow_engine.py")
-const WF_ROUTES = read("backend/app/api/routes/public_workflows.py")
-const CONFIG = read("backend/app/core/config.py")
-const MAIN = read("backend/main.py")
+// backend/ + migration 026 are gitignored from the public repo, so reads are
+// guarded to keep collection alive there; the maintainer tree runs everything.
+const HAVE_M026 = haveMigration("026_workflows.sql")
+const M026 = HAVE_M026 ? read("supabase/migrations/026_workflows.sql") : ""
+const WF_MODELS = HAVE_BACKEND ? read("backend/app/models/public_workflows.py") : ""
+const WF_ENGINE = HAVE_BACKEND ? read("backend/app/services/workflow_engine.py") : ""
+const WF_ROUTES = HAVE_BACKEND ? read("backend/app/api/routes/public_workflows.py") : ""
+const CONFIG = HAVE_BACKEND ? read("backend/app/core/config.py") : ""
+const MAIN = HAVE_BACKEND ? read("backend/main.py") : ""
 
 const STATES = ["queued", "running", "awaiting_human", "succeeded", "failed", "cancelled", "timed_out"]
 const STEP_TYPES = ["task", "assert", "if", "loop", "parallel", "human_approval", "retry", "succeed", "fail"]
 const COND_OPS = ["eq", "ne", "lt", "gt", "lte", "gte", "contains", "truthy", "falsy", "exists", "and", "or", "not"]
 
-describe("026 migration — workflows + workflow_runs schema", () => {
+// public-clone skip: migration 026 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M026)("026 migration — workflows + workflow_runs schema", () => {
   it("creates workflows, workflow_runs, workflow_run_events", () => {
     expect(M026).toMatch(/CREATE TABLE IF NOT EXISTS public\.workflows/)
     expect(M026).toMatch(/CREATE TABLE IF NOT EXISTS public\.workflow_runs/)
@@ -78,7 +83,8 @@ describe("026 migration — workflows + workflow_runs schema", () => {
   })
 })
 
-describe("DSL grammar — step types + structured conditions", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("DSL grammar — step types + structured conditions", () => {
   it("models declare exactly the 9 step types", () => {
     for (const t of STEP_TYPES) expect(WF_MODELS, `step type ${t}`).toContain(`"${t}"`)
   })
@@ -95,7 +101,8 @@ describe("DSL grammar — step types + structured conditions", () => {
   })
 })
 
-describe("static validation — fail-loud + bounded", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("static validation — fail-loud + bounded", () => {
   it("validates structure, unique ids, depth, and step count", () => {
     expect(WF_ENGINE).toMatch(/def validate_definition/)
     expect(WF_ENGINE).toMatch(/duplicate step id/)
@@ -116,7 +123,8 @@ describe("static validation — fail-loud + bounded", () => {
   })
 })
 
-describe("engine — task steps are runs; human_approval pauses the workflow", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("engine — task steps are runs; human_approval pauses the workflow", () => {
   it("task steps execute a real run inline and bind the result", () => {
     expect(WF_ENGINE).toMatch(/public_run_service\.execute_inline/)
     expect(WF_ENGINE).toMatch(/workflow_run_id=state\.run_id/)
@@ -140,7 +148,8 @@ describe("engine — task steps are runs; human_approval pauses the workflow", (
   })
 })
 
-describe("workflow routes — ordering, scopes, kill-switch", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("workflow routes — ordering, scopes, kill-switch", () => {
   it("declares the static /runs subtree BEFORE the dynamic /{workflow_id}", () => {
     const runsIdx = WF_ROUTES.indexOf('@router.post("/runs"')
     const dynIdx = WF_ROUTES.indexOf('@router.get("/{workflow_id}"')
@@ -163,7 +172,8 @@ describe("workflow routes — ordering, scopes, kill-switch", () => {
   })
 })
 
-describe("config flags + mount", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("config flags + mount", () => {
   it("declares the workflows kill-switch and guard ceilings", () => {
     for (const k of ["WORKFLOWS_API_ENABLED", "WORKFLOWS_MAX_CONCURRENT_PER_USER", "WORKFLOWS_MAX_STEPS",
                      "WORKFLOWS_MAX_ITERATIONS_CEILING", "WORKFLOWS_MAX_DEADLINE_SECONDS", "WORKFLOWS_MAX_NESTING_DEPTH"]) {

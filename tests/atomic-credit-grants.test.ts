@@ -24,6 +24,7 @@
 import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
+import { haveMigration } from "./helpers/private-sources";
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 
@@ -31,13 +32,23 @@ function readSrc(rel: string): string {
   return fs.readFileSync(path.join(REPO_ROOT, rel), "utf-8");
 }
 
+// Migrations 012/013/014 are gitignored from the public repo; the suites that
+// read them skip there, while the maintainer tree always runs them.
+const HAVE_M014 = haveMigration("014_atomic_credit_grants.sql");
+const HAVE_CROSS_FIX_MIGRATIONS =
+  haveMigration("012_auto_blog_runs.sql") &&
+  haveMigration("013_cron_runs.sql") &&
+  HAVE_M014;
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Migration 014 — RPCs + dedup constraints
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe("Migration 014: atomic credit grants", () => {
-  const sql = readSrc("supabase/migrations/014_atomic_credit_grants.sql");
+// public-clone skip: migration 014 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M014)("Migration 014: atomic credit grants", () => {
+  // guarded read: this body still executes at collection even when skipped
+  const sql = HAVE_M014 ? readSrc("supabase/migrations/014_atomic_credit_grants.sql") : "";
 
   it("file exists with the expected migration name", () => {
     expect(sql.length).toBeGreaterThan(500);
@@ -287,7 +298,8 @@ describe("awardCredits helpers (referral + run-feedback)", () => {
 // Cross-fix integration: all 4 generations of credit-grant fixes coexist
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe("Cross-fix integration", () => {
+// public-clone skip: migrations 012/013/014 are gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_CROSS_FIX_MIGRATIONS)("Cross-fix integration", () => {
   it("migration 012 (auto_blog_runs), 013 (cron_runs), 014 (atomic credits) all exist", () => {
     for (const fname of [
       "012_auto_blog_runs.sql",

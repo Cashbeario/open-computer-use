@@ -16,6 +16,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { haveMigration } from "./helpers/private-sources";
 
 // ---- Mock @/lib/supabase/service ------------------------------------------
 //
@@ -456,7 +457,8 @@ describe("source-level guards", () => {
     expect(src).toMatch(/coasty-snapshot-\$\{userId\.substring\(0, 8\)\}-\$\{ts\}-\$\{jitter\}/);
   });
 
-  it("migration 013 exists with PRIMARY KEY (job_name, run_window)", async () => {
+  // public-clone skip (this test only): migration 013 is gitignored there
+  it.skipIf(!haveMigration("013_cron_runs.sql"))("migration 013 exists with PRIMARY KEY (job_name, run_window)", async () => {
     const fs = await import("fs");
     const path = await import("path");
     const repoRoot = path.resolve(__dirname, "..");

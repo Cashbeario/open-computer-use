@@ -21,17 +21,19 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
+import { HAVE_BACKEND } from "./helpers/private-sources"
 
 const ROOT = join(__dirname, "..")
+// The harness ships publicly; backend/ is gitignored from the public repo, so
+// its reads are guarded and the backend-side tests skip there (the maintainer
+// tree always runs them).
 const harness = readFileSync(join(ROOT, "scripts", "coasty_api_test.py"), "utf-8")
-const models = readFileSync(
-  join(ROOT, "backend", "app", "models", "public_cua.py"),
-  "utf-8"
-)
-const cuaRoutes = readFileSync(
-  join(ROOT, "backend", "app", "api", "routes", "public_cua.py"),
-  "utf-8"
-)
+const models = HAVE_BACKEND
+  ? readFileSync(join(ROOT, "backend", "app", "models", "public_cua.py"), "utf-8")
+  : ""
+const cuaRoutes = HAVE_BACKEND
+  ? readFileSync(join(ROOT, "backend", "app", "api", "routes", "public_cua.py"), "utf-8")
+  : ""
 
 describe("idempotency capability-probe sentinel stays schema-valid", () => {
   // Harness side: `"screenshot": "A" * 100` inside IDEM_PROBE_BODY.
@@ -56,12 +58,14 @@ describe("idempotency capability-probe sentinel stays schema-valid", () => {
     expect(harness).toContain('"Idempotency-Key": IDEM_PROBE_KEY')
   })
 
-  it("backend still declares an outer-shape floor and a key ceiling", () => {
+  // public-clone skip (backend-side tests only): backend/ is gitignored there
+  it.skipIf(!HAVE_BACKEND)("backend still declares an outer-shape floor and a key ceiling", () => {
     expect(floor, "screenshot length floor in models/public_cua.py").toBeTruthy()
     expect(keyMax, "Idempotency-Key max length in routes/public_cua.py").toBeTruthy()
   })
 
-  it("sentinel screenshot satisfies the backend's outer shape", () => {
+  // public-clone skip (backend-side tests only): backend/ is gitignored there
+  it.skipIf(!HAVE_BACKEND)("sentinel screenshot satisfies the backend's outer shape", () => {
     const len = Number(probeShot![2])
     expect(len).toBeGreaterThanOrEqual(Number(floor![1]))
     expect(len % 4, "base64 length must be a multiple of 4").toBe(0)
@@ -69,7 +73,8 @@ describe("idempotency capability-probe sentinel stays schema-valid", () => {
     expect(len).toBeLessThan(1000)
   })
 
-  it("probe key is oversized relative to the backend ceiling", () => {
+  // public-clone skip (backend-side tests only): backend/ is gitignored there
+  it.skipIf(!HAVE_BACKEND)("probe key is oversized relative to the backend ceiling", () => {
     expect(Number(probeKey![2])).toBeGreaterThan(Number(keyMax![1]))
   })
 })

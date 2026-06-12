@@ -11,25 +11,31 @@
 import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
+import { HAVE_BACKEND, haveMigration } from "./helpers/private-sources"
 
 const root = process.cwd()
 const read = (p: string) => readFileSync(join(root, p), "utf8")
 
-const M025 = read("supabase/migrations/025_agent_runs.sql")
-const KEYS = read("backend/app/services/api_key_service.py")
-const CUA_MODELS = read("backend/app/models/public_cua.py")
-const RUN_MODELS = read("backend/app/models/public_runs.py")
-const RUN_SVC = read("backend/app/services/public_run_service.py")
-const RUN_ROUTES = read("backend/app/api/routes/public_runs.py")
-const CONFIG = read("backend/app/core/config.py")
-const MAIN = read("backend/main.py")
-const CUA_EXEC = read("backend/app/services/cua_executor.py")
-const CUA_SVC = read("backend/app/services/public_cua_service.py")
+// backend/ + migration 025 are gitignored from the public repo, so reads are
+// guarded to keep collection alive there; in the maintainer tree both exist
+// and every suite below runs.
+const HAVE_M025 = haveMigration("025_agent_runs.sql")
+const M025 = HAVE_M025 ? read("supabase/migrations/025_agent_runs.sql") : ""
+const KEYS = HAVE_BACKEND ? read("backend/app/services/api_key_service.py") : ""
+const CUA_MODELS = HAVE_BACKEND ? read("backend/app/models/public_cua.py") : ""
+const RUN_MODELS = HAVE_BACKEND ? read("backend/app/models/public_runs.py") : ""
+const RUN_SVC = HAVE_BACKEND ? read("backend/app/services/public_run_service.py") : ""
+const RUN_ROUTES = HAVE_BACKEND ? read("backend/app/api/routes/public_runs.py") : ""
+const CONFIG = HAVE_BACKEND ? read("backend/app/core/config.py") : ""
+const MAIN = HAVE_BACKEND ? read("backend/main.py") : ""
+const CUA_EXEC = HAVE_BACKEND ? read("backend/app/services/cua_executor.py") : ""
+const CUA_SVC = HAVE_BACKEND ? read("backend/app/services/public_cua_service.py") : ""
 
 const RUN_STATES = ["queued", "running", "awaiting_human", "succeeded", "failed", "cancelled", "timed_out"]
 const TERMINAL = ["succeeded", "failed", "cancelled", "timed_out"]
 
-describe("025 migration — agent_runs schema + state machine", () => {
+// public-clone skip: migration 025 is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_M025)("025 migration — agent_runs schema + state machine", () => {
   it("creates agent_runs and agent_run_events", () => {
     expect(M025).toMatch(/CREATE TABLE IF NOT EXISTS public\.agent_runs/)
     expect(M025).toMatch(/CREATE TABLE IF NOT EXISTS public\.agent_run_events/)
@@ -99,7 +105,8 @@ describe("025 migration — agent_runs schema + state machine", () => {
   })
 })
 
-describe("RunStatus model mirrors the migration", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("RunStatus model mirrors the migration", () => {
   it("declares exactly the 7 run states", () => {
     for (const s of RUN_STATES) {
       expect(RUN_MODELS, `RunStatus has ${s}`).toContain(`"${s}"`)
@@ -116,7 +123,8 @@ describe("RunStatus model mirrors the migration", () => {
   })
 })
 
-describe("Phase 2 — v4 + instructions", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("Phase 2 — v4 + instructions", () => {
   it("CUAVersion exposes v4", () => {
     expect(CUA_MODELS).toMatch(/V4\s*=\s*"v4"/)
   })
@@ -144,7 +152,8 @@ describe("Phase 2 — v4 + instructions", () => {
   })
 })
 
-describe("scopes — runs + workflows are first-class and granted by default", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("scopes — runs + workflows are first-class and granted by default", () => {
   it("declares the four new scopes", () => {
     expect(KEYS).toMatch(/SCOPE_RUNS_READ\s*=\s*"runs:read"/)
     expect(KEYS).toMatch(/SCOPE_RUNS_WRITE\s*=\s*"runs:write"/)
@@ -205,7 +214,8 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
     }
   })
 
-  it("backend DEFAULT_SCOPES_LIST matches the same machine-lifecycle expansion", () => {
+  // public-clone skip (this test only): backend/ is gitignored there
+  it.skipIf(!HAVE_BACKEND)("backend DEFAULT_SCOPES_LIST matches the same machine-lifecycle expansion", () => {
     const def = KEYS.slice(KEYS.indexOf("DEFAULT_SCOPES_LIST"), KEYS.indexOf("DEFAULT_SCOPES_LIST") + 1200)
     for (const s of ["SCOPE_MACHINES_WRITE", "SCOPE_TERMINAL_EXEC", "SCOPE_FILES_WRITE", "SCOPE_SNAPSHOTS_WRITE"]) {
       expect(def, `backend DEFAULT has ${s}`).toContain(s)
@@ -231,12 +241,14 @@ describe("dashboard key-mint (route.ts) stays in lockstep with the backend scope
     expect(ROUTE).toMatch(/!ALL_SCOPES\.has\(s\)/)
   })
 
-  it("backend create_key defaults empty scopes to DEFAULT_SCOPES_LIST (never mints a scopeless key)", () => {
+  // public-clone skip (this test only): backend/ is gitignored there
+  it.skipIf(!HAVE_BACKEND)("backend create_key defaults empty scopes to DEFAULT_SCOPES_LIST (never mints a scopeless key)", () => {
     expect(KEYS).toMatch(/if not scopes:\s*\n\s*scopes = list\(DEFAULT_SCOPES_LIST\)/)
   })
 })
 
-describe("run service — billing, ownership, takeover, SSRF, kill-switch", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("run service — billing, ownership, takeover, SSRF, kill-switch", () => {
   it("bills per step against the dollar wallet, idempotently per (run, step)", () => {
     expect(RUN_SVC).toMatch(/api_billing_service\.charge/)
     expect(RUN_SVC).toMatch(/f"\{run_request_id\}:step:\{step_index\}"/)
@@ -289,7 +301,8 @@ describe("run service — billing, ownership, takeover, SSRF, kill-switch", () =
   })
 })
 
-describe("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
   it("each route asserts the right scope", () => {
     // window sized to span the idempotency reservation block between the
     // scope check and the service call
@@ -324,7 +337,8 @@ describe("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
   })
 })
 
-describe("config flags + mounts", () => {
+// public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND)("config flags + mounts", () => {
   it("declares the runs kill-switch and tuning knobs", () => {
     for (const k of ["RUNS_API_ENABLED", "RUNS_MAX_CONCURRENT_PER_USER", "RUNS_MAX_DEADLINE_SECONDS",
                      "RUNS_IDLE_TIMEOUT_SECONDS", "RUNS_HEARTBEAT_SECONDS", "RUNS_REAP_STALE_SECONDS"]) {

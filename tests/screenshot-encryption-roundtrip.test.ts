@@ -23,9 +23,23 @@ import { execFileSync } from "child_process"
 import { randomBytes } from "crypto"
 import * as path from "path"
 import * as fs from "fs"
+import { HAVE_BACKEND } from "./helpers/private-sources"
 
 const REPO_ROOT = path.resolve(__dirname, "..")
 const BACKEND_DIR = path.join(REPO_ROOT, "backend")
+
+// The Python encrypt path lives in backend/, which is gitignored from the
+// public repo, and the suite shells out to `python`; skip when either is
+// missing (the maintainer tree has both, so it always runs there).
+function probePython(): boolean {
+  try {
+    execFileSync("python", ["--version"], { stdio: "ignore" })
+    return true
+  } catch {
+    return false
+  }
+}
+const HAVE_PYTHON = HAVE_BACKEND && probePython()
 
 // 32-byte test key shared between the two runtimes for this test only.
 const TEST_KEY = randomBytes(32).toString("base64")
@@ -73,7 +87,8 @@ sys.stdout.write("enc:v1:" + encrypt_str(plaintext))
   }
 }
 
-describe("Python → Node screenshot decryption round-trip", () => {
+// public-clone skip: backend/ is gitignored there + python may be absent (maintainer tree always runs this)
+describe.skipIf(!HAVE_BACKEND || !HAVE_PYTHON)("Python → Node screenshot decryption round-trip", () => {
   let maybeDecryptScreenshot: typeof import("../lib/screenshot-encryption").maybeDecryptScreenshot
   let decryptScreenshotsInParts: typeof import("../lib/screenshot-encryption").decryptScreenshotsInParts
 

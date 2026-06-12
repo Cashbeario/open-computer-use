@@ -26,6 +26,8 @@ import { IntlClientProvider } from "./intl-client-provider"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 import { locales, rtlLocales, type Locale } from "@/i18n/config"
 import { getHreflangAlternates, PRODUCT_IMAGES, MERCHANT_LISTING_EXTRAS } from "@/lib/seo"
+import { describeMode, isOssMode } from "@/lib/oss-mode"
+import { OssBanner } from "@/components/common/oss-banner"
 import { VISIBLE_TIERS, BOOST_PACKAGES } from "@/lib/pricing/tiers"
 import { priceMonthly, priceMonthlyLong, i18nPriceVars } from "@/lib/pricing/format"
 
@@ -215,6 +217,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
+        {/* Deployment-mode stamp read by lib/oss-mode-client.ts on hydration.
+            Computed per-request (not NEXT_PUBLIC_*) so one build artifact can
+            serve either mode. Value is only ever "oss" or "production" — no
+            secrets. */}
+        <meta name="coasty-mode" content={describeMode()} />
         {/* Umami analytics is loaded by a consent-gated client component
             (components/analytics/umami.tsx) so it never fires before consent. */}
         {/* Structured Data for SEO */}
@@ -406,6 +413,10 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <AnimatedFavicon />
+        {/* OSS-mode banner — server-gated here per the component's contract
+            (components/common/oss-banner.tsx:4-8); never mounts in
+            production mode. */}
+        {isOssMode() && <OssBanner />}
         <IntlClientProvider locale={locale} messages={messages as Record<string, unknown>}>
           <ConsentProvider>
           <PostHogProvider>

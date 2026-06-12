@@ -7,6 +7,8 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { verifyBearerToken } from '@/lib/supabase/bearer-auth';
 import { logApiAccess } from '@/lib/observability/api-access-log';
+import { isOssMode } from '@/lib/oss-mode';
+import { getCurrentIdentity } from '@/lib/auth/current-identity';
 
 // Python backend URL - can be configured via environment variable
 // Use 127.0.0.1 instead of localhost to force IPv4
@@ -26,6 +28,49 @@ export async function POST(req: NextRequest) {
   let responseStatus = 500;
   let response: Response | undefined;
   try {
+    // ── OSS mode ─────────────────────────────────────────────────────────
+    // Identity is the API key (lib/auth/current-identity.ts), not a Supabase
+    // session — without this branch every OSS chat request died on the
+    // Supabase 401 below, which reads as "broken auth" rather than the
+    // truth. The truth today: coasty.ai exposes no public chat endpoint yet
+    // (backend/main.py mounts only cua/machines/schedules/triggers/runs/
+    // workflows under /v1 — no /v1/chat), so we fail fast with a readable
+    // message in the flat `{ error: string }` envelope this route's clients
+    // parse (see the passthrough comment further down).
+    //
+    // When /v1/chat ships, replace the 501 below with:
+    //   return forwardToBackend(req, { auth: 'api-key',
+    //     body: JSON.stringify({ ...await req.json(), user_id: identity.userId }) })
+    // and flip the `/api/chat` row in lib/api-router.ts PATH_MAP from
+    // `oss: null` back to `{ prefix: "/v1/chat" }` (its test pins both).
+    if (isOssMode()) {
+      const identity = await getCurrentIdentity();
+      if (!identity) {
+        response = new Response(
+          JSON.stringify({
+            error:
+              'COASTY_API_KEY is not set. Add it to .env.local and restart ' +
+              '— get a free sandbox key at https://coasty.ai/developers.',
+          }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+        return response;
+      }
+      response = new Response(
+        JSON.stringify({
+          error:
+            'In-app chat is not available in OSS mode yet: coasty.ai does ' +
+            'not expose a public chat endpoint (your COASTY_API_KEY does ' +
+            'work for the /v1 REST API — try `npx @coasty/mcp` or ' +
+            'https://coasty.ai/api-docs). Chat here requires the full ' +
+            'self-hosted stack or a coasty.ai account.',
+          code: 'OSS_CHAT_NOT_AVAILABLE',
+        }),
+        { status: 501, headers: { 'Content-Type': 'application/json' } }
+      );
+      return response;
+    }
+
     // Authenticate user — try cookies first (web), then Bearer token (Electron)
     let authUser: { id: string; email?: string } | null = null;
 

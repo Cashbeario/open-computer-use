@@ -8,9 +8,18 @@ import { logApiAccess } from "@/lib/observability/api-access-log"
 export const runtime = "nodejs"
 export const maxDuration = 60
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
-  apiVersion: "2025-08-27.basil",
-})
+// Module-scope construction breaks `next build` page-data collection when
+// STRIPE_API_KEY is unset (OSS clones); lazy init defers the throw to the
+// first request.
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_API_KEY!, {
+      apiVersion: "2025-08-27.basil",
+    })
+  }
+  return _stripe
+}
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
@@ -356,7 +365,7 @@ export async function POST(req: NextRequest) {
     let event: Stripe.Event
 
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+      event = getStripe().webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err) {
       console.error("Webhook signature verification failed:", err)
       outResponse = NextResponse.json(
@@ -484,7 +493,7 @@ export async function POST(req: NextRequest) {
           }
 
           // Get the subscription details from Stripe
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
+          const subscription = await getStripe().subscriptions.retrieve(subscriptionId) as any
 
           // Get the plan from database first
           const { data: plan } = await (supabase as any)
@@ -1145,7 +1154,7 @@ export async function POST(req: NextRequest) {
         // truth and the renewal handler reads from DB too.
         if (newPlanTier && subscription.metadata?.tier !== newPlanTier) {
           try {
-            await stripe.subscriptions.update(subscription.id, {
+            await getStripe().subscriptions.update(subscription.id, {
               metadata: { ...(subscription.metadata || {}), tier: newPlanTier },
             })
           } catch (e) {
@@ -1324,7 +1333,7 @@ export async function POST(req: NextRequest) {
         }
 
         const subscriptionId = invoice.subscription as string
-        let subscription = await stripe.subscriptions.retrieve(subscriptionId) as any
+        let subscription = await getStripe().subscriptions.retrieve(subscriptionId) as any
         const userId = subscription.metadata?.user_id
         const tier = subscription.metadata?.tier
 
@@ -1417,7 +1426,7 @@ export async function POST(req: NextRequest) {
                   `webhook.invoice.fallback.refetch subscription=${subscriptionId} invoice=${invoice.id} reason=all_invoice_periods_missing`
                 )
                 try {
-                  subscription = await stripe.subscriptions.retrieve(
+                  subscription = await getStripe().subscriptions.retrieve(
                     subscriptionId,
                     { expand: ["items.data.price"] }
                   ) as any

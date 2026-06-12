@@ -5,9 +5,18 @@ import { getBoostPackage, type BoostPackageId } from "@/lib/pricing/tiers"
 
 export const runtime = "nodejs"
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
-  apiVersion: "2025-08-27.basil",
-})
+// Module-scope construction breaks `next build` page-data collection when
+// STRIPE_API_KEY is unset (OSS clones); lazy init defers the throw to the
+// first request.
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_API_KEY!, {
+      apiVersion: "2025-08-27.basil",
+    })
+  }
+  return _stripe
+}
 
 // Called by /api/credits/balance when balance drops below threshold
 // Also callable by backend via internal API key
@@ -113,7 +122,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Get default payment method
-    const customer = await stripe.customers.retrieve(stripeCustomer.stripe_customer_id) as Stripe.Customer
+    const customer = await getStripe().customers.retrieve(stripeCustomer.stripe_customer_id) as Stripe.Customer
     let paymentMethodId =
       (typeof customer.invoice_settings?.default_payment_method === "string"
         ? customer.invoice_settings.default_payment_method
@@ -124,7 +133,7 @@ export async function POST(req: NextRequest) {
 
     // Fallback: list payment methods and use most recent
     if (!paymentMethodId) {
-      const methods = await stripe.paymentMethods.list({
+      const methods = await getStripe().paymentMethods.list({
         customer: stripeCustomer.stripe_customer_id,
         type: "card",
         limit: 1,
@@ -150,7 +159,7 @@ export async function POST(req: NextRequest) {
     // 8. Create off-session PaymentIntent
     const idempotencyKey = `auto-refill-${userId}-${now.toISOString().slice(0, 10)}-${refillsToday}`
 
-    const paymentIntent = await stripe.paymentIntents.create(
+    const paymentIntent = await getStripe().paymentIntents.create(
       {
         amount: Math.round(pkg.priceUSD * 100),
         currency: "usd",

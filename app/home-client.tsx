@@ -8,7 +8,29 @@ import { Toaster } from "@/components/ui/sonner"
 import { PaymentHandler } from "@/app/components/payment-handler"
 import { ReferralProcessor } from "@/app/components/referral/referral-processor"
 
-export function HomeClient({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function HomeClient({
+  isAuthenticated,
+  ossMode = false,
+}: {
+  isAuthenticated: boolean
+  ossMode?: boolean
+}) {
+  // OSS mode: render the chat surface directly. The identity is the API key
+  // (no Supabase session), so skip PaymentHandler / ReferralProcessor —
+  // both are Stripe/Supabase-coupled and have no OSS equivalent.
+  if (ossMode) {
+    return (
+      <>
+        <Toaster position="top-center" />
+        <MessagesProvider>
+          <LayoutApp>
+            <ChatContainer />
+          </LayoutApp>
+        </MessagesProvider>
+      </>
+    )
+  }
+
   // Landing page doesn't need sidebar
   if (!isAuthenticated) {
     return (

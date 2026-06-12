@@ -1,0 +1,48 @@
+# Minimal CI for the public repo: type-check + unit tests for the web app
+# and the Electron app. Suites that read the private backend/ or
+# supabase/migrations/ skip themselves on clones (tests/helpers/
+# private-sources.ts), so a fresh checkout is expected to be green.
+#
+# Deliberately absent:
+#   - lint: the codebase carries ~900 pre-existing eslint errors; a lint
+#     gate here would block every PR until that backlog is burned down.
+#   - e2e (Playwright / Electron): needs browser downloads and a display
+#     server; run locally per CONTRIBUTING.md.
+name: CI
+
+on:
+  push:
+    branches: [production]
+  pull_request:
+    branches: [production]
+
+jobs:
+  web:
+    name: Web (type-check + unit tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npx vitest run --maxWorkers=2
+
+  electron:
+    name: Electron (build + unit tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: electron
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npx vitest run --maxWorkers=2

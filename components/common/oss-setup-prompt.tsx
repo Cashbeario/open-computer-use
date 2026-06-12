@@ -18,7 +18,37 @@
  * bundle in OSS mode, which keeps the OSS bundle small and fast.
  */
 
-export function OssSetupPrompt() {
+export function OssSetupPrompt({ keyPresent = false }: { keyPresent?: boolean }) {
+  // Auth-page variant: the key IS set, the visitor just landed on a sign-in
+  // URL that has no meaning in OSS mode. Tell them so instead of implying
+  // their configuration is broken.
+  if (keyPresent) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md space-y-6 text-center">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground">
+            No sign-in needed in OSS mode
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            This deployment authenticates with{" "}
+            <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+              COASTY_API_KEY
+            </code>{" "}
+            — the key is the identity, so there is no account to sign in to.
+          </p>
+          <div className="pt-2">
+            <a
+              href="/"
+              className="inline-block rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Back to the app
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-6 text-center">

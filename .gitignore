@@ -177,9 +177,13 @@ mcp/.env
 temp/*
 
 # OSWorld showcase artifacts — pushed to the dedicated coasty-ai/coasty-osworld
-results/
-logs/
-docs/
+# Anchored to the repo root: the unanchored forms also matched app/docs/,
+# app/developers/docs/, and app/developers/logs/ — real Next.js routes that
+# silently never shipped to the public repo (their guard tests failed on
+# every fresh clone).
+/results/
+/logs/
+/docs/
 
 # Playwright (visual-fit / i18n-overflow tests)
 playwright-report/

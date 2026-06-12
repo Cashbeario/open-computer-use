@@ -1,7 +1,16 @@
 {
-  "name": "llmhub",
+  "name": "open-computer-use",
   "version": "0.1.0",
   "private": true,
+  "description": "Full-stack AI collaboration platform with computer automation — Next.js frontend, Electron desktop overlay, and multi-agent browser/terminal/desktop control",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coasty-ai/open-computer-use.git"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

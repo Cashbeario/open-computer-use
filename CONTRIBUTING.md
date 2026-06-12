@@ -36,7 +36,7 @@ This project and everyone participating in it is governed by our commitment to f
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the [existing issues](https://github.com/coasty-ai/open-computer-use/issues) to avoid duplicates.
+Before creating bug reports, please check the [existing issues](https://github.com/coasty-ai/open-computer-use/issues) to avoid duplicates. GitHub pre-fills new issues from the templates in `.github/`.
 
 When you create a bug report, please include as many details as possible:
 
@@ -112,71 +112,88 @@ We love code contributions! Here's how to get started:
 
 1. **Find an issue to work on** or create a new one
 2. **Comment on the issue** to let others know you're working on it
-3. **Fork the repository** and create a branch from `main`
+3. **Fork the repository** and create a branch from `production` (the default branch)
 4. **Make your changes** following our coding standards
 5. **Test thoroughly** - add tests if needed
-6. **Submit a pull request** with a clear description
+6. **Submit a pull request** targeting `production` with a clear description
 
 ## Development Setup
 
 ### Prerequisites
 
-- Node.js 20+ and npm
-- Python 3.10+
-- Docker and Docker Compose
+- Node.js `^20.19.0 || >=22.12.0` (the repo's `.nvmrc` pins 22) and npm
 - Git
+- Python 3.10+ and Docker are only needed by maintainers with access to the private backend (`backend/` is not part of this public repository)
 
-### Initial Setup
+### Initial Setup (OSS mode)
+
+This is the contributor path. All you need beyond Node is a free sandbox API key from [coasty.ai/developers](https://coasty.ai/developers).
 
 1. **Clone your fork:**
 
 ```bash
-git clone https://github.com/coasty-ai/open-computer-use.git
+git clone https://github.com/<your-username>/open-computer-use.git
 cd open-computer-use
 ```
 
-2. **Set up environment variables:**
+2. **Install dependencies:**
 
 ```bash
-# Frontend
-cp .env.example .env
-# Edit .env with your configuration
-
-# Backend
-cp backend/.env.example backend/.env
-# Edit backend/.env with your configuration
+npm install
 ```
 
-3. **Install dependencies:**
+No compiler is required. A wall of `ssh2` node-gyp warnings during install is benign; the install still succeeds.
+
+3. **Set up environment variables:**
 
 ```bash
-# Frontend
-npm install
+cp .env.oss.example .env.local
+# Windows cmd.exe: copy .env.oss.example .env.local
+```
 
-# Backend
+Open `.env.local` and set your key: `COASTY_API_KEY=sk-coasty-test-...`
+
+`CSRF_SECRET` and `ENCRYPTION_KEY` are generated automatically into `.env.local` the first time the dev server boots, so you do not need to set them.
+
+`.env.example` documents the full-stack configuration (Supabase, Stripe, AWS) used by the hosted deployment. You do not need it for OSS contributions.
+
+4. **Start the dev server:**
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). The app boots into the chat workspace in OSS mode. Note: sending a chat message currently returns a clear 501 because coasty.ai does not yet expose a public chat endpoint (`/v1/chat` is in progress). The workspace UI, the public /v1 REST API, and the test suites all work with your key.
+
+### Electron Desktop App
+
+```bash
+cd electron
+npm install
+npm run dev
+```
+
+See [electron/README.md](electron/README.md) for environment variables, testing, and packaging.
+
+### Backend (maintainers only)
+
+The Python FastAPI backend is not included in this public repository, so these steps apply only to maintainers with access to the private `backend/` tree:
+
+```bash
 cd backend
+cp .env.example .env
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cd ..
-```
-
-4. **Start development servers:**
-
-```bash
-# Terminal 1: Frontend
-npm run dev
-
-# Terminal 2: Backend
-cd backend
 python main.py
 ```
 
 ### Making Changes
 
-1. **Create a new branch:**
+1. **Create a new branch from `production` (the default branch):**
 
 ```bash
+git checkout production
 git checkout -b feature/your-feature-name
 # or
 git checkout -b fix/your-bug-fix
@@ -184,17 +201,14 @@ git checkout -b fix/your-bug-fix
 
 2. **Make your changes** following our coding standards
 
-3. **Test your changes:**
+3. **Check your changes:**
 
 ```bash
-# Frontend
-npm run type-check
-npm run lint
-
-# Backend
-cd backend
-pytest
+npm run type-check   # must pass
+npm test             # must pass
 ```
+
+`npm run lint` currently reports a large number of pre-existing errors and is not yet part of the contributor gate. Please avoid adding new lint errors in files you touch, but a clean lint run is not required to open a PR.
 
 4. **Commit your changes:**
 
@@ -228,11 +242,13 @@ test: add tests for browser agent
 
 ## Pull Request Process
 
+Pull requests target the `production` branch (the default branch).
+
 1. **Update documentation** if needed (README, CLAUDE.md, etc.)
 2. **Add or update tests** for your changes
 3. **Ensure all tests pass** and code follows style guidelines
-5. **Fill out the PR template** completely
-6. **Request review** from maintainers
+4. **Fill out the PR template** completely (GitHub pre-fills it from `.github/`)
+5. **Request review** from maintainers
 
 ### Pull Request Template
 
@@ -362,7 +378,7 @@ open-computer-use/
 │   ├── c/[chatId]/        # Chat pages
 │   ├── api/               # API routes
 │   └── ...
-├── backend/               # Python FastAPI backend
+├── backend/               # Python FastAPI backend (maintainers only; not in this public repo)
 │   ├── app/
 │   │   ├── api/routes/   # API endpoints
 │   │   ├── services/     # Business logic
@@ -382,24 +398,30 @@ open-computer-use/
 
 ## Testing Guidelines
 
-### Frontend Testing
+### Web Testing (Vitest)
 
-We use Jest and React Testing Library:
+We use [Vitest](https://vitest.dev/) (not Jest), with `@testing-library/react` where components are involved:
 
 ```bash
 # Run all tests
 npm test
 
+# Watch mode
+npm run test:watch
+
 # Run with coverage
 npm run test:coverage
 
-# Watch mode
-npm run test:watch
+# Run a single file
+npx vitest run tests/path/to/file.test.ts
 ```
+
+`npm test` passes on a fresh clone. Suites that depend on the private backend or its migrations detect that those files are missing and skip; they run in the maintainer tree.
 
 **Example Test:**
 
 ```typescript
+import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { ChatMessage } from "./ChatMessage"
 
@@ -417,11 +439,44 @@ describe("ChatMessage", () => {
 })
 ```
 
-### Backend Testing
-
-We use pytest:
+### Web End-to-End Testing (Playwright)
 
 ```bash
+# One-time browser download
+npx playwright install chromium
+
+# Run the e2e suite
+npm run test:e2e
+```
+
+### Electron Testing
+
+Electron unit tests run without any environment configuration or credentials:
+
+```bash
+cd electron
+npm test
+```
+
+The Electron end-to-end tests (Playwright) need a build first:
+
+```bash
+cd electron
+npm run build
+npm run test:e2e
+# or both in one step:
+npm run test:e2e:build
+```
+
+### Full Suite and Backend Testing (maintainers only)
+
+`npm run test:all` additionally runs the Python backend tests, so it needs Python, pytest, and the private `backend/` tree. It is not runnable on a public clone.
+
+Backend tests use pytest:
+
+```bash
+cd backend
+
 # Run all tests
 pytest
 
@@ -432,30 +487,9 @@ pytest tests/test_agents.py
 pytest --cov=app tests/
 ```
 
-**Example Test:**
-
-```python
-import pytest
-from app.services.multi_agent_executor import MultiAgentExecutor
-
-@pytest.mark.asyncio
-async def test_task_planning():
-    """Test that task planner creates valid plans"""
-    executor = MultiAgentExecutor(
-        machine_id="test_machine",
-        connection_info={},
-        provider=mock_provider
-    )
-
-    plan = await executor.plan_tasks("Search for Python tutorials")
-
-    assert len(plan.subtasks) > 0
-    assert plan.subtasks[0].assigned_agent is not None
-```
-
 ## Review Process
 
-1. **Automated Checks**: CI runs tests and linting
+1. **Automated Checks**: GitHub Actions CI (`.github/workflows/ci.yml`) runs type-check and the unit test suites for both web and Electron on every PR targeting `production`. Lint is not part of the gate yet (the current lint output is known-noisy with pre-existing errors).
 2. **Code Review**: At least one maintainer review required
 3. **Testing**: Reviewer tests changes locally
 4. **Feedback**: Address any requested changes

@@ -1,6 +1,20 @@
 export async function register() {
   // Only run on server side
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // --- OSS-mode secret bootstrap (must run before anything reads
+    // CSRF_SECRET / ENCRYPTION_KEY) ---
+    // Generates missing CSRF_SECRET / ENCRYPTION_KEY and persists them to
+    // .env.local on first boot. No-op outside OSS mode — production deploys
+    // must set these explicitly (see lib/auto-secrets.ts:57-86). Dynamic
+    // import keeps node:fs / node:crypto out of the Edge instrumentation
+    // bundle, same pattern as the machine-cleanup import below.
+    try {
+      const { ensureLocalSecrets } = await import("@/lib/auto-secrets");
+      ensureLocalSecrets();
+    } catch (error) {
+      console.error('❌ Failed to bootstrap OSS-mode secrets:', error);
+    }
+
     // Track services for graceful shutdown
     let cleanupService: { start: () => void; stop: () => void } | null = null;
 

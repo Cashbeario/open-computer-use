@@ -130,12 +130,16 @@ Open Computer Use is an open-source platform that gives AI agents real computer 
 
 You only need **one API key**. Get a free sandbox key at [coasty.ai/developers](https://coasty.ai/developers).
 
+**Prerequisites:** Node.js `^20.19.0 || >=22.12.0` (the repo's `.nvmrc` pins 22) and npm. No compiler is needed; a wall of `ssh2` node-gyp warnings during install is benign.
+
 ```bash
 git clone https://github.com/coasty-ai/open-computer-use.git
 cd open-computer-use
 npm install
 cp .env.oss.example .env.local
 ```
+
+On Windows, use `copy .env.oss.example .env.local` in cmd.exe (PowerShell understands `cp`).
 
 Open `.env.local` and paste your key:
 
@@ -149,7 +153,19 @@ Then run:
 npm run dev
 ```
 
-Open **[http://localhost:3000](http://localhost:3000)** and start a chat. That's it.
+Open **[http://localhost:3000](http://localhost:3000)**. The app boots straight into the chat workspace in OSS mode. `CSRF_SECRET` and `ENCRYPTION_KEY` are generated automatically into `.env.local` on first boot, so there is nothing else to configure.
+
+### What works today
+
+Being upfront about the current state of OSS mode:
+
+- The chat workspace UI loads and runs locally.
+- Sending a chat message returns a clear 501: coasty.ai does not yet expose a public chat endpoint (`/v1/chat` is in progress).
+- Your `COASTY_API_KEY` already powers the public [/v1 REST API](https://coasty.ai/api-docs) (predict, sessions, machines, runs, workflows, schedules) and the [MCP server](#mcp-server) (`npx @coasty/mcp`).
+
+### OSS mode vs production mode
+
+The full chat and agents stack (production mode) depends on services this public repo does not include: the Python backend plus Supabase, Stripe, and AWS. Production mode is what runs the hosted deployment at [coasty.ai](https://coasty.ai). OSS mode is the contributor path for working on this codebase.
 
 <br />
 
@@ -159,7 +175,7 @@ Open **[http://localhost:3000](http://localhost:3000)** and start a chat. That's
 
 ## Desktop App
 
-A lightweight overlay that runs AI agent commands directly on your local machine.
+A lightweight overlay that runs AI agent commands directly on your local machine. Native automation on Windows, macOS, and Linux, with a floating always-on-top pill UI and an expanded chat panel.
 
 ```bash
 cd electron
@@ -167,7 +183,9 @@ npm install
 npm run dev
 ```
 
-Native automation on Windows, macOS, and Linux. Floating always-on-top pill UI with expanded chat panel.
+This launches the overlay window. Without an `electron/.env` file the app starts on the auth screen with a visible "Supabase is not configured" state. To actually sign in and chat you need `electron/.env` (`cp .env.example .env`) with Supabase credentials, plus a running backend at `COASTY_BACKEND_URL` (default `http://localhost:8001`, not included in this repo).
+
+See [`electron/README.md`](./electron/README.md) for development, testing, packaging, and platform notes.
 
 <br />
 
@@ -193,12 +211,14 @@ See [`mcp/`](./mcp) for details.
 
 ## Contributing
 
-1. Fork the repo
-2. Create a branch: `git checkout -b feature/your-feature`
-3. Commit your changes
-4. Open a pull request
+The default branch is `production`: branch from it, and open your pull request against it.
 
-Bug reports and feature requests welcome in [Issues](https://github.com/coasty-ai/open-computer-use/issues).
+1. Fork the repo
+2. Create a branch from `production`: `git checkout -b feature/your-feature`
+3. Commit your changes
+4. Open a pull request targeting `production`
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, testing, and review details. Bug reports and feature requests welcome in [Issues](https://github.com/coasty-ai/open-computer-use/issues).
 
 <br />
 
@@ -233,7 +253,7 @@ This platform gives AI agents significant autonomy. Use it to automate repetitiv
 
 ## License
 
-[Apache License 2.0](LICENSE) — Copyright (c) 2025 Open Computer Use Contributors
+[Apache License 2.0](LICENSE), Copyright (c) 2025 Open Computer Use Contributors. One exception: the [`mcp/`](./mcp) subpackage is published to npm under the MIT license and carries its own [`mcp/LICENSE`](./mcp/LICENSE).
 
 <br />
 

@@ -30,7 +30,7 @@ import { SwarmModeTab } from "./tabs/swarm-mode"
 import { WorkforceTab } from "./tabs/workforce"
 import { DesktopAppTab } from "./tabs/desktop-app"
 import { BillingTab } from "./tabs/billing"
-import { APITab } from "./tabs/api"
+import { DeveloperDocs } from "@/app/components/developers/developer-docs"
 import { DEVELOPERS_API_ENABLED } from "@/lib/feature-flags"
 import { usePlatformMode } from "@/lib/platform-mode-store"
 
@@ -94,7 +94,18 @@ function TabContent({ activeTab, inApp }: { activeTab: TabId; inApp: boolean }) 
     case "billing":
       return <BillingTab inApp={inApp} />
     case "api":
-      return <APITab inApp={inApp} />
+      // The guide's API tab renders the SAME canonical reference as
+      // /developers/docs (one source of truth) rather than a separate, older
+      // hand-written copy. Sidebar sticky offsets clear the guide's sticky tab
+      // nav: in-app the scroll container starts at the top; the public guide
+      // also sits below the fixed landing header. (The retired bespoke APITab
+      // still backs the standalone /api-docs page.)
+      return (
+        <DeveloperDocs
+          sidebarStickyClassName={inApp ? "top-[84px]" : "top-[124px]"}
+          sidebarMaxHeight={inApp ? "calc(100dvh - 7rem)" : "calc(100dvh - 9rem)"}
+        />
+      )
   }
 }
 

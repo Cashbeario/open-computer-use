@@ -17,6 +17,7 @@ import {
   IconActivity,
   IconChartBar,
   IconBook2,
+  IconChefHat,
   IconCode,
   IconUser,
 } from "@tabler/icons-react"
@@ -1430,6 +1431,22 @@ export const SidebarNavSection = memo(function SidebarNavSection({
             hoverInfo={{
               description: "Docs",
               detail: "Authentication, a copyable quick start, endpoint and action tables, and response shapes.",
+              visual: "developers",
+            }}
+          />
+          <NavButton
+            id="sidebar-developers-cookbook-link"
+            testId="sidebar-nav-developers-cookbook"
+            icon={<IconChefHat size={16} stroke={1.5} className="shrink-0" />}
+            label="Cookbook"
+            tooltip="Examples & open-source repos"
+            href="/developers/cookbook"
+            isActive={isItemActive("/developers/cookbook")}
+            accentColor="text-rose-500 dark:text-rose-400"
+            onClick={closeMobileIfNeeded}
+            hoverInfo={{
+              description: "Cookbook",
+              detail: "Open-source examples and projects to build on the Coasty API: the Computer Use Cookbook and Open Cowork.",
               visual: "developers",
             }}
           />

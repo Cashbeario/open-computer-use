@@ -17,7 +17,7 @@ import {
   IconActivity,
   IconChartBar,
   IconBook2,
-  IconChefHat,
+  IconFileCode,
   IconCode,
   IconUser,
 } from "@tabler/icons-react"
@@ -1437,7 +1437,7 @@ export const SidebarNavSection = memo(function SidebarNavSection({
           <NavButton
             id="sidebar-developers-cookbook-link"
             testId="sidebar-nav-developers-cookbook"
-            icon={<IconChefHat size={16} stroke={1.5} className="shrink-0" />}
+            icon={<IconFileCode size={16} stroke={1.5} className="shrink-0" />}
             label="Cookbook"
             tooltip="Examples & open-source repos"
             href="/developers/cookbook"

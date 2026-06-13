@@ -154,41 +154,18 @@ describe('signature verification', () => {
     expect(src).not.toMatch(/allowDowngrade\s*=\s*true/)
   })
 
-  // Signing config lives in the SIGNED OVERLAY (electron-builder.signed.yml),
-  // not the base config. The base config is intentionally unsigned so a
-  // contributor's `npm run package` succeeds on a clean machine without
-  // Azure/Apple credentials; release builds use the overlay via the
-  // sign-and-build scripts. These two tests assert the security guarantee
-  // still holds in the overlay, and the next two assert the base config is
-  // genuinely unsigned (so the split can't silently regress in either
-  // direction).
-  it('confirms Windows installer is Azure-signed in the signed overlay (publisherName configured)', () => {
-    const yml = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.signed.yml'), 'utf-8')
+  it('confirms Windows installer is Azure-signed (publisherName configured)', () => {
+    const yml = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.yml'), 'utf-8')
     expect(yml).toMatch(/azureSignOptions:/)
     expect(yml).toMatch(/codeSigningAccountName:/)
     expect(yml).toMatch(/certificateProfileName:/)
   })
 
-  it('confirms macOS build is hardened-runtime + notarized in the signed overlay (signature chain)', () => {
-    const signed = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.signed.yml'), 'utf-8')
-    const base = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.yml'), 'utf-8')
-    // notarize moves to the overlay; hardenedRuntime + entitlements stay in
-    // the base (they are harmless and correct for unsigned local builds too).
-    expect(signed).toMatch(/notarize:\s*true/)
-    expect(base).toMatch(/hardenedRuntime:\s*true/)
-    expect(base).toMatch(/entitlements:/)
-  })
-
-  it('keeps the base config UNSIGNED so clean-machine `npm run package` works', () => {
-    const base = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.yml'), 'utf-8')
-    // No Azure signing block and notarize explicitly false in the base.
-    expect(base).not.toMatch(/azureSignOptions:/)
-    expect(base).toMatch(/notarize:\s*false/)
-  })
-
-  it('signed overlay extends the base config (single source of truth for everything else)', () => {
-    const signed = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.signed.yml'), 'utf-8')
-    expect(signed).toMatch(/extends:\s*\.\/electron-builder\.yml/)
+  it('confirms macOS build is hardened-runtime + notarized (signature chain)', () => {
+    const yml = fs.readFileSync(path.join(__dirname, '..', '..', 'electron-builder.yml'), 'utf-8')
+    expect(yml).toMatch(/hardenedRuntime:\s*true/)
+    expect(yml).toMatch(/notarize:\s*true/)
+    expect(yml).toMatch(/entitlements:/)
   })
 
   it('refuses to install when error event fires with checksum/signature failure (status → error, no quitAndInstall)', () => {

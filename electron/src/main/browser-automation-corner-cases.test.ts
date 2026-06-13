@@ -55,7 +55,14 @@ vi.mock('fs', async () => {
   return {
     ...realFs,
     existsSync: (p: any) => {
-      if (typeof p === 'string' && /chrome\.exe|msedge\.exe|brave\.exe|google-chrome|chromium|Microsoft Edge|Brave Browser/i.test(p)) {
+      // Match EVERY browser-binary path findChromePath() probes on all three
+      // platforms. The Linux candidates use hyphenated names
+      // (microsoft-edge, brave-browser) that the macOS spellings
+      // ("Microsoft Edge", "Brave Browser") do not cover — without them the
+      // mock falls through to the real FS on the Ubuntu CI runner (which ships
+      // Microsoft Edge at /usr/bin/microsoft-edge), so `chromePathExists=false`
+      // would not actually simulate "no browser" and the test would hang.
+      if (typeof p === 'string' && /chrome\.exe|msedge\.exe|brave\.exe|google-chrome|chromium|microsoft-edge|brave-browser|Microsoft Edge|Brave Browser/i.test(p)) {
         return h.ctl.chromePathExists && p === h.FAKE_CHROME
       }
       return realFs.existsSync(p)

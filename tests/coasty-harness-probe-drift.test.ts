@@ -21,13 +21,16 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
-import { HAVE_BACKEND } from "./helpers/private-sources"
+import { HAVE_BACKEND, HAVE_HARNESS } from "./helpers/private-sources"
 
 const ROOT = join(__dirname, "..")
-// The harness ships publicly; backend/ is gitignored from the public repo, so
-// its reads are guarded and the backend-side tests skip there (the maintainer
-// tree always runs them).
-const harness = readFileSync(join(ROOT, "scripts", "coasty_api_test.py"), "utf-8")
+// Both sides are gitignored from the public repo: the harness
+// (scripts/coasty_api_test.py) is an internal ops script and backend/ is not
+// shipped. So both reads are guarded and the dependent tests skip on a fresh
+// public clone (the maintainer tree always has both and always runs them).
+const harness = HAVE_HARNESS
+  ? readFileSync(join(ROOT, "scripts", "coasty_api_test.py"), "utf-8")
+  : ""
 const models = HAVE_BACKEND
   ? readFileSync(join(ROOT, "backend", "app", "models", "public_cua.py"), "utf-8")
   : ""
@@ -44,28 +47,32 @@ describe("idempotency capability-probe sentinel stays schema-valid", () => {
   const floor = models.match(/len\(stripped\)\s*<\s*(\d+)/)
   const keyMax = cuaRoutes.match(/len\(key\)\s*>\s*(\d+)/)
 
-  it("harness defines the sentinel as a single-char base64 repeat", () => {
+  // public-clone skip (harness-side): scripts/coasty_api_test.py is not shipped
+  it.skipIf(!HAVE_HARNESS)("harness defines the sentinel as a single-char base64 repeat", () => {
     expect(probeShot, "IDEM_PROBE_BODY screenshot must be '<b64 char>' * N").toBeTruthy()
     expect(probeKey, "IDEM_PROBE_KEY must be '<char>' * N").toBeTruthy()
   })
 
-  it("the broken sentinel ('screenshot': 'x') never comes back", () => {
+  // public-clone skip (harness-side): scripts/coasty_api_test.py is not shipped
+  it.skipIf(!HAVE_HARNESS)("the broken sentinel ('screenshot': 'x') never comes back", () => {
     expect(harness).not.toMatch(/"screenshot":\s*"x"/)
   })
 
-  it("preflight posts the named constants, not an inline body", () => {
+  // public-clone skip (harness-side): scripts/coasty_api_test.py is not shipped
+  it.skipIf(!HAVE_HARNESS)("preflight posts the named constants, not an inline body", () => {
     expect(harness).toContain('c.post("/predict", IDEM_PROBE_BODY')
     expect(harness).toContain('"Idempotency-Key": IDEM_PROBE_KEY')
   })
 
-  // public-clone skip (backend-side tests only): backend/ is gitignored there
+  // public-clone skip (backend-side only): backend/ is gitignored there
   it.skipIf(!HAVE_BACKEND)("backend still declares an outer-shape floor and a key ceiling", () => {
     expect(floor, "screenshot length floor in models/public_cua.py").toBeTruthy()
     expect(keyMax, "Idempotency-Key max length in routes/public_cua.py").toBeTruthy()
   })
 
-  // public-clone skip (backend-side tests only): backend/ is gitignored there
-  it.skipIf(!HAVE_BACKEND)("sentinel screenshot satisfies the backend's outer shape", () => {
+  // public-clone skip: cross-references BOTH the harness sentinel and the
+  // backend floor, so both sources must be present.
+  it.skipIf(!HAVE_BACKEND || !HAVE_HARNESS)("sentinel screenshot satisfies the backend's outer shape", () => {
     const len = Number(probeShot![2])
     expect(len).toBeGreaterThanOrEqual(Number(floor![1]))
     expect(len % 4, "base64 length must be a multiple of 4").toBe(0)
@@ -73,8 +80,9 @@ describe("idempotency capability-probe sentinel stays schema-valid", () => {
     expect(len).toBeLessThan(1000)
   })
 
-  // public-clone skip (backend-side tests only): backend/ is gitignored there
-  it.skipIf(!HAVE_BACKEND)("probe key is oversized relative to the backend ceiling", () => {
+  // public-clone skip: cross-references the harness probe key and the backend
+  // ceiling, so both sources must be present.
+  it.skipIf(!HAVE_BACKEND || !HAVE_HARNESS)("probe key is oversized relative to the backend ceiling", () => {
     expect(Number(probeKey![2])).toBeGreaterThan(Number(keyMax![1]))
   })
 })

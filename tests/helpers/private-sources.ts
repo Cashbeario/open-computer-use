@@ -20,3 +20,10 @@ export const HAVE_BACKEND = !SIMULATE && existsSync(join(ROOT, "backend"))
 
 export const haveMigration = (file: string): boolean =>
   !SIMULATE && existsSync(join(ROOT, "supabase", "migrations", file))
+
+// scripts/coasty_api_test.py is an internal harness kept OUT of the public
+// repo (it sits with the other untracked ops scripts). When it's absent, the
+// harness-side drift tests skip instead of dying at collection; the
+// maintainer tree always has it so they always run there.
+export const HAVE_HARNESS =
+  !SIMULATE && existsSync(join(ROOT, "scripts", "coasty_api_test.py"))

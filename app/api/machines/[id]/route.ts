@@ -5,6 +5,9 @@ import { getAwsEc2Service } from "@/lib/aws/ec2-service";
 import { transformMachineFromDB, transformSessionFromDB } from "@/lib/utils/db-transforms";
 import type { MachineActionRequest } from "@/types/machines.types";
 import { deleteSwarmMailbox } from "@/lib/services/workmail-service";
+import { resolveInternalOrSession } from "@/lib/auth/internal-or-session";
+
+export const runtime = "nodejs";
 
 interface RouteParams {
   params: Promise<{
@@ -15,18 +18,15 @@ interface RouteParams {
 // GET /api/machines/[id] - Get machine details
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
-    }
-    const { id: machineId } = await params;
-    
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData?.user) {
+    // Accept either a dashboard user (cookie session) or the backend acting on
+    // a user's behalf (internal key + X-User-ID). On the internal path the
+    // returned client is service-role (RLS off) — the machine lookup keeps its
+    // explicit .eq("user_id", userId) so the user filter is the tenant guard.
+    const { userId, supabase } = await resolveInternalOrSession(request);
+    if (!userId || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = authData.user.id;
+    const { id: machineId } = await params;
 
     // Get machine details
     const { data: dbMachine, error: machineError } = await supabase
@@ -78,18 +78,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // POST /api/machines/[id] - Perform action on machine
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
-    }
-    const { id: machineId } = await params;
-    
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData?.user) {
+    // Accept either a dashboard user (cookie session) or the backend acting on
+    // a user's behalf (internal key + X-User-ID). On the internal path the
+    // returned client is service-role (RLS off) — the machine lookup and every
+    // mutation keep their explicit user/machine filters as the tenant guard.
+    const { userId, supabase } = await resolveInternalOrSession(request);
+    if (!userId || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = authData.user.id;
+    const { id: machineId } = await params;
     const body: MachineActionRequest = await request.json();
 
     // Get machine
@@ -144,7 +141,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
             // Poll for status
             setTimeout(async () => {
-              await updateMachineStatusAws(machineId, instanceId);
+              await updateMachineStatusAws(machineId, instanceId, supabase);
             }, 10000);
 
             return NextResponse.json({ message: "Machine starting" });
@@ -166,10 +163,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                 .eq("id", machineId);
             }
 
-            await updateMachineStatus(machineId, machine.azure_container_group);
+            await updateMachineStatus(machineId, machine.azure_container_group, supabase);
 
             setTimeout(async () => {
-              await updateMachineStatus(machineId, machine.azure_container_group);
+              await updateMachineStatus(machineId, machine.azure_container_group, supabase);
             }, 10000);
 
             return NextResponse.json({
@@ -229,7 +226,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           .update({ status: "stopped", started_at: null })
           .eq("id", machineId);
 
-        await recordMachineUsage(machine);
+        await recordMachineUsage(machine, supabase);
 
         return NextResponse.json({ message: "Machine stopped" });
 
@@ -263,10 +260,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           await awsService.startInstance(instanceId);
 
           setTimeout(async () => {
-            await updateMachineStatusAws(machineId, instanceId);
+            await updateMachineStatusAws(machineId, instanceId, supabase);
           }, 15000);
 
-          await recordMachineUsage(machine);
+          await recordMachineUsage(machine, supabase);
 
           return NextResponse.json({ message: "Machine restarting" });
         } else {
@@ -296,13 +293,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
               .eq("id", machineId);
           }
 
-          await updateMachineStatus(machineId, machine.azure_container_group);
+          await updateMachineStatus(machineId, machine.azure_container_group, supabase);
 
           setTimeout(async () => {
-            await updateMachineStatus(machineId, machine.azure_container_group);
+            await updateMachineStatus(machineId, machine.azure_container_group, supabase);
           }, 5000);
 
-          await recordMachineUsage(machine);
+          await recordMachineUsage(machine, supabase);
 
           return NextResponse.json({
             message: startResult.recreated
@@ -514,16 +511,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// Helper function to update machine status
-async function updateMachineStatus(machineId: string, containerGroupName: string) {
+// Helper function to update machine status.
+// `db` lets callers pass the request's resolved client (cookie or service-role)
+// so updates work on the internal-key proxy path where no cookie session
+// exists; falls back to a cookie client for any other caller.
+async function updateMachineStatus(machineId: string, containerGroupName: string, db?: any) {
   try {
-    const supabase = await createClient();
+    const supabase = db || (await createClient());
     if (!supabase) {
       console.error("Database connection failed in updateMachineStatus");
       return;
     }
     const azureService = getAzureContainerService();
-    
+
     // Get current machine data first
     const { data: currentMachine } = await supabase
       .from("user_machines")
@@ -563,10 +563,13 @@ async function updateMachineStatus(machineId: string, containerGroupName: string
   }
 }
 
-// Helper function to update AWS EC2 machine status
-async function updateMachineStatusAws(machineId: string, instanceId: string) {
+// Helper function to update AWS EC2 machine status.
+// `db` lets callers pass the request's resolved client (cookie or service-role)
+// so updates work on the internal-key proxy path where no cookie session
+// exists; falls back to a cookie client for any other caller.
+async function updateMachineStatusAws(machineId: string, instanceId: string, db?: any) {
   try {
-    const supabase = await createClient();
+    const supabase = db || (await createClient());
     if (!supabase) {
       console.error("Database connection failed in updateMachineStatusAws");
       return;
@@ -609,10 +612,13 @@ async function updateMachineStatusAws(machineId: string, instanceId: string) {
   }
 }
 
-// Helper function to record machine usage
-async function recordMachineUsage(machine: any) {
+// Helper function to record machine usage.
+// `db` lets callers pass the request's resolved client (cookie or service-role)
+// so the insert works on the internal-key proxy path where no cookie session
+// exists; falls back to a cookie client for any other caller.
+async function recordMachineUsage(machine: any, db?: any) {
   try {
-    const supabase = await createClient();
+    const supabase = db || (await createClient());
     if (!supabase) {
       console.error("Database connection failed in recordMachineUsage");
       return;

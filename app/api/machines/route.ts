@@ -6,22 +6,22 @@ import { transformMachineFromDB } from "@/lib/utils/db-transforms";
 import type { UserMachine, CreateMachineRequest, MachineStatus } from "@/types/machines.types";
 import { dockerService } from "@/lib/docker/docker-service";
 import { createSwarmMailbox, deleteSwarmMailbox } from "@/lib/services/workmail-service";
+import { resolveInternalOrSession } from "@/lib/auth/internal-or-session";
 import crypto from "crypto";
+
+export const runtime = "nodejs";
 
 // GET /api/machines - List user's machines
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
-    }
-    
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData?.user) {
+    // Accept either a dashboard user (cookie session) or the backend acting on
+    // a user's behalf (internal key + X-User-ID). On the internal path the
+    // returned client is service-role (RLS off) — every query below keeps its
+    // explicit .eq("user_id", userId) so the user filter is the tenant guard.
+    const { userId, supabase } = await resolveInternalOrSession(request);
+    if (!userId || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const userId = authData.user.id;
 
     // Get user's machines
     const { data: dbMachines, error: machinesError } = await supabase
@@ -321,17 +321,15 @@ export async function GET(request: NextRequest) {
 // POST /api/machines - Create a new machine
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    if (!supabase) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
-    }
-    
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData?.user) {
+    // Accept either a dashboard user (cookie session) or the backend acting on
+    // a user's behalf (internal key + X-User-ID). On the internal path the
+    // returned client is service-role (RLS off) — every query below keeps its
+    // explicit .eq("user_id", userId) so the user filter is the tenant guard.
+    const { userId, supabase } = await resolveInternalOrSession(request);
+    if (!userId || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = authData.user.id;
     const body: CreateMachineRequest = await request.json();
     const provider = body.provider || 'azure';
 
@@ -629,7 +627,7 @@ export async function POST(request: NextRequest) {
           let checkCount = 0;
           const checkInterval = setInterval(async () => {
             checkCount++;
-            await updateMachineStatusAws(machineId, result.instanceId);
+            await updateMachineStatusAws(machineId, result.instanceId, supabase);
 
             const { data: updatedMachine } = await supabase
               .from("user_machines")
@@ -762,12 +760,12 @@ export async function POST(request: NextRequest) {
           })
           .eq("id", machineId);
 
-        await updateMachineStatus(machineId, containerName);
+        await updateMachineStatus(machineId, containerName, supabase);
 
         let checkCount = 0;
         const checkInterval = setInterval(async () => {
           checkCount++;
-          await updateMachineStatus(machineId, containerName);
+          await updateMachineStatus(machineId, containerName, supabase);
 
           const { data: updatedMachine } = await supabase
             .from("user_machines")
@@ -855,16 +853,19 @@ function generateSecureVncPassword(isWindows: boolean): string {
   }
 }
 
-// Helper function to update machine status
-async function updateMachineStatus(machineId: string, containerGroupName: string) {
+// Helper function to update machine status.
+// `db` lets callers pass the request's resolved client (cookie or service-role)
+// so background updates work on the internal-key proxy path where no cookie
+// session exists; falls back to a cookie client for any other caller.
+async function updateMachineStatus(machineId: string, containerGroupName: string, db?: any) {
   try {
-    const supabase = await createClient();
+    const supabase = db || (await createClient());
     if (!supabase) {
       console.error("Database connection failed in updateMachineStatus");
       return;
     }
     const azureService = getAzureContainerService();
-    
+
     const status = await azureService.getContainerStatus(containerGroupName);
     
     const updateData: any = {
@@ -890,10 +891,13 @@ async function updateMachineStatus(machineId: string, containerGroupName: string
   }
 }
 
-// Helper function to update AWS EC2 machine status
-async function updateMachineStatusAws(machineId: string, instanceId: string) {
+// Helper function to update AWS EC2 machine status.
+// `db` lets callers pass the request's resolved client (cookie or service-role)
+// so background updates work on the internal-key proxy path where no cookie
+// session exists; falls back to a cookie client for any other caller.
+async function updateMachineStatusAws(machineId: string, instanceId: string, db?: any) {
   try {
-    const supabase = await createClient();
+    const supabase = db || (await createClient());
     if (!supabase) {
       console.error("Database connection failed in updateMachineStatusAws");
       return;

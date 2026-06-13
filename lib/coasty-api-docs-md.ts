@@ -81,6 +81,11 @@ Other useful headers: \`X-Coasty-Key-Kind\` (\`live\` / \`test\` / \`legacy\`),
 \`X-Coasty-Test-Mode: true\` (test keys only), and \`X-Coasty-Idempotent-Replay: true\`
 when a response was served from the idempotency cache.
 
+Every response also carries three rate-limit headers — \`X-RateLimit-Limit\`,
+\`X-RateLimit-Remaining\`, and \`X-RateLimit-Reset\` (the unix epoch second the
+window rolls over). They are **advisory**: surface them for backoff, but treat a
+\`429 RATE_LIMITED\` body (with its \`Retry-After\`) as the authoritative signal.
+
 ### Key management
 
 - Create, list, and revoke keys at https://coasty.ai/developers/keys, or via the
@@ -216,9 +221,13 @@ print(run["result"])               # {"passed": ..., "status": ..., "summary": .
 
 | Version | Description | Avg step | Tiers |
 | --- | --- | --- | --- |
-| \`v1\` | Baseline: single action per call, reflection, 8-screenshot trajectory | 9-10s | professional, enterprise |
-| \`v3\` | Lean (default): multi-action per call, no reflection, aggressive compaction | 3.5-4s | all tiers |
-| \`v4\` | Autonomous + verifier (pass/fail, recovery, exploration, cost governor) | varies | professional, enterprise |
+| \`v1\` | Baseline: single action per call, reflection, 8-screenshot trajectory | 9-10s | all tiers |
+| \`v3\` | Lean: multi-action per call, no reflection, aggressive compaction | 3.5-4s | all tiers |
+| \`v4\` | Autonomous + verifier (pass/fail, recovery, exploration, cost governor) | varies | all tiers |
+| \`v5\` | Latest (default): autonomous + verifier with improved grounding and recovery | varies | all tiers |
+
+\`v5\` is the **default** when you omit \`cua_version\`, and \`v1\` / \`v3\` / \`v4\` /
+\`v5\` are all supported on every tier.
 
 ### Prompt steering: instructions vs system_prompt
 
@@ -243,13 +252,17 @@ per \`trajectory\` screenshot you attach, +$0.01 (1 cr) per HD image (width >
 screenshot), +$0.03 (3 cr) when \`cua_version\` is \`v1\`, and +$0.01 (1 cr)
 when \`system_prompt\` exceeds 500 characters. Refunded if the call fails.
 
+**Idempotency:** this endpoint honors the \`Idempotency-Key\` request header.
+A replay returns the original response with \`X-Coasty-Idempotent-Replay: true\`
+and bills 0 (the cached result is served without a second model call).
+
 **Request body**
 
 | Field | Type | Req | Default | Notes |
 | --- | --- | --- | --- | --- |
 | \`screenshot\` | string | yes | - | Base64-encoded PNG/JPEG. Must be > 100 chars. |
 | \`instruction\` | string | yes | - | Natural language task. Must be non-empty. |
-| \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. |
+| \`cua_version\` | string | no | \`v5\` | \`v1\` / \`v3\` / \`v4\` / \`v5\`. |
 | \`system_prompt\` | string\\|null | no | null | REPLACES the base prompt. |
 | \`instructions\` | string\\|null | no | null | APPENDED to the base prompt. |
 | \`screen_width\` | int | no | 1920 | 320-3840. |
@@ -343,7 +356,7 @@ cost — deleting just frees your concurrency slot.
 
 | Field | Type | Req | Default | Notes |
 | --- | --- | --- | --- | --- |
-| \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. |
+| \`cua_version\` | string | no | \`v5\` | \`v1\` / \`v3\` / \`v4\` / \`v5\`. |
 | \`screen_width\` | int | no | 1920 | 320-3840. |
 | \`screen_height\` | int | no | 1080 | 240-2160. |
 | \`max_trajectory_length\` | int | no | 3 | 1-20. Clamped to your tier max. |
@@ -356,7 +369,7 @@ cost — deleting just frees your concurrency slot.
 
 \`\`\`json
 {
-  "session_id": "sess_3b9c...",
+  "session_id": "ses_3b9c...",
   "cua_version": "v3",
   "screen_size": "1920x1080",
   "created_at": "2026-06-01T12:00:00Z",
@@ -405,7 +418,7 @@ Get one session's status (\`SessionInfoResponse\`):
 
 \`\`\`json
 {
-  "session_id": "sess_3b9c...",
+  "session_id": "ses_3b9c...",
   "cua_version": "v3",
   "screen_size": "1920x1080",
   "step_count": 4,
@@ -445,6 +458,10 @@ coordinates. Scope: \`ground\`.
 
 **Price:** $0.03 (3 credits) per call, +$0.01 (1 credit) if the screenshot
 is HD (width > 1280 or height > 720).
+
+**Idempotency:** this endpoint honors the \`Idempotency-Key\` request header.
+A replay returns the original response with \`X-Coasty-Idempotent-Replay: true\`
+and bills 0 (the cached coordinates are served without a second model call).
 
 **Request body**
 
@@ -497,9 +514,12 @@ List available models, CUA versions, and action types. No body.
   "models": [
     { "id": "default", "description": "Default model - balanced performance and cost" }
   ],
+  "default_cua_version": "v5",
   "cua_versions": [
     { "id": "v1", "description": "Baseline - single action per call, reflection enabled, 8-screenshot trajectory", "avg_step_time": "9-10s", "features": ["reflection", "single_action"] },
-    { "id": "v3", "description": "Lean - multi-action per call, no reflection, aggressive compaction", "avg_step_time": "3.5-4s", "features": ["multi_action", "compaction"] }
+    { "id": "v3", "description": "Lean - multi-action per call, no reflection, aggressive compaction", "avg_step_time": "3.5-4s", "features": ["multi_action", "compaction"] },
+    { "id": "v4", "description": "Autonomous + verifier - pass/fail verification, recovery, exploration, cost governor", "avg_step_time": "varies", "features": ["verifier", "recovery", "exploration"] },
+    { "id": "v5", "description": "Latest (default) - autonomous + verifier with improved grounding and recovery", "avg_step_time": "varies", "features": ["verifier", "recovery", "grounding"], "default": true }
   ],
   "action_types": ["click", "type_text", "key_press", "key_combo", "scroll", "drag", "move", "wait", "done", "fail"]
 }
@@ -556,7 +576,7 @@ Start a run. Returns immediately with \`status: "queued"\` and a one-time
 | --- | --- | --- | --- | --- |
 | \`machine_id\` | string | yes | - | Target machine (VM). Must be owned by your key's user. 1-128 chars. |
 | \`task\` | string | yes | - | Natural-language goal. 1-16000 chars. |
-| \`cua_version\` | string | no | \`v3\` | \`v1\` / \`v3\` / \`v4\`. \`v4\` requires professional+ tier. |
+| \`cua_version\` | string | no | \`v5\` | \`v1\` / \`v3\` / \`v4\` / \`v5\`. |
 | \`instructions\` | string\\|null | no | null | APPENDED to the base prompt. Up to 16000 chars. |
 | \`system_prompt\` | string\\|null | no | null | Custom preamble (takes priority). Up to 32000 chars. |
 | \`max_steps\` | int | no | 50 | 1-1000. Clamped to the server ceiling. |
@@ -578,7 +598,7 @@ create safe. Reusing a key with a different body returns \`422 IDEMPOTENCY_KEY_R
 | \`status\` | string | \`queued\` / \`running\` / \`awaiting_human\` / \`succeeded\` / \`failed\` / \`cancelled\` / \`timed_out\`. |
 | \`machine_id\` | string | The machine the agent is driving. |
 | \`task\` | string | The goal you submitted. |
-| \`cua_version\` | string | \`v3\` (default) or \`v4\`. |
+| \`cua_version\` | string | The engine that ran: \`v1\` / \`v3\` / \`v4\` / \`v5\` (default \`v5\`). |
 | \`instructions\` | string\\|null | Extra guidance appended to the base prompt. |
 | \`max_steps\` | int | Hard cap on agent steps. |
 | \`on_awaiting_human\` | string | \`pause\` / \`fail\` / \`cancel\`. |
@@ -672,7 +692,7 @@ run = requests.post(
     json={
         "machine_id": "m_9f2c",
         "task": "Open the billing page and download the latest invoice as PDF",
-        "cua_version": "v3",         # "v4" needs professional tier or above
+        "cua_version": "v3",         # omit for the default v5; v1/v3/v4/v5 on all tiers
         "max_steps": 40,
         "on_awaiting_human": "pause",
     },
@@ -1257,18 +1277,22 @@ switch to live when the loop is stable.
 
 ### Action types
 
-Every action type the model can return in \`actions\`:
+Every action type the model can return in \`actions\`.
+**This is the canonical wire shape** — the exact \`params\` keys returned in
+\`PredictResponse.actions\` (list-shaped \`key_press.keys\`, seconds-based \`wait\`,
+\`x1/y1/x2/y2\` drag). The "Executing every action type locally" table above maps
+these same params to pyautogui / Playwright.
 
 | Type | Params | Description |
 | --- | --- | --- |
-| \`click\` | \`{ x, y }\` | Single left click at the pixel coordinate. |
+| \`click\` | \`{ x, y, button?, clicks? }\` | Click at the pixel coordinate (\`button\` defaults to \`"left"\`, \`clicks\` to 1). |
 | \`type_text\` | \`{ text }\` | Type a literal string at the current focus. |
-| \`key_press\` | \`{ key }\` | Press one key, e.g. \`"enter"\`, \`"tab"\`, \`"escape"\`. |
-| \`key_combo\` | \`{ keys: [..] }\` | Press a chord, e.g. \`["ctrl", "c"]\` or \`["cmd", "v"]\`. |
-| \`scroll\` | \`{ x, y, direction, amount }\` | Scroll up/down/left/right at a position. |
-| \`drag\` | \`{ from_x, from_y, to_x, to_y }\` | Press, move, and release between two points. |
+| \`key_press\` | \`{ keys: [..] }\` | Press one or more keys in order, e.g. \`["enter"]\` or \`["tab", "tab", "enter"]\`. |
+| \`key_combo\` | \`{ keys: [..] }\` | Press a chord held together, e.g. \`["ctrl", "c"]\` or \`["cmd", "v"]\`. |
+| \`scroll\` | \`{ clicks, direction?, x?, y? }\` | Scroll at a position. \`clicks\` is signed (+up / -down); \`direction\` is one of \`"vertical"\` (default) or \`"horizontal"\` (horizontal comes from \`hscroll\`). |
+| \`drag\` | \`{ x1, y1, x2, y2, button? }\` | Press, move, and release between two points. |
 | \`move\` | \`{ x, y }\` | Move the cursor without clicking. |
-| \`wait\` | \`{ ms }\` | Pause before the next step (e.g. for a page load). |
+| \`wait\` | \`{ seconds }\` | Pause \`seconds\` before the next step (e.g. for a page load). |
 | \`done\` | \`{}\` | The task is complete. \`status\` becomes \`"done"\`. |
 | \`fail\` | \`{ reason? }\` | The task is impossible. \`status\` becomes \`"fail"\`. |
 
@@ -1330,7 +1354,7 @@ Field reference (every error carries the first four; the rest are conditional):
 | 409 | \`RESUME_CONFLICT\` | Another resume/cancel/timeout won the race. | Re-GET the run to read its current status, then retry. |
 | 409 | \`IDEMPOTENCY_KEY_REUSED\` | Same \`Idempotency-Key\` sent with a different body. | Resend the original body to get the cached result, or use a new key. |
 | 409 | \`INVALID_STATE\` | A lifecycle action is illegal in the resource's current state. Body has \`current_state\` + \`allowed_from\`. | Check the state first (actions need \`running\`; provisioning is async), then retry. |
-| 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. \`v4\` on free/starter, custom prompts on free). | Upgrade your plan or use an available alternative. |
+| 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. custom prompts on free). | Upgrade your plan or use an available alternative. |
 | 500 | \`INTERNAL_ERROR\` | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
 | 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding, send a clearer or higher-resolution screenshot. |
 | 504 | \`UPSTREAM_TIMEOUT\` | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
@@ -1341,8 +1365,9 @@ Errors that are transient (\`UPSTREAM_TIMEOUT\`, \`UPSTREAM_UNAVAILABLE\`) carry
 
 ### Per-tier features
 
-API tiers are derived from your subscription. \`v4\` requires professional tier
-or above. Custom prompts (\`system_prompt\` + \`instructions\`) are gated by
+API tiers are derived from your subscription. Every \`cua_version\`
+(\`v1\` / \`v3\` / \`v4\` / \`v5\`, default \`v5\`) is available on all tiers. Custom
+prompts (\`system_prompt\` + \`instructions\`) are gated by
 \`max_system_prompt_chars\` per tier: free 0 (unavailable), starter 2000,
 professional 4000, enterprise 16000.
 

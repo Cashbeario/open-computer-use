@@ -45,7 +45,14 @@ export async function uploadFileToVM(
     
     // Determine destination path on VM (sanitize to prevent path traversal)
     const safeName = sanitizeFileName(file.name)
-    const vmPath = `/home/desktop/Desktop/${safeName}`
+    // OS-portable destination: the VM agent runs os.path.expanduser on this,
+    // so `~/Desktop` resolves to C:\Users\Administrator\Desktop on Windows,
+    // /home/ubuntu/Desktop on cloud Linux, and /home/desktop/Desktop on local
+    // Docker. The legacy hardcoded "/home/desktop/Desktop" only resolved on
+    // cloud Linux (via the agent's /home/desktop -> /home/ubuntu remap) and
+    // had no valid path on a Windows VM, so uploads silently went nowhere.
+    // Matches the backend's own default — see file_operations.py:198-204.
+    const vmPath = `~/Desktop/${safeName}`
     
     // Upload via file API
     const response = await fetch('/api/files?op=upload', {
@@ -146,7 +153,14 @@ export async function processVMFiles(
 export function createVMOptimisticAttachments(files: File[]): VMAttachment[] {
   return files.map(file => {
     const safeName = sanitizeFileName(file.name)
-    const vmPath = `/home/desktop/Desktop/${safeName}`
+    // OS-portable destination: the VM agent runs os.path.expanduser on this,
+    // so `~/Desktop` resolves to C:\Users\Administrator\Desktop on Windows,
+    // /home/ubuntu/Desktop on cloud Linux, and /home/desktop/Desktop on local
+    // Docker. The legacy hardcoded "/home/desktop/Desktop" only resolved on
+    // cloud Linux (via the agent's /home/desktop -> /home/ubuntu remap) and
+    // had no valid path on a Windows VM, so uploads silently went nowhere.
+    // Matches the backend's own default — see file_operations.py:198-204.
+    const vmPath = `~/Desktop/${safeName}`
     return {
       name: file.name,
       type: file.type,  // Changed from contentType

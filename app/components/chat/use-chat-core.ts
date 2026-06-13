@@ -268,8 +268,10 @@ export function useChatCore({
       let finalMessage = originalInput
       if (attachments && attachments.length > 0) {
         const fileTags = attachments.map((a: any) => {
-          // VM uploads always have vmPath
-          const path = a.vmPath || `/home/desktop/Desktop/${a.name}`
+          // VM uploads always have vmPath. The fallback uses the OS-portable
+          // `~/Desktop` form (resolved per-OS by the agent's expanduser) so a
+          // missing vmPath still points at a valid Desktop on a Windows VM.
+          const path = a.vmPath || `~/Desktop/${a.name}`
           // Include size attribute if available
           const sizeAttr = a.size ? ` size="${a.size}"` : ''
           return `<file-attachment name="${a.name}" path="${path}"${sizeAttr} />`

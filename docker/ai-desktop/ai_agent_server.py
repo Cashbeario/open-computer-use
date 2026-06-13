@@ -2927,14 +2927,18 @@ class DesktopAgentServer:
             if not content:
                 return {"success": False, "error": "No content provided"}
             
-            # Handle relative paths
-            if not filepath.startswith('/'):
-                # Default to Desktop for relative paths
-                filepath = os.path.join('/home/desktop/Desktop', filepath)
-            
-            # Expand ~ to home directory
+            # Expand ~ to the home directory FIRST. The web client sends an
+            # OS-portable "~/Desktop/<name>" so the same path resolves on
+            # Windows, cloud Linux, and this container; expanding up front
+            # turns it into an absolute path here ("/home/desktop/Desktop/...").
+            # The old order (prepend-then-expand) treated "~/Desktop/x" as a
+            # relative path and produced "/home/desktop/Desktop/~/Desktop/x".
             filepath = os.path.expanduser(filepath)
-            
+
+            # Anything still relative defaults to the Desktop.
+            if not os.path.isabs(filepath):
+                filepath = os.path.join(os.path.expanduser('~/Desktop'), filepath)
+
             # Create directory if it doesn't exist
             directory = os.path.dirname(filepath)
             if directory and not os.path.exists(directory):

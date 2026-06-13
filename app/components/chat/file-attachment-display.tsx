@@ -88,7 +88,7 @@ export function FileAttachmentDisplay({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           machine_id: machineId,
-          filepath: attachment.vmPath || `/home/desktop/Desktop/${attachment.name}`,
+          filepath: attachment.vmPath || `~/Desktop/${attachment.name}`,
           encoding: 'auto'
         })
       })
@@ -164,7 +164,7 @@ export function FileAttachmentDisplay({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           machine_id: machineId,
-          filepath: attachment.vmPath || `/home/desktop/Desktop/${attachment.name}`
+          filepath: attachment.vmPath || `~/Desktop/${attachment.name}`
         })
       })
 

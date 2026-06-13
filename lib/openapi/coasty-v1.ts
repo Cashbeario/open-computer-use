@@ -128,6 +128,29 @@ const schemas = {
       input_tokens: { type: "integer", default: 0 },
       output_tokens: { type: "integer", default: 0 },
       credits_charged: { type: "integer", default: 0 },
+      cost_cents: { type: "integer", default: 0, description: "USD cost in cents (credits_charged * $0.01)." },
+      breakdown: {
+        type: "array",
+        nullable: true,
+        description:
+          "Self-auditable per-call cost breakdown. Each line's credits sum to credits_charged. null on free / test / no-charge calls (and on /v1/parse, which never bills).",
+        items: {
+          type: "object",
+          required: ["item", "credits"],
+          properties: {
+            item: {
+              type: "string",
+              enum: ["base", "trajectory", "hd_images", "engine", "custom_prompt"],
+            },
+            credits: { type: "integer" },
+            count: {
+              type: "integer",
+              nullable: true,
+              description: "Optional multiplier (e.g. number of HD screenshots billed); omitted where it adds nothing.",
+            },
+          },
+        },
+      },
     },
   },
   TrajectoryStep: {
@@ -154,15 +177,27 @@ const schemas = {
       },
       cua_version: {
         type: "string",
-        enum: ["v1", "v3"],
-        default: "v3",
+        enum: ["v1", "v3", "v4", "v5"],
+        default: "v5",
         description:
-          "v1 = baseline (single action, reflection, 8-step trajectory, 9-10s). v3 = lean (multi-action, no reflection, 3.5-4s).",
+          "v1 = baseline (single action, reflection, 8-step trajectory, 9-10s). v3 = lean (multi-action, no reflection, 3.5-4s). v4 = autonomous + verifier. v5 = latest (default): autonomous + verifier with improved grounding and recovery.",
       },
       model: { type: "string", nullable: true },
       system_prompt: { type: "string", nullable: true },
-      screen_width: { type: "integer", minimum: 320, maximum: 3840, default: 1920 },
-      screen_height: { type: "integer", minimum: 240, maximum: 2160, default: 1080 },
+      screen_width: {
+        type: "integer",
+        minimum: 320,
+        maximum: 3840,
+        nullable: true,
+        description: "Omit to use the screenshot's true size (measured server-side); no longer defaults to 1920.",
+      },
+      screen_height: {
+        type: "integer",
+        minimum: 240,
+        maximum: 2160,
+        nullable: true,
+        description: "Omit to use the screenshot's true size (measured server-side); no longer defaults to 1080.",
+      },
       trajectory: { type: "array", items: { $ref: "#/components/schemas/TrajectoryStep" } },
       max_actions: { type: "integer", minimum: 1, maximum: 10, default: 5 },
       tools: { type: "array", items: { type: "string" }, nullable: true },
@@ -179,6 +214,19 @@ const schemas = {
       raw_code: { type: "array", items: { type: "string" } },
       reasoning: { type: "string" },
       status: { type: "string", enum: ["continue", "done", "fail"] },
+      cua_version: {
+        type: "string",
+        nullable: true,
+        description: "Echo: the CUA engine version that actually served this call (e.g. \"v5\").",
+      },
+      screen_width: {
+        type: "integer",
+        description: "Echo: the width the server actually used — the coordinate space the returned (x, y) are in.",
+      },
+      screen_height: {
+        type: "integer",
+        description: "Echo: the height the server actually used — the coordinate space the returned (x, y) are in.",
+      },
       usage: { $ref: "#/components/schemas/UsageInfo" },
     },
   },
@@ -187,7 +235,7 @@ const schemas = {
   CreateSessionRequest: {
     type: "object",
     properties: {
-      cua_version: { type: "string", enum: ["v1", "v3"], default: "v3" },
+      cua_version: { type: "string", enum: ["v1", "v3", "v4", "v5"], default: "v5" },
       model: { type: "string", nullable: true },
       screen_width: { type: "integer", minimum: 320, maximum: 3840, default: 1920 },
       screen_height: { type: "integer", minimum: 240, maximum: 2160, default: 1080 },
@@ -230,6 +278,11 @@ const schemas = {
       raw_code: { type: "array", items: { type: "string" } },
       reasoning: { type: "string" },
       status: { type: "string", enum: ["continue", "done", "fail"] },
+      cua_version: {
+        type: "string",
+        nullable: true,
+        description: "Echo: the CUA engine version that actually served this step (e.g. \"v5\").",
+      },
       usage: { $ref: "#/components/schemas/UsageInfo" },
     },
   },
@@ -255,8 +308,20 @@ const schemas = {
     properties: {
       screenshot: { type: "string" },
       element: { type: "string", description: "Natural-language description of the UI element." },
-      screen_width: { type: "integer", minimum: 320, maximum: 3840, default: 1920 },
-      screen_height: { type: "integer", minimum: 240, maximum: 2160, default: 1080 },
+      screen_width: {
+        type: "integer",
+        minimum: 320,
+        maximum: 3840,
+        nullable: true,
+        description: "Omit to use the screenshot's true size (measured server-side); no longer defaults to 1920.",
+      },
+      screen_height: {
+        type: "integer",
+        minimum: 240,
+        maximum: 2160,
+        nullable: true,
+        description: "Omit to use the screenshot's true size (measured server-side); no longer defaults to 1080.",
+      },
     },
   },
   GroundResponse: {
@@ -265,6 +330,14 @@ const schemas = {
     properties: {
       x: { type: "integer" },
       y: { type: "integer" },
+      screen_width: {
+        type: "integer",
+        description: "Echo: the width the server actually used — the coordinate space the returned (x, y) are in.",
+      },
+      screen_height: {
+        type: "integer",
+        description: "Echo: the height the server actually used — the coordinate space the returned (x, y) are in.",
+      },
       usage: { $ref: "#/components/schemas/UsageInfo" },
     },
   },
@@ -388,6 +461,68 @@ const schemas = {
       created_at: { type: "string", format: "date-time", nullable: true },
       started_at: { type: "string", format: "date-time", nullable: true },
       metadata: { type: "object", additionalProperties: { type: "string" } },
+      billing: {
+        $ref: "#/components/schemas/MachineBilling",
+        description: "How this API-provisioned machine is metered (omitted for non-API machines).",
+      },
+    },
+  },
+  MachineBilling: {
+    type: "object",
+    description: "Per-machine runtime billing state. 1 credit = 1 cent.",
+    properties: {
+      rate_cents_per_hour: { type: "integer", description: "Hourly rate in the machine's current state." },
+      running_credits_per_hour: { type: "integer", description: "Rate while running (5 Linux / 9 Windows)." },
+      stopped_credits_per_hour: { type: "integer", description: "Rate while stopped/suspended (storage only, 1)." },
+      accrued_cents: { type: "integer", description: "Credits owed for the current metering segment so far." },
+      projected_daily_cents: { type: "integer", description: "rate_cents_per_hour * 24 — a full day at the current rate." },
+      since: { type: "string", format: "date-time", nullable: true, description: "When the current metering segment started." },
+      total_credits_billed: { type: "integer", description: "Lifetime credits this machine has billed." },
+      suspended_for_billing: { type: "boolean", description: "true if stopped because the wallet ran dry." },
+    },
+  },
+  BillingActiveItem: {
+    type: "object",
+    required: [
+      "machine_id",
+      "status",
+      "rate_cents_per_hour",
+      "running_credits_per_hour",
+      "stopped_credits_per_hour",
+      "accrued_cents",
+      "total_credits_billed",
+      "suspended_for_billing",
+    ],
+    properties: {
+      machine_id: { type: "string" },
+      display_name: { type: "string" },
+      status: { type: "string", enum: ["running", "stopped"] },
+      os_type: { type: "string", enum: ["linux", "windows"] },
+      rate_cents_per_hour: { type: "integer", description: "Hourly rate in this machine's current state." },
+      running_credits_per_hour: { type: "integer" },
+      stopped_credits_per_hour: { type: "integer" },
+      accrued_cents: { type: "integer", description: "Cost of the current metering segment so far." },
+      since: { type: "string", format: "date-time", nullable: true, description: "When the current segment started." },
+      total_credits_billed: { type: "integer" },
+      suspended_for_billing: { type: "boolean" },
+      auto_destroy_at: { type: "string", format: "date-time", nullable: true },
+      ttl_minutes: { type: "integer", nullable: true },
+    },
+  },
+  BillingActiveResponse: {
+    type: "object",
+    required: ["active", "current_run_rate_cents_per_hour", "request_id"],
+    properties: {
+      active: {
+        type: "array",
+        items: { $ref: "#/components/schemas/BillingActiveItem" },
+        description: "Every API-billed machine currently metering (running OR stopped). Empty for test-mode keys.",
+      },
+      current_run_rate_cents_per_hour: {
+        type: "integer",
+        description: "Summed instantaneous burn rate across the active list — total cents/hour right now.",
+      },
+      request_id: { type: "string" },
     },
   },
   ConnectionDetailsRedacted: {
@@ -921,9 +1056,7 @@ const paths = {
             example: {
               screenshot: "<base64-png>",
               instruction: "Click the Sign In button",
-              cua_version: "v3",
-              screen_width: 1920,
-              screen_height: 1080,
+              cua_version: "v5",
             },
           },
         },
@@ -1291,6 +1424,25 @@ const paths = {
           description: "OK.",
           content: { "application/json": { schema: { $ref: "#/components/schemas/HealthResponse" } } },
         },
+      },
+    },
+  },
+  "/v1/billing/active": {
+    get: {
+      tags: ["machines"],
+      operationId: "getActiveBilling",
+      summary: "What is billing me right now",
+      description:
+        "Lists every API-billed machine currently metering your wallet (running OR stopped — stopped bills at the storage-only rate). current_run_rate_cents_per_hour is the summed instantaneous burn rate. Test-mode keys return an empty fleet (active: [], rate 0). 1 credit = 1 cent.",
+      security: [{ apiKey: [] }, { bearerAuth: [] }],
+      responses: {
+        "200": {
+          description: "Currently-metering fleet.",
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/BillingActiveResponse" } },
+          },
+        },
+        ...standardErrors,
       },
     },
   },

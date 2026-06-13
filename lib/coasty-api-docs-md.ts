@@ -77,6 +77,18 @@ second call:
 - \`X-Credits-Charged\`: what this request cost in credits (1 credit = $0.01; \`0\` on test keys).
 - \`X-Credits-Remaining\`: your wallet balance after the charge (USD cents).
 
+**Refunds are machine-observable.** Per-request charges are auto-refunded when a
+call fails (e.g. a \`5xx\` \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\`). On a refunded
+failure the response carries \`X-Credits-Charged: 0\` **and** \`X-Credits-Refunded: <n>\`
+(the credits returned to your wallet), so you can confirm the refund from the
+response headers — you no longer have to re-poll \`/v1/usage\`.
+
+**Idempotent replays bill 0.** A replay (same \`Idempotency-Key\`) is served from
+the cache with \`X-Coasty-Idempotent-Replay: true\`, and it now also carries
+\`X-Credits-Remaining\` (and the rate-limit headers) like any normal response. The
+replayed body's \`usage.credits_charged\` is \`0\` to match the header
+\`X-Credits-Charged: 0\` — header and body agree that the replay was free.
+
 Other useful headers: \`X-Coasty-Key-Kind\` (\`live\` / \`test\` / \`legacy\`),
 \`X-Coasty-Test-Mode: true\` (test keys only), and \`X-Coasty-Idempotent-Replay: true\`
 when a response was served from the idempotency cache.
@@ -265,8 +277,8 @@ and bills 0 (the cached result is served without a second model call).
 | \`cua_version\` | string | no | \`v5\` | \`v1\` / \`v3\` / \`v4\` / \`v5\`. |
 | \`system_prompt\` | string\\|null | no | null | REPLACES the base prompt. |
 | \`instructions\` | string\\|null | no | null | APPENDED to the base prompt. |
-| \`screen_width\` | int | no | 1920 | 320-3840. |
-| \`screen_height\` | int | no | 1080 | 240-2160. |
+| \`screen_width\` | int\\|null | no | measured from the screenshot when omitted | 320-3840 when set. Omit to use the screenshot's true size. |
+| \`screen_height\` | int\\|null | no | measured from the screenshot when omitted | 240-2160 when set. Omit to use the screenshot's true size. |
 | \`trajectory\` | array | no | [] | Prior steps for context: \`[{screenshot, actions, reasoning}]\`. |
 | \`max_actions\` | int | no | 5 | 1-10. Capped to your tier max. |
 | \`tools\` | string[]\\|null | no | null | Allowed action types (null = all). |
@@ -285,13 +297,41 @@ and bills 0 (the cached result is served without a second model call).
     { "action_type": "type_text", "params": { "text": "you@example.com" }, "description": "Type the email address" }
   ],
   "raw_code": ["pyautogui.click(512, 340)", "pyautogui.typewrite('you@example.com')"],
-  "usage": { "input_tokens": 1523, "output_tokens": 245, "credits_charged": 6, "cost_cents": 6 }
+  "cua_version": "v5",
+  "screen_width": 1280,
+  "screen_height": 720,
+  "usage": {
+    "input_tokens": 1523,
+    "output_tokens": 245,
+    "credits_charged": 6,
+    "cost_cents": 6,
+    "breakdown": [
+      { "item": "base", "credits": 5 },
+      { "item": "hd_images", "credits": 1, "count": 1 }
+    ]
+  }
 }
 \`\`\`
 
 \`status\` is one of \`continue\`, \`done\`, \`fail\`. Each action object is
 \`{ action_type, params, description, raw_code }\`. \`usage.cost_cents\` is the USD
 cost in cents.
+
+\`screen_width\` / \`screen_height\` **echo the dimensions the server actually used**
+for this call — i.e. the coordinate space the returned action \`(x, y)\` are
+expressed in (the screenshot's true size when you omit them). Echoing them removes
+the coordinate-scaling guesswork: you no longer have to assume which space the
+coordinates are in. \`cua_version\` echoes the CUA engine version that served the
+call (e.g. \`"v5"\`).
+
+\`usage.breakdown\` is the **per-call cost breakdown** that makes the charge
+self-auditable: an ordered list of \`{ item, credits, count? }\` lines whose
+\`credits\` **sum to \`credits_charged\`**. \`item\` is one of \`base\`, \`trajectory\`,
+\`hd_images\`, \`engine\`, \`custom_prompt\`; \`count\` is an optional multiplier (e.g.
+the number of HD screenshots billed) and is omitted where it adds nothing.
+\`breakdown\` is \`null\` (omitted) on free / test / no-charge calls (and on
+\`/v1/parse\`, which never bills); when present, the lines always reconcile to the
+total.
 
 **curl**
 
@@ -396,7 +436,10 @@ a \`system_prompt\` over 500 characters.
 | \`include_raw_code\` | bool | no | true |
 
 **Response** (\`SessionPredictResponse\`): \`{ request_id, session_id, step,
-actions, raw_code, reasoning, status, usage }\`.
+actions, raw_code, reasoning, status, cua_version, usage }\`. \`cua_version\` echoes
+the engine that served the step. \`usage.breakdown\` carries the same
+self-auditable \`[{ item, credits, count? }]\` cost lines as \`/v1/predict\` (summing
+to \`credits_charged\`; \`null\` on a free / test step).
 
 #### POST /v1/sessions/{id}/reset
 
@@ -469,10 +512,30 @@ and bills 0 (the cached coordinates are served without a second model call).
 | --- | --- | --- | --- |
 | \`screenshot\` | string | yes | - |
 | \`element\` | string | yes | - |
-| \`screen_width\` | int | no | 1920 |
-| \`screen_height\` | int | no | 1080 |
+| \`screen_width\` | int\\|null | no | measured from the screenshot when omitted (320-3840 when set) |
+| \`screen_height\` | int\\|null | no | measured from the screenshot when omitted (240-2160 when set) |
 
-**Response** (\`GroundResponse\`): \`{ "x": 512, "y": 340, "usage": { ... } }\`.
+**Response** (\`GroundResponse\`):
+
+\`\`\`json
+{
+  "x": 512,
+  "y": 340,
+  "screen_width": 1280,
+  "screen_height": 720,
+  "usage": {
+    "credits_charged": 3,
+    "cost_cents": 3,
+    "breakdown": [ { "item": "base", "credits": 3 } ]
+  }
+}
+\`\`\`
+
+\`screen_width\` / \`screen_height\` **echo the dimensions the server actually used**
+— the coordinate space the returned \`(x, y)\` are in (the screenshot's true size
+when you omit them), so there is no coordinate-scaling guesswork. \`usage.breakdown\`
+is the same self-auditable \`[{ item, credits, count? }]\` cost list as \`/v1/predict\`
+(summing to \`credits_charged\`; \`null\` on a free / test call).
 
 \`\`\`bash
 curl -s https://coasty.ai/v1/ground \\
@@ -1226,11 +1289,18 @@ For Android: \`adb exec-out screencap -p\` in, \`adb shell input tap x y\` out.
 
 Coordinates come back **in the same space as the screenshot you sent**. If you
 downscale (e.g. a 2560x1440 desktop resized to 1280x720 to save a credit),
-multiply returned x/y by your scale factor before clicking — and pass the
-DOWNSCALED size as \`screen_width\`/\`screen_height\`. Sending full resolution
-with the real width/height also works (coordinates map 1:1) and costs +1 credit
-above 1280x720. A mismatched screenshot vs \`screen_width\`/\`screen_height\` is
-the number-one cause of "it clicks the wrong place".
+multiply returned x/y by your scale factor before clicking.
+
+On \`/v1/predict\` and \`/v1/ground\`, \`screen_width\`/\`screen_height\` are now
+**optional**: omit them and the server measures the **screenshot's true size**
+(it no longer assumes 1920x1080). So an omitted-dims SD screenshot bills SD — the
+old trap where leaving them out silently defaulted to 1920x1080 (HD, +1 credit)
+is **gone**. To be unambiguous, the response **echoes** the \`screen_width\`/
+\`screen_height\` it used, which is exactly the space the returned \`(x, y)\` live in
+— read those back instead of guessing. Still, a screenshot whose pixels do not
+match the coordinate space you click in is the number-one cause of "it clicks the
+wrong place", so keep capture, predict, and click in one resolution (or scale
+deliberately by the echoed dims).
 
 ### Executing every action type locally
 
@@ -1523,6 +1593,23 @@ the machine auto-terminates at \`created_at + ttl_minutes\`, ending all
 billing. Extend or clear the TTL any time via \`PATCH /v1/machines/{id}\`.
 The same numbers are served machine-readably at \`GET /v1/machines/pricing\`.
 
+**Per-machine \`billing\` object.** Each API-provisioned machine in a
+\`GET /v1/machines\` response carries a \`billing\` object describing how it is metered:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| \`rate_cents_per_hour\` | int | The hourly rate applied in the machine's current state (running vs stopped). |
+| \`running_credits_per_hour\` | int | Rate while running (5 Linux / 9 Windows). |
+| \`stopped_credits_per_hour\` | int | Rate while stopped/suspended (storage only, 1). |
+| \`accrued_cents\` | int | Credits owed for the **current metering segment so far** (since the last state change). |
+| \`projected_daily_cents\` | int | \`rate_cents_per_hour * 24\` — a full day at the current rate. |
+| \`since\` | string\\|null | ISO-8601 timestamp when the current metering segment started. |
+| \`total_credits_billed\` | int | Lifetime credits this machine has billed. |
+| \`suspended_for_billing\` | bool | \`true\` if it was stopped because the wallet ran dry. |
+
+For a fleet-wide "what is billing me right now" view across every machine at
+once, use the \`/v1/billing/active\` endpoint (documented below).
+
 ### Machine endpoints + scopes
 
 | Method + path | Scope | Description |
@@ -1530,6 +1617,7 @@ The same numbers are served machine-readably at \`GET /v1/machines/pricing\`.
 | \`POST /v1/machines\` | \`machines:write\` | Provision a VM. Honors \`Idempotency-Key\`. |
 | \`GET /v1/machines\` | \`machines:read\` | List your machines (\`limit\`, 1-200, default 50). |
 | \`GET /v1/machines/pricing\` | \`machines:read\` | The runtime + one-time price table (machine-readable). |
+| \`GET\` \`/v1/billing/active\` | \`machines:read\` | What is metering your wallet **right now** across the whole fleet. |
 | \`GET /v1/machines/{id}\` | \`machines:read\` | Get one machine. |
 | \`DELETE /v1/machines/{id}\` | \`machines:write\` | Terminate a machine. |
 | \`POST /v1/machines/{id}/start\` | \`machines:write\` | Start a stopped machine. |
@@ -1570,6 +1658,13 @@ everything else needs \`actions:exec\`.
 
 Pass \`Idempotency-Key: <up to 128 chars, [A-Za-z0-9_-:]>\` so a retried provision
 does not create a second VM (deduped for 24h).
+
+**No-TTL warning.** If you provision **without** a \`ttl_minutes\`, the machine
+will run (and bill the hourly runtime rate) until you explicitly destroy it. To
+make that machine-observable, the response carries an HTTP
+\`Warning: 199 - "..."\` header noting the machine has no auto-stop — set
+\`ttl_minutes\` at provision time, or \`PATCH /v1/machines/{id}\` later, to bound the
+spend.
 
 **curl**
 
@@ -1648,6 +1743,53 @@ A snapshot costs **$0.01 (1 credit)** one-time, charged up front and refunded
 if the snapshot fails. Start, stop, restart, and delete are free per call —
 they only switch which hourly runtime rate applies ($0.05-0.09/hr running,
 $0.01/hr stopped, $0 after termination).
+
+### GET /v1/billing/active
+
+Answers "**what is billing me right now?**" — it lists every API-billed machine
+that is **currently metering** your wallet, whether \`running\` or \`stopped\` (a
+stopped machine still meters at the storage-only rate; only \`creating\`, \`error\`,
+and \`terminated\` machines cost nothing). Scope: \`machines:read\`. Auth:
+\`X-API-Key\` (or \`Authorization: Bearer\`). 1 credit = 1 cent.
+
+\`\`\`bash
+curl -s "$BASE/billing/active" -H "$AUTH"
+\`\`\`
+
+\`\`\`json
+{
+  "active": [
+    {
+      "machine_id": "...",
+      "display_name": "...",
+      "status": "running",
+      "os_type": "linux",
+      "rate_cents_per_hour": 5,
+      "running_credits_per_hour": 5,
+      "stopped_credits_per_hour": 1,
+      "accrued_cents": 12,
+      "since": "2026-06-13T19:00:00Z",
+      "total_credits_billed": 120,
+      "suspended_for_billing": false,
+      "auto_destroy_at": null,
+      "ttl_minutes": null
+    }
+  ],
+  "current_run_rate_cents_per_hour": 5,
+  "request_id": "req_..."
+}
+\`\`\`
+
+Each entry mirrors the per-machine \`billing\` object: \`rate_cents_per_hour\` is the
+rate in the machine's current state, \`accrued_cents\` is what this metering segment
+has cost so far, and \`since\` is when that segment started. \`auto_destroy_at\` /
+\`ttl_minutes\` reflect any TTL you set. \`current_run_rate_cents_per_hour\` is the
+**summed instantaneous burn rate** across the whole \`active\` list — your total
+cents/hour right now.
+
+Test-mode keys (\`sk-coasty-test-\`) return an **empty fleet** (\`"active": []\`,
+\`"current_run_rate_cents_per_hour": 0\`) because mock \`mch_test_*\` machines are
+never billed.
 
 ### GET /v1/machines/{id}/screenshot
 

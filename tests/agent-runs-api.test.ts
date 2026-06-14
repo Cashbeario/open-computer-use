@@ -125,8 +125,11 @@ describe.skipIf(!HAVE_BACKEND)("RunStatus model mirrors the migration", () => {
 
 // public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
 describe.skipIf(!HAVE_BACKEND)("Phase 2 — v4 + instructions", () => {
-  it("CUAVersion exposes v4", () => {
+  it("CUAVersion exposes v4 and v5 (v5 is the latest/default)", () => {
     expect(CUA_MODELS).toMatch(/V4\s*=\s*"v4"/)
+    // v5 shipped as LATEST_VERSION (computer_use_agent/factory.py); the enum
+    // and SUPPORTED_CUA_VERSIONS must carry it so the public API can select it.
+    expect(CUA_MODELS).toMatch(/V5\s*=\s*"v5"/)
   })
   it("instructions APPENDS (predict + session models carry it)", () => {
     expect(CUA_MODELS).toMatch(/instructions:\s*Optional\[str\]/)
@@ -136,12 +139,33 @@ describe.skipIf(!HAVE_BACKEND)("Phase 2 — v4 + instructions", () => {
     expect(CUA_SVC).toMatch(/# Additional Instructions/)
     expect(CUA_SVC).toMatch(/Never mutate the cached base prompt in place/)
   })
-  it("v4 is gated to professional+ tiers (free/starter stay v3-only)", () => {
-    // professional + enterprise include v4; free + starter do not.
-    expect(KEYS).toMatch(/"professional":[\s\S]{0,400}"allowed_versions":\s*\["v1",\s*"v3",\s*"v4"\]/)
-    expect(KEYS).toMatch(/"enterprise":[\s\S]{0,400}"allowed_versions":\s*\["v1",\s*"v3",\s*"v4"\]/)
-    expect(KEYS).toMatch(/"free":[\s\S]{0,400}"allowed_versions":\s*\["v3"\]/)
-    expect(KEYS).toMatch(/"starter":[\s\S]{0,400}"allowed_versions":\s*\["v3"\]/)
+  it("every tier exposes the full version set incl. v5 (v4/v5 are not tier-gated)", () => {
+    // Policy change pinned here: every tier may select ANY supported CUA
+    // version, and v5 (the latest — LATEST_VERSION in
+    // computer_use_agent/factory.py) is the default when omitted. The earlier
+    // "v4 = professional+, free/starter = v3-only" gate was intentionally
+    // retired (see the comment at TIER_LIMITS["free"] in api_key_service.py).
+    // This guard now pins the uniformity instead of the old gate: all four
+    // tiers carry the identical full set, so a future edit that narrows one
+    // tier — or drops v5 — fails here.
+    const start = KEYS.indexOf("TIER_LIMITS = {")
+    const end = KEYS.indexOf("# Per-user rate-limit hard cap")
+    expect(start, "TIER_LIMITS block found").toBeGreaterThan(-1)
+    expect(end, "TIER_LIMITS end anchor found after start").toBeGreaterThan(start)
+    const tierBlock = KEYS.slice(start, end)
+
+    for (const tier of ["free", "starter", "professional", "enterprise"]) {
+      expect(tierBlock, `tier "${tier}" present in TIER_LIMITS`).toMatch(
+        new RegExp(`"${tier}":\\s*\\{`),
+      )
+    }
+
+    // Exactly one allowed_versions per tier, and every one is the full set.
+    const versionLists = tierBlock.match(/"allowed_versions":\s*\[[^\]]*\]/g) || []
+    expect(versionLists.length, "one allowed_versions per tier (4 tiers)").toBe(4)
+    for (const vl of versionLists) {
+      expect(vl).toMatch(/\["v1",\s*"v3",\s*"v4",\s*"v5"\]/)
+    }
   })
   it("CUAExecutor honours a per-run version override (so a run can pin v3/v4)", () => {
     expect(CUA_EXEC).toMatch(/cua_version:\s*Optional\[str\]\s*=\s*None/)

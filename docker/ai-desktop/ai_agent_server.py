@@ -2960,8 +2960,13 @@ class DesktopAgentServer:
                     file_content = content
                     mode = 'w'
                 
-                # Write the file
-                with open(filepath, mode) as f:
+                # Write the file. Text mode pins encoding="utf-8" so a file
+                # containing characters outside the host's locale codec (e.g.
+                # U+2192 "->" under Windows cp1252 / a bare-locale "ascii"
+                # container) writes correctly instead of raising a
+                # UnicodeEncodeError. Binary mode takes no encoding.
+                open_kwargs = {} if 'b' in mode else {'encoding': 'utf-8'}
+                with open(filepath, mode, **open_kwargs) as f:
                     f.write(file_content)
                 
                 # Get file info

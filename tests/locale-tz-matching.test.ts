@@ -144,11 +144,18 @@ describe("Linux agent — TZ + browser pref wiring", () => {
     );
   });
 
-  it("agent main() calls _apply_tz at startup (not just on first browser cmd)", () => {
-    // The ipinfo.io fetch can take ~1s on cold DNS — eagerly resolving at
-    // startup eliminates that latency on the first browser_navigate.
+  it("agent main() resolves locale eagerly at startup but AFTER binding the port (non-blocking readiness)", () => {
+    // Locale is still resolved eagerly at startup (not deferred to the first
+    // browser cmd), so the first browser_navigate has no cold-DNS latency.
+    // But it now runs in a thread executor AFTER websockets.serve binds :8080,
+    // because _apply_tz does a blocking ipinfo.io HTTP GET and must not delay
+    // the orchestrator's readiness probe. Pin both facts.
     const mainSlice = LINUX_AGENT.slice(LINUX_AGENT.indexOf("async def main"));
-    expect(mainSlice).toMatch(/_apply_tz\(\)/);
+    expect(mainSlice).toMatch(/run_in_executor\(None,_apply_tz\)/);
+    const serveAt = mainSlice.indexOf("websockets.serve");
+    const tzAt = mainSlice.indexOf("_apply_tz");
+    expect(serveAt).toBeGreaterThan(-1);
+    expect(tzAt).toBeGreaterThan(serveAt);
   });
 });
 
@@ -176,9 +183,17 @@ describe("Windows agent — locale resolver parity", () => {
     expect(WINDOWS_AGENT).toMatch(/add_experimental_option\("prefs",prefs\)/);
   });
 
-  it("Windows main() calls _apply_tz at startup (best-effort, time.tzset is no-op on win)", () => {
+  it("Windows main() resolves locale eagerly at startup but AFTER binding the port (non-blocking readiness)", () => {
+    // Same invariant as the Linux agent: eager-at-startup, but scheduled in a
+    // thread executor after websockets.serve binds :8080 so the blocking
+    // ipinfo.io lookup never delays readiness. (time.tzset is a no-op on
+    // Windows; the locale still drives Chrome --lang / accept_languages.)
     const mainSlice = WINDOWS_AGENT.slice(WINDOWS_AGENT.indexOf("async def main"));
-    expect(mainSlice).toMatch(/_apply_tz\(\)/);
+    expect(mainSlice).toMatch(/run_in_executor\(None,_apply_tz\)/);
+    const serveAt = mainSlice.indexOf("websockets.serve");
+    const tzAt = mainSlice.indexOf("_apply_tz");
+    expect(serveAt).toBeGreaterThan(-1);
+    expect(tzAt).toBeGreaterThan(serveAt);
   });
 });
 

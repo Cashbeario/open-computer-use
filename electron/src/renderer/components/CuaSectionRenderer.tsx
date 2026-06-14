@@ -496,9 +496,10 @@ function DetailRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-medium tracking-tight text-neutral-400/40 hover:text-neutral-300/70 transition-colors"
+        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-normal tracking-tight text-neutral-400/40 hover:text-neutral-300/70 transition-colors"
       >
         <IconChevronRight
+          stroke={1.5}
           className={cn(
             'w-2.5 h-2.5 shrink-0 transition-transform duration-200 ease-out',
             open && 'rotate-90'

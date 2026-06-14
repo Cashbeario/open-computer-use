@@ -481,10 +481,10 @@ function DetailRow({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-medium tracking-tight text-foreground/40 hover:text-foreground/70 transition-colors"
+        className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-normal tracking-tight text-foreground/40 hover:text-foreground/70 transition-colors"
       >
         <CaretRight
-          weight="bold"
+          weight="regular"
           className={cn(
             "size-2.5 shrink-0 transition-transform duration-200 ease-out",
             open && "rotate-90"

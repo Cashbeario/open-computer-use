@@ -126,7 +126,11 @@ export class AwsEc2Service {
     // - Linux: ARM64 t4g instances (cheaper Graviton2)
     let instanceType: string;
     if (isWindows) {
-      instanceType = config.instanceType || process.env.AWS_EC2_WINDOWS_INSTANCE_TYPE || "t3.small";
+      // t3.medium (4GB) not t3.small (2GB): Windows Server 2022 + desktop +
+      // Chrome + the Python agent thrash a 2GB box, and boot-time paging is a
+      // major contributor to slow provisioning. Same 2 vCPU; the win is RAM.
+      // Override via AWS_EC2_WINDOWS_INSTANCE_TYPE.
+      instanceType = config.instanceType || process.env.AWS_EC2_WINDOWS_INSTANCE_TYPE || "t3.medium";
     } else {
       instanceType = config.instanceType || process.env.AWS_EC2_INSTANCE_TYPE || "t4g.nano";
       if (config.desktopEnabled) {
@@ -165,7 +169,23 @@ export class AwsEc2Service {
 
     if (isWindows) {
       goldenAmiId = process.env.AWS_EC2_WINDOWS_GOLDEN_AMI_ID || undefined;
-      amiId = snapshotAmiId || goldenAmiId || config.amiId || process.env.AWS_EC2_WINDOWS_AMI_ID || (await this.resolveWindowsAmi());
+      const explicitWindowsAmi =
+        snapshotAmiId || goldenAmiId || config.amiId || process.env.AWS_EC2_WINDOWS_AMI_ID;
+      if (!explicitWindowsAmi) {
+        // The Windows UserData assumes a golden AMI with Python / TightVNC /
+        // websockify / noVNC pre-baked. Falling back to stock Windows Server
+        // 2022 (resolveWindowsAmi) would launch a VM whose agent can never
+        // start — the orchestrator would just burn the full readiness-poll
+        // budget (~7.5 min) and then fail. Fail loud instead of silently
+        // provisioning a guaranteed-dead VM.
+        throw new Error(
+          "Windows VM requires a pre-baked golden AMI. Set " +
+            "AWS_EC2_WINDOWS_GOLDEN_AMI_ID (preferred) or AWS_EC2_WINDOWS_AMI_ID " +
+            "to a golden image. Stock Windows lacks Python/TightVNC/noVNC, so " +
+            "the agent would never become reachable on :8080.",
+        );
+      }
+      amiId = explicitWindowsAmi;
     } else {
       goldenAmiId = process.env.AWS_EC2_GOLDEN_AMI_ID || undefined;
       amiId = snapshotAmiId || goldenAmiId || config.amiId || process.env.AWS_EC2_AMI_ID || (await this.resolveUbuntuAmi());
@@ -189,6 +209,14 @@ export class AwsEc2Service {
             VolumeSize: storageGb,
             VolumeType: "gp3",
             DeleteOnTermination: true,
+            // Windows first boot reads a large, scattered working set (pagefile,
+            // PnP, EC2Launch, the baked C:\coasty tree) while gp3 lazily
+            // hydrates blocks from the golden snapshot. Provision above the
+            // 3000/125 free baseline to speed that I/O-bound cold boot. Within
+            // gp3 limits (<=16000 IOPS, <=1000 MB/s, IOPS<=500x GiB) and a few
+            // cents on an ephemeral DeleteOnTermination volume. Linux ARM VMs
+            // boot fast on the baseline, so this is Windows-only.
+            ...(isWindows ? { Iops: 6000, Throughput: 250 } : {}),
           },
         },
       ],
@@ -219,6 +247,16 @@ export class AwsEc2Service {
       runInput.UserData = useSlimUserData
         ? this.generateGoldenAmiUserData(config.vncPassword)
         : this.generateDesktopUserData(config.vncPassword);
+    }
+
+    // Burstable (T-family) instances throttle to their CPU baseline once
+    // launch credits are exhausted — exactly during the CPU-heavy boot. Pin
+    // unlimited mode so boot can burst freely (t3 usually defaults to this,
+    // but pin it explicitly so an account-level "standard" default can't
+    // silently slow every boot). RunInstances rejects CreditSpecification on
+    // non-T families, so guard on the prefix.
+    if (/^t[234]/.test(instanceType)) {
+      runInput.CreditSpecification = { CpuCredits: "unlimited" };
     }
 
     // Launch instance
@@ -812,7 +850,7 @@ def _resolve_locale():
    proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
    req=urllib.request.Request("https://ipinfo.io/json",headers={"User-Agent":"coasty/1"})
    op=urllib.request.build_opener(urllib.request.ProxyHandler({"https":proxy,"http":proxy})) if proxy else urllib.request.build_opener()
-   resp=op.open(req,timeout=4);d=json.loads(resp.read().decode())
+   resp=op.open(req,timeout=2);d=json.loads(resp.read().decode())
    if not tz:tz=(d.get("timezone") or "").strip()
    country=(d.get("country") or "").strip().upper()
   except Exception as e:print(f"[locale] geo lookup failed: {e}",flush=True)
@@ -1298,14 +1336,14 @@ class Agent:
  def _fr(self,p):
   try:
    path=os.path.expanduser(p.get("path",""))
-   with open(path,"r",errors="replace") as f:c=f.read()
+   with open(path,"r",encoding="utf-8",errors="replace") as f:c=f.read()
    if len(c)>50000:c=c[:50000]+"\\n...[truncated]"
    return{"success":True,"content":c}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fw(self,p):
   try:
    path=os.path.expanduser(p.get("path",""));os.makedirs(os.path.dirname(path) or".",exist_ok=True)
-   with open(path,"w") as f:f.write(p.get("content",""))
+   with open(path,"w",encoding="utf-8") as f:f.write(p.get("content",""))
    return{"success":True}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fu(self,p):
@@ -1318,7 +1356,7 @@ class Agent:
    if enc=="base64":
     with open(path,"wb") as f:f.write(base64.b64decode(content))
    else:
-    with open(path,"w") as f:f.write(content)
+    with open(path,"w",encoding="utf-8") as f:f.write(content)
    sz=os.path.getsize(path)
    return{"success":True,"filepath":path,"size":sz,"message":f"Uploaded {sz} bytes"}
   except Exception as e:return{"success":False,"error":str(e)}
@@ -1330,13 +1368,13 @@ class Agent:
    sz=os.path.getsize(path);name=os.path.basename(path);enc=p.get("encoding","auto")
    if enc=="auto":
     try:
-     with open(path,"r") as f:content=f.read();enc="utf-8"
+     with open(path,"r",encoding="utf-8") as f:content=f.read();enc="utf-8"
     except UnicodeDecodeError:
      with open(path,"rb") as f:content=base64.b64encode(f.read()).decode("ascii");enc="base64"
    elif enc=="base64":
     with open(path,"rb") as f:content=base64.b64encode(f.read()).decode("ascii")
    else:
-    with open(path,"r",errors="replace") as f:content=f.read()
+    with open(path,"r",encoding="utf-8",errors="replace") as f:content=f.read()
    return{"success":True,"filename":name,"filepath":path,"size":sz,"encoding":enc,"content":content}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fld(self,p):
@@ -1352,7 +1390,7 @@ class Agent:
   except Exception as e:return{"success":False,"error":str(e)}
  def _fa(self,p):
   try:
-   with open(os.path.expanduser(p.get("path","")),"a") as f:f.write(p.get("content",""))
+   with open(os.path.expanduser(p.get("path","")),"a",encoding="utf-8") as f:f.write(p.get("content",""))
    return{"success":True}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fd(self,p):
@@ -1403,8 +1441,6 @@ class Agent:
   try:b=_get_browser();return{"success":True,"url":b.current_url,"title":b.title}
   except Exception as e:return{"success":False,"error":str(e)}
 async def main():
- try:_apply_tz()
- except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
  # ping_interval=20 / ping_timeout=10 — server-side keep-alive (2026-05-17 NAT fix).
@@ -1416,6 +1452,12 @@ async def main():
  # a healthy connection. Existing AMI'd instances do NOT pick this up
  # automatically — see operator runbook for rolling restart guidance.
  async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=20,ping_timeout=10,close_timeout=60,compression=None):
+  # Locale resolution does a BLOCKING ipinfo.io HTTP GET. Run it in a thread
+  # AFTER the port is bound so it can never delay the :8080 readiness probe
+  # the orchestrator polls. Best-effort; locale only affects browser actions
+  # that happen seconds later, and it self-heals on the next action.
+  try:asyncio.get_running_loop().run_in_executor(None,_apply_tz)
+  except Exception as e:print(f"[locale] background apply failed: {e}",flush=True)
   await asyncio.Future()
 if __name__=="__main__":asyncio.run(main())
 `;
@@ -2152,7 +2194,7 @@ def _resolve_locale():
    proxy=os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or ""
    req=urllib.request.Request("https://ipinfo.io/json",headers={"User-Agent":"coasty/1"})
    op=urllib.request.build_opener(urllib.request.ProxyHandler({"https":proxy,"http":proxy})) if proxy else urllib.request.build_opener()
-   resp=op.open(req,timeout=4);d=json.loads(resp.read().decode())
+   resp=op.open(req,timeout=2);d=json.loads(resp.read().decode())
    if not tz:tz=(d.get("timezone") or "").strip()
    country=(d.get("country") or "").strip().upper()
   except Exception as e:print(f"[locale] geo lookup failed: {e}",flush=True)
@@ -2532,14 +2574,14 @@ class Agent:
  def _fr(self,p):
   try:
    path=os.path.expanduser(p.get("path",""))
-   with open(path,"r",errors="replace") as f:c=f.read()
+   with open(path,"r",encoding="utf-8",errors="replace") as f:c=f.read()
    if len(c)>50000:c=c[:50000]+"\\n...[truncated]"
    return{"success":True,"content":c}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fw(self,p):
   try:
    path=os.path.expanduser(p.get("path",""));os.makedirs(os.path.dirname(path) or".",exist_ok=True)
-   with open(path,"w") as f:f.write(p.get("content",""))
+   with open(path,"w",encoding="utf-8") as f:f.write(p.get("content",""))
    return{"success":True}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fu(self,p):
@@ -2551,7 +2593,7 @@ class Agent:
    if enc=="base64":
     with open(path,"wb") as f:f.write(base64.b64decode(content))
    else:
-    with open(path,"w") as f:f.write(content)
+    with open(path,"w",encoding="utf-8") as f:f.write(content)
    sz=os.path.getsize(path)
    return{"success":True,"filepath":path,"size":sz,"message":f"Uploaded {sz} bytes"}
   except Exception as e:return{"success":False,"error":str(e)}
@@ -2562,13 +2604,13 @@ class Agent:
    sz=os.path.getsize(path);name=os.path.basename(path);enc=p.get("encoding","auto")
    if enc=="auto":
     try:
-     with open(path,"r") as f:content=f.read();enc="utf-8"
+     with open(path,"r",encoding="utf-8") as f:content=f.read();enc="utf-8"
     except UnicodeDecodeError:
      with open(path,"rb") as f:content=base64.b64encode(f.read()).decode("ascii");enc="base64"
    elif enc=="base64":
     with open(path,"rb") as f:content=base64.b64encode(f.read()).decode("ascii")
    else:
-    with open(path,"r",errors="replace") as f:content=f.read()
+    with open(path,"r",encoding="utf-8",errors="replace") as f:content=f.read()
    return{"success":True,"filename":name,"filepath":path,"size":sz,"encoding":enc,"content":content}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fld(self,p):
@@ -2595,7 +2637,7 @@ class Agent:
   except Exception as e:return{"success":False,"error":str(e)}
  def _fa(self,p):
   try:
-   with open(os.path.expanduser(p.get("path","")),"a") as f:f.write(p.get("content",""))
+   with open(os.path.expanduser(p.get("path","")),"a",encoding="utf-8") as f:f.write(p.get("content",""))
    return{"success":True}
   except Exception as e:return{"success":False,"error":str(e)}
  def _fd(self,p):
@@ -2646,8 +2688,6 @@ class Agent:
   try:b=_get_browser();return{"success":True,"url":b.current_url,"title":b.title}
   except Exception as e:return{"success":False,"error":str(e)}
 async def main():
- try:_apply_tz()
- except Exception as e:print(f"[locale] startup apply failed: {e}",flush=True)
  agent=Agent()
  print(f"AI Agent listening on {HOST}:{PORT}",flush=True)
  # ping_interval=20 / ping_timeout=10 — server-side keep-alive (Windows variant).
@@ -2656,6 +2696,12 @@ async def main():
  # instances do NOT pick this up automatically — recycle them via the
  # operator runbook before this side becomes effective.
  async with websockets.serve(agent.serve,HOST,PORT,max_size=100*1024*1024,ping_interval=20,ping_timeout=10,close_timeout=60,compression=None):
+  # Locale resolution does a BLOCKING ipinfo.io HTTP GET. Run it in a thread
+  # AFTER the port is bound so it can never delay the :8080 readiness probe
+  # the orchestrator polls. Best-effort; locale only affects browser actions
+  # that happen seconds later, and it self-heals on the next action.
+  try:asyncio.get_running_loop().run_in_executor(None,_apply_tz)
+  except Exception as e:print(f"[locale] background apply failed: {e}",flush=True)
   await asyncio.Future()
 if __name__=="__main__":asyncio.run(main())
 `;
@@ -2785,6 +2831,13 @@ if (-not $pythonPath) { $pythonPath = "python" }
 set VNC_PASSWORD=$pw
 set AGENT_PORT=8080
 set AGENT_HOST=0.0.0.0
+REM Force CPython into UTF-8 mode (PEP 540): open() defaults to utf-8 and
+REM stdout/stderr use utf-8. Without this, Windows defaults to cp1252, so
+REM writing an uploaded text file (or logging) any char outside cp1252 (e.g.
+REM U+2192 ->) raises 'charmap' codec UnicodeEncodeError. Belt-and-suspenders
+REM alongside the explicit encoding="utf-8" on every text open in the agent.
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
 :loop
 cd /d C:\\coasty\\agent
 $pythonPath server.py
@@ -2879,7 +2932,7 @@ Set-Content -Path "C:\\coasty\\status.txt" -Value "ready"
 # After reboot: Windows logon screen -> auto-logon -> desktop created ->
 # Startup folder runs agent + noVNC in interactive session ->
 # TightVNC mirrors desktop -> screenshots work
-shutdown /r /t 10 /c "Coasty setup complete - activating desktop" /f
+shutdown /r /t 0 /c "Coasty setup complete - activating desktop" /f
 </powershell>`;
 
     // ── UserData size optimization ─────────────────────────────────────
@@ -3169,8 +3222,12 @@ echo "Golden AMI boot complete at $(date)"
       "t3.micro": 0.0104 + 0.012,
       "t3.small": 0.0208 + 0.012,
       "t3.medium": 0.0416 + 0.012,
+      "t3.large": 0.0832 + 0.012,
     };
-    return parseFloat(((prices[instanceType] || 0.0042) * hours).toFixed(4));
+    // Fallback: assume Windows t3.large pricing for unknown types rather than
+    // the t4g.nano Linux price, so an AWS_EC2_WINDOWS_INSTANCE_TYPE override
+    // to a larger box never silently under-reports cost.
+    return parseFloat(((prices[instanceType] || (0.0832 + 0.012)) * hours).toFixed(4));
   }
 }
 

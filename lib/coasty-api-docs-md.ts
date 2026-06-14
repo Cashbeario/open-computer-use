@@ -67,8 +67,9 @@ sends a \`WWW-Authenticate: Bearer\` challenge header).
 
 ### Request ids and response headers
 
-Every response (success or error) carries an \`X-Coasty-Request-Id\` header, and
-every error body repeats it as \`error.request_id\`. Quote that id verbatim when
+Every response (success or error) carries an \`X-Coasty-Request-Id\` header (also
+emitted as the alias \`X-Request-Id\` on every response — they hold the same value),
+and every error body repeats it as \`error.request_id\`. Quote that id verbatim when
 you contact support; it ties together the whole request end-to-end.
 
 Billed responses also return two headers so you can track spend without a
@@ -84,10 +85,17 @@ failure the response carries \`X-Credits-Charged: 0\` **and** \`X-Credits-Refund
 response headers — you no longer have to re-poll \`/v1/usage\`.
 
 **Idempotent replays bill 0.** A replay (same \`Idempotency-Key\`) is served from
-the cache with \`X-Coasty-Idempotent-Replay: true\`, and it now also carries
-\`X-Credits-Remaining\` (and the rate-limit headers) like any normal response. The
-replayed body's \`usage.credits_charged\` is \`0\` to match the header
-\`X-Credits-Charged: 0\` — header and body agree that the replay was free.
+the cache with \`X-Coasty-Idempotent-Replay: true\` (plus \`Idempotency-Replayed: true\`
+and \`Idempotency-Status: completed\`), and it now also carries \`X-Credits-Remaining\`
+(and the rate-limit headers) like any normal response. The replayed body's
+\`usage.credits_charged\` is \`0\` and \`usage.billed\` is \`false\` to match the header
+\`X-Credits-Charged: 0\` — header and body agree that the replay was free. See the
+dedicated **Idempotency** section for the full contract.
+
+**\`usage.billed\` flag.** Every billed inference response now carries
+\`usage.billed\`: \`true\` on a real billed call, and \`false\` on test keys
+(\`sk-coasty-test-*\`) and on idempotent replays. Branch on it to tell a paid call
+apart from a free one without comparing credit numbers.
 
 Other useful headers: \`X-Coasty-Key-Kind\` (\`live\` / \`test\` / \`legacy\`),
 \`X-Coasty-Test-Mode: true\` (test keys only), and \`X-Coasty-Idempotent-Replay: true\`
@@ -95,8 +103,26 @@ when a response was served from the idempotency cache.
 
 Every response also carries three rate-limit headers — \`X-RateLimit-Limit\`,
 \`X-RateLimit-Remaining\`, and \`X-RateLimit-Reset\` (the unix epoch second the
-window rolls over). They are **advisory**: surface them for backoff, but treat a
-\`429 RATE_LIMITED\` body (with its \`Retry-After\`) as the authoritative signal.
+window rolls over). The same three values are mirrored under the IETF-draft names
+\`RateLimit-Limit\` / \`RateLimit-Remaining\` / \`RateLimit-Reset\`, emitted alongside
+the \`X-RateLimit-*\` set. They are **advisory**: surface them for backoff, but
+treat a \`429 RATE_LIMITED\` body (with its \`Retry-After\`) as the authoritative
+signal.
+
+**Response-headers quick reference** (every \`/v1\` response, success or error):
+
+| Header | Meaning |
+| --- | --- |
+| \`X-Coasty-Request-Id\` / \`X-Request-Id\` | The request correlation id (aliases; same value). |
+| \`X-Credits-Charged\` | Credits this request cost (\`0\` on test keys and replays). |
+| \`X-Credits-Remaining\` | Wallet balance after the charge (USD cents). |
+| \`X-Credits-Refunded\` | Credits returned to your wallet on a refunded \`5xx\` (paired with \`X-Credits-Charged: 0\`). |
+| \`X-Coasty-Idempotent-Replay\` | \`true\` when served from the idempotency cache. |
+| \`Idempotency-Status\` | \`processing\` while the original is still running, \`completed\` once cached. |
+| \`Idempotency-Replayed\` | \`true\` on a replay, \`false\` on the original. |
+| \`X-RateLimit-Limit\` / \`-Remaining\` / \`-Reset\` | Advisory rate-limit budget (also as \`RateLimit-Limit\` / \`-Remaining\` / \`-Reset\`). |
+| \`X-Coasty-Key-Kind\` | \`live\` / \`test\` / \`legacy\`. |
+| \`X-Coasty-Test-Mode\` | \`true\` on test keys only. |
 
 ### Key management
 
@@ -333,6 +359,47 @@ the number of HD screenshots billed) and is omitted where it adds nothing.
 \`/v1/parse\`, which never bills); when present, the lines always reconcile to the
 total.
 
+**Coordinate contract.** Every \`(x, y)\` in \`actions\` is in the **pixel space of
+the screenshot you submitted**, with a **top-left origin** at \`(0, 0)\` and
+**no normalization** (coordinates are never 0..1 or percentage-scaled). The response
+echoes the \`screen_width\` / \`screen_height\` the server used; when you omit those
+fields the server **measures the screenshot's true size**, so the returned
+\`(x, y)\` are always in the space of the exact image you sent. Click those pixels
+directly (or scale by the echoed dims if you resized between capture and click).
+
+**Latency & recommended timeouts.** A stateless \`/v1/predict\` (on \`v3\` / \`v4\` /
+\`v5\`) is a **single model call** — typically a few seconds up to ~30s. A session
+\`predict\` (\`/v1/sessions/{id}/predict\`) runs **multiple serial model calls** and
+can take longer; a heavy step can run up to **~300s** server-side. But any single
+**synchronous** HTTP response is bounded by the **~100s edge timeout**, so for the
+longest steps either:
+
+- set a **client timeout of at least 120s** (not the old 60s) on predict /
+  session-predict, **or**
+- use the **SSE-keepalive** mode below (the connection is held open with comment
+  frames), **or**
+- use the asynchronous **runs** API (\`/v1/runs\`) for long autonomous work.
+
+**SSE-keepalive predict (opt-in).** On \`POST /v1/predict\` and
+\`POST /v1/sessions/{id}/predict\`, send \`Accept: text/event-stream\` (or add
+\`?stream=keepalive\` to the URL) and the result comes back as **Server-Sent
+Events** instead of one JSON body. While the model is inferring, the server emits
+\`: keepalive\` comment frames (about every **15s**) so the edge timeout never cuts
+the connection, then a terminal \`event: result\` whose \`data:\` is the same
+\`PredictResponse\` / \`SessionPredictResponse\` JSON. On failure the terminal frame
+is \`event: error\` with \`data:\` set to the standard error envelope.
+
+\`\`\`
+: keepalive
+: keepalive
+event: result
+data: {"request_id":"req_8f2c1e9a","status":"done","actions":[...],"usage":{...}}
+\`\`\`
+
+**Without the Accept header** (no \`Accept: text/event-stream\`, no
+\`?stream=keepalive\`) the response is unchanged — plain JSON, exactly as documented
+above. Use the SSE mode only for long steps.
+
 **curl**
 
 \`\`\`bash
@@ -384,6 +451,15 @@ Stateful, multi-step tasks. The server remembers the trajectory across steps so
 you only send the latest screenshot each turn. Scope: \`session\`. Always delete a
 session when done to free your concurrency quota.
 
+**Session TTL / expiry.** A session has a **2-hour (7200s) idle TTL**: the idle
+timer is reset on each predict and on each reset, so an actively-used session
+never expires out from under you. \`expires_at\` is returned in the session
+create and get responses — it is the wall-clock time the session lapses if left
+idle. A \`predict\` or \`reset\` against an **expired or unknown** session returns
+\`404 SESSION_NOT_FOUND\`. \`POST /v1/sessions/{id}/reset\` clears the agent's
+**accumulated state (the trajectory)** but **keeps the session config**
+(\`cua_version\`, screen size, prompts, tools) and refreshes the idle TTL.
+
 #### POST /v1/sessions
 
 Create a session.
@@ -413,7 +489,7 @@ cost — deleting just frees your concurrency slot.
   "cua_version": "v3",
   "screen_size": "1920x1080",
   "created_at": "2026-06-01T12:00:00Z",
-  "expires_at": "2026-06-01T12:30:00Z"
+  "expires_at": "2026-06-01T14:00:00Z"
 }
 \`\`\`
 
@@ -466,7 +542,7 @@ Get one session's status (\`SessionInfoResponse\`):
   "screen_size": "1920x1080",
   "step_count": 4,
   "created_at": "2026-06-01T12:00:00Z",
-  "expires_at": "2026-06-01T12:30:00Z",
+  "expires_at": "2026-06-01T14:00:00Z",
   "total_credits_used": 16
 }
 \`\`\`
@@ -607,6 +683,124 @@ defaults to the current month).
 \`\`\`
 
 \`balance\` / \`wallet_balance_cents\` is the prepaid USD wallet balance in cents.
+
+---
+
+## Idempotency
+
+Send an \`Idempotency-Key\` header on any **mutating** call to make it safe to
+retry — a dropped connection, a local timeout, or a crash-and-retry can never
+charge you twice or create a duplicate resource. The key is a string you choose,
+up to 128 chars from \`[A-Za-z0-9_-:]\` (a UUID is ideal).
+
+It is accepted on \`POST /v1/predict\`, \`POST /v1/ground\`, \`POST /v1/sessions\`
+(create), \`POST /v1/sessions/{id}/predict\`, \`POST /v1/runs\`,
+\`POST /v1/workflows/{id}/runs\` and \`POST /v1/workflows/runs\`,
+\`POST /v1/machines\` (+ its lifecycle actions: start / stop / restart / snapshot /
+\`PATCH\`), and \`POST /v1/schedules\` (+ \`/run\`).
+
+### What counts as the "same request"
+
+Two calls are the same request when they carry the **same key AND the same body**.
+"Same body" is decided by a **SHA-256 of the canonical JSON request body** — the
+body re-serialized with **sorted keys** so whitespace and key order never matter.
+For \`POST /v1/sessions/{id}/predict\` the path \`session_id\` is **folded into the
+hash** as well, so the same key reused across two different sessions is correctly
+treated as two different requests.
+
+Reusing a key with a **different** body is a client error:
+\`422 IDEMPOTENCY_KEY_REUSED\`. Resend the original body to collect the cached
+result, or pick a new key.
+
+### Key scope
+
+A key is scoped **per-account**, and test mode is **isolated** from live (a key
+string used on a \`sk-coasty-test-*\` key never collides with the same string on a
+live key). It is **not per-endpoint**: the same key string sent to two different
+endpoints is disambiguated by the body hash, so you do not have to namespace keys
+by route.
+
+### Replay & in-flight windows
+
+- **Completed result — 24 hours.** Once a request finishes, its result is cached
+  and **replayable for 24 hours**. A replay returns the original response
+  verbatim with \`X-Coasty-Idempotent-Replay: true\`, \`Idempotency-Replayed: true\`,
+  and \`Idempotency-Status: completed\`.
+- **In-flight reservation — 10 minutes.** While the original is still executing,
+  the key holds a reservation for **up to 10 minutes**.
+
+### A keyed replay never double-bills
+
+A replay is served from the cache without a second model call, so it is **free**:
+
+- header \`X-Credits-Charged: 0\`
+- body \`usage.credits_charged: 0\` and \`usage.billed: false\`
+- headers \`X-Coasty-Idempotent-Replay: true\`, \`Idempotency-Replayed: true\`,
+  \`Idempotency-Status: completed\`
+
+### Wait-and-return (self-healing retry)
+
+If a keyed request arrives while the original with the **same key** is **still
+executing**, the server does not error — it **waits (up to ~25s)** for the
+original to finish and then returns that result as a replay. So a client that
+timed out locally and retried with the same key **transparently receives the
+result it already paid for**, instead of an error or a second charge.
+
+Only if the original is *still* running after that wait do you get
+\`409 IDEMPOTENCY_IN_FLIGHT\`. That response carries:
+
+\`\`\`json
+{
+  "error": {
+    "code": "IDEMPOTENCY_IN_FLIGHT",
+    "message": "A request with this Idempotency-Key is still processing.",
+    "type": "rate_limit_error",
+    "request_id": "req_...",
+    "retry_after": 2,
+    "retryable": true,
+    "retry_with_same_idempotency_key": true
+  }
+}
+\`\`\`
+
+plus a \`Retry-After\` header and \`Idempotency-Status: processing\`. **Retry with the
+SAME key** after \`Retry-After\` — a fresh key would start a second, separately
+billed operation.
+
+### Fetch-by-key: GET /v1/idempotency/{key}
+
+If you lost or aborted the response (e.g. the process died after sending the
+request), collect the result by the key alone — no body, no endpoint, just the
+key. Scope: any valid key (auth via \`X-API-Key\` or \`Authorization: Bearer\`).
+
+\`\`\`bash
+curl -s "https://coasty.ai/v1/idempotency/order-4821" -H "X-API-Key: $COASTY_API_KEY"
+\`\`\`
+
+**Completed** -> \`200\` (header \`Idempotency-Status: completed\`):
+
+\`\`\`json
+{
+  "status": "completed",
+  "request_id": "req_8f2c1e9a",
+  "result": { "...": "the original response body, verbatim" },
+  "original_status": 200
+}
+\`\`\`
+
+**Still running** -> \`200\` (header \`Idempotency-Status: processing\`):
+
+\`\`\`json
+{ "status": "processing", "request_id": "req_8f2c1e9a" }
+\`\`\`
+
+**Unknown / expired key** -> \`404 NOT_FOUND\`.
+
+### Status headers summary
+
+- \`Idempotency-Status\`: \`processing\` (original still running) or \`completed\`
+  (a cached result was returned).
+- \`Idempotency-Replayed\`: \`true\` on a replay, \`false\` on the original execution.
 
 ---
 
@@ -813,18 +1007,35 @@ if run["status"] == "awaiting_human":
 
 ### GET /v1/runs/{id}/events (SSE)
 
-Server-Sent Events stream of the run timeline. Reconnect-safe: pass
-\`Last-Event-ID: <seq>\` (or \`?after=<seq>\`) to replay everything after that
-sequence. Events are durable in Postgres, so a dropped connection never loses or
-double-emits an event (the \`seq\` is the cursor).
+Server-Sent Events stream of the run timeline. **Resume is fully supported** (and
+the values are spelled out here so you do not have to guess them).
 
-Each event has \`{ seq, type, data, created_at }\` and is emitted as:
+**Resume.** Pass either the \`Last-Event-ID: <seq>\` request header **or** the
+\`?after=<seq>\` query param to replay everything after that sequence;
+\`Last-Event-ID\` **takes precedence** when both are present. The cursor is the
+integer \`seq\` echoed in each \`id:\` line: it is **monotonic per run** and delivery
+is **exactly-once** — the server only emits events whose \`seq\` is **strictly
+greater** than your cursor, so a reconnect never replays or skips an event.
+
+**Replay window is effectively UNBOUNDED.** Events are durable in Postgres, so you
+can resume from \`seq=0\` for the entire life of the run — there is no short
+buffer that ages events out. Start a fresh consumer at \`?after=0\` (or omit it) to
+get the whole history, then keep the last \`seq\` you saw as your reconnect cursor.
+
+**Keepalive & framing.** A \`: keepalive\` comment is sent about every **15s** so
+the connection is not cut while the run is quiet. Each event is framed
+\`id:\` / \`event:\` / \`data:\` and carries \`{ seq, type, data, created_at }\`:
 
 \`\`\`
+: keepalive
 id: 42
 event: status
 data: {"status":"running"}
 \`\`\`
+
+**Terminal event.** The stream ends with \`event: done\` and then closes. There is
+**no \`DONE\` text sentinel** — stop reading when you receive the \`event: done\`
+frame.
 
 **Run event types**
 
@@ -862,9 +1073,11 @@ or \`cancel\` the run goes straight to the corresponding terminal state.
 
 ### Webhooks
 
-Pass a \`webhook_url\` (https only) when you create a run. Coasty POSTs a JSON
-payload on lifecycle transitions. The create response returns \`webhook_secret\`
-exactly once: store it, because every callback is signed with it.
+Pass a \`webhook_url\` when you create a run. The URL must be **HTTPS-only** and is
+**SSRF-guarded** (no private, loopback, or link-local hosts are accepted). Coasty
+POSTs a JSON payload on lifecycle transitions. The create response returns the
+per-run signing secret \`webhook_secret\` (a \`whsec_...\` value) **exactly once**:
+store it, because every callback is signed with it.
 
 **Webhook events**
 
@@ -879,12 +1092,22 @@ exactly once: store it, because every callback is signed with it.
 **Signature.** Each callback carries a header:
 
 \`\`\`
-Coasty-Signature: t=<unix_ts>,v1=<hex>
+Coasty-Signature: t={unix_ts},v1={hex}
 \`\`\`
 
-The signed payload is \`"<t>." + raw_request_body\`. Compute
-\`HMAC-SHA256(webhook_secret, signed_payload)\` as hex and compare to \`v1\` with a
-constant-time compare. Reject if it does not match or \`t\` is too old.
+The signed bytes are \`HMAC_SHA256(secret, f"{t}." + raw_request_body)\` — i.e. the
+unix timestamp \`t\`, a literal \`.\`, then the **raw** (unparsed) request body. To
+**verify**: recompute that HMAC over \`"{t}." + raw_body\`, **constant-time** compare
+the hex to \`v1\`, and **reject if \`abs(now - t) > 300\` seconds** (a ±5-minute
+tolerance that bounds replay).
+
+**Delivery is retried.** A callback is attempted **up to 3 attempts** with
+**exponential backoff** on a connect-error, timeout, or \`5xx\` from your endpoint;
+a \`4xx\` is **terminal** (no further retries). Because of retries, **receivers MUST
+be idempotent** — **dedupe on the \`Coasty-Event\` id** (a stable per-event id sent
+on every delivery) so a redelivered callback is a no-op. Treat
+\`GET /v1/runs/{id}\` plus the durable SSE event log as the **authoritative source
+of truth**; a missed or duplicated webhook never changes what those report.
 
 \`\`\`python
 import hashlib, hmac, os, requests
@@ -1386,7 +1609,9 @@ status set accordingly. The body is always wrapped in an \`error\` object:
 }
 \`\`\`
 
-Field reference (every error carries the first four; the rest are conditional):
+Field reference (every error carries \`code\`, \`message\`, \`type\`, \`request_id\`,
+\`suggestion\`, \`retryable\`, and \`retry_with_same_idempotency_key\`; the rest are
+conditional):
 
 - \`code\`: machine-readable, stable across versions. Branch your logic on this,
   never on \`message\`.
@@ -1398,40 +1623,92 @@ Field reference (every error carries the first four; the rest are conditional):
   support.
 - \`suggestion\`: a concrete next step (auto-filled per code). LLM agents can act
   on this to self-recover.
+- \`retryable\` (boolean): \`true\` when retrying the *same* call may succeed —
+  transient server failures and back-pressure. \`false\` for deterministic client
+  errors (bad input, missing scope, not found) that will fail again unchanged.
+  See the \`retryable\` column in the catalog below.
+- \`retry_with_same_idempotency_key\` (boolean): \`true\` only for
+  \`IDEMPOTENCY_IN_FLIGHT\` — retry with the **same** \`Idempotency-Key\` to attach to
+  the in-flight original. \`false\` everywhere else (retry, if at all, with a fresh
+  request).
 - \`docs_url\`: deep link to the matching docs anchor (also sent as
   \`Link: <url>; rel="help"\`).
 - \`support\`: \`founders@coasty.ai\`, attached only on 5xx and a few ambiguous 4xx.
 - Context extras: code-specific fields such as \`required_scope\`,
   \`current_scopes\`, \`required\`, \`balance\`, \`retry_after\`, \`valid_options\`,
   \`examples\`, \`details\`, \`current_state\`, \`allowed_from\`. Use these to
-  auto-correct.
+  auto-correct. (\`retry_after\` accompanies \`retryable: true\` back-pressure codes;
+  \`examples\` carries machine-readable limits on \`PAYLOAD_TOO_LARGE\` /
+  \`INVALID_SCREENSHOT\`, see below.)
+
+**Every \`/v1\` error returns this catalogued envelope** — including
+gateway / \`5xx\` / timeout paths. There is no raw-text or HTML error path: even a
+504 or an upstream failure is wrapped with a \`code\`, \`message\`, \`type\`,
+\`request_id\`, \`suggestion\`, \`retryable\`, and \`retry_with_same_idempotency_key\`.
+**Branch on \`code\`, never on the message.**
 
 ### Full error catalog
 
-| Status | Code | Cause | Fix |
-| --- | --- | --- | --- |
-| 401 | \`INVALID_API_KEY\` | Key missing, malformed, revoked, or \`Bearer \` pasted into \`X-API-Key\`. Also sends \`WWW-Authenticate\`. | Send a raw \`sk-coasty-live-\`/\`sk-coasty-test-\` key in \`X-API-Key\`, or \`Authorization: Bearer <key>\`. |
-| 403 | \`INSUFFICIENT_SCOPE\` | Key is valid but lacks the scope this route needs. Body has \`required_scope\` + \`current_scopes\`. | Re-mint the key with the missing scope, or call an endpoint your scopes allow. |
-| 402 | \`INSUFFICIENT_CREDITS\` | Prepaid USD wallet can't cover this request. Body has \`required\` + \`balance\`. | Top up at https://coasty.ai/credits, or use a \`sk-coasty-test-\` key (free). |
-| 402 | \`WALLET_EXHAUSTED\` | Wallet ran dry mid-run; the run stopped at the step in \`message\`. Completed steps were already billed. | Top up, then start a new run. |
-| 422 | \`VALIDATION_ERROR\` | A request field failed validation. \`error.details\` (loc) names the field path + expected type. | Fix the named field and retry. |
-| 422 | \`INVALID_SCREENSHOT\` | \`screenshot\` is not decodable base64 (often a \`data:...;base64,\` prefix or embedded newlines). | Strip the \`data:\` prefix and whitespace; send raw base64. |
-| 413 | \`PAYLOAD_TOO_LARGE\` | Body exceeds the cap (CUA screenshot endpoints accept up to 10 MB of base64). | Downscale or JPEG-compress the screenshot, or split the work. |
-| 400 | \`INVALID_LIMIT\` | A \`limit\` query param is outside \`1..200\`. Body has \`actual\`, \`min\`, \`max\`. | Pass \`1 <= limit <= 200\` (default 50), or omit the param. |
-| 400 | \`INVALID_STATUS_FILTER\` | A \`status\` filter value is not a recognized state. Body lists \`valid_options\`. | Use a value from \`valid_options\` or omit \`?status=\`. |
-| 404 | \`NOT_FOUND\` / \`MACHINE_NOT_FOUND\` / \`RUN_NOT_FOUND\` / \`WORKFLOW_NOT_FOUND\` / \`SESSION_NOT_FOUND\` | Id does not exist in this key's namespace. Ids are mode-isolated: a test key cannot see live resources and vice-versa. | Verify the id with the matching \`GET\` listing endpoint, using a key of the same kind. |
-| 409 | \`NOT_AWAITING_HUMAN\` | You tried to resume a run that is not in \`awaiting_human\`. | Re-GET the run; resume only while \`status == "awaiting_human"\`. |
-| 409 | \`RESUME_CONFLICT\` | Another resume/cancel/timeout won the race. | Re-GET the run to read its current status, then retry. |
-| 409 | \`IDEMPOTENCY_KEY_REUSED\` | Same \`Idempotency-Key\` sent with a different body. | Resend the original body to get the cached result, or use a new key. |
-| 409 | \`INVALID_STATE\` | A lifecycle action is illegal in the resource's current state. Body has \`current_state\` + \`allowed_from\`. | Check the state first (actions need \`running\`; provisioning is async), then retry. |
-| 400 | \`FEATURE_NOT_AVAILABLE\` | The feature is gated to a higher tier (e.g. custom prompts on free). | Upgrade your plan or use an available alternative. |
-| 500 | \`INTERNAL_ERROR\` | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
-| 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` | The model call failed. The charge is automatically refunded. | Retry; for grounding, send a clearer or higher-resolution screenshot. |
-| 504 | \`UPSTREAM_TIMEOUT\` | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
-| 503 | \`UPSTREAM_UNAVAILABLE\` | An upstream service is briefly unavailable. | Retry with backoff; check https://status.coasty.ai. |
+The \`Retryable\` column mirrors the envelope's \`retryable\` field: **yes** means
+retrying the same call may succeed (transient server failures and back-pressure);
+**no** means the call is deterministic and will fail again unchanged.
+\`IDEMPOTENCY_IN_FLIGHT\` additionally sets \`retry_with_same_idempotency_key: true\`
+— retry it with the **same** key.
 
-Errors that are transient (\`UPSTREAM_TIMEOUT\`, \`UPSTREAM_UNAVAILABLE\`) carry a
-\`Retry-After\` header (and a \`retry_after\` body field) — honor it before retrying.
+| Status | Code | Retryable | Cause | Fix |
+| --- | --- | --- | --- | --- |
+| 401 | \`INVALID_API_KEY\` | no | Key missing, malformed, revoked, or \`Bearer \` pasted into \`X-API-Key\`. Also sends \`WWW-Authenticate\`. | Send a raw \`sk-coasty-live-\`/\`sk-coasty-test-\` key in \`X-API-Key\`, or \`Authorization: Bearer <key>\`. |
+| 403 | \`INSUFFICIENT_SCOPE\` | no | Key is valid but lacks the scope this route needs. Body has \`required_scope\` + \`current_scopes\`. | Re-mint the key with the missing scope, or call an endpoint your scopes allow. |
+| 402 | \`INSUFFICIENT_CREDITS\` | no | Prepaid USD wallet can't cover this request. Body has \`required\` + \`balance\`. | Top up at https://coasty.ai/credits, or use a \`sk-coasty-test-\` key (free). |
+| 402 | \`WALLET_EXHAUSTED\` | no | Wallet ran dry mid-run; the run stopped at the step in \`message\`. Completed steps were already billed. | Top up, then start a new run. |
+| 422 | \`VALIDATION_ERROR\` | no | A request field failed validation. \`error.details\` (loc) names the field path + expected type. | Fix the named field and retry. |
+| 422 | \`INVALID_SCREENSHOT\` | no | \`screenshot\` is not decodable base64 (often a \`data:...;base64,\` prefix or embedded newlines). \`error.examples\` carries the machine-readable limits. | Strip the \`data:\` prefix and whitespace; send raw base64. |
+| 413 | \`PAYLOAD_TOO_LARGE\` | no | Body exceeds the cap (CUA screenshot endpoints accept up to 10 MB of base64). \`error.examples\` carries the machine-readable limits. | Downscale or JPEG-compress the screenshot, or split the work. |
+| 400 | \`INVALID_LIMIT\` | no | A \`limit\` query param is outside \`1..200\`. Body has \`actual\`, \`min\`, \`max\`. | Pass \`1 <= limit <= 200\` (default 50), or omit the param. |
+| 400 | \`INVALID_STATUS_FILTER\` | no | A \`status\` filter value is not a recognized state. Body lists \`valid_options\`. | Use a value from \`valid_options\` or omit \`?status=\`. |
+| 404 | \`NOT_FOUND\` / \`MACHINE_NOT_FOUND\` / \`RUN_NOT_FOUND\` / \`WORKFLOW_NOT_FOUND\` / \`SESSION_NOT_FOUND\` | no | Id does not exist in this key's namespace. Ids are mode-isolated: a test key cannot see live resources and vice-versa. | Verify the id with the matching \`GET\` listing endpoint, using a key of the same kind. |
+| 409 | \`NOT_AWAITING_HUMAN\` | no | You tried to resume a run that is not in \`awaiting_human\`. | Re-GET the run; resume only while \`status == "awaiting_human"\`. |
+| 409 | \`RESUME_CONFLICT\` | no | Another resume/cancel/timeout won the race. | Re-GET the run to read its current status, then retry. |
+| 409 | \`IDEMPOTENCY_KEY_REUSED\` | no | Same \`Idempotency-Key\` sent with a different body. | Resend the original body to get the cached result, or use a new key. |
+| 409 | \`IDEMPOTENCY_IN_FLIGHT\` | yes (\`retry_with_same_idempotency_key: true\`) | The original request with this key is still executing after the wait-and-return window. Carries \`Retry-After\`. | Retry with the **same** \`Idempotency-Key\` after \`Retry-After\`. |
+| 409 | \`INVALID_STATE\` | no | A lifecycle action is illegal in the resource's current state. Body has \`current_state\` + \`allowed_from\`. | Check the state first (actions need \`running\`; provisioning is async), then retry. |
+| 400 | \`FEATURE_NOT_AVAILABLE\` | no | The feature is gated to a higher tier (e.g. custom prompts on free). | Upgrade your plan or use an available alternative. |
+| 429 | \`RATE_LIMIT_EXCEEDED\` / \`RATE_LIMITED\` / \`TOO_MANY_RUNS\` / \`TOO_MANY_WORKFLOW_RUNS\` | yes | Back-pressure: per-key/per-user request rate or a concurrency cap. Carries \`Retry-After\`. | Honor \`Retry-After\`, then retry with backoff. |
+| 500 | \`INTERNAL_ERROR\` | yes | An unexpected server-side failure. | Retry; if it persists, file a ticket with the \`request_id\`. |
+| 503 | \`DB_UNAVAILABLE\` / \`DB_ERROR\` / \`SERVICE_UNAVAILABLE\` / \`RUNS_API_DISABLED\` / \`WORKFLOWS_API_DISABLED\` | yes | A backing service (database / a feature subsystem) is briefly unavailable. | Retry with backoff; check https://status.coasty.ai. |
+| 500 | \`PREDICTION_FAILED\` / \`GROUNDING_FAILED\` / \`SCREENSHOT_FAILED\` | yes | The model / capture call failed. The charge is automatically refunded. | Retry; for grounding, send a clearer or higher-resolution screenshot. |
+| 500 | \`CREATE_FAILED\` / \`RUN_CREATE_FAILED\` / \`WORKFLOW_RUN_CREATE_FAILED\` / \`WORKFLOW_CREATE_FAILED\` / \`WORKFLOW_UPDATE_FAILED\` / \`WORKFLOW_DELETE_FAILED\` / \`UPDATE_FAILED\` / \`SESSION_CREATE_FAILED\` / \`RUN_FAILED\` / \`DISPATCH_FAILED\` | yes | A transient server-side failure while creating / updating / dispatching a resource. | Add an \`Idempotency-Key\` and retry; the retry attaches to the original if it actually succeeded. |
+| 504 | \`UPSTREAM_TIMEOUT\` | yes | An upstream provisioning service timed out. | Add an \`Idempotency-Key\` and retry; if the original succeeded, the retry is a no-op. |
+| 503 | \`UPSTREAM_UNAVAILABLE\` / \`UPSTREAM_ERROR\` / \`UPSTREAM_AUTH_FAILED\` | yes | An upstream service is briefly unavailable or rejected the call. | Retry with backoff; check https://status.coasty.ai. |
+
+Every \`retryable: true\` code (transient server + back-pressure) carries a
+\`Retry-After\` header and a \`retry_after\` body field — honor it before retrying.
+The complete retryable set is: transient-server (\`INTERNAL_ERROR\`,
+\`DB_UNAVAILABLE\`, \`DB_ERROR\`, \`SERVICE_UNAVAILABLE\`, \`UPSTREAM_TIMEOUT\`,
+\`UPSTREAM_UNAVAILABLE\`, \`UPSTREAM_ERROR\`, \`UPSTREAM_AUTH_FAILED\`,
+\`PREDICTION_FAILED\`, \`GROUNDING_FAILED\`, \`SCREENSHOT_FAILED\`, \`CREATE_FAILED\`,
+\`RUN_CREATE_FAILED\`, \`WORKFLOW_RUN_CREATE_FAILED\`, \`WORKFLOW_CREATE_FAILED\`,
+\`WORKFLOW_UPDATE_FAILED\`, \`WORKFLOW_DELETE_FAILED\`, \`UPDATE_FAILED\`,
+\`SESSION_CREATE_FAILED\`, \`RUN_FAILED\`, \`DISPATCH_FAILED\`, \`RUNS_API_DISABLED\`,
+\`WORKFLOWS_API_DISABLED\`) and back-pressure (\`RATE_LIMIT_EXCEEDED\`,
+\`RATE_LIMITED\`, \`TOO_MANY_RUNS\`, \`TOO_MANY_WORKFLOW_RUNS\`,
+\`IDEMPOTENCY_IN_FLIGHT\`). Every other code is \`retryable: false\`.
+
+**Machine-readable screenshot limits.** \`PAYLOAD_TOO_LARGE\` (413) and
+\`INVALID_SCREENSHOT\` (422) attach an \`error.examples\` object so a client can
+self-correct without hard-coding the numbers:
+
+\`\`\`json
+{
+  "max_base64_bytes": 10485760,
+  "max_mb": 10,
+  "min_base64_chars": 100,
+  "formats": ["png", "jpeg"]
+}
+\`\`\`
+
+So a screenshot's base64 must be **100 chars to 10 MB (10485760 bytes)** and a
+\`png\` or \`jpeg\` — and those exact limits are readable straight off the error.
 
 ### Per-tier features
 

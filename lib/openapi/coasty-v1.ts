@@ -78,6 +78,31 @@ const ApiErrorSchema = {
           description: "Server-assigned correlation ID. Include in support requests.",
           examples: ["req_a1b2c3d4e5f6"],
         },
+        suggestion: {
+          type: "string",
+          description: "A concrete next step, auto-filled per code. LLM agents can act on it to self-recover.",
+        },
+        retryable: {
+          type: "boolean",
+          description:
+            "true when retrying the same call may succeed (transient server failures + back-pressure: INTERNAL_ERROR, DB_UNAVAILABLE, SERVICE_UNAVAILABLE, UPSTREAM_*, PREDICTION_FAILED, *_FAILED, RATE_LIMITED, TOO_MANY_RUNS, IDEMPOTENCY_IN_FLIGHT, ...). false for deterministic client errors. Present on EVERY error envelope, including gateway/5xx/timeout paths.",
+        },
+        retry_with_same_idempotency_key: {
+          type: "boolean",
+          description:
+            "true only for IDEMPOTENCY_IN_FLIGHT — retry with the SAME Idempotency-Key to attach to the in-flight original. false everywhere else.",
+        },
+        retry_after: {
+          type: "integer",
+          nullable: true,
+          description: "Seconds to wait before retrying (accompanies retryable:true back-pressure codes; mirrors the Retry-After header).",
+        },
+        examples: {
+          type: "object",
+          additionalProperties: true,
+          description:
+            "Machine-readable limits for self-correction. On PAYLOAD_TOO_LARGE / INVALID_SCREENSHOT: { max_base64_bytes: 10485760, max_mb: 10, min_base64_chars: 100, formats: [\"png\",\"jpeg\"] }.",
+        },
       },
     },
   },
@@ -104,6 +129,31 @@ const errorResponse = (description: string, code: string) => ({
 
 const schemas = {
   ApiError: ApiErrorSchema,
+
+  // Idempotency fetch-by-key
+  IdempotencyLookupResponse: {
+    type: "object",
+    required: ["status", "request_id"],
+    description:
+      "Result of GET /v1/idempotency/{key}. 'completed' returns the original response body + original_status; 'processing' means the original is still running; an unknown/expired key is a 404 NOT_FOUND.",
+    properties: {
+      status: {
+        type: "string",
+        enum: ["completed", "processing"],
+        description: "completed = a cached result is included; processing = the original is still executing.",
+      },
+      request_id: { type: "string" },
+      result: {
+        nullable: true,
+        description: "The original response body, verbatim. Present only when status is 'completed'.",
+      },
+      original_status: {
+        type: "integer",
+        nullable: true,
+        description: "The HTTP status the original response returned (e.g. 200). Present only when status is 'completed'.",
+      },
+    },
+  },
 
   // Predict
   ActionResponse: {
@@ -133,7 +183,7 @@ const schemas = {
         type: "array",
         nullable: true,
         description:
-          "Self-auditable per-call cost breakdown. Each line's credits sum to credits_charged. null on free / test / no-charge calls (and on /v1/parse, which never bills).",
+          "Self-auditable per-call cost breakdown; line credits sum to credits_charged. null on free/test/no-charge calls and /v1/parse.",
         items: {
           type: "object",
           required: ["item", "credits"],
@@ -150,6 +200,11 @@ const schemas = {
             },
           },
         },
+      },
+      billed: {
+        type: "boolean",
+        description:
+          "true on a real billed call; false on test keys (sk-coasty-test-*) and on idempotent replays (which return credits_charged: 0).",
       },
     },
   },
@@ -963,7 +1018,7 @@ const parameters = {
     in: "header",
     required: false,
     description:
-      "Optional client-supplied key (≤128 chars, [A-Za-z0-9_-:]) for safe retries. Replays the original response for 24 h when the body hash matches; returns 422 IDEMPOTENCY_KEY_REUSED if the body differs.",
+      "Optional client-supplied key (≤128 chars, [A-Za-z0-9_-:]) for safe retries. 'Same request' = a SHA-256 of the canonical (sorted-key) JSON body (session_id is folded in for /sessions/{id}/predict). Replays the original response for 24 h when the body hash matches (X-Coasty-Idempotent-Replay: true, credits_charged 0, usage.billed false); a retry while the original is still running waits up to ~25 s then returns the result, otherwise 409 IDEMPOTENCY_IN_FLIGHT (retry with the SAME key). Returns 422 IDEMPOTENCY_KEY_REUSED if the body differs. Collect a lost result via GET /v1/idempotency/{key}.",
     schema: { type: "string", maxLength: 128, pattern: "^[A-Za-z0-9_\\-:]+$" },
     examples: { uuid: { value: "550e8400-e29b-41d4-a716-446655440000" } },
   },
@@ -998,6 +1053,13 @@ const parameters = {
     in: "path",
     required: true,
     schema: { type: "string" },
+  },
+  IdempotencyKeyPath: {
+    name: "key",
+    in: "path",
+    required: true,
+    description: "The Idempotency-Key whose result you want to collect (≤128 chars, [A-Za-z0-9_-:]).",
+    schema: { type: "string", maxLength: 128, pattern: "^[A-Za-z0-9_\\-:]+$" },
   },
 } as const;
 
@@ -1079,7 +1141,7 @@ const paths = {
       tags: ["sessions"],
       operationId: "createSession",
       summary: "Create a stateful CUA session",
-      description: "Persistent session (~5-15 min idle TTL). Maintains trajectory across predictions. Concurrent-session limit varies by tier (free: 1, pro: 10).",
+      description: "Persistent session with a 2-hour (7200s) idle TTL, reset on each predict/reset; expires_at is returned. A predict/reset against an expired or unknown session is a 404 SESSION_NOT_FOUND. Maintains trajectory across predictions. Concurrent-session limit varies by tier (free: 1, pro: 10).",
       security: [{ apiKey: [] }, { bearerAuth: [] }],
       requestBody: {
         required: true,
@@ -1275,6 +1337,32 @@ const paths = {
           },
         },
         ...standardErrors,
+      },
+    },
+  },
+
+  // ── Idempotency ──
+  "/v1/idempotency/{key}": {
+    parameters: [{ $ref: "#/components/parameters/IdempotencyKeyPath" }],
+    get: {
+      tags: ["keys"],
+      operationId: "getIdempotencyResult",
+      summary: "Fetch a result by Idempotency-Key",
+      description:
+        "Collect a prior mutating call's result by its Idempotency-Key alone (for clients that lost the original response). 'completed' returns the original body + original_status; 'processing' means it is still running; unknown/expired is 404.",
+      security: [{ apiKey: [] }, { bearerAuth: [] }],
+      responses: {
+        "200": {
+          description: "The cached result (completed) or its in-flight status (processing).",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/IdempotencyLookupResponse" },
+            },
+          },
+        },
+        "401": { $ref: "#/components/responses/Unauthorized" },
+        "404": { $ref: "#/components/responses/NotFound" },
+        "500": { $ref: "#/components/responses/ServerError" },
       },
     },
   },

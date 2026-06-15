@@ -327,10 +327,23 @@ describe.skipIf(!HAVE_BACKEND)("run service — billing, ownership, takeover, SS
 
 // public-clone skip: backend/ is gitignored there (maintainer tree always runs this)
 describe.skipIf(!HAVE_BACKEND)("run routes — scopes, kill-switch, idempotency, SSE replay", () => {
-  it("each route asserts the right scope", () => {
-    // window sized to span the idempotency reservation block between the
-    // scope check and the service call
-    expect(RUN_ROUTES).toMatch(/enforce_scope\(SCOPE_RUNS_WRITE\)[\s\S]{0,3500}create_run/)
+  it("each route asserts the right scope (write enforced before the create call)", () => {
+    // Pin the real invariant — SCOPE_RUNS_WRITE is enforced BEFORE the create
+    // service call, with the idempotency reservation in between — by scoping to
+    // the create_run() body and comparing positions, instead of a brittle
+    // char-count window. The reservation block legitimately grows over time
+    // (it crossed the old 3500-char window at ~4255 chars); an ordering check
+    // is both more robust and a stronger guarantee than "appears within N chars".
+    const createBody = RUN_ROUTES.slice(
+      RUN_ROUTES.indexOf("async def create_run("),
+      RUN_ROUTES.indexOf("async def list_runs("),
+    )
+    const scopeAt = createBody.indexOf("enforce_scope(SCOPE_RUNS_WRITE)")
+    const callAt = createBody.indexOf("public_run_service.create_run(")
+    expect(scopeAt, "create_run enforces SCOPE_RUNS_WRITE").toBeGreaterThan(-1)
+    expect(callAt, "create_run calls public_run_service.create_run").toBeGreaterThan(-1)
+    expect(scopeAt, "scope is enforced BEFORE the create service call").toBeLessThan(callAt)
+    // Read routes (list/get/stream) gate on the read scope.
     expect(RUN_ROUTES).toMatch(/enforce_scope\(SCOPE_RUNS_READ\)/)
   })
   it("respects the RUNS_API_ENABLED kill-switch", () => {

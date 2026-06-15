@@ -23,8 +23,11 @@ function IconXCircle({ className }: { className?: string }) {
 }
 
 function IconChevronRight({ className }: { className?: string }) {
+  // strokeWidth 1.5 (was 2.5): a lighter disclosure caret for the detail-row
+  // triggers, matching the softened label weight. This component takes only
+  // className, so thickness is set here, not via a per-usage prop.
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 18l6-6-6-6" />
     </svg>
   )
@@ -499,7 +502,6 @@ function DetailRow({
         className="group/detail flex items-center gap-1.5 py-0.5 text-[12px] font-normal tracking-tight text-neutral-400/40 hover:text-neutral-300/70 transition-colors"
       >
         <IconChevronRight
-          stroke={1.5}
           className={cn(
             'w-2.5 h-2.5 shrink-0 transition-transform duration-200 ease-out',
             open && 'rotate-90'
